@@ -1,3 +1,5 @@
+source .venv/bin/activate
+
 # Environment variable overrides for local development
 export SECRET_KEY=not-so-secret
 export DATABASE_URL="postgresql+psycopg2://manas:@localhost/argos"

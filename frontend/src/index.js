@@ -1,12 +1,25 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { HashRouter } from "react-router-dom";
+
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+// core styles
+import "./scss/theme.scss";
+
+// vendor styles
+import "@fortawesome/fontawesome-free/css/all.css";
+import "react-datetime/css/react-datetime.css";
+
+
+
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <HashRouter>
+      <App />
+    </HashRouter>
   </React.StrictMode>,
   document.getElementById('root')
 );

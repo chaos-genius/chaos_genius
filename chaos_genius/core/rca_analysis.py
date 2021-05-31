@@ -26,22 +26,22 @@ def col_name_mapper(x):
 def compare_subgroups(
     d1: pd.DataFrame, 
     d2: pd.DataFrame, 
-    dims: list[str], 
-    metrics: list[str], 
-    agg: list[str], 
-    m_col_names: dict[str: dict[str: list[str]]], 
-    suffixes: list[str]
+    dims: list, 
+    metrics: list, 
+    agg: list, 
+    m_col_names: dict[str: dict[str: list]], 
+    suffixes: list
 ) -> pd.DataFrame:
     """Compares 2 subgroups based on metrics
 
     Args:
         d1 (pd.DataFrame): Subgroup 1 (baseline)
         d2 (pd.DataFrame): Subgroup 2 (RCA/focus group)
-        dims (list[str]): Dimensions to use
-        metrics (list[str]): Metrics to compute for
-        agg (list[str]): [description]
+        dims (list): Dimensions to use
+        metrics (list): Metrics to compute for
+        agg (list): [description]
         m_col_names (dict[str): Column names to use (highly specific)
-        suffixes (list[str]): Suffixes for groups (highly specific)
+        suffixes (list): Suffixes for groups (highly specific)
 
     Returns:
         pd.DataFrame: Dataframe with cols 'val', 'size' and 'impact' to 
@@ -74,18 +74,18 @@ def compare_subgroups(
 def group_comparison_across_subgroups(
     d1: pd.DataFrame, 
     d2: pd.DataFrame, 
-    dims: list[str], 
-    metrics: list[str],
-    n: list[int]
+    dims: list, 
+    metrics: list,
+    n: list
 ) -> pd.DataFrame:
     """Performs comparison across all subgroups.
 
     Args:
         d1 (pd.DataFrame): Group 1 (baseline)
         d2 (pd.DataFrame): Group 2 (RCA/focus group)
-        dims (list[str]): Dimensions to use
-        metrics (list[str]): Metrics to compute for
-        n (list[int]): List of number of dimensions to use as a subgroup 
+        dims (list): Dimensions to use
+        metrics (list): Metrics to compute for
+        n (list): List of number of dimensions to use as a subgroup 
 
     Returns:
         pd.DataFrame: Dataframe which has the output
@@ -139,10 +139,10 @@ def group_comparison_across_subgroups(
 def get_subgroup_impacts(
     d1: pd.DataFrame, 
     d2: pd.DataFrame, 
-    dims: list[str], 
-    metrics: list[str], 
-    agg: list[str], 
-    n: list[int]
+    dims: list, 
+    metrics: list, 
+    agg: list, 
+    n: list
 ) -> pd.DataFrame:
     """Gets impacts of subgroups of levels in n for d1 and d2 across 
     dims for metrics.
@@ -150,10 +150,10 @@ def get_subgroup_impacts(
     Args:
         d1 (pd.DataFrame): Group 1 (Base Group)
         d2 (pd.DataFrame): Group 2 (RCA/Focus Group)
-        dims (list[str]): Dimensions ot create subgroups from
-        metrics (list[str]): Metrics to use
-        agg (list[str]): Metric Aggregations
-        n (list[int]): Level of subgroups to use
+        dims (list): Dimensions ot create subgroups from
+        metrics (list): Metrics to use
+        agg (list): Metric Aggregations
+        n (list): Level of subgroups to use
 
     Returns:
         pd.DataFrame: Dataframe with sizes, contributions and impact 
@@ -398,12 +398,12 @@ def get_waterfall_ylims(
     return y_min, y_max
 
 
-def comb_sum(n: int, rs: list[int]) -> int:
+def comb_sum(n: int, rs: list) -> int:
     """Returns summation of ncr for r in rs
 
     Args:
         n (int): n
-        rs (list[int]): list of r values
+        rs (list): list of r values
 
     Returns:
         int: summation of ncr for r in rs
@@ -445,10 +445,10 @@ query_string_to_user_string_vectorized = np.vectorize(query_string_to_user_strin
 def get_waterfall_and_impact_table(
     d1: pd.DataFrame, 
     d2: pd.DataFrame, 
-    dims: list[str], 
+    dims: list, 
     metric: str, 
-    n: list[int]= None,
-    agg: list[str]= ["mean", "count"], 
+    n: list= None,
+    agg: list= ["mean", "count"], 
     pop_overlap_threshold: int= 0.8,
     impact_overlap_threshold: int= 0.8,
     impact_base_threshold: int= 0.05,
@@ -461,11 +461,11 @@ def get_waterfall_and_impact_table(
     Args:
         d1 (pd.DataFrame): Group 1 (baseline)
         d2 (pd.DataFrame): Group 2 (RCA/Focus)
-        dims (list[str]): List of dimensions
+        dims (list): List of dimensions
         metric (str): metric to use
-        n (list[int], optional): List of number of dimensions to use 
+        n (list, optional): List of number of dimensions to use 
         while grouping. Defaults to None.
-        agg (list[str], optional): Aggregate against. Defaults to ["mean", "count"].
+        agg (list, optional): Aggregate against. Defaults to ["mean", "count"].
         pop_overlap_threshold (int, optional): Ignoring subpopulations 
         greater than this value. Defaults to 0.8.
         impact_overlap_threshold (int, optional): Ignoring impact values 

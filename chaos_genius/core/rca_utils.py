@@ -46,14 +46,14 @@ def select_lt_reduce(df, cols, num):
     return out
 
 def load_data(
-    inp_file: str, rel_cols: list[str], 
+    inp_file: str, rel_cols: list, 
     time_col: str, time_fmt: str
 ) -> pd.DataFrame:
     """Load in a pandas dataframe from CSV File
 
     Args:
         inp_file (str): csv filename to load data from
-        rel_cols (list[str]): list of columns to extract from dataframe
+        rel_cols (list): list of columns to extract from dataframe
         time_col (str): col which has timestamps
         time_fmt (str): format of timestamps in data
 
@@ -68,15 +68,15 @@ def load_data(
         df.set_index(time_col, drop= True, inplace= True)
     return df
 
-def create_list_tuples(dims: list[str], n: list[int]) -> dict[int: list[str]]:
+def create_list_tuples(dims: list, n: list) -> dict[int: list]:
     """Creates a dictionary of all possible combinations of dims. 
 
     Args:
-        dims (list[str]): Columns to group
-        n (list[int]): levels of grouping to perform
+        dims (list): Columns to group
+        n (list): levels of grouping to perform
 
     Returns:
-        dict[int: list[str]]: Returns dictionary with level of grouping 
+        dict[int: list]: Returns dictionary with level of grouping 
             mapped to all possible groups
     """ 
     out = dict()
@@ -85,14 +85,14 @@ def create_list_tuples(dims: list[str], n: list[int]) -> dict[int: list[str]]:
     return out
 
 def get_total_unique_metrics(
-    df: pd.DataFrame, dims: list[str], metrics: list[str]
+    df: pd.DataFrame, dims: list, metrics: list
 ) -> int:
     """Returns total unique metrics needed to be analyzed
 
     Args:
         df (pd.DataFrame): Dataframe to use
-        dims (list[str]): List of dimensions in dataset
-        metrics (list[str]): List of metrics in dataset
+        dims (list): List of dimensions in dataset
+        metrics (list): List of metrics in dataset
 
     Returns:
         int: total number of unique metrics
@@ -153,7 +153,7 @@ def gen_sub_pop(df: pd.DataFrame, dims, metrics, agg, min_group_size= None, min_
 
     return df_stats
 
-def generate_all_groups(df: pd.DataFrame, dims, metrics, agg, n: list[int], min_group_size= None, min_impact= None):
+def generate_all_groups(df: pd.DataFrame, dims, metrics, agg, n: list, min_group_size= None, min_impact= None):
     list_tuples = create_list_tuples(dims, n)
     list_tuples = [i for k, items in list_tuples.items() for i in items if k in n]
 
@@ -234,10 +234,10 @@ def group_comparison_all_subgroups(
     df: pd.DataFrame, 
     g1_selector: str, 
     g2_selector: str, 
-    dims: list[str], 
-    metrics: list[str], 
-    agg: list[str], 
-    n: list[int]
+    dims: list, 
+    metrics: list, 
+    agg: list, 
+    n: list
 ) -> pd.DataFrame:
     """Performs comparison across all subgroups.
 
@@ -245,10 +245,10 @@ def group_comparison_all_subgroups(
         df (pd.DataFrame): Dataframe to use
         g1_selector (str): Selector for group 1 (baseline)
         g2_selector (str): Selector for group 2 (RCA/focus group)
-        dims (list[str]): Dimensions to use
-        metrics (list[str]): Metrics to compute for
-        agg (list[str]): Aggregations to apply (currently pass only ["mean", "count"])
-        n (list[int]): List of number of dimensions to use as a subgroup 
+        dims (list): Dimensions to use
+        metrics (list): Metrics to compute for
+        agg (list): Aggregations to apply (currently pass only ["mean", "count"])
+        n (list): List of number of dimensions to use as a subgroup 
 
     Returns:
         pd.DataFrame: Dataframe which has the output

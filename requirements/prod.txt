@@ -13,6 +13,12 @@ psycopg2-binary==2.8.6
 # Migrations
 Flask-Migrate==2.7.0
 
+# Data Analysis
+matplotlib==3.4.2
+numpy==1.20.3
+pandas==1.2.4
+ipython==7.24.0
+
 # Forms
 email-validator==1.1.2
 Flask-WTF==0.14.3

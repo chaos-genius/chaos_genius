@@ -4,6 +4,7 @@ import datetime as dt
 
 from chaos_genius.databases.base_model import Column, PkModel, db
 
+# TODO: Update the as dict here 
 
 class Kpi(PkModel):
     """A KPI."""
@@ -15,7 +16,10 @@ class Kpi(PkModel):
     kpi_type = Column(db.Text(), nullable=False)
     kpi_query = Column(db.Text(), nullable=False)
     metric_column = Column(db.Text(), nullable=False)
+    aggregation = Column(db.Text(), nullable=False)
     datetime_column = Column(db.Text(), nullable=False)
+    filters = Column(db.JSON)
+    dimensions = Column(db.JSON)
 
     is_certified = Column(db.Boolean(), default=False)
     active = Column(db.Boolean(), default=False)
@@ -32,6 +36,7 @@ class Kpi(PkModel):
     @property
     def safe_dict(self):
         return {
+            "id": self.id,
             "name": self.name,
             "data_source": self.data_source,
             "kpi_type": self.kpi_type,
@@ -44,6 +49,7 @@ class Kpi(PkModel):
     @property
     def as_dict(self):
         return {
+            "id": self.id,
             "name": self.name,
             "data_source": self.data_source,
             "active": self.active,

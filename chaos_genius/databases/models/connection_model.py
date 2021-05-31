@@ -25,6 +25,7 @@ class Connection(PkModel):
     @property
     def safe_dict(self):
         return {
+            "id": self.id,
             "name": self.name,
             "active": self.active,
             "created_at": self.created_at
@@ -33,6 +34,7 @@ class Connection(PkModel):
     @property
     def as_dict(self):
         return {
+            "id": self.id,
             "name": self.name,
             "db_uri": self.db_uri,
             "active": self.active,

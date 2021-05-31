@@ -68,7 +68,7 @@ def load_data(
         df.set_index(time_col, drop= True, inplace= True)
     return df
 
-def create_list_tuples(dims: list, n: list) -> dict[int: list]:
+def create_list_tuples(dims: list, n: list) -> dict:
     """Creates a dictionary of all possible combinations of dims. 
 
     Args:
@@ -76,7 +76,7 @@ def create_list_tuples(dims: list, n: list) -> dict[int: list]:
         n (list): levels of grouping to perform
 
     Returns:
-        dict[int: list]: Returns dictionary with level of grouping 
+        dict: Returns dictionary with level of grouping 
             mapped to all possible groups
     """ 
     out = dict()

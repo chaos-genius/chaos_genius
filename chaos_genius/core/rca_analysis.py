@@ -29,7 +29,7 @@ def compare_subgroups(
     dims: list, 
     metrics: list, 
     agg: list, 
-    m_col_names: dict[str: dict[str: list]], 
+    m_col_names: dict, 
     suffixes: list
 ) -> pd.DataFrame:
     """Compares 2 subgroups based on metrics
@@ -40,7 +40,7 @@ def compare_subgroups(
         dims (list): Dimensions to use
         metrics (list): Metrics to compute for
         agg (list): [description]
-        m_col_names (dict[str): Column names to use (highly specific)
+        m_col_names (dict): Column names to use (highly specific)
         suffixes (list): Suffixes for groups (highly specific)
 
     Returns:

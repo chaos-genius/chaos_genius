@@ -25,3 +25,11 @@ Backend
 
 
 
+TODO
+
+- [ ] Manage the ENV config in better way
+- [ ] Add the central error handler
+- [ ] ...
+
+
+

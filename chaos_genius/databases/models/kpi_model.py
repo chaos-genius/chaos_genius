@@ -1,16 +1,23 @@
 # -*- coding: utf-8 -*-
-"""Connection model."""
+"""kpi model."""
 import datetime as dt
 
 from chaos_genius.databases.base_model import Column, PkModel, db
 
 
-class Connection(PkModel):
-    """A Connection for given database."""
+class Kpi(PkModel):
+    """A KPI."""
 
-    __tablename__ = "connection"
+    __tablename__ = "kpi"
     name = Column(db.String(80), nullable=False)
-    db_uri = Column(db.Text(), unique=True, nullable=False)
+    data_source = Column(db.Integer, nullable=False)
+
+    kpi_type = Column(db.Text(), nullable=False)
+    kpi_query = Column(db.Text(), nullable=False)
+    metric_column = Column(db.Text(), nullable=False)
+    datetime_column = Column(db.Text(), nullable=False)
+
+    is_certified = Column(db.Boolean(), default=False)
     active = Column(db.Boolean(), default=False)
     created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
 
@@ -20,12 +27,16 @@ class Connection(PkModel):
 
     def __repr__(self):
         """Represent instance as a unique string."""
-        return f"<Connection({self.name})>"
+        return f"<KPI({self.name})>"
 
     @property
     def safe_dict(self):
         return {
             "name": self.name,
+            "data_source": self.data_source,
+            "kpi_type": self.kpi_type,
+            "metric_column": self.metric_column,
+            "is_certified": self.is_certified,
             "active": self.active,
             "created_at": self.created_at
         }
@@ -34,7 +45,8 @@ class Connection(PkModel):
     def as_dict(self):
         return {
             "name": self.name,
-            "db_uri": self.db_uri,
+            "data_source": self.data_source,
             "active": self.active,
             "created_at": self.created_at
         }
+

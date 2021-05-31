@@ -21,8 +21,19 @@ blueprint = Blueprint("api_connection", __name__, static_folder="../static")
 def connection():
     """Connection List view."""
     current_app.logger.info("Connection list")
-    # Handle logging in
-    if request.method == "POST":
-        pass
-    return jsonify({'data': 'Connection List'})
-    # return render_template("public/home.html", form=form)
+
+    if request.method == 'POST':
+        if request.is_json:
+            data = request.get_json()
+            conn_name = data.get('name')
+            conn_uri = data.get('db_uri')
+            new_connection = Connection(name=conn_name, db_uri=conn_uri)
+            new_connection.save()
+            return jsonify({"message": f"Connection {new_connection.name} has been created successfully."})
+        else:
+            return jsonify({"error": "The request payload is not in JSON format"})
+
+    elif request.method == 'GET':
+        connections = Connection.query.all()
+        results = [conn.safe_dict for conn in connections]
+        return jsonify({"count": len(results), "data": results})

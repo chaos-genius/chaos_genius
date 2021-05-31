@@ -6,11 +6,11 @@ import sys
 from flask import Flask, render_template
 
 from chaos_genius import commands
-from chaos_genius.views import connection_view, dataset_view, public_view
+from chaos_genius.views import connection_view, kpi_view, public_view
 from chaos_genius.extensions import (
     bcrypt,
     cache,
-    csrf_protect,
+    # csrf_protect,
     db,
     debug_toolbar,
     flask_static_digest,
@@ -40,7 +40,7 @@ def register_extensions(app):
     bcrypt.init_app(app)
     cache.init_app(app)
     db.init_app(app)
-    csrf_protect.init_app(app)
+    # csrf_protect.init_app(app)
     # login_manager.init_app(app)
     debug_toolbar.init_app(app)
     migrate.init_app(app, db)
@@ -52,7 +52,7 @@ def register_blueprints(app):
     """Register Flask blueprints."""
     app.register_blueprint(public_view.blueprint, url_prefix='/')
     app.register_blueprint(connection_view.blueprint, url_prefix='/api/connection')
-    app.register_blueprint(dataset_view.blueprint, url_prefix='/api/dataset')
+    app.register_blueprint(kpi_view.blueprint, url_prefix='/api/kpi')
     return None
 
 

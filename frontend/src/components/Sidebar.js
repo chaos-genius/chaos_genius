@@ -110,7 +110,7 @@ export default (props = {}) => {
 
               <CollapsableNavItem eventKey="organisation/" title="Organisation" icon={faSitemap}>
                 <NavItem title="Users" link={Routes.Users.path} icon={faUsers} />
-                <NavItem title="Data Source" link={Routes.DataSources.path} icon={faCoins} />
+                <NavItem title="Data Sources" link={Routes.DataSources.path} icon={faCoins} />
                 <NavItem title="Settings" link={Routes.OrganisationSettings.path} icon={faCogs} />
               </CollapsableNavItem>
 

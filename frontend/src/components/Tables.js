@@ -74,6 +74,7 @@ export const RcaAnalysisTable = (props) => {
   return (
     <Card border="light" className="shadow-sm mb-4">
       <Card.Body className="pb-0">
+        <div className="table-responsive" style={{'max-height': '500px', 'overflow-y': 'auto'}}>
         <Table responsive className="table-centered table-nowrap rounded mb-0">
           <thead className="thead-light">
             <tr>
@@ -84,6 +85,7 @@ export const RcaAnalysisTable = (props) => {
             {props.data.map(pt => <TableRow {...pt} />)}
           </tbody>
         </Table>
+        </div>
       </Card.Body>
     </Card>
   );

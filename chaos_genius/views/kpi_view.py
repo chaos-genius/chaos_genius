@@ -90,7 +90,7 @@ def rca_analysis(kpi_info, connection_info, timeline="mom"):
                     # TODO: Bad Hack to remove the last comma, fix it
                     values_str = str(tuple(values))
                     values_str = values_str[:-2] + ')'
-                    kpi_filters_query += f" and {key} in {values_str}"
+                    kpi_filters_query += f" and \"{key}\" in {values_str}"
 
         base_query = f"select * from {kpi_info['kpi_query']} {base_filter} {kpi_filters_query} "
         rca_query = f"select * from {kpi_info['kpi_query']} {rca_filter} {kpi_filters_query} "

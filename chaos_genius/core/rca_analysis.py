@@ -182,7 +182,7 @@ def calculate_group_overlap(
     df: pd.DataFrame, 
     str_col: str, 
     act_df: pd.DataFrame
-) -> list[float]:
+) -> list:
     """Calculates overlap percentages in subgroups.
 
     Args:

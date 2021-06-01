@@ -10,6 +10,7 @@
 
 Frontend
 
+- Go to frontend directory via `cd frontend`
 - Install the dependency via `npm install`
 - Run the frontend local server via `npm run start`
 - Run the backend local server via `npm run start-backend`

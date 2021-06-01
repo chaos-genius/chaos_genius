@@ -19,6 +19,7 @@ Backend
 
 - Install the python virtualenv via `python3 -m venv .venv`
 - Activate the environment `source .venv/bin/activate`
+- Install the dependancy `pip install -r requirements/dev.txt`
 - Run the dev server `bash dev_server.sh`
 
 

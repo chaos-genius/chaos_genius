@@ -23,6 +23,7 @@ class Home extends React.Component {
       chartData: [],
       yAxis: [],
       tableData: [],
+      dataColumns: ["Subgroup Name", "Previous Avg", "Previous Subgroup Size", "Current Avg", "Current Subgroup Size", "Impact"],
       amChart: null
     };
     this.handleKpiChange = this.handleKpiChange.bind(this);
@@ -31,7 +32,28 @@ class Home extends React.Component {
 
   componentDidMount() {
     this.fetchKPIData();
+    this.setDataColumns();
   }
+
+  setDataColumns() {
+    let timeMetric = '';
+    if (this.state.timeline === 'mom') {
+      timeMetric = 'month';
+    } else if (this.state.timeline === 'wow') {
+      timeMetric = 'week';
+    }
+    this.setState({
+      dataColumns: [
+        `Subgroup Name`,
+        `Prev ${timeMetric} Avg`,
+        `Prev ${timeMetric} Size`,
+        `Curr ${timeMetric} Avg`,
+        `Curr ${timeMetric} Size`,
+        `Impact`
+      ]
+    });
+  }
+
 
   fetchKPIData() {
     fetch('/api/kpi/')
@@ -61,6 +83,11 @@ class Home extends React.Component {
       categoryAxis.dataFields.category = "category";
       categoryAxis.renderer.minGridDistance = 40;
   
+      // Configure axis label
+      var xlabel = categoryAxis.renderer.labels.template;
+      xlabel.wrap = true;
+      xlabel.maxWidth = 120;
+
       let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
       if (this.state.yAxis.length > 0) {
         valueAxis.min = this.state.yAxis[0];
@@ -132,6 +159,7 @@ class Home extends React.Component {
       "timeline": targetComponent.value
     }, () => {
       this.fetchAnalysisData();
+      this.setDataColumns();
     })
   }
 
@@ -218,7 +246,7 @@ class Home extends React.Component {
 
         <Row style={{display: this.state.amChart ? 'block' : 'none' }}>
           <Col xs={12} xl={12}>
-            <RcaAnalysisTable data={this.state.tableData.slice(0, 50)}/>
+            <RcaAnalysisTable data={this.state.tableData.slice(0, 50)} columns={this.state.dataColumns}/>
           </Col>
         </Row>
 

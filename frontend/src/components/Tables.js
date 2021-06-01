@@ -24,8 +24,6 @@ const ValueChange = ({ value, suffix }) => {
 
 
 export const RcaAnalysisTable = (props) => {
-  console.log('--inside table--');
-  console.log(props);
   const TableRow = (props) => {
     const { subgroup, g1_size, g1_agg, g2_size, g2_agg, impact } = props;
 
@@ -67,19 +65,19 @@ export const RcaAnalysisTable = (props) => {
     );
   };
 
+  const headerRows = props.columns.map((header) => {
+    return (
+      <th key={header} className="border-0">{header}</th>
+    )
+  })
+
   return (
     <Card border="light" className="shadow-sm mb-4">
       <Card.Body className="pb-0">
         <Table responsive className="table-centered table-nowrap rounded mb-0">
           <thead className="thead-light">
             <tr>
-              {/* <th className="border-0">#</th> */}
-              <th className="border-0">Subgroup Name</th>
-              <th className="border-0">Previous Avg</th>
-              <th className="border-0">Previous Subgroup Size</th>
-              <th className="border-0">Current Avg</th>
-              <th className="border-0">Current Subgroup Size</th>
-              <th className="border-0">Impact</th>
+              {headerRows}
             </tr>
           </thead>
           <tbody>

@@ -624,11 +624,12 @@ def get_waterfall_and_impact_table(
     })
 
     js_df["open"] = js_df["value"].shift(1, fill_value=0)
-    js_df["displayValue"] = js_df["value"] - js_df["open"]
 
     js_df["color"] = ["#ff9eb7" if val <= 0 else "#72ddc3" for val in [0] + t_out["impact_non_overlap"].values.tolist() + [0]]
 
     js_df.loc[[0, len(js_df)-1], ["open", "color"]] = [[0, "#bbb"], [0, "#9cc7ff"]]
+
+    js_df["displayValue"] = js_df["value"] - js_df["open"]
 
     if plot_in_mpl:
         display(js_df)
@@ -638,7 +639,7 @@ def get_waterfall_and_impact_table(
     js_df["category"] = query_string_to_user_string_vectorized(js_df["category"])
     df_subgroup_impact["user_string"] = query_string_to_user_string_vectorized(df_subgroup_impact["string"])
 
-    js_df = js_df.round(4)
+    js_df = js_df.round(3)
     df_subgroup_impact = df_subgroup_impact.round(4)
 
     out_dict = {

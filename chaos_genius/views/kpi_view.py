@@ -96,8 +96,7 @@ def rca_analysis(kpi_info, connection_info, timeline="mom"):
         rca_query = f"select * from {kpi_info['kpi_query']} {rca_filter} {kpi_filters_query} "
         base_df = get_df_from_db_uri(connection_info["db_uri"], base_query)
         rca_df = get_df_from_db_uri(connection_info["db_uri"], rca_query)
-
-        final_data = get_waterfall_and_impact_table(base_df, rca_df, kpi_info["dimensions"], kpi_info["metric"], [1, 2, 3])
+        final_data = get_waterfall_and_impact_table(base_df, rca_df, kpi_info["dimensions"], kpi_info["metric"], n=[1, 2, 3])
         tmp_chart_data = final_data['data_table']
         new_tmp = []
         for data in tmp_chart_data:

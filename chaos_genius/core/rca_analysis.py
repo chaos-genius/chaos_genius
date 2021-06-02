@@ -1,47 +1,63 @@
 import re
-from typing import Tuple
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-
+import json
 from copy import deepcopy
+from functools import reduce
+from itertools import combinations
 from math import comb
 from textwrap import wrap
+from typing import Dict, List, Tuple
 
-import json
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
-from chaos_genius.core.rca_utils import *
-
-from IPython.display import display
-
-
-def conv(inp):
-    return " and ".join([f"`{col}`==\"{val}\"" for col, val in zip(inp.index, inp.values) if val is not np.nan])
+try:
+    from IPython.display import display
+except ModuleNotFoundError:
+    display = print
 
 
 def col_name_mapper(x):
     return "_".join(x) if not "" in x else "".join(x)
 
 
+def create_list_tuples(dims: List[str], n: List[int]) -> Dict[int, List[str]]:
+    """Creates a dictionary of all possible combinations of dims. 
+
+    Args:
+        dims (list[str]): Columns to group
+        n (list[int]): levels of grouping to perform
+
+    Returns:
+        dict[int: list[str]]: Returns dictionary with level of grouping 
+            mapped to all possible groups
+    """
+
+    out = dict()
+    for i in n:
+        out[i] = list(map(list, combinations(dims, i)))
+    return out
+
+
 def compare_subgroups(
-    d1: pd.DataFrame, 
-    d2: pd.DataFrame, 
-    dims: list, 
-    metrics: list, 
-    agg: list, 
-    m_col_names: dict, 
-    suffixes: list
+    d1: pd.DataFrame,
+    d2: pd.DataFrame,
+    dims: List[str],
+    metrics: List[str],
+    agg: List[str],
+    m_col_names: Dict[str, Dict[str, List[str]]],
+    suffixes: List[str]
 ) -> pd.DataFrame:
     """Compares 2 subgroups based on metrics
 
     Args:
         d1 (pd.DataFrame): Subgroup 1 (baseline)
         d2 (pd.DataFrame): Subgroup 2 (RCA/focus group)
-        dims (list): Dimensions to use
-        metrics (list): Metrics to compute for
-        agg (list): [description]
-        m_col_names (dict): Column names to use (highly specific)
-        suffixes (list): Suffixes for groups (highly specific)
+        dims (list[str]): Dimensions to use
+        metrics (list[str]): Metrics to compute for
+        agg (list[str]): [description]
+        m_col_names (dict[str): Column names to use (highly specific)
+        suffixes (list[str]): Suffixes for groups (highly specific)
 
     Returns:
         pd.DataFrame: Dataframe with cols 'val', 'size' and 'impact' to 
@@ -51,41 +67,56 @@ def compare_subgroups(
     d1_out = d1_out.agg({metric: agg for metric in metrics}).reset_index()
     d1_out.columns = d1_out.columns.map(col_name_mapper)
     d1_out.columns = d1_out.columns.get_level_values(0)
-    
+
     d2_out = d2.groupby(dims)
     d2_out = d2_out.agg({metric: agg for metric in metrics}).reset_index()
     d2_out.columns = d2_out.columns.map(col_name_mapper)
     d2_out.columns = d2_out.columns.get_level_values(0)
 
-    out = d1_out.merge(d2_out, how="outer", on=dims, suffixes= suffixes).fillna(0)
-    
+    out = d1_out.merge(d2_out, how="outer", on=dims,
+                       suffixes=suffixes).fillna(0)
+
     for i in range(len(metrics)):
-        out[m_col_names["val"]["_g1"][i]] = out[m_col_names["mean"]["_g1"][i]] * out[m_col_names["count"]["_g1"][i]] / (out[m_col_names["count"]["_g1"][i]].sum() + 1e-5)
-        out[m_col_names["val"]["_g2"][i]] = out[m_col_names["mean"]["_g2"][i]] * out[m_col_names["count"]["_g2"][i]] / (out[m_col_names["count"]["_g2"][i]].sum() + 1e-5)
+        out[m_col_names["val"]["_g1"][i]] = \
+            out[m_col_names["mean"]["_g1"][i]] \
+            * out[m_col_names["count"]["_g1"][i]] \
+            / (out[m_col_names["count"]["_g1"][i]].sum() + 1e-5)
 
-        out[m_col_names["size"]["_g1"][i]] = out[m_col_names["count"]["_g1"][i]] * 100 / (out[m_col_names["count"]["_g1"][i]].sum() + 1e-5)
-        out[m_col_names["size"]["_g2"][i]] = out[m_col_names["count"]["_g2"][i]] * 100 / (out[m_col_names["count"]["_g2"][i]].sum() + 1e-5)
+        out[m_col_names["val"]["_g2"][i]] = \
+            out[m_col_names["mean"]["_g2"][i]] \
+            * out[m_col_names["count"]["_g2"][i]] \
+            / (out[m_col_names["count"]["_g2"][i]].sum() + 1e-5)
 
-        out[m_col_names["impact"][i]] = out[m_col_names["val"]["_g2"][i]] - out[m_col_names["val"]["_g1"][i]]
+        out[m_col_names["size"]["_g1"][i]] = \
+            out[m_col_names["count"]["_g1"][i]] * 100 \
+            / (out[m_col_names["count"]["_g1"][i]].sum() + 1e-5)
+
+        out[m_col_names["size"]["_g2"][i]] = \
+            out[m_col_names["count"]["_g2"][i]] * 100 \
+            / (out[m_col_names["count"]["_g2"][i]].sum() + 1e-5)
+
+        out[m_col_names["impact"][i]] = \
+            out[m_col_names["val"]["_g2"][i]] - \
+            out[m_col_names["val"]["_g1"][i]]
 
     return out
 
 
 def group_comparison_across_subgroups(
-    d1: pd.DataFrame, 
-    d2: pd.DataFrame, 
-    dims: list, 
-    metrics: list,
-    n: list
+    d1: pd.DataFrame,
+    d2: pd.DataFrame,
+    dims: List[str],
+    metrics: List[str],
+    n: List[int]
 ) -> pd.DataFrame:
     """Performs comparison across all subgroups.
 
     Args:
         d1 (pd.DataFrame): Group 1 (baseline)
         d2 (pd.DataFrame): Group 2 (RCA/focus group)
-        dims (list): Dimensions to use
-        metrics (list): Metrics to compute for
-        n (list): List of number of dimensions to use as a subgroup 
+        dims (list[str]): Dimensions to use
+        metrics (list[str]): Metrics to compute for
+        n (list[int]): List of number of dimensions to use as a subgroup 
 
     Returns:
         pd.DataFrame: Dataframe which has the output
@@ -99,10 +130,10 @@ def group_comparison_across_subgroups(
 
     full_df = pd.concat([d1, d2])
     new_dims = dims[:]
-    
+
     for col in non_cat_cols.index:
         new_dims.remove(col)
-        a = pd.qcut(full_df[col], 4, duplicates= "drop").astype(str)
+        a = pd.qcut(full_df[col], 4, duplicates="drop").astype(str)
         full_df[col+"_binned"] = a
         new_dims.append(col+"_binned")
 
@@ -124,7 +155,7 @@ def group_comparison_across_subgroups(
 
     first_subgroup = list_tuples.pop(0)
     df_impact = compare_subgroups(
-        d1, d2, first_subgroup, 
+        d1, d2, first_subgroup,
         metrics, agg, m_col_names, suffixes
     )
 
@@ -137,12 +168,12 @@ def group_comparison_across_subgroups(
 
 
 def get_subgroup_impacts(
-    d1: pd.DataFrame, 
-    d2: pd.DataFrame, 
-    dims: list, 
-    metrics: list, 
-    agg: list, 
-    n: list
+    d1: pd.DataFrame,
+    d2: pd.DataFrame,
+    dims: List[str],
+    metrics: List[str],
+    agg: List[str] = ["mean", "count"],
+    n: List[int] = None
 ) -> pd.DataFrame:
     """Gets impacts of subgroups of levels in n for d1 and d2 across 
     dims for metrics.
@@ -150,39 +181,65 @@ def get_subgroup_impacts(
     Args:
         d1 (pd.DataFrame): Group 1 (Base Group)
         d2 (pd.DataFrame): Group 2 (RCA/Focus Group)
-        dims (list): Dimensions ot create subgroups from
-        metrics (list): Metrics to use
-        agg (list): Metric Aggregations
-        n (list): Level of subgroups to use
+        dims (list[str]): Dimensions ot create subgroups from
+        metrics (list[str]): Metrics to use
+        agg (list[str]): Metric Aggregations. 
+        Defaults to ["mean", "count"].
+        n (list[int]): Level of subgroups to use. Defaults to None.
 
     Returns:
         pd.DataFrame: Dataframe with sizes, contributions and impact 
         values for each subgroup
     """
 
+    if n is None:
+        n = list(range(1, len(dims)+1))
+
     final_out = group_comparison_across_subgroups(
         d1, d2, dims, metrics, n
     )
 
-    #sort by absolute impact values
+    # sort by absolute impact values
     final_out[[i + "_abs_impact" for i in metrics]] = \
         final_out[[i + "_impact" for i in metrics]].abs()
     final_out = final_out.sort_values(
-        [i + "_abs_impact" for i in metrics], ascending= False
-    ).drop([i + "_abs_impact" for i in metrics], axis= 1)
+        [i + "_abs_impact" for i in metrics], ascending=False
+    ).drop([i + "_abs_impact" for i in metrics], axis=1)
 
-    # convert columns to query strings
-    final_out["string"] = list(map(lambda x: conv(x[1]), final_out[dims].iterrows()))
-    final_out = final_out[["string"] + [j for i in [[f"{m}_impact", f"{m}_size_g1", f"{m}_size_g2", f"{m}_val_g1", f"{m}_val_g2", f"{m}_mean_g1", f"{m}_mean_g2"] for m in metrics] for j in i]]
-    final_out.reset_index(drop= True, inplace= True)
+    final_out.reset_index(drop=True, inplace=True)
     return final_out
+
+def convert_df_dims_to_query_strings(
+    df: pd.DataFrame,
+    dims: List[str]
+) -> list:
+    """Converts all given dimensions in df into query strings
+
+    Args:
+        df (pd.DataFrame): Dataframe with dims
+        dims (List[str]): List of dimensions to use
+
+    Returns:
+        pd.Series: Query strings
+    """
+
+    def conv(inp):
+        query_string_lists = [
+            f"`{col}`==\"{val}\"" for col, val in zip(inp.index, inp.values) \
+            if val is not np.nan
+        ]
+        return " and ".join(query_string_lists)
+
+    return list(
+        map(lambda x: conv(x[1]), df[dims].iterrows())
+    )
 
 
 def calculate_group_overlap(
-    df: pd.DataFrame, 
-    str_col: str, 
+    df: pd.DataFrame,
+    str_col: str,
     act_df: pd.DataFrame
-) -> list:
+) -> List[float]:
     """Calculates overlap percentages in subgroups.
 
     Args:
@@ -206,8 +263,8 @@ def calculate_group_overlap(
 
 
 def get_score(
-    df: pd.DataFrame, 
-    overlap_col: str, 
+    df: pd.DataFrame,
+    overlap_col: str,
     val_col: str
 ) -> pd.Series:
     """Generates a score for each subgroup
@@ -228,8 +285,8 @@ def get_score(
 
 
 def calc_group_score(
-    df: pd.DataFrame, 
-    overlap_col: str, 
+    df: pd.DataFrame,
+    overlap_col: str,
     score_col: str
 ) -> float:
     """Calculates scores for each group of subgroups
@@ -242,74 +299,145 @@ def calc_group_score(
     Returns:
         float: Score for the whole group
     """
-    return df[score_col].abs().sum() - df[overlap_col].abs().sum() # incorporate minimizing others
+
+    # incorporate minimizing others
+    return df[score_col].abs().sum() - df[overlap_col].abs().sum()
 
 
 def get_best_combo(
-    df: pd.DataFrame, 
-    str_col: str, 
-    val_col: str, 
-    act_df: pd.DataFrame, 
-    N: int = 200, 
-    K: int = 3, 
-    overlap_col: str = "overlap", 
-    score_col: str = "score"
-) -> list:
-    """Gets indices of all the possible groups of subgroups sorted by the group scores
+    df_subgroups: pd.DataFrame,
+    whole_df: pd.DataFrame,
+    d1: pd.DataFrame,
+    d2: pd.DataFrame,
+    metric: str,
+    K: int = 5,
+    pop_overlap_threshold: int = 0.8,
+    impact_overlap_threshold: int = 0.8,
+    impact_base_threshold: int = 0.05,
+    debug= False
+) -> pd.DataFrame:
+    """Returns best combination of subgroups for waterfall.
 
     Args:
-        df (pd.DataFrame): Dataframe with subgroups
-        str_col (str): Column name for subgroup strings
-        val_col (str): Column name for subgroup values
-        act_df (pd.DataFrame): Actual dataframe with subgroup data
-        N (int, optional): Max number of indices to consider. 
-        Defaults to 200.
-        K (int, optional): Number of subgroups in a group. 
-        Defaults to 3.
-        overlap_col (str, optional): Column name for overlap 
-        percentages. Defaults to "overlap".
-        score_col (str, optional): Column name for subgroup scores. 
-        Defaults to "score".
+        df_subgroups (pd.DataFrame): Dataframe with subgroups
+        whole_df (pd.DataFrame): Dataframe which is a merge of d1 and d2
+        d1 (pd.DataFrame): Group 1 (Baseline)
+        d2 (pd.DataFrame): Group 2 (Focus/RCA)
+        metric (str): Column name of the metric
+        K (int, optional): Max subgroups in waterfall. Defaults to 5.
+        pop_overlap_threshold (int, optional): Max subgroup overlap 
+        percentage allowed. Defaults to 0.8.
+        impact_overlap_threshold (int, optional): Max value of impact 
+        caused by impact allowed. Defaults to 0.8.
+        impact_base_threshold (int, optional): Min impact of subgroup. 
+        Defaults to 0.05.
+        debug (bool, optional): Whether to print debug values. 
+        Defaults to False.
 
     Returns:
-        list: Each element contains indices of each subgroup in group 
-        and list is sorted by highest to lowest score.
+        pd.DataFrame: Dataframe with the best combination of subgroups 
+        and non overlap impact values
     """
 
-    group_indices = list(range(K))
-    start_index = K
-    
-    df[overlap_col] = np.nan
-    df[score_col] = np.nan
-    
-    gscores = []
-    
-    while start_index < len(df) and start_index < N:
+    l1 = d1[metric].count()
+    l2 = d2[metric].count()
+
+    prev_indices = set()
+    current_comb = []
+    current_comb_indices = []
+    current_comb_filters = set()
+    i = -1
+
+    while i < len(df_subgroups) - 1 and len(current_comb) <= K:
+        i += 1
+
+        curr_filter_string = df_subgroups.iloc[i]["string"]
+
+        indices = set(whole_df.query(curr_filter_string).index)
+        new_indices = indices.union(prev_indices)
+        non_overlap_indices = new_indices - prev_indices
+
+        # check if filters of subgroup are already 
+        # in current combination.
+        curr_filters = set(curr_filter_string.split(" and "))
+        list_filter_in_current_filters = [
+            True if filter_ in current_comb_filters else False \
+            for filter_ in curr_filters
+        ]
+        curr_filters_exist_in_comb = reduce(
+            lambda x, y: x or y,
+            list_filter_in_current_filters
+        )
+        if curr_filters_exist_in_comb:
+            continue
+
+        # check if overlap of subgroup with whole combination is greater
+        # than the threshold. 
+        overlap_pop_perc = 1 - (len(non_overlap_indices) / len(indices))
+        if overlap_pop_perc > pop_overlap_threshold:
+            continue
+
+        t_df = whole_df.loc[list(non_overlap_indices)]
+
+        t_d1 = pd.merge(t_df, d1, how="inner")
+        t_d2 = pd.merge(t_df, d2, how="inner")
+
+        p1 = t_d1[metric].mean() * t_d1[metric].count() / l1
+        p2 = t_d2[metric].mean() * t_d2[metric].count() / l2
+
+        p1 = 0 if np.isnan(p1) else p1
+        p2 = 0 if np.isnan(p2) else p2
+        non_overlap_impact = p2 - p1
+        total_impact = df_subgroups.iloc[i][metric + "_impact"] + 1e-10
+        overlap_impact = abs(total_impact - non_overlap_impact) / total_impact
+
+        # check if percentage of overlapping impact of subgroup is not 
+        # smaller than a threshold value
+        if len(current_comb) > 0:
+            max_overlap_impact_in_comb = max(
+                [abs(sg[2]) for sg in current_comb]
+            )
+
+            impact_perc = abs(non_overlap_impact) / max_overlap_impact_in_comb
+            if impact_perc < impact_base_threshold:
+                continue
         
-        overlap = calculate_group_overlap(df.iloc[group_indices], str_col, act_df)
-        df[overlap_col].iloc[group_indices] = overlap
-        
-        scores = get_score(df.iloc[group_indices], overlap_col, val_col)
-        df[score_col].iloc[group_indices] = scores
-        
-        gscores.append([deepcopy(group_indices), calc_group_score(df.iloc[group_indices], overlap_col, score_col)])
-        
-        rem_ind = df[score_col].iloc[group_indices].idxmin()
-        
-        group_indices.remove(rem_ind)
-        
-        group_indices.append(start_index)
-        
-        start_index += 1
-        
-    gscores.sort(reverse= False, key= lambda x: x[1])
-    
-    return gscores
+        # check if impact of subgroup is not smaller than a threshold
+        # percentage of the highest impact subgroup
+        if overlap_impact < impact_overlap_threshold:
+            if debug:
+                display(i, len(non_overlap_indices), p1, p2)
+
+            current_comb.append([
+                df_subgroups.iloc[i]["string"],
+                df_subgroups.iloc[i][metric + "_impact"],
+                non_overlap_impact,
+                len(indices),
+                len(non_overlap_indices),
+                len(prev_indices)
+            ])
+            current_comb_indices.append(i)
+            current_comb_filters = current_comb_filters.union(curr_filters)
+
+            prev_indices = new_indices
+
+        else:
+            continue
+
+    return pd.DataFrame(
+        current_comb,
+        index=current_comb_indices,
+        columns=[
+            "string", "impact_full_group", "impact_non_overlap",
+            "indices in group", "non-overlap indices",
+            "total unique indices in combination"
+        ]
+    )
 
 
 def waterfall_plot_mpl(
-    trans: pd.DataFrame, 
-    col: str, 
+    trans: pd.DataFrame,
+    col: str,
     rot: int = 0
 ) -> plt.Axes:
     """Plots waterfall chart using matplotlib
@@ -317,55 +445,56 @@ def waterfall_plot_mpl(
     Args:
         trans (pd.DataFrame): Dataframe with waterfall data
         col (str): Column to use for values
-        rot (int, optional): Rotation of labels along X axis. Defaults to 0.
+        rot (int, optional): Rotation of labels along X axis. 
+        Defaults to 0.
 
     Returns:
         plt.Axes: axes with waterfall plotted
     """
-    
+
     blank = trans[col].cumsum().shift(1).fillna(0)
 
-    #Get the net total number for the final element in the waterfall
+    # Get the net total number for the final element in the waterfall
     total = trans.sum()[col]
-    trans.loc["net"]= total
+    trans.loc["net"] = total
     blank.loc["net"] = total
 
-    #The steps graphically show the levels as well as used for label placement
+    # The steps graphically show the levels 
+    # as well as used for label placement
     step = blank.reset_index(drop=True).repeat(3).shift(-1)
     step[1::3] = np.nan
 
-    #When plotting the last element, we want to show the full bar,
-    #Set the blank to 0
+    # When plotting the last element, we want to show the full bar,
+    # Set the blank to 0
     blank.loc["net"] = 0
 
     #Plot and label
-    
+
     new_trans = trans.copy()
-    
+
     new_trans["pos"] = new_trans[col]
     new_trans["neg"] = new_trans[col]
     new_trans.loc[new_trans["pos"] < 0, "pos"] = 0
     new_trans.loc[new_trans["neg"] > 0, "neg"] = 0
-    new_trans.drop(col, axis= 1, inplace= True)
-    
-    
+    new_trans.drop(col, axis=1, inplace=True)
+
     my_plot = new_trans.plot(
-        kind='bar', stacked=True, bottom=blank, 
-        legend=None, figsize=(15, 5), rot= rot,
-        color= {"pos": "green", "neg": "red"}
+        kind='bar', stacked=True, bottom=blank,
+        legend=None, figsize=(15, 5), rot=rot,
+        color={"pos": "green", "neg": "red"}
     )
-    my_plot.plot(step.index, step.values,'k')
+    my_plot.plot(step.index, step.values, 'k')
 
     y_min = min([step.values[2], *blank[1:-1], +step.values[-3]])*0.95
     y_max = max(blank+trans[col]) * 1.05
 
     plt.ylim([y_min, y_max])
-    
+
     return my_plot
 
 
 def get_waterfall_ylims(
-    trans: pd.DataFrame, 
+    trans: pd.DataFrame,
     col: str
 ) -> Tuple[float, float]:
     """Returns y limits for the Y axis of a waterfall plot
@@ -379,17 +508,18 @@ def get_waterfall_ylims(
     """
     blank = trans[col].cumsum().shift(1).fillna(0)
 
-    #Get the net total number for the final element in the waterfall
+    # Get the net total number for the final element in the waterfall
     total = trans.sum()[col]
-    trans.loc["net"]= total
+    trans.loc["net"] = total
     blank.loc["net"] = total
 
-    #The steps graphically show the levels as well as used for label placement
+    # The steps graphically show the levels as well 
+    # as used for label placement
     step = blank.reset_index(drop=True).repeat(3).shift(-1)
     step[1::3] = np.nan
 
-    #When plotting the last element, we want to show the full bar,
-    #Set the blank to 0
+    # When plotting the last element, we want to show the full bar,
+    # Set the blank to 0
     blank.loc["net"] = 0
 
     y_min = min([step.values[2], *blank[1:-1], +step.values[-3]])*0.95
@@ -398,12 +528,12 @@ def get_waterfall_ylims(
     return y_min, y_max
 
 
-def comb_sum(n: int, rs: list) -> int:
+def comb_sum(n: int, rs: List[int]) -> int:
     """Returns summation of ncr for r in rs
 
     Args:
         n (int): n
-        rs (list): list of r values
+        rs (list[int]): list of r values
 
     Returns:
         int: summation of ncr for r in rs
@@ -423,6 +553,9 @@ def query_string_to_user_string(in_str: str) -> str:
     Returns:
         str: User readable string
     """
+
+    re_str = r"`([a-zA-Z0-9\s]+)`\s*([=<>]{1,2})\s*[\"]*([a-zA-Z0-9]+)[\"]*"
+
     try:
         final_out = []
         val_dict = {
@@ -430,7 +563,7 @@ def query_string_to_user_string(in_str: str) -> str:
         }
         filters = in_str.split(" and ")
         for filt in filters:
-            out = re.search(r"`([a-zA-Z0-9\s]+)`\s*([=<>]{1,2})\s*[\"]*([a-zA-Z0-9]+)[\"]*", filt)
+            out = re.search(re_str, filt)
             out = out.groups()
             final_out.append(" ".join([val_dict.get(i, i) for i in out]))
         return " & ".join(final_out)
@@ -438,34 +571,124 @@ def query_string_to_user_string(in_str: str) -> str:
         print(e)
         return in_str
 
+
 # vectorized function
-query_string_to_user_string_vectorized = np.vectorize(query_string_to_user_string)
+query_string_to_user_string_vectorized = np.vectorize(
+    query_string_to_user_string
+)
+
+
+def get_waterfall_output_data(
+    subgroup_df: pd.DataFrame,
+    metric: str,
+    d1_mean: float,
+    d2_mean: float,
+    word_wrap_num: int= 15,
+    plot_in_mpl: bool= False,
+) -> Tuple[Tuple[float, float], pd.DataFrame]:
+    """Returns y_axis limits for waterfall as well as the data for 
+    plotting the waterfall
+
+    Args:
+        waterfall_df (pd.DataFrame): Input data
+        metric (str): metric to use
+        d1_mean (float): Mean of Group 1 (Baseline)
+        d2_mean (float): Mean of Group 2 (Focus/RCA)
+        word_wrap_num (int, optional): Wrap words when plotting in 
+        matplotlib. Defaults to 15.
+        plot_in_mpl (bool, optional): Show output in matplotlib. 
+        Defaults to False.
+
+    Returns:
+        Tuple[Tuple[float, float], pd.DataFrame]: y_axis limits, data
+    """
+
+    a = ["start"]
+    t = ["\n".join(wrap(i, word_wrap_num))
+         for i in subgroup_df["string"].values.tolist()]
+    a.extend(t)
+    t = [d1_mean]
+    t.extend(subgroup_df["impact_non_overlap"].values.tolist())
+
+    if plot_in_mpl:
+        print("plot")
+        ax = waterfall_plot_mpl(pd.DataFrame(
+            data={metric: t}, index=a), metric)
+
+    y_axis_lims = get_waterfall_ylims(
+        pd.DataFrame(data={metric: t}, index=a), metric)
+
+    a = ["start"]
+    a.extend(subgroup_df["string"].values.tolist() + ["end"])
+    t = [d1_mean]
+    t.extend(subgroup_df["impact_non_overlap"].values.tolist())
+    t.append([d2_mean])
+    t = t[0:1] + [sum(t[:i+1]) for i in range(1, len(t)-1)] + t[-1]
+    js_df = pd.DataFrame(data={
+        "value": t,
+        "category": a,
+        "stepValue": t
+    })
+
+    js_df["open"] = js_df["value"].shift(1, fill_value=0)
+
+    js_df["color"] = [
+        "#ff9eb7" if val <= 0 else "#72ddc3" for val in \
+        [0] + subgroup_df["impact_non_overlap"].values.tolist() + [0]
+    ]
+
+    js_df.loc[[0, len(js_df)-1], ["open", "color"]] = [
+        [0, "#bbb"],
+        [0, "#9cc7ff"]
+    ]
+
+    js_df["displayValue"] = js_df["value"] - js_df["open"]
+
+    if plot_in_mpl:
+        print("plot")
+        display(js_df)
+        plt.show()
+
+    js_df["category"] = query_string_to_user_string_vectorized(
+        js_df["category"]
+    )
+
+    return y_axis_lims, js_df
 
 
 def get_waterfall_and_impact_table(
-    d1: pd.DataFrame, 
-    d2: pd.DataFrame, 
-    dims: list, 
-    metric: str, 
-    n: list= None,
-    agg: list= ["mean", "count"], 
-    pop_overlap_threshold: int= 0.8,
-    impact_overlap_threshold: int= 0.8,
-    impact_base_threshold: int= 0.05,
-    word_wrap_num: int= 15,
-    debug: bool= False,
-    plot_in_mpl= False
+    d1: pd.DataFrame,
+    d2: pd.DataFrame,
+    dims: List[str],
+    metric: str,
+    K: int = 5,
+    n: List[int] = None,
+    agg: List[str] = ["mean", "count"],
+    pop_overlap_threshold: int = 0.8,
+    impact_overlap_threshold: int = 0.8,
+    impact_base_threshold: int = 0.05,
+    word_wrap_num: int = 15,
+    debug: bool = False,
+    plot_in_mpl: bool = False
 ) -> dict:
-    """Generate data for waterfall and impact calculation of subgroups
+    """Generate data for waterfall and impact calculation of subgroups.
+
+    Methodology:
+        Calculates all possible subgroup impacts (without overlap) and
+        then searches through the list of subgroups for the best 
+        combination without any overlap in its subgroups while
+        having a large impact. 
 
     Args:
         d1 (pd.DataFrame): Group 1 (baseline)
         d2 (pd.DataFrame): Group 2 (RCA/Focus)
-        dims (list): List of dimensions
+        dims (list[str]): List of dimensions
         metric (str): metric to use
-        n (list, optional): List of number of dimensions to use 
+        K (int): Max subgroups in waterfall. Defaults to 5.
+        n (list[int], optional): List of number of dimensions to use 
         while grouping. Defaults to None.
-        agg (list, optional): Aggregate against. Defaults to ["mean", "count"].
+        agg (list[str], optional): Aggregate against. Defaults to 
+        ["mean", "count"].
         pop_overlap_threshold (int, optional): Ignoring subpopulations 
         greater than this value. Defaults to 0.8.
         impact_overlap_threshold (int, optional): Ignoring impact values 
@@ -475,20 +698,22 @@ def get_waterfall_and_impact_table(
         word_wrap_num (int, optional): number to use for wordwrapping 
         user readable subgroup strings. Defaults to 15.
         debug (bool, optional): Print debug data. Defaults to False.
-        plot_in_mpl (bool, optional): Plot using matplotlib. Defaults to False.
+        plot_in_mpl (bool, optional): Plot using matplotlib. 
+        Defaults to False.
 
     Returns:
         dict: Dictionary with output data
     """
 
+    d1.set_index('index', inplace=True)
+    d2.set_index('index', inplace=True)
+
     if n == None:
         n = [*range(1, len(dims)+1)]
 
-    l1 = d1[metric].count()
-    l2 = d2[metric].count()
-
+    # get sorted impacts of all subgroups
     df_subgroup_impact = get_subgroup_impacts(
-        d1, 
+        d1,
         d2,
         dims,
         [metric],
@@ -496,161 +721,118 @@ def get_waterfall_and_impact_table(
         n
     )
 
+    # convert dims to query_strings
+    df_subgroup_impact["string"] = convert_df_dims_to_query_strings(
+        df_subgroup_impact,
+        dims
+    )
+
+    # keep only relevant columns
+    df_subgroup_impact.drop(dims, axis= 1, inplace= True)
+    metric_columns = [
+        f"{metric}_impact", f"{metric}_size_g1", f"{metric}_size_g2", 
+        f"{metric}_val_g1", f"{metric}_val_g2", f"{metric}_mean_g1", 
+        f"{metric}_mean_g2"
+    ]
+    df_subgroup_impact = df_subgroup_impact[
+        ["string"] + metric_columns
+    ]
+
     if debug:
         display(df_subgroup_impact)
 
-    prev_indices = set()
-    t_out = pd.concat([d1, d2])
-    
+    whole_df = pd.concat([d1, d2])
+
     if debug:
-        display("Max indices:", len(t_out))
+        display("Max indices:", len(whole_df))
 
-    current_comb = []
-    current_comb_indices = []
-    current_comb_filters = set()
-
-    i = -1
-
-    while i < len(df_subgroup_impact) - 1 and len(current_comb) <= 5:
-        i += 1
-
-        curr_filter_string = df_subgroup_impact.iloc[i]["string"]
-        curr_filters = set(curr_filter_string.split(" and "))
-
-        indices = set(t_out.query(curr_filter_string).index)
-        new_indices = indices.union(prev_indices)
-        rel_indices = new_indices - prev_indices
-
-        curr_filters_exist_in_comb = reduce(
-            lambda x, y: x or y, 
-            [True if filter_ in current_comb_filters else False for filter_ in curr_filters]
-        )
-
-        if curr_filters_exist_in_comb:
-            continue
-
-        overlap_pop_perc = 1 - (len(rel_indices) / len(indices))
-
-        if overlap_pop_perc > pop_overlap_threshold:
-            continue
-
-
-        t_df = t_out.loc[list(rel_indices)]
-
-        t_d1 = pd.merge(t_df, d1, how= "inner")
-        t_d2 = pd.merge(t_df, d2, how= "inner")
-
-        p1 = t_d1[metric].mean() * t_d1[metric].count() / l1
-        p2 = t_d2[metric].mean() * t_d2[metric].count() / l2
-
-        p1 = 0 if np.isnan(p1) else p1
-        p2 = 0 if np.isnan(p2) else p2
-        non_overlap_impact = p2 - p1
-        total_impact = df_subgroup_impact.iloc[i][metric + "_impact"] + 1e-10
-        overlap_impact = abs(total_impact - non_overlap_impact) / total_impact
-        
-        if len(current_comb) > 0:
-            max_overlap_impact_in_comb = max([abs(sg[2]) for sg in current_comb])
-            if abs(non_overlap_impact) / max_overlap_impact_in_comb < impact_base_threshold:
-                continue
-
-        if overlap_impact < impact_overlap_threshold:
-            if debug:
-                display(i, len(rel_indices), p1, p2)
-
-            current_comb.append([
-                df_subgroup_impact.iloc[i]["string"], 
-                df_subgroup_impact.iloc[i][metric + "_impact"], 
-                non_overlap_impact, 
-                len(indices), 
-                len(rel_indices), 
-                len(prev_indices)
-            ])
-            current_comb_indices.append(i)
-            current_comb_filters = current_comb_filters.union(curr_filters)
-
-            prev_indices = new_indices
-
-        else:
-            continue
-
-    t_out = pd.DataFrame(
-        current_comb, 
-        index= current_comb_indices, 
-        columns= [
-            "string", "impact_full_group", "impact_non_overlap", 
-            "indices in group", "non-overlap indices", "total unique indices in combination"
-        ]
+    # Get best subgroups for waterfall plot
+    best_subgroup_combo_df = get_best_combo(
+        df_subgroup_impact,
+        whole_df,
+        d1, d2,
+        metric,
+        K,
+        pop_overlap_threshold,
+        impact_overlap_threshold,
+        impact_base_threshold,
+        debug
     )
 
     if debug:
-        display(t_out)
+        display(best_subgroup_combo_df)
 
-    t_out = t_out[["string", "impact_non_overlap"]]
+    # filter out relevant data for waterfall
+    best_subgroup_combo_df = best_subgroup_combo_df[["string", "impact_non_overlap"]]
 
     act_sum = d2[metric].mean() - d1[metric].mean()
-    our_sum = t_out["impact_non_overlap"].sum()
-    t_out = t_out.append(
-        {"string": "\"others\"", "impact_non_overlap": act_sum - our_sum}, 
-        ignore_index= True
+    our_sum = best_subgroup_combo_df["impact_non_overlap"].sum()
+    best_subgroup_combo_df = best_subgroup_combo_df.append(
+        {"string": "\"others\"", "impact_non_overlap": act_sum - our_sum},
+        ignore_index=True
     )
-    
+
     if debug:
-        display(t_out)
+        display(best_subgroup_combo_df)
 
-    a = ["start"]
-    t = ["\n".join(wrap(i, word_wrap_num)) for i in t_out["string"].values.tolist()]
-    a.extend(t)
-    t = [d1[metric].mean()]
-    t.extend(t_out["impact_non_overlap"].values.tolist())
+    # yaxis limits and waterfall data
+    y_axis_lims, waterfall_df = get_waterfall_output_data(
+        best_subgroup_combo_df,
+        metric,
+        d1[metric].mean(),
+        d2[metric].mean(),
+        word_wrap_num,
+        plot_in_mpl
+    )
 
-    if plot_in_mpl:
-        ax = waterfall_plot_mpl(pd.DataFrame(data= {metric: t}, index= a), metric)
-        plt.title(f"{metric} against {dims}")
+    df_subgroup_impact["user_string"] = query_string_to_user_string_vectorized(
+        df_subgroup_impact["string"]
+    )
 
-    y_axis_lims = get_waterfall_ylims(pd.DataFrame(data= {metric: t}, index= a), metric)
-
-    a = ["start"]
-    # t = ["\n".join(wrap(i, word_wrap_num)) for i in t_out["string"].values.tolist()]
-    a.extend(t_out["string"].values.tolist() + ["end"])
-    t = [d1[metric].mean()]
-    t.extend(t_out["impact_non_overlap"].values.tolist())
-    t.append([d2[metric].mean()])
-    t = t[0:1] + [sum(t[:i+1]) for i in range(1, len(t)-1)] + t[-1]
-    js_df = pd.DataFrame(data= {
-        "value": t, 
-        "category": a,
-        "stepValue": t
-    })
-
-    js_df["open"] = js_df["value"].shift(1, fill_value=0)
-
-    js_df["color"] = ["#ff9eb7" if val <= 0 else "#72ddc3" for val in [0] + t_out["impact_non_overlap"].values.tolist() + [0]]
-
-    js_df.loc[[0, len(js_df)-1], ["open", "color"]] = [[0, "#bbb"], [0, "#9cc7ff"]]
-
-    js_df["displayValue"] = js_df["value"] - js_df["open"]
-
-    if plot_in_mpl:
-        display(js_df)
-        plt.show()
-
-
-    js_df["category"] = query_string_to_user_string_vectorized(js_df["category"])
-    df_subgroup_impact["user_string"] = query_string_to_user_string_vectorized(df_subgroup_impact["string"])
-
-    js_df = js_df.round(3)
     df_subgroup_impact = df_subgroup_impact.round(4)
+    waterfall_df = waterfall_df.round(3)
 
     out_dict = {
         "chart": {
-            "chart_data": js_df.to_dict("records"),
+            "chart_data": waterfall_df.to_dict("records"),
             "y_axis_lim": [round(i, 4) for i in y_axis_lims]
         },
         "data_table": df_subgroup_impact.to_dict("records")
     }
 
     return out_dict
+
+
+def get_single_dim_impact(
+    d1: pd.DataFrame,
+    d2: pd.DataFrame,
+    main_dim: str,
+    dims: List[str],
+    metric: str,
+    N: int = 5
+) -> pd.DataFrame:
+    """Gets Impact Values for subgroups across a single dimension
+
+    Args:
+        d1 (pd.DataFrame): Group 1 (baseline)
+        d2 (pd.DataFrame): Group 2 (RCA/Focus)
+        main_dim (str): Main dimensions
+        dims (list[str]): List of dimensions
+        metric (str): metric to use
+        N (int, optional): Number of rows to return. Defaults to 5.
+
+    Returns:
+        pd.DataFrame: Dataframe with impact values
+    """
+    df_impact = get_subgroup_impacts(
+        d1, d2, [main_dim]+dims, [metric]
+    )
+
+    df_impact = df_impact[~df_impact[main_dim].isna()]
+
+    df_impact = df_impact.reset_index(drop= True).iloc[:N]
+
+    return df_impact
 
 
 if __name__ == "__main__":
@@ -663,10 +845,24 @@ if __name__ == "__main__":
         df.query("20210601 <= date < 20210701"),
         ["job", "education", "marital", "housing", "loan"],
         "sum_conversion",
-        n = [1, 2, 3],
-        debug= False,
-        plot_in_mpl= False
+        n=[1, 2, 3],
+        debug=False,
+        plot_in_mpl=True
     )
 
     with open("tmp2.json", "w") as f:
         f.write(out)
+
+    out = get_single_dim_impact(
+        df.query("20210501 <= date < 20210601"),
+        df.query("20210601 <= date < 20210701"),
+        "education",
+        ["marital", "housing", "loan"],
+        "sum_conversion"
+    )
+
+    out["string"] = query_string_to_user_string_vectorized(convert_df_dims_to_query_strings(out, ["education", "marital", "housing", "loan"]))
+
+    out = out[["string", "sum_conversion_impact"]]
+
+    display(out)

@@ -1,0 +1,49 @@
+.custom-table .MuiPaper-root {
+    box-shadow: unset;
+}
+
+.custom-table  .MuiTableBody-root td.MuiTableCell-root{
+    font-family: "Nunito Sans",sans-serif !important;
+    border-bottom: unset;
+    font-size: .875rem !important;
+    padding: .75rem .5rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    text-align: left;
+}
+
+.custom-table .MuiTableHead-root th.MuiTableCell-root {
+    font-family: "Nunito Sans",sans-serif;
+    background-color: #f5f8fb;
+    color: #262b40;
+    font-size: .75rem;
+    font-weight: 700;
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+    border-bottom: unset;
+    text-align: left;
+}
+
+.custom-table .MuiInput-underline:before{
+    border-bottom: unset !important;
+}
+.custom-table .MuiInput-underline:after{
+    border-bottom: unset !important;
+}
+.custom-table .MuiPaper-root .MuiInputAdornment-positionEnd{
+    display: none;
+}
+.custom-table .MuiPaper-root > .MuiToolbar-root .MuiInputBase-root{
+    border: 1px solid #66799e;
+    border-radius: 6px;
+    padding: 0.3rem 1rem;
+    min-width: 300px;
+}
+.custom-table .MuiPaper-root > .MuiToolbar-root .MuiIconButton-root:hover {
+    background-color:unset;
+}
+button.MuiIconButton-root.close-button {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+}

@@ -147,7 +147,7 @@ def rca_analysis(kpi_info, connection_info, timeline="mom", dimensions= None):
         base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, timeline)
 
         # TODO: add the kpi_info["metric_precision"] in the arguments for metric precision
-        if dimensions is None:
+        if dimensions is None or dimensions == "multidimensional":
             final_data = get_waterfall_and_impact_table(base_df, rca_df, kpi_info["dimensions"], kpi_info["metric"], n=[1, 2, 3])
         elif dimensions in kpi_info["dimensions"]:
             dims_without_main_dim = list(deepcopy(kpi_info["dimensions"]))

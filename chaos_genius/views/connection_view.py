@@ -16,6 +16,11 @@ from chaos_genius.utils import flash_errors
 
 blueprint = Blueprint("api_connection", __name__, static_folder="../static")
 
+CONNECTION_TYPES = [
+    {'name': 'PostgreSQL', 'value': 'postgresql'},
+    {'name': 'MySQL', 'value': 'mysql'}
+]
+
 
 @blueprint.route("/", methods=["GET", "POST"])
 def connection():
@@ -37,3 +42,10 @@ def connection():
         connections = Connection.query.all()
         results = [conn.safe_dict for conn in connections]
         return jsonify({"count": len(results), "data": results})
+
+
+@blueprint.route("/connection-types", methods=["GET", "POST"])
+def connection_types():
+    """Connection Type view."""
+    return jsonify({"data": CONNECTION_TYPES})
+

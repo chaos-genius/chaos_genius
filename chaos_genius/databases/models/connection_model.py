@@ -10,7 +10,7 @@ class Connection(PkModel):
 
     __tablename__ = "connection"
     name = Column(db.String(80), nullable=False)
-    connection_type = Column(db.String(80), nullable=False)
+    connection_type = Column(db.String(80)) # TODO: Make the nullable=False
     db_uri = Column(db.Text(), unique=True, nullable=False)
     active = Column(db.Boolean(), default=False)
     created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)

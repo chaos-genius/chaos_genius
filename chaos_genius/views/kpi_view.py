@@ -2,6 +2,7 @@
 """KPI views for creating and viewing the kpis."""
 import traceback
 from datetime import datetime, timedelta
+from copy import deepcopy
 
 from flask import (
     Blueprint,
@@ -17,7 +18,7 @@ from flask import (
 from chaos_genius.utils import flash_errors
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.connection_model import Connection
-from chaos_genius.core.rca_analysis import get_waterfall_and_impact_table
+from chaos_genius.core.rca_analysis import get_rca_group_panel_metrics, get_waterfall_and_impact_table, get_waterfall_and_impact_table_single_dim
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 
 
@@ -46,6 +47,27 @@ def kpi():
         results = KPI_DATA
         return jsonify({"count": len(results), "data": results})
 
+@blueprint.route("/<int:kpi_id>/get-dimensions", methods=["GET"])
+def kpi_get_dimensions(kpi_id):
+    dimensions = []
+    try:
+        kpi_info = KPI_DATA[kpi_id-1]
+        dimensions = DB_DIMS[kpi_info["kpi_query"]]
+    except Exception as err:
+        current_app.logger.info(f"Error Found: {err}")
+    return jsonify({"dimensions": dimensions, "msg": ""})
+
+@blueprint.route("/<int:kpi_id>/kpi-aggregations", methods=["GET"])
+def kpi_get_aggregation(kpi_id):
+    data = []
+    try:
+        kpi_info = KPI_DATA[kpi_id-1]
+        connection_info = Connection.get_by_id(kpi_info["data_source"])
+        timeline = request.args.get("timeline")
+        data = kpi_aggregation(kpi_info, connection_info.as_dict, timeline)
+    except Exception as err:
+        current_app.logger.info(f"Error Found: {err}")
+    return jsonify({"data": data, "msg": ""})
 
 @blueprint.route("/<int:kpi_id>/rca-analysis", methods=["GET"])
 def kpi_rca_analysis(kpi_id):
@@ -55,50 +77,85 @@ def kpi_rca_analysis(kpi_id):
         kpi_info = KPI_DATA[kpi_id-1]
         connection_info = Connection.get_by_id(kpi_info["data_source"])
         timeline = request.args.get("timeline")
-        data = rca_analysis(kpi_info, connection_info.as_dict, timeline)
+        dimensions = request.args.get("dimensions", None)
+        data = rca_analysis(kpi_info, connection_info.as_dict, timeline, dimensions)
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("RCA Analysis Done")
     return jsonify({"data": data, "msg": ""})
 
 
-def rca_analysis(kpi_info, connection_info, timeline="mom"):
-    try:
-        today = datetime.today()
-        if timeline == "mom":
-            base_dt = f"{today.year}-{today.month-1}-01"
-            cur_dt = f"{today.year}-{today.month}-01"
-            next_dt = f"{today.year}-{today.month+1}-01"
-        elif timeline == "wow":
-            weekday = today.weekday()
-            base_dt_obj = today - timedelta(days=weekday+7)
-            base_dt = str(base_dt_obj.date())
-            cur_dt_obj = today - timedelta(days=weekday)
-            cur_dt = str(cur_dt_obj.date())
-            next_dt_obj = cur_dt_obj + timedelta(days=7)
-            next_dt = str(next_dt_obj.date())
+def get_baseline_and_rca_df(kpi_info, connection_info, timeline="mom"):
+    today = datetime.today()
+    if timeline == "mom":
+        base_dt = f"{today.year}-{today.month-1}-01"
+        cur_dt = f"{today.year}-{today.month}-01"
+        next_dt = f"{today.year}-{today.month+1}-01"
+    elif timeline == "wow":
+        weekday = today.weekday()
+        base_dt_obj = today - timedelta(days=weekday+7)
+        base_dt = str(base_dt_obj.date())
+        cur_dt_obj = today - timedelta(days=weekday)
+        cur_dt = str(cur_dt_obj.date())
+        next_dt_obj = cur_dt_obj + timedelta(days=7)
+        next_dt = str(next_dt_obj.date())
 
-        base_filter = f" where {kpi_info['datetime_column']} >= '{base_dt}' and {kpi_info['datetime_column']} < '{cur_dt}' "
-        rca_filter = f" where {kpi_info['datetime_column']} >= '{cur_dt}' and {kpi_info['datetime_column']} < '{next_dt}' "
+    base_filter = f" where {kpi_info['datetime_column']} >= '{base_dt}' and {kpi_info['datetime_column']} < '{cur_dt}' "
+    rca_filter = f" where {kpi_info['datetime_column']} >= '{cur_dt}' and {kpi_info['datetime_column']} < '{next_dt}' "
 
-        kpi_filters = kpi_info['filters']
+    kpi_filters = kpi_info['filters']
+    kpi_filters_query = " "
+    if kpi_filters:
         kpi_filters_query = " "
-        if kpi_filters:
-            kpi_filters_query = " "
-            for key, values in kpi_filters.items():
-                if values:
-                    # TODO: Bad Hack to remove the last comma, fix it
-                    values_str = str(tuple(values))
-                    values_str = values_str[:-2] + ')'
-                    kpi_filters_query += f" and \"{key}\" in {values_str}"
+        for key, values in kpi_filters.items():
+            if values:
+                # TODO: Bad Hack to remove the last comma, fix it
+                values_str = str(tuple(values))
+                values_str = values_str[:-2] + ')'
+                kpi_filters_query += f" and \"{key}\" in {values_str}"
 
-        base_query = f"select * from {kpi_info['kpi_query']} {base_filter} {kpi_filters_query} "
-        rca_query = f"select * from {kpi_info['kpi_query']} {rca_filter} {kpi_filters_query} "
-        base_df = get_df_from_db_uri(connection_info["db_uri"], base_query)
-        rca_df = get_df_from_db_uri(connection_info["db_uri"], rca_query)
+    base_query = f"select * from {kpi_info['kpi_query']} {base_filter} {kpi_filters_query} "
+    rca_query = f"select * from {kpi_info['kpi_query']} {rca_filter} {kpi_filters_query} "
+    base_df = get_df_from_db_uri(connection_info["db_uri"], base_query)
+    rca_df = get_df_from_db_uri(connection_info["db_uri"], rca_query)
+
+    return base_df, rca_df
+
+
+def kpi_aggregation(kpi_info, connection_info, timeline="mom"):
+    try:
+        base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, timeline)
 
         # TODO: add the kpi_info["metric_precision"] in the arguments for metric precision
-        final_data = get_waterfall_and_impact_table(base_df, rca_df, kpi_info["dimensions"], kpi_info["metric"], n=[1, 2, 3])
+        panel_metrics = get_rca_group_panel_metrics(base_df, rca_df, kpi_info['metric'])
+
+        final_data = {
+            "panel_metrics": panel_metrics,
+            "line_chart_data": [],
+            "insights": []
+        }
+
+    except Exception as err:
+        # print(traceback.format_exc())
+        current_app.logger.error(f"Error in RCA Analysis: {err}")
+        final_data = {"impact": None, "g1_metrics": dict(), "g2_metrics": dict()}
+    return final_data
+
+
+def rca_analysis(kpi_info, connection_info, timeline="mom", dimensions= None):
+    try:
+        base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, timeline)
+
+        # TODO: add the kpi_info["metric_precision"] in the arguments for metric precision
+        if dimensions is None:
+            final_data = get_waterfall_and_impact_table(base_df, rca_df, kpi_info["dimensions"], kpi_info["metric"], n=[1, 2, 3])
+        elif dimensions in kpi_info["dimensions"]:
+            dims_without_main_dim = list(deepcopy(kpi_info["dimensions"]))
+            dims_without_main_dim.remove(dimensions)
+            n = list(range(1, min([3, len(dims_without_main_dim)])))
+            final_data = get_waterfall_and_impact_table_single_dim(base_df, rca_df, dimensions, dims_without_main_dim, kpi_info["metric"], n= n)
+        else:
+            raise ValueError(f"Dimension: {dimensions} does not exist.")
 
         tmp_chart_data = final_data['data_table']
         new_tmp = []
@@ -117,7 +174,10 @@ def rca_analysis(kpi_info, connection_info, timeline="mom"):
     except Exception as err:
         # print(traceback.format_exc())
         current_app.logger.error(f"Error in RCA Analysis: {err}")
-        final_data = {"chart": {"chart_data": [], "y_axis_lim": []}, "data_table": []}
+        final_data = {
+            "chart": {"chart_data": [], "y_axis_lim": [], "chart_table": []}, 
+            "data_table": []
+        }
     return final_data
 
 
@@ -133,3 +193,8 @@ KPI_DATA = [
     {"id": 9, "name": "Total price for maize", "kpi_query": "mh_food_prices", "data_source": 4, "datetime_column": "date", "metric": "modal_price", "metric_precision": 2, "aggregation": "mean", "filters": {"Commodity": ["Maize"]}, "dimensions": ["APMC", "district_name"]},
     {"id": 10, "name": "Total price for green chilli", "kpi_query": "mh_food_prices", "data_source": 4, "datetime_column": "date", "metric": "modal_price", "metric_precision": 2, "aggregation": "mean", "filters": {"Commodity": ["Green Chilli"]}, "dimensions": ["APMC", "district_name"]}
 ]
+
+DB_DIMS = {
+    "marketing_records": ["job","marital","education","housing","loan"],
+    "mh_food_prices": ["Commodity", "APMC", "district_name"]
+}

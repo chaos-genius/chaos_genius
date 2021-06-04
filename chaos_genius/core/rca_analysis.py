@@ -1,6 +1,5 @@
 import re
 import json
-from copy import deepcopy
 from functools import reduce
 from itertools import combinations
 from math import comb
@@ -656,6 +655,197 @@ def get_waterfall_output_data(
     return y_axis_lims, js_df
 
 
+def get_group_metrics(
+    df: pd.DataFrame,
+    metric: str
+) -> Dict:
+    """Gets basic metrics for a df
+
+    Args:
+        df (pd.DataFrame): Dataframe to use
+        metric (str): Metric to compute for
+
+    Returns:
+        Dict: Dict with relevant metrics
+    """
+    out_dict = {
+        "mean": df[metric].mean().item(),
+        "median": df[metric].median().item(),
+        "count": len(df[metric]),
+        "not-null count": df[metric].count().item(),
+        "sum": df[metric].sum().item()
+    }
+
+    return out_dict
+
+
+def get_rca_group_panel_metrics(
+    d1: pd.DataFrame,
+    d2: pd.DataFrame,
+    metric: str
+) -> Dict:
+    """Gets metrics for both groups
+
+    Args:
+        d1 (pd.DataFrame): Baseline group
+        d2 (pd.DataFrame): Focus/RCA group
+        metric (str): Metric to compute for
+
+    Returns:
+        Dict: Dict with impact and metrics of both groups
+    """
+    g1 = get_group_metrics(d1, metric)
+    g2 = get_group_metrics(d2, metric)
+    out_dict = {
+        "impact": g2["mean"] - g1["mean"],
+        "g1_metrics": g1,
+        "g2_metrics": g2
+    }
+    return out_dict
+
+
+def get_waterfall_and_impact_table_single_dim(
+    d1: pd.DataFrame,
+    d2: pd.DataFrame,
+    main_dim: str,
+    dims: List[str],
+    metric: str,
+    K: int = 5,
+    n: List[int] = None,
+    word_wrap_num: int = 15,
+    debug: bool = False,
+    plot_in_mpl: bool = False
+) -> Dict:
+    """Generate data for waterfall and impact calculation of subgroups 
+    for a single dimension.
+
+    Methodology:
+        Calculates all possible subgroup impacts (without overlap) and
+        then searches through the list of subgroups for the best 
+        combination without any overlap in its subgroups while
+        having a large impact. 
+
+    Args:
+        d1 (pd.DataFrame): Group 1 (baseline)
+        d2 (pd.DataFrame): Group 2 (RCA/Focus)
+        main_dim (str): Single dim
+        dims (list[str]): List of dimensions
+        metric (str): metric to use
+        K (int): Max subgroups in waterfall. Defaults to 5.
+        n (list[int], optional): List of number of dimensions to use 
+        while grouping. Defaults to None.
+        word_wrap_num (int, optional): number to use for wordwrapping 
+        user readable subgroup strings. Defaults to 15.
+        debug (bool, optional): Print debug data. Defaults to False.
+        plot_in_mpl (bool, optional): Plot using matplotlib. 
+        Defaults to False.
+
+    Returns:
+        dict: Dictionary with output data
+    """
+
+    if n == None:
+        n = [*range(1, len(dims)+1)]
+
+    # get sorted impacts of all subgroups
+    df_subgroup_impact = get_single_dim_impact(
+        d1,
+        d2,
+        main_dim,
+        dims,
+        metric,
+        N= None,
+        n= n
+    )
+
+    # convert dims to query_strings
+    df_subgroup_impact["string"] = convert_df_dims_to_query_strings(
+        df_subgroup_impact,
+        dims + [main_dim]
+    )
+
+    # keep only relevant columns
+    df_subgroup_impact.drop(dims, axis= 1, inplace= True)
+    metric_columns = [
+        f"{metric}_impact", f"{metric}_size_g1", f"{metric}_size_g2", 
+        f"{metric}_val_g1", f"{metric}_val_g2", f"{metric}_mean_g1", 
+        f"{metric}_mean_g2", f"{metric}_count_g1", f"{metric}_count_g2"
+    ]
+    df_subgroup_impact = df_subgroup_impact[
+        ["string"] + metric_columns
+    ]
+
+    if debug:
+        display(df_subgroup_impact)
+
+    whole_df = pd.concat([d1, d2])
+
+    if debug:
+        display("Max indices:", len(whole_df))
+
+    # Get subgroups for waterfall plot
+    best_subgroup_combo_df = get_subgroup_impacts(
+        d1,
+        d2,
+        [main_dim],
+        [metric],
+        n = [1]
+    )
+    best_subgroup_combo_df = best_subgroup_combo_df.reset_index(drop= True).iloc[:K]
+    best_subgroup_combo_df["string"] = convert_df_dims_to_query_strings(
+        best_subgroup_combo_df,
+        [main_dim]
+    )
+
+    if debug:
+        display(best_subgroup_combo_df)
+
+    # filter out relevant data for waterfall
+    best_subgroup_combo_df = best_subgroup_combo_df[["string", f"{metric}_impact"]]
+    best_subgroup_combo_df_short = best_subgroup_combo_df.rename(columns={f"{metric}_impact": "impact_non_overlap"})
+    
+
+    act_sum = d2[metric].mean() - d1[metric].mean()
+    our_sum = best_subgroup_combo_df_short["impact_non_overlap"].sum()
+
+    if round(act_sum - our_sum, 4) != 0:
+        best_subgroup_combo_df_short = best_subgroup_combo_df_short.append(
+            {"string": "\"others\"", "impact_non_overlap": act_sum - our_sum},
+            ignore_index=True
+        )
+
+    if debug:
+        display(best_subgroup_combo_df_short)
+
+    # yaxis limits and waterfall data
+    y_axis_lims, waterfall_df = get_waterfall_output_data(
+        best_subgroup_combo_df_short,
+        metric,
+        d1[metric].mean(),
+        d2[metric].mean(),
+        word_wrap_num,
+        plot_in_mpl
+    )
+
+    df_subgroup_impact["user_string"] = query_string_to_user_string_vectorized(
+        df_subgroup_impact["string"]
+    )
+
+    df_subgroup_impact = df_subgroup_impact.round(4)
+    # waterfall_df = waterfall_df.round(4)
+
+    out_dict = {
+        "chart": {
+            "chart_data": waterfall_df.to_dict("records"),
+            "y_axis_lim": [round(i, 4) for i in y_axis_lims],
+            "chart_table": best_subgroup_combo_df.to_dict("records")
+        },
+        "data_table": df_subgroup_impact.to_dict("records")
+    }
+
+    return out_dict
+
+
 def get_waterfall_and_impact_table(
     d1: pd.DataFrame,
     d2: pd.DataFrame,
@@ -670,7 +860,7 @@ def get_waterfall_and_impact_table(
     word_wrap_num: int = 15,
     debug: bool = False,
     plot_in_mpl: bool = False
-) -> dict:
+) -> Dict:
     """Generate data for waterfall and impact calculation of subgroups.
 
     Methodology:
@@ -705,9 +895,6 @@ def get_waterfall_and_impact_table(
         dict: Dictionary with output data
     """
 
-    d1.set_index('index', inplace=True)
-    d2.set_index('index', inplace=True)
-
     if n == None:
         n = [*range(1, len(dims)+1)]
 
@@ -732,7 +919,7 @@ def get_waterfall_and_impact_table(
     metric_columns = [
         f"{metric}_impact", f"{metric}_size_g1", f"{metric}_size_g2", 
         f"{metric}_val_g1", f"{metric}_val_g2", f"{metric}_mean_g1", 
-        f"{metric}_mean_g2", f"{metric}_count_g1", f"{metric}_count_g2"
+        f"{metric}_mean_g2"
     ]
     df_subgroup_impact = df_subgroup_impact[
         ["string"] + metric_columns
@@ -763,21 +950,21 @@ def get_waterfall_and_impact_table(
         display(best_subgroup_combo_df)
 
     # filter out relevant data for waterfall
-    best_subgroup_combo_df = best_subgroup_combo_df[["string", "impact_non_overlap"]]
+    best_subgroup_combo_df_short = best_subgroup_combo_df[["string", "impact_non_overlap"]]
 
     act_sum = d2[metric].mean() - d1[metric].mean()
-    our_sum = best_subgroup_combo_df["impact_non_overlap"].sum()
-    best_subgroup_combo_df = best_subgroup_combo_df.append(
+    our_sum = best_subgroup_combo_df_short["impact_non_overlap"].sum()
+    best_subgroup_combo_df_short = best_subgroup_combo_df_short.append(
         {"string": "\"others\"", "impact_non_overlap": act_sum - our_sum},
         ignore_index=True
     )
 
     if debug:
-        display(best_subgroup_combo_df)
+        display(best_subgroup_combo_df_short)
 
     # yaxis limits and waterfall data
     y_axis_lims, waterfall_df = get_waterfall_output_data(
-        best_subgroup_combo_df,
+        best_subgroup_combo_df_short,
         metric,
         d1[metric].mean(),
         d2[metric].mean(),
@@ -790,12 +977,13 @@ def get_waterfall_and_impact_table(
     )
 
     df_subgroup_impact = df_subgroup_impact.round(4)
-    waterfall_df = waterfall_df.round(3)
+    # waterfall_df = waterfall_df.round(4)
 
     out_dict = {
         "chart": {
             "chart_data": waterfall_df.to_dict("records"),
-            "y_axis_lim": [round(i, 4) for i in y_axis_lims]
+            "y_axis_lim": [round(i, 4) for i in y_axis_lims],
+            "chart_table": best_subgroup_combo_df.to_dict("records")
         },
         "data_table": df_subgroup_impact.to_dict("records")
     }
@@ -809,7 +997,8 @@ def get_single_dim_impact(
     main_dim: str,
     dims: List[str],
     metric: str,
-    N: int = 5
+    N: int = 5,
+    n: List[int] = None
 ) -> pd.DataFrame:
     """Gets Impact Values for subgroups across a single dimension
 
@@ -820,17 +1009,20 @@ def get_single_dim_impact(
         dims (list[str]): List of dimensions
         metric (str): metric to use
         N (int, optional): Number of rows to return. Defaults to 5.
+        n (List[int], optional): Subgroups dimensions to use
 
     Returns:
         pd.DataFrame: Dataframe with impact values
     """
     df_impact = get_subgroup_impacts(
-        d1, d2, [main_dim]+dims, [metric]
+        d1, d2, [main_dim]+dims, [metric], n= n
     )
 
     df_impact = df_impact[~df_impact[main_dim].isna()]
+    df_impact = df_impact.reset_index(drop= True)
 
-    df_impact = df_impact.reset_index(drop= True).iloc[:N]
+    if N is not None:
+        df_impact = df_impact.iloc[:N]
 
     return df_impact
 
@@ -846,12 +1038,12 @@ if __name__ == "__main__":
         ["job", "education", "marital", "housing", "loan"],
         "sum_conversion",
         n=[1, 2, 3],
-        debug=False,
+        debug=True,
         plot_in_mpl=True
     )
 
     with open("tmp2.json", "w") as f:
-        f.write(out)
+        f.write(json.dumps(out, indent= 4))
 
     out = get_single_dim_impact(
         df.query("20210501 <= date < 20210601"),

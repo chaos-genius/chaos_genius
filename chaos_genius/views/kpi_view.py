@@ -104,8 +104,10 @@ def rca_analysis(kpi_info, connection_info, timeline="mom"):
                 "subgroup": data.get('user_string'),
                 "g1_size": round(data.get(f"{kpi_info['metric']}_size_g1", 0.0), 1),
                 "g1_agg": round(data.get(f"{kpi_info['metric']}_mean_g1", 0.0), 3),
+                "g1_count": data.get(f"{kpi_info['metric']}_count_g1", 0),
                 "g2_size": round(data.get(f"{kpi_info['metric']}_size_g2", 0.0), 1),
                 "g2_agg": round(data.get(f"{kpi_info['metric']}_mean_g2", 0.0), 3),
+                "g2_count": data.get(f"{kpi_info['metric']}_count_g2", 0),
                 "impact": round(data.get(f"{kpi_info['metric']}_impact", 0.0), 3),
             })
         final_data['data_table'] = new_tmp

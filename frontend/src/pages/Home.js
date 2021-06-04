@@ -8,7 +8,6 @@ import { RcaAnalysisTable } from '../components/Tables';
 // Am4charts
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
-import * as am4plugins_sunburst from "@amcharts/amcharts4/plugins/sunburst";
 import am4themes_animated from "@amcharts/amcharts4/themes/animated";
 am4core.useTheme(am4themes_animated);
 
@@ -24,7 +23,7 @@ class Home extends React.Component {
       chartData: [],
       yAxis: [],
       tableData: [],
-      dataColumns: ["Subgroup Name", "Previous Avg", "Previous Subgroup Size", "Current Avg", "Current Subgroup Size", "Impact"],
+      dataColumns: ["Subgroup Name", "Previous Avg", "Previous Subgroup Size", "Previous Subgroup Count", "Current Avg", "Current Subgroup Size", "Current Subgroup Count", "Impact"],
       amChart: null,
       alertType: 'info',
       alertMessage: 'Please select the KPI first'
@@ -50,8 +49,10 @@ class Home extends React.Component {
         `Subgroup Name`,
         `Prev ${timeMetric} Avg`,
         `Prev ${timeMetric} Size`,
+        `Prev ${timeMetric} Count`,
         `Curr ${timeMetric} Avg`,
         `Curr ${timeMetric} Size`,
+        `Curr ${timeMetric} Count`,
         `Impact`
       ]
     });

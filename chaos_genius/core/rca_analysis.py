@@ -732,7 +732,7 @@ def get_waterfall_and_impact_table(
     metric_columns = [
         f"{metric}_impact", f"{metric}_size_g1", f"{metric}_size_g2", 
         f"{metric}_val_g1", f"{metric}_val_g2", f"{metric}_mean_g1", 
-        f"{metric}_mean_g2"
+        f"{metric}_mean_g2", f"{metric}_count_g1", f"{metric}_count_g2"
     ]
     df_subgroup_impact = df_subgroup_impact[
         ["string"] + metric_columns

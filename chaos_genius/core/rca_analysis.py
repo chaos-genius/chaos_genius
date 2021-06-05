@@ -572,7 +572,7 @@ def query_string_to_user_string(in_str: str) -> str:
         str: User readable string
     """
 
-    re_str = r"`([a-zA-Z0-9\s]+)`\s*([=<>]{1,2})\s*[\"]*([a-zA-Z0-9]+)[\"]*"
+    re_str = r"`(.+)`\s*([=<>]{1,2})\s*[\"]*([^\"]+)[\"]*"
 
     try:
         final_out = []
@@ -588,12 +588,6 @@ def query_string_to_user_string(in_str: str) -> str:
     except Exception as e:
         print(e)
         return in_str
-
-
-# vectorized function
-query_string_to_user_string_vectorized = np.vectorize(
-    query_string_to_user_string
-)
 
 
 def get_waterfall_output_data(
@@ -666,10 +660,6 @@ def get_waterfall_output_data(
         print("plot")
         display(js_df)
         plt.show()
-
-    js_df["category"] = query_string_to_user_string_vectorized(
-        js_df["category"]
-    )
 
     return y_axis_lims, js_df
 
@@ -839,7 +829,7 @@ def get_waterfall_and_impact_table_single_dim(
 
     if round(act_sum - our_sum, precision) != 0:
         best_subgroup_combo_df_short = best_subgroup_combo_df_short.append(
-            {"string": "\"others\"", "impact_non_overlap": act_sum - our_sum},
+            {"string": "others", "impact_non_overlap": act_sum - our_sum},
             ignore_index=True
         )
 
@@ -856,9 +846,14 @@ def get_waterfall_and_impact_table_single_dim(
         plot_in_mpl
     )
 
-    df_subgroup_impact["user_string"] = query_string_to_user_string_vectorized(
-        df_subgroup_impact["string"]
-    )
+    df_subgroup_impact["user_string"] = \
+        df_subgroup_impact["user_string"].apply(query_string_to_user_string)
+
+    waterfall_df["category"] = \
+        waterfall_df["category"].apply(query_string_to_user_string)
+
+    best_subgroup_combo_df["string"] = \
+        best_subgroup_combo_df["string"].apply(query_string_to_user_string)
 
     waterfall_df = waterfall_df.round(precision)
     best_subgroup_combo_df = best_subgroup_combo_df.round(precision)
@@ -1005,9 +1000,14 @@ def get_waterfall_and_impact_table(
         plot_in_mpl
     )
 
-    df_subgroup_impact["user_string"] = query_string_to_user_string_vectorized(
-        df_subgroup_impact["string"]
-    )
+    df_subgroup_impact["string"] = \
+        df_subgroup_impact["string"].apply(query_string_to_user_string)
+
+    waterfall_df["category"] = \
+        waterfall_df["category"].apply(query_string_to_user_string)
+
+    best_subgroup_combo_df["string"] = \
+        best_subgroup_combo_df["string"].apply(query_string_to_user_string)
 
     waterfall_df = waterfall_df.round(precision)
     best_subgroup_combo_df = best_subgroup_combo_df.round(precision)
@@ -1087,7 +1087,8 @@ if __name__ == "__main__":
         "sum_conversion"
     )
 
-    out["string"] = query_string_to_user_string_vectorized(convert_df_dims_to_query_strings(out, ["education", "marital", "housing", "loan"]))
+    out["string"] = convert_df_dims_to_query_strings(out, ["education", "marital", "housing", "loan"])
+    out["string"] = out["string"].apply(query_string_to_user_string)
 
     out = out[["string", "sum_conversion_impact"]]
 

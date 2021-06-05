@@ -1,5 +1,6 @@
 
 import React from "react";
+import { Alert } from '@themesberg/react-bootstrap';
 import { Col, Row, Button, Card, Form, InputGroup } from '@themesberg/react-bootstrap';
 
 import { RcaAnalysisTable } from '../components/Tables';
@@ -7,7 +8,6 @@ import { RcaAnalysisTable } from '../components/Tables';
 // Am4charts
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
-import * as am4plugins_sunburst from "@amcharts/amcharts4/plugins/sunburst";
 import am4themes_animated from "@amcharts/amcharts4/themes/animated";
 am4core.useTheme(am4themes_animated);
 
@@ -23,7 +23,10 @@ class Home extends React.Component {
       chartData: [],
       yAxis: [],
       tableData: [],
-      amChart: null
+      dataColumns: ["Subgroup Name", "Previous Avg", "Previous Subgroup Size", "Previous Subgroup Count", "Current Avg", "Current Subgroup Size", "Current Subgroup Count", "Impact"],
+      amChart: null,
+      alertType: 'info',
+      alertMessage: 'Please select the KPI first'
     };
     this.handleKpiChange = this.handleKpiChange.bind(this);
     this.handleTimelineChange = this.handleTimelineChange.bind(this);
@@ -31,7 +34,30 @@ class Home extends React.Component {
 
   componentDidMount() {
     this.fetchKPIData();
+    this.setDataColumns();
   }
+
+  setDataColumns() {
+    let timeMetric = '';
+    if (this.state.timeline === 'mom') {
+      timeMetric = 'month';
+    } else if (this.state.timeline === 'wow') {
+      timeMetric = 'week';
+    }
+    this.setState({
+      dataColumns: [
+        `Subgroup Name`,
+        `Prev ${timeMetric} Avg`,
+        `Prev ${timeMetric} Size`,
+        `Prev ${timeMetric} Count`,
+        `Curr ${timeMetric} Avg`,
+        `Curr ${timeMetric} Size`,
+        `Curr ${timeMetric} Count`,
+        `Impact`
+      ]
+    });
+  }
+
 
   fetchKPIData() {
     fetch('/api/kpi/')
@@ -61,6 +87,11 @@ class Home extends React.Component {
       categoryAxis.dataFields.category = "category";
       categoryAxis.renderer.minGridDistance = 40;
   
+      // Configure axis label
+      var xlabel = categoryAxis.renderer.labels.template;
+      xlabel.wrap = true;
+      xlabel.maxWidth = 120;
+
       let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
       if (this.state.yAxis.length > 0) {
         valueAxis.min = this.state.yAxis[0];
@@ -115,7 +146,9 @@ class Home extends React.Component {
         chartData: [],
         yAxis: [],
         tableData: [],
-        amChart: null  
+        amChart: null,
+        alertType: 'info',
+        alertMessage: 'Please select the KPI first'
       })
       return;
     }
@@ -132,21 +165,38 @@ class Home extends React.Component {
       "timeline": targetComponent.value
     }, () => {
       this.fetchAnalysisData();
+      this.setDataColumns();
     })
   }
 
   fetchAnalysisData() {
+    this.setState({
+      alertMessage: "Fetching the analysis...",
+      tableData: [],
+      chartData: [],
+      yAxis: []
+    })
     fetch(`/api/kpi/${this.state.kpi}/rca-analysis?timeline=${this.state.timeline}&dimensions=${this.state.dimension}`)
       .then(response => response.json())
       .then(respData => {
         const data = respData.data;
-        this.setState({
-          chartData: data.chart.chart_data,
-          yAxis: data.chart.y_axis_lim,
-          tableData: data.data_table
-        }, () => {
-          this.plotChart();
-        })
+        let chartData = data.chart.chart_data;
+        let tableData = data.data_table;
+        let yAxis = data.chart.y_axis_lim;
+        if (chartData.length > 0) {
+          this.setState({
+            chartData: chartData,
+            tableData: tableData,
+            yAxis: yAxis
+          }, () => {
+            this.plotChart();
+          })
+        } else {
+          this.setState({
+            alertType: 'warning',
+            alertMessage: 'Not enough data to provide the analysis. Please change the timeline or KPI.'
+          })
+        }
       });
   }
 
@@ -206,22 +256,56 @@ class Home extends React.Component {
           </Col>
         </Row>
 
-        <Row style={{display: this.state.amChart ? 'block' : 'none' }}>
+        <Row>
           <Col xs={12} xl={12}>
             <Card border="light" className="shadow-sm mb-4">
               <Card.Body className="pb-0">
-                <div id="chartdivWaterfall" style={{ width: "100%", height: "500px" }}></div>
+                <h5 className="mb-4">Smart Waterfall</h5>
+                <p>The key subgroups which are driving the metric provided in the KPI will be shown here.</p>
+                <div style={{display: this.state.chartData.length ? 'block' : 'none' }}>
+                  <Card border="light" className="shadow-sm mb-4">
+                    <Card.Body className="pb-0">
+                      <div id="chartdivWaterfall" style={{ width: "100%", height: "500px" }}></div>
+                    </Card.Body>
+                  </Card>
+                </div>
+                <div style={{display: this.state.chartData.length ? 'none' : 'block' }}>
+                  <Card border="light" className="shadow-sm mb-4">
+                    <Card.Body className="pb-0">
+                    <Alert variant={this.state.alertType}>
+                      {this.state.alertMessage}
+                    </Alert>
+                    </Card.Body>
+                  </Card>
+                </div>
               </Card.Body>
             </Card>
           </Col>
         </Row>
 
-        <Row style={{display: this.state.amChart ? 'block' : 'none' }}>
+        <Row>
           <Col xs={12} xl={12}>
-            <RcaAnalysisTable data={this.state.tableData.slice(0, 50)}/>
+          <Card border="light" className="shadow-sm mb-4">
+              <Card.Body className="pb-0">
+                <h5 className="mb-4">Top Subgroups Data</h5>
+                <p>These are the top 50 subgroups sorted by their Impact.</p>
+                <div style={{display: this.state.tableData.length ? 'block' : 'none' }}>
+                  <RcaAnalysisTable data={this.state.tableData.slice(0, 50)} columns={this.state.dataColumns}/>
+                </div>
+                <div style={{display: this.state.tableData.length ? 'none' : 'block' }}>
+                  <Card border="light" className="shadow-sm mb-4">
+                    <Card.Body className="pb-0">
+                    <Alert variant={this.state.alertType}>
+                      {this.state.alertMessage}
+                    </Alert>
+                    </Card.Body>
+                  </Card>
+                </div>
+              </Card.Body>
+            </Card>
+
           </Col>
         </Row>
-
       </>
     );
   }

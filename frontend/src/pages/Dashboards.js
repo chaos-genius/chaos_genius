@@ -182,6 +182,11 @@ class Dashboard extends React.Component {
       categoryAxis.dataFields.category = "category";
       categoryAxis.renderer.minGridDistance = 40;
 
+      // Configure axis label
+      var xlabel = categoryAxis.renderer.labels.template;
+      xlabel.wrap = true;
+      xlabel.maxWidth = 120;
+
       let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
       if (this.state.yAxis.length > 0) {
         valueAxis.min = this.state.yAxis[0];

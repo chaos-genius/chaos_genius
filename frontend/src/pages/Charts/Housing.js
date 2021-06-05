@@ -157,8 +157,6 @@ am4core.useTheme(am4themes_animated);
 
 export const tab1Fields = (props,kpi) => {
 
-
-    console.log("props",props);
     const { g1_metrics, g2_metrics, impact } = props;
 
     const valueIcon = impact < 0 ? faAngleDown : faAngleUp;

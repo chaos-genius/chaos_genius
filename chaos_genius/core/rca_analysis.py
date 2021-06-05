@@ -676,13 +676,16 @@ def get_waterfall_output_data(
 
 def get_group_metrics(
     df: pd.DataFrame,
-    metric: str
+    metric: str,
+    precision: int = 3
 ) -> Dict:
     """Gets basic metrics for a df
 
     Args:
         df (pd.DataFrame): Dataframe to use
         metric (str): Metric to compute for
+        precision (int, optional): Return values rounded to specific 
+        decimals. Defaults to 3.
 
     Returns:
         Dict: Dict with relevant metrics
@@ -694,6 +697,7 @@ def get_group_metrics(
         "not-null count": df[metric].count().item(),
         "sum": df[metric].sum().item()
     }
+    out_dict = {i: round(j, precision) for i, j in out_dict.items()}
 
     return out_dict
 
@@ -701,7 +705,8 @@ def get_group_metrics(
 def get_rca_group_panel_metrics(
     d1: pd.DataFrame,
     d2: pd.DataFrame,
-    metric: str
+    metric: str,
+    precision: int = 3
 ) -> Dict:
     """Gets metrics for both groups
 
@@ -709,12 +714,14 @@ def get_rca_group_panel_metrics(
         d1 (pd.DataFrame): Baseline group
         d2 (pd.DataFrame): Focus/RCA group
         metric (str): Metric to compute for
+        precision (int, optional): Return values rounded to specific 
+        decimals. Defaults to 3.
 
     Returns:
         Dict: Dict with impact and metrics of both groups
     """
-    g1 = get_group_metrics(d1, metric)
-    g2 = get_group_metrics(d2, metric)
+    g1 = get_group_metrics(d1, metric, precision= precision)
+    g2 = get_group_metrics(d2, metric, precision= precision)
     out_dict = {
         "impact": g2["mean"] - g1["mean"],
         "g1_metrics": g1,
@@ -733,7 +740,8 @@ def get_waterfall_and_impact_table_single_dim(
     n: List[int] = None,
     word_wrap_num: int = 15,
     debug: bool = False,
-    plot_in_mpl: bool = False
+    plot_in_mpl: bool = False,
+    precision: int = 3
 ) -> Dict:
     """Generate data for waterfall and impact calculation of subgroups 
     for a single dimension.
@@ -758,6 +766,8 @@ def get_waterfall_and_impact_table_single_dim(
         debug (bool, optional): Print debug data. Defaults to False.
         plot_in_mpl (bool, optional): Plot using matplotlib. 
         Defaults to False.
+        precision (int, optional): Return values rounded to specific 
+        decimals. Defaults to 3.
 
     Returns:
         dict: Dictionary with output data
@@ -827,7 +837,7 @@ def get_waterfall_and_impact_table_single_dim(
     act_sum = d2[metric].mean() - d1[metric].mean()
     our_sum = best_subgroup_combo_df_short["impact_non_overlap"].sum()
 
-    if round(act_sum - our_sum, 4) != 0:
+    if round(act_sum - our_sum, precision) != 0:
         best_subgroup_combo_df_short = best_subgroup_combo_df_short.append(
             {"string": "\"others\"", "impact_non_overlap": act_sum - our_sum},
             ignore_index=True
@@ -850,13 +860,14 @@ def get_waterfall_and_impact_table_single_dim(
         df_subgroup_impact["string"]
     )
 
-    df_subgroup_impact = df_subgroup_impact.round(4)
-    # waterfall_df = waterfall_df.round(4)
+    waterfall_df = waterfall_df.round(precision)
+    best_subgroup_combo_df = best_subgroup_combo_df.round(precision)
+    df_subgroup_impact = df_subgroup_impact.round(precision)
 
     out_dict = {
         "chart": {
             "chart_data": waterfall_df.to_dict("records"),
-            "y_axis_lim": [round(i, 4) for i in y_axis_lims],
+            "y_axis_lim": [round(i, precision) for i in y_axis_lims],
             "chart_table": best_subgroup_combo_df.to_dict("records")
         },
         "data_table": df_subgroup_impact.to_dict("records")
@@ -878,7 +889,8 @@ def get_waterfall_and_impact_table(
     impact_base_threshold: int = 0.05,
     word_wrap_num: int = 15,
     debug: bool = False,
-    plot_in_mpl: bool = False
+    plot_in_mpl: bool = False,
+    precision: int = 3
 ) -> Dict:
     """Generate data for waterfall and impact calculation of subgroups.
 
@@ -909,6 +921,8 @@ def get_waterfall_and_impact_table(
         debug (bool, optional): Print debug data. Defaults to False.
         plot_in_mpl (bool, optional): Plot using matplotlib. 
         Defaults to False.
+        precision (int, optional): Return values rounded to specific 
+        decimals. Defaults to 3.
 
     Returns:
         dict: Dictionary with output data
@@ -995,13 +1009,14 @@ def get_waterfall_and_impact_table(
         df_subgroup_impact["string"]
     )
 
-    df_subgroup_impact = df_subgroup_impact.round(4)
-    # waterfall_df = waterfall_df.round(4)
+    waterfall_df = waterfall_df.round(precision)
+    best_subgroup_combo_df = best_subgroup_combo_df.round(precision)
+    df_subgroup_impact = df_subgroup_impact.round(precision)
 
     out_dict = {
         "chart": {
             "chart_data": waterfall_df.to_dict("records"),
-            "y_axis_lim": [round(i, 4) for i in y_axis_lims],
+            "y_axis_lim": [round(i, precision) for i in y_axis_lims],
             "chart_table": best_subgroup_combo_df.to_dict("records")
         },
         "data_table": df_subgroup_impact.to_dict("records")

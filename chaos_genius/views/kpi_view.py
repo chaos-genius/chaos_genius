@@ -126,8 +126,7 @@ def kpi_aggregation(kpi_info, connection_info, timeline="mom"):
     try:
         base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, timeline)
 
-        # TODO: add the kpi_info["metric_precision"] in the arguments for metric precision
-        panel_metrics = get_rca_group_panel_metrics(base_df, rca_df, kpi_info['metric'])
+        panel_metrics = get_rca_group_panel_metrics(base_df, rca_df, kpi_info['metric'], precision= kpi_info.get("metric_precision", 3))
 
         final_data = {
             "panel_metrics": panel_metrics,
@@ -148,14 +147,13 @@ def rca_analysis(kpi_info, connection_info, timeline="mom", dimensions= None):
 
         base_df, rca_df = rca_preprocessor(base_df, rca_df)
 
-        # TODO: add the kpi_info["metric_precision"] in the arguments for metric precision
         if dimensions is None or dimensions == "multidimension":
-            final_data = get_waterfall_and_impact_table(base_df, rca_df, kpi_info["dimensions"], kpi_info["metric"], n=[1, 2, 3])
+            final_data = get_waterfall_and_impact_table(base_df, rca_df, kpi_info["dimensions"], kpi_info["metric"], n=[1, 2, 3], precision= kpi_info.get("metric_precision", 3))
         elif dimensions in kpi_info["dimensions"]:
             dims_without_main_dim = list(deepcopy(kpi_info["dimensions"]))
             dims_without_main_dim.remove(dimensions)
             n = list(range(1, min([3, len(dims_without_main_dim)])))
-            final_data = get_waterfall_and_impact_table_single_dim(base_df, rca_df, dimensions, dims_without_main_dim, kpi_info["metric"], n= n)
+            final_data = get_waterfall_and_impact_table_single_dim(base_df, rca_df, dimensions, dims_without_main_dim, kpi_info["metric"], n= n, precision= kpi_info.get("metric_precision", 3))
         else:
             raise ValueError(f"Dimension: {dimensions} does not exist.")
 

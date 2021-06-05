@@ -155,9 +155,9 @@ am4core.useTheme(am4themes_animated);
 //     )
 // }
 
-export const tab1Fields = (props,kpi) => {
+export const tab1Fields = (cardData,kpi) => {
 
-    const { g1_metrics, g2_metrics, impact } = props;
+    const { g1_metrics, g2_metrics, impact } = cardData;
 
     const valueIcon = impact < 0 ? faAngleDown : faAngleUp;
     const valueTxtColor = impact < 0 ? "text-danger" : "text-success";

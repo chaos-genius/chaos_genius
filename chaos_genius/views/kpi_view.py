@@ -152,7 +152,7 @@ def rca_analysis(kpi_info, connection_info, timeline="mom", dimensions= None):
         elif dimensions in kpi_info["dimensions"]:
             dims_without_main_dim = list(deepcopy(kpi_info["dimensions"]))
             dims_without_main_dim.remove(dimensions)
-            n = list(range(1, min([3, len(dims_without_main_dim)])))
+            n = list(range(1, min([3, len(dims_without_main_dim)])+1))
             final_data = get_waterfall_and_impact_table_single_dim(base_df, rca_df, dimensions, dims_without_main_dim, kpi_info["metric"], n= n, precision= kpi_info.get("metric_precision", 3))
         else:
             raise ValueError(f"Dimension: {dimensions} does not exist.")

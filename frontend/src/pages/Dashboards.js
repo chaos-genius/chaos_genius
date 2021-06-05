@@ -346,7 +346,7 @@ class Dashboard extends React.Component {
             <CustomTabs tabs={tabCardData} />
           </CardContent>
         </Card> */}
-        {(this.state.cardData)?(tab1Fields(this.state.chartData,this.state.kpiName)):("")}
+        {(this.state.cardData)?(tab1Fields(this.state.cardData,this.state.kpiName)):("")}
         {this.keyPoints()}
 
         {/* <CustomTabs tabs={tabChartData} /> */}

@@ -35,6 +35,7 @@ class Dashboard extends React.Component {
     this.state = {
       showDefault: false,
       kpi: "0",
+      kpiName:"KPI",
       dimension: "multidimension",
       dimensionData: [],
       timeline: "mom",
@@ -83,6 +84,7 @@ class Dashboard extends React.Component {
       .then(response => response.json())
       .then(data => {
         this.setState({
+          dimension:'multidimension',
           dimensionData: data.dimensions,
           loading: false
         }, () => {
@@ -92,7 +94,9 @@ class Dashboard extends React.Component {
   }
   handleKpiChange = (e) => {
     const targetComponent = e.target;
+
     const componentValue = targetComponent.value;
+
     if (componentValue === "0") {
       this.setState({
         chartData: [],
@@ -103,7 +107,8 @@ class Dashboard extends React.Component {
       return;
     }
     this.setState({
-      kpi: componentValue
+      kpi: componentValue,
+      kpiName: targetComponent.options[componentValue].innerText
     }, () => {
       this.fetchDimensionData();
     })
@@ -328,7 +333,6 @@ class Dashboard extends React.Component {
     //     </div>
     //   )
     // } 
-
     return (
       <>
         <this.FilterData />
@@ -337,11 +341,11 @@ class Dashboard extends React.Component {
             <CustomTabs tabs={tabCardData} />
           </CardContent>
         </Card> */}
-        {(this.state.cardData)?(tab1Fields(this.state.cardData)):("")}
+        {(this.state.cardData)?(tab1Fields(this.state.chartData,this.state.kpiName)):("")}
         {this.keyPoints()}
 
         {/* <CustomTabs tabs={tabChartData} /> */}
-        {this.tabHousingChart()}
+        {this.tabHousingChart(this.state.cardData,this.state.kpi)}
         {/* <Housing tableData={this.state.tableData.slice(0, 50)} /> */}
         <div style={{ display: this.state.tableData.length ? 'block' : 'none' }}>
           <RcaAnalysisTable data={this.state.tableData.slice(0, 50)} columns={this.state.dataColumns} />

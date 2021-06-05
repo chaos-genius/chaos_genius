@@ -87,10 +87,20 @@ def kpi_rca_analysis(kpi_id):
 
 def get_baseline_and_rca_df(kpi_info, connection_info, timeline="mom"):
     today = datetime.today()
+    indentifier = ''
+    if connection_info["connection_type"] == "mysql":
+        indentifier = '`'
+    elif connection_info["connection_type"] == "postgresql":
+        indentifier = '"'
+
     if timeline == "mom":
-        base_dt = f"{today.year}-{today.month-1}-01"
-        cur_dt = f"{today.year}-{today.month}-01"
-        next_dt = f"{today.year}-{today.month+1}-01"
+        month_day = today.day
+        base_dt_obj = today.replace(month=today.month-1) - timedelta(days=month_day)
+        base_dt = str(base_dt_obj.date())
+        cur_dt_obj = today - timedelta(days=month_day)
+        cur_dt = str(cur_dt_obj.date())
+        next_dt_obj = today.replace(month=today.month+1) - timedelta(days=month_day)
+        next_dt = str(next_dt_obj.date())
     elif timeline == "wow":
         weekday = today.weekday()
         base_dt_obj = today - timedelta(days=weekday+7)
@@ -100,8 +110,8 @@ def get_baseline_and_rca_df(kpi_info, connection_info, timeline="mom"):
         next_dt_obj = cur_dt_obj + timedelta(days=7)
         next_dt = str(next_dt_obj.date())
 
-    base_filter = f" where {kpi_info['datetime_column']} >= '{base_dt}' and {kpi_info['datetime_column']} < '{cur_dt}' "
-    rca_filter = f" where {kpi_info['datetime_column']} >= '{cur_dt}' and {kpi_info['datetime_column']} < '{next_dt}' "
+    base_filter = f" where {indentifier}{kpi_info['datetime_column']}{indentifier} >= '{base_dt}' and {indentifier}{kpi_info['datetime_column']}{indentifier} < '{cur_dt}' "
+    rca_filter = f" where {indentifier}{kpi_info['datetime_column']}{indentifier} >= '{cur_dt}' and {indentifier}{kpi_info['datetime_column']}{indentifier}< '{next_dt}' "
 
     kpi_filters = kpi_info['filters']
     kpi_filters_query = " "
@@ -112,7 +122,7 @@ def get_baseline_and_rca_df(kpi_info, connection_info, timeline="mom"):
                 # TODO: Bad Hack to remove the last comma, fix it
                 values_str = str(tuple(values))
                 values_str = values_str[:-2] + ')'
-                kpi_filters_query += f" and \"{key}\" in {values_str}"
+                kpi_filters_query += f" and {indentifier}{key}{indentifier} in {values_str}"
 
     base_query = f"select * from {kpi_info['kpi_query']} {base_filter} {kpi_filters_query} "
     rca_query = f"select * from {kpi_info['kpi_query']} {rca_filter} {kpi_filters_query} "
@@ -191,7 +201,13 @@ KPI_DATA = [
     {"id": 7, "name": "Total price", "kpi_query": "mh_food_prices", "data_source": 4, "datetime_column": "date", "metric": "modal_price", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["Commodity", "APMC", "district_name"]},
     {"id": 8, "name": "Total price for onion", "kpi_query": "mh_food_prices", "data_source": 4, "datetime_column": "date", "metric": "modal_price", "metric_precision": 2, "aggregation": "mean", "filters": {"Commodity": ["Onion"]}, "dimensions": ["APMC", "district_name"]},
     {"id": 9, "name": "Total price for maize", "kpi_query": "mh_food_prices", "data_source": 4, "datetime_column": "date", "metric": "modal_price", "metric_precision": 2, "aggregation": "mean", "filters": {"Commodity": ["Maize"]}, "dimensions": ["APMC", "district_name"]},
-    {"id": 10, "name": "Total price for green chilli", "kpi_query": "mh_food_prices", "data_source": 4, "datetime_column": "date", "metric": "modal_price", "metric_precision": 2, "aggregation": "mean", "filters": {"Commodity": ["Green Chilli"]}, "dimensions": ["APMC", "district_name"]}
+    {"id": 10, "name": "Total price for green chilli", "kpi_query": "mh_food_prices", "data_source": 4, "datetime_column": "date", "metric": "modal_price", "metric_precision": 2, "aggregation": "mean", "filters": {"Commodity": ["Green Chilli"]}, "dimensions": ["APMC", "district_name"]},
+    {"id": 11, "name": "Call/day (MySQL)", "kpi_query": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "sum_calls", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
+    {"id": 12, "name": "Conversion per day (MySQL)", "kpi_query": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "sum_conversion", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
+    {"id": 13, "name": "Avg call duration (MySQL)", "kpi_query": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
+    {"id": 14, "name": "Avg call duration for admin job (MySQL)", "kpi_query": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["admin."]}, "dimensions": ["marital","education","housing","loan"]},
+    {"id": 15, "name": "Avg call duration for blue collar job (MySQL)", "kpi_query": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["blue-collar"]}, "dimensions": ["marital","education","housing","loan"]},
+    {"id": 16, "name": "Avg call duration for management job (MySQL)", "kpi_query": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["management"]}, "dimensions": ["marital","education","housing","loan"]},
 ]
 
 DB_DIMS = {

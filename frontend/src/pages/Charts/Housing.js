@@ -155,7 +155,8 @@ am4core.useTheme(am4themes_animated);
 //     )
 // }
 
-export const tab1Fields = (props) => {
+export const tab1Fields = (props,kpi) => {
+
     const { g1_metrics, g2_metrics, impact } = props;
 
     const valueIcon = impact < 0 ? faAngleDown : faAngleUp;
@@ -166,7 +167,7 @@ export const tab1Fields = (props) => {
             <Grid item xs={12} md={3}>
                 <Card>
                     <CardContent>
-                        <Typography variant="h4" component="h4">DAUs</Typography>
+                        <Typography variant="h4" component="h4">{kpi}</Typography>
 
                         {/* <Typography component="h6" variant="h6" className="small" >Jan 4, 2021</Typography> */}
                         <Grid container spacing={2}>
@@ -205,7 +206,7 @@ export const tab1Fields = (props) => {
             <Grid item xs={12} md={3}>
                 <Card>
                     <CardContent>
-                        <Typography variant="h4" component="h4">DAUs</Typography>
+                        <Typography variant="h4" component="h4">{kpi}</Typography>
                         <Grid container spacing={2}>
                             <Grid item xs={6}>
                                 <Typography component="h3" variant="h3" className="mb-0">{(g2_metrics?.count) ? (g2_metrics.count) : ('--')}</Typography>

@@ -846,8 +846,8 @@ def get_waterfall_and_impact_table_single_dim(
         plot_in_mpl
     )
 
-    df_subgroup_impact["user_string"] = \
-        df_subgroup_impact["user_string"].apply(query_string_to_user_string)
+    df_subgroup_impact["string"] = \
+        df_subgroup_impact["string"].apply(query_string_to_user_string)
 
     waterfall_df["category"] = \
         waterfall_df["category"].apply(query_string_to_user_string)

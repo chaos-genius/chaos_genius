@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@material-ui/core": "^4.11.4",
+    "@material-ui/icons": "^5.0.0-alpha.35",
     "@amcharts/amcharts4": "^4.10.18",
     "@fortawesome/fontawesome-free": "^5.15.1",
     "@fortawesome/fontawesome-svg-core": "^1.2.30",
@@ -16,6 +18,7 @@
     "@themesberg/react-bootstrap": "^1.4.1",
     "bootstrap": "5.0.0-beta1",
     "moment-timezone": "^0.5.31",
+    "material-table": "^1.69.3",
     "node-sass": "^4.14.1",
     "react": "^16.13.1",
     "react-datetime": "^3.0.4",

@@ -72,7 +72,7 @@ button.MuiIconButton-root.close-button {
 
 .graph-info-cards h4{
     font-weight: 600 !important;
-    font-size: 1.25rem !important;
+    font-size: 1rem !important;
 }
 .graph-info-cards h3{
     font-weight: 600 !important;
@@ -91,6 +91,26 @@ button.MuiIconButton-root.close-button {
     font-weight: 600!important;
 }
 
+/* .small-text-danger{
+    background-color: #FA5252 !important;
+    color: #fff !important;
+    padding: 2px 4px;
+    border-radius: 6px;
+    font-size: 0.9rem !important;
+    text-align: center;
+    margin-bottom: 0 !important;
+    margin-top: 6px !important;
+}
+.small-text-success{
+    background-color: #05a677 !important;
+    color: #fff !important;
+    padding: 2px 4px;
+    border-radius: 6px;
+    font-size: 0.9rem !important;
+    text-align: center;
+    margin-bottom: 0 !important;
+    margin-top: 6px !important;
+} */
 
 /* FORM Layout  */
 

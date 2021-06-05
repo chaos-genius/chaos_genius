@@ -13,8 +13,8 @@ import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import CustomModal from './../components/CustomModal'
 import CustomTabs from './../components/CustomTabs'
 
-// import { Housing } from './Charts/Housing'
-import { RcaAnalysisTable } from '../components/Tables';
+import { tab1Fields} from './Charts/Housing'
+import { RcaAnalysisTable } from '../components/DashboardTable';
 
 import './../assets/css/custom.css'
 
@@ -40,9 +40,11 @@ class Dashboard extends React.Component {
       timeline: "mom",
       kpiData: [],
       chartData: [],
+      dataColumns: ["Subgroup Name", "Previous Avg", "Previous Subgroup Size", "Previous Subgroup Count", "Current Avg", "Current Subgroup Size", "Current Subgroup Count", "Impact"],
       yAxis: [],
       tableData: [],
       amChart: null,
+      cardData:[],
       loading: false
     }
   }
@@ -81,8 +83,10 @@ class Dashboard extends React.Component {
       .then(response => response.json())
       .then(data => {
         this.setState({
-          dimensionData: data.dimension,
+          dimensionData: data.dimensions,
           loading: false
+        }, () => {
+          this.fetchAnalysisData();
         })
       });
   }
@@ -102,7 +106,6 @@ class Dashboard extends React.Component {
       kpi: componentValue
     }, () => {
       this.fetchDimensionData();
-      this.fetchAnalysisData();
     })
   }
   handleTimelineChange = (e) => {
@@ -125,6 +128,18 @@ class Dashboard extends React.Component {
   fetchAnalysisData = () => {
     const { kpi, timeline, dimension } = this.state;
     this.setState({ loading: true })
+
+
+    fetch(`/api/kpi/${kpi}/kpi-aggregations?timeline=${timeline}`)
+      .then(response => response.json())
+      .then(respData => {
+        const data = respData.data;
+        if(data?.panel_metrics){
+          this.setState({
+            cardData: data.panel_metrics,
+          })
+        }
+      });
     fetch(`/api/kpi/${kpi}/rca-analysis?timeline=${timeline}&dimensions=${dimension}`)
       .then(response => response.json())
       .then(respData => {
@@ -144,13 +159,14 @@ class Dashboard extends React.Component {
   }
 
   plotChart = () => {
+    let chart = am4core.create("chartdivWaterfall", am4charts.XYChart);
     if (this.state.amChart) {
+
       this.state.amChart.data = this.state.chartData;
       let valueAxis = this.state.amChart.yAxes.getIndex(0);
       valueAxis.min = this.state.yAxis[0];
       valueAxis.max = this.state.yAxis[1];
     } else {
-      let chart = am4core.create("chartdivWaterfall", am4charts.XYChart);
       chart.hiddenState.properties.opacity = 0; // this makes initial fade in effect
 
       // using math in the data instead of final values just to illustrate the idea of Waterfall chart
@@ -212,85 +228,61 @@ class Dashboard extends React.Component {
     this.fetchDimensionData();
   }
 
-  // componentDidUpdate() {
-  //   this.plotChart();
-  // }
-  tab1Fields = () => {
-    return (
-      <Grid container spacing={3} className="mt-4 mb-4 graph-info-cards">
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h4" component="h4">DAUs</Typography>
-              <Typography component="h3" variant="h3">212234</Typography>
-              <Typography component="h6" variant="h6" className="small" >Jan 4, 2021</Typography>
-              <Typography component="h6" variant="h6" className="small"> Since last month <span className="danger-text"><ArrowDownwardIcon />28.4%</span></Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h4" component="h4">DAUs</Typography>
-              <Typography component="h3" variant="h3">232134</Typography>
-              <Typography component="h6" variant="h6" className="small" >Jan 4, 2021</Typography>
-              <Typography component="h6" variant="h6" className="small"> Since last month <span className="success-text"><ArrowUpwardIcon />28.4%</span></Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <div id="chartdiv" style={{ width: "100%", height: "auto" }}></div>
-          {/* <this.CustomChart /> */}
-        </Grid>
-      </Grid>
-    )
-  }
+  
   tabHousingChart = () => {
     return (
-      <div id="chartdivWaterfall" style={{ width: "100%", height: "500px" }}></div>
+      <Card className="mt-4 mb-4">
+        <CardContent>
+          <div id="chartdivWaterfall" style={{ width: "100%", height: "500px" }}></div>
+        </CardContent>
+      </Card>
     )
   }
   FilterData = () => {
-    const { kpiData,dimensionData } = this.state;
-    console.log(dimensionData);
+    const { kpiData, dimensionData, dimension, timeline, kpi } = this.state;
     return (
-      <Grid container className="mb-4" spacing={3}>
-        <Grid item xs={12} md={2}>
-          <FormControl variant="outlined" style={{ width: '100%' }}>
-            <InputLabel htmlFor="kpiId">Select KPI</InputLabel>
-            <Select native defaultValue={this.state.kpi} id="kpiId" onChange={this.handleKpiChange}>
-              <option key='0' value='0'>KPI</option>
-              {kpiData.map((kpi) => {
-                return (
-                  <option key={kpi.id} value={kpi.id}>{kpi.name}</option>
-                )
-              })}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <FormControl variant="outlined" style={{ width: '100%' }}>
-            <InputLabel htmlFor="analysisTimeline">Timeline</InputLabel>
-            <Select native defaultValue={this.state.timeline} id="analysisTimeline" onChange={this.handleTimelineChange}>
-              <option value="mom">Current Month on Last Month</option>
-              <option value="wow">Current Week on Last Week</option>
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={12} md={2}>
-          <FormControl variant="outlined" style={{ width: '100%' }}>
-            <InputLabel htmlFor="dimension">Dimension</InputLabel>
-            <Select native defaultValue="multidimension" id="dimension">
-            {/* {dimensionData.map((kpi) => {
-                return (
-                  <option key={kpi.id} value={kpi.id}>{kpi.name}</option>
-                )
-              })} */}
-              {/* <option value="multidimension">Multi Dimension</option> */}
-            </Select>
-          </FormControl>
-        </Grid>
-      </Grid>
+      <Card className="mt-4 mb-4">
+        <CardContent>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={2}>
+              <FormControl variant="outlined" style={{ width: '100%' }}>
+                <InputLabel htmlFor="kpiId">Select KPI</InputLabel>
+                <Select native defaultValue={kpi} id="kpiId" onChange={this.handleKpiChange}>
+                  <option key='0' value='0'>KPI</option>
+                  {kpiData.map((kpi) => {
+                    return (
+                      <option key={kpi.id} value={kpi.id}>{kpi.name}</option>
+                    )
+                  })}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={3}>
+              <FormControl variant="outlined" style={{ width: '100%' }}>
+                <InputLabel htmlFor="analysisTimeline">Timeline</InputLabel>
+                <Select native defaultValue={timeline} id="analysisTimeline" onChange={this.handleTimelineChange}>
+                  <option value="mom">Current Month on Last Month</option>
+                  <option value="wow">Current Week on Last Week</option>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={2}>
+              <FormControl variant="outlined" style={{ width: '100%' }}>
+                <InputLabel htmlFor="dimension">Dimension</InputLabel>
+                <Select native defaultValue={dimension} id="dimension" onChange={this.handleDimensionChange}>
+                  <option value="multidimension">Multi Dimension</option>
+                  {dimensionData.map((dimension) => {
+                    return (
+                      <option key={dimension} value={dimension}>{dimension}</option>
+                    )
+                  })}
+                  {/* <option value="multidimension">Multi Dimension</option> */}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
     )
   }
   keyPoints = () => {
@@ -308,27 +300,27 @@ class Dashboard extends React.Component {
   }
 
   render() {
-    const tabCardData = [{
-      title: "AutoRCA",
-      body: this.tab1Fields()
-    }];
-    const tabChartData = [{
-      title: "Housing",
-      body: this.tabHousingChart()
-    }, {
-      title: "Loan",
-      body: this.tabHousingChart()
-    }, {
-      title: "Education",
-      body: this.tabHousingChart()
-    }, {
-      title: "Martial",
-      body: this.tabHousingChart()
-    }, {
-      title: "Job",
-      body: this.tabHousingChart()
-    }];
-
+    // const tabCardData = [{
+    //   title: "AutoRCA",
+    //   body: this.tab1Fields()
+    // }];
+    // const tabChartData = [{
+    //   title: "Housing",
+    //   body: this.tabHousingChart()
+    // }, {
+    //   title: "Loan",
+    //   body: this.keyPoints()
+    // }];
+    // , {
+    //   title: "Education",
+    //   body: this.tabHousingChart()
+    // }, {
+    //   title: "Martial",
+    //   body: this.tabHousingChart()
+    // }, {
+    //   title: "Job",
+    //   body: this.tabHousingChart()
+    // }
     // if (this.state.loading) {
     //   return (
     //     <div className="loader">
@@ -336,17 +328,26 @@ class Dashboard extends React.Component {
     //     </div>
     //   )
     // } 
-      return (
-        <>
-          <this.FilterData />
-          <CustomTabs tabs={tabCardData} />
-          {this.keyPoints()}
 
-          <CustomTabs tabs={tabChartData} />
-          {/* <Housing tableData={this.state.tableData.slice(0, 50)} /> */}
-          <RcaAnalysisTable data={this.state.tableData.slice(0, 50)}/>
-        </>
-      )
+    return (
+      <>
+        <this.FilterData />
+        {/* <Card className="mb-4">
+          <CardContent>
+            <CustomTabs tabs={tabCardData} />
+          </CardContent>
+        </Card> */}
+        {(this.state.cardData)?(tab1Fields(this.state.cardData)):("")}
+        {this.keyPoints()}
+
+        {/* <CustomTabs tabs={tabChartData} /> */}
+        {this.tabHousingChart()}
+        {/* <Housing tableData={this.state.tableData.slice(0, 50)} /> */}
+        <div style={{ display: this.state.tableData.length ? 'block' : 'none' }}>
+          <RcaAnalysisTable data={this.state.tableData.slice(0, 50)} columns={this.state.dataColumns} />
+        </div>
+      </>
+    )
   }
 
 

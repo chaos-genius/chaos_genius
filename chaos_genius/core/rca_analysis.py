@@ -684,7 +684,7 @@ def get_group_metrics(
         "mean": df[metric].mean().item(),
         "median": df[metric].median().item(),
         "count": len(df[metric]),
-        "not-null count": df[metric].count().item(),
+        "not_null_count": df[metric].count().item(),
         "sum": df[metric].sum().item()
     }
     out_dict = {i: round(j, precision) for i, j in out_dict.items()}

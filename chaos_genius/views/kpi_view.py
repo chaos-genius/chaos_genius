@@ -18,7 +18,7 @@ from flask import (
 from chaos_genius.utils import flash_errors
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.connection_model import Connection
-from chaos_genius.core.rca_analysis import get_rca_group_panel_metrics, get_waterfall_and_impact_table, get_waterfall_and_impact_table_single_dim
+from chaos_genius.core.rca_analysis import get_rca_group_panel_metrics, get_waterfall_and_impact_table, get_waterfall_and_impact_table_single_dim, rca_preprocessor
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 
 
@@ -145,6 +145,8 @@ def kpi_aggregation(kpi_info, connection_info, timeline="mom"):
 def rca_analysis(kpi_info, connection_info, timeline="mom", dimensions= None):
     try:
         base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, timeline)
+
+        base_df, rca_df = rca_preprocessor(base_df, rca_df)
 
         # TODO: add the kpi_info["metric_precision"] in the arguments for metric precision
         if dimensions is None or dimensions == "multidimension":

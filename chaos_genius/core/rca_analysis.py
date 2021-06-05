@@ -16,6 +16,25 @@ except ModuleNotFoundError:
     display = print
 
 
+def rca_preprocessor(
+    d1: pd.DataFrame, 
+    d2: pd.DataFrame
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Preprocesses dataframes for RCA Analysis
+
+    Args:
+        d1 (pd.DataFrame): Baseline Group
+        d2 (pd.DataFrame): Focus/RCA Group
+
+    Returns:
+        Tuple[pd.DataFrame, pd.DataFrame]: Proccessed DataFrames
+    """
+    d1 = d1.reset_index(drop= True)
+    d2 = d2.reset_index(drop= True)
+    d2.index = d2.index + len(d1)
+    return d1, d2
+
+
 def col_name_mapper(x):
     return "_".join(x) if not "" in x else "".join(x)
 

@@ -1,3 +1,13 @@
+
+.h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+    font-family: "Nunito Sans",sans-serif !important;
+    margin-top: 0 !important;
+    margin-bottom: .5rem !important;
+    line-height: 1.3 !important;
+    color: #262b40 !important;
+}
+
+
 .custom-table .MuiPaper-root {
     box-shadow: unset;
 }
@@ -34,7 +44,7 @@
     display: none;
 }
 .custom-table .MuiPaper-root > .MuiToolbar-root .MuiInputBase-root{
-    border: 1px solid #66799e;
+    border: 1px solid #66799e !important;
     border-radius: 6px;
     padding: 0.3rem 1rem;
     min-width: 300px;
@@ -46,4 +56,109 @@ button.MuiIconButton-root.close-button {
     position: absolute;
     right: 15px;
     top: 10px;
+}
+/* cards Layout */
+.MuiCard-root {
+    overflow: hidden;
+    background-color: #fff;
+    background-clip: border-box;
+    border: .0625rem solid rgba(46,54,80,.125) !important;
+    border-radius: .5rem !important;
+    box-shadow: unset !important;
+}
+.MuiCardContent-root {
+    padding: 1.25rem 1.5rem !important;
+}
+
+.graph-info-cards h4{
+    font-weight: 600 !important;
+    font-size: 1.25rem !important;
+}
+.graph-info-cards h3{
+    font-weight: 600 !important;
+    font-size: 1.75rem !important;
+}
+.graph-info-cards h6.small{
+    font-size: .875em !important;
+    font-weight: normal !important;
+}
+.graph-info-cards .success-text{
+    color: #05a677!important;
+    font-weight: 600!important;
+}
+.graph-info-cards .danger-text{
+    color: #fa5252!important;
+    font-weight: 600!important;
+}
+
+
+/* FORM Layout  */
+
+.MuiInputBase-root{
+    margin-top: 15px !important;
+    border: unset !important;
+}
+.MuiInputLabel-formControl {
+    position: relative !important;
+    transform: unset !important;
+}
+.MuiInputLabel-outlined{
+    transform: unset;
+}
+.MuiOutlinedInput-input {
+    padding: .55rem 1.75rem .55rem .75rem !important; 
+    font-family: "Nunito Sans",sans-serif !important;
+    font-size: 1rem !important;
+    font-weight: 400 !important;
+    color: #66799e !important;
+    border: .0625rem solid #d1d7e0 !important;
+    border-radius: .5rem !important;
+    box-shadow: inset 0 1px 2px rgb(46 54 80 / 8%) !important;
+}
+.MuiOutlinedInput-notchedOutline{
+    border-color: unset !important;
+    border: unset !important;
+}
+.MuiFormLabel-root{
+    font-family: "Nunito Sans",sans-serif !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    color: #4a5073 !important;
+}
+
+/* APPBAR */
+
+.MuiAppBar-colorPrimary{
+    background-color: unset !important;
+    box-shadow: unset !important;
+    color: #262b40 !important;
+}
+.MuiTab-textColorInherit.Mui-selected{
+    color: #262b40 !important;
+    background-color: #f8f8f8 !important;
+    border: 1px solid #262b40 !important;
+    
+}
+.MuiTab-textColorInherit{
+    padding: .75rem .85rem;
+    border-radius: .5rem !important;
+    color: #506690 !important;
+    background-color:#fff !important;
+    border: 1px solid #eaedf2 !important;
+    text-transform: unset !important;
+}
+button.MuiTab-root:not(:last-child) {
+    margin-right: 1rem;
+}
+.MuiTabs-indicator{
+    background-color: unset !important;
+}
+.loader{
+    width: 100%;
+    min-height: 500px;
+    background: #f5f8fb;
+    text-align: center;
+    align-items: center;
+    display: flex;
+    justify-content: center;
 }

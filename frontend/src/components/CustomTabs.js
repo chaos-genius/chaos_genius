@@ -4,7 +4,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 
 function TabPanel(props) {
@@ -56,7 +55,7 @@ export default function SimpleTabs(props){
     };
 
     return (
-        <div className={classes.root}>
+        <div >
             <AppBar position="static">
                 <Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
                     {props.tabs.map((tabData, index) =>

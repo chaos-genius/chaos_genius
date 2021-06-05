@@ -159,7 +159,6 @@ class Dashboard extends React.Component {
   }
 
   plotChart = () => {
-    let chart = am4core.create("chartdivWaterfall", am4charts.XYChart);
     if (this.state.amChart) {
 
       this.state.amChart.data = this.state.chartData;
@@ -167,6 +166,7 @@ class Dashboard extends React.Component {
       valueAxis.min = this.state.yAxis[0];
       valueAxis.max = this.state.yAxis[1];
     } else {
+      let chart = am4core.create("chartdivWaterfall", am4charts.XYChart);
       chart.hiddenState.properties.opacity = 0; // this makes initial fade in effect
 
       // using math in the data instead of final values just to illustrate the idea of Waterfall chart

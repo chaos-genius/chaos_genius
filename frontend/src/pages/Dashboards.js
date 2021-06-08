@@ -13,7 +13,7 @@ import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import CustomModal from './../components/CustomModal'
 import CustomTabs from './../components/CustomTabs'
 
-import { tab1Fields} from './Charts/Housing'
+import { tab1Fields } from './Charts/Housing'
 import { RcaAnalysisTable } from '../components/DashboardTable';
 
 import './../assets/css/custom.css'
@@ -35,7 +35,7 @@ class Dashboard extends React.Component {
     this.state = {
       showDefault: false,
       kpi: "0",
-      kpiName:"KPI",
+      kpiName: "KPI",
       dimension: "multidimension",
       dimensionData: [],
       timeline: "mom",
@@ -45,9 +45,9 @@ class Dashboard extends React.Component {
       yAxis: [],
       tableData: [],
       amChart: null,
-      cardData:[],
+      cardData: [],
       loading: false,
-      tabState:0
+      tabState: 0
     }
   }
 
@@ -87,7 +87,7 @@ class Dashboard extends React.Component {
         const dimensionArray = data.dimensions;
         dimensionArray.unshift("multidimension")
         this.setState({
-          dimension:'multidimension',
+          dimension: 'multidimension',
           dimensionData: dimensionArray,
           loading: false
         }, () => {
@@ -112,7 +112,7 @@ class Dashboard extends React.Component {
     this.setState({
       kpi: componentValue,
       kpiName: targetComponent.options[componentValue].innerText,
-      tabState:0
+      tabState: 0
     }, () => {
       this.fetchKpiAggegation();
       this.fetchDimensionData();
@@ -126,17 +126,17 @@ class Dashboard extends React.Component {
       this.fetchAnalysisData();
     })
   }
-  handleDimensionChange = (e,type,newValue) => {
+  handleDimensionChange = (e, type, newValue) => {
     const targetComponent = e.target;
     // console.log("targetComponent",targetComponent)
     let targetValue = this.state.dimension;
-    if(type === "options"){
+    if (type === "options") {
       targetValue = targetComponent.value
-    }else{
+    } else {
       targetValue = targetComponent.innerText
-      if(newValue || newValue === 0){
+      if (newValue || newValue === 0) {
         this.setState({
-          tabState:newValue
+          tabState: newValue
         })
       }
     }
@@ -153,7 +153,7 @@ class Dashboard extends React.Component {
       .then(response => response.json())
       .then(respData => {
         const data = respData.data;
-        if(data?.panel_metrics){
+        if (data?.panel_metrics) {
           this.setState({
             cardData: data.panel_metrics,
           })
@@ -193,66 +193,66 @@ class Dashboard extends React.Component {
     //   valueAxis.min = this.state.yAxis[0];
     //   valueAxis.max = this.state.yAxis[1];
     // } else {
-      let chart = am4core.create("chartdivWaterfall", am4charts.XYChart);
+    let chart = am4core.create("chartdivWaterfall", am4charts.XYChart);
 
-      chart.hiddenState.properties.opacity = 0; // this makes initial fade in effect
+    chart.hiddenState.properties.opacity = 0; // this makes initial fade in effect
 
-      // using math in the data instead of final values just to illustrate the idea of Waterfall chart
-      // a separate data field for step series is added because we don't need last step (notice, the last data item doesn't have stepValue)
-      chart.data = this.state.chartData;
+    // using math in the data instead of final values just to illustrate the idea of Waterfall chart
+    // a separate data field for step series is added because we don't need last step (notice, the last data item doesn't have stepValue)
+    chart.data = this.state.chartData;
 
-      let categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
-      categoryAxis.dataFields.category = "category";
-      categoryAxis.renderer.minGridDistance = 40;
+    let categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+    categoryAxis.dataFields.category = "category";
+    categoryAxis.renderer.minGridDistance = 40;
 
-      // Configure axis label
-      var xlabel = categoryAxis.renderer.labels.template;
-      xlabel.wrap = true;
-      xlabel.maxWidth = 120;
+    // Configure axis label
+    var xlabel = categoryAxis.renderer.labels.template;
+    xlabel.wrap = true;
+    xlabel.maxWidth = 120;
 
-      let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-      if (this.state.yAxis.length > 0) {
-        valueAxis.min = this.state.yAxis[0];
-        valueAxis.max = this.state.yAxis[1];
-      }
+    let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+    if (this.state.yAxis.length > 0) {
+      valueAxis.min = this.state.yAxis[0];
+      valueAxis.max = this.state.yAxis[1];
+    }
 
-      let columnSeries = chart.series.push(new am4charts.ColumnSeries());
-      columnSeries.dataFields.categoryX = "category";
-      columnSeries.dataFields.valueY = "value";
-      columnSeries.dataFields.openValueY = "open";
-      columnSeries.fillOpacity = 0.8;
-      columnSeries.sequencedInterpolation = true;
-      columnSeries.interpolationDuration = 1500;
+    let columnSeries = chart.series.push(new am4charts.ColumnSeries());
+    columnSeries.dataFields.categoryX = "category";
+    columnSeries.dataFields.valueY = "value";
+    columnSeries.dataFields.openValueY = "open";
+    columnSeries.fillOpacity = 0.8;
+    columnSeries.sequencedInterpolation = true;
+    columnSeries.interpolationDuration = 1500;
 
-      let columnTemplate = columnSeries.columns.template;
-      columnTemplate.strokeOpacity = 0;
-      columnTemplate.propertyFields.fill = "color";
+    let columnTemplate = columnSeries.columns.template;
+    columnTemplate.strokeOpacity = 0;
+    columnTemplate.propertyFields.fill = "color";
 
-      let label = columnTemplate.createChild(am4core.Label);
-      label.text = "{displayValue.formatNumber('#,## a')}";
-      label.align = "center";
-      label.valign = "middle";
-      label.wrap = true;
-      label.maxWidth = 120;
+    let label = columnTemplate.createChild(am4core.Label);
+    label.text = "{displayValue.formatNumber('#,## a')}";
+    label.align = "center";
+    label.valign = "middle";
+    label.wrap = true;
+    label.maxWidth = 120;
 
-      let stepSeries = chart.series.push(new am4charts.StepLineSeries());
-      stepSeries.dataFields.categoryX = "category";
-      stepSeries.dataFields.valueY = "stepValue";
-      stepSeries.noRisers = true;
-      stepSeries.stroke = new am4core.InterfaceColorSet().getFor("alternativeBackground");
-      stepSeries.strokeDasharray = "3,3";
-      stepSeries.interpolationDuration = 2000;
-      stepSeries.sequencedInterpolation = true;
+    let stepSeries = chart.series.push(new am4charts.StepLineSeries());
+    stepSeries.dataFields.categoryX = "category";
+    stepSeries.dataFields.valueY = "stepValue";
+    stepSeries.noRisers = true;
+    stepSeries.stroke = new am4core.InterfaceColorSet().getFor("alternativeBackground");
+    stepSeries.strokeDasharray = "3,3";
+    stepSeries.interpolationDuration = 2000;
+    stepSeries.sequencedInterpolation = true;
 
-      // because column width is 80%, we modify start/end locations so that step would start with column and end with next column
-      stepSeries.startLocation = 0.1;
-      stepSeries.endLocation = 1.1;
+    // because column width is 80%, we modify start/end locations so that step would start with column and end with next column
+    stepSeries.startLocation = 0.1;
+    stepSeries.endLocation = 1.1;
 
-      chart.cursor = new am4charts.XYCursor();
-      chart.cursor.behavior = "none";
-      this.setState({
-        amChart: chart,
-      })
+    chart.cursor = new am4charts.XYCursor();
+    chart.cursor.behavior = "none";
+    this.setState({
+      amChart: chart,
+    })
 
     // }
   }
@@ -263,14 +263,18 @@ class Dashboard extends React.Component {
     this.fetchDimensionData();
   }
 
-  
+
   tabHousingChart = () => {
     return (
       <Card className="mb-4 chart-tab-card">
         <CardContent>
           <h5 className="mb-4">Smart Waterfall</h5>
           <p>The key subgroups which are driving the metric provided in the KPI will be shown here.</p>
-          <div id="chartdivWaterfall" style={{ width: "100%", height: "500px" }}></div>
+          <Card className="mb-4">
+            <CardContent>
+              <div id="chartdivWaterfall" style={{ width: "100%", height: "500px" }}></div>
+            </CardContent>
+          </Card>
         </CardContent>
       </Card>
     )
@@ -340,9 +344,9 @@ class Dashboard extends React.Component {
     //   title: "AutoRCA",
     //   body: this.tab1Fields()
     // }];
-    const tabChartData = []; 
-    if(this.state.dimensionData){
-      this.state.dimensionData.map((key) =>{
+    const tabChartData = [];
+    if (this.state.dimensionData) {
+      this.state.dimensionData.map((key) => {
         const datatab = {};
         datatab['title'] = key;
         datatab['body'] = this.tabHousingChart();
@@ -366,7 +370,7 @@ class Dashboard extends React.Component {
           <CircularProgress color="secondary" />
         </div>
       )
-    } 
+    }
     return (
       <>
         <this.FilterData />
@@ -375,14 +379,20 @@ class Dashboard extends React.Component {
             <CustomTabs tabs={tabCardData} />
           </CardContent>
         </Card> */}
-        {(this.state.cardData)?(tab1Fields(this.state.cardData,this.state.kpiName)):("")}
+        {(this.state.cardData) ? (tab1Fields(this.state.cardData, this.state.kpiName)) : ("")}
         {this.keyPoints()}
 
         <CustomTabs tabs={tabChartData} plotChart={this.plotChart} handleDimensionChange={this.handleDimensionChange} tabState={this.state.tabState} />
         {/* {this.tabHousingChart()} */}
         {/* <Housing tableData={this.state.tableData.slice(0, 50)} /> */}
         <div style={{ display: this.state.tableData.length ? 'block' : 'none' }}>
-          <RcaAnalysisTable data={this.state.tableData.slice(0, 50)} columns={this.state.dataColumns} />
+          <Card className="mb-4 ">
+            <CardContent>
+              <h5 className="mb-4">Top Subgroups Data</h5>
+              <p>These are the top 50 subgroups sorted by their Impact.</p>
+              <RcaAnalysisTable data={this.state.tableData.slice(0, 50)} columns={this.state.dataColumns} />
+            </CardContent>
+          </Card>
         </div>
       </>
     )

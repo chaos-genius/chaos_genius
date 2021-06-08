@@ -149,30 +149,38 @@ button.MuiIconButton-root.close-button {
 /* APPBAR */
 
 .MuiAppBar-colorPrimary{
-    background-color: unset !important;
+    background-color: #fff !important;
     box-shadow: unset !important;
     color: #262b40 !important;
+    border: .0625rem solid rgba(46,54,80,.125) !important;
+    /* border-bottom: .0625rem solid rgba(46,54,80,.125) !important;
+    border-left: .0625rem solid rgba(46,54,80,.125) !important; */
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
 }
 .MuiTab-textColorInherit.Mui-selected{
     color: #262b40 !important;
     background-color: #fff !important;
-    border-top:  .0625rem solid rgba(46,54,80,.125)  !important;
-    border-left: .0625rem solid rgba(46,54,80,.125)  !important;
-    border-bottom: unset !important;
-    border-radius: unset !important;
-    border-top-left-radius: 0.5rem !important;
-    border-top-right-radius: 0.5rem !important;
+    border:  unset  !important;
     margin-bottom: 0 !important;
+    border-bottom: 3px solid #262b40 !important;
+    
+}
+.MuiTabs-flexContainer > .MuiTab-textColorInherit{
+    margin-left: 6px;
+}
+.MuiTab-wrapper{
+    text-transform:capitalize
 }
 /* .MuiTabs-root .MuiTab-root.MuiButtonBase-root{
     border-radius: unset !important;
 } */
 .MuiTab-textColorInherit{
     padding: .75rem .85rem;
-    border-radius: .5rem !important;
+    border-radius: unset !important;
     color: #506690 !important;
     background-color:#fff !important;
-    border: 1px solid #eaedf2 !important;
+    border: unset !important;
     text-transform: unset !important;
 }
 /* button.MuiTab-root:not(:last-child) {

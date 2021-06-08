@@ -84,9 +84,11 @@ class Dashboard extends React.Component {
     fetch(`/api/kpi/${this.state.kpi}/get-dimensions`)
       .then(response => response.json())
       .then(data => {
+        const dimensionArray = data.dimensions;
+        dimensionArray.unshift("multidimension")
         this.setState({
           dimension:'multidimension',
-          dimensionData: data.dimensions,
+          dimensionData: dimensionArray,
           loading: false
         }, () => {
           this.fetchAnalysisData();
@@ -103,14 +105,16 @@ class Dashboard extends React.Component {
         chartData: [],
         yAxis: [],
         tableData: [],
-        amChart: null
+        amChart: null,
       })
       return;
     }
     this.setState({
       kpi: componentValue,
-      kpiName: targetComponent.options[componentValue].innerText
+      kpiName: targetComponent.options[componentValue].innerText,
+      tabState:0
     }, () => {
+      this.fetchKpiAggegation();
       this.fetchDimensionData();
     })
   }
@@ -143,12 +147,8 @@ class Dashboard extends React.Component {
       this.fetchAnalysisData();
     })
   }
-
-  fetchAnalysisData = () => {
-    const { kpi, timeline, dimension } = this.state;
-    this.setState({ loading: true })
-
-
+  fetchKpiAggegation = () => {
+    const { kpi, timeline } = this.state;
     fetch(`/api/kpi/${kpi}/kpi-aggregations?timeline=${timeline}`)
       .then(response => response.json())
       .then(respData => {
@@ -159,7 +159,13 @@ class Dashboard extends React.Component {
           })
         }
       });
-    fetch(`/api/kpi/${kpi}/rca-analysis?timeline=${timeline}&dimensions=${dimension}`)
+  }
+
+  fetchAnalysisData = () => {
+    const { kpi, timeline, dimension } = this.state;
+    this.setState({ loading: true })
+
+    fetch(`/api/kpi/${kpi}/rca-analysis?timeline=${timeline}&dimensions=${dimension.toLowerCase()}`)
       .then(response => response.json())
       .then(respData => {
         const data = respData.data;
@@ -253,6 +259,7 @@ class Dashboard extends React.Component {
 
   componentDidMount() {
     this.fetchKPIData();
+    this.fetchKpiAggegation();
     this.fetchDimensionData();
   }
 
@@ -261,6 +268,8 @@ class Dashboard extends React.Component {
     return (
       <Card className="mb-4 chart-tab-card">
         <CardContent>
+          <h5 className="mb-4">Smart Waterfall</h5>
+          <p>The key subgroups which are driving the metric provided in the KPI will be shown here.</p>
           <div id="chartdivWaterfall" style={{ width: "100%", height: "500px" }}></div>
         </CardContent>
       </Card>
@@ -294,7 +303,7 @@ class Dashboard extends React.Component {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} md={2}>
+            {/* <Grid item xs={12} md={2}>
               <FormControl variant="outlined" style={{ width: '100%' }}>
                 <InputLabel htmlFor="dimension">Dimension</InputLabel>
                 <Select native defaultValue={dimension} id="dimension" onChange={(event) => this.handleDimensionChange(event,"options")}>
@@ -304,10 +313,9 @@ class Dashboard extends React.Component {
                       <option key={dimension} value={dimension}>{dimension}</option>
                     )
                   })}
-                  {/* <option value="multidimension">Multi Dimension</option> */}
                 </Select>
               </FormControl>
-            </Grid>
+            </Grid> */}
           </Grid>
         </CardContent>
       </Card>

@@ -46,7 +46,8 @@ class Dashboard extends React.Component {
       tableData: [],
       amChart: null,
       cardData:[],
-      loading: false
+      loading: false,
+      tabState:0
     }
   }
 
@@ -121,10 +122,23 @@ class Dashboard extends React.Component {
       this.fetchAnalysisData();
     })
   }
-  handleDimensionChange = (e) => {
+  handleDimensionChange = (e,type,newValue) => {
     const targetComponent = e.target;
+    // console.log("targetComponent",targetComponent)
+    let targetValue = this.state.dimension;
+    if(type === "options"){
+      targetValue = targetComponent.value
+    }else{
+      targetValue = targetComponent.innerText
+      if(newValue || newValue === 0){
+        this.setState({
+          tabState:newValue
+        })
+      }
+    }
+
     this.setState({
-      dimension: targetComponent.value
+      dimension: targetValue
     }, () => {
       this.fetchAnalysisData();
     })
@@ -164,14 +178,17 @@ class Dashboard extends React.Component {
   }
 
   plotChart = () => {
-    if (this.state.amChart) {
+    console.log("abc")
+    am4core.options.autoDispose = true;
 
-      this.state.amChart.data = this.state.chartData;
-      let valueAxis = this.state.amChart.yAxes.getIndex(0);
-      valueAxis.min = this.state.yAxis[0];
-      valueAxis.max = this.state.yAxis[1];
-    } else {
+    // if (this.state.amChart) {
+    //   this.state.amChart.data = this.state.chartData;
+    //   let valueAxis = this.state.amChart.yAxes.getIndex(0);
+    //   valueAxis.min = this.state.yAxis[0];
+    //   valueAxis.max = this.state.yAxis[1];
+    // } else {
       let chart = am4core.create("chartdivWaterfall", am4charts.XYChart);
+
       chart.hiddenState.properties.opacity = 0; // this makes initial fade in effect
 
       // using math in the data instead of final values just to illustrate the idea of Waterfall chart
@@ -228,9 +245,10 @@ class Dashboard extends React.Component {
       chart.cursor = new am4charts.XYCursor();
       chart.cursor.behavior = "none";
       this.setState({
-        amChart: chart
+        amChart: chart,
       })
-    }
+
+    // }
   }
 
   componentDidMount() {
@@ -241,7 +259,7 @@ class Dashboard extends React.Component {
   
   tabHousingChart = () => {
     return (
-      <Card className="mt-4 mb-4">
+      <Card className="mb-4 chart-tab-card">
         <CardContent>
           <div id="chartdivWaterfall" style={{ width: "100%", height: "500px" }}></div>
         </CardContent>
@@ -279,7 +297,7 @@ class Dashboard extends React.Component {
             <Grid item xs={12} md={2}>
               <FormControl variant="outlined" style={{ width: '100%' }}>
                 <InputLabel htmlFor="dimension">Dimension</InputLabel>
-                <Select native defaultValue={dimension} id="dimension" onChange={this.handleDimensionChange}>
+                <Select native defaultValue={dimension} id="dimension" onChange={(event) => this.handleDimensionChange(event,"options")}>
                   <option value="multidimension">Multi Dimension</option>
                   {dimensionData.map((dimension) => {
                     return (
@@ -314,13 +332,16 @@ class Dashboard extends React.Component {
     //   title: "AutoRCA",
     //   body: this.tab1Fields()
     // }];
-    // const tabChartData = [{
-    //   title: "Housing",
-    //   body: this.tabHousingChart()
-    // }, {
-    //   title: "Loan",
-    //   body: this.keyPoints()
-    // }];
+    const tabChartData = []; 
+    if(this.state.dimensionData){
+      this.state.dimensionData.map((key) =>{
+        const datatab = {};
+        datatab['title'] = key;
+        datatab['body'] = this.tabHousingChart();
+        tabChartData.push(datatab)
+      });
+    }
+    // console.log("tabChartData",tabChartData)
     // , {
     //   title: "Education",
     //   body: this.tabHousingChart()
@@ -331,13 +352,13 @@ class Dashboard extends React.Component {
     //   title: "Job",
     //   body: this.tabHousingChart()
     // }
-    // if (this.state.loading) {
-    //   return (
-    //     <div className="loader">
-    //       <CircularProgress color="secondary" />
-    //     </div>
-    //   )
-    // } 
+    if (this.state.loading) {
+      return (
+        <div className="loader">
+          <CircularProgress color="secondary" />
+        </div>
+      )
+    } 
     return (
       <>
         <this.FilterData />
@@ -349,8 +370,8 @@ class Dashboard extends React.Component {
         {(this.state.cardData)?(tab1Fields(this.state.cardData,this.state.kpiName)):("")}
         {this.keyPoints()}
 
-        {/* <CustomTabs tabs={tabChartData} /> */}
-        {this.tabHousingChart(this.state.cardData,this.state.kpi)}
+        <CustomTabs tabs={tabChartData} plotChart={this.plotChart} handleDimensionChange={this.handleDimensionChange} tabState={this.state.tabState} />
+        {/* {this.tabHousingChart()} */}
         {/* <Housing tableData={this.state.tableData.slice(0, 50)} /> */}
         <div style={{ display: this.state.tableData.length ? 'block' : 'none' }}>
           <RcaAnalysisTable data={this.state.tableData.slice(0, 50)} columns={this.state.dataColumns} />

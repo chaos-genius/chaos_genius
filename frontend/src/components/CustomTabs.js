@@ -48,10 +48,20 @@ const useStyles = makeStyles((theme) => ({
 
 export default function SimpleTabs(props){
     const classes = useStyles();
-    const [value, setValue] = React.useState(0);
+    const [value, setValue] = React.useState((props?.tabState)?(props.tabState):(0));
+    const [eventHtml, setEventHtml] = React.useState("");
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
+        // if(props?.plotChart){
+        //     setTimeout(function(){ props.plotChart(newValue) }, 1000);   
+        // }
+        if(props?.handleDimensionChange){            
+            // console.log(value)
+            // console.log(newValue)
+            props.handleDimensionChange(event,"tab",newValue)
+        }
+        
     };
 
     return (

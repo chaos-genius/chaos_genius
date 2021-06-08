@@ -155,10 +155,18 @@ button.MuiIconButton-root.close-button {
 }
 .MuiTab-textColorInherit.Mui-selected{
     color: #262b40 !important;
-    background-color: #f8f8f8 !important;
-    border: 1px solid #262b40 !important;
-    
+    background-color: #fff !important;
+    border-top:  .0625rem solid rgba(46,54,80,.125)  !important;
+    border-left: .0625rem solid rgba(46,54,80,.125)  !important;
+    border-bottom: unset !important;
+    border-radius: unset !important;
+    border-top-left-radius: 0.5rem !important;
+    border-top-right-radius: 0.5rem !important;
+    margin-bottom: 0 !important;
 }
+/* .MuiTabs-root .MuiTab-root.MuiButtonBase-root{
+    border-radius: unset !important;
+} */
 .MuiTab-textColorInherit{
     padding: .75rem .85rem;
     border-radius: .5rem !important;
@@ -167,8 +175,14 @@ button.MuiIconButton-root.close-button {
     border: 1px solid #eaedf2 !important;
     text-transform: unset !important;
 }
-button.MuiTab-root:not(:last-child) {
+/* button.MuiTab-root:not(:last-child) {
     margin-right: 1rem;
+} */
+.MuiPaper-root.chart-tab-card{
+    border-top: unset !important;
+    border-radius: unset !important;
+    border-bottom-left-radius: 0.5rem !important;
+    border-bottom-right-radius: 0.5rem !important;
 }
 .MuiTabs-indicator{
     background-color: unset !important;
@@ -181,4 +195,8 @@ button.MuiTab-root:not(:last-child) {
     align-items: center;
     display: flex;
     justify-content: center;
+}
+.card .table td, .card .table th{
+    max-width: 150px;
+    white-space: break-spaces;
 }

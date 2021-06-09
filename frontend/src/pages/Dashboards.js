@@ -123,6 +123,7 @@ class Dashboard extends React.Component {
     this.setState({
       timeline: targetComponent.value
     }, () => {
+      this.setDataColumns();
       this.fetchAnalysisData();
     })
   }
@@ -261,22 +262,38 @@ class Dashboard extends React.Component {
     this.fetchKPIData();
     this.fetchKpiAggegation();
     this.fetchDimensionData();
+    this.setDataColumns();
   }
-
+  setDataColumns = () => {
+    let timeMetric = '';
+    if (this.state.timeline === 'mom') {
+      timeMetric = 'month';
+    } else if (this.state.timeline === 'wow') {
+      timeMetric = 'week';
+    }
+    this.setState({
+      dataColumns: [
+        `Subgroup Name`,
+        `Prev ${timeMetric} Avg`,
+        `Prev ${timeMetric} Size`,
+        `Prev ${timeMetric} Count`,
+        `Curr ${timeMetric} Avg`,
+        `Curr ${timeMetric} Size`,
+        `Curr ${timeMetric} Count`,
+        `Impact`
+      ]
+    });
+  }
 
   tabHousingChart = () => {
     return (
+
       <Card className="mb-4 chart-tab-card">
         <CardContent>
-          <h5 className="mb-4">Smart Waterfall</h5>
-          <p>The key subgroups which are driving the metric provided in the KPI will be shown here.</p>
-          <Card className="mb-4">
-            <CardContent>
-              <div id="chartdivWaterfall" style={{ width: "100%", height: "500px" }}></div>
-            </CardContent>
-          </Card>
+          <div id="chartdivWaterfall" style={{ width: "100%", height: "500px" }}></div>
         </CardContent>
       </Card>
+
     )
   }
   FilterData = () => {
@@ -381,8 +398,13 @@ class Dashboard extends React.Component {
         </Card> */}
         {(this.state.cardData) ? (tab1Fields(this.state.cardData, this.state.kpiName)) : ("")}
         {this.keyPoints()}
-
-        <CustomTabs tabs={tabChartData} plotChart={this.plotChart} handleDimensionChange={this.handleDimensionChange} tabState={this.state.tabState} />
+        <Card className="mb-4 ">
+          <CardContent>
+            <h5 className="mb-4">Smart Waterfall</h5>
+            <p>The key subgroups which are driving the metric provided in the KPI will be shown here.</p>
+            <CustomTabs tabs={tabChartData} plotChart={this.plotChart} handleDimensionChange={this.handleDimensionChange} tabState={this.state.tabState} />
+          </CardContent>
+        </Card>
         {/* {this.tabHousingChart()} */}
         {/* <Housing tableData={this.state.tableData.slice(0, 50)} /> */}
         <div style={{ display: this.state.tableData.length ? 'block' : 'none' }}>

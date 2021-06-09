@@ -31,8 +31,9 @@ def connection():
         if request.is_json:
             data = request.get_json()
             conn_name = data.get('name')
+            conn_type = data.get('connection_type')
             conn_uri = data.get('db_uri')
-            new_connection = Connection(name=conn_name, db_uri=conn_uri)
+            new_connection = Connection(name=conn_name, db_uri=conn_uri, connection_type=conn_type)
             new_connection.save()
             return jsonify({"message": f"Connection {new_connection.name} has been created successfully."})
         else:

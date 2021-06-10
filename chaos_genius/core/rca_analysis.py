@@ -62,9 +62,9 @@ def compare_subgroups(
     d2: pd.DataFrame,
     dims: List[str],
     metrics: List[str],
-    agg: List[str],
     m_col_names: Dict[str, Dict[str, List[str]]],
-    suffixes: List[str]
+    suffixes: List[str],
+    agg: str = "mean"
 ) -> pd.DataFrame:
     """Compares 2 subgroups based on metrics
 
@@ -73,21 +73,24 @@ def compare_subgroups(
         d2 (pd.DataFrame): Subgroup 2 (RCA/focus group)
         dims (list[str]): Dimensions to use
         metrics (list[str]): Metrics to compute for
-        agg (list[str]): [description]
         m_col_names (dict[str): Column names to use (highly specific)
         suffixes (list[str]): Suffixes for groups (highly specific)
+        agg (str): Aggregation method. Defaults to "mean".
 
     Returns:
         pd.DataFrame: Dataframe with cols 'val', 'size' and 'impact' to 
             show impact calculations of both subgroups
     """
+
+    agg_list = [agg] + ["count"]
+
     d1_out = d1.groupby(dims)
-    d1_out = d1_out.agg({metric: agg for metric in metrics}).reset_index()
+    d1_out = d1_out.agg({metric: agg_list for metric in metrics}).reset_index()
     d1_out.columns = d1_out.columns.map(col_name_mapper)
     d1_out.columns = d1_out.columns.get_level_values(0)
 
     d2_out = d2.groupby(dims)
-    d2_out = d2_out.agg({metric: agg for metric in metrics}).reset_index()
+    d2_out = d2_out.agg({metric: agg_list for metric in metrics}).reset_index()
     d2_out.columns = d2_out.columns.map(col_name_mapper)
     d2_out.columns = d2_out.columns.get_level_values(0)
 
@@ -95,19 +98,27 @@ def compare_subgroups(
                        suffixes=suffixes).fillna(0)
 
     for i in range(len(metrics)):
-        out[m_col_names["val"]["_g1"][i]] = \
-            out[m_col_names["mean"]["_g1"][i]] \
-            * out[m_col_names["count"]["_g1"][i]] \
-            / (out[m_col_names["count"]["_g1"][i]].sum() + 1e-5)
+        if agg == "mean":
+            out[m_col_names["val"]["_g1"][i]] = \
+                out[m_col_names["mean"]["_g1"][i]] \
+                * out[m_col_names["count"]["_g1"][i]] \
+                / (out[m_col_names["count"]["_g1"][i]].sum() + 1e-5)
 
-        out[m_col_names["val"]["_g2"][i]] = \
-            out[m_col_names["mean"]["_g2"][i]] \
-            * out[m_col_names["count"]["_g2"][i]] \
-            / (out[m_col_names["count"]["_g2"][i]].sum() + 1e-5)
+            out[m_col_names["val"]["_g2"][i]] = \
+                out[m_col_names["mean"]["_g2"][i]] \
+                * out[m_col_names["count"]["_g2"][i]] \
+                / (out[m_col_names["count"]["_g2"][i]].sum() + 1e-5)
 
+        elif agg == "sum":
+            out[m_col_names["val"]["_g1"][i]] = \
+                out[m_col_names["sum"]["_g1"][i]] 
+
+            out[m_col_names["val"]["_g2"][i]] = \
+                out[m_col_names["sum"]["_g2"][i]] 
+        
         out[m_col_names["size"]["_g1"][i]] = \
-            out[m_col_names["count"]["_g1"][i]] * 100 \
-            / (out[m_col_names["count"]["_g1"][i]].sum() + 1e-5)
+                out[m_col_names["count"]["_g1"][i]] * 100 \
+                / (out[m_col_names["count"]["_g1"][i]].sum() + 1e-5)
 
         out[m_col_names["size"]["_g2"][i]] = \
             out[m_col_names["count"]["_g2"][i]] * 100 \
@@ -117,6 +128,7 @@ def compare_subgroups(
             out[m_col_names["val"]["_g2"][i]] - \
             out[m_col_names["val"]["_g1"][i]]
 
+
     return out
 
 
@@ -125,7 +137,8 @@ def group_comparison_across_subgroups(
     d2: pd.DataFrame,
     dims: List[str],
     metrics: List[str],
-    n: List[int]
+    n: List[int],
+    agg: str = "mean"
 ) -> pd.DataFrame:
     """Performs comparison across all subgroups.
 
@@ -135,32 +148,39 @@ def group_comparison_across_subgroups(
         dims (list[str]): Dimensions to use
         metrics (list[str]): Metrics to compute for
         n (list[int]): List of number of dimensions to use as a subgroup 
+        agg (str): Aggregation to apply. "mean" or "sum" can be used.
+        Defaults to "mean".
 
     Returns:
         pd.DataFrame: Dataframe which has the output
     """
 
     # aggregations to use
-    agg = ["mean", "count"]
+    agglist = [agg] +  ["count"]
 
     # create bins for any numerical dimensions
     non_cat_cols = d1.dtypes[dims][d1.dtypes[dims] != object]
 
     full_df = pd.concat([d1, d2])
     new_dims = dims[:]
+    binned_cols = dict()
 
     for col in non_cat_cols.index:
         new_dims.remove(col)
         a = pd.qcut(full_df[col], 4, duplicates="drop").astype(str)
         full_df[col+"_binned"] = a
         new_dims.append(col+"_binned")
+        binned_cols[col+"_binned"] = col
+
+    d1 = full_df.loc[d1.index]
+    d2 = full_df.loc[d2.index]
 
     dims = new_dims
 
     # generate all column names
     suffixes = ["_g1", "_g2"]
     m_col_names = {
-        "mean": {j: [i+"_mean"+j for i in metrics] for j in suffixes},
+        agg: {j: [i+f"_{agg}"+j for i in metrics] for j in suffixes},
         "count": {j: [i+"_count"+j for i in metrics] for j in suffixes},
         "val": {j: [i+"_val"+j for i in metrics] for j in suffixes},
         "impact": [i+"_impact" for i in metrics],
@@ -174,13 +194,15 @@ def group_comparison_across_subgroups(
     first_subgroup = list_tuples.pop(0)
     df_impact = compare_subgroups(
         d1, d2, first_subgroup,
-        metrics, agg, m_col_names, suffixes
+        metrics, m_col_names, suffixes, agg= agg
     )
 
     for subgroup in list_tuples:
         df_impact = df_impact.append(compare_subgroups(
-            d1, d2, subgroup, metrics, agg, m_col_names, suffixes
+            d1, d2, subgroup, metrics, m_col_names, suffixes, agg= agg
         ))
+
+    df_impact = df_impact.rename(columns= binned_cols)
 
     return df_impact
 
@@ -190,7 +212,7 @@ def get_subgroup_impacts(
     d2: pd.DataFrame,
     dims: List[str],
     metrics: List[str],
-    agg: List[str] = ["mean", "count"],
+    agg: str = "mean",
     n: List[int] = None
 ) -> pd.DataFrame:
     """Gets impacts of subgroups of levels in n for d1 and d2 across 
@@ -201,8 +223,8 @@ def get_subgroup_impacts(
         d2 (pd.DataFrame): Group 2 (RCA/Focus Group)
         dims (list[str]): Dimensions ot create subgroups from
         metrics (list[str]): Metrics to use
-        agg (list[str]): Metric Aggregations. 
-        Defaults to ["mean", "count"].
+        agg (str): Metric aggregation to apply. 
+        Defaults to "mean".
         n (list[int]): Level of subgroups to use. Defaults to None.
 
     Returns:
@@ -214,7 +236,7 @@ def get_subgroup_impacts(
         n = list(range(1, len(dims)+1))
 
     final_out = group_comparison_across_subgroups(
-        d1, d2, dims, metrics, n
+        d1, d2, dims, metrics, n, agg= agg
     )
 
     # sort by absolute impact values
@@ -226,6 +248,7 @@ def get_subgroup_impacts(
 
     final_out.reset_index(drop=True, inplace=True)
     return final_out
+
 
 def convert_df_dims_to_query_strings(
     df: pd.DataFrame,
@@ -240,11 +263,27 @@ def convert_df_dims_to_query_strings(
     Returns:
         pd.Series: Query strings
     """
+    
+    def parse_dim_values_for_query_string(col: str, value: str) -> str:
+        out = re.match(
+            "([\(\[]+)([+-]?\d*\.?\d+), ([+-]?\d*\.?\d+)([\)\]]+)", value
+        )
+        if out:
+            groups = out.groups()
+            out_str = str(groups[1])
+            out_str += " <= " if groups[0] == "[" else " < "
+            out_str += f"`{col}`"
+            out_str += " <= " if groups[3] == "]" else " < "
+            out_str += str(groups[2])
+            return out_str
+        else:
+            return f"`{col}`==\"{value}\""
+            
 
     def conv(inp):
         query_string_lists = [
-            f"`{col}`==\"{val}\"" for col, val in zip(inp.index, inp.values) \
-            if val is not np.nan
+            parse_dim_values_for_query_string(col, val) for col, val in \
+            zip(inp.index, inp.values) if val is not np.nan
         ]
         return " and ".join(query_string_lists)
 
@@ -328,7 +367,9 @@ def get_best_combo(
     d1: pd.DataFrame,
     d2: pd.DataFrame,
     metric: str,
+    agg: str = "mean",
     K: int = 5,
+    max_subgroups_considered: int = 100,
     pop_overlap_threshold: int = 0.8,
     impact_overlap_threshold: int = 0.8,
     impact_base_threshold: int = 0.05,
@@ -341,8 +382,11 @@ def get_best_combo(
         whole_df (pd.DataFrame): Dataframe which is a merge of d1 and d2
         d1 (pd.DataFrame): Group 1 (Baseline)
         d2 (pd.DataFrame): Group 2 (Focus/RCA)
-        metric (str): Column name of the metric
+        metric (str): Column name of the metric.
+        agg (str, optional): Aggregation to use. Defaults to "mean".
         K (int, optional): Max subgroups in waterfall. Defaults to 5.
+        max_subgroups_considered (int, optional): Max subgroups to
+        consider for waterfall. Defaults to 100.
         pop_overlap_threshold (int, optional): Max subgroup overlap 
         percentage allowed. Defaults to 0.8.
         impact_overlap_threshold (int, optional): Max value of impact 
@@ -366,7 +410,9 @@ def get_best_combo(
     current_comb_filters = set()
     i = -1
 
-    while i < len(df_subgroups) - 1 and len(current_comb) <= K:
+    while i < len(df_subgroups) - 1 and i < max_subgroups_considered \
+        and len(current_comb) <= K:
+
         i += 1
 
         curr_filter_string = df_subgroups.iloc[i]["string"]
@@ -400,8 +446,15 @@ def get_best_combo(
         t_d1 = pd.merge(t_df, d1, how="inner")
         t_d2 = pd.merge(t_df, d2, how="inner")
 
-        p1 = t_d1[metric].mean() * t_d1[metric].count() / l1
-        p2 = t_d2[metric].mean() * t_d2[metric].count() / l2
+        if agg == "mean":
+            p1 = t_d1[metric].mean() * t_d1[metric].count() / l1
+            p2 = t_d2[metric].mean() * t_d2[metric].count() / l2
+        elif agg == "sum":
+            p1 = t_d1[metric].sum()
+            p2 = t_d2[metric].sum()
+        else:
+            raise ValueError(f"Currently supported values of agg are 'mean' " \
+                + f"and 'sum'. The value given was {agg}.")
 
         p1 = 0 if np.isnan(p1) else p1
         p2 = 0 if np.isnan(p2) else p2
@@ -572,29 +625,46 @@ def query_string_to_user_string(in_str: str) -> str:
         str: User readable string
     """
 
-    re_str = r"`(.+)`\s*([=<>]{1,2})\s*[\"]*([^\"]+)[\"]*"
+    re_strs = [
+        r"`(.+)`\s*([=<>]{1,2})\s*[\"]*([^\"]+)[\"]*",
+        r"([+-]?\d*\.?\d+)\s([<=]{1,2})\s[`]{0,1}(.*?)[`]{0,1}\s([<=]{1,2})\s([+-]?\d*\.?\d+)"
+    ]
 
     try:
         final_out = []
         val_dict = {
-            "==": "="
+            "==": "=",
+            "<": "<",
+            "<=": "<=",
         }
         filters = in_str.split(" and ")
         for filt in filters:
-            out = re.search(re_str, filt)
-            out = out.groups()
-            final_out.append(" ".join([val_dict.get(i, i) for i in out]))
+            if filt in ["start", "end"]:
+                final_out.append(filt)
+                continue
+
+            for re_str in re_strs:
+                out = re.match(re_str, filt)
+                if out is None:
+                    continue
+                else:
+                    out = out.groups()
+                    final_out.append(" ".join([val_dict.get(i, i) for i in out]))
+                    break
+            else:
+                print(f"{filt} did not match any re strings.")
+                final_out.append(filt)
         return " & ".join(final_out)
     except Exception as e:
-        print(e)
+        print(f"Could not convert {in_str} to user string.")
         return in_str
 
 
 def get_waterfall_output_data(
     subgroup_df: pd.DataFrame,
     metric: str,
-    d1_mean: float,
-    d2_mean: float,
+    d1_agg: float,
+    d2_agg: float,
     word_wrap_num: int= 15,
     plot_in_mpl: bool= False,
 ) -> Tuple[Tuple[float, float], pd.DataFrame]:
@@ -604,8 +674,8 @@ def get_waterfall_output_data(
     Args:
         waterfall_df (pd.DataFrame): Input data
         metric (str): metric to use
-        d1_mean (float): Mean of Group 1 (Baseline)
-        d2_mean (float): Mean of Group 2 (Focus/RCA)
+        d1_agg (float): Aggregated value of Group 1 (Baseline)
+        d2_agg (float): Aggregated value of Group 2 (Focus/RCA)
         word_wrap_num (int, optional): Wrap words when plotting in 
         matplotlib. Defaults to 15.
         plot_in_mpl (bool, optional): Show output in matplotlib. 
@@ -619,7 +689,7 @@ def get_waterfall_output_data(
     t = ["\n".join(wrap(i, word_wrap_num))
          for i in subgroup_df["string"].values.tolist()]
     a.extend(t)
-    t = [d1_mean]
+    t = [d1_agg]
     t.extend(subgroup_df["impact_non_overlap"].values.tolist())
 
     if plot_in_mpl:
@@ -632,9 +702,9 @@ def get_waterfall_output_data(
 
     a = ["start"]
     a.extend(subgroup_df["string"].values.tolist() + ["end"])
-    t = [d1_mean]
+    t = [d1_agg]
     t.extend(subgroup_df["impact_non_overlap"].values.tolist())
-    t.append([d2_mean])
+    t.append([d2_agg])
     t = t[0:1] + [sum(t[:i+1]) for i in range(1, len(t)-1)] + t[-1]
     js_df = pd.DataFrame(data={
         "value": t,
@@ -696,6 +766,7 @@ def get_rca_group_panel_metrics(
     d1: pd.DataFrame,
     d2: pd.DataFrame,
     metric: str,
+    agg: str = "mean",
     precision: int = 3
 ) -> Dict:
     """Gets metrics for both groups
@@ -704,6 +775,7 @@ def get_rca_group_panel_metrics(
         d1 (pd.DataFrame): Baseline group
         d2 (pd.DataFrame): Focus/RCA group
         metric (str): Metric to compute for
+        agg (str, optional): Aggregation to use. Defaults to "mean".
         precision (int, optional): Return values rounded to specific 
         decimals. Defaults to 3.
 
@@ -713,7 +785,7 @@ def get_rca_group_panel_metrics(
     g1 = get_group_metrics(d1, metric, precision= precision)
     g2 = get_group_metrics(d2, metric, precision= precision)
     out_dict = {
-        "impact": g2["mean"] - g1["mean"],
+        "impact": g2[agg] - g1[agg],
         "g1_metrics": g1,
         "g2_metrics": g2
     }
@@ -726,6 +798,7 @@ def get_waterfall_and_impact_table_single_dim(
     main_dim: str,
     dims: List[str],
     metric: str,
+    agg: str = "mean",
     K: int = 5,
     n: List[int] = None,
     word_wrap_num: int = 15,
@@ -748,6 +821,7 @@ def get_waterfall_and_impact_table_single_dim(
         main_dim (str): Single dim
         dims (list[str]): List of dimensions
         metric (str): metric to use
+        agg (str, optional): Aggregation to use. Defaults to "mean".
         K (int): Max subgroups in waterfall. Defaults to 5.
         n (list[int], optional): List of number of dimensions to use 
         while grouping. Defaults to None.
@@ -774,7 +848,8 @@ def get_waterfall_and_impact_table_single_dim(
         dims,
         metric,
         N= None,
-        n= n
+        n= n,
+        agg= agg
     )
 
     # convert dims to query_strings
@@ -787,8 +862,8 @@ def get_waterfall_and_impact_table_single_dim(
     df_subgroup_impact.drop(dims, axis= 1, inplace= True)
     metric_columns = [
         f"{metric}_impact", f"{metric}_size_g1", f"{metric}_size_g2", 
-        f"{metric}_val_g1", f"{metric}_val_g2", f"{metric}_mean_g1", 
-        f"{metric}_mean_g2", f"{metric}_count_g1", f"{metric}_count_g2"
+        f"{metric}_val_g1", f"{metric}_val_g2", f"{metric}_{agg}_g1", 
+        f"{metric}_{agg}_g2", f"{metric}_count_g1", f"{metric}_count_g2"
     ]
     df_subgroup_impact = df_subgroup_impact[
         ["string"] + metric_columns
@@ -808,6 +883,7 @@ def get_waterfall_and_impact_table_single_dim(
         d2,
         [main_dim],
         [metric],
+        agg = agg,
         n = [1]
     )
     best_subgroup_combo_df = best_subgroup_combo_df.reset_index(drop= True).iloc[:K]
@@ -824,7 +900,7 @@ def get_waterfall_and_impact_table_single_dim(
     best_subgroup_combo_df_short = best_subgroup_combo_df.rename(columns={f"{metric}_impact": "impact_non_overlap"})
     
 
-    act_sum = d2[metric].mean() - d1[metric].mean()
+    act_sum = d2[metric].agg(agg) - d1[metric].agg(agg)
     our_sum = best_subgroup_combo_df_short["impact_non_overlap"].sum()
 
     if round(act_sum - our_sum, precision) != 0:
@@ -840,8 +916,8 @@ def get_waterfall_and_impact_table_single_dim(
     y_axis_lims, waterfall_df = get_waterfall_output_data(
         best_subgroup_combo_df_short,
         metric,
-        d1[metric].mean(),
-        d2[metric].mean(),
+        d1[metric].agg(agg),
+        d2[metric].agg(agg),
         word_wrap_num,
         plot_in_mpl
     )
@@ -878,7 +954,8 @@ def get_waterfall_and_impact_table(
     metric: str,
     K: int = 5,
     n: List[int] = None,
-    agg: List[str] = ["mean", "count"],
+    agg: str = "mean",
+    max_subgroups_considered: int = 100,
     pop_overlap_threshold: int = 0.8,
     impact_overlap_threshold: int = 0.8,
     impact_base_threshold: int = 0.05,
@@ -903,8 +980,9 @@ def get_waterfall_and_impact_table(
         K (int): Max subgroups in waterfall. Defaults to 5.
         n (list[int], optional): List of number of dimensions to use 
         while grouping. Defaults to None.
-        agg (list[str], optional): Aggregate against. Defaults to 
-        ["mean", "count"].
+        agg (str, optional): Aggregation function. Defaults to "mean".
+        max_subgroups_considered (int, optional): Max subgroups to
+        consider for waterfall. Defaults to 100.
         pop_overlap_threshold (int, optional): Ignoring subpopulations 
         greater than this value. Defaults to 0.8.
         impact_overlap_threshold (int, optional): Ignoring impact values 
@@ -946,8 +1024,8 @@ def get_waterfall_and_impact_table(
     df_subgroup_impact.drop(dims, axis= 1, inplace= True)
     metric_columns = [
         f"{metric}_impact", f"{metric}_size_g1", f"{metric}_size_g2", 
-        f"{metric}_val_g1", f"{metric}_val_g2", f"{metric}_mean_g1", 
-        f"{metric}_mean_g2"
+        f"{metric}_val_g1", f"{metric}_val_g2", f"{metric}_{agg}_g1", 
+        f"{metric}_{agg}_g2"
     ]
     df_subgroup_impact = df_subgroup_impact[
         ["string"] + metric_columns
@@ -967,7 +1045,9 @@ def get_waterfall_and_impact_table(
         whole_df,
         d1, d2,
         metric,
+        agg,
         K,
+        max_subgroups_considered,
         pop_overlap_threshold,
         impact_overlap_threshold,
         impact_base_threshold,
@@ -980,10 +1060,10 @@ def get_waterfall_and_impact_table(
     # filter out relevant data for waterfall
     best_subgroup_combo_df_short = best_subgroup_combo_df[["string", "impact_non_overlap"]]
 
-    act_sum = d2[metric].mean() - d1[metric].mean()
+    act_sum = d2[metric].agg(agg) - d1[metric].agg(agg)
     our_sum = best_subgroup_combo_df_short["impact_non_overlap"].sum()
     best_subgroup_combo_df_short = best_subgroup_combo_df_short.append(
-        {"string": "\"others\"", "impact_non_overlap": act_sum - our_sum},
+        {"string": "others", "impact_non_overlap": act_sum - our_sum},
         ignore_index=True
     )
 
@@ -994,8 +1074,8 @@ def get_waterfall_and_impact_table(
     y_axis_lims, waterfall_df = get_waterfall_output_data(
         best_subgroup_combo_df_short,
         metric,
-        d1[metric].mean(),
-        d2[metric].mean(),
+        d1[metric].agg(agg),
+        d2[metric].agg(agg),
         word_wrap_num,
         plot_in_mpl
     )
@@ -1032,7 +1112,8 @@ def get_single_dim_impact(
     dims: List[str],
     metric: str,
     N: int = 5,
-    n: List[int] = None
+    n: List[int] = None,
+    agg: str = "mean"
 ) -> pd.DataFrame:
     """Gets Impact Values for subgroups across a single dimension
 
@@ -1043,13 +1124,14 @@ def get_single_dim_impact(
         dims (list[str]): List of dimensions
         metric (str): metric to use
         N (int, optional): Number of rows to return. Defaults to 5.
-        n (List[int], optional): Subgroups dimensions to use
+        n (List[int], optional): Subgroups dimensions to use.
+        agg (str, optional): Aggregation function. Defaults to "mean".
 
     Returns:
         pd.DataFrame: Dataframe with impact values
     """
     df_impact = get_subgroup_impacts(
-        d1, d2, [main_dim]+dims, [metric], n= n
+        d1, d2, [main_dim]+dims, [metric], n= n, agg= agg
     )
 
     df_impact = df_impact[~df_impact[main_dim].isna()]
@@ -1060,6 +1142,85 @@ def get_single_dim_impact(
 
     return df_impact
 
+def get_hierarchical_table(
+    d1: pd.DataFrame,
+    d2: pd.DataFrame,
+    main_dim: str,
+    dims: List[str],
+    metric: str,
+    agg: str = "mean",
+    max_subpopulations: int = 5,
+    get_full_subpop_name: bool = True,
+    precision: int = 3
+) -> Dict:
+    """Gets the hierarchichal table data for a dimension with its 
+    subgroups.
+
+    Args:
+        d1 (pd.DataFrame): Baseline group
+        d2 (pd.DataFrame): Focus/RCA group
+        main_dim (str): First dimension to use
+        dims (List[str]): Dimensions in order to consider for subgroups
+        metric (str): Metric to compute for
+        agg (str, optional): Aggregation to apply on metric. 
+        Defaults to "mean".
+        max_subpopulations (int, optional): Max subpopulations to 
+        return. Defaults to 5.
+        get_full_subpop_name (bool, optional): Use full name of group 
+        or only subgroup's name. Defaults to True.
+        precision (int, optional): Decimal precision of output. 
+        Defaults to 3.
+
+    Returns:
+        Dict: Rows of data
+    """
+
+    all_dims = [main_dim] + dims
+    df_impact = None
+    
+    for i in range(1, len(all_dims)+1):
+        if df_impact is None:
+            t_df = get_subgroup_impacts(
+                d1, d2, all_dims[:i], [metric], n=[i], agg= agg
+            )
+            t_df["parentId"] = np.nan
+            t_df["string"] = convert_df_dims_to_query_strings(t_df, all_dims[:i])
+            df_impact = t_df
+        else:
+            prev_strings = list(zip(
+                range(len(df_impact) - len(t_df), len(df_impact)),
+                convert_df_dims_to_query_strings(t_df, all_dims[:i-1])
+            ))
+            t_df = get_subgroup_impacts(
+                d1, d2, all_dims[:i], [metric], n=[i], agg= agg
+            )
+            
+            def sorting_func(x):
+                y = x.copy()
+                y[f"{metric}_abs_impact"] = y[f"{metric}_impact"]
+                y = y.sort_values(f"{metric}_abs_impact").drop(f"{metric}_abs_impact", axis= 1)
+                return y.reset_index(drop= True).iloc[:max_subpopulations]
+            
+            t_df = t_df.groupby(all_dims[:i-1]).apply(sorting_func).reset_index(drop= True)
+            t_df["parentId"] = None
+            t_df["string"] = convert_df_dims_to_query_strings(t_df, all_dims[:i])
+        
+            for idx, prev_string in prev_strings:
+                indexes = t_df["string"].str.contains(prev_string)
+                t_df.loc[indexes, "parentId"] = idx
+            t_df.dropna(subset=["parentId"], inplace= True)
+            
+            # for when you don't want the full string in hierarchial data
+            if not get_full_subpop_name:
+                t_df["string"] = convert_df_dims_to_query_strings(t_df, all_dims[i-1:i])
+            
+            df_impact = df_impact.append(t_df, ignore_index= True)
+    
+    df_impact = df_impact.reset_index().rename(columns={"index": "id"})
+    df_impact = df_impact.drop(all_dims, axis= 1)
+    df_impact = df_impact.round(precision)
+    df_impact["string"] = df_impact["string"].apply(query_string_to_user_string)
+    return df_impact.to_dict(orient= "records")
 
 if __name__ == "__main__":
 

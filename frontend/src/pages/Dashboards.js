@@ -162,10 +162,14 @@ class Dashboard extends React.Component {
   }
 
   fetchAnalysisData = () => {
-    const { kpi, timeline, dimension } = this.state;
-    this.setState({ loading: true })
+    const { kpi, timeline, dimension,tabState } = this.state;
+    let dimensionStr = ""
+    if(tabState !== 0){
+      dimensionStr = `&dimension=${dimension.toLowerCase()}`
+    }
 
-    fetch(`/api/kpi/${kpi}/rca-analysis?timeline=${timeline}&dimensions=${dimension.toLowerCase()}`)
+    this.setState({ loading: true })
+    fetch(`/api/kpi/${kpi}/rca-analysis?timeline=${timeline}${dimensionStr}`)
       .then(response => response.json())
       .then(respData => {
         const data = respData.data;

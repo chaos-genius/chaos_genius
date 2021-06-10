@@ -79,8 +79,8 @@ def kpi_rca_analysis(kpi_id):
         kpi_info = KPI_DATA[kpi_id-1]
         connection_info = Connection.get_by_id(kpi_info["data_source"])
         timeline = request.args.get("timeline")
-        dimensions = request.args.get("dimensions", None)
-        data = rca_analysis(kpi_info, connection_info.as_dict, timeline, dimensions)
+        dimension = request.args.get("dimension", None)
+        data = rca_analysis(kpi_info, connection_info.as_dict, timeline, dimension)
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("RCA Analysis Done")
@@ -94,8 +94,8 @@ def kpi_rca_hierarchical_data(kpi_id):
         kpi_info = KPI_DATA[kpi_id-1]
         connection_info = Connection.get_by_id(kpi_info["data_source"])
         timeline = request.args.get("timeline")
-        dimensions = request.args.get("dimensions", None)
-        data = rca_hierarchical_data(kpi_info, connection_info.as_dict, timeline, dimensions)
+        dimension = request.args.get("dimension", None)
+        data = rca_hierarchical_data(kpi_info, connection_info.as_dict, timeline, dimension)
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("RCA Analysis Done")
@@ -191,13 +191,13 @@ def kpi_aggregation(kpi_info, connection_info, timeline="mom"):
     return final_data
 
 
-def rca_analysis(kpi_info, connection_info, timeline="mom", dimensions= None):
+def rca_analysis(kpi_info, connection_info, timeline="mom", dimension= None):
     try:
         base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, timeline)
 
         base_df, rca_df = rca_preprocessor(base_df, rca_df)
 
-        if dimensions is None or dimensions == "multidimension":
+        if dimension is None:
             final_data = get_waterfall_and_impact_table(
                 d1 = base_df, 
                 d2 = rca_df, 
@@ -206,21 +206,21 @@ def rca_analysis(kpi_info, connection_info, timeline="mom", dimensions= None):
                 n = [1, 2, 3], 
                 precision = kpi_info.get("metric_precision", 3)
             )
-        elif dimensions in kpi_info["dimensions"]:
+        elif dimension in kpi_info["dimensions"]:
             dims_without_main_dim = list(deepcopy(kpi_info["dimensions"]))
-            dims_without_main_dim.remove(dimensions)
+            dims_without_main_dim.remove(dimension)
             n = list(range(1, min([3, len(dims_without_main_dim)])+1))
             final_data = get_waterfall_and_impact_table_single_dim(
                 d1 = base_df, 
                 d2 = rca_df, 
-                main_dim = dimensions, 
+                main_dim = dimension, 
                 dims = dims_without_main_dim, 
                 metric = kpi_info["metric"], 
                 n = n, 
                 precision = kpi_info.get("metric_precision", 3)
             )
         else:
-            raise ValueError(f"Dimension: {dimensions} does not exist.")
+            raise ValueError(f"Dimension: {dimension} does not exist.")
 
         tmp_chart_data = final_data['data_table']
         final_data['data_table'] = process_rca_output(tmp_chart_data, kpi_info)
@@ -233,21 +233,21 @@ def rca_analysis(kpi_info, connection_info, timeline="mom", dimensions= None):
         }
     return final_data
 
-def rca_hierarchical_data(kpi_info, connection_info, timeline="mom", dimensions= None):
+def rca_hierarchical_data(kpi_info, connection_info, timeline="mom", dimension= None):
     try:
         base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, timeline)
         base_df, rca_df = rca_preprocessor(base_df, rca_df)
 
-        if dimensions not in kpi_info["dimensions"]:
-            raise ValueError(f"{dimensions} not in {kpi_info['dimensions']}")
+        if dimension not in kpi_info["dimensions"]:
+            raise ValueError(f"{dimension} not in {kpi_info['dimensions']}")
 
         dims_without_main_dim = list(deepcopy(kpi_info["dimensions"]))
-        dims_without_main_dim.remove(dimensions)
+        dims_without_main_dim.remove(dimension)
 
         final_data = get_hierarchical_table(
             d1 = base_df, 
             d2 = rca_df, 
-            main_dim = dimensions,
+            main_dim = dimension,
             dims = dims_without_main_dim, 
             metric = kpi_info["metric"],
             precision = kpi_info.get("metric_precision", 3)

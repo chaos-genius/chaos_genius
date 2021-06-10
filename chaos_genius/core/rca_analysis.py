@@ -1151,9 +1151,10 @@ def get_hierarchical_table(
     agg: str = "mean",
     max_subpopulations: int = 5,
     get_full_subpop_name: bool = True,
-    precision: int = 3
+    precision: int = 3,
+    min_impact_threshold: float = 0.01
 ) -> Dict:
-    """Gets the hierarchichal table data for a dimension with its 
+    """Gets the hierarchical table data for a dimension with its 
     subgroups.
 
     Args:
@@ -1170,6 +1171,8 @@ def get_hierarchical_table(
         or only subgroup's name. Defaults to True.
         precision (int, optional): Decimal precision of output. 
         Defaults to 3.
+        min_impact_threshold (float, optional): Minimum value of impact
+        for subgroup to be included. Defaults to 0.01.
 
     Returns:
         Dict: Rows of data
@@ -1196,9 +1199,11 @@ def get_hierarchical_table(
             )
             
             def sorting_func(x):
+                abs_name = f"{metric}_abs_impact"
                 y = x.copy()
-                y[f"{metric}_abs_impact"] = y[f"{metric}_impact"]
-                y = y.sort_values(f"{metric}_abs_impact").drop(f"{metric}_abs_impact", axis= 1)
+                y[abs_name] = y[f"{metric}_impact"].abs()
+                y = y[y[abs_name] > min_impact_threshold]
+                y = y.sort_values(abs_name).drop(abs_name, axis= 1)
                 return y.reset_index(drop= True).iloc[:max_subpopulations]
             
             t_df = t_df.groupby(all_dims[:i-1]).apply(sorting_func).reset_index(drop= True)

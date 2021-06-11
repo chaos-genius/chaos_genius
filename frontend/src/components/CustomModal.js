@@ -32,10 +32,11 @@ export default function AlertDialog(props) {
                 TransitionComponent={Transition}
                 open={props.open}
                 keepMounted
+                fullWidth={true}
                 onClose={handleCloseCallback}
                 aria-labelledby="alert-dialog-slide-title"
                 aria-describedby="alert-dialog-slide-description"
-                className={props.addDependent ? "custom-modal custom-modal-add-dependant" : props.cardImage ? "custom-modal-image-preview custom-modal" : "custom-modal"}
+                className="custom-modal"
             >
                 <DialogTitle id="alert-dialog-slide-title">{props.title}
                     {

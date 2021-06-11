@@ -153,10 +153,10 @@ def process_rca_output(chart_data, kpi_info):
     rename_dict = {
         'string': "subgroup",
         f"{kpi_info['metric']}_size_g1": "g1_size",
-        f"{kpi_info['metric']}_mean_g1": "g1_agg",
+        f"{kpi_info['metric']}_{kpi_info['aggregation']}_g1": "g1_agg",
         f"{kpi_info['metric']}_count_g1": "g1_count",
         f"{kpi_info['metric']}_size_g2": "g2_size", 
-        f"{kpi_info['metric']}_mean_g2": "g2_agg", 
+        f"{kpi_info['metric']}_{kpi_info['aggregation']}_g2": "g2_agg", 
         f"{kpi_info['metric']}_count_g2": "g2_count",
         f"{kpi_info['metric']}_impact": "impact",
         "id": "id",
@@ -175,7 +175,8 @@ def kpi_aggregation(kpi_info, connection_info, timeline="mom"):
             d1 = base_df, 
             d2 = rca_df, 
             metric = kpi_info['metric'], 
-            precision = kpi_info.get("metric_precision", 3)
+            precision = kpi_info.get("metric_precision", 3),
+            agg = kpi_info["aggregation"]
         )
 
         final_data = {
@@ -204,7 +205,8 @@ def rca_analysis(kpi_info, connection_info, timeline="mom", dimension= None):
                 dims = kpi_info["dimensions"], 
                 metric = kpi_info["metric"], 
                 n = [1, 2, 3], 
-                precision = kpi_info.get("metric_precision", 3)
+                precision = kpi_info.get("metric_precision", 3),
+                agg = kpi_info["aggregation"]
             )
         elif dimension in kpi_info["dimensions"]:
             dims_without_main_dim = list(deepcopy(kpi_info["dimensions"]))
@@ -217,7 +219,8 @@ def rca_analysis(kpi_info, connection_info, timeline="mom", dimension= None):
                 dims = dims_without_main_dim, 
                 metric = kpi_info["metric"], 
                 n = n, 
-                precision = kpi_info.get("metric_precision", 3)
+                precision = kpi_info.get("metric_precision", 3),
+                agg = kpi_info["aggregation"]
             )
         else:
             raise ValueError(f"Dimension: {dimension} does not exist.")
@@ -250,7 +253,8 @@ def rca_hierarchical_data(kpi_info, connection_info, timeline="mom", dimension= 
             main_dim = dimension,
             dims = dims_without_main_dim, 
             metric = kpi_info["metric"],
-            precision = kpi_info.get("metric_precision", 3)
+            precision = kpi_info.get("metric_precision", 3),
+            agg = kpi_info["aggregation"]
         )
 
         final_data = {
@@ -284,9 +288,12 @@ KPI_DATA = [
     {"id": 14, "name": "Avg call duration for admin job (MySQL)", "kpi_query": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["admin."]}, "dimensions": ["marital","education","housing","loan"]},
     {"id": 15, "name": "Avg call duration for blue collar job (MySQL)", "kpi_query": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["blue-collar"]}, "dimensions": ["marital","education","housing","loan"]},
     {"id": 16, "name": "Avg call duration for management job (MySQL)", "kpi_query": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["management"]}, "dimensions": ["marital","education","housing","loan"]},
+    {"id": 17, "name": "E-Com - Total Sales", "kpi_query": "ecom_retail", "data_source": 17, "datetime_column": "date", "metric": "ItemTotalPrice", "metric_precision": 2, "aggregation": "sum", "filters": {}, "dimensions": ["DayOfWeek", "PurchaseTime", "Country"]},
+    {"id": 18, "name": "E-Com - Average Sales", "kpi_query": "ecom_retail", "data_source": 17, "datetime_column": "date", "metric": "ItemTotalPrice", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["DayOfWeek", "PurchaseTime", "Country"]},
 ]
 
 DB_DIMS = {
     "marketing_records": ["job","marital","education","housing","loan"],
-    "mh_food_prices": ["Commodity", "APMC", "district_name"]
+    "mh_food_prices": ["Commodity", "APMC", "district_name"],
+    "ecom_retail": ["DayOfWeek", "PurchaseTime", "Country"]
 }

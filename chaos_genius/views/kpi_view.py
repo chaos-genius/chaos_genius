@@ -14,11 +14,13 @@ from flask import (
     url_for,
     jsonify
 )
+import numpy as np
+import pandas as pd
 
 from chaos_genius.utils import flash_errors
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.connection_model import Connection
-from chaos_genius.core.rca_analysis import get_rca_group_panel_metrics, get_waterfall_and_impact_table, get_waterfall_and_impact_table_single_dim, rca_preprocessor
+from chaos_genius.core.rca_analysis import get_hierarchical_table, get_rca_group_panel_metrics, get_waterfall_and_impact_table, get_waterfall_and_impact_table_single_dim, rca_preprocessor
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 
 
@@ -77,8 +79,23 @@ def kpi_rca_analysis(kpi_id):
         kpi_info = KPI_DATA[kpi_id-1]
         connection_info = Connection.get_by_id(kpi_info["data_source"])
         timeline = request.args.get("timeline")
-        dimensions = request.args.get("dimensions", None)
-        data = rca_analysis(kpi_info, connection_info.as_dict, timeline, dimensions)
+        dimension = request.args.get("dimension", None)
+        data = rca_analysis(kpi_info, connection_info.as_dict, timeline, dimension)
+    except Exception as err:
+        current_app.logger.info(f"Error Found: {err}")
+    current_app.logger.info("RCA Analysis Done")
+    return jsonify({"data": data, "msg": ""})
+
+@blueprint.route("/<int:kpi_id>/rca-hierarchical-data", methods=["GET"])
+def kpi_rca_hierarchical_data(kpi_id):
+    current_app.logger.info(f"RCA Analysis Started for KPI ID: {kpi_id}")
+    data = []
+    try:
+        kpi_info = KPI_DATA[kpi_id-1]
+        connection_info = Connection.get_by_id(kpi_info["data_source"])
+        timeline = request.args.get("timeline")
+        dimension = request.args.get("dimension", None)
+        data = rca_hierarchical_data(kpi_info, connection_info.as_dict, timeline, dimension)
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("RCA Analysis Done")
@@ -132,11 +149,34 @@ def get_baseline_and_rca_df(kpi_info, connection_info, timeline="mom"):
     return base_df, rca_df
 
 
+def process_rca_output(chart_data, kpi_info):
+    rename_dict = {
+        'string': "subgroup",
+        f"{kpi_info['metric']}_size_g1": "g1_size",
+        f"{kpi_info['metric']}_mean_g1": "g1_agg",
+        f"{kpi_info['metric']}_count_g1": "g1_count",
+        f"{kpi_info['metric']}_size_g2": "g2_size", 
+        f"{kpi_info['metric']}_mean_g2": "g2_agg", 
+        f"{kpi_info['metric']}_count_g2": "g2_count",
+        f"{kpi_info['metric']}_impact": "impact",
+        "id": "id",
+        "parentId": "parentId",
+    }
+    df = pd.DataFrame(chart_data).rename(columns= rename_dict)
+    df = df.drop(set(df.columns) - set(rename_dict.values()), axis= 1)
+    df = df.fillna(np.nan).replace([np.nan], [None])
+    return df.to_dict(orient= "records")
+
 def kpi_aggregation(kpi_info, connection_info, timeline="mom"):
     try:
         base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, timeline)
 
-        panel_metrics = get_rca_group_panel_metrics(base_df, rca_df, kpi_info['metric'], precision= kpi_info.get("metric_precision", 3))
+        panel_metrics = get_rca_group_panel_metrics(
+            d1 = base_df, 
+            d2 = rca_df, 
+            metric = kpi_info['metric'], 
+            precision = kpi_info.get("metric_precision", 3)
+        )
 
         final_data = {
             "panel_metrics": panel_metrics,
@@ -151,36 +191,39 @@ def kpi_aggregation(kpi_info, connection_info, timeline="mom"):
     return final_data
 
 
-def rca_analysis(kpi_info, connection_info, timeline="mom", dimensions= None):
+def rca_analysis(kpi_info, connection_info, timeline="mom", dimension= None):
     try:
         base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, timeline)
 
         base_df, rca_df = rca_preprocessor(base_df, rca_df)
 
-        if dimensions is None or dimensions == "multidimension":
-            final_data = get_waterfall_and_impact_table(base_df, rca_df, kpi_info["dimensions"], kpi_info["metric"], n=[1, 2, 3], precision= kpi_info.get("metric_precision", 3))
-        elif dimensions in kpi_info["dimensions"]:
+        if dimension is None:
+            final_data = get_waterfall_and_impact_table(
+                d1 = base_df, 
+                d2 = rca_df, 
+                dims = kpi_info["dimensions"], 
+                metric = kpi_info["metric"], 
+                n = [1, 2, 3], 
+                precision = kpi_info.get("metric_precision", 3)
+            )
+        elif dimension in kpi_info["dimensions"]:
             dims_without_main_dim = list(deepcopy(kpi_info["dimensions"]))
-            dims_without_main_dim.remove(dimensions)
+            dims_without_main_dim.remove(dimension)
             n = list(range(1, min([3, len(dims_without_main_dim)])+1))
-            final_data = get_waterfall_and_impact_table_single_dim(base_df, rca_df, dimensions, dims_without_main_dim, kpi_info["metric"], n= n, precision= kpi_info.get("metric_precision", 3))
+            final_data = get_waterfall_and_impact_table_single_dim(
+                d1 = base_df, 
+                d2 = rca_df, 
+                main_dim = dimension, 
+                dims = dims_without_main_dim, 
+                metric = kpi_info["metric"], 
+                n = n, 
+                precision = kpi_info.get("metric_precision", 3)
+            )
         else:
-            raise ValueError(f"Dimension: {dimensions} does not exist.")
+            raise ValueError(f"Dimension: {dimension} does not exist.")
 
         tmp_chart_data = final_data['data_table']
-        new_tmp = []
-        for data in tmp_chart_data:
-            new_tmp.append({
-                "subgroup": data.get('string'),
-                "g1_size": round(data.get(f"{kpi_info['metric']}_size_g1", 0.0), 1),
-                "g1_agg": round(data.get(f"{kpi_info['metric']}_mean_g1", 0.0), 3),
-                "g1_count": data.get(f"{kpi_info['metric']}_count_g1", 0),
-                "g2_size": round(data.get(f"{kpi_info['metric']}_size_g2", 0.0), 1),
-                "g2_agg": round(data.get(f"{kpi_info['metric']}_mean_g2", 0.0), 3),
-                "g2_count": data.get(f"{kpi_info['metric']}_count_g2", 0),
-                "impact": round(data.get(f"{kpi_info['metric']}_impact", 0.0), 3),
-            })
-        final_data['data_table'] = new_tmp
+        final_data['data_table'] = process_rca_output(tmp_chart_data, kpi_info)
     except Exception as err:
         # print(traceback.format_exc())
         current_app.logger.error(f"Error in RCA Analysis: {err}")
@@ -190,6 +233,39 @@ def rca_analysis(kpi_info, connection_info, timeline="mom", dimensions= None):
         }
     return final_data
 
+def rca_hierarchical_data(kpi_info, connection_info, timeline="mom", dimension= None):
+    try:
+        base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, timeline)
+        base_df, rca_df = rca_preprocessor(base_df, rca_df)
+
+        if dimension not in kpi_info["dimensions"]:
+            raise ValueError(f"{dimension} not in {kpi_info['dimensions']}")
+
+        dims_without_main_dim = list(deepcopy(kpi_info["dimensions"]))
+        dims_without_main_dim.remove(dimension)
+
+        final_data = get_hierarchical_table(
+            d1 = base_df, 
+            d2 = rca_df, 
+            main_dim = dimension,
+            dims = dims_without_main_dim, 
+            metric = kpi_info["metric"],
+            precision = kpi_info.get("metric_precision", 3)
+        )
+
+        final_data = {
+            'data_table': final_data
+        }
+
+        tmp_chart_data = final_data['data_table']
+        final_data['data_table'] = process_rca_output(tmp_chart_data, kpi_info)
+    except Exception as err:
+        # print(traceback.format_exc())
+        current_app.logger.error(f"Error in RCA hierarchical table generation: {err}")
+        final_data = {
+            "data_table": []
+        }
+    return final_data
 
 KPI_DATA = [
     {"id": 1, "name": "Call/day", "kpi_query": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "sum_calls", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},

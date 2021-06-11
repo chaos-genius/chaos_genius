@@ -34,7 +34,7 @@ class Dashboard extends React.Component {
 
     this.state = {
       showDefault: false,
-      kpi: "0",
+      kpi: 0,
       kpiName: "KPI",
       dimension: "multidimension",
       dimensionData: [],
@@ -100,15 +100,6 @@ class Dashboard extends React.Component {
 
     const componentValue = targetComponent.value;
 
-    if (componentValue === "0") {
-      this.setState({
-        chartData: [],
-        yAxis: [],
-        tableData: [],
-        amChart: null,
-      })
-      return;
-    }
     this.setState({
       kpi: componentValue,
       kpiName: targetComponent.options[componentValue].innerText,
@@ -150,42 +141,43 @@ class Dashboard extends React.Component {
   }
   fetchKpiAggegation = () => {
     const { kpi, timeline } = this.state;
-    fetch(`/api/kpi/${kpi}/kpi-aggregations?timeline=${timeline}`)
-      .then(response => response.json())
-      .then(respData => {
-        const data = respData.data;
-        if (data?.panel_metrics) {
-          this.setState({
-            cardData: data.panel_metrics,
-          })
-        }
-      });
+    if (kpi !== 0) {
+      fetch(`/api/kpi/${kpi}/kpi-aggregations?timeline=${timeline}`)
+        .then(response => response.json())
+        .then(respData => {
+          const data = respData.data;
+          if (data?.panel_metrics) {
+            this.setState({
+              cardData: data.panel_metrics,
+            })
+          }
+        });
+    }
   }
 
   fetchAnalysisData = () => {
     const { kpi, timeline, dimension } = this.state;
-    this.setState({ loading: true })
-
-    fetch(`/api/kpi/${kpi}/rca-analysis?timeline=${timeline}&dimensions=${dimension.toLowerCase()}`)
-      .then(response => response.json())
-      .then(respData => {
-        const data = respData.data;
-        if (data?.chart) {
-          this.setState({
-            chartData: data.chart.chart_data,
-            yAxis: data.chart.y_axis_lim,
-            tableData: data.data_table,
-            loading: false
-          }, () => {
-            this.plotChart();
-          })
-        }
-      });
-
+    if (kpi !== 0) {
+      this.setState({ loading: true })
+      fetch(`/api/kpi/${kpi}/rca-analysis?timeline=${timeline}&dimensions=${dimension.toLowerCase()}`)
+        .then(response => response.json())
+        .then(respData => {
+          const data = respData.data;
+          if (data?.chart) {
+            this.setState({
+              chartData: data.chart.chart_data,
+              yAxis: data.chart.y_axis_lim,
+              tableData: data.data_table,
+              loading: false
+            }, () => {
+              this.plotChart();
+            })
+          }
+        });
+    }
   }
 
   plotChart = () => {
-    console.log("abc")
     am4core.options.autoDispose = true;
 
     // if (this.state.amChart) {

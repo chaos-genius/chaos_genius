@@ -97,6 +97,7 @@ class Dashboard extends React.Component {
       timeline: targetComponent.value
     }, () => {
       this.setDataColumns();
+      this.fetchKpiAggegation();
       this.fetchAnalysisData();
     })
   }

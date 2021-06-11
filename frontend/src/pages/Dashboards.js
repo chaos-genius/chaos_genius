@@ -14,7 +14,7 @@ import CustomModal from './../components/CustomModal'
 import CustomTabs from './../components/CustomTabs'
 
 import { tab1Fields } from './Charts/Housing'
-import { RcaAnalysisTable } from '../components/DashboardTable';
+import RcaAnalysisTable from '../components/DashboardTable';
 
 import './../assets/css/custom.css'
 
@@ -41,7 +41,7 @@ class Dashboard extends React.Component {
       timeline: "mom",
       kpiData: [],
       chartData: [],
-      dataColumns: ["Subgroup Name", "Previous Avg", "Previous Subgroup Size", "Previous Subgroup Count", "Current Avg", "Current Subgroup Size", "Current Subgroup Count", "Impact"],
+      dataColumns: [{title:"Subgroup Name",field:"subgroup"}, {title:"Previous Avg",field: 'g1_agg'}, {title:"Previous Subgroup Size",field: 'g1_size'}, {title:"Previous Subgroup Count",field: 'g1_count'}, {title:"Current Avg",field: 'g2_agg'}, {title:"Current Subgroup Size",field: 'g2_size'}, {title:"Current Subgroup Count",field: 'g2_count'}, {title:"Impact",field: 'impact'}],
       yAxis: [],
       tableData: [],
       amChart: null,
@@ -50,24 +50,6 @@ class Dashboard extends React.Component {
       tabState: 0
     }
   }
-
-
-  addActionButton = () => {
-    return (
-      <span className="m-1 btn btn-tertiary" >New DataSource</span>
-    )
-  }
-  editActionButton = () => {
-    return (
-      <Button variant="warning" className="m-1" onClick={() => this.setState({ showDefault: true })}>Manage DataSources</Button>
-    )
-  }
-  handleClose = () => {
-    this.setState({
-      showDefault: false
-    })
-  }
-
   fetchKPIData = () => {
     this.setState({ loading: true })
     fetch('/api/kpi/')
@@ -120,21 +102,23 @@ class Dashboard extends React.Component {
   }
   handleDimensionChange = (e, type, newValue) => {
     const targetComponent = e.target;
-    // console.log("targetComponent",targetComponent)
+    console.log("targetComponent", targetComponent)
+    console.log("targetComponent", targetComponent.id)
     let targetValue = this.state.dimension;
     if (type === "options") {
       targetValue = targetComponent.value
     } else {
-      targetValue = targetComponent.innerText
+      targetValue = targetComponent.id
       if (newValue || newValue === 0) {
         this.setState({
-          tabState: newValue
+          tabState: newValue          
         })
       }
     }
 
     this.setState({
-      dimension: targetValue
+      dimension: targetValue,
+      tableData:[]
     }, () => {
       this.fetchAnalysisData();
     })
@@ -159,9 +143,23 @@ class Dashboard extends React.Component {
     const { kpi, timeline, dimension, tabState } = this.state;
     let dimensionStr = ""
     if (tabState !== 0) {
-      dimensionStr = `&dimension=${dimension.toLowerCase()}`
+      dimensionStr = `&dimension=${dimension}`
     }
     if (kpi !== 0) {
+      this.setState({ loading: true })
+      fetch(`/api/kpi/${kpi}/rca-hierarchical-data?timeline=${timeline}${dimensionStr}`)
+        .then(response => response.json())
+        .then(respData => {
+          const data = respData.data;
+          if (data?.data_table) {
+            this.setState({
+              tableData: data.data_table,
+              loading: false
+            })
+          }
+        });
+
+
       this.setState({ loading: true })
       fetch(`/api/kpi/${kpi}/rca-analysis?timeline=${timeline}${dimensionStr}`)
         .then(response => response.json())
@@ -171,13 +169,14 @@ class Dashboard extends React.Component {
             this.setState({
               chartData: data.chart.chart_data,
               yAxis: data.chart.y_axis_lim,
-              tableData: data.data_table,
+              // tableData: data.data_table,
               loading: false
             }, () => {
               this.plotChart();
             })
           }
         });
+
     }
   }
 
@@ -268,15 +267,15 @@ class Dashboard extends React.Component {
       timeMetric = 'week';
     }
     this.setState({
-      dataColumns: [
-        `Subgroup Name`,
-        `Prev ${timeMetric} Avg`,
-        `Prev ${timeMetric} Size`,
-        `Prev ${timeMetric} Count`,
-        `Curr ${timeMetric} Avg`,
-        `Curr ${timeMetric} Size`,
-        `Curr ${timeMetric} Count`,
-        `Impact`
+      dataColumns:[
+        {title:`Subgroup Name`,field:"subgroup"},
+        {title:`Prev ${timeMetric} Avg`,field: 'g1_agg'},
+        {title:`Prev ${timeMetric} Size`,field: 'g1_size'},
+        {title:`Prev ${timeMetric} Count`,field: 'g1_count'},
+        {title:`Curr ${timeMetric} Avg`,field: 'g2_agg'},
+        {title:`Curr ${timeMetric} Size`,field: 'g2_size'},
+        {title:`Curr ${timeMetric} Count`,field: 'g2_count'},
+        {title:`Impact`,field: 'impact'}
       ]
     });
   }
@@ -353,10 +352,6 @@ class Dashboard extends React.Component {
   }
 
   render() {
-    // const tabCardData = [{
-    //   title: "AutoRCA",
-    //   body: this.tab1Fields()
-    // }];
     const tabChartData = [];
     if (this.state.dimensionData) {
       this.state.dimensionData.map((key) => {
@@ -366,24 +361,6 @@ class Dashboard extends React.Component {
         tabChartData.push(datatab)
       });
     }
-    // console.log("tabChartData",tabChartData)
-    // , {
-    //   title: "Education",
-    //   body: this.tabHousingChart()
-    // }, {
-    //   title: "Martial",
-    //   body: this.tabHousingChart()
-    // }, {
-    //   title: "Job",
-    //   body: this.tabHousingChart()
-    // }
-    if (this.state.loading) {
-      return (
-        <div className="loader">
-          <CircularProgress color="secondary" />
-        </div>
-      )
-    }
     return (
       <>
         <this.FilterData />
@@ -392,13 +369,19 @@ class Dashboard extends React.Component {
             <CustomTabs tabs={tabCardData} />
           </CardContent>
         </Card> */}
-        {(this.state.cardData) ? (tab1Fields(this.state.cardData, this.state.kpiName)) : ("")}
-        {this.keyPoints()}
+        { (this.state.cardData) ? (tab1Fields(this.state.cardData, this.state.kpiName)) : ("")}
+        { this.keyPoints()}
         <Card className="mb-4 ">
           <CardContent>
             <h5 className="mb-4">Smart Waterfall</h5>
             <p>The key subgroups which are driving the metric provided in the KPI will be shown here.</p>
-            <CustomTabs tabs={tabChartData} plotChart={this.plotChart} handleDimensionChange={this.handleDimensionChange} tabState={this.state.tabState} />
+            {(this.state.loading) ? (
+              <div className="loader">
+                <CircularProgress color="secondary" />
+              </div>
+            ) : (
+              <CustomTabs tabs={tabChartData} plotChart={this.plotChart} handleDimensionChange={this.handleDimensionChange} tabState={this.state.tabState} />
+            )}
           </CardContent>
         </Card>
         {/* {this.tabHousingChart()} */}
@@ -408,7 +391,8 @@ class Dashboard extends React.Component {
             <CardContent>
               <h5 className="mb-4">Top Subgroups Data</h5>
               <p>These are the top 50 subgroups sorted by their Impact.</p>
-              <RcaAnalysisTable data={this.state.tableData.slice(0, 50)} columns={this.state.dataColumns} />
+              {(Object.keys(this.state.tableData).length > 0) ? (
+                <RcaAnalysisTable data={this.state.tableData.slice(0, 50)} columns={this.state.dataColumns} />) : ("")}
             </CardContent>
           </Card>
         </div>

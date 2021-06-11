@@ -5,16 +5,17 @@ import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
+import { Badge } from '@themesberg/react-bootstrap';
 
 function TabPanel(props) {
-    const { children, value, index, ...other } = props;
+    const { children, value, index,title, ...other } = props;
 
     return (
         <div
             role="tabpanel"
             hidden={value !== index}
-            id={`simple-tabpanel-${index}`}
-            aria-labelledby={`simple-tab-${index}`}
+            id={title}
+            aria-labelledby={title}
             {...other}
         >
             {value === index && (
@@ -32,10 +33,10 @@ TabPanel.propTypes = {
     value: PropTypes.any.isRequired,
 };
 
-function a11yProps(index) {
+function a11yProps(index,title) {
     return {
-        id: `simple-tab-${index}`,
-        'aria-controls': `simple-tabpanel-${index}`,
+        id: `${title}`,
+        'aria-controls': `${title}`,
     };
 }
 
@@ -64,17 +65,24 @@ export default function SimpleTabs(props){
         
     };
 
+    const handleTabView = (title) =>{
+        return(
+            <span className="tab-badge"><h4 className="title">by <Badge bg="primary" className="me-1" >{title}</Badge></h4></span>
+        )
+    }
+
+
     return (
         <div >
             <AppBar position="static">
                 <Tabs value={value} onChange={handleChange} aria-label="simple tabs example">
                     {props.tabs.map((tabData, index) =>
-                        <Tab label={tabData.title} {...a11yProps(index)} />
+                        <Tab label={handleTabView(tabData.title)} {...a11yProps(index,tabData.title)} />
                     )}
                 </Tabs>
             </AppBar>
             {props.tabs.map((tabData, index) =>
-                <TabPanel value={value} index={index}>
+                <TabPanel value={value} index={index} title={tabData.title}>
                     {tabData.body}
                 </TabPanel>
             )}

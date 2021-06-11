@@ -170,7 +170,7 @@ button.MuiIconButton-root.close-button {
     margin-left: 6px;
 }
 .MuiTab-wrapper{
-    text-transform:capitalize
+    pointer-events: none;
 }
 /* .MuiTabs-root .MuiTab-root.MuiButtonBase-root{
     border-radius: unset !important;
@@ -207,4 +207,24 @@ button.MuiIconButton-root.close-button {
 .card .table td, .card .table th{
     max-width: 150px;
     white-space: break-spaces;
+}
+.tab-badge h4.title{
+    font-size: 0.9rem;
+}
+
+.tab-badge .badge.bg-primary{
+    font-size: 1rem;
+    padding: 5px 10px;
+    border-radius: 30px;
+    vertical-align: bottom;
+}
+.progress-lg {
+    height: 4px !important;
+    border-radius: 26px;
+}
+@media (min-width: 600px){
+
+.MuiTab-root {
+    min-width: 145px !important;
+}
 }

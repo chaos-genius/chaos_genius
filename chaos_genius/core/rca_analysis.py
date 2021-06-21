@@ -411,7 +411,7 @@ def get_best_combo(
     i = -1
 
     while i < len(df_subgroups) - 1 and i < max_subgroups_considered \
-        and len(current_comb) <= K:
+        and len(current_comb) < K:
 
         i += 1
 

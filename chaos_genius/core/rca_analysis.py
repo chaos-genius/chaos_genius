@@ -418,6 +418,10 @@ def get_best_combo(
         curr_filter_string = df_subgroups.iloc[i]["string"]
 
         indices = set(whole_df.query(curr_filter_string).index)
+        if len(indices) == 0:
+            # since current subgroup has no items in df
+            continue
+
         new_indices = indices.union(prev_indices)
         non_overlap_indices = new_indices - prev_indices
 

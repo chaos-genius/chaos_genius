@@ -41,10 +41,11 @@ class Dashboard extends React.Component {
       timeline: "mom",
       kpiData: [],
       chartData: [],
-      dataColumns: [{title:"Subgroup Name",field:"subgroup"}, {title:"Previous Avg",field: 'g1_agg'}, {title:"Previous Subgroup Size",field: 'g1_size'}, {title:"Previous Subgroup Count",field: 'g1_count'}, {title:"Current Avg",field: 'g2_agg'}, {title:"Current Subgroup Size",field: 'g2_size'}, {title:"Current Subgroup Count",field: 'g2_count'}, {title:"Impact",field: 'impact'}],
+      dataColumns: [{ title: "Subgroup Name", field: "subgroup" }, { title: "Previous Avg", field: 'g1_agg' }, { title: "Previous Subgroup Size", field: 'g1_size' }, { title: "Previous Subgroup Count", field: 'g1_count' }, { title: "Current Avg", field: 'g2_agg' }, { title: "Current Subgroup Size", field: 'g2_size' }, { title: "Current Subgroup Count", field: 'g2_count' }, { title: "Impact", field: 'impact' }],
       yAxis: [],
       tableData: [],
       amChart: null,
+      cardDataLoader: false,
       cardData: [],
       loading: false,
       tabState: 0
@@ -103,8 +104,6 @@ class Dashboard extends React.Component {
   }
   handleDimensionChange = (e, type, newValue) => {
     const targetComponent = e.target;
-    console.log("targetComponent", targetComponent)
-    console.log("targetComponent", targetComponent.id)
     let targetValue = this.state.dimension;
     if (type === "options") {
       targetValue = targetComponent.value
@@ -112,14 +111,14 @@ class Dashboard extends React.Component {
       targetValue = targetComponent.id
       if (newValue || newValue === 0) {
         this.setState({
-          tabState: newValue          
+          tabState: newValue
         })
       }
     }
 
     this.setState({
       dimension: targetValue,
-      tableData:[]
+      tableData: []
     }, () => {
       this.fetchAnalysisData();
     })
@@ -127,6 +126,9 @@ class Dashboard extends React.Component {
   fetchKpiAggegation = () => {
     const { kpi, timeline } = this.state;
     if (kpi !== 0) {
+      this.setState({
+        cardDataLoader: true
+      })
       fetch(`/api/kpi/${kpi}/kpi-aggregations?timeline=${timeline}`)
         .then(response => response.json())
         .then(respData => {
@@ -136,6 +138,9 @@ class Dashboard extends React.Component {
               cardData: data.panel_metrics,
             })
           }
+          this.setState({
+            cardDataLoader: false
+          })
         });
     }
   }
@@ -268,15 +273,15 @@ class Dashboard extends React.Component {
       timeMetric = 'week';
     }
     this.setState({
-      dataColumns:[
-        {title:`Subgroup Name`,field:"subgroup"},
-        {title:`Prev ${timeMetric} Avg`,field: 'g1_agg'},
-        {title:`Prev ${timeMetric} Size`,field: 'g1_size'},
-        {title:`Prev ${timeMetric} Count`,field: 'g1_count'},
-        {title:`Curr ${timeMetric} Avg`,field: 'g2_agg'},
-        {title:`Curr ${timeMetric} Size`,field: 'g2_size'},
-        {title:`Curr ${timeMetric} Count`,field: 'g2_count'},
-        {title:`Impact`,field: 'impact'}
+      dataColumns: [
+        { title: `Subgroup Name`, field: "subgroup" },
+        { title: `Prev ${timeMetric} Avg`, field: 'g1_agg' },
+        { title: `Prev ${timeMetric} Size`, field: 'g1_size' },
+        { title: `Prev ${timeMetric} Count`, field: 'g1_count' },
+        { title: `Curr ${timeMetric} Avg`, field: 'g2_agg' },
+        { title: `Curr ${timeMetric} Size`, field: 'g2_size' },
+        { title: `Curr ${timeMetric} Count`, field: 'g2_count' },
+        { title: `Impact`, field: 'impact' }
       ]
     });
   }
@@ -370,7 +375,7 @@ class Dashboard extends React.Component {
             <CustomTabs tabs={tabCardData} />
           </CardContent>
         </Card> */}
-        { (this.state.cardData) ? (tab1Fields(this.state.cardData, this.state.kpiName)) : ("")}
+        { (this.state.cardData) ? (tab1Fields(this.state.cardData, this.state.kpiName,this.state.cardDataLoader)) : ("")}
         { this.keyPoints()}
         <Card className="mb-4 ">
           <CardContent>

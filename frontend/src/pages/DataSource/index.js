@@ -6,18 +6,24 @@ import {
   Card, CardContent, Grid, FormControl,
   TextField, InputLabel, Select
 } from '@material-ui/core';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircle,faEdit } from '@fortawesome/free-solid-svg-icons';
+import { faCircle, faEdit } from '@fortawesome/free-solid-svg-icons';
 
-import CustomTable from './../components/CustomTable'
-import CustomModal from './../components/CustomModal'
-import CustomTabs from './../components/CustomTabs'
+import CustomTable from '../../components/CustomTable'
+import CustomModal from '../../components/CustomModal'
+import CustomTabs from '../../components/CustomTabs'
 
-import Api from './../Service/Api'
-import './../assets/css/custom.css'
+import Api from '../../Service/Api'
+import './../../assets/css/custom.css'
 
-import postgresql from './../assets/img/postgresql.png'
-import mysql from './../assets/img/mysql.png'
+import postgresql from './../../assets/img/postgresql.png'
+import mysql from './../../assets/img/mysql.png'
+
+import * as dataSource from './data-source.json';
+
+import { tab1Fields } from './HelperFunction'
 class DataSources extends React.Component {
 
   constructor(props) {
@@ -27,6 +33,8 @@ class DataSources extends React.Component {
       showDefault: false,
       connectionTypes: [],
       connection: '',
+      connection_name: '',
+      properties: [],
       connectionError: '',
       dataSource: '',
       dataSourceError: '',
@@ -70,16 +78,16 @@ class DataSources extends React.Component {
     }
   }
   renderConnectionType = (conn_type) => {
-    if(conn_type === "postgresql"){
-      return(
+    if (conn_type === "postgresql") {
+      return (
         <span><img src={postgresql} className="image-small rounded-circle me-2" /> {conn_type}</span>
       )
-    }else if(conn_type === "mysql"){
-      return(
-        <span><img src={mysql} className="image-small rounded-circle me-2"  /> {conn_type}</span>
+    } else if (conn_type === "mysql") {
+      return (
+        <span><img src={mysql} className="image-small rounded-circle me-2" /> {conn_type}</span>
       )
-    }else{
-      return(
+    } else {
+      return (
         <span>{conn_type}</span>
       )
     }
@@ -106,7 +114,9 @@ class DataSources extends React.Component {
       });
   }
   handleInputChange = (e, key) => {
+    console.log(e.target)
     const value = e.target.value;
+
     const setObj = {};
 
     setObj[key] = value
@@ -120,89 +130,56 @@ class DataSources extends React.Component {
 
 
   }
+  filterProperties = () => {
+    const { connectionTypes, connection } = this.state;
+    // console.log("connectionTypes",connectionTypes)
+    let renderData = [];
+    if (Object.keys(connectionTypes).length > 0) {
+      renderData = connectionTypes.filter((obj) => {
+        return obj.name === connection
+      })
+    }
+    if (Object.keys(renderData).length > 0) {
+      this.setState({
+        properties: renderData[0]['connectionSpecification'].properties
+      })
+    }
+  }
+  handleAutoComplete = (e, value) => {
+    if (value?.name) {
+      this.setState({
+        connection: value.name,
+      }, () => {
+        this.filterProperties()
+      })
+    }
+  }
+
+  handleInputAutoComplete = (e, value) => {
+    this.setState({
+      connection_name: value
+    })
+  }
 
   fetchConnectionTypes = () => {
-    fetch('/api/connection/connection-types')
-      .then(response => response.json())
-      .then(data => {
-        this.setState({
-          connectionTypes: data.data,
-          connection: data.data[0]['value']
-        })
-      });
+
+    // fetch(greeting)
+    //   .then(response => response.json())
+    //   .then(data => {
+    //     this.setState({
+    //       connectionTypes: data.data,
+    //       connection: data.data[0]['value'],
+    //       connection_name: data.data[0]['name']
+    //     })
+    //   });
+    this.setState({
+      connectionTypes: dataSource.data,
+      connection: dataSource.data[0]['name'],
+    }, () => {
+      this.filterProperties()
+    })
   }
 
-
-  tab1Fields = () => {
-    const { connectionTypes, connection,dataSource,dbURI, dataSourceError, dbURIError } = this.state;
-    return (
-      <Card className="mb-4 chart-tab-card">
-        <CardContent>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <FormControl variant="outlined" style={{ width: '100%' }}>
-                <InputLabel htmlFor="connectionTypes">Select Connection Type</InputLabel>
-                <Select native defaultValue={connection} id="connectionTypes" onChange={(e) => this.handleInputChange(e, "connection")}>
-                  {connectionTypes.map((conn) => {
-                    return (
-                      <option key={conn.value} value={conn.value}>{conn.name}</option>
-                    )
-                  })}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl variant="outlined" style={{ width: '100%' }}>
-                <InputLabel htmlFor="dataSource">Name Data Source</InputLabel>
-                <TextField
-                  error={(dataSourceError) ? (true) : (false)}
-                  value={dataSource}
-                  id="dataSource"
-                  type="text"
-                  variant="outlined"
-                  onChange={(e) => this.handleInputChange(e, "dataSource")}
-                  helperText={(dataSourceError) ? (dataSourceError) : ("")}
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl variant="outlined" style={{ width: '100%' }}>
-                <InputLabel htmlFor="dbURI">URL</InputLabel>
-                <TextField
-                  error={(dbURIError) ? (true) : (false)}
-                  value={dbURI}
-                  id="dbURI"
-                  type="text"
-                  variant="outlined"
-                  onChange={(e) => this.handleInputChange(e, "dbURI")}
-                  helperText={(dbURIError) ? (dbURIError) : ("")}
-                />
-              </FormControl>
-            </Grid>
-          </Grid>
-          {/* <Row>
-              <Col>
-                <Form.Group className="mb-3">
-                  <Form.Label>Url</Form.Label>
-                  <Form.Control type="url" placeholder="SQL Alchemy URL" />
-                </Form.Group>
-              </Col>
-              <Col>
-                <Button variant="primary" className="mt-4">Test Connection</Button>
-              </Col>
-            </Row>
-            <Row>
-              <Col>
-                <Form.Group className="mb-3">
-                  <Form.Label>Name Your Data Source</Form.Label>
-                  <Form.Control type="name" placeholder="Display Name" />
-                </Form.Group>
-              </Col>
-            </Row> */}
-        </CardContent>
-      </Card>
-    )
-  }
   handleFormSubmit = () => {
     const { connection, dataSource, dbURI } = this.state;
     if (!connection) {
@@ -248,7 +225,7 @@ class DataSources extends React.Component {
   addModalContent = () => {
     const tabData = [{
       title: "Connect New",
-      body: this.tab1Fields()
+      body: ((Object.keys(this.state.connectionTypes).length > 0) && Object.keys(this.state.properties).length > 0) ? (tab1Fields(this.state, this.handleAutoComplete, this.handleInputAutoComplete)) : ("")
     }, {
       title: "Upload Files",
       body: "Tab2"
@@ -271,7 +248,6 @@ class DataSources extends React.Component {
   }
 
   render() {
-    console.log(this.state.tableData)
     return (
       <Container fluid>
         <Card>

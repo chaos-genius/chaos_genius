@@ -16,7 +16,7 @@ import KpiExplorer from './pages/KpiExplorer';
 import ActionItems from './pages/ActionItems';
 import Alerts from './pages/Alerts';
 import Users from './pages/Users';
-import DataSources from './pages/DataSources';
+import DataSources from './pages/DataSource';
 import OrganisationSettings from './pages/OrganisationSettings';
 
 

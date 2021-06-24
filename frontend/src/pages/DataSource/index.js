@@ -23,7 +23,7 @@ import mysql from './../../assets/img/mysql.png'
 
 import * as dataSource from './data-source.json';
 
-import { tab1Fields } from './HelperFunction'
+import { tab1Fields, renderInputFields } from './HelperFunction'
 class DataSources extends React.Component {
 
   constructor(props) {
@@ -40,7 +40,10 @@ class DataSources extends React.Component {
       dataSourceError: '',
       dbURI: '',
       dbURIError: '',
-      tableData: []
+      tableData: [],
+      formData: [],
+      validate: [],
+      formError: []
     }
   }
 
@@ -116,15 +119,16 @@ class DataSources extends React.Component {
   handleInputChange = (e, key) => {
     console.log(e.target)
     const value = e.target.value;
+    const setObj = this.state.formData;
+    // const setObj = {};
 
-    const setObj = {};
-
+    // setObj[this.state.formData[key]] = value
     setObj[key] = value
+    console.log("key", key)
+    console.log("setObj", setObj)
     this.setState(setObj);
     this.setState({
-      connectionError: '',
-      dataSourceError: '',
-      dbURIError: ''
+      formError:[]
     })
 
 
@@ -141,7 +145,8 @@ class DataSources extends React.Component {
     }
     if (Object.keys(renderData).length > 0) {
       this.setState({
-        properties: renderData[0]['connectionSpecification'].properties
+        properties: renderData[0]['connectionSpecification'].properties,
+        validate: renderData[0]['connectionSpecification'].required
       })
     }
   }
@@ -181,63 +186,75 @@ class DataSources extends React.Component {
   }
 
   handleFormSubmit = () => {
-    const { connection, dataSource, dbURI } = this.state;
-    if (!connection) {
-      this.setState({
-        connectionError: "Please Select Connection Type"
+    const { formData, formError, validate } = this.state;
+    const setObj = formError;
+    // console.log("validate",validate)
+    if (Object.keys(validate).length > 0) {
+      validate.map((obj) => {
+        const textField = formData[obj]
+        if (!textField) {
+          setObj[obj]= "Please Enter " + obj;          
+        }
       })
-      return
-    } else if (!dataSource) {
-      this.setState({
-        dataSourceError: "Please Enter DataSource Name"
-      })
-      return
-    } else if (!dbURI) {
-      this.setState({
-        dbURIError: "Please Enter URL"
-      })
-      return
+      this.setState(setObj)
     }
-    const data = {
-      "name": dataSource,
-      "connection_type": connection,
-      "db_uri": dbURI
-    }
+    // if (!connection) {
+    //   this.setState({
+    //     connectionError: "Please Select Connection Type"
+    //   })
+    //   return
+    // } else if (!dataSource) {
+    //   this.setState({
+    //     dataSourceError: "Please Enter DataSource Name"
+    //   })
+    //   return
+    // } else if (!dbURI) {
+    //   this.setState({
+    //     dbURIError: "Please Enter URL"
+    //   })
+    //   return
+    // }
+    // const data = {
+    //   "name": dataSource,
+    //   "connection_type": connection,
+    //   "db_uri": dbURI
+    // }
 
-    const apiService = new Api();
-    apiService.post('/api/connection/', data).then((response) => {
-      // <Alert onClose={() => { }}>This is a success alert — check it out!</Alert>
-      this.setState({
-        dataSource: '',
-        dbURI: ''
-      })
-      this.handleClose();
-      this.fetchConnection();
-    }).catch((err) => {
-
-    })
-
-
-
-
+    // const apiService = new Api();
+    // apiService.post('/api/connection/', data).then((response) => {
+    //   // <Alert onClose={() => { }}>This is a success alert — check it out!</Alert>
+    //   this.setState({
+    //     dataSource: '',
+    //     dbURI: ''
+    //   })
+    //   this.handleClose();
+    //   this.fetchConnection();
+    // })
   }
 
   addModalContent = () => {
-    const tabData = [{
-      title: "Connect New",
-      body: ((Object.keys(this.state.connectionTypes).length > 0) && Object.keys(this.state.properties).length > 0) ? (tab1Fields(this.state, this.handleAutoComplete, this.handleInputAutoComplete)) : ("")
-    }, {
-      title: "Upload Files",
-      body: "Tab2"
-    }
-    ];
+    // const tabData = [{
+    //   title: "Connect New",
+    //   body: 
+    // }, {
+    //   title: "Upload Files",
+    //   body: "Tab2"
+    // }
+    // ];
 
 
     return (
       <>
         <DialogContent>
           <DialogContentText id="alert-dialog-slide-description" component="span">
-            <CustomTabs tabs={tabData} />
+            <Card className="mb-4">
+              <CardContent>
+                <Grid container spacing={3}>
+                  {((Object.keys(this.state.connectionTypes).length > 0)) ? (tab1Fields(this.state, this.handleAutoComplete, this.handleInputAutoComplete)) : ("")}
+                  {(Object.keys(this.state.properties).length > 0) ? (renderInputFields(this.state, this.handleInputChange)) : ("")}
+                </Grid>
+              </CardContent>
+            </Card>
           </DialogContentText>
         </DialogContent>
         <DialogActions>

@@ -12,7 +12,7 @@ from flask import (
 )
 
 from chaos_genius.databases.models.connection_model import Connection
-from chaos_genius.utils import flash_errors
+# from chaos_genius.utils import flash_errors
 
 blueprint = Blueprint("public", __name__, static_folder="../static")
 

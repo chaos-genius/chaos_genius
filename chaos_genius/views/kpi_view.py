@@ -17,7 +17,7 @@ from flask import (
 import numpy as np
 import pandas as pd
 
-from chaos_genius.utils import flash_errors
+# from chaos_genius.utils import flash_errors
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.connection_model import Connection
 from chaos_genius.core.rca_analysis import get_hierarchical_table, get_rca_group_panel_metrics, get_waterfall_and_impact_table, get_waterfall_and_impact_table_single_dim, rca_preprocessor

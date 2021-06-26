@@ -12,7 +12,8 @@ from flask import (
 )
 
 from chaos_genius.databases.models.connection_model import Connection
-from chaos_genius.utils import flash_errors
+from chaos_genius.extensions import airbyte
+# from chaos_genius.utils import flash_errors
 
 blueprint = Blueprint("api_connection", __name__, static_folder="../static")
 
@@ -50,3 +51,44 @@ def connection_types():
     """Connection Type view."""
     return jsonify({"data": CONNECTION_TYPES})
 
+
+@blueprint.route("/types", methods=["GET"])
+def connection_type_list():
+    """Connection Type view."""
+    connection_types, msg = [], ""
+    try:
+        airbyte_client = airbyte.connection
+        airbyte_client.init_source_def_conf()
+        connection_types = airbyte_client.source_conf
+    except Exception as err_msg:
+        print(err_msg)
+        msg = err_msg
+    return jsonify({"data": connection_types, "msg": msg})
+
+
+@blueprint.route("/test", methods=["POST"])
+def connection_test():
+    """Test Connection."""
+    connection_status, msg = [], ""
+    try:
+        payload = request.get_json()
+        airbyte_client = airbyte.connection
+        connection_status = airbyte_client.test_connection(payload)
+    except Exception as err_msg:
+        print(err_msg)
+        msg = err_msg
+    return jsonify({"data": connection_status, "msg": msg})
+
+
+@blueprint.route("/create", methods=["POST"])
+def connection_create():
+    """Test Connection."""
+    connection_status, msg = [], ""
+    try:
+        payload = request.get_json()
+        airbyte_client = airbyte.connection
+        connection_status = airbyte_client.create_connection(payload)
+    except Exception as err_msg:
+        print(err_msg)
+        msg = err_msg
+    return jsonify({"data": connection_status, "msg": msg})

@@ -63,3 +63,26 @@ def lint(fix_imports, check):
         execute_tool("Fixing import order", "isort", *isort_args)
     execute_tool("Formatting style", "black", *black_args)
     execute_tool("Checking code style", "flake8")
+
+
+@click.command()
+def airbyte():
+    """Initialise the airbyte env"""
+
+    click.echo(f"AirByte Setup: Airbyte setup started.")
+    from chaos_genius.airbyte.airbyte_client import init_airbyte
+
+    # TODO: Ask these params from CLI
+    server_url = "http://localhost:8001"
+    db_host = "md-postgres-test-db-instance.cjzi0pwi8ki4.ap-south-1.rds.amazonaws.com"
+    db_user = "postgres"
+    db_password = "y5D87FnikqVHW7eg3NVQ"
+    db_port = 5432
+    db_name = "test_airbyte"
+    db_schema = "public"
+
+    status = init_airbyte(server_url, db_host, db_user, db_password, db_port, db_name, db_schema)
+    if status:
+        click.echo(f"AirByte Setup: Airbyte initialised successfully.")
+    else:
+        click.echo(f"AirByte Setup: Airbyte initialisation failed.")

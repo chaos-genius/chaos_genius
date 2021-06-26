@@ -2,14 +2,19 @@ import React, { useState } from "react";
 
 import {
     DialogContent, DialogContentText, DialogActions,
-    Card, CardContent, Grid, FormControl,
-    TextField, InputLabel, Select
+    Card, FormControlLabel, Grid, FormControl,
+    TextField, InputLabel, Checkbox
 } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
-const renderTextField = (field, formData,formError, handleInputChange) => {
+const renderTextField = (field, textType, formData, formError, handleInputChange) => {
     const textID = field[0];
-    const textError = (formError?.[textID])? (formError[textID]) : ("")
+    const textError = (formError?.[textID]) ? (formError[textID]) : ("")
+    let inputProps = {};
+    if (textType === "number") {
+        inputProps['min'] = (field[1]?.['minimum']) ? (field[1]['minimum']) : ("0")
+        inputProps['max'] = (field[1]?.['maximum']) ? (field[1]['maximum']) : ("")
+    }
     return (
         <Grid item xs={12}>
             <FormControl variant="outlined" style={{ width: '100%' }}>
@@ -18,25 +23,64 @@ const renderTextField = (field, formData,formError, handleInputChange) => {
                     error={(textError) ? (true) : (false)}
                     value={formData[textID]}
                     id={textID}
-                    type={(field[1]?.['is_secret']) ? ("password") : ("text")}
+                    type={(field[1]?.['is_secret']) ? ("password") : (textType)}
                     variant="outlined"
                     onChange={(e) => handleInputChange(e, textID)}
                     helperText={textError}
+                    inputProps={inputProps}
                 />
             </FormControl>
         </Grid>
     )
 }
-export const renderInputFields = (props, handleInputChange) => {
-    const { properties, formData,formError } = props;
-    console.log(formError)
+const renderBooleanField = (field, textType, formData, formError, handleBooleanChange) => {
+    const textID = field[0];
+    const textError = (formError?.[textID]) ? (formError[textID]) : ("")
+    return (
+        <Grid item xs={12}>
+            <FormControlLabel
+                control={
+                    <Checkbox
+                        checked={(formData[textID])?(formData[textID]):(false)}
+                        onChange={(e) => handleBooleanChange(e, textID)}
+                        name={textID}
+                        color="primary"
+                    />
+                }
+                label={(field[1]?.['title']) ? (field[1]['title']) : ("")}
+            />
+            {/* <FormControl variant="outlined" style={{ width: '100%' }}>
+                <InputLabel htmlFor={textID} >{(field[1]?.['title']) ? (field[1]['title']) : ("")}</InputLabel>
+                <TextField
+                    error={(textError) ? (true) : (false)}
+                    value={formData[textID]}
+                    id={textID}
+                    type={(field[1]?.['is_secret']) ? ("password") : (textType)}
+                    variant="outlined"
+                    onChange={(e) => handleInputChange(e, textID)}
+                    helperText={textError}
+                    inputProps={inputProps}
+                />
+            </FormControl> */}
+        </Grid>
+    )
+}
+export const renderInputFields = (props, handleInputChange,handleBooleanChange) => {
+    const { properties, formData, formError } = props;
+    console.log("formData",formData)
     let fields = [];
     if (Object.keys(properties).length > 0) {
         Object.entries(properties).forEach((obj) => {
-            console.log("objjj", obj)
+            // console.log("objjj", obj)
             switch (obj[1]['type']) {
                 case "string":
-                    fields.push(renderTextField(obj, formData,formError, handleInputChange))
+                    fields.push(renderTextField(obj, "text", formData, formError, handleInputChange))
+                    break;
+                case "integer":
+                    fields.push(renderTextField(obj, "number", formData, formError, handleInputChange))
+                    break;
+                case "boolean":
+                    fields.push(renderBooleanField(obj, "checkbox", formData, formError, handleBooleanChange))
                     break;
                 default:
                     fields.push("");

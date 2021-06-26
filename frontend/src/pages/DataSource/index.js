@@ -96,7 +96,7 @@ class DataSources extends React.Component {
     }
   }
   fetchConnection = () => {
-    fetch('/api/connection')
+    fetch('https://chaosgenius.mayhemdata.com/api/connection')
       .then(response => response.json())
       .then(data => {
         const tabData = [];
@@ -124,8 +124,26 @@ class DataSources extends React.Component {
 
     // setObj[this.state.formData[key]] = value
     setObj[key] = value
-    console.log("key", key)
-    console.log("setObj", setObj)
+    // console.log("key", key)
+    // console.log("setObj", setObj)
+    this.setState(setObj);
+    this.setState({
+      formError:[]
+    })
+
+
+
+  }
+  handleBooleanChange = (e, key) => {
+    console.log(e.target)
+    const value = e.target.checked;
+    const setObj = this.state.formData;
+    // const setObj = {};
+
+    // setObj[this.state.formData[key]] = value
+    setObj[key] = value
+    // console.log("key", key)
+    // console.log("setObj", setObj)
     this.setState(setObj);
     this.setState({
       formError:[]
@@ -154,6 +172,8 @@ class DataSources extends React.Component {
     if (value?.name) {
       this.setState({
         connection: value.name,
+        formData:[],
+        formError:[]
       }, () => {
         this.filterProperties()
       })
@@ -251,7 +271,7 @@ class DataSources extends React.Component {
               <CardContent>
                 <Grid container spacing={3}>
                   {((Object.keys(this.state.connectionTypes).length > 0)) ? (tab1Fields(this.state, this.handleAutoComplete, this.handleInputAutoComplete)) : ("")}
-                  {(Object.keys(this.state.properties).length > 0) ? (renderInputFields(this.state, this.handleInputChange)) : ("")}
+                  {(Object.keys(this.state.properties).length > 0) ? (renderInputFields(this.state, this.handleInputChange,this.handleBooleanChange)) : ("")}
                 </Grid>
               </CardContent>
             </Card>

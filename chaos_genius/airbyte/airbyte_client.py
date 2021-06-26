@@ -9,7 +9,7 @@ from chaos_genius.utils.io_helper import cg_print
 
 
 BASE_PATH = os.getcwd()
-ENV_FILE_PATH = os.path.join(BASE_PATH, '.airbyte.json')
+ENV_FILE_PATH = os.path.join(BASE_PATH, '.integrations.json')
 DESTINATION_DEF_ID = "25c5221d-dce2-4163-ade9-739ef790f503" # POSTGRES DB
 SOURCE_DEF_ID = [
     "39f092a6-8c87-4f6f-a8d9-5cef45b7dbe1", # Google Analytics
@@ -318,6 +318,10 @@ class AirByteClient(object):
         """
         api_url = f"{self.server_uri}/api/v1/health"
         return get_request(api_url)
+
+    def test_connection(self, payload):
+        api_url = f"{self.server_uri}/api/v1/scheduler/sources/check_connection"
+        return post_request(api_url, payload)
 
 
 # Utils Function

@@ -24,6 +24,8 @@ import mysql from './../../assets/img/mysql.png'
 import * as dataSource from './data-source.json';
 
 import { tab1Fields, renderInputFields } from './HelperFunction'
+import { BASE_URL } from '../../config/Constants'
+import { LegendToggleOutlined } from "@material-ui/icons";
 class DataSources extends React.Component {
 
   constructor(props) {
@@ -35,15 +37,18 @@ class DataSources extends React.Component {
       connection: '',
       connection_name: '',
       properties: [],
+      selectedConnection: '',
       connectionError: '',
       dataSource: '',
       dataSourceError: '',
       dbURI: '',
       dbURIError: '',
       tableData: [],
-      formData: [],
+      formData: {},
       validate: [],
-      formError: []
+      formError: [],
+      testConnection: false,
+      testLogs: ''
     }
   }
 
@@ -96,7 +101,7 @@ class DataSources extends React.Component {
     }
   }
   fetchConnection = () => {
-    fetch('https://chaosgenius.mayhemdata.com/api/connection')
+    fetch(`${BASE_URL}/api/connection`)
       .then(response => response.json())
       .then(data => {
         const tabData = [];
@@ -128,7 +133,7 @@ class DataSources extends React.Component {
     // console.log("setObj", setObj)
     this.setState(setObj);
     this.setState({
-      formError:[]
+      formError: []
     })
 
 
@@ -146,7 +151,7 @@ class DataSources extends React.Component {
     // console.log("setObj", setObj)
     this.setState(setObj);
     this.setState({
-      formError:[]
+      formError: []
     })
 
 
@@ -164,16 +169,18 @@ class DataSources extends React.Component {
     if (Object.keys(renderData).length > 0) {
       this.setState({
         properties: renderData[0]['connectionSpecification'].properties,
-        validate: renderData[0]['connectionSpecification'].required
+        validate: renderData[0]['connectionSpecification'].required,
+        selectedConnection: renderData[0]['sourceDefinitionId']
       })
     }
   }
   handleAutoComplete = (e, value) => {
+    console.log("value", value)
     if (value?.name) {
       this.setState({
         connection: value.name,
-        formData:[],
-        formError:[]
+        formData: {},
+        formError: []
       }, () => {
         this.filterProperties()
       })
@@ -187,71 +194,96 @@ class DataSources extends React.Component {
   }
 
   fetchConnectionTypes = () => {
+    fetch(`${BASE_URL}/api/connection/types`)
+      .then(response => response.json())
+      .then(data => {
+        const tabData = [];
+        if (data?.data) {
+          this.setState({
+            connectionTypes: data.data,
+            connection: data.data[0]['name'],
+          }, () => {
+            this.filterProperties()
+          })
+        }
+      });
 
-    // fetch(greeting)
-    //   .then(response => response.json())
-    //   .then(data => {
-    //     this.setState({
-    //       connectionTypes: data.data,
-    //       connection: data.data[0]['value'],
-    //       connection_name: data.data[0]['name']
-    //     })
-    //   });
-    this.setState({
-      connectionTypes: dataSource.data,
-      connection: dataSource.data[0]['name'],
-    }, () => {
-      this.filterProperties()
-    })
   }
 
-  handleFormSubmit = () => {
-    const { formData, formError, validate } = this.state;
+  handleTestConnection = () => {
+    const { formData, formError, validate, selectedConnection } = this.state;
     const setObj = formError;
     // console.log("validate",validate)
     if (Object.keys(validate).length > 0) {
       validate.map((obj) => {
         const textField = formData[obj]
         if (!textField) {
-          setObj[obj]= "Please Enter " + obj;          
+          setObj[obj] = "Please Enter " + obj;
         }
       })
       this.setState(setObj)
     }
-    // if (!connection) {
-    //   this.setState({
-    //     connectionError: "Please Select Connection Type"
-    //   })
-    //   return
-    // } else if (!dataSource) {
-    //   this.setState({
-    //     dataSourceError: "Please Enter DataSource Name"
-    //   })
-    //   return
-    // } else if (!dbURI) {
-    //   this.setState({
-    //     dbURIError: "Please Enter URL"
-    //   })
-    //   return
-    // }
-    // const data = {
-    //   "name": dataSource,
-    //   "connection_type": connection,
-    //   "db_uri": dbURI
-    // }
+    if (Object.keys(formError).length === 0) {
+      // console.log("setObj",setObj)
+      // console.log("formError",formError)
+      // console.log("formData",formData)
+      let submitData = {};
+      submitData['sourceDefinitionId'] = selectedConnection
+      submitData['connectionConfiguration'] = formData
 
-    // const apiService = new Api();
-    // apiService.post('/api/connection/', data).then((response) => {
-    //   // <Alert onClose={() => { }}>This is a success alert — check it out!</Alert>
-    //   this.setState({
-    //     dataSource: '',
-    //     dbURI: ''
-    //   })
-    //   this.handleClose();
-    //   this.fetchConnection();
-    // })
+      // let finalData = submitData;
+      let myHeaders = new Headers();
+      myHeaders.append('Content-Type', 'application/json');
+      myHeaders.append("Access-Control-Allow-Origin", "*");
+      myHeaders.append("Access-Control-Allow-Credentials", true);
+      let requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: JSON.stringify(submitData),
+        redirect: 'follow'
+        // mode: 'no-cors'
+      };
+
+      fetch(`${BASE_URL}api/connection/test`, requestOptions)
+        .then(response => response.json())
+        .then(data => {
+          console.log("response", data)
+          this.setState({
+            testLogs: data.data.jobInfo.logs,
+            testConnection: data.data.status
+          })
+        }).catch(error => {
+          // this.setState({
+          //   testLogs: demo,
+          //   testConnection: false
+          // })
+        });
+      // console.log("formData",JSON.stringify(formData))
+      // console.log("finalData",finalData)
+      // const apiService = new Api();
+      // apiService.post(`${BASE_URL}api/connection/test`, finalData).then((response) => {
+      //   this.setState({
+      //     testLogs: response.data.jobInfo.logs,
+      //     testConnection: response.data.status
+      //   })
+      //   // this.handleClose();
+      // })
+
+    }
+
   }
+  renderlogs = (logs) => {
+    const logsfield = []
 
+    logs.map((obj) => {
+      logsfield.push(<p>{obj}</p>)
+    })
+    return (
+      <>
+        {logsfield}
+      </>
+    )
+  }
   addModalContent = () => {
     // const tabData = [{
     //   title: "Connect New",
@@ -262,7 +294,7 @@ class DataSources extends React.Component {
     // }
     // ];
 
-
+    // console.log("logLines",this.state.testLogs.logs['logLines'])
     return (
       <>
         <DialogContent>
@@ -271,14 +303,15 @@ class DataSources extends React.Component {
               <CardContent>
                 <Grid container spacing={3}>
                   {((Object.keys(this.state.connectionTypes).length > 0)) ? (tab1Fields(this.state, this.handleAutoComplete, this.handleInputAutoComplete)) : ("")}
-                  {(Object.keys(this.state.properties).length > 0) ? (renderInputFields(this.state, this.handleInputChange,this.handleBooleanChange)) : ("")}
+                  {(Object.keys(this.state.properties).length > 0) ? (renderInputFields(this.state, this.handleInputChange, this.handleBooleanChange)) : ("")}
                 </Grid>
+                <pre>{(!this.state.testConnection && this.state.testLogs) ? (this.renderlogs(this.state.testLogs.logs['logLines'])) : ("")}</pre>
               </CardContent>
             </Card>
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button variant="primary" onClick={this.handleFormSubmit}>Add</Button>
+          <Button variant="primary" onClick={this.handleTestConnection}>Test Connection</Button>
         </DialogActions>
       </>
     )

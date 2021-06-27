@@ -21,7 +21,7 @@ const renderTextField = (field, textType, formData, formError, handleInputChange
                 <InputLabel htmlFor={textID} >{(field[1]?.['title']) ? (field[1]['title']) : ("")}</InputLabel>
                 <TextField
                     error={(textError) ? (true) : (false)}
-                    value={formData[textID]}
+                    value={(formData?.[textID])?(formData[textID]):("")}
                     id={textID}
                     type={(field[1]?.['is_secret']) ? ("password") : (textType)}
                     variant="outlined"
@@ -67,7 +67,7 @@ const renderBooleanField = (field, textType, formData, formError, handleBooleanC
 }
 export const renderInputFields = (props, handleInputChange,handleBooleanChange) => {
     const { properties, formData, formError } = props;
-    console.log("formData",formData)
+    // console.log("formData",formData)
     let fields = [];
     if (Object.keys(properties).length > 0) {
         Object.entries(properties).forEach((obj) => {

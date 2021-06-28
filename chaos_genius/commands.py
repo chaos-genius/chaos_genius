@@ -66,11 +66,11 @@ def lint(fix_imports, check):
 
 
 @click.command()
-def airbyte():
-    """Initialise the airbyte env"""
+def third_party_connector():
+    """Initialise the third party connector env"""
 
-    click.echo(f"AirByte Setup: Airbyte setup started.")
-    from chaos_genius.airbyte.airbyte_client import init_airbyte
+    click.echo(f"Third Party Setup: Third Party setup started.")
+    from chaos_genius.third_party.third_party_client import init_third_party
 
     # TODO: Ask these params from CLI
     server_url = "http://localhost:8001"
@@ -81,8 +81,8 @@ def airbyte():
     db_name = "test_airbyte"
     db_schema = "public"
 
-    status = init_airbyte(server_url, db_host, db_user, db_password, db_port, db_name, db_schema)
+    status = init_third_party(server_url, db_host, db_user, db_password, db_port, db_name, db_schema)
     if status:
-        click.echo(f"AirByte Setup: Airbyte initialised successfully.")
+        click.echo(f"Third Party Setup: Connector initialised successfully.")
     else:
-        click.echo(f"AirByte Setup: Airbyte initialisation failed.")
+        click.echo(f"Third Party Setup: Connector initialisation failed.")

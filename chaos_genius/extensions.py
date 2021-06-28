@@ -8,7 +8,7 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_static_digest import FlaskStaticDigest
 # from flask_wtf.csrf import CSRFProtect
-from chaos_genius.airbyte.flask_airbyte import FlaskAirByte
+from chaos_genius.third_party.flask_third_party import FlaskThirdParty
 
 bcrypt = Bcrypt()
 # csrf_protect = CSRFProtect()
@@ -18,4 +18,4 @@ migrate = Migrate()
 cache = Cache()
 debug_toolbar = DebugToolbarExtension()
 flask_static_digest = FlaskStaticDigest()
-airbyte = FlaskAirByte()
+third_party_connector = FlaskThirdParty()

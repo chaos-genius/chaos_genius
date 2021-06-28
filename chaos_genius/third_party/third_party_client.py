@@ -22,11 +22,11 @@ SOURCE_DEF_ID = [
 ]
 
 
-class AirByteClient(object):
+class ThirdPartyClient(object):
     def __init__(self, server_uri=None):
-        """This is used to initiate the Airbyte API client. Methods will assume that the
-        airbyte env has been already created via the init_airbyte method.
-        There are methods which can be used to create the resource on for the airbyte
+        """This is used to initiate the Third Party API client. Methods will assume that the
+        third_party env has been already created via the init_third_party method.
+        There are methods which can be used to create the resource for the third party
 
         Args:
             server_uri (str): Server URL for which the API need to be hit
@@ -41,10 +41,10 @@ class AirByteClient(object):
         self.destination_db = config.get("destination_db", {})
         self.destination_def_id = DESTINATION_DEF_ID
 
-        # Check the airbyte server running status
+        # Check the third party server running status
         status = self.get_server_health()
         if not status.get('db'):
-            raise Exception("ERROR: Airbyte Server not running.")
+            raise Exception("ERROR: Third Party Server not running.")
 
         # load the source and destination configuration
         # if server_uri == None: # as flask extension
@@ -360,15 +360,15 @@ def read_config(url):
     return config
 
 
-# Airbyte Setup and configs
+# Third Party Server Setup and configs
 
-def init_airbyte(server_uri, db_host, db_user, db_password, db_port, db_name, db_schema):
-    """This will initialise the setup for the airbyte. All the configuration will be
-    stored in the env file in the base directory. Airbyte API endpoint and datails of
+def init_third_party(server_uri, db_host, db_user, db_password, db_port, db_name, db_schema):
+    """This will initialise the setup for the third party server. All the configuration will be
+    stored in the env file in the base directory. Third Party API endpoint and datails of
     the Postgres db for storing the third party data will be stored.
 
     Args:
-        server_uri (str): URI for the airbyte API endpoint
+        server_uri (str): URI for the third party API endpoint
         db_host (str): Postgres Database hostname
         db_user (str): Postgres database user
         db_password (str): Database password
@@ -377,14 +377,14 @@ def init_airbyte(server_uri, db_host, db_user, db_password, db_port, db_name, db
         db_schema (str): Database schema
     """
 
-    airbyte_config = {}
-    airbyte_config["server_uri"] = server_uri
+    third_party_config = {}
+    third_party_config["server_uri"] = server_uri
     if os.path.exists(ENV_FILE_PATH):
-        airbyte_config = read_config(ENV_FILE_PATH)
-        cg_print(f"AirByte Setup: Already initialised.")
-        client = AirByteClient()
+        third_party_config = read_config(ENV_FILE_PATH)
+        cg_print(f"Third Party Setup: Already initialised.")
+        client = ThirdPartyClient()
     else:
-        client = AirByteClient(server_uri=server_uri)
+        client = ThirdPartyClient(server_uri=server_uri)
         payload = {
             "email": "user@example.com",
             "anonymousDataCollection": False,
@@ -396,9 +396,9 @@ def init_airbyte(server_uri, db_host, db_user, db_password, db_port, db_name, db
         workspace = client.create_workspace(payload)
         # TODO: Check whether we need to update the
         # initialSetupComplete and displaySetupWizard flags
-        airbyte_config["workspace_id"] = workspace["workspaceId"]
-        airbyte_config["workspace_details"] = workspace
-        airbyte_config["destination_db"] = {
+        third_party_config["workspace_id"] = workspace["workspaceId"]
+        third_party_config["workspace_details"] = workspace
+        third_party_config["destination_db"] = {
             "host": db_host,
             "user": db_user,
             "password": db_password,
@@ -407,7 +407,7 @@ def init_airbyte(server_uri, db_host, db_user, db_password, db_port, db_name, db
             "schema": db_schema
         }
         with open(ENV_FILE_PATH, 'w') as fp:
-            json.dump(airbyte_config, fp)
+            json.dump(third_party_config, fp)
 
     status = client.get_server_health()
     return status.get('db', False)
@@ -426,6 +426,6 @@ if __name__ == "__main__":
     # workspace_id = "5ae6b09b-fdec-41af-aaf7-7d94cfc33ef6"
 
     print('--------------')
-    client = AirByteClient(server_uri="http://localhost:8001")
+    client = ThirdPartyClient(server_uri="http://localhost:8001")
     data = client.reset_connection("40f56e5d-1cc4-4425-a7c7-a488d2d2adc8")
     pprint.pprint(data)

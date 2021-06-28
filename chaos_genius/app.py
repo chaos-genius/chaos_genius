@@ -16,7 +16,7 @@ from chaos_genius.extensions import (
     flask_static_digest,
     login_manager,
     migrate,
-    airbyte
+    third_party_connector
 )
 
 
@@ -46,7 +46,7 @@ def register_extensions(app):
     debug_toolbar.init_app(app)
     migrate.init_app(app, db)
     flask_static_digest.init_app(app)
-    airbyte.init_app(app)
+    third_party_connector.init_app(app)
     return None
 
 
@@ -86,7 +86,7 @@ def register_commands(app):
     """Register Click commands."""
     app.cli.add_command(commands.test)
     app.cli.add_command(commands.lint)
-    app.cli.add_command(commands.airbyte)
+    app.cli.add_command(commands.third_party_connector)
 
 
 def configure_logger(app):

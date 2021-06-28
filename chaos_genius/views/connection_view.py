@@ -13,7 +13,7 @@ from flask import (
 from flask_cors import CORS
 
 from chaos_genius.databases.models.connection_model import Connection
-from chaos_genius.extensions import airbyte
+from chaos_genius.extensions import third_party_connector as connector
 # from chaos_genius.utils import flash_errors
 
 blueprint = Blueprint("api_connection", __name__, static_folder="../static")
@@ -59,9 +59,9 @@ def connection_type_list():
     """Connection Type view."""
     connection_types, msg = [], ""
     try:
-        airbyte_client = airbyte.connection
-        airbyte_client.init_source_def_conf()
-        connection_types = airbyte_client.source_conf
+        connector_client = connector.connection
+        connector_client.init_source_def_conf()
+        connection_types = connector_client.source_conf
     except Exception as err_msg:
         print(err_msg)
         msg = err_msg
@@ -74,8 +74,8 @@ def connection_test():
     connection_status, msg = [], ""
     try:
         payload = request.get_json()
-        airbyte_client = airbyte.connection
-        connection_status = airbyte_client.test_connection(payload)
+        connector_client = connector.connection
+        connection_status = connector_client.test_connection(payload)
     except Exception as err_msg:
         print(err_msg)
         msg = err_msg
@@ -88,8 +88,8 @@ def connection_create():
     connection_status, msg = {}, ""
     try:
         payload = request.get_json()
-        airbyte_client = airbyte.connection
-        # connection_status = airbyte_client.create_connection(payload)
+        connector_client = connector.connection
+        # connection_status = connector_client.create_connection(payload)
     except Exception as err_msg:
         print(err_msg)
         msg = err_msg

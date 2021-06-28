@@ -17,7 +17,7 @@ from chaos_genius.extensions import airbyte
 # from chaos_genius.utils import flash_errors
 
 blueprint = Blueprint("api_connection", __name__, static_folder="../static")
-CORS(api_v1) # TODO: remove this
+CORS(blueprint) # TODO: remove this
 
 CONNECTION_TYPES = [
     {'name': 'PostgreSQL', 'value': 'postgresql'},

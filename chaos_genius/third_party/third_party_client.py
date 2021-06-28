@@ -214,7 +214,7 @@ class ThirdPartyClient(object):
             dict: creation status of the source
         """
         payload = {
-            "name": f"CG-{self.destination_db}",
+            "name": f"CG-{destination_name}",
             "destinationDefinitionId": self.destination_def_id,
             "workspaceId": self.workspace_id,
             "connectionConfiguration": {
@@ -229,7 +229,7 @@ class ThirdPartyClient(object):
             }
         }
         api_url = f"{self.server_uri}/api/v1/destinations/create"
-        reponse = post_request(api_url, payload)
+        response = post_request(api_url, payload)
         response["connectionConfiguration"] = payload["connectionConfiguration"]
         return response
 
@@ -285,8 +285,7 @@ class ThirdPartyClient(object):
         Returns:
             dict: status and id of the created connection
         """
-        payload = paylaod
-        api_url = f"{self.server_uri}/v1/connections/create"
+        api_url = f"{self.server_uri}/api/v1/connections/create"
         return post_request(api_url, payload)
 
     def update_connection(self, updated_data):

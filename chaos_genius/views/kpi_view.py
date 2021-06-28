@@ -19,7 +19,7 @@ import pandas as pd
 
 # from chaos_genius.utils import flash_errors
 from chaos_genius.databases.models.kpi_model import Kpi
-from chaos_genius.databases.models.connection_model import Connection
+from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.core.rca_analysis import get_hierarchical_table, get_rca_group_panel_metrics, get_waterfall_and_impact_table, get_waterfall_and_impact_table_single_dim, rca_preprocessor
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 
@@ -37,9 +37,9 @@ def kpi():
             data = request.get_json()
             # conn_name = data.get('name')
             # conn_uri = data.get('db_uri')
-            # new_connection = Connection(name=conn_name, db_uri=conn_uri)
+            # new_connection = DataSource(name=conn_name, db_uri=conn_uri)
             # new_connection.save()
-            return jsonify({"message": f"Connection new_connection.name has been created successfully."})
+            return jsonify({"message": f"DataSource new_connection.name has been created successfully."})
         else:
             return jsonify({"error": "The request payload is not in JSON format"})
 
@@ -64,7 +64,7 @@ def kpi_get_aggregation(kpi_id):
     data = []
     try:
         kpi_info = KPI_DATA[kpi_id-1]
-        connection_info = Connection.get_by_id(kpi_info["data_source"])
+        connection_info = DataSource.get_by_id(kpi_info["data_source"])
         timeline = request.args.get("timeline")
         data = kpi_aggregation(kpi_info, connection_info.as_dict, timeline)
     except Exception as err:
@@ -77,7 +77,7 @@ def kpi_rca_analysis(kpi_id):
     data = []
     try:
         kpi_info = KPI_DATA[kpi_id-1]
-        connection_info = Connection.get_by_id(kpi_info["data_source"])
+        connection_info = DataSource.get_by_id(kpi_info["data_source"])
         timeline = request.args.get("timeline")
         dimension = request.args.get("dimension", None)
         data = rca_analysis(kpi_info, connection_info.as_dict, timeline, dimension)
@@ -92,7 +92,7 @@ def kpi_rca_hierarchical_data(kpi_id):
     data = []
     try:
         kpi_info = KPI_DATA[kpi_id-1]
-        connection_info = Connection.get_by_id(kpi_info["data_source"])
+        connection_info = DataSource.get_by_id(kpi_info["data_source"])
         timeline = request.args.get("timeline")
         dimension = request.args.get("dimension", None)
         data = rca_hierarchical_data(kpi_info, connection_info.as_dict, timeline, dimension)

@@ -6,7 +6,7 @@ import sys
 from flask import Flask, render_template
 
 from chaos_genius import commands
-from chaos_genius.views import connection_view, kpi_view, public_view
+from chaos_genius.views import data_source_view, kpi_view, public_view
 from chaos_genius.extensions import (
     bcrypt,
     cache,
@@ -53,7 +53,8 @@ def register_extensions(app):
 def register_blueprints(app):
     """Register Flask blueprints."""
     app.register_blueprint(public_view.blueprint, url_prefix='/')
-    app.register_blueprint(connection_view.blueprint, url_prefix='/api/connection')
+    # TODO: Rename the api endpoint to data source
+    app.register_blueprint(data_source_view.blueprint, url_prefix='/api/connection')
     app.register_blueprint(kpi_view.blueprint, url_prefix='/api/kpi')
     return None
 

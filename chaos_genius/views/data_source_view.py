@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Connection views for creating and viewing the connections."""
+"""DataSource views for creating and viewing the data source."""
 from flask import (
     Blueprint,
     current_app,
@@ -12,12 +12,12 @@ from flask import (
 )
 from flask_cors import CORS
 
-from chaos_genius.databases.models.connection_model import Connection
+from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.extensions import third_party_connector as connector
 from chaos_genius.third_party.source_config_mapping import SOURCE_CONFIG_MAPPING
 # from chaos_genius.utils import flash_errors
 
-blueprint = Blueprint("api_connection", __name__, static_folder="../static")
+blueprint = Blueprint("api_data_source", __name__, static_folder="../static")
 CORS(blueprint) # TODO: remove this
 
 CONNECTION_TYPES = [
@@ -27,9 +27,9 @@ CONNECTION_TYPES = [
 
 
 @blueprint.route("/", methods=["GET", "POST"])
-def connection():
-    """Connection List view."""
-    current_app.logger.info("Connection list")
+def data_source():
+    """DataSource List view."""
+    current_app.logger.info("DataSource list")
 
     if request.method == 'POST':
         if request.is_json:
@@ -37,28 +37,28 @@ def connection():
             conn_name = data.get('name')
             conn_type = data.get('connection_type')
             conn_uri = data.get('db_uri')
-            new_connection = Connection(name=conn_name, db_uri=conn_uri, connection_type=conn_type)
-            new_connection.save()
-            return jsonify({"message": f"Connection {new_connection.name} has been created successfully."})
+            new_data_source = DataSource(name=conn_name, db_uri=conn_uri, connection_type=conn_type)
+            new_data_source.save()
+            return jsonify({"message": f"DataSource {new_data_source.name} has been created successfully."})
         else:
             return jsonify({"error": "The request payload is not in JSON format"})
 
     elif request.method == 'GET':
-        connections = Connection.query.all()
-        results = [conn.safe_dict for conn in connections]
+        data_sources = DataSource.query.all()
+        results = [conn.safe_dict for conn in data_sources]
         return jsonify({"count": len(results), "data": results})
 
 
 @blueprint.route("/connection-types", methods=["GET", "POST"])
-def connection_types():
-    """Connection Type view."""
+def data_source_types():
+    """DataSource Type view."""
     return jsonify({"data": CONNECTION_TYPES})
 
 
 @blueprint.route("/types", methods=["GET"])
-def connection_type_list():
-    """Connection Type view."""
-    connection_types, msg = [], ""
+def list_data_source_type():
+    """DataSource Type view."""
+    data_source_types, msg = [], ""
     try:
         connector_client = connector.connection
         connector_client.init_source_def_conf()
@@ -70,8 +70,8 @@ def connection_type_list():
 
 
 @blueprint.route("/test", methods=["POST"])
-def connection_test():
-    """Test Connection."""
+def test_data_source():
+    """Test DataSource."""
     connection_status, msg = [], ""
     try:
         payload = request.get_json()
@@ -84,8 +84,8 @@ def connection_test():
 
 
 @blueprint.route("/create", methods=["POST"])
-def connection_create():
-    """Create Connection."""
+def create_data_source():
+    """Create DataSource."""
     connection_status, msg, status = {}, "failed", False
     sourceRecord, desinationRecord, connectionRecord, stream_tables = {}, {}, {}, []
 
@@ -132,7 +132,7 @@ def connection_create():
         status = "connected"
 
         # Save in the database
-        new_connection = Connection(
+        new_connection = DataSource(
             name=conn_name,
             # db_uri=conn_uri, Create the db uri at the creation itself
             connection_type=conn_type,
@@ -145,7 +145,7 @@ def connection_create():
             dbConfig={"tables": stream_tables}
         )
         new_connection.save()
-        msg = f"Connection {new_connection.name} has been created successfully."
+        msg = f"DataSource {new_connection.name} has been created successfully."
 
     except Exception as err_msg:
         print(err_msg)

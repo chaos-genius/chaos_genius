@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-"""Connection model."""
+"""DataSource model."""
 import datetime as dt
 
 from chaos_genius.databases.base_model import Column, PkModel, db
 
 
-class Connection(PkModel):
-    """A Connection for given database."""
+class DataSource(PkModel):
+    """A DataSource for given database."""
 
-    __tablename__ = "connection"
+    __tablename__ = "data_source"
     name = Column(db.String(80), nullable=False)
     connection_type = Column(db.String(80)) # TODO: Make the nullable=False
     db_uri = Column(db.Text())
@@ -33,7 +33,7 @@ class Connection(PkModel):
 
     def __repr__(self):
         """Represent instance as a unique string."""
-        return f"<Connection:{self.connection_type} ({self.name})>"
+        return f"<DataSource:{self.connection_type} ({self.name})>"
 
     @property
     def safe_dict(self):

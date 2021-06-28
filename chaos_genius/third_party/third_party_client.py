@@ -180,6 +180,19 @@ class ThirdPartyClient(object):
         api_url = f"{self.server_uri}/api/v1/sources/update"
         return post_request(api_url, payload)
 
+    def get_source_schema(self, source_id):
+        """This will be used to fetch the details of the created destination
+
+        Args:
+            source_id (str): source id
+
+        Returns:
+            list: list of dict containing the destination details
+        """
+        payload = {"sourceId": source_id}
+        api_url = f"{self.server_uri}/api/v1/sources/discover_schema"
+        return post_request(api_url, payload)
+
     def get_destination(self):
         """This will be used to fetch the details of the created destination
 
@@ -189,6 +202,37 @@ class ThirdPartyClient(object):
         payload = {"workspaceId": self.workspace_id}
         api_url = f"{self.server_uri}/api/v1/destinations/list"
         return post_request(api_url, payload)
+
+    def create_destination(self, destination_name):
+        """Create the new destination with the provided configuration
+        Note: Make sure that you have tested the source before saving that in db
+
+        Args:
+            destination (dict): details about the source
+
+        Returns:
+            dict: creation status of the source
+        """
+        payload = {
+            "name": f"CG-{self.destination_db}",
+            "destinationDefinitionId": self.destination_def_id,
+            "workspaceId": self.workspace_id,
+            "connectionConfiguration": {
+                "basic_normalization": True,
+                "ssl": False,
+                "password": self.destination_db["password"],
+                "username": self.destination_db["user"],
+                "schema": self.destination_db["schema"],
+                "database": self.destination_db["name"],
+                "port": self.destination_db["port"],
+                "host": self.destination_db["host"]
+            }
+        }
+        api_url = f"{self.server_uri}/api/v1/destinations/create"
+        reponse = post_request(api_url, payload)
+        response["connectionConfiguration"] = payload["connectionConfiguration"]
+        return response
+
 
     def get_destination_specs(self, destination_def_id=None):
         """This will be used to fetch the details of the destination configuration
@@ -241,7 +285,7 @@ class ThirdPartyClient(object):
         Returns:
             dict: status and id of the created connection
         """
-        payload = {"workspaceId": self.workspace_id}
+        payload = paylaod
         api_url = f"{self.server_uri}/v1/connections/create"
         return post_request(api_url, payload)
 

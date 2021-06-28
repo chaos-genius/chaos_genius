@@ -14,6 +14,7 @@ from flask_cors import CORS
 
 from chaos_genius.databases.models.connection_model import Connection
 from chaos_genius.extensions import third_party_connector as connector
+from chaos_genius.third_party.source_config_mapping import SOURCE_CONFIG_MAPPING
 # from chaos_genius.utils import flash_errors
 
 blueprint = Blueprint("api_connection", __name__, static_folder="../static")
@@ -84,13 +85,70 @@ def connection_test():
 
 @blueprint.route("/create", methods=["POST"])
 def connection_create():
-    """Test Connection."""
-    connection_status, msg = {}, ""
+    """Create Connection."""
+    connection_status, msg, status = {}, "failed", False
+    sourceRecord, desinationRecord, connectionRecord, stream_tables = {}, {}, {}, []
+
+    is_third_party = False
     try:
         payload = request.get_json()
+        conn_name = payload.get('name')
+        conn_type = payload.get('connection_type')
+        source_form = payload.get('sourceForm')
         connector_client = connector.connection
-        # connection_status = connector_client.create_connection(payload)
+        # Create the source
+        sourceCreationPayload = {
+            "name": f"CG-{conn_name}",
+            "sourceDefinitionId": source_form.get("sourceDefinitionId"),
+            "workspaceId": connector_client.workspace_id,
+            "connectionConfiguration": source_form.get("connectionConfiguration")
+        }
+        sourceRecord = connector_client.create_source(sourceCreationPayload)
+        sourceRecord["connectionConfiguration"] = sourceCreationPayload["connectionConfiguration"]
+        if is_third_party: # if the connection is third party type
+            # create the destination record
+            desinationRecord = connector_client.create_destination(conn_name)
+            # create the third_party_connection
+            mapping_config = SOURCE_CONFIG_MAPPING.get(source_form.get("sourceDefinitionId"), {})
+            source_schema = connector_client.get_source_schema(sourceRecord["sourceId"])
+            stream_schema = source_schema["catalog"]["streams"]
+            for stream in stream_schema:
+                stream["config"].update(mapping_config)
+            conn_payload = {
+                "sourceId": "",
+                "destinationId": "",
+                "schedule": {
+                    "units": 24,
+                    "timeUnit": "hours"
+                },
+                "prefix": f"CG-{conn_type}-{conn_name}",
+                "status": "active",
+                "syncCatalog": {
+                    "streams": stream_schema
+                }
+            }
+            connectionRecord = connector_client.create_connection(conn_payload)
+            stream_tables = [stream["stream"]["name"] for stream in stream_schema]
+        status = "connected"
+
+        # Save in the database
+        new_connection = Connection(
+            name=conn_name,
+            # db_uri=conn_uri, Create the db uri at the creation itself
+            connection_type=conn_type,
+            active=True,
+            is_third_party=is_third_party,
+            connection_status=status,
+            sourceConfig=sourceRecord,
+            destinationConfig=desinationRecord,
+            connectionConfig=connectionRecord,
+            dbConfig={"tables": stream_tables}
+        )
+        new_connection.save()
+        msg = f"Connection {new_connection.name} has been created successfully."
+
     except Exception as err_msg:
         print(err_msg)
         msg = err_msg
-    return jsonify({"data": connection_status, "msg": msg})
+        import traceback; print(traceback.format_exc())
+    return jsonify({"data": {}, "msg": msg, "status": status})

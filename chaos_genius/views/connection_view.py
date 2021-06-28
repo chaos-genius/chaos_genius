@@ -10,12 +10,14 @@ from flask import (
     url_for,
     jsonify
 )
+from flask_cors import CORS
 
 from chaos_genius.databases.models.connection_model import Connection
 from chaos_genius.extensions import airbyte
 # from chaos_genius.utils import flash_errors
 
 blueprint = Blueprint("api_connection", __name__, static_folder="../static")
+CORS(api_v1) # TODO: remove this
 
 CONNECTION_TYPES = [
     {'name': 'PostgreSQL', 'value': 'postgresql'},
@@ -83,11 +85,11 @@ def connection_test():
 @blueprint.route("/create", methods=["POST"])
 def connection_create():
     """Test Connection."""
-    connection_status, msg = [], ""
+    connection_status, msg = {}, ""
     try:
         payload = request.get_json()
         airbyte_client = airbyte.connection
-        connection_status = airbyte_client.create_connection(payload)
+        # connection_status = airbyte_client.create_connection(payload)
     except Exception as err_msg:
         print(err_msg)
         msg = err_msg

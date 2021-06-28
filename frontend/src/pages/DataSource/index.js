@@ -210,6 +210,44 @@ class DataSources extends React.Component {
 
   }
 
+  saveDataSource = () => {
+    const payload = this.createPayload();
+    if (!payload) return;
+    let requestOptions = {
+      method: 'POST',
+      body: JSON.stringify(submitData)
+    };
+    fetch(`${BASE_URL}api/connection/create`, requestOptions)
+      .then(response => response.json())
+      .then(data => {
+        console.log("response", data);
+        // TODO: Close the model and reload the connection list
+      }).catch(error => {
+        console.log(error);
+    });
+  }
+
+  createPayload = () => {
+    const { formData, formError, validate, selectedConnection } = this.state;
+    const setObj = formError;
+    if (Object.keys(validate).length > 0) {
+      validate.map((obj) => {
+        const textField = formData[obj]
+        if (!textField) {
+          setObj[obj] = "Please Enter " + obj;
+        }
+      })
+      this.setState(setObj)
+    }
+    if (Object.keys(formError).length === 0) {
+      let payloadData = {};
+      payloadData['sourceDefinitionId'] = selectedConnection
+      payloadData['connectionConfiguration'] = formData
+    }
+    return null;
+  }
+
+
   handleTestConnection = () => {
     const { formData, formError, validate, selectedConnection } = this.state;
     const setObj = formError;

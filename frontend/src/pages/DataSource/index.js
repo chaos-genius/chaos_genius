@@ -211,11 +211,17 @@ class DataSources extends React.Component {
   }
 
   saveDataSource = () => {
-    const payload = this.createPayload();
+    const contexualForm = this.createPayload();
+    // TODO: Change the values
+    const payload = {
+      sourceForm: contexualForm,
+      connectionName: 'Mysql Order Data',
+      connectionType: 'mysql'
+    }
     if (!payload) return;
     let requestOptions = {
       method: 'POST',
-      body: JSON.stringify(submitData)
+      body: JSON.stringify(payload)
     };
     fetch(`${BASE_URL}api/connection/create`, requestOptions)
       .then(response => response.json())

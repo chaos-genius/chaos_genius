@@ -153,3 +153,18 @@ def create_data_source():
         msg = err_msg
         import traceback; print(traceback.format_exc())
     return jsonify({"data": {}, "msg": msg, "status": status})
+
+
+@blueprint.route("/delete", methods=["POST"])
+def delete_data_source():
+    """Delete Data Source."""
+    status, msg = False, "failed"
+    try:
+        payload = request.get_json()
+        data_source = payload["data_source_id"]
+        msg = "deleted"
+        status = True
+    except Exception as err_msg:
+        print(err_msg)
+
+    return jsonify({"data": {}, "msg": msg, "status": status})

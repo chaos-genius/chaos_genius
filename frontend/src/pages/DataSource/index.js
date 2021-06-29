@@ -4,12 +4,12 @@ import { Button, Container, Row, Col, Alert } from '@themesberg/react-bootstrap'
 import {
   DialogContent, DialogContentText, DialogActions,
   Card, CardContent, Grid, FormControl,
-  TextField, InputLabel, Select
+  TextField, InputLabel, Typography
 } from '@material-ui/core';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircle, faEdit } from '@fortawesome/free-solid-svg-icons';
+import { faCircle, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
 import CustomTable from '../../components/CustomTable'
 import CustomModal from '../../components/CustomModal'
@@ -22,7 +22,7 @@ import postgresql from './../../assets/img/postgresql.png'
 import mysql from './../../assets/img/mysql.png'
 
 import { tab1Fields, renderInputFields, renderlogs } from './HelperFunction'
-import { BASE_URL } from '../../config/Constants'
+import { BASE_URL, DEFAULT_HEADERS } from '../../config/Constants'
 import { LegendToggleOutlined } from "@material-ui/icons";
 class DataSources extends React.Component {
 
@@ -32,7 +32,7 @@ class DataSources extends React.Component {
     this.state = {
       showDefault: false,
       connectionTypes: [],
-      connectionName:'',
+      connectionName: '',
       connection: '',
       connection_name: '',
       properties: [],
@@ -47,7 +47,9 @@ class DataSources extends React.Component {
       validate: [],
       formError: [],
       testConnection: '',
-      testLogs: ''
+      testLogs: '',
+      confirmation: false,
+      deleteID: ''
     }
   }
 
@@ -57,14 +59,14 @@ class DataSources extends React.Component {
       <span className="m-1 btn btn-tertiary" >New DataSource</span>
     )
   }
-  editActionButton = () => {
+  editActionButton = (id) => {
     return (
-      <Button variant="white" className="m-1" onClick={() => this.setState({ showDefault: true })}><FontAwesomeIcon icon={faEdit} /></Button>
+      <Button variant="white" className="m-1" onClick={() => this.setState({ confirmation: true, deleteID: id })}><FontAwesomeIcon icon={faTrashAlt} /></Button>
     )
   }
-  handleClose = () => {
+  handleClose = (key) => {
     this.setState({
-      showDefault: false
+      key: false
     })
   }
 
@@ -110,7 +112,7 @@ class DataSources extends React.Component {
             datum['name'] = obj.name;
             datum['connection_type'] = this.renderConnectionType(obj.connection_type);
             datum['active'] = this.renderActiveDataSource(obj.active)
-            // datum['action'] = this.editActionButton()
+            datum['action'] = this.editActionButton(obj.id)
             datum['date'] = obj.created_at
             tabData.push(datum);
           })
@@ -120,13 +122,38 @@ class DataSources extends React.Component {
         }
       });
   }
+  deleteDataSource = () => {
+
+    let payload = {
+      data_source_id: this.state.deleteID
+    }
+
+    let requestOptions = {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: DEFAULT_HEADERS,
+    };
+
+    fetch(`${BASE_URL}api/connection/delete`, requestOptions)
+      .then(response => response.json())
+      .then(data => {
+        this.setState({
+          confirmation:false,
+          deleteID:''
+        },() => {
+          this.fetchConnection()
+        })
+      }).catch(error => {
+        console.log(error);
+      });
+  }
   handleInputChange = (e, key) => {
     console.log(e.target)
     const value = e.target.value;
     const setObj = this.state.formData;
-  
+
     setObj[key] = value
-    
+
     this.setState(setObj);
     this.setState({
       formError: []
@@ -139,13 +166,13 @@ class DataSources extends React.Component {
     this.setState(setObj);
     this.setState({
       connectionNameError: '',
-      formError:[]
+      formError: []
     })
   }
   handleBooleanChange = (e, key) => {
     const value = e.target.checked;
     const setObj = this.state.formData;
-   
+
     setObj[key] = value
 
     this.setState(setObj);
@@ -174,7 +201,6 @@ class DataSources extends React.Component {
     }
   }
   handleAutoComplete = (e, value) => {
-    console.log("value", value)
     if (value?.name) {
       this.setState({
         connection: value.name,
@@ -216,24 +242,20 @@ class DataSources extends React.Component {
       name: this.state.connectionName,
       connection_type: this.state.connection
     }
-    console.log("payload",payload)
     if (!payload) return;
 
-    let myHeaders = new Headers();
-    myHeaders.append('Content-Type', 'application/json');
-    myHeaders.append("Access-Control-Allow-Origin", "*");
-    myHeaders.append("Access-Control-Allow-Credentials", true);
+
     let requestOptions = {
       method: 'POST',
       body: JSON.stringify(payload),
-      headers: myHeaders,
+      headers: DEFAULT_HEADERS,
     };
 
     fetch(`${BASE_URL}api/connection/create`, requestOptions)
       .then(response => response.json())
       .then(data => {
         console.log("response", data);
-        this.setState({ showDefault: false },() => {
+        this.setState({ showDefault: false }, () => {
           this.fetchConnection()
         })
       }).catch(error => {
@@ -242,12 +264,12 @@ class DataSources extends React.Component {
   }
 
   createPayload = () => {
-    const { formData, formError, validate, selectedConnection,connectionName,connectionNameError } = this.state;
+    const { formData, formError, validate, selectedConnection, connectionName, connectionNameError } = this.state;
     const setObj = formError;
     let payloadData = {};
-    if(!connectionName){
+    if (!connectionName) {
       this.setState({
-        connectionNameError:"Please Enter Connection Name"
+        connectionNameError: "Please Enter Connection Name"
       })
       return
     }
@@ -273,13 +295,10 @@ class DataSources extends React.Component {
     const contexualForm = this.createPayload();
     if (contexualForm) {
       // let finalData = submitData;
-      let myHeaders = new Headers();
-      myHeaders.append('Content-Type', 'application/json');
-      myHeaders.append("Access-Control-Allow-Origin", "*");
-      myHeaders.append("Access-Control-Allow-Credentials", true);
+
       let requestOptions = {
         method: 'POST',
-        headers: myHeaders,
+        headers: DEFAULT_HEADERS,
         body: JSON.stringify(contexualForm),
         redirect: 'follow'
         // mode: 'no-cors'
@@ -300,7 +319,21 @@ class DataSources extends React.Component {
     }
 
   }
-
+  deleteConfirmation = () => {
+    return (
+      <>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description" component="span">
+            <Typography component="h4"> Are You sure want to delete?</Typography>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions className="text-center">
+          <Button variant="primary" onClick={this.deleteDataSource}>Yes</Button>
+          <Button variant="default" onClick={() => this.handleClose("confirmation")}>cancel</Button>
+        </DialogActions>
+      </>
+    )
+  }
   addModalContent = () => {
     // const tabData = [{
     //   title: "Connect New",
@@ -328,7 +361,7 @@ class DataSources extends React.Component {
                         type="text"
                         variant="outlined"
                         onChange={(e) => this.handleNormalInputChange(e, "connectionName")}
-                        helperText={this.state.connectionNameError}                        
+                        helperText={this.state.connectionNameError}
                       />
                     </FormControl>
                   </Grid>
@@ -342,7 +375,7 @@ class DataSources extends React.Component {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-        <Button variant="warning" onClick={this.handleTestConnection}>Test Connection</Button>
+          <Button variant="warning" onClick={this.handleTestConnection}>Test Connection</Button>
           <Button variant="primary" onClick={this.saveDataSource}>Submit</Button>
         </DialogActions>
       </>
@@ -361,8 +394,8 @@ class DataSources extends React.Component {
                     { title: 'Name', field: 'name' },
                     { title: 'Type', field: 'connection_type' },
                     { title: 'Active', field: 'active' },
-                    { title: 'Date', field: 'date' }
-                    // { title: '', field: 'action' }
+                    { title: 'Date', field: 'date' },
+                    { title: '', field: 'action' }
                   ]}
                   data={this.state.tableData}
                   title=""
@@ -389,7 +422,13 @@ class DataSources extends React.Component {
           title="Add New Data Source"
           body={this.addModalContent()}
           open={this.state.showDefault}
-          handleCloseCallback={this.handleClose}
+          handleCloseCallback={() => this.handleClose("showDefault")}
+        />
+        <CustomModal
+          title=""
+          body={this.deleteConfirmation()}
+          open={this.state.confirmation}
+          handleCloseCallback={() => this.handleClose("confirmation")}
         />
       </Container>
     )

@@ -13,3 +13,11 @@ let site_url = "";
 //     site_url = "https://chaosgenius.mayhemdata.com/";
 // }
 export const BASE_URL = site_url;
+
+
+let myHeaders = new Headers();
+myHeaders.append('Content-Type', 'application/json');
+myHeaders.append("Access-Control-Allow-Origin", "*");
+myHeaders.append("Access-Control-Allow-Credentials", true);
+
+export const DEFAULT_HEADERS = myHeaders;

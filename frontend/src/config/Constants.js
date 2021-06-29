@@ -9,7 +9,7 @@ const isLocalhost = Boolean(
     )
 );
 let site_url = "";
-if (isLocalhost === true) {
-    site_url = "https://chaosgenius.mayhemdata.com/";
-}
+// if (isLocalhost === true) {
+//     site_url = "https://chaosgenius.mayhemdata.com/";
+// }
 export const BASE_URL = site_url;

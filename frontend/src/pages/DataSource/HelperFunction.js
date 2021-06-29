@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import {
     DialogContent, DialogContentText, DialogActions,
-    Card, FormControlLabel, Grid, FormControl,
+    Card,CardContent, FormControlLabel, Grid, FormControl,
     TextField, InputLabel, Checkbox
 } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -18,10 +18,10 @@ const renderTextField = (field, textType, formData, formError, handleInputChange
     return (
         <Grid item xs={12}>
             <FormControl variant="outlined" style={{ width: '100%' }}>
-                <InputLabel htmlFor={textID} >{(field[1]?.['title']) ? (field[1]['title']) : ("")}</InputLabel>
+                <InputLabel htmlFor={textID} >{(field[1]?.['title']) ? (field[1]['title']) : (textID)}</InputLabel>
                 <TextField
                     error={(textError) ? (true) : (false)}
-                    value={(formData?.[textID])?(formData[textID]):("")}
+                    value={(formData?.[textID]) ? (formData[textID]) : ("")}
                     id={textID}
                     type={(field[1]?.['is_secret']) ? ("password") : (textType)}
                     variant="outlined"
@@ -41,7 +41,7 @@ const renderBooleanField = (field, textType, formData, formError, handleBooleanC
             <FormControlLabel
                 control={
                     <Checkbox
-                        checked={(formData[textID])?(formData[textID]):(false)}
+                        checked={(formData[textID]) ? (formData[textID]) : (false)}
                         onChange={(e) => handleBooleanChange(e, textID)}
                         name={textID}
                         color="primary"
@@ -65,7 +65,7 @@ const renderBooleanField = (field, textType, formData, formError, handleBooleanC
         </Grid>
     )
 }
-export const renderInputFields = (props, handleInputChange,handleBooleanChange) => {
+export const renderInputFields = (props, handleInputChange, handleBooleanChange) => {
     const { properties, formData, formError } = props;
     // console.log("formData",formData)
     let fields = [];
@@ -125,5 +125,20 @@ export const tab1Fields = (props, handleAutoComplete, handleInputAutoComplete) =
             </FormControl>
             {/* ) : ("")} */}
         </Grid>
+    )
+}
+export const renderlogs = (logs) => {
+    // console.log("logs", logs.logLines)
+    const logsfield = []
+
+    logs.logLines.map((obj) => {
+        logsfield.push(<p>{obj}</p>)
+    })
+    return (
+        <Card className="mt-4 mb-4">
+            <CardContent>
+                {logsfield}
+            </CardContent>
+        </Card>
     )
 }

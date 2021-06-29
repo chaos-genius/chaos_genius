@@ -21,9 +21,7 @@ import './../../assets/css/custom.css'
 import postgresql from './../../assets/img/postgresql.png'
 import mysql from './../../assets/img/mysql.png'
 
-import * as dataSource from './data-source.json';
-
-import { tab1Fields, renderInputFields } from './HelperFunction'
+import { tab1Fields, renderInputFields, renderlogs } from './HelperFunction'
 import { BASE_URL } from '../../config/Constants'
 import { LegendToggleOutlined } from "@material-ui/icons";
 class DataSources extends React.Component {
@@ -34,6 +32,7 @@ class DataSources extends React.Component {
     this.state = {
       showDefault: false,
       connectionTypes: [],
+      connectionName:'',
       connection: '',
       connection_name: '',
       properties: [],
@@ -47,7 +46,7 @@ class DataSources extends React.Component {
       formData: {},
       validate: [],
       formError: [],
-      testConnection: false,
+      testConnection: '',
       testLogs: ''
     }
   }
@@ -111,7 +110,7 @@ class DataSources extends React.Component {
             datum['name'] = obj.name;
             datum['connection_type'] = this.renderConnectionType(obj.connection_type);
             datum['active'] = this.renderActiveDataSource(obj.active)
-            datum['action'] = this.editActionButton()
+            // datum['action'] = this.editActionButton()
             datum['date'] = obj.created_at
             tabData.push(datum);
           })
@@ -125,30 +124,30 @@ class DataSources extends React.Component {
     console.log(e.target)
     const value = e.target.value;
     const setObj = this.state.formData;
-    // const setObj = {};
-
-    // setObj[this.state.formData[key]] = value
+  
     setObj[key] = value
-    // console.log("key", key)
-    // console.log("setObj", setObj)
+    
     this.setState(setObj);
     this.setState({
       formError: []
     })
-
-
-
+  }
+  handleNormalInputChange = (e, key) => {
+    const value = e.target.value;
+    const setObj = {};
+    setObj[key] = value
+    this.setState(setObj);
+    this.setState({
+      connectionNameError: '',
+      formError:[]
+    })
   }
   handleBooleanChange = (e, key) => {
-    console.log(e.target)
     const value = e.target.checked;
     const setObj = this.state.formData;
-    // const setObj = {};
-
-    // setObj[this.state.formData[key]] = value
+   
     setObj[key] = value
-    // console.log("key", key)
-    // console.log("setObj", setObj)
+
     this.setState(setObj);
     this.setState({
       formError: []
@@ -212,30 +211,46 @@ class DataSources extends React.Component {
 
   saveDataSource = () => {
     const contexualForm = this.createPayload();
-    // TODO: Change the values
     const payload = {
       sourceForm: contexualForm,
-      connectionName: 'Mysql Order Data',
-      connectionType: 'mysql'
+      name: this.state.connectionName,
+      connection_type: this.state.connection
     }
+    console.log("payload",payload)
     if (!payload) return;
+
+    let myHeaders = new Headers();
+    myHeaders.append('Content-Type', 'application/json');
+    myHeaders.append("Access-Control-Allow-Origin", "*");
+    myHeaders.append("Access-Control-Allow-Credentials", true);
     let requestOptions = {
       method: 'POST',
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      headers: myHeaders,
     };
+
     fetch(`${BASE_URL}api/connection/create`, requestOptions)
       .then(response => response.json())
       .then(data => {
         console.log("response", data);
-        // TODO: Close the model and reload the connection list
+        this.setState({ showDefault: false },() => {
+          this.fetchConnection()
+        })
       }).catch(error => {
         console.log(error);
-    });
+      });
   }
 
   createPayload = () => {
-    const { formData, formError, validate, selectedConnection } = this.state;
+    const { formData, formError, validate, selectedConnection,connectionName,connectionNameError } = this.state;
     const setObj = formError;
+    let payloadData = {};
+    if(!connectionName){
+      this.setState({
+        connectionNameError:"Please Enter Connection Name"
+      })
+      return
+    }
     if (Object.keys(validate).length > 0) {
       validate.map((obj) => {
         const textField = formData[obj]
@@ -246,35 +261,17 @@ class DataSources extends React.Component {
       this.setState(setObj)
     }
     if (Object.keys(formError).length === 0) {
-      let payloadData = {};
       payloadData['sourceDefinitionId'] = selectedConnection
       payloadData['connectionConfiguration'] = formData
     }
-    return null;
+    return payloadData;
   }
 
 
   handleTestConnection = () => {
-    const { formData, formError, validate, selectedConnection } = this.state;
-    const setObj = formError;
-    // console.log("validate",validate)
-    if (Object.keys(validate).length > 0) {
-      validate.map((obj) => {
-        const textField = formData[obj]
-        if (!textField) {
-          setObj[obj] = "Please Enter " + obj;
-        }
-      })
-      this.setState(setObj)
-    }
-    if (Object.keys(formError).length === 0) {
-      // console.log("setObj",setObj)
-      // console.log("formError",formError)
-      // console.log("formData",formData)
-      let submitData = {};
-      submitData['sourceDefinitionId'] = selectedConnection
-      submitData['connectionConfiguration'] = formData
 
+    const contexualForm = this.createPayload();
+    if (contexualForm) {
       // let finalData = submitData;
       let myHeaders = new Headers();
       myHeaders.append('Content-Type', 'application/json');
@@ -283,7 +280,7 @@ class DataSources extends React.Component {
       let requestOptions = {
         method: 'POST',
         headers: myHeaders,
-        body: JSON.stringify(submitData),
+        body: JSON.stringify(contexualForm),
         redirect: 'follow'
         // mode: 'no-cors'
       };
@@ -291,43 +288,19 @@ class DataSources extends React.Component {
       fetch(`${BASE_URL}api/connection/test`, requestOptions)
         .then(response => response.json())
         .then(data => {
-          console.log("response", data)
           this.setState({
             testLogs: data.data.jobInfo.logs,
             testConnection: data.data.status
           })
         }).catch(error => {
-          // this.setState({
-          //   testLogs: demo,
-          //   testConnection: false
-          // })
+          console.log(error)
         });
-      // console.log("formData",JSON.stringify(formData))
-      // console.log("finalData",finalData)
-      // const apiService = new Api();
-      // apiService.post(`${BASE_URL}api/connection/test`, finalData).then((response) => {
-      //   this.setState({
-      //     testLogs: response.data.jobInfo.logs,
-      //     testConnection: response.data.status
-      //   })
-      //   // this.handleClose();
-      // })
+
 
     }
 
   }
-  renderlogs = (logs) => {
-    const logsfield = []
 
-    logs.map((obj) => {
-      logsfield.push(<p>{obj}</p>)
-    })
-    return (
-      <>
-        {logsfield}
-      </>
-    )
-  }
   addModalContent = () => {
     // const tabData = [{
     //   title: "Connect New",
@@ -338,7 +311,6 @@ class DataSources extends React.Component {
     // }
     // ];
 
-    // console.log("logLines",this.state.testLogs.logs['logLines'])
     return (
       <>
         <DialogContent>
@@ -346,16 +318,32 @@ class DataSources extends React.Component {
             <Card className="mb-4">
               <CardContent>
                 <Grid container spacing={3}>
+                  <Grid item xs={12}>
+                    <FormControl variant="outlined" style={{ width: '100%' }}>
+                      <InputLabel htmlFor="connectionName">Connection Name</InputLabel>
+                      <TextField
+                        error={(this.state.connectionNameError) ? (true) : (false)}
+                        value={this.state.connectionName}
+                        id="connectionName"
+                        type="text"
+                        variant="outlined"
+                        onChange={(e) => this.handleNormalInputChange(e, "connectionName")}
+                        helperText={this.state.connectionNameError}                        
+                      />
+                    </FormControl>
+                  </Grid>
                   {((Object.keys(this.state.connectionTypes).length > 0)) ? (tab1Fields(this.state, this.handleAutoComplete, this.handleInputAutoComplete)) : ("")}
                   {(Object.keys(this.state.properties).length > 0) ? (renderInputFields(this.state, this.handleInputChange, this.handleBooleanChange)) : ("")}
                 </Grid>
-                <pre>{(!this.state.testConnection && this.state.testLogs) ? (this.renderlogs(this.state.testLogs.logs['logLines'])) : ("")}</pre>
               </CardContent>
             </Card>
+            {(this.state.testConnection === "failed" && this.state.testLogs) ? (renderlogs(this.state.testLogs)) : ("")}
+
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button variant="primary" onClick={this.handleTestConnection}>Test Connection</Button>
+        <Button variant="warning" onClick={this.handleTestConnection}>Test Connection</Button>
+          <Button variant="primary" onClick={this.saveDataSource}>Submit</Button>
         </DialogActions>
       </>
     )
@@ -373,8 +361,8 @@ class DataSources extends React.Component {
                     { title: 'Name', field: 'name' },
                     { title: 'Type', field: 'connection_type' },
                     { title: 'Active', field: 'active' },
-                    { title: 'Date', field: 'date' },
-                    { title: '', field: 'action' }
+                    { title: 'Date', field: 'date' }
+                    // { title: '', field: 'action' }
                   ]}
                   data={this.state.tableData}
                   title=""

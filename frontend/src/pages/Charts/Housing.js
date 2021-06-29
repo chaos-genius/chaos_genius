@@ -1,7 +1,7 @@
 import React from "react";
 import CustomTable from './../../components/CustomTable'
 import {
-    Card, CardContent, Typography, Grid
+    Card, CardContent, Typography, Grid, CircularProgress
 } from '@material-ui/core';
 
 // import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
@@ -155,104 +155,111 @@ am4core.useTheme(am4themes_animated);
 //     )
 // }
 
-export const tab1Fields = (cardData,kpi) => {
+export const tab1Fields = (cardData, kpi, loader) => {
 
     const { g1_metrics, g2_metrics, impact } = cardData;
 
     const valueIcon = impact < 0 ? faAngleDown : faAngleUp;
     const valueTxtColor = impact < 0 ? "text-danger" : "text-success";
+    if (loader) {
+        return (
+            <div className="loader">
+                <CircularProgress color="secondary" />
+            </div>
+        )
+    } else {
+        return (
+            <Grid container spacing={3} className="mt-4 mb-4 graph-info-cards">
+                <Grid item xs={12} md={3}>
+                    <Card>
+                        <CardContent>
+                            <Typography variant="h4" component="h4">{kpi}</Typography>
 
-    return (
-        <Grid container spacing={3} className="mt-4 mb-4 graph-info-cards">
-            <Grid item xs={12} md={3}>
-                <Card>
-                    <CardContent>
-                        <Typography variant="h4" component="h4">{kpi}</Typography>
-
-                        {/* <Typography component="h6" variant="h6" className="small" >Jan 4, 2021</Typography> */}
-                        <Grid container spacing={2}>
-                            <Grid item xs={12}>
-                                <Typography component="h3" variant="h3" >{(g1_metrics?.count) ? (g1_metrics.count) : ('--')}</Typography>
+                            {/* <Typography component="h6" variant="h6" className="small" >Jan 4, 2021</Typography> */}
+                            <Grid container spacing={2}>
+                                <Grid item xs={12}>
+                                    <Typography component="h3" variant="h3" >{(g1_metrics?.count) ? (g1_metrics.count) : ('--')}</Typography>
+                                </Grid>
                             </Grid>
-                        </Grid>
-                        <Grid container spacing={2}>
-                            <Grid item xs={4}>
-                                <Typography component="h6" variant="h6" className="small" > Mean</Typography>
+                            <Grid container spacing={2}>
+                                <Grid item xs={4}>
+                                    <Typography component="h6" variant="h6" className="small" > Mean</Typography>
+                                </Grid>
+                                <Grid item xs={8}>
+                                    <Typography component="h6" variant="h6" className="small fw-bold" >{(g1_metrics?.mean) ? (parseFloat(g1_metrics.mean).toFixed(2)) : ('--')}</Typography>
+                                </Grid>
                             </Grid>
-                            <Grid item xs={8}>
-                                <Typography component="h6" variant="h6" className="small fw-bold" >{(g1_metrics?.mean) ? (parseFloat(g1_metrics.mean).toFixed(2)) : ('--')}</Typography>
+                            <Grid container spacing={2}>
+                                <Grid item xs={4}>
+                                    <Typography component="h6" variant="h6" className="small" > Median</Typography>
+                                </Grid>
+                                <Grid item xs={8}>
+                                    <Typography component="h6" variant="h6" className="small fw-bold" >{(g1_metrics?.median) ? (parseFloat(g1_metrics.median).toFixed(2)) : ('--')}</Typography>
+                                </Grid>
                             </Grid>
-                        </Grid>
-                        <Grid container spacing={2}>
-                            <Grid item xs={4}>
-                                <Typography component="h6" variant="h6" className="small" > Median</Typography>
+                            <Grid container spacing={2}>
+                                <Grid item xs={4}>
+                                    <Typography component="h6" variant="h6" className="small" > Sum</Typography>
+                                </Grid>
+                                <Grid item xs={8}>
+                                    <Typography component="h6" variant="h6" className="small fw-bold" >{(g1_metrics?.sum) ? (parseFloat(g1_metrics.sum).toFixed(2)) : ('--')}</Typography>
+                                </Grid>
                             </Grid>
-                            <Grid item xs={8}>
-                                <Typography component="h6" variant="h6" className="small fw-bold" >{(g1_metrics?.median) ? (parseFloat(g1_metrics.median).toFixed(2)) : ('--')}</Typography>
-                            </Grid>
-                        </Grid>
-                        <Grid container spacing={2}>
-                            <Grid item xs={4}>
-                                <Typography component="h6" variant="h6" className="small" > Sum</Typography>
-                            </Grid>
-                            <Grid item xs={8}>
-                                <Typography component="h6" variant="h6" className="small fw-bold" >{(g1_metrics?.sum) ? (parseFloat(g1_metrics.sum).toFixed(2)) : ('--')}</Typography>
-                            </Grid>
-                        </Grid>
-                        {/* <Typography component="h6" variant="h6" className="small"> Since last month <span className="danger-text"><ArrowDownwardIcon />28.4%</span></Typography> */}
-                    </CardContent>
-                </Card>
-            </Grid>
-            <Grid item xs={12} md={3}>
-                <Card>
-                    <CardContent>
-                        <Typography variant="h4" component="h4">{kpi}</Typography>
-                        <Grid container spacing={2}>
-                            <Grid item xs={6}>
-                                <Typography component="h3" variant="h3" className="mb-0">{(g2_metrics?.count) ? (g2_metrics.count) : ('--')}</Typography>
-                            </Grid>
-                            <Grid item xs={6}>
-                                <Typography component="h6" variant="h6" className="small mt-2">
-                                    <span className={valueTxtColor}>
-                                        <FontAwesomeIcon icon={valueIcon} />
-                                        <span className="fw-bold ms-1">
-                                            {parseFloat(impact).toFixed(2)}
+                            {/* <Typography component="h6" variant="h6" className="small"> Since last month <span className="danger-text"><ArrowDownwardIcon />28.4%</span></Typography> */}
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} md={3}>
+                    <Card>
+                        <CardContent>
+                            <Typography variant="h4" component="h4">{kpi}</Typography>
+                            <Grid container spacing={2}>
+                                <Grid item xs={6}>
+                                    <Typography component="h3" variant="h3" className="mb-0">{(g2_metrics?.count) ? (g2_metrics.count) : ('--')}</Typography>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Typography component="h6" variant="h6" className="small mt-2">
+                                        <span className={valueTxtColor}>
+                                            <FontAwesomeIcon icon={valueIcon} />
+                                            <span className="fw-bold ms-1">
+                                                {parseFloat(impact).toFixed(2)}
+                                            </span>
                                         </span>
-                                    </span>
 
-                                </Typography>
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={4}>
+                                    <Typography component="h6" variant="h6" className="small" > Mean</Typography>
+                                </Grid>
+                                <Grid item xs={8}>
+                                    <Typography component="h6" variant="h6" className="small fw-bold" >{(g2_metrics?.mean) ? (parseFloat(g2_metrics.mean).toFixed(2)) : ('--')}</Typography>
+                                </Grid>
                             </Grid>
-                            <Grid item xs={4}>
-                                <Typography component="h6" variant="h6" className="small" > Mean</Typography>
+                            <Grid container spacing={2}>
+                                <Grid item xs={4}>
+                                    <Typography component="h6" variant="h6" className="small" > Median</Typography>
+                                </Grid>
+                                <Grid item xs={8}>
+                                    <Typography component="h6" variant="h6" className="small fw-bold" >{(g2_metrics?.median) ? (parseFloat(g2_metrics.median).toFixed(2)) : ('--')}</Typography>
+                                </Grid>
                             </Grid>
-                            <Grid item xs={8}>
-                                <Typography component="h6" variant="h6" className="small fw-bold" >{(g2_metrics?.mean) ? (parseFloat(g2_metrics.mean).toFixed(2)) : ('--')}</Typography>
+                            <Grid container spacing={2}>
+                                <Grid item xs={4}>
+                                    <Typography component="h6" variant="h6" className="small" > Sum</Typography>
+                                </Grid>
+                                <Grid item xs={8}>
+                                    <Typography component="h6" variant="h6" className="small fw-bold" >{(g2_metrics?.sum) ? (parseFloat(g2_metrics.sum).toFixed(2)) : ('--')}</Typography>
+                                </Grid>
                             </Grid>
-                        </Grid>
-                        <Grid container spacing={2}>
-                            <Grid item xs={4}>
-                                <Typography component="h6" variant="h6" className="small" > Median</Typography>
-                            </Grid>
-                            <Grid item xs={8}>
-                                <Typography component="h6" variant="h6" className="small fw-bold" >{(g2_metrics?.median) ? (parseFloat(g2_metrics.median).toFixed(2)) : ('--')}</Typography>
-                            </Grid>
-                        </Grid>
-                        <Grid container spacing={2}>
-                            <Grid item xs={4}>
-                                <Typography component="h6" variant="h6" className="small" > Sum</Typography>
-                            </Grid>
-                            <Grid item xs={8}>
-                                <Typography component="h6" variant="h6" className="small fw-bold" >{(g2_metrics?.sum) ? (parseFloat(g2_metrics.sum).toFixed(2)) : ('--')}</Typography>
-                            </Grid>
-                        </Grid>
 
-                    </CardContent>
-                </Card>
-            </Grid>
-            <Grid item xs={12} md={6}>
-                <div id="chartdiv" style={{ width: "100%", height: "auto" }}></div>
-                {/* <this.CustomChart /> */}
-            </Grid>
-        </Grid >
-    )
+                        </CardContent>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                    <div id="chartdiv" style={{ width: "100%", height: "auto" }}></div>
+                    {/* <this.CustomChart /> */}
+                </Grid>
+            </Grid >
+        )
+    }
 }

@@ -148,6 +148,7 @@ def create_data_source():
         msg = f"DataSource {new_connection.name} has been created successfully."
 
     except Exception as err_msg:
+        print('-'*60)
         print(err_msg)
         msg = err_msg
         import traceback; print(traceback.format_exc())

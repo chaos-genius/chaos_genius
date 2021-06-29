@@ -17,7 +17,7 @@ blueprint = Blueprint("public", __name__, static_folder="../static")
 
 
 @blueprint.route("/", methods=["GET"])
-def home_view():
+def home():
     """Home route."""
     return jsonify({'data': 'Check the project documentation for more'})
 

@@ -89,7 +89,7 @@ def create_data_source():
     connection_status, msg, status = {}, "failed", False
     sourceRecord, desinationRecord, connectionRecord, stream_tables = {}, {}, {}, []
 
-    is_third_party = False
+    is_third_party = True
     try:
         payload = request.get_json()
         conn_name = payload.get('name')
@@ -115,8 +115,8 @@ def create_data_source():
             for stream in stream_schema:
                 stream["config"].update(mapping_config)
             conn_payload = {
-                "sourceId": "",
-                "destinationId": "",
+                "sourceId": sourceRecord["sourceId"],
+                "destinationId": desinationRecord["destinationId"],
                 "schedule": {
                     "units": 24,
                     "timeUnit": "hours"

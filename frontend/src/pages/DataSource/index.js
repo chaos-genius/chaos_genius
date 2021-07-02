@@ -48,6 +48,7 @@ class DataSources extends React.Component {
       formError: [],
       testConnection: '',
       testLogs: '',
+      testMessage: null,
       confirmation: false,
       deleteID: ''
     }
@@ -56,7 +57,7 @@ class DataSources extends React.Component {
 
   addActionButton = () => {
     return (
-      <span className="m-1 btn btn-tertiary" >New DataSource</span>
+      <span className="m-1 btn btn-tertiary" >New Data Source</span>
     )
   }
   editActionButton = (id) => {
@@ -65,9 +66,9 @@ class DataSources extends React.Component {
     )
   }
   handleClose = (key) => {
-    this.setState({
-      key: false
-    })
+    let stateObj = {};
+    stateObj[key] = false
+    this.setState(stateObj);
   }
 
 
@@ -309,6 +310,7 @@ class DataSources extends React.Component {
         .then(data => {
           this.setState({
             testLogs: data.data.jobInfo.logs,
+            testMessage: data.data.message,
             testConnection: data.data.status
           })
         }).catch(error => {
@@ -370,6 +372,7 @@ class DataSources extends React.Component {
                 </Grid>
               </CardContent>
             </Card>
+            {this.state.testMessage !== null && (<div><strong>Connection Status:</strong> {this.state.testMessage}</div>)}
             {(this.state.testConnection === "failed" && this.state.testLogs) ? (renderlogs(this.state.testLogs)) : ("")}
 
           </DialogContentText>
@@ -408,7 +411,7 @@ class DataSources extends React.Component {
                   actions={[
                     {
                       icon: () => this.addActionButton(),
-                      tooltip: 'Add User',
+                      tooltip: 'Add New Data Source',
                       isFreeAction: true,
                       onClick: () => this.setState({ showDefault: true })
                     }

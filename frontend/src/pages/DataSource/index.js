@@ -326,12 +326,12 @@ class DataSources extends React.Component {
       <>
         <DialogContent>
           <DialogContentText id="alert-dialog-slide-description" component="span">
-            <Typography component="h4"> Are You sure want to delete?</Typography>
+            <Typography component="h4"> Do you want to delete?</Typography>
           </DialogContentText>
         </DialogContent>
         <DialogActions className="text-center">
           <Button variant="primary" onClick={this.deleteDataSource}>Yes</Button>
-          <Button variant="default" onClick={() => this.handleClose("confirmation")}>cancel</Button>
+          <Button variant="default" onClick={() => this.handleClose("confirmation")}>No</Button>
         </DialogActions>
       </>
     )

@@ -42,6 +42,10 @@ class DataSource(PkModel):
             "name": self.name,
             "connection_type": self.connection_type,
             "active": self.active,
+            "is_third_party": self.is_third_party,
+            "connection_status": self.connection_status,
+            "sync_status": self.sync_status,
+            "last_sync": self.last_sync,
             "created_at": self.created_at
         }
 
@@ -52,6 +56,14 @@ class DataSource(PkModel):
             "name": self.name,
             "connection_type": self.connection_type,
             "db_uri": self.db_uri,
+            "is_third_party": self.is_third_party,
+            "connection_status": self.connection_status,
+            "sync_status": self.sync_status,
+            "sourceConfig": self.sourceConfig,
+            "destinationConfig": self.destinationConfig,
+            "connectionConfig": self.connectionConfig,
+            "dbConfig": self.dbConfig,
+            "last_sync": self.last_sync,
             "active": self.active,
             "created_at": self.created_at
         }

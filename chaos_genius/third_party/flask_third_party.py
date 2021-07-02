@@ -1,5 +1,5 @@
 from flask import current_app, _app_ctx_stack
-from chaos_genius.third_party.third_party_client import ThirdPartyClient
+from chaos_genius.third_party.integration_client import ThirdPartyClient
 
 
 class FlaskThirdParty(object):
@@ -18,14 +18,14 @@ class FlaskThirdParty(object):
 
     def teardown(self, exception):
         ctx = _app_ctx_stack.top
-        if hasattr(ctx, 'third_party_client'):
+        if hasattr(ctx, 'integration_client'):
             pass
-            # ctx.third_party_client.close()
+            # ctx.integration_client.close()
 
     @property
     def connection(self):
         ctx = _app_ctx_stack.top
         if ctx is not None:
-            if not hasattr(ctx, 'third_party_client'):
-                ctx.third_party_client = self.connect()
-            return ctx.third_party_client
+            if not hasattr(ctx, 'integration_client'):
+                ctx.integration_client = self.connect()
+            return ctx.integration_client

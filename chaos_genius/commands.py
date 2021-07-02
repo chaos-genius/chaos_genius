@@ -66,11 +66,11 @@ def lint(fix_imports, check):
 
 
 @click.command()
-def third_party_connector():
+def integration_connector():
     """Initialise the third party connector env"""
 
     click.echo(f"Third Party Setup: Third Party setup started.")
-    from chaos_genius.third_party.third_party_client import init_third_party
+    from chaos_genius.third_party.integration_client import init_third_party
 
     # TODO: Ask these params from CLI
     server_url = "http://localhost:8001"

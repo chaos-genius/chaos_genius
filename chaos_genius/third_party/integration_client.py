@@ -6,20 +6,14 @@ import pprint
 import traceback
 import click
 from chaos_genius.utils.io_helper import cg_print
+from chaos_genius.third_party.source_config_mapping import (
+    SOURCE_WHITELIST_AND_TYPE as SOURCE_DEF_ID,
+    DESTINATION_DEF_ID
+)
 
 
 BASE_PATH = os.getcwd()
 ENV_FILE_PATH = os.path.join(BASE_PATH, '.integrations.json')
-DESTINATION_DEF_ID = "25c5221d-dce2-4163-ade9-739ef790f503" # POSTGRES DB
-SOURCE_DEF_ID = [
-    "39f092a6-8c87-4f6f-a8d9-5cef45b7dbe1", # Google Analytics
-    "71607ba1-c0ac-4799-8049-7f4b90dd50f7", # Google Sheets
-    "435bb9a5-7887-4809-aa58-28c27df0d7ad", # MySQL
-    "decd338e-5647-4c0b-adf4-da0e75f5a750", # Postgres
-    "b1892b11-788d-44bd-b9ec-3a436f7b54ce", # Shopify
-    "e094cb9a-26de-4645-8761-65c0c425d1de", # Stripe
-    "29b409d9-30a5-4cc8-ad50-886eb846fea3", # Quickbooks
-]
 
 
 class ThirdPartyClient(object):
@@ -69,6 +63,7 @@ class ThirdPartyClient(object):
         for source in available_sources:
             source_specs = self.get_source_def_specs(source["sourceDefinitionId"])
             source["connectionSpecification"] = source_specs["connectionSpecification"]
+            source["isThirdParty"] = SOURCE_DEF_ID[source["sourceDefinitionId"]]
         self.source_conf = available_sources
 
     def create_workspace(self, payload):
@@ -180,6 +175,19 @@ class ThirdPartyClient(object):
         api_url = f"{self.server_uri}/api/v1/sources/update"
         return post_request(api_url, payload)
 
+    def delete_source(self, source_id):
+        """This will be used to delete the source.
+
+        Args:
+            source_id (str): id of the source
+
+        Returns:
+            dict: status of the deletion
+        """
+        payload = {"sourceId": source_id}
+        api_url = f"{self.server_uri}/api/v1/sources/delete"
+        return post_request(api_url, payload, 'text')
+
     def get_source_schema(self, source_id):
         """This will be used to fetch the details of the created destination
 
@@ -221,9 +229,9 @@ class ThirdPartyClient(object):
                 "basic_normalization": True,
                 "ssl": False,
                 "password": self.destination_db["password"],
-                "username": self.destination_db["user"],
-                "schema": self.destination_db["schema"],
-                "database": self.destination_db["name"],
+                "username": self.destination_db["username"],
+                "schema": "public",
+                "database": self.destination_db["database"],
                 "port": self.destination_db["port"],
                 "host": self.destination_db["host"]
             }
@@ -233,6 +241,18 @@ class ThirdPartyClient(object):
         response["connectionConfiguration"] = payload["connectionConfiguration"]
         return response
 
+    def delete_destination(self, destination_id):
+        """This will be used to delete the destination.
+
+        Args:
+            destination_id (str): id of the destination
+
+        Returns:
+            dict: status of the deletion
+        """
+        payload = {"destinationId": destination_id}
+        api_url = f"{self.server_uri}/api/v1/destinations/delete"
+        return post_request(api_url, payload, 'text')
 
     def get_destination_specs(self, destination_def_id=None):
         """This will be used to fetch the details of the destination configuration
@@ -289,7 +309,7 @@ class ThirdPartyClient(object):
         return post_request(api_url, payload)
 
     def update_connection(self, updated_data):
-        """This will be used to update the connection already created connection.
+        """This will be used to update the already created connection.
 
         Args:
             payload (dict): updated details of the connection
@@ -298,8 +318,21 @@ class ThirdPartyClient(object):
             dict: status of the created connection
         """
         payload = updated_data
-        api_url = f"{self.server_uri}/api/v1/destinations/list"
+        api_url = f"{self.server_uri}/api/v1/connections/update"
         return post_request(api_url, payload)
+
+    def delete_connection(self, connection_id):
+        """This will be used to delete the already created connection.
+
+        Args:
+            connection_id (str): id of the connection
+
+        Returns:
+            dict: status of the deletion
+        """
+        payload = {"connectionId": connection_id}
+        api_url = f"{self.server_uri}/api/v1/connections/delete"
+        return post_request(api_url, payload, 'text')
 
     def reset_connection(self, connection_id):
         """This will be used to reset the connection. This can wipe the already saved data
@@ -328,15 +361,16 @@ class ThirdPartyClient(object):
         api_url = f"{self.server_uri}/api/v1/connections/sync"
         return post_request(api_url, payload)
 
-    def get_job_list(self, payload):
+    def get_job_list(self, connection_id):
         """Get the list of the all the run job for a given connection
 
         Args:
-            payload (dict): config for the job list
+            connection_id (str): id of the connection
 
         Returns:
             list: list of dict containing the job details
         """
+        payload = {"configId": connection_id, "configTypes": ["sync","reset_connection"]}
         api_url = f"{self.server_uri}/api/v1/jobs/list"
         return post_request(api_url, payload)
 
@@ -369,13 +403,16 @@ class ThirdPartyClient(object):
 
 # Utils Function
 
-def post_request(url, payload):
+def post_request(url, payload, response_type='json'):
     response_data = {}
     try:
         response = requests.post(url=url, json=payload)
         # import pdb; pdb.set_trace()
         if response.ok:
-            response_data = response.json()
+            if response_type == 'json':
+                response_data = response.json()
+            else:
+                response_data = {"response": response.text}
         else:
             print(response.text)
             response.raise_for_status()
@@ -443,11 +480,10 @@ def init_third_party(server_uri, db_host, db_user, db_password, db_port, db_name
         third_party_config["workspace_details"] = workspace
         third_party_config["destination_db"] = {
             "host": db_host,
-            "user": db_user,
+            "username": db_user,
             "password": db_password,
             "port": db_port,
-            "name": db_name,
-            "schema": db_schema
+            "database": db_name
         }
         with open(ENV_FILE_PATH, 'w') as fp:
             json.dump(third_party_config, fp)

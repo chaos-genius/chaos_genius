@@ -239,9 +239,14 @@ button.MuiIconButton-root.close-button {
 .MuiAccordionDetails-root p{
     font-size: 12px;
 }
+.mr-3{
+    margin-right: 30px !important;
+}
 @media (min-width: 600px){
 
 .MuiTab-root {
     min-width: 145px !important;
 }
+
+
 }

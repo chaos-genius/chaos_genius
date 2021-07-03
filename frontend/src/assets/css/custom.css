@@ -222,15 +222,9 @@ button.MuiIconButton-root.close-button {
     height: 4px !important;
     border-radius: 26px;
 }
-
-.mr-3{
-    margin-right: 30px !important;
-}
 @media (min-width: 600px){
 
 .MuiTab-root {
     min-width: 145px !important;
 }
-
-
 }

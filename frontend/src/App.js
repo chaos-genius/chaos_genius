@@ -12,7 +12,7 @@ import UserProfile from './pages/UserProfile';
 import UserSettings from './pages/UserSettings';
 import Home from './pages/Home';
 import Dashboards from './pages/Dashboards';
-import KpiExplorer from './pages/Kpi';
+import KpiExplorer from './pages/KpiExplorer';
 import ActionItems from './pages/ActionItems';
 import Alerts from './pages/Alerts';
 import Users from './pages/Users';

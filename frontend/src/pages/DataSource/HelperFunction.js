@@ -15,6 +15,7 @@ const renderTextField = (field, textType, formData, formError, handleInputChange
         inputProps['min'] = (field[1]?.['minimum']) ? (field[1]['minimum']) : ("0")
         inputProps['max'] = (field[1]?.['maximum']) ? (field[1]['maximum']) : ("")
     }
+    inputProps['autoComplete'] = 'off'
     return (
         <Grid item xs={12}>
             <FormControl variant="outlined" style={{ width: '100%' }}>
@@ -23,7 +24,7 @@ const renderTextField = (field, textType, formData, formError, handleInputChange
                     error={(textError) ? (true) : (false)}
                     value={(formData?.[textID]) ? (formData[textID]) : ("")}
                     id={textID}
-                    type={(field[1]?.['is_secret']) ? ("password") : (textType)}
+                    type={(field[1]?.['airbyte_secret']) ? ("password") : (textType)}
                     variant="outlined"
                     onChange={(e) => handleInputChange(e, textID)}
                     helperText={textError}
@@ -115,12 +116,14 @@ export const tab1Fields = (props, handleAutoComplete, handleInputAutoComplete) =
                     inputValue={connection_name}
                     onInputChange={(e, newInputValue) => { handleInputAutoComplete(e, newInputValue) }}
                     getOptionLabel={(option) => (option?.name) ? (option.name) : (option)}
+                    getOptionSelected={(option, value) => option.name === value}
                     renderOption={(option) => (
                         <React.Fragment>
                             {(option?.name) ? (option.name) : ("")}
                         </React.Fragment>
                     )}
-                    renderInput={(params) => (<TextField {...params} variant="outlined" />)}
+                    renderInput={(params) => (<TextField {...params} variant="outlined" inputProps={{...params.inputProps,autoComplete: 'new-password' }} />)}
+
                 />
             </FormControl>
             {/* ) : ("")} */}
@@ -135,10 +138,8 @@ export const renderlogs = (logs) => {
         logsfield.push(<p>{obj}</p>)
     })
     return (
-        <Card className="mt-4 mb-4">
-            <CardContent>
-                {logsfield}
-            </CardContent>
-        </Card>
+        <>
+            {logsfield}
+        </>
     )
 }

@@ -4,9 +4,8 @@ import { Button, Container, Row, Col, Alert } from '@themesberg/react-bootstrap'
 import {
   DialogContent, DialogContentText, DialogActions,
   Card, CardContent, Grid, FormControl,
-  TextField, InputLabel, Typography
+  TextField, InputLabel, Typography, Accordion, AccordionSummary, AccordionDetails
 } from '@material-ui/core';
-
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircle, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
@@ -18,12 +17,13 @@ import CustomTabs from '../../components/CustomTabs'
 import Api from '../../Service/Api'
 import './../../assets/css/custom.css'
 
+import imgSuccess from './../../assets/img/imgSuccess.svg'
 import postgresql from './../../assets/img/postgresql.png'
 import mysql from './../../assets/img/mysql.png'
 
 import { tab1Fields, renderInputFields, renderlogs } from './HelperFunction'
 import { BASE_URL, DEFAULT_HEADERS } from '../../config/Constants'
-import { LegendToggleOutlined } from "@material-ui/icons";
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 class DataSources extends React.Component {
 
   constructor(props) {
@@ -50,7 +50,8 @@ class DataSources extends React.Component {
       testLogs: '',
       testMessage: null,
       confirmation: false,
-      deleteID: ''
+      deleteID: '',
+      successModal:false
     }
   }
 
@@ -139,9 +140,9 @@ class DataSources extends React.Component {
       .then(response => response.json())
       .then(data => {
         this.setState({
-          confirmation:false,
-          deleteID:''
-        },() => {
+          confirmation: false,
+          deleteID: ''
+        }, () => {
           this.fetchConnection()
         })
       }).catch(error => {
@@ -149,7 +150,7 @@ class DataSources extends React.Component {
       });
   }
   handleInputChange = (e, key) => {
-    console.log(e.target)
+    // console.log(e.target)
     const value = e.target.value;
     const setObj = this.state.formData;
 
@@ -206,7 +207,9 @@ class DataSources extends React.Component {
       this.setState({
         connection: value.name,
         formData: {},
-        formError: []
+        formError: [],
+        testLogs:'',
+        testMessage:null
       }, () => {
         this.filterProperties()
       })
@@ -235,6 +238,20 @@ class DataSources extends React.Component {
       });
 
   }
+  renderSuccessModal = () =>{
+    return(
+      <div className="row">
+        <div className="col-md-12 text-center">
+          <img src={imgSuccess} alt="info" />
+          <Typography component="h4" className="alert-modal-title mt-3">You have successfully Added a Data Source</Typography>
+          <Typography component="h5" className="alert-modal-subtitle mt-1">Next step is to set up KPI definitions.</Typography>
+          <div className="mb-4 mt-4">
+            <a href="/kpi" ><span className="custom-primary-button custom-width mt-2 mb-3">Add KPI</span></a>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   saveDataSource = () => {
     const contexualForm = this.createPayload();
@@ -255,8 +272,8 @@ class DataSources extends React.Component {
     fetch(`${BASE_URL}api/connection/create`, requestOptions)
       .then(response => response.json())
       .then(data => {
-        console.log("response", data);
-        this.setState({ showDefault: false }, () => {
+        // console.log("response", data);
+        this.setState({ successModal:true,showDefault: false,formData:[],formError:[] }, () => {
           this.fetchConnection()
         })
       }).catch(error => {
@@ -336,6 +353,22 @@ class DataSources extends React.Component {
       </>
     )
   }
+  renderLogsUI = () => {
+    return (
+      <Accordion>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
+        >
+          <Typography>Logs</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          {renderlogs(this.state.testLogs)}
+        </AccordionDetails>
+      </Accordion>
+    )
+  }
   addModalContent = () => {
     // const tabData = [{
     //   title: "Connect New",
@@ -370,10 +403,14 @@ class DataSources extends React.Component {
                   {((Object.keys(this.state.connectionTypes).length > 0)) ? (tab1Fields(this.state, this.handleAutoComplete, this.handleInputAutoComplete)) : ("")}
                   {(Object.keys(this.state.properties).length > 0) ? (renderInputFields(this.state, this.handleInputChange, this.handleBooleanChange)) : ("")}
                 </Grid>
+                <Grid item xs={12} className="mt-4">
+                  {this.state.testMessage !== null && (<div><strong>Connection Status:</strong> {this.state.testMessage}</div>)}
+                </Grid>
               </CardContent>
             </Card>
-            {this.state.testMessage !== null && (<div><strong>Connection Status:</strong> {this.state.testMessage}</div>)}
-            {(this.state.testConnection === "failed" && this.state.testLogs) ? (renderlogs(this.state.testLogs)) : ("")}
+            
+
+            {(this.state.testConnection === "failed" && this.state.testLogs) ? (this.renderLogsUI()) : ("")}
 
           </DialogContentText>
         </DialogContent>
@@ -432,6 +469,12 @@ class DataSources extends React.Component {
           body={this.deleteConfirmation()}
           open={this.state.confirmation}
           handleCloseCallback={() => this.handleClose("confirmation")}
+        />
+        <CustomModal
+          title=""
+          body={this.renderSuccessModal()}
+          open={this.state.successModal}
+          handleCloseCallback={() => this.handleClose("successModal")}
         />
       </Container>
     )

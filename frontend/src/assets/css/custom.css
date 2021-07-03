@@ -8,7 +8,7 @@
 }
 
 
-.custom-table .MuiPaper-root {
+.custom-table .MuiPaper-root,.MuiPaper-root.MuiAccordion-root {
     box-shadow: unset;
 }
 
@@ -58,7 +58,7 @@ button.MuiIconButton-root.close-button {
     top: 10px;
 }
 /* cards Layout */
-.MuiCard-root {
+.MuiCard-root,.MuiPaper-root.MuiAccordion-root {
     overflow: hidden;
     background-color: #fff;
     background-clip: border-box;
@@ -222,7 +222,23 @@ button.MuiIconButton-root.close-button {
     height: 4px !important;
     border-radius: 26px;
 }
+.MuiCard-root, .MuiPaper-root.MuiAccordion-root{
+    background-color: #262B40;
+    color: #fff;
+}
 
+.MuiPaper-root.MuiAccordion-root .MuiIconButton-label{
+    color: #fff;
+}
+.MuiAccordion-root:before{
+    background-color: transparent !important;
+}
+.MuiAccordionDetails-root{
+    display: block !important;
+}
+.MuiAccordionDetails-root p{
+    font-size: 12px;
+}
 .mr-3{
     margin-right: 30px !important;
 }

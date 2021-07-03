@@ -11,6 +11,7 @@ export const Routes = {
     Home: { path: "/" },
     Dashboards: { path: "/dashboard" },
     KpiExplorer: { path: "/kpi" },
+    AddKpi: { path: "/kpi/new" },
     ActionItems: { path: "/actionitems" },
     Alerts: { path: "/alerts" },
 

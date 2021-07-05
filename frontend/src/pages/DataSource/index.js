@@ -209,6 +209,7 @@ class DataSources extends React.Component {
     if (value?.name) {
       this.setState({
         connection: value.name,
+        connectionName:'',
         formData: {},
         formError: [],
         testLogs: '',

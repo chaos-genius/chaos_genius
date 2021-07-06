@@ -4,7 +4,8 @@ import { Button, Container, Row, Col, Alert } from '@themesberg/react-bootstrap'
 import {
   DialogContent, DialogContentText, DialogActions,
   Card, CardContent, Grid, FormControl,
-  TextField, InputLabel, Typography, Accordion, AccordionSummary, AccordionDetails
+  TextField, InputLabel, Typography, Accordion, AccordionSummary, AccordionDetails,
+  CircularProgress
 } from '@material-ui/core';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -48,10 +49,12 @@ class DataSources extends React.Component {
       formError: [],
       testConnection: '',
       testLogs: '',
+      testLoader: false,
       testMessage: null,
       confirmation: false,
       deleteID: '',
-      successModal:false
+      successModal: false,
+      submitLoader:false
     }
   }
 
@@ -206,10 +209,11 @@ class DataSources extends React.Component {
     if (value?.name) {
       this.setState({
         connection: value.name,
+        connectionName:'',
         formData: {},
         formError: [],
-        testLogs:'',
-        testMessage:null
+        testLogs: '',
+        testMessage: null
       }, () => {
         this.filterProperties()
       })
@@ -238,8 +242,8 @@ class DataSources extends React.Component {
       });
 
   }
-  renderSuccessModal = () =>{
-    return(
+  renderSuccessModal = () => {
+    return (
       <div className="row">
         <div className="col-md-12 text-center">
           <img src={imgSuccess} alt="info" />
@@ -268,15 +272,16 @@ class DataSources extends React.Component {
       body: JSON.stringify(payload),
       headers: DEFAULT_HEADERS,
     };
-
+    this.setState({submitLoader:true})
     fetch(`${BASE_URL}api/connection/create`, requestOptions)
       .then(response => response.json())
       .then(data => {
         // console.log("response", data);
-        this.setState({ successModal:true,showDefault: false,formData:[],formError:[] }, () => {
+        this.setState({ successModal: true, showDefault: false, formData: [], formError: [],submitLoader:false }, () => {
           this.fetchConnection()
         })
       }).catch(error => {
+        this.setState({submitLoader:false})
         console.log(error);
       });
   }
@@ -321,16 +326,18 @@ class DataSources extends React.Component {
         redirect: 'follow'
         // mode: 'no-cors'
       };
-
+      this.setState({ testLoader: true })
       fetch(`${BASE_URL}api/connection/test`, requestOptions)
         .then(response => response.json())
         .then(data => {
           this.setState({
             testLogs: data.data.jobInfo.logs,
             testMessage: data.data.message,
-            testConnection: data.data.status
+            testConnection: data.data.status,
+            testLoader: false
           })
         }).catch(error => {
+          this.setState({ testLoader: false })
           console.log(error)
         });
 
@@ -405,18 +412,28 @@ class DataSources extends React.Component {
                 </Grid>
                 <Grid item xs={12} className="mt-4">
                   {this.state.testMessage !== null && (<div><strong>Connection Status:</strong> {this.state.testMessage}</div>)}
+                  {(this.state.testConnection === "succeeded")?(<div><strong>Connection Status:</strong> Succeeded</div>):("")}
                 </Grid>
               </CardContent>
             </Card>
-            
+
 
             {(this.state.testConnection === "failed" && this.state.testLogs) ? (this.renderLogsUI()) : ("")}
 
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button variant="warning" onClick={this.handleTestConnection}>Test Connection</Button>
-          <Button variant="primary" onClick={this.saveDataSource}>Submit</Button>
+          <Button variant="warning" onClick={this.handleTestConnection}>{
+            (this.state.testLoader) ?
+              (<CircularProgress size={24} className="button-progress" />) :
+              (<>Test Connection</>)
+          }</Button>
+          <Button variant="primary" onClick={this.saveDataSource}>
+          {
+            (this.state.submitLoader) ?
+              (<CircularProgress size={24} className="button-progress" />) :
+              (<>Submit</>)
+          }</Button>
         </DialogActions>
       </>
     )

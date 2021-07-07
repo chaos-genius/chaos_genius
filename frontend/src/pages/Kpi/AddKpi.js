@@ -66,10 +66,10 @@ class AddKpi extends React.Component {
     renderAppBar = () => {
         return (
             <Grid container spacing={2}>
-                <Grid item xs={1} className="display-flex-center pl-0 pr-0"> 
+                <Grid item xs={2} className="display-flex-center pl-0 pr-0"> 
                     <Typography component="h4"><span className="mr-2"><ArrowBack />Add Kpi</span></Typography>
                 </Grid>
-                <Grid item xs={11} className="text-center">
+                <Grid item xs={8} className="text-center">
                     <StepTabs index={1}/>
                 </Grid>
             </Grid>

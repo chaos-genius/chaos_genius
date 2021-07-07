@@ -18,6 +18,7 @@ import ActionItems from './pages/ActionItems';
 import Alerts from './pages/Alerts';
 import Users from './pages/Users';
 import DataSources from './pages/DataSource';
+import AddDataSources from './pages/DataSource/AddDataSources';
 import OrganisationSettings from './pages/OrganisationSettings';
 
 
@@ -75,6 +76,7 @@ function App() {
 
       <RouteWithSidebar exact path={Routes.Users.path} component={Users} />
       <RouteWithSidebar exact path={Routes.DataSources.path} component={DataSources} />
+      <RouteWithSidebar exact path={Routes.AddDataSources.path} component={AddDataSources} />
       <RouteWithSidebar exact path={Routes.OrganisationSettings.path} component={OrganisationSettings} />
 
       <Redirect to={Routes.NotFound.path} />

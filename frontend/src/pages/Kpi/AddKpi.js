@@ -5,6 +5,8 @@ import {
     Card, CardContent, CardActions, Grid, FormControl, FormControlLabel,
     TextField, Checkbox, InputLabel, Typography, Button
 } from '@material-ui/core';
+import StepTabs from "./../../components/StepTabs"
+import BreadCrumb from "./../../components/BreadCrumb"
 
 import { ArrowBack } from "@material-ui/icons";
 
@@ -61,16 +63,25 @@ class AddKpi extends React.Component {
         }
 
     }
-    renderAppBar = () =>{
-        return(
-          <Typography component="h4"><span className="mr-2"><ArrowBack />Add Kpi</span></Typography>
+    renderAppBar = () => {
+        return (
+            <Grid container spacing={2}>
+                <Grid item xs={1} className="display-flex-center pl-0 pr-0"> 
+                    <Typography component="h4"><span className="mr-2"><ArrowBack />Add Kpi</span></Typography>
+                </Grid>
+                <Grid item xs={11} className="text-center">
+                    <StepTabs index={1}/>
+                </Grid>
+            </Grid>
         )
-      }
+    }
     render() {
         const { kpiName, kpiNameError, defination, definationError, dataSource,
-            dataSourceError, query, queryError, metric, metricError, aggregate, aggregateError } = this.state
+            dataSourceError, query, queryError, metric, metricError, aggregate, aggregateError } = this.state;
         return (
             <>
+                <BreadCrumb />
+
                 {this.renderAppBar()}
                 <Grid container spacing={3} justify="center">
                     <Grid item xs={6}>

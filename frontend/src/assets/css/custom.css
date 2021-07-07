@@ -245,6 +245,20 @@ button.MuiIconButton-root.close-button {
 .btn{
     min-width: 100px;
 }
+.MuiPaper-root.MuiStepper-root {
+    background-color: transparent;
+}
+.display-flex-center{
+    display: flex;
+    align-items: center;
+}
+.pl-0{
+    padding-left: 0 !important
+} 
+.pr-0{
+    padding-right: 0 !important;
+
+}
 @media (min-width: 600px){
 
 .MuiTab-root {

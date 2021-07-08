@@ -20,7 +20,7 @@ import pandas as pd
 # from chaos_genius.utils import flash_errors
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.data_source_model import DataSource
-from chaos_genius.core.rca_analysis import get_hierarchical_table, get_rca_group_panel_metrics, get_waterfall_and_impact_table, get_waterfall_and_impact_table_single_dim, rca_preprocessor
+from chaos_genius.core.rca import RootCauseAnalysis
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 
 
@@ -67,6 +67,18 @@ def kpi_get_aggregation(kpi_id):
         connection_info = DataSource.get_by_id(kpi_info["data_source"])
         timeline = request.args.get("timeline")
         data = kpi_aggregation(kpi_info, connection_info.as_dict, timeline)
+    except Exception as err:
+        current_app.logger.info(f"Error Found: {err}")
+    return jsonify({"data": data, "msg": ""})
+
+@blueprint.route("/<int:kpi_id>/kpi-line-data", methods=["GET"])
+def kpi_get_line_data(kpi_id):
+    data = []
+    try:
+        kpi_info = KPI_DATA[kpi_id-1]
+        connection_info = DataSource.get_by_id(kpi_info["data_source"])
+        timeline = request.args.get("timeline")
+        data = kpi_line_data(kpi_info, connection_info.as_dict, timeline)
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")
     return jsonify({"data": data, "msg": ""})
@@ -152,13 +164,13 @@ def get_baseline_and_rca_df(kpi_info, connection_info, timeline="mom"):
 def process_rca_output(chart_data, kpi_info):
     rename_dict = {
         'string': "subgroup",
-        f"{kpi_info['metric']}_size_g1": "g1_size",
-        f"{kpi_info['metric']}_{kpi_info['aggregation']}_g1": "g1_agg",
-        f"{kpi_info['metric']}_count_g1": "g1_count",
-        f"{kpi_info['metric']}_size_g2": "g2_size", 
-        f"{kpi_info['metric']}_{kpi_info['aggregation']}_g2": "g2_agg", 
-        f"{kpi_info['metric']}_count_g2": "g2_count",
-        f"{kpi_info['metric']}_impact": "impact",
+        f"size_g1": "g1_size",
+        f"val_g1": "g1_agg",
+        f"count_g1": "g1_count",
+        f"size_g2": "g2_size", 
+        f"val_g2": "g2_agg", 
+        f"count_g2": "g2_count",
+        f"impact": "impact",
         "id": "id",
         "parentId": "parentId",
     }
@@ -171,13 +183,15 @@ def kpi_aggregation(kpi_info, connection_info, timeline="mom"):
     try:
         base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, timeline)
 
-        panel_metrics = get_rca_group_panel_metrics(
-            d1 = base_df, 
-            d2 = rca_df, 
-            metric = kpi_info['metric'], 
+        rca = RootCauseAnalysis(
+            base_df, rca_df, 
+            dims= kpi_info['dimensions'], 
+            metric= kpi_info['metric'], 
+            agg = kpi_info["aggregation"],
             precision = kpi_info.get("metric_precision", 3),
-            agg = kpi_info["aggregation"]
         )
+
+        panel_metrics = rca.get_panel_metrics()
 
         final_data = {
             "panel_metrics": panel_metrics,
@@ -185,43 +199,66 @@ def kpi_aggregation(kpi_info, connection_info, timeline="mom"):
             "insights": []
         }
 
+        print(final_data)
+
     except Exception as err:
         # print(traceback.format_exc())
         current_app.logger.error(f"Error in RCA Analysis: {err}")
-        final_data = {"impact": None, "g1_metrics": dict(), "g2_metrics": dict()}
+        final_data = {
+            "panel_metrics": [],
+            "line_chart_data": [],
+            "insights": []
+        }
     return final_data
+
+
+def kpi_line_data(kpi_info, connection_info, timeline="mom"):
+    metric = kpi_info["metric"]
+    dt_col = kpi_info["datetime_column"]
+    agg = kpi_info["aggregation"]
+    
+    base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, "mom")
+    
+    base_df = base_df.resample("D", on= dt_col).agg({metric: agg}).reset_index().round(kpi_info.get("metric_precision", 3))
+    rca_df = rca_df.resample("D", on= dt_col).agg({metric: agg}).reset_index().round(kpi_info.get("metric_precision", 3))
+
+    base_df[dt_col] = base_df[dt_col].dt.strftime('%Y/%m/%d %H:%M:%S')
+    rca_df[dt_col] = rca_df[dt_col].dt.strftime('%Y/%m/%d %H:%M:%S')
+
+    return {
+        "baseline": base_df.to_dict(orient="records"),
+        "focus_group": rca_df.to_dict(orient="records")
+    }
 
 
 def rca_analysis(kpi_info, connection_info, timeline="mom", dimension= None):
     try:
         base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, timeline)
 
-        base_df, rca_df = rca_preprocessor(base_df, rca_df)
+        num_dim_combs_to_consider = list(range(1, min(3, len(kpi_info['dimensions']))))
 
-        if dimension is None:
-            final_data = get_waterfall_and_impact_table(
-                d1 = base_df, 
-                d2 = rca_df, 
-                dims = kpi_info["dimensions"], 
-                metric = kpi_info["metric"], 
-                n = [1, 2, 3], 
-                precision = kpi_info.get("metric_precision", 3),
-                agg = kpi_info["aggregation"]
-            )
-        elif dimension in kpi_info["dimensions"]:
-            dims_without_main_dim = list(deepcopy(kpi_info["dimensions"]))
-            dims_without_main_dim.remove(dimension)
-            n = list(range(1, min([3, len(dims_without_main_dim)])+1))
-            final_data = get_waterfall_and_impact_table_single_dim(
-                d1 = base_df, 
-                d2 = rca_df, 
-                main_dim = dimension, 
-                dims = dims_without_main_dim, 
-                metric = kpi_info["metric"], 
-                n = n, 
-                precision = kpi_info.get("metric_precision", 3),
-                agg = kpi_info["aggregation"]
-            )
+        rca = RootCauseAnalysis(
+            base_df, rca_df, 
+            dims= kpi_info['dimensions'], 
+            metric= kpi_info['metric'], 
+            agg = kpi_info["aggregation"],
+            num_dim_combs_to_consider = num_dim_combs_to_consider,
+            precision = kpi_info.get("metric_precision", 3),
+        )
+
+        if dimension is None or dimension in kpi_info["dimensions"]:
+            impact_table = rca.get_impact_rows(dimension)
+            waterfall_table = rca.get_waterfall_table_rows(dimension)
+            waterfall_data, y_axis_lim = rca.get_waterfall_plot_data(dimension)
+
+            final_data = {
+                "data_table": impact_table,
+                "chart": {
+                    "chart_table": waterfall_table,
+                    "chart_data": waterfall_data,
+                    "y_axis_lim": y_axis_lim
+                }
+            }
         else:
             raise ValueError(f"Dimension: {dimension} does not exist.")
 
@@ -239,6 +276,10 @@ def rca_analysis(kpi_info, connection_info, timeline="mom", dimension= None):
 def rca_hierarchical_data(kpi_info, connection_info, timeline="mom", dimension= None):
     try:
         base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, timeline)
+        
+        # TODO: Implement Hierarchical Data Table
+        raise NotImplementedError
+        
         base_df, rca_df = rca_preprocessor(base_df, rca_df)
 
         if dimension not in kpi_info["dimensions"]:

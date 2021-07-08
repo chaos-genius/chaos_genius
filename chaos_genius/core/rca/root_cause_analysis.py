@@ -113,6 +113,24 @@ class RootCauseAnalysis():
         return impact_table
 
 
+    def _get_single_dim_impact_table(self, single_dim):
+
+        if self._impact_table is None:
+            self._impact_table = self._initialize_impact_table()
+
+        impact_table = self._impact_table.copy()
+        other_dims = set(self._dims)
+        other_dims.remove(single_dim)
+        impact_table = impact_table[
+            (~impact_table[single_dim].isna())
+            & (impact_table[other_dims].isna().sum(axis=1) == len(other_dims))
+        ]
+
+        impact_table = impact_table.reset_index(drop=True)
+
+        return impact_table
+
+
     def _initialize_waterfall_table(self, single_dim = None):
 
         if self._impact_table is None:
@@ -525,6 +543,51 @@ class RootCauseAnalysis():
             [round(i, self._precision) for i in y_axis_lims]
         )
 
+    
+    def get_hierarchical_table(
+        self,
+        single_dim: str,
+        max_depth: int = 3,
+        max_children: int = 5
+    ) -> Dict:
+
+        other_dims = self._dims[:]
+        other_dims.remove(single_dim)
+
+        impact_table = self._initialize_impact_table()
+        impact_table["parentId"] = None
+        # impact_table["id"] = impact_table.index
+        impact_table["depth"] = None
+
+        output_table = self._get_single_dim_impact_table(single_dim)
+
+        output_table["depth"] = 1
+
+        for depth in range(1, max_depth):
+            parents = output_table[output_table["depth"] == depth]
+            for index, row in parents.iterrows():
+                string = row["string"]
+                children = impact_table[impact_table["string"].str.contains(
+                    string)]
+                children = children[
+                    children[other_dims].isna().sum(axis=1)
+                    == len(other_dims) - depth
+                ]
+                children = children.iloc[:max_children]
+                children["depth"] = depth + 1
+                children["parentId"] = index
+                output_table = output_table.append(children, ignore_index=True)
+
+        output_table.drop(self._dims, axis=1, inplace=True)
+
+        output_table = output_table.reset_index().rename(
+            columns={"index": "id"})
+
+        output_table["string"] = \
+            output_table["string"].apply(convert_query_string_to_user_string)
+
+        return output_table.round(self._precision).to_dict("records")
+
 
 if __name__ == "__main__":
     df = pd.read_csv("toy_dataset_sheet.csv")
@@ -552,7 +615,4 @@ if __name__ == "__main__":
     single_dim_waterfall_table = rca.get_waterfall_table_rows(single_dim= "Device Type")
     single_dim_waterfall_data = rca.get_waterfall_plot_data(single_dim= "Device Type")
 
-    print(json.dumps(panel_metrics_data, indent= 4))
-
-    # TODO: Fix heirarchical table
-    # single_dim_hierarchial_table = rca.get_hierarchical_table(single_dim= "Device Type")
+    single_dim_hierarchial_table = rca.get_hierarchical_table(single_dim= "Device Type")

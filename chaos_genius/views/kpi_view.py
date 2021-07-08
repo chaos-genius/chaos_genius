@@ -276,30 +276,23 @@ def rca_analysis(kpi_info, connection_info, timeline="mom", dimension= None):
 def rca_hierarchical_data(kpi_info, connection_info, timeline="mom", dimension= None):
     try:
         base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, timeline)
-        
-        # TODO: Implement Hierarchical Data Table
-        raise NotImplementedError
-        
-        base_df, rca_df = rca_preprocessor(base_df, rca_df)
 
         if dimension not in kpi_info["dimensions"]:
             raise ValueError(f"{dimension} not in {kpi_info['dimensions']}")
 
-        dims_without_main_dim = list(deepcopy(kpi_info["dimensions"]))
-        dims_without_main_dim.remove(dimension)
+        num_dim_combs_to_consider = list(range(1, min(3, len(kpi_info['dimensions']))))
 
-        final_data = get_hierarchical_table(
-            d1 = base_df, 
-            d2 = rca_df, 
-            main_dim = dimension,
-            dims = dims_without_main_dim, 
-            metric = kpi_info["metric"],
+        rca = RootCauseAnalysis(
+            base_df, rca_df, 
+            dims= kpi_info['dimensions'], 
+            metric= kpi_info['metric'], 
+            agg = kpi_info["aggregation"],
+            num_dim_combs_to_consider = num_dim_combs_to_consider,
             precision = kpi_info.get("metric_precision", 3),
-            agg = kpi_info["aggregation"]
         )
 
         final_data = {
-            'data_table': final_data
+            'data_table': rca.get_hierarchical_table(dimension)
         }
 
         tmp_chart_data = final_data['data_table']

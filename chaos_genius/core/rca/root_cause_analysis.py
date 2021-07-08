@@ -21,8 +21,8 @@ try:
 except ModuleNotFoundError:
     display = print
 
-# TODO: Add count to SUPPORTED_AGGREGATIONS
-SUPPORTED_AGGREGATIONS = ["mean", "sum"]
+
+SUPPORTED_AGGREGATIONS = ["mean", "sum", "count"]
 EPSILON = 1e-8
 
 
@@ -226,6 +226,8 @@ class RootCauseAnalysis():
             value = value_numerator / value_denominator
         elif self._agg == "sum":
             value = data[agg_name]
+        elif self._agg == "count":
+            value = data[agg_name]
         else:
             raise ValueError(f"Aggregation {self._agg} is not defined.")
 
@@ -237,7 +239,7 @@ class RootCauseAnalysis():
         self,
         dim_comb: List[str]
     ) -> pd.DataFrame:
-        agg_list = [self._agg] + ["count"]
+        agg_list = [self._agg, "count"] if self._agg != "count" else ["count"]
 
         grp1_df = self._grp1_df.groupby(
             dim_comb)[self._metric].agg(agg_list).reset_index()
@@ -258,6 +260,8 @@ class RootCauseAnalysis():
                 value_denominator = combined_df[count_name].sum() + EPSILON
                 value = value_numerator / value_denominator
             elif self._agg == "sum":
+                value = combined_df[agg_name]
+            elif self._agg == "count":
                 value = combined_df[agg_name]
             else:
                 raise ValueError(f"Aggregation {self._agg} is not defined.")
@@ -324,6 +328,9 @@ class RootCauseAnalysis():
                     elif self._agg == "sum":
                         grp1_val = t_d1[self._metric].sum()
                         grp2_val = t_d2[self._metric].sum()
+                    elif self._agg == "count":
+                        grp1_val = t_d1[self._metric].count()
+                        grp2_val = t_d2[self._metric].count()
 
                     overlap_impact = grp2_val - grp1_val
                     if np.isnan(overlap_impact):

@@ -217,18 +217,25 @@ def kpi_line_data(kpi_info, connection_info, timeline="mom"):
     dt_col = kpi_info["datetime_column"]
     agg = kpi_info["aggregation"]
     
-    base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, "mom")
+    dfs = get_baseline_and_rca_df(kpi_info, connection_info, "mom")
     
-    base_df = base_df.resample("D", on= dt_col).agg({metric: agg}).reset_index().round(kpi_info.get("metric_precision", 3))
-    rca_df = rca_df.resample("D", on= dt_col).agg({metric: agg}).reset_index().round(kpi_info.get("metric_precision", 3))
+    for df in dfs:
+        df = df.resample("D", on= dt_col).agg({metric: agg}).reset_index().round(kpi_info.get("metric_precision", 3))
+        df["day"] = df["date"].dt.day
+        df[dt_col] = df[dt_col].dt.strftime('%Y/%m/%d %H:%M:%S')
 
-    base_df[dt_col] = base_df[dt_col].dt.strftime('%Y/%m/%d %H:%M:%S')
-    rca_df[dt_col] = rca_df[dt_col].dt.strftime('%Y/%m/%d %H:%M:%S')
+    base_df, rca_df = dfs
 
-    return {
-        "baseline": base_df.to_dict(orient="records"),
-        "focus_group": rca_df.to_dict(orient="records")
-    }
+    output = base_df.merge(rca_df, how="outer", on="day")
+    output = output.rename(columns= {
+        "date_x": "previousDate", 
+        "date_y": "date", 
+        "ItemTotalPrice_x": "value2",
+        "ItemTotalPrice_y": "value1"
+    }) 
+    output = output.drop("day", axis= 1).iloc[:30]
+
+    return output.to_dict(orient="records")
 
 
 def rca_analysis(kpi_info, connection_info, timeline="mom", dimension= None):

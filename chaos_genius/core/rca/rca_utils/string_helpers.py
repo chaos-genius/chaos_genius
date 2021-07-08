@@ -5,6 +5,7 @@ import numpy as np
 
 # TODO: Update docstrings to sphinx format
 
+
 def _parse_single_col_for_query_string(col: str, value: str) -> str:
     # matches expressions like [-0.01, 0.001) representing limits for
     # binned numbers
@@ -34,7 +35,7 @@ def convert_df_dims_to_query_strings(inp) -> str:
     """
 
     query_string_lists = [
-        _parse_single_col_for_query_string(col, val) for col, val in \
+        _parse_single_col_for_query_string(col, val) for col, val in
         zip(inp.index, inp.values) if val is not np.nan
     ]
     return " and ".join(query_string_lists)
@@ -74,7 +75,8 @@ def convert_query_string_to_user_string(in_str: str) -> str:
                     continue
                 else:
                     out = out.groups()
-                    final_out.append(" ".join([val_dict.get(i, i) for i in out]))
+                    final_out.append(
+                        " ".join([val_dict.get(i, i) for i in out]))
                     break
             else:
                 print(f"{filt} did not match any re strings.")

@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def get_best_subgroups_using_superset_algo(
     df_subgroups: pd.DataFrame,
     max_waterfall_columns: int,
@@ -17,7 +18,7 @@ def get_best_subgroups_using_superset_algo(
     i = -1
 
     while i < len(df_subgroups) - 1 and i < max_subgroups_considered \
-        and len([i[-1] for i in current_comb if i[-1] is False]) < max_waterfall_columns:
+            and len([i[-1] for i in current_comb if i[-1] is False]) < max_waterfall_columns:
 
         i += 1
         ignored = False
@@ -25,7 +26,6 @@ def get_best_subgroups_using_superset_algo(
         curr_filter_string = df_subgroups.iloc[i]["string"]
         curr_filter_split = curr_filter_string.split(" and ")
         len_curr_filters = len(curr_filter_split)
-
 
         # check if filters of subgroup are already
         # in current combination.
@@ -39,15 +39,16 @@ def get_best_subgroups_using_superset_algo(
                     break
 
             elif len_curr_filters > len_comb_filter:
-                curr_filter_combs = combinations(curr_filter_split, len_comb_filter)
-                curr_filter_combs = [" and ".join(i) for i in curr_filter_combs]
+                curr_filter_combs = combinations(
+                    curr_filter_split, len_comb_filter)
+                curr_filter_combs = [" and ".join(
+                    i) for i in curr_filter_combs]
                 if comb_filter_string in curr_filter_combs:
                     curr_filters_exist_in_comb = True
                     break
 
             else:
                 continue
-
 
         if curr_filters_exist_in_comb:
             ignored = True

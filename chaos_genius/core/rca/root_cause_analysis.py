@@ -163,7 +163,7 @@ class RootCauseAnalysis():
         best_subgroups.rename(
             columns={"impact": "impact_full_group"}, inplace=True
         )
-        best_subgroups[["indices in group", "non overlap indices"]] = 0
+        best_subgroups[["indices_in_group", "non_overlap_indices"]] = 0
 
         # calculate overlap values
         best_subgroups = self._get_overlap_values_for_waterfall(best_subgroups)
@@ -346,10 +346,10 @@ class RootCauseAnalysis():
                     all_indices = all_indices.union(
                         overlap_points_d1).union(overlap_points_d2)
 
-            subgroups_df_output.loc[curr_loc, "indices in group"] = \
+            subgroups_df_output.loc[curr_loc, "indices_in_group"] = \
                 len(d1_idxs) + len(d2_idxs)
 
-            subgroups_df_output.loc[curr_loc, "non overlap indices"] = \
+            subgroups_df_output.loc[curr_loc, "non_overlap_indices"] = \
                 len(d1_idxs) + len(d2_idxs) - overlap_indices_count
 
         return subgroups_df_output
@@ -454,6 +454,12 @@ class RootCauseAnalysis():
         else:
             best_subgroups = self._initialize_waterfall_table(
                 single_dim=single_dim)
+
+        best_subgroups["total_data_points"] = best_subgroups["indices_in_group"] \
+            + best_subgroups["non_overlap_indices"]
+
+        best_subgroups.drop("ignored", axis=1, inplace=True)
+
         return best_subgroups
 
     def get_panel_metrics(self) -> 'OrderedDict[str, List[float]]':

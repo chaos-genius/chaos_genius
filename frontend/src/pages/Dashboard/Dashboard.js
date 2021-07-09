@@ -10,7 +10,7 @@ import CustomTabs from '../../components/CustomTabs'
 
 import { tab1Fields } from './HelperFunctions'
 import SideBar from './SideBar'
-
+import MultidimensionTable from './MultidimensionTable'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import RcaAnalysisTable from '../../components/DashboardTable';
@@ -30,9 +30,11 @@ class Dashboard extends React.Component {
         super(props)
         this.state = {
             kpi: 0,
-            kpiName: "KPI",
+            kpiName: "",
             cardData: [],
             cardDataLoader: false,
+            dimension: '',
+            dimensionType: 'multidimension',
             timeline: "mom",
             lineChartData: {},
             dimensionData: [],
@@ -44,12 +46,32 @@ class Dashboard extends React.Component {
             amChart: null,
             cardDataLoader: false,
             loading: false,
-            tabState: 0
+            tabState: 0,
+            multiDimensionTableData: []
 
         }
 
     }
-
+    fetchKPIData = () => {
+        this.setState({ loading: true })
+        fetch(`/api/kpi/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data?.data) {
+                    if (data.data?.[0]['id']) {
+                        this.setState({
+                            kpi: data.data[0]['id'],
+                            kpiName: data.data[0]['name'],
+                            kpiData: data.data,
+                            loading: false
+                        }, () => {
+                            this.fetchKpiAggegation();
+                            this.fetchDimensionData();
+                        })
+                    }
+                }
+            });
+    }
     fetchKpiAggegation = () => {
         const { kpi, timeline } = this.state;
         if (kpi !== 0) {
@@ -62,13 +84,33 @@ class Dashboard extends React.Component {
                     const data = respData.data;
                     if (data?.panel_metrics) {
                         this.setState({
-                            cardData: data.panel_metrics,                            
+                            cardData: data.panel_metrics,
                         })
                     }
                     this.setState({
                         cardDataLoader: false
                     })
                 });
+            this.setState({
+                cardDataLoader: true
+            })
+            fetch(`${BASE_URL}/api/kpi/${kpi}/kpi-line-data?timeline=${timeline}`)
+                .then(response => response.json())
+                .then(respData => {
+                    const data = respData.data;
+                    if (data) {
+                        this.setState({
+                            lineChartData: data,
+                        }, () => {
+                            this.plotLineChart();
+                        })
+                    }
+                    this.setState({
+                        cardDataLoader: false
+                    })
+                });
+
+
         }
     }
     handleKpiChange = (e) => {
@@ -95,15 +137,23 @@ class Dashboard extends React.Component {
             this.fetchAnalysisData();
         })
     }
+    handleDimensionType = (e) => {
+        const targetComponent = e.target;
+        this.setState({
+            dimensionType: targetComponent.value
+        }, () => {
+            this.fetchDimensionData();
+        })
+    }
     fetchDimensionData = () => {
         this.setState({ loading: true })
         fetch(`${BASE_URL}/api/kpi/${this.state.kpi}/get-dimensions`)
             .then(response => response.json())
             .then(data => {
                 const dimensionArray = data.dimensions;
-                dimensionArray.unshift("multidimension")
+                // dimensionArray.unshift("multidimension")
                 this.setState({
-                    dimension: 'multidimension',
+                    dimension: dimensionArray[0],
                     dimensionData: dimensionArray,
                     loading: false
                 }, () => {
@@ -133,9 +183,9 @@ class Dashboard extends React.Component {
         })
     }
     fetchAnalysisData = () => {
-        const { kpi, timeline, dimension, tabState } = this.state;
+        const { kpi, timeline, dimension, tabState, dimensionType } = this.state;
         let dimensionStr = ""
-        if (tabState !== 0) {
+        if (dimensionType !== "multidimension") {
             dimensionStr = `&dimension=${dimension}`
         }
         if (kpi !== 0) {
@@ -162,7 +212,7 @@ class Dashboard extends React.Component {
                         this.setState({
                             chartData: data.chart.chart_data,
                             yAxis: data.chart.y_axis_lim,
-                            // tableData: data.data_table,
+                            multiDimensionTableData: data.chart.chart_table,
                             loading: false
                         }, () => {
                             this.plotChart();
@@ -218,7 +268,7 @@ class Dashboard extends React.Component {
         columnTemplate.propertyFields.fill = "color";
 
         let label = columnTemplate.createChild(am4core.Label);
-        label.text = "{displayValue.formatNumber('#,## a')}";
+        label.text = "{displayValue.formatNumber('###,###.##')}";
         label.align = "center";
         label.valign = "middle";
         label.wrap = true;
@@ -245,17 +295,7 @@ class Dashboard extends React.Component {
 
         // }
     }
-    fetchKPIData = () => {
-        this.setState({ loading: true })
-        fetch(`${BASE_URL}/api/kpi/`)
-            .then(response => response.json())
-            .then(data => {
-                this.setState({
-                    kpiData: data.data,
-                    loading: false
-                })
-            });
-    }
+
     setDataColumns = () => {
         let timeMetric = '';
         if (this.state.timeline === 'mom') {
@@ -277,21 +317,12 @@ class Dashboard extends React.Component {
         });
     }
     componentDidMount() {
-        this.plotLineChart();
         this.fetchKPIData();
-        this.fetchKpiAggegation();
-        this.fetchDimensionData();
         this.setDataColumns();
     }
     tabHousingChart = () => {
         return (
-
-            <Card className="mb-4 chart-tab-card">
-                <CardContent>
-                    <div id="chartdivWaterfall" style={{ width: "100%", height: "500px" }}></div>
-                </CardContent>
-            </Card>
-
+            <div id="chartdivWaterfall" style={{ width: "100%", height: "500px" }}></div>
         )
     }
     renderAutoRCA = () => {
@@ -306,10 +337,10 @@ class Dashboard extends React.Component {
         }
         return (
             <>
-                <Card>
+                <Card className="chart-tab-card">
                     <CardContent>
-                        <Grid container spacing={2}>
-                            <Grid item xs={12}>
+                        <Grid container spacing={2} justify="flex-end" className="custom-dash-select">
+                            <Grid item xs={12} md={4}>
                                 <FormControl variant="outlined" style={{ width: '100%' }}>
                                     {/* <InputLabel htmlFor="analysisTimeline">Timeline</InputLabel> */}
                                     <Select native defaultValue={this.state.timeline} id="analysisTimeline" onChange={(e) => this.handleTimelineChange(e)}>
@@ -321,13 +352,13 @@ class Dashboard extends React.Component {
                         </Grid>
 
                         <Grid container spacing={2} >
-                            <Grid item xs={12} md={5}>
+                            <Grid item xs={12} md={6}>
                                 {(this.state.cardData) ? (tab1Fields(this.state.cardData, this.state.kpiName, this.state.cardDataLoader)) : ("")}
                             </Grid>
-                            <Grid item xs={12} md={7}>
-                                <Card>
+                            <Grid item xs={12} md={6}>
+                                <Card className="line-chart-card">
                                     <CardContent>
-                                        <div id="lineChartDiv" style={{ width: "100%", height: "300px" }}></div>
+                                        <div id="lineChartDiv" style={{ width: "100%", height: "223px" }}></div>
                                     </CardContent>
                                 </Card>
                             </Grid>
@@ -336,22 +367,54 @@ class Dashboard extends React.Component {
 
                     </CardContent>
                 </Card>
-                <Accordion>
+                <Accordion className="custom-dash-accordian" defaultExpanded={true}>
                     <AccordionSummary
                         expandIcon={<ExpandMoreIcon />}
                         aria-controls="panel1a-content"
                         id="panel1a-header"
                     >
-                        <Typography>Drill Downs</Typography>
+                        <Typography component="h4" className="title">Drill Downs</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
+                        <Grid container spacing={2} justify="flex-end" className="custom-dash-select">
+                            <Grid item xs={12} md={4}>
+                                <FormControl variant="outlined" style={{ width: '100%' }}>
+                                    {/* <InputLabel htmlFor="analysisTimeline">Timeline</InputLabel> */}
+                                    <Select native defaultValue={this.state.dimensionType} id="dimensionType" onChange={(e) => this.handleDimensionType(e)}>
+                                        <option value="multidimension">MultiDimension</option>
+                                        <option value="singledimension">Single Dimension</option>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                        </Grid>
                         {(this.state.loading) ? (
                             <div className="loader">
                                 <CircularProgress color="secondary" />
                             </div>
+                        ) : (this.state.dimensionType === "multidimension") ? (
+                            this.tabHousingChart()
                         ) : (
-                            <CustomTabs tabs={tabChartData} handleDimensionChange={this.handleDimensionChange} tabState={this.state.tabState}  />
+                            <CustomTabs tabs={tabChartData} handleDimensionChange={this.handleDimensionChange} tabState={this.state.tabState} scrollable="auto" />
                         )}
+                        <div className="mt-4">
+                            {(this.state.dimensionType !== "multidimension") ? (
+                                <div style={{ display: this.state.tableData.length ? 'block' : 'none' }}>
+
+                                    <h5 className="mb-4">Top Subgroups Data</h5>
+                                    <p>These are the top 50 subgroups sorted by their Impact.</p>
+                                    {(Object.keys(this.state.tableData).length > 0) ? (
+                                        <RcaAnalysisTable data={this.state.tableData.slice(0, 50)} columns={this.state.dataColumns} />) : ("")}
+
+                                </div>
+                            ) : (Object.keys(this.state.multiDimensionTableData).length > 0) ? (
+
+                                <MultidimensionTable multiDimensionTableData={this.state.multiDimensionTableData} />
+
+
+                            ) : ("")}
+                        </div>
+
+
                     </AccordionDetails>
                 </Accordion>
 
@@ -359,28 +422,14 @@ class Dashboard extends React.Component {
         )
     }
     plotLineChart = () => {
+
+        // https://www.amcharts.com/demos/comparing-different-date-values-google-analytics-style/?theme=frozen#code
+
         am4core.options.autoDispose = true;
 
-        // if (this.state.amChart) {
-        //   this.state.amChart.data = this.state.chartData;
-        //   let valueAxis = this.state.amChart.yAxes.getIndex(0);
-        //   valueAxis.min = this.state.yAxis[0];
-        //   valueAxis.max = this.state.yAxis[1];
-        // } else {
         let chart = am4core.create("lineChartDiv", am4charts.XYChart);
 
-        // Add data
-        // chart.data = [
-        //     { date: new Date(2019, 5, 12), value1: 50, value2: 48, previousDate: new Date(2019, 5, 5) },
-        //     { date: new Date(2019, 5, 13), value1: 53, value2: 51, previousDate: new Date(2019, 5, 6) },
-        //     { date: new Date(2019, 5, 14), value1: 56, value2: 58, previousDate: new Date(2019, 5, 7) },
-        //     { date: new Date(2019, 5, 15), value1: 52, value2: 53, previousDate: new Date(2019, 5, 8) },
-        //     { date: new Date(2019, 5, 16), value1: 48, value2: 44, previousDate: new Date(2019, 5, 9) },
-        //     { date: new Date(2019, 5, 17), value1: 47, value2: 42, previousDate: new Date(2019, 5, 10) },
-        //     { date: new Date(2019, 5, 18), value1: 59, value2: 55, previousDate: new Date(2019, 5, 11) }
-        // ]
-        chart.data = [{ "previousDate": "2011/05/01 00:00:00", "value2": 6973.66, "date": "2011/06/01 00:00:00", "value1": 15390.89 }, { "previousDate": "2011/05/02 00:00:00", "value2": 0.0, "date": "2011/06/02 00:00:00", "value1": 28104.56 }, { "previousDate": "2011/05/03 00:00:00", "value2": 28910.41, "date": "2011/06/03 00:00:00", "value1": 15042.26 }, { "previousDate": "2011/05/04 00:00:00", "value2": 27532.0, "date": "2011/06/04 00:00:00", "value1": 0.0 }, { "previousDate": "2011/05/05 00:00:00", "value2": 25232.67, "date": "2011/06/05 00:00:00", "value1": 25639.54 }, { "previousDate": "2011/05/06 00:00:00", "value2": 30786.7, "date": "2011/06/06 00:00:00", "value1": 16290.98 }, { "previousDate": "2011/05/07 00:00:00", "value2": 0.0, "date": "2011/06/07 00:00:00", "value1": 33908.26 }, { "previousDate": "2011/05/08 00:00:00", "value2": 18867.4, "date": "2011/06/08 00:00:00", "value1": 30192.13 }, { "previousDate": "2011/05/09 00:00:00", "value2": 21624.41, "date": "2011/06/09 00:00:00", "value1": 42910.38 }, { "previousDate": "2011/05/10 00:00:00", "value2": 29870.7, "date": "2011/06/10 00:00:00", "value1": 58245.12 }]
-        // chart.data = this.state.chartData['baseline']
+        chart.data = this.state.lineChartData;
 
         // Create axes
         let dateAxis = chart.xAxes.push(new am4charts.DateAxis());
@@ -390,16 +439,16 @@ class Dashboard extends React.Component {
 
         // Create series
         let series = chart.series.push(new am4charts.LineSeries());
-        series.dataFields.valueY = "value1";
+        series.dataFields.valueY = "value";
         series.dataFields.dateX = "date";
         series.strokeWidth = 2;
         series.minBulletDistance = 10;
-        series.tooltipText = "[bold]{date.formatDate()}:[/] {value1}\n[bold]{previousDate.formatDate()}:[/] {value2}";
+        series.tooltipText = "[bold]{date.formatDate()}:[/] {value}\n[bold]{previousDate.formatDate()}:[/] {previousValue}";
         series.tooltip.pointerOrientation = "vertical";
 
         // Create series
         let series2 = chart.series.push(new am4charts.LineSeries());
-        series2.dataFields.valueY = "value2";
+        series2.dataFields.valueY = "previousValue";
         series2.dataFields.dateX = "date";
         series2.strokeWidth = 2;
         series2.strokeDasharray = "3,4";
@@ -418,21 +467,14 @@ class Dashboard extends React.Component {
 
         return (
             <Grid container spacing={3}>
-                <Grid item xs={3}>
-                    <SideBar handleKpiChange={this.handleKpiChange} />
-                </Grid>
-                <Grid item xs={9}>
+                {(Object.keys(this.state.kpiData).length > 0) ? (
+                    <Grid item xs={3}>
+                        <SideBar handleKpiChange={this.handleKpiChange} kpiData={this.state.kpiData} kpiID={this.state.kpi} />
+                    </Grid>
+                ) : ("")}
+
+                <Grid item xs={9} className="tab-with-borders">
                     <CustomTabs tabs={tabChartData} />
-                    <div style={{ display: this.state.tableData.length ? 'block' : 'none' }}>
-                        <Card className="mb-4 ">
-                            <CardContent>
-                                <h5 className="mb-4">Top Subgroups Data</h5>
-                                <p>These are the top 50 subgroups sorted by their Impact.</p>
-                                {(Object.keys(this.state.tableData).length > 0) ? (
-                                    <RcaAnalysisTable data={this.state.tableData.slice(0, 50)} columns={this.state.dataColumns} />) : ("")}
-                            </CardContent>
-                        </Card>
-                    </div>
                 </Grid>
             </Grid>
         )

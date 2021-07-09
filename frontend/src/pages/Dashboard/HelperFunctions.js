@@ -182,12 +182,19 @@ export const tab1Fields = (cardData, kpi, loader) => {
     } else {
         return (
             <Card className="custom-cardData">
-                <CardContent>
-                    <Grid container spacing={2} className="mt-4 mb-4 graph-info-cards">
-
-                        <Grid item xs={12} md={4}>
-                            <Typography variant="h4" component="h4">Last Month</Typography>
-                            <Typography component="h6" variant="h6" className="small" >(Mar 1 to Mar 31)</Typography>
+                <div className="cardData-titles">
+                    <Typography component="h4" className="title">Mean</Typography>
+                    <Typography component="h4" className="title">Median</Typography>
+                    <Typography component="h4" className="title">Max</Typography>
+                    <Typography component="h4" className="title">Min</Typography>
+                </div>
+                <CardContent>                    
+                    <Grid container spacing={2} className="mt-2 mb-2 graph-info-cards">
+                        <Grid item xs={12} md={4} className="text-center">
+                            <div className="min-height">
+                                <Typography variant="h4" component="h4">Last Month</Typography>
+                                <Typography component="h6" variant="h6" className="small" >(Mar 1 to Mar 31)</Typography>
+                            </div>
                             <Card>
                                 <CardContent>
                                     <Grid container spacing={1} className="text-center">
@@ -214,9 +221,11 @@ export const tab1Fields = (cardData, kpi, loader) => {
                                 </CardContent>
                             </Card>
                         </Grid>
-                        <Grid item xs={12} md={4}>
-                            <Typography variant="h4" component="h4">This Month</Typography>
-                            <Typography component="h6" variant="h6" className="small" >(Mar 1 to Mar 31)</Typography>
+                        <Grid item xs={12} md={4} className="text-center">
+                            <div className="min-height">
+                                <Typography variant="h4" component="h4">This Month</Typography>
+                                <Typography component="h6" variant="h6" className="small" >(Mar 1 to Mar 31)</Typography>
+                            </div>
                             <Card>
                                 <CardContent>
                                     <Grid container spacing={1} className="text-center">
@@ -243,9 +252,11 @@ export const tab1Fields = (cardData, kpi, loader) => {
                                 </CardContent>
                             </Card>
                         </Grid>
-                        <Grid item xs={12} md={4}>
-                            <Typography variant="h4" component="h4">Difference</Typography>
-                            <Typography component="h6" variant="h6" className="small" >(Mar 1 to Mar 31)</Typography>
+                        <Grid item xs={12} md={4} className="text-center">
+                            <div className="min-height">
+                                <Typography variant="h4" component="h4">Difference</Typography>
+                                <Typography component="h6" variant="h6" className="small" ></Typography>
+                            </div>
                             <Card>
                                 <CardContent>
 

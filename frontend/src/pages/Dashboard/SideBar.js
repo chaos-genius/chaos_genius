@@ -13,33 +13,25 @@ class SideBar extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            kpiData: [],
-            loading: false
+            // kpiData: [],
+            // loading: false
         }
     }
 
-    fetchKPIData = () => {
-        this.setState({ loading: true })
-        fetch('/api/kpi/')
-            .then(response => response.json())
-            .then(data => {
-                this.setState({
-                    kpiData: data.data,
-                    loading: false
-                })
-            });
-    }
-    componentDidMount() {
-        this.fetchKPIData();
-    }
+
+    // componentDidMount() {
+    //     this.fetchKPIData();
+
+    // }
 
     render() {
-        const {kpiData}=this.state;
-        const {handleKpiChange} = this.props;
+        // const {kpiData}=this.state;
+        const { handleKpiChange, kpiData, kpiID } = this.props;
+        // console.log("kpi", kpiID)
         return (
-            <Card>
+            <Card className="kpi-sidebar">
                 <CardContent>
-                    <Typography component="h4">List of KPI’s (08)</Typography>
+                    <Typography component="h4" className="sidebar-title">List of KPI’s (08)</Typography>
                     <FormControl variant="outlined" style={{ width: '100%' }}>
                         <TextField
                             // error={(kpiNameError) ? (true) : (false)}
@@ -54,11 +46,10 @@ class SideBar extends React.Component {
                     </FormControl>
                 </CardContent>
                 <Grid container>
-                    {kpiData.map((kpi) => {
+                    {kpiData.map((obj) => {
                         return (
-                            //   <option key={kpi.id} value={kpi.id}>{kpi.name}</option>
                             <Grid item xs={12}>
-                                <Button variation="outline" color="primary" className="btn-block" id={kpi.id} onClick={(e) => handleKpiChange(e)}>{kpi.name}</Button>
+                                <Button variation="outline" color="primary" className={(kpiID == obj.id) ? ("btn-block custom-sidebar-button active") : ("btn-block custom-sidebar-button")} id={obj.id} onClick={(e) => handleKpiChange(e)}>{obj.name}</Button>
                             </Grid>
                         )
                     })}

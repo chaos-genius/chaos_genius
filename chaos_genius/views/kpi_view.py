@@ -232,8 +232,8 @@ def kpi_line_data(kpi_info, connection_info, timeline="mom"):
     output = output.rename(columns= {
         "date_x": "previousDate", 
         "date_y": "date", 
-        "ItemTotalPrice_x": "value2",
-        "ItemTotalPrice_y": "value1"
+        f"{metric}_x": "previousValue",
+        f"{metric}_y": "value"
     }) 
     output = output.drop("day", axis= 1).iloc[:30]
     output.dropna(inplace= True)

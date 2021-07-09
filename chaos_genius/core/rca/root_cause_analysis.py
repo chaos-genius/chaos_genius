@@ -455,9 +455,6 @@ class RootCauseAnalysis():
             best_subgroups = self._initialize_waterfall_table(
                 single_dim=single_dim)
 
-        best_subgroups["total_data_points"] = best_subgroups["indices_in_group"] \
-            + best_subgroups["non_overlap_indices"]
-
         best_subgroups.drop("ignored", axis=1, inplace=True)
 
         return best_subgroups

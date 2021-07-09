@@ -1,6 +1,9 @@
+body{
+    font-family: "Inter","Helvetica","Apple Color Emoji","Segoe UI Emoji","NotoColorEmoji","Noto Color Emoji","Segoe UI Symbol","Android Emoji","EmojiSymbols","-apple-system","BlinkMacSystemFont","Segoe UI","Roboto","Helvetica Neue","Noto Sans",sans-serif !important;
+}
 
 .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
-    font-family: "Nunito Sans",sans-serif !important;
+    font-family: "Inter","Helvetica","Apple Color Emoji","Segoe UI Emoji","NotoColorEmoji","Noto Color Emoji","Segoe UI Symbol","Android Emoji","EmojiSymbols","-apple-system","BlinkMacSystemFont","Segoe UI","Roboto","Helvetica Neue","Noto Sans",sans-serif !important;
     margin-top: 0 !important;
     margin-bottom: .5rem !important;
     line-height: 1.3 !important;
@@ -71,15 +74,16 @@ button.MuiIconButton-root.close-button {
 }
 
 .graph-info-cards h4{
-    font-weight: 600 !important;
-    font-size: 1rem !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
 }
 .graph-info-cards h3{
     font-weight: 600 !important;
-    font-size: 1.75rem !important;
+    font-size: 20px !important;
 }
 .graph-info-cards h6.small{
-    font-size: .875em !important;
+    font-size: 12px !important;
+    color: #7A7A7A;
     font-weight: normal !important;
 }
 .graph-info-cards .success-text{
@@ -172,6 +176,9 @@ button.MuiIconButton-root.close-button {
 .MuiTab-wrapper{
     pointer-events: none;
 }
+.MuiButton-label{
+    pointer-events: none;
+}
 /* .MuiTabs-root .MuiTab-root.MuiButtonBase-root{
     border-radius: unset !important;
 } */
@@ -258,6 +265,9 @@ button.MuiIconButton-root.close-button {
 .pr-0{
     padding-right: 0 !important;
 
+}
+.custom-cardData .MuiCardContent-root{
+    padding: 8px !important;
 }
 @media (min-width: 600px){
 

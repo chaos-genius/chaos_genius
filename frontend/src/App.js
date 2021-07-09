@@ -11,7 +11,8 @@ import UserOnboarding from './pages/UserOnboarding';
 import UserProfile from './pages/UserProfile';
 import UserSettings from './pages/UserSettings';
 import Home from './pages/Home';
-import Dashboards from './pages/Dashboards';
+import Dashboards from './pages/Dashboard';
+import Dashboard from './pages/Dashboard/Dashboard';
 import KpiExplorer from './pages/Kpi';
 import AddKpi from './pages/Kpi/AddKpi';
 import ActionItems from './pages/ActionItems';
@@ -69,7 +70,8 @@ function App() {
 
       <RouteWithSidebar exact path={Routes.Home.path} component={Home} />
       <RouteWithSidebar exact path={Routes.Dashboards.path} component={Dashboards} />
-      <RouteWithSidebar exact path={Routes.KpiExplorer.path} component={KpiExplorer} />
+      <RouteWithSidebar exact path={Routes.Dashboards.path} component={Dashboards} />
+      <RouteWithSidebar exact path={Routes.DashboardNew.path} component={Dashboard} />
       <RouteWithSidebar exact path={Routes.AddKpi.path} component={AddKpi} />
       <RouteWithSidebar exact path={Routes.ActionItems.path} component={ActionItems} />
       <RouteWithSidebar exact path={Routes.Alerts.path} component={Alerts} />

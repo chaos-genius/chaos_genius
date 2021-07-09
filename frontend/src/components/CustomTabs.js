@@ -67,7 +67,7 @@ export default function SimpleTabs(props){
 
     const handleTabView = (title) =>{
         return(
-            <span className="tab-badge"><h4 className="title">by <Badge bg="primary" className="me-1" >{title}</Badge></h4></span>
+            <h4 className="title">{title}</h4>
         )
     }
 

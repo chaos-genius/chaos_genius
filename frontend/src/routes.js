@@ -10,6 +10,7 @@ export const Routes = {
     // Main Menu
     Home: { path: "/" },
     Dashboards: { path: "/dashboard" },
+    DashboardNew: { path: "/dashboard/new" },
     KpiExplorer: { path: "/kpi" },
     AddKpi: { path: "/kpi/new" },
     ActionItems: { path: "/actionitems" },

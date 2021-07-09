@@ -10,13 +10,13 @@ import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 
 
-import CustomModal from './../components/CustomModal'
-import CustomTabs from './../components/CustomTabs'
+import CustomModal from '../../components/CustomModal'
+import CustomTabs from '../../components/CustomTabs'
 
-import { tab1Fields } from './Charts/Housing'
-import RcaAnalysisTable from '../components/DashboardTable';
+import { tab1Fields } from './HelperFunctions'
+import RcaAnalysisTable from '../../components/DashboardTable';
 
-import './../assets/css/custom.css'
+import './../../assets/css/custom.css'
 
 
 // Am4charts

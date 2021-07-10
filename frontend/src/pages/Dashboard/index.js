@@ -86,7 +86,7 @@ class Dashboard extends React.Component {
       loading: false,
       tabState: 0,
       multiDimensionTableData: [],
-      overlap: true,
+      overlap: false,
       overlapTableData:[],
       dataCol:[]
 
@@ -254,7 +254,7 @@ class Dashboard extends React.Component {
               chartData: data.chart.chart_data,
               yAxis: data.chart.y_axis_lim,
               multiDimensionTableData: data.chart.chart_table,
-              dataCol: data.data_columns,
+              dataCol: data.data_columns,              
               overlapTableData: data.data_table,
               loading: false
             }, () => {
@@ -385,7 +385,19 @@ class Dashboard extends React.Component {
         tabChartData.push(datatab)
       });
     }
-    
+    const columns =[{ title: "Subgroup", field: 'string' },
+    { title: "Full Impact", field: "impact_full_group" }, 
+    { title: "Non Overlap Impact", field: 'impact_non_overlap' }, 
+    { title: "Data points in group", field: 'indices_in_group' }, 
+    { title: "Non overlapping data points", field: 'non_overlap_indices' }]
+
+    let overLapTableCol = (this.state.overlap)?(this.state.dataCol):(columns);
+    let tableData = (this.state.overlap)?(this.state.overlapTableData):(this.state.multiDimensionTableData);
+
+console.log("overlap",this.state.overlap)
+console.log("tableData",tableData)
+console.log("dataCol",overLapTableCol)
+
     return (
       <>
         <Card className="chart-tab-card">
@@ -473,7 +485,8 @@ class Dashboard extends React.Component {
                     </Grid>
                   </Grid>
                   
-                  <MultidimensionTable multiDimensionTableData={this.state.multiDimensionTableData} columnData={this.state.dataCol} overlap={this.state.overlap} overlapData={this.state.overlapTableData} />
+                  {/* <MultidimensionTable multiDimensionTableData={this.state.multiDimensionTableData} columnData={this.state.dataCol} overlap={this.state.overlap} overlapData={this.state.overlapTableData} /> */}
+                  <MultidimensionTable tableData={tableData} dataCol={overLapTableCol} />
        
                 </>
 

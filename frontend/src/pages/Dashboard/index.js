@@ -391,12 +391,12 @@ class Dashboard extends React.Component {
     { title: "Data points in group", field: 'indices_in_group' }, 
     { title: "Non overlapping data points", field: 'non_overlap_indices' }]
 
-    let overLapTableCol = (this.state.overlap)?(this.state.dataCol):(columns);
-    let tableData = (this.state.overlap)?(this.state.overlapTableData):(this.state.multiDimensionTableData);
+    let overLapTableCol = (!this.state.overlap)?(this.state.dataCol):(columns);
+    let tableData = (!this.state.overlap)?(this.state.overlapTableData):(this.state.multiDimensionTableData);
 
-console.log("overlap",this.state.overlap)
-console.log("tableData",tableData)
-console.log("dataCol",overLapTableCol)
+// console.log("overlap",this.state.overlap)
+// console.log("tableData",tableData)
+// console.log("dataCol",overLapTableCol)
 
     return (
       <>

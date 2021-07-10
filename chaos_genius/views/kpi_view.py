@@ -123,24 +123,18 @@ def get_baseline_and_rca_df(kpi_info, connection_info, timeline="mom"):
         indentifier = '"'
 
     if timeline == "mom":
-        month_day = today.day
-        base_dt_obj = today.replace(month=today.month-1) - timedelta(days=month_day)
-        base_dt = str(base_dt_obj.date())
-        cur_dt_obj = today - timedelta(days=month_day)
-        cur_dt = str(cur_dt_obj.date())
-        next_dt_obj = today.replace(month=today.month+1) - timedelta(days=month_day)
-        next_dt = str(next_dt_obj.date())
+        num_days = 30
     elif timeline == "wow":
-        weekday = today.weekday()
-        base_dt_obj = today - timedelta(days=weekday+7)
-        base_dt = str(base_dt_obj.date())
-        cur_dt_obj = today - timedelta(days=weekday)
-        cur_dt = str(cur_dt_obj.date())
-        next_dt_obj = cur_dt_obj + timedelta(days=7)
-        next_dt = str(next_dt_obj.date())
+        num_days = 7
+    base_dt_obj = today - timedelta(days=2*num_days)
+    base_dt = str(base_dt_obj.date())
+    mid_dt_obj = today - timedelta(days=num_days)
+    mid_dt = str(mid_dt_obj.date())
+    cur_dt = str(today.date())
+        
 
-    base_filter = f" where {indentifier}{kpi_info['datetime_column']}{indentifier} >= '{base_dt}' and {indentifier}{kpi_info['datetime_column']}{indentifier} < '{cur_dt}' "
-    rca_filter = f" where {indentifier}{kpi_info['datetime_column']}{indentifier} >= '{cur_dt}' and {indentifier}{kpi_info['datetime_column']}{indentifier}< '{next_dt}' "
+    base_filter = f" where {indentifier}{kpi_info['datetime_column']}{indentifier} >= '{base_dt}' and {indentifier}{kpi_info['datetime_column']}{indentifier} < '{mid_dt}' "
+    rca_filter = f" where {indentifier}{kpi_info['datetime_column']}{indentifier} >= '{mid_dt}' and {indentifier}{kpi_info['datetime_column']}{indentifier}< '{cur_dt}' "
 
     kpi_filters = kpi_info['filters']
     kpi_filters_query = " "

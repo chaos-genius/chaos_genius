@@ -17,6 +17,7 @@ export const Routes = {
 
     // Orgnisation Menu
     Users: { path: "/orgusers" },
+    AddDataSources: { path: "/datasource/new" },
     DataSources: { path: "/datasource" },
     OrganisationSettings: { path: "/orgsettings" },
 

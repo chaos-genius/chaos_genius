@@ -1,6 +1,9 @@
+body{
+    font-family: "Inter","Helvetica","Apple Color Emoji","Segoe UI Emoji","NotoColorEmoji","Noto Color Emoji","Segoe UI Symbol","Android Emoji","EmojiSymbols","-apple-system","BlinkMacSystemFont","Segoe UI","Roboto","Helvetica Neue","Noto Sans",sans-serif !important;
+}
 
 .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
-    font-family: "Nunito Sans",sans-serif !important;
+    font-family: "Inter","Helvetica","Apple Color Emoji","Segoe UI Emoji","NotoColorEmoji","Noto Color Emoji","Segoe UI Symbol","Android Emoji","EmojiSymbols","-apple-system","BlinkMacSystemFont","Segoe UI","Roboto","Helvetica Neue","Noto Sans",sans-serif !important;
     margin-top: 0 !important;
     margin-bottom: .5rem !important;
     line-height: 1.3 !important;
@@ -71,15 +74,18 @@ button.MuiIconButton-root.close-button {
 }
 
 .graph-info-cards h4{
-    font-weight: 600 !important;
-    font-size: 1rem !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    color: #222222;
 }
 .graph-info-cards h3{
     font-weight: 600 !important;
-    font-size: 1.75rem !important;
+    font-size: 18px !important;
+    
 }
 .graph-info-cards h6.small{
-    font-size: .875em !important;
+    font-size: 12px !important;
+    color: #7A7A7A;
     font-weight: normal !important;
 }
 .graph-info-cards .success-text{
@@ -147,23 +153,28 @@ button.MuiIconButton-root.close-button {
 }
 
 /* APPBAR */
+.tab-with-border .MuiAppBar-colorPrimary{
+    border: .0625rem solid rgba(46,54,80,.125) !important;
+    color: #262b40 !important;
 
+}
 .MuiAppBar-colorPrimary{
     background-color: #fff !important;
     box-shadow: unset !important;
-    color: #262b40 !important;
-    border: .0625rem solid rgba(46,54,80,.125) !important;
+    border-bottom: .0625rem solid rgba(46,54,80,.125) !important;
     /* border-bottom: .0625rem solid rgba(46,54,80,.125) !important;
     border-left: .0625rem solid rgba(46,54,80,.125) !important; */
     border-top-left-radius: 0.5rem;
     border-top-right-radius: 0.5rem;
 }
 .MuiTab-textColorInherit.Mui-selected{
-    color: #262b40 !important;
+    color: #60CA9A !important;
     background-color: #fff !important;
     border:  unset  !important;
     margin-bottom: 0 !important;
-    border-bottom: 3px solid #262b40 !important;
+    border-bottom: 3px solid #60CA9A !important;
+    font-weight: 600 !important;
+
     
 }
 .MuiTabs-flexContainer > .MuiTab-textColorInherit{
@@ -172,16 +183,22 @@ button.MuiIconButton-root.close-button {
 .MuiTab-wrapper{
     pointer-events: none;
 }
+.MuiButton-label{
+    pointer-events: none;
+}
 /* .MuiTabs-root .MuiTab-root.MuiButtonBase-root{
     border-radius: unset !important;
 } */
 .MuiTab-textColorInherit{
-    padding: .75rem .85rem;
+    padding: 15px !important;
     border-radius: unset !important;
-    color: #506690 !important;
+    color: #222222 !important;
+    font-size: 18px !important;
+    font-weight: normal !important;
     background-color:#fff !important;
     border: unset !important;
     text-transform: unset !important;
+    font-family: "Inter",sans-serif !important;
 }
 /* button.MuiTab-root:not(:last-child) {
     margin-right: 1rem;
@@ -228,7 +245,7 @@ button.MuiIconButton-root.close-button {
 }
 
 .MuiPaper-root.MuiAccordion-root .MuiIconButton-label{
-    color: #fff;
+    color: #222222;
 }
 .MuiAccordion-root:before{
     background-color: transparent !important;
@@ -244,6 +261,104 @@ button.MuiIconButton-root.close-button {
 }
 .btn{
     min-width: 100px;
+}
+.MuiPaper-root.MuiStepper-root {
+    background-color: transparent;
+}
+.display-flex-center{
+    display: flex;
+    align-items: center;
+}
+.pl-0{
+    padding-left: 0 !important
+}
+.pr-0{
+    padding-right: 0 !important;
+}
+.custom-cardData.MuiCard-root{
+    position: relative;
+}
+.custom-cardData .MuiCardContent-root{
+    padding: 8px !important;
+}
+.custom-cardData .graph-info-cards{
+    max-width:90%;
+    float: right;
+}
+.custom-cardData .cardData-titles{
+    position: absolute;
+    left: 10px;
+    bottom: 18px;
+}
+.custom-cardData .cardData-titles .title{
+    font-weight: normal;
+    font-size: 12px;
+    color: #7A7A7A !important;
+    padding: 4px 0 !important;
+    text-align: right;
+}
+.kpi-sidebar .sidebar-title{
+    font-weight: 500;
+    font-size: 14px;
+    color: #222222 !important;
+}
+.kpi-sidebar .custom-sidebar-button{
+    font-weight: 500;
+    font-size: 14px;
+    padding: 15px 24px;
+    color: #7A7A7A !important;
+    justify-content: left;
+    text-transform: none;
+    font-family: inherit;
+    display: block;
+    text-align: left;
+}
+.kpi-sidebar .custom-sidebar-button.active{
+    background: #EFFAF5;
+    color: #60CA9A;
+    border-left: 1px solid #60CA9A;
+}
+.custom-dash-select .MuiOutlinedInput-root {
+    margin-top: 0 !important;
+    margin-bottom: 12px;
+}
+.custom-dash-select .MuiSelect-root {
+    background: #F5F5F5;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    font-family: "Inter",sans-serif !important;
+    color: #222222 !important;
+}
+.custom-cardData .MuiGrid-spacing-xs-2 > .MuiGrid-item{
+    padding: 6px;
+}
+.graph-info-cards .min-height{
+    min-height: 55px;
+}
+.line-chart-card .MuiCardContent-root{
+    padding: 1.25rem 0 !important;
+}
+.custom-dash-accordian.MuiPaper-root.MuiAccordion-root{
+    background-color: #fff;    
+    color: #222222;
+    margin-top: 20px;
+}
+.custom-dash-accordian > .Mui-expanded{
+    /* opacity: 0.12; */
+    border-bottom: 1px solid #2222221f;
+}
+.custom-dash-accordian h4.title{
+    font-weight: 600;
+    font-size: 20px;
+    color: #222222 !important;
+    margin-bottom: 0 !important;
+}
+.custom-dash-accordian .MuiTab-textColorInherit{
+    font-size: 16px !important;
+}
+.custom-dash-accordian .MuiTabs-root{
+    max-width: 80%;
 }
 @media (min-width: 600px){
 

@@ -79,7 +79,7 @@ class RootCauseAnalysis():
         self._max_subgroups_considered = 100
 
     def _initialize_impact_table(self):
-        self._dims = self._create_binned_columns(self._dims)
+        self._dims, binned_cols = self._create_binned_columns(self._dims)
         dim_combs_list = self._generate_all_dim_combinations()
 
         impacts = []
@@ -98,7 +98,7 @@ class RootCauseAnalysis():
 
         # add query string
         impact_table.loc[:, "string"] = impact_table[self._dims].apply(
-            convert_df_dims_to_query_strings,
+            lambda inp: convert_df_dims_to_query_strings(inp, binned_cols),
             axis=1
         )
 
@@ -201,7 +201,7 @@ class RootCauseAnalysis():
         self._grp1_df = self._full_df.loc[self._grp1_df.index]
         self._grp2_df = self._full_df.loc[self._grp2_df.index]
 
-        return new_dims
+        return new_dims, binned_cols
 
     def _generate_all_dim_combinations(self) -> List[List[str]]:
         """Creates a dictionary of all possible combinations of dims.

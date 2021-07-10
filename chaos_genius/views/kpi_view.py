@@ -235,6 +235,7 @@ def kpi_line_data(kpi_info, connection_info, timeline="mom"):
         f"{metric}_x": "previousValue",
         f"{metric}_y": "value"
     }) 
+    output["index"] = output.index
     output = output.drop("day", axis= 1).iloc[:30]
     output.dropna(inplace= True)
 

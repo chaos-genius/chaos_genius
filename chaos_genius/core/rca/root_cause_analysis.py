@@ -490,7 +490,7 @@ class RootCauseAnalysis():
 
         return panel_metrics
 
-    def get_impact_rows(self, single_dim=None) -> Dict:
+    def get_impact_rows(self, single_dim=None) -> List[Dict[str, object]]:
 
         if self._impact_table is None:
             self._impact_table = self._initialize_impact_table()
@@ -507,6 +507,28 @@ class RootCauseAnalysis():
             impact_table["string"].apply(convert_query_string_to_user_string)
 
         return impact_table.round(self._precision).to_dict("records")
+
+    def get_impact_rows_with_columns(
+        self, single_dim=None
+    ) -> Tuple[List[Dict[str, object]], List[Dict[str, str]]]:
+        impact_table = self.get_impact_rows(single_dim)
+        cols = ['g1_agg', 'g1_count', 'g1_size', 'g2_agg', 'g2_count', 'g2_size', 'impact', 'subgroup']
+        mapping = [
+            {"subgroup": "Subgroup Name"},
+            {"g1_count": "Prev Month Count"},
+            {"g1_size": "Prev Month Size"},
+            {"g2_count": "Current Month Count"},
+            {"g2_size": "Current Month Size"},
+            {"impact": "Impact"},
+        ]
+        if self._agg != "count":
+            # insert before g1_count
+            mapping.insert(1, {"g1_agg": "Prev Month Agg"})
+            # insert before g2_count (but add 1 because of previous insertion)
+            mapping.insert(3, {"g2_agg": "Current Month Agg"})
+
+        return impact_table, mapping
+
 
     def get_waterfall_table_rows(
         self,

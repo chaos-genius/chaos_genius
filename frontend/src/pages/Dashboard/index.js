@@ -233,6 +233,8 @@ class Dashboard extends React.Component {
         //   valueAxis.max = this.state.yAxis[1];
         // } else {
         let chart = am4core.create("chartdivWaterfall", am4charts.XYChart);
+        chart.fontSize = 12;
+        chart.fontFamily = "Inter";
 
         chart.hiddenState.properties.opacity = 0; // this makes initial fade in effect
 
@@ -243,13 +245,23 @@ class Dashboard extends React.Component {
         let categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
         categoryAxis.dataFields.category = "category";
         categoryAxis.renderer.minGridDistance = 40;
+        categoryAxis.renderer.grid.template.disabled = true;
 
         // Configure axis label
         var xlabel = categoryAxis.renderer.labels.template;
         xlabel.wrap = true;
         xlabel.maxWidth = 120;
 
+        // Automatically figure out correct max width for labels
+        categoryAxis.events.on("sizechanged", function(ev) {
+            let axis = ev.target;
+            let cellWidth = axis.pixelWidth / (axis.endIndex - axis.startIndex);
+            axis.renderer.labels.template.maxWidth = cellWidth;
+        });
+
         let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+        valueAxis.renderer.minGridDistance = 50;
+        valueAxis.renderer.grid.template.opacity = 0.6;
         if (this.state.yAxis.length > 0) {
             valueAxis.min = this.state.yAxis[0];
             valueAxis.max = this.state.yAxis[1];
@@ -273,6 +285,7 @@ class Dashboard extends React.Component {
         label.valign = "middle";
         label.wrap = true;
         label.maxWidth = 120;
+        label.fontWeight = 600;
 
         let stepSeries = chart.series.push(new am4charts.StepLineSeries());
         stepSeries.dataFields.categoryX = "category";
@@ -288,6 +301,8 @@ class Dashboard extends React.Component {
         stepSeries.endLocation = 1.1;
 
         chart.cursor = new am4charts.XYCursor();
+        chart.tooltip.label.fontSize = 12;
+        chart.tooltip.label.fontFamily = "Inter";
         chart.cursor.behavior = "none";
         this.setState({
             amChart: chart,
@@ -429,34 +444,60 @@ class Dashboard extends React.Component {
 
         let chart = am4core.create("lineChartDiv", am4charts.XYChart);
 
+        chart.legend = new am4charts.Legend();
+        chart.legend.position = "bottom";
+
         chart.data = this.state.lineChartData;
 
+        chart.fontSize = 12;
+        chart.fontFamily = "Inter";
+
         // Create axes
-        let dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+        let dateAxis = chart.xAxes.push(new am4charts.ValueAxis());
         dateAxis.renderer.minGridDistance = 50;
+        dateAxis.renderer.grid.template.disabled = true;
 
         let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+        valueAxis.renderer.grid.template.disabled = true;
 
         // Create series
         let series = chart.series.push(new am4charts.LineSeries());
+        series.legendSettings.labelText = "Current Values"
         series.dataFields.valueY = "value";
-        series.dataFields.dateX = "date";
-        series.strokeWidth = 2;
+        series.dataFields.valueX = "index";
+        series.stroke = am4core.color("#05A677");
+        series.strokeWidth = 2.5;
         series.minBulletDistance = 10;
         series.tooltipText = "[bold]{date.formatDate()}:[/] {value}\n[bold]{previousDate.formatDate()}:[/] {previousValue}";
         series.tooltip.pointerOrientation = "vertical";
+        series.tooltip.getFillFromObject = false;
+        series.tooltip.background.fill = am4core.color("#778CA3");
+        series.tooltip.label.fontSize = 12;
+        series.tooltip.label.fontFamily = "Inter";
+        series.tooltip.label.fill = "#fff";
 
         // Create series
         let series2 = chart.series.push(new am4charts.LineSeries());
+        series2.legendSettings.labelText = "Previous Values"
         series2.dataFields.valueY = "previousValue";
-        series2.dataFields.dateX = "date";
-        series2.strokeWidth = 2;
-        series2.strokeDasharray = "3,4";
-        series2.stroke = series.stroke;
+        series2.dataFields.valueX = "index";
+        series2.stroke = am4core.color("#778CA3");
+        series2.strokeWidth = 2.5;
+        series2.strokeDasharray = "6, 4";
 
         // Add cursor
         chart.cursor = new am4charts.XYCursor();
-        chart.cursor.xAxis = dateAxis;
+        
+        // Required to make tooltips function in an XY chart with both axes as ValueAxis
+        // Taken from https://www.amcharts.com/docs/v4/tutorials/multiple-cursor-tooltips-on-scatter-chart/
+        am4charts.ValueAxis.prototype.getSeriesDataItem = function(series, position) {
+            var key = this.axisFieldName + this.axisLetter;
+            var value = this.positionToValue(position);
+            const dataItem = series.dataItems.getIndex(series.dataItems.findClosestIndex(value, function(x) {
+                return x[key] ? x[key] : undefined;
+            }, "any"));
+            return dataItem;
+        }
 
     }
     render() {

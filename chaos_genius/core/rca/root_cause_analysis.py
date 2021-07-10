@@ -414,13 +414,13 @@ class RootCauseAnalysis():
         js_df["open"] = js_df["value"].shift(1, fill_value=0)
 
         js_df["color"] = [
-            "#ff9eb7" if val <= 0 else "#72ddc3" for val in
+            "#FA5252" if val <= 0 else "#05A677" for val in
             [0] + waterfall_df["impact_non_overlap"].values.tolist() + [0]
         ]
 
         js_df.loc[[0, len(js_df)-1], ["open", "color"]] = [
-            [0, "#bbb"],
-            [0, "#9cc7ff"]
+            [0, "#778CA3"],
+            [0, "#778CA3"]
         ]
 
         js_df["displayValue"] = js_df["value"] - js_df["open"]

@@ -133,8 +133,8 @@ def get_baseline_and_rca_df(kpi_info, connection_info, timeline="mom"):
     cur_dt = str(today.date())
         
 
-    base_filter = f" where {indentifier}{kpi_info['datetime_column']}{indentifier} >= '{base_dt}' and {indentifier}{kpi_info['datetime_column']}{indentifier} < '{mid_dt}' "
-    rca_filter = f" where {indentifier}{kpi_info['datetime_column']}{indentifier} >= '{mid_dt}' and {indentifier}{kpi_info['datetime_column']}{indentifier}< '{cur_dt}' "
+    base_filter = f" where {indentifier}{kpi_info['datetime_column']}{indentifier} > '{base_dt}' and {indentifier}{kpi_info['datetime_column']}{indentifier} <= '{mid_dt}' "
+    rca_filter = f" where {indentifier}{kpi_info['datetime_column']}{indentifier} > '{mid_dt}' and {indentifier}{kpi_info['datetime_column']}{indentifier}<= '{cur_dt}' "
 
     kpi_filters = kpi_info['filters']
     kpi_filters_query = " "

@@ -218,11 +218,13 @@ def kpi_line_data(kpi_info, connection_info, timeline="mom"):
     agg = kpi_info["aggregation"]
     
     dfs = get_baseline_and_rca_df(kpi_info, connection_info, "mom")
-    
-    for df in dfs:
+    dfs = list(dfs)
+
+    for i, df in enumerate(dfs):
         df = df.resample("D", on= dt_col).agg({metric: agg}).reset_index().round(kpi_info.get("metric_precision", 3))
         df["day"] = df["date"].dt.day
         df[dt_col] = df[dt_col].dt.strftime('%Y/%m/%d %H:%M:%S')
+        dfs[i] = df
 
     base_df, rca_df = dfs
 
@@ -230,10 +232,11 @@ def kpi_line_data(kpi_info, connection_info, timeline="mom"):
     output = output.rename(columns= {
         "date_x": "previousDate", 
         "date_y": "date", 
-        "ItemTotalPrice_x": "value2",
-        "ItemTotalPrice_y": "value1"
+        f"{metric}_x": "previousValue",
+        f"{metric}_y": "value"
     }) 
     output = output.drop("day", axis= 1).iloc[:30]
+    output.dropna(inplace= True)
 
     return output.to_dict(orient="records")
 

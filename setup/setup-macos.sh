@@ -7,7 +7,7 @@ RED='\033[1;31m' # Blue
 NC='\033[0m' # No Color
 
 printf "${GREEN}-->${NC} Installing ${GREEN}Chaos Genius${NC} ...\n\n"
-printf "${GRAY}Chaos Genius is an Open-source Business Observability tool
+printf "${GRAY}Chaos Genius 🔮 is an Open-source Business Observability tool
 that helps you monitor your business & system metrics
 and get automated RCA with multi-dimension drill-downs.${NC}\n\n"
 
@@ -66,7 +66,7 @@ else
 fi
 
 if ! hash docker; then
-    printf "${RED}-->${NC} Chaos Genius requires python3. It is not installed\n"
+    printf "${RED}-->${NC} Chaos Genius requires docker. It is not installed\n"
     printf "${RED}-->${NC} You can install it by 'brew install docker'\n"
     exit 1
 else
@@ -95,3 +95,7 @@ printf "\n${GREEN}-->${NC} Starting services \n"
 printf "${BLUE}-->${NC} Starting database & data connectors\n"
 printf "${BLUE}-->${NC} Starting front-end services\n"
 printf "${BLUE}-->${NC} Starting backend-end services\n"
+
+
+# Welcome message 
+printf "\n${GREEN}-->${NC} Setup complete for ${GREEN}Chaos Genius${NC}! \n🔮\n"

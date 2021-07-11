@@ -34,12 +34,23 @@ def kpi():
     # Handle logging in
     if request.method == 'POST':
         if request.is_json:
+            # TODO: Add the backend validation
             data = request.get_json()
-            # conn_name = data.get('name')
-            # conn_uri = data.get('db_uri')
-            # new_connection = DataSource(name=conn_name, db_uri=conn_uri)
-            # new_connection.save()
-            return jsonify({"message": f"DataSource new_connection.name has been created successfully."})
+            new_kpi = Kpi(
+                name=data.get('name'),
+                is_certified=data.get('is_certified'),
+                data_source=data.get('data_source'),
+                kpi_type=data.get('dataset_type'),
+                kpi_query=data.get('kpi_query'),
+                table_name=data.get('table_name'),
+                metric=data.get('metric'),
+                aggregation=data.get('aggregation'),
+                datetime_column=data.get('datetime_column'),
+                filters=data.get('filters'),
+                dimensions=data.get('dimensions')
+            )
+            new_kpi.save()
+            return jsonify({"message": f"DataSource {new_kpi.name} has been created successfully."})
         else:
             return jsonify({"error": "The request payload is not in JSON format"})
 

@@ -11,17 +11,18 @@ class Kpi(PkModel):
 
     __tablename__ = "kpi"
     name = Column(db.String(80), nullable=False)
+    is_certified = Column(db.Boolean(), default=False)
     data_source = Column(db.Integer, nullable=False)
 
-    kpi_type = Column(db.Text(), nullable=False)
+    kpi_type = Column(db.String(80), nullable=False)
     kpi_query = Column(db.Text(), nullable=False)
-    metric_column = Column(db.Text(), nullable=False)
-    aggregation = Column(db.Text(), nullable=False)
+    table_name = Column(db.Text(), nullable=False)
+    metric = Column(db.Text(), nullable=False)
+    aggregation = Column(db.String(80), nullable=False)
     datetime_column = Column(db.Text(), nullable=False)
     filters = Column(db.JSON)
     dimensions = Column(db.JSON)
 
-    is_certified = Column(db.Boolean(), default=False)
     active = Column(db.Boolean(), default=False)
     created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
 
@@ -38,10 +39,13 @@ class Kpi(PkModel):
         return {
             "id": self.id,
             "name": self.name,
+            "is_certified": self.is_certified,
             "data_source": self.data_source,
             "kpi_type": self.kpi_type,
-            "metric_column": self.metric_column,
-            "is_certified": self.is_certified,
+            "kpi_query": self.kpi_query,
+            "table_name": self.table_name,
+            "metric": self.metric,
+            "aggregation": self.aggregation,
             "active": self.active,
             "created_at": self.created_at
         }
@@ -51,8 +55,13 @@ class Kpi(PkModel):
         return {
             "id": self.id,
             "name": self.name,
+            "is_certified": self.is_certified,
             "data_source": self.data_source,
+            "kpi_type": self.kpi_type,
+            "kpi_query": self.kpi_query,
+            "table_name": self.table_name,
+            "metric": self.metric,
+            "aggregation": self.aggregation,
             "active": self.active,
             "created_at": self.created_at
         }
-

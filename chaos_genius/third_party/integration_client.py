@@ -6,9 +6,10 @@ import pprint
 import traceback
 import click
 from chaos_genius.utils.io_helper import cg_print
-from chaos_genius.third_party.source_config_mapping import (
+from chaos_genius.third_party.integration_server_config import (
     SOURCE_WHITELIST_AND_TYPE as SOURCE_DEF_ID,
-    DESTINATION_DEF_ID
+    DESTINATION_DEF_ID,
+    DEFAULT_WORKSPACE_ID
 )
 
 
@@ -31,9 +32,12 @@ class ThirdPartyClient(object):
             config = read_config(ENV_FILE_PATH)
         self.config = config
         self.server_uri = config.get("server_uri", server_uri)
-        self.workspace_id = config.get("workspace_id")
         self.destination_db = config.get("destination_db", {})
         self.destination_def_id = DESTINATION_DEF_ID
+
+        workspace_id = config.get("workspace_id")
+        if not workspace_id:
+            self.workspace_id = DEFAULT_WORKSPACE_ID
 
         # Check the third party server running status
         status = self.get_server_health()
@@ -85,9 +89,12 @@ class ThirdPartyClient(object):
             "securityUpdates": False,
             "notifications": []
         }
+        NOTE: By default the workspace id has been set, use that id only in the MVP
+        Hence we aren't creating the workspace
         """
-        api_url = f"{self.server_uri}/api/v1/workspaces/create"
-        return post_request(api_url, payload)
+        return self.get_workspace()
+        # api_url = f"{self.server_uri}/api/v1/workspaces/create"
+        # return post_request(api_url, payload)
 
     def get_workspace(self):
         """This will be used to fetch the worksapce details

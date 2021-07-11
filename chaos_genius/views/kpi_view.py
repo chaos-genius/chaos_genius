@@ -235,6 +235,7 @@ def kpi_line_data(kpi_info, connection_info, timeline="mom"):
         f"{metric}_x": "previousValue",
         f"{metric}_y": "value"
     }) 
+    output["index"] = output.index
     output = output.drop("day", axis= 1).iloc[:30]
     output.dropna(inplace= True)
 
@@ -257,12 +258,13 @@ def rca_analysis(kpi_info, connection_info, timeline="mom", dimension= None):
         )
 
         if dimension is None or dimension in kpi_info["dimensions"]:
-            impact_table = rca.get_impact_rows(dimension)
+            impact_table, impact_table_col_mapping = rca.get_impact_rows_with_columns(dimension)
             waterfall_table = rca.get_waterfall_table_rows(dimension)
             waterfall_data, y_axis_lim = rca.get_waterfall_plot_data(dimension)
 
             final_data = {
                 "data_table": impact_table,
+                "data_columns": impact_table_col_mapping,
                 "chart": {
                     "chart_table": waterfall_table,
                     "chart_data": waterfall_data,

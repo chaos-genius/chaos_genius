@@ -14,13 +14,15 @@ from flask_cors import CORS
 
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.extensions import integration_connector as connector
-from chaos_genius.third_party.source_config_mapping import (
+from chaos_genius.third_party.integration_server_config import (
     SOURCE_CONFIG_MAPPING,
     SOURCE_WHITELIST_AND_TYPE,
     DATABASE_CONFIG_MAPPER,
     DESTINATION_TYPE as db_type
 )
 from chaos_genius.databases.db_utils import create_sqlalchemy_uri
+from chaos_genius.databases.db_metadata import DbMetadata, get_metadata
+
 # from chaos_genius.utils import flash_errors
 
 blueprint = Blueprint("api_data_source", __name__, static_folder="../static")
@@ -65,7 +67,7 @@ def data_source_types():
 @blueprint.route("/types", methods=["GET"])
 def list_data_source_type():
     """DataSource Type view."""
-    data_source_types, msg = [], ""
+    connection_types, msg = [], ""
     try:
         connector_client = connector.connection
         connector_client.init_source_def_conf()
@@ -211,6 +213,26 @@ def delete_data_source():
         print(err_msg)
 
     return jsonify({"data": {}, "msg": msg, "status": status})
+
+
+@blueprint.route("/metadata", methods=["POST"])
+def metadata_data_source():
+    """Metadata Data Source."""
+    metadata, msg = {}, ""
+    try:
+        payload = request.get_json()
+        data_source_id = payload["data_source_id"]
+        from_query = payload["from_query"]
+        query = payload["query"]
+        data_source_obj = DataSource.get_by_id(data_source_id)
+        if data_source_obj:
+            ds_data = data_source_obj.as_dict
+            metadata, err_msg = get_metadata(ds_data, from_query, query)
+    except Exception as err_msg:
+        print(err_msg)
+        msg = err_msg
+
+    return jsonify({"data": metadata, "msg": msg})
 
 
 @blueprint.route("/logs", methods=["POST"])

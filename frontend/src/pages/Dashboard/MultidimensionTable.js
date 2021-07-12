@@ -8,20 +8,52 @@ import { faAngleDown, faAngleUp } from '@fortawesome/free-solid-svg-icons';
 class MultidimensionTable extends React.Component {
     constructor(props) {
         super(props)
-        // this.state = {
-        //     dataCol: props.columnData,
-        //     tableData: props.multiDimensionTableData,
-        //     overlapData: props.overlapData,
-        //     overlap:props.overlap
-        // }
+        this.state = {
+            tableData: [],            
+        }
     }
-
+    ValueChange = (value) => {
+        // console.log("value", value)
+        const valueIcon = value < 0 ? faAngleDown : faAngleUp;
+        const valueTxtColor = value < 0 ? "text-danger" : "text-success";
+        // console.log(typeof value)
+        return (
+            (value) ? (
+                <span className={valueTxtColor}>
+                    <FontAwesomeIcon icon={valueIcon} />
+                    <span className="fw-bold ms-1">
+                        {Math.abs(value)}
+                    </span>
+                </span>
+            ) : ("--")
+        );
+    };
 
     render() {
-// console.log("tableData",this.state.tableData)
+        // console.log("tableData",this.props.tableData)
+        if (Object.keys(this.props.tableData).length > 0) {
+            this.props.tableData.map((obj) => {
+                if (obj?.impact_full_group) {
+                    if(typeof obj.impact_full_group === "number"){
+                        obj.impact_full_group = this.ValueChange(obj.impact_full_group)
+                    }
+                }
+                if(obj?.impact_non_overlap){
+                    if(typeof obj.impact_non_overlap === "number"){
+                        obj.impact_non_overlap = this.ValueChange(obj.impact_non_overlap)
+                    }
+                }
+                if(obj?.impact){
+                    if(typeof obj.impact === "number"){
+                        obj.impact = this.ValueChange(obj.impact)
+                    }
+                }
+            })
+        }
+
         if (Object.keys(this.props.tableData).length > 0) {
             return (
-                <div className="custom-table custom-multidimension-table">                    
+                <div className="custom-table custom-multidimension-table">
                     <CustomTable
                         columns={this.props.dataCol}
                         data={this.props.tableData}
@@ -30,7 +62,7 @@ class MultidimensionTable extends React.Component {
                             paginationType: "stepped",
                             showTitle: false,
                             searchFieldAlignment: 'left',
-                            search:false,
+                            search: false,
                             paging: false
                         }}
                     />

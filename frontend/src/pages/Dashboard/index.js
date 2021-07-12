@@ -45,7 +45,7 @@ const AntSwitch = withStyles((theme) =>
                 color: theme.palette.common.white,
                 '& + $track': {
                     opacity: 1,
-                    backgroundColor: "#00b464",
+                    backgroundColor: "#0597F2",
                 },
             },
         },
@@ -53,11 +53,12 @@ const AntSwitch = withStyles((theme) =>
             width: 15,
             height: 15,
             boxShadow: 'none',
+            color: "#FFFFFF"
         },
         track: {
             borderRadius: '25px',
             opacity: 1,
-            backgroundColor: "#00b464",
+            backgroundColor: "#9F9F9F",
         },
         checked: {},
     }),
@@ -95,7 +96,7 @@ class Dashboard extends React.Component {
   }
   fetchKPIData = () => {
     this.setState({ loading: true })
-    fetch(`/api/kpi/`)
+    fetch(`${BASE_URL}/api/kpi/`)
       .then(response => response.json())
       .then(data => {
         if (data?.data) {
@@ -385,7 +386,7 @@ class Dashboard extends React.Component {
   }
   handleChangeOverlap = (e) => {
     const isChecked = e.target.checked;
-    console.log("isChecked",isChecked)
+    // console.log("isChecked",isChecked)
     this.setState({
       overlap: isChecked
     })
@@ -400,11 +401,11 @@ class Dashboard extends React.Component {
         tabChartData.push(datatab)
       });
     }
-    const columns =[{ title: "Subgroup", field: 'string' },
-    { title: "Full Impact", field: "impact_full_group" }, 
-    { title: "Non Overlap Impact", field: 'impact_non_overlap' }, 
+    const columns =[{ title: "Subgroup", field: 'string' },    
     { title: "Data points in group", field: 'indices_in_group' }, 
-    { title: "Non overlapping data points", field: 'non_overlap_indices' }]
+    { title: "Non overlapping data points", field: 'non_overlap_indices' },
+    { title: "Full Impact", field: "impact_full_group" }, 
+    { title: "Non Overlap Impact", field: 'impact_non_overlap' }, ]
 
     let overLapTableCol = (!this.state.overlap)?(this.state.dataCol):(columns);
     let tableData = (!this.state.overlap)?(this.state.overlapTableData):(this.state.multiDimensionTableData);
@@ -489,7 +490,7 @@ class Dashboard extends React.Component {
                     <Grid item xs={8}>
                       <h5 className="mt-4">Top Drivers</h5>
                     </Grid>
-                    <Grid item xs={4} className="text-right">
+                    <Grid item xs={4} className="custom-dash-switch">
                       <Grid component="label" container alignItems="center" spacing={1}>
                         {/* <Grid item className={(this.props.dynamicData.pricing === true) ? ("label-switch ") : ("label-switch active")}>Monthly Plan</Grid> */}
                         <Grid item className="display-xs-block">

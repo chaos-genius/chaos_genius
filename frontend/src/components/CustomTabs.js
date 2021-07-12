@@ -69,7 +69,7 @@ export default function SimpleTabs(props){
     return (
         <div >
             <AppBar position="static">
-                <Tabs value={value} onChange={handleChange} aria-label="simple tabs example" variant={(props.scrollable === "auto")?("scrollable"):("")} scrollButtons={(props.scrollable === "auto")?("auto"):("off")}>
+                <Tabs value={value} onChange={handleChange} aria-label="simple tabs example" variant={(props.scrollable === "auto")?("scrollable"):("standard")} scrollButtons={(props.scrollable === "auto")?("auto"):("off")}>
                     {props.tabs.map((tabData, index) =>
                         <Tab label={tabData.title} {...a11yProps(index,tabData.title)} />
                     )}

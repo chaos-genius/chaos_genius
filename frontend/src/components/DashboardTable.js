@@ -125,9 +125,9 @@ class RcaAnalysisTable extends React.Component {
                 <Col xs={12} xl={12} className="px-0">
                     <small className="fw-bold">{size}%</small>
                 </Col>
-                <Col xs={12} xl={12} className="px-0">
+                {/* <Col xs={12} xl={12} className="px-0">
                     <ProgressBar variant="primary" className="progress-lg mb-0" now={size} min={0} max={100} />
-                </Col>
+                </Col> */}
             </Row>
         )
     }

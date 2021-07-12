@@ -1,6 +1,6 @@
 body{
     font-family: "Inter","Helvetica","Apple Color Emoji","Segoe UI Emoji","NotoColorEmoji","Noto Color Emoji","Segoe UI Symbol","Android Emoji","EmojiSymbols","-apple-system","BlinkMacSystemFont","Segoe UI","Roboto","Helvetica Neue","Noto Sans",sans-serif !important;
-    background-color: #F5F5F5;
+    background-color: #F5F5F5 !important;
     color: #222222;
 }
 
@@ -18,13 +18,14 @@ body{
 }
 
 .custom-table  .MuiTableBody-root td.MuiTableCell-root{
-    font-family: "Nunito Sans",sans-serif !important;
+    font-family: "Inter",sans-serif !important;
     border-bottom: unset;
-    font-size: .875rem !important;
+    font-size: 14px !important;
     padding: .75rem .5rem;
     padding-left: 1.5rem;
     padding-right: 1.5rem;
     text-align: left;
+    color: #222222 !important;
 }
 
 .custom-table .MuiTableHead-root th.MuiTableCell-root {
@@ -324,6 +325,9 @@ button.MuiIconButton-root.close-button {
 .metrics-card.card-grey{
     background: #F5F5F5 !important;
 }
+.kpi-sidebar.MuiCard-root{
+    height: 100%;
+}
 .kpi-sidebar .sidebar-title{
     font-weight: 500;
     font-size: 14px;
@@ -339,11 +343,16 @@ button.MuiIconButton-root.close-button {
     font-family: inherit;
     display: block;
     text-align: left;
+    border-radius: 0;
 }
 .kpi-sidebar .custom-sidebar-button.active{
     background: #EFFAF5;
-    color: #60CA9A;
-    border-left: 1px solid #60CA9A;
+    color: #60CA9A !important;
+    border-left: 2px solid #60CA9A;
+}
+.kpi-sidebar .custom-sidebar-button.active .right-icon{
+    position: absolute;
+    right: 12px;
 }
 .custom-dash-select .MuiOutlinedInput-root {
     margin-top: 0 !important;
@@ -443,6 +452,57 @@ div.label-switch {
 }
 .label-switch.active .MuiIconButton-label{
     color: #fff;
+}
+.custom-dash-switch{
+    display: flex;
+    align-items: flex-end;
+}
+.custom-dash-switch .MuiGrid-root{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-right: 10px;
+    margin-bottom: 4px;
+}
+.sidebar.collapse.bg-primary{
+    background-color: #222222 !important;
+    color: #BDBDBD !important;
+}
+
+/* Sidebar */
+.sidebar.contracted .nav-item{
+    width: 100% !important;
+    text-align: center;
+    white-space: break-spaces !important;
+    border: unset;
+}
+.sidebar.contracted .nav-item > .nav-link{
+    color: #BDBDBD;
+    border: unset !important;
+}
+.sidebar.contracted .nav-item.active > .nav-link{
+    background-color: unset !important;
+    color: #60CA9A;
+    border: unset !important;
+}
+.sidebar.contracted .nav-item > .nav-link .sidebar-title{
+    opacity: 1 !important;
+    color: inherit !important;
+    font-family: "Inter",sans-serif !important;
+    font-weight: normal;
+    font-size: 12px;
+    letter-spacing: 0.2px;
+    padding-top: 5px;
+}
+.sidebar.contracted .nav-item.active > .nav-link .sidebar-title{
+    font-weight: 600;
+}
+.sidebar .nav-link .sidebar-icon{
+    margin-right: unset !important;
+}
+.sidebar.contracted .nav-item .nav-link:hover{
+    background-color: unset !important;
+    color: #BDBDBD !important; 
 }
 @media (min-width: 600px){
 

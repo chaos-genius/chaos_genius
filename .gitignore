@@ -348,3 +348,4 @@ docs/yarn-error.log*
 
 ########### Third Party Integrations ##########
 .integrations.json
+.connectors

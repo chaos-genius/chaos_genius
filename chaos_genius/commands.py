@@ -70,7 +70,7 @@ def integration_connector():
     """Initialise the third party connector env"""
 
     click.echo(f"Third Party Setup: Third Party setup started.")
-    from chaos_genius.third_party.integration_client import init_third_party
+    from chaos_genius.third_party.integration_client import init_integration_server
 
     # TODO: Ask these params from CLI
     server_url = "http://localhost:8001"
@@ -81,7 +81,7 @@ def integration_connector():
     db_name = "test_airbyte"
     db_schema = "public"
 
-    status = init_third_party(server_url, db_host, db_user, db_password, db_port, db_name, db_schema)
+    status = init_integration_server(server_url, db_host, db_user, db_password, db_port, db_name, db_schema)
     if status:
         click.echo(f"Third Party Setup: Connector initialised successfully.")
     else:

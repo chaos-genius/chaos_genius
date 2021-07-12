@@ -20,7 +20,7 @@ ENV_FILE_PATH = os.path.join(BASE_PATH, '.integrations.json')
 class ThirdPartyClient(object):
     def __init__(self, server_uri=None):
         """This is used to initiate the Third Party API client. Methods will assume that the
-        third_party env has been already created via the init_third_party method.
+        third_party env has been already created via the init_integration_server method.
         There are methods which can be used to create the resource for the third party
 
         Args:
@@ -36,8 +36,9 @@ class ThirdPartyClient(object):
         self.destination_def_id = DESTINATION_DEF_ID
 
         workspace_id = config.get("workspace_id")
-        if not workspace_id:
-            self.workspace_id = DEFAULT_WORKSPACE_ID
+        # Hardcode the worksapce exposed in the UI for now
+        # if not workspace_id:
+        self.workspace_id = DEFAULT_WORKSPACE_ID
 
         # Check the third party server running status
         status = self.get_server_health()
@@ -449,7 +450,7 @@ def read_config(url):
 
 # Third Party Server Setup and configs
 
-def init_third_party(server_uri, db_host, db_user, db_password, db_port, db_name, db_schema):
+def init_integration_server(server_uri, db_host, db_user, db_password, db_port, db_name, db_schema):
     """This will initialise the setup for the third party server. All the configuration will be
     stored in the env file in the base directory. Third Party API endpoint and datails of
     the Postgres db for storing the third party data will be stored.

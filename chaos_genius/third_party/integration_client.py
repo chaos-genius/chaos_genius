@@ -5,16 +5,14 @@ import requests
 import pprint
 import traceback
 import click
+from dotenv import dotenv_values
+
 from chaos_genius.utils.io_helper import cg_print
 from chaos_genius.third_party.integration_server_config import (
     SOURCE_WHITELIST_AND_TYPE as SOURCE_DEF_ID,
     DESTINATION_DEF_ID,
     DEFAULT_WORKSPACE_ID
 )
-
-
-BASE_PATH = os.getcwd()
-ENV_FILE_PATH = os.path.join(BASE_PATH, '.integrations.json')
 
 
 class ThirdPartyClient(object):
@@ -27,16 +25,20 @@ class ThirdPartyClient(object):
             server_uri (str): Server URL for which the API need to be hit
         """
         super().__init__()
-        config = {}
-        if os.path.exists(ENV_FILE_PATH):
-            config = read_config(ENV_FILE_PATH)
+        config = dotenv_values(".env")
         self.config = config
-        self.server_uri = config.get("server_uri", server_uri)
-        self.destination_db = config.get("destination_db", {})
+        self.server_uri = config.get("INTEGRATION_SERVER", server_uri)
+        self.destination_db = {
+            "host": config["DB_HOST"],
+            "port": config["DB_PORT"],
+            "username": config["DB_USERNAME"],
+            "password": config["DB_PASSWORD"],
+            "database": config["DATA_DATABASE"],
+        }
         self.destination_def_id = DESTINATION_DEF_ID
 
-        workspace_id = config.get("workspace_id")
         # Hardcode the worksapce exposed in the UI for now
+        # workspace_id = config.get("workspace_id")
         # if not workspace_id:
         self.workspace_id = DEFAULT_WORKSPACE_ID
 
@@ -105,6 +107,16 @@ class ThirdPartyClient(object):
         """
         payload = {"workspaceId": self.workspace_id}
         api_url = f"{self.server_uri}/api/v1/workspaces/get"
+        return post_request(api_url, payload)
+
+    def update_workspace(self, payload):
+        """This will be used to update the worksapce details
+
+        Returns:
+            dict: details of the workspace
+        """
+        payload = payload
+        api_url = f"{self.server_uri}/api/v1/workspaces/update"
         return post_request(api_url, payload)
 
     def get_source_def_list(self):
@@ -414,8 +426,7 @@ class ThirdPartyClient(object):
 def post_request(url, payload, response_type='json'):
     response_data = {}
     try:
-        response = requests.post(url=url, json=payload)
-        # import pdb; pdb.set_trace()
+        response = requests.post(url=url, json=payload, timeout=10)
         if response.ok:
             if response_type == 'json':
                 response_data = response.json()
@@ -433,7 +444,7 @@ def post_request(url, payload, response_type='json'):
 def get_request(url, params=None):
     response_data = {}
     try:
-        response = requests.get(url=url)
+        response = requests.get(url=url, timeout=10)
         response_data = response.json()
     except Exception as err:
         print(err)
@@ -450,51 +461,36 @@ def read_config(url):
 
 # Third Party Server Setup and configs
 
-def init_integration_server(server_uri, db_host, db_user, db_password, db_port, db_name, db_schema):
+def init_integration_server():
     """This will initialise the setup for the third party server. All the configuration will be
     stored in the env file in the base directory. Third Party API endpoint and datails of
     the Postgres db for storing the third party data will be stored.
 
-    Args:
-        server_uri (str): URI for the third party API endpoint
-        db_host (str): Postgres Database hostname
-        db_user (str): Postgres database user
-        db_password (str): Database password
-        db_port (int): Database port
-        db_name (str): Database name
-        db_schema (str): Database schema
     """
 
-    third_party_config = {}
-    third_party_config["server_uri"] = server_uri
-    if os.path.exists(ENV_FILE_PATH):
-        third_party_config = read_config(ENV_FILE_PATH)
-        cg_print(f"Third Party Setup: Already initialised.")
-        client = ThirdPartyClient()
-    else:
-        client = ThirdPartyClient(server_uri=server_uri)
+    config = dotenv_values(".env")
+    server_url = config["INTEGRATION_SERVER"]
+    db_host = config["DB_HOST"]
+    db_user = config["DB_USERNAME"]
+    db_password = config["DB_PASSWORD"]
+    db_port = config["DB_PORT"]
+    db_name = config["DATA_DATABASE"]
+
+    client = ThirdPartyClient()
+    status = client.get_server_health()
+    if status.get('db', False):
         payload = {
+            "workspaceId": DEFAULT_WORKSPACE_ID,
+            "initialSetupComplete": True,
+            "displaySetupWizard": False,
             "email": "user@example.com",
             "anonymousDataCollection": False,
-            "name": "ChaosGenius",
             "news": False,
-            "securityUpdates": False,
-            "notifications": []
+            "securityUpdates": False
         }
-        workspace = client.create_workspace(payload)
-        # TODO: Check whether we need to update the
-        # initialSetupComplete and displaySetupWizard flags
-        third_party_config["workspace_id"] = workspace["workspaceId"]
-        third_party_config["workspace_details"] = workspace
-        third_party_config["destination_db"] = {
-            "host": db_host,
-            "username": db_user,
-            "password": db_password,
-            "port": db_port,
-            "database": db_name
-        }
-        with open(ENV_FILE_PATH, 'w') as fp:
-            json.dump(third_party_config, fp)
+        workspace = client.update_workspace(payload)
+    else:
+        raise Exception("Integration Server isn't running. Run the server and then try again.")
 
     status = client.get_server_health()
     return status.get('db', False)

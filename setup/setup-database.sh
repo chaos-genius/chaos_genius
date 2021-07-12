@@ -18,4 +18,8 @@ while true; do
 done
 
 printf "${GREEN}-->${NC} Starting the database setup...\n"
-
+source .venv/bin/activate
+source .env
+flask db upgrade
+flask integration-connector
+printf "${GREEN}-->${NC} Database setup done...\n"

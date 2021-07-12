@@ -86,7 +86,6 @@ else
     printf "${BLUE}-->${NC} Found postgresql\n"
 fi
 
-printf "${GREEN}-->${NC} Creating the ENV file \n"
 touch .env
 echo "FLASK_APP=run" >> .env
 echo "FLASK_ENV=production" >> .env
@@ -101,4 +100,5 @@ echo "DB_PORT=5432" >> .env
 echo "META_DATABASE=chaosgenius" >> .env
 echo "DATA_DATABASE=chaosgenius_data" >> .env
 echo "DATABASE_URL='postgresql+psycopg2://$(whoami):@localhost/chaosgenius'" >> .env
+echo "INTEGRATION_SERVER='http://localhost:8001'" >> .env
 printf "${GREEN}-->${NC} Created the ENV file \n"

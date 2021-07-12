@@ -95,10 +95,10 @@ echo "FLASK_RUN_PORT=5000" >> .env
 echo "SECRET_KEY=not-so-secret" >> .env
 echo "SEND_FILE_MAX_AGE_DEFAULT=31556926" >> .env
 echo "DB_HOST=localhost" >> .env
-echo "DB_USERNAME=$whoami" >> .env
+echo "DB_USERNAME=$(whoami)" >> .env
 echo "DB_PASSWORD=''" >> .env
 echo "DB_PORT=5432" >> .env
 echo "META_DATABASE=chaosgenius" >> .env
 echo "DATA_DATABASE=chaosgenius_data" >> .env
-echo "DATABASE_URL='postgresql+psycopg2://$whoami:@localhost/chaosgenius'" >> .env
+echo "DATABASE_URL='postgresql+psycopg2://$(whoami):@localhost/chaosgenius'" >> .env
 printf "${GREEN}-->${NC} Created the ENV file \n"

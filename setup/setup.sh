@@ -5,25 +5,21 @@ BLUE='\033[1;34m' # Blue
 GRAY='\033[0;37m' # Grey
 RED='\033[1;31m' # Blue
 NC='\033[0m' # No Color
-MACOS='Darwin'
-UBUNTU='Linux'
 
 printf "${GREEN}-->${NC} Installing ${GREEN}Chaos Genius${NC} ...\n\n"
 printf "${GRAY}Chaos Genius 🔮 is an Open-source Business Observability tool
 that helps you monitor your business & system metrics
 and get automated RCA with multi-dimension drill-downs.${NC}\n\n"
 
-# OS_NAME=$(uname -a 2>&1 | cut -d ' ' -f 1)
-# echo $OS_NAME
-# if ["$OS_NAME" = "$MACOS"]; then
-#     bash ./setup-macos.sh
-# elif ["$OS_NAME" = "$UBUNTU"]; then
-#     bash ./setup-ubuntu.sh
-# else
-#     printf "${RED}-->${NC} Chaos Genius only support Linux and MacOs\n"
-#     exit 1
-# fi
-# bash "$PWD/setup/setup-macos.sh"
+OS_NAME=$(uname -a 2>&1 | cut -d ' ' -f 1)
+if [ "$OS_NAME" = "Darwin" ]; then
+    bash "$PWD/setup/setup-macos.sh"
+elif [ "$OS_NAME" = "Linux" ]; then
+    bash "$PWD/setup/setup-ubuntu.sh"
+else
+    printf "${RED}-->${NC} Chaos Genius only support Linux and MacOs\n"
+    exit 1
+fi
 
 
 # Check & install connector dependencies
@@ -80,10 +76,10 @@ fi
 
 
 # Start services & go!
-printf "\n${GREEN}-->${NC} Starting services \n"
-printf "${BLUE}-->${NC} Starting database & data connectors\n"
-printf "${BLUE}-->${NC} Starting front-end services\n"
-printf "${BLUE}-->${NC} Starting backend-end services\n"
+# printf "\n${GREEN}-->${NC} Starting services \n"
+# printf "${BLUE}-->${NC} Starting database & data connectors\n"
+# printf "${BLUE}-->${NC} Starting front-end services\n"
+# printf "${BLUE}-->${NC} Starting backend-end services\n"
 
 
 # Welcome message 

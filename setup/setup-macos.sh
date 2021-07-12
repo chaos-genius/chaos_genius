@@ -78,7 +78,27 @@ fi
 if ! hash psql; then
     printf "${RED}-->${NC} Chaos Genius requires postgresql. It is not installed\n"
     printf "${RED}-->${NC} You can install it by 'brew install postgresql'\n"
+    brew install postgresql
+    createdb chaosgenius
+    createdb chaosgenius_data
     exit 1
 else
     printf "${BLUE}-->${NC} Found postgresql\n"
 fi
+
+printf "${GREEN}-->${NC} Creating the ENV file \n"
+touch .env
+echo "FLASK_APP=run" >> .env
+echo "FLASK_ENV=production" >> .env
+echo "FLASK_DEBUG=0" >> .env
+echo "FLASK_RUN_PORT=5000" >> .env
+echo "SECRET_KEY=not-so-secret" >> .env
+echo "SEND_FILE_MAX_AGE_DEFAULT=31556926" >> .env
+echo "DB_HOST=localhost" >> .env
+echo "DB_USERNAME=$whoami" >> .env
+echo "DB_PASSWORD=''" >> .env
+echo "DB_PORT=5432" >> .env
+echo "META_DATABASE=chaosgenius" >> .env
+echo "DATA_DATABASE=chaosgenius_data" >> .env
+echo "DATABASE_URL='postgresql+psycopg2://$whoami:@localhost/chaosgenius'" >> .env
+printf "${GREEN}-->${NC} Created the ENV file \n"

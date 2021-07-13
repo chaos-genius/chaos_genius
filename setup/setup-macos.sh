@@ -81,12 +81,12 @@ if ! hash psql; then
     brew install postgresql
     createdb chaosgenius
     createdb chaosgenius_data
-    exit 1
 else
     printf "${BLUE}-->${NC} Found postgresql\n"
 fi
 
 touch .env
+echo "" > .env
 echo "FLASK_APP=run" >> .env
 echo "FLASK_ENV=production" >> .env
 echo "FLASK_DEBUG=0" >> .env
@@ -98,7 +98,13 @@ echo "DB_USERNAME=$(whoami)" >> .env
 echo "DB_PASSWORD=''" >> .env
 echo "DB_PORT=5432" >> .env
 echo "META_DATABASE=chaosgenius" >> .env
-echo "DATA_DATABASE=chaosgenius_data" >> .env
 echo "DATABASE_URL='postgresql+psycopg2://$(whoami):@localhost/chaosgenius'" >> .env
+echo "" >> .env
 echo "INTEGRATION_SERVER='http://localhost:8001'" >> .env
+echo "INTEGRATION_DB_HOST='host.docker.internal'" >> .env
+echo "INTEGRATION_DB_USERNAME=$(whoami)" >> .env
+echo "INTEGRATION_DB_PASSWORD=''" >> .env
+echo "INTEGRATION_DB_PORT=5432" >> .env
+echo "INTEGRATION_DATABASE=chaosgenius_data" >> .env
+
 printf "${GREEN}-->${NC} Created the ENV file \n"

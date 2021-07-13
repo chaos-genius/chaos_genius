@@ -29,11 +29,11 @@ class ThirdPartyClient(object):
         self.config = config
         self.server_uri = config.get("INTEGRATION_SERVER", server_uri)
         self.destination_db = {
-            "host": config["DB_HOST"],
-            "port": config["DB_PORT"],
-            "username": config["DB_USERNAME"],
-            "password": config["DB_PASSWORD"],
-            "database": config["DATA_DATABASE"],
+            "host": config["INTEGRATION_DB_HOST"],
+            "port": int(config["INTEGRATION_DB_PORT"]),
+            "username": config["INTEGRATION_DB_USERNAME"],
+            "password": config["INTEGRATION_DB_PASSWORD"],
+            "database": config["INTEGRATION_DATABASE"],
         }
         self.destination_def_id = DESTINATION_DEF_ID
 
@@ -325,7 +325,7 @@ class ThirdPartyClient(object):
         Returns:
             dict: status and id of the created connection
         """
-        api_url = f"{self.server_uri}/api/v1/connections/create"
+        api_url = f"{self.server_uri}/api/v1/web_backend/connections/create"
         return post_request(api_url, payload)
 
     def update_connection(self, updated_data):
@@ -338,7 +338,7 @@ class ThirdPartyClient(object):
             dict: status of the created connection
         """
         payload = updated_data
-        api_url = f"{self.server_uri}/api/v1/connections/update"
+        api_url = f"{self.server_uri}/api/v1/web_backend/connections/update"
         return post_request(api_url, payload)
 
     def delete_connection(self, connection_id):
@@ -351,7 +351,7 @@ class ThirdPartyClient(object):
             dict: status of the deletion
         """
         payload = {"connectionId": connection_id}
-        api_url = f"{self.server_uri}/api/v1/connections/delete"
+        api_url = f"{self.server_uri}/api/v1/web_backend/connections/delete"
         return post_request(api_url, payload, 'text')
 
     def reset_connection(self, connection_id):
@@ -426,29 +426,28 @@ class ThirdPartyClient(object):
 def post_request(url, payload, response_type='json'):
     response_data = {}
     try:
-        response = requests.post(url=url, json=payload, timeout=10)
+        response = requests.post(url=url, json=payload, timeout=25)
         if response.ok:
             if response_type == 'json':
                 response_data = response.json()
             else:
                 response_data = {"response": response.text}
         else:
-            print(response.text)
             response.raise_for_status()
     except Exception as err:
         print(err)
-        print(traceback.format_exc())
+        # print(traceback.format_exc())
     return response_data
 
 
 def get_request(url, params=None):
     response_data = {}
     try:
-        response = requests.get(url=url, timeout=10)
+        response = requests.get(url=url, timeout=25)
         response_data = response.json()
     except Exception as err:
         print(err)
-        print(traceback.format_exc())
+        # print(traceback.format_exc())
     return response_data
 
 
@@ -470,11 +469,11 @@ def init_integration_server():
 
     config = dotenv_values(".env")
     server_url = config["INTEGRATION_SERVER"]
-    db_host = config["DB_HOST"]
-    db_user = config["DB_USERNAME"]
-    db_password = config["DB_PASSWORD"]
-    db_port = config["DB_PORT"]
-    db_name = config["DATA_DATABASE"]
+    db_host = config["INTEGRATION_DB_HOST"]
+    db_user = config["INTEGRATION_DB_USERNAME"]
+    db_password = config["INTEGRATION_DB_PASSWORD"]
+    db_port = config["INTEGRATION_DB_PORT"]
+    db_name = config["INTEGRATION_DATABASE"]
 
     client = ThirdPartyClient()
     status = client.get_server_health()
@@ -494,21 +493,3 @@ def init_integration_server():
 
     status = client.get_server_health()
     return status.get('db', False)
-
-
-if __name__ == "__main__":
-    # destination_configuration = {
-    #     "host": "md-postgres-test-db-instance.cjzi0pwi8ki4.ap-south-1.rds.amazonaws.com",
-    #     "username": "postgres",
-    #     "password": "",
-    #     "port": 5432,
-    #     "database": "third_party_data",
-    #     "schema": "public",
-    # }
-    # server_url = "http://localhost:8001"
-    # workspace_id = "5ae6b09b-fdec-41af-aaf7-7d94cfc33ef6"
-
-    print('--------------')
-    client = ThirdPartyClient(server_uri="http://localhost:8001")
-    data = client.reset_connection("40f56e5d-1cc4-4425-a7c7-a488d2d2adc8")
-    pprint.pprint(data)

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """DataSource views for creating and viewing the data source."""
+import re
 from flask import (
     Blueprint,
     current_app,
@@ -95,6 +96,7 @@ def test_data_source():
 @blueprint.route("/create", methods=["POST"])
 def create_data_source():
     """Create DataSource."""
+    # TODO: Better error handling and proper message in case of the failure
     connection_status, msg, status = {}, "failed", False
     sourceRecord, desinationRecord, connectionRecord, stream_tables = {}, {}, {}, []
     db_connection_uri = ""
@@ -125,7 +127,10 @@ def create_data_source():
             for stream in stream_schema:
                 stream["config"].update(mapping_config)
 
-            table_prefix = f"CG-{conn_type}-{conn_name}-"
+            stripped_conn_type = "".join(re.findall("[a-zA-Z]+", conn_type))
+            stripped_conn_name = "".join(re.findall("[a-zA-Z]+", conn_name))
+            table_prefix = f"CG_{stripped_conn_type}_{stripped_conn_name}_"
+            table_prefix = table_prefix.lower()
             conn_payload = {
                 "sourceId": sourceRecord["sourceId"],
                 "destinationId": desinationRecord["destinationId"],
@@ -135,6 +140,17 @@ def create_data_source():
                 },
                 "prefix": table_prefix,
                 "status": "active",
+                "operations": [
+                    {
+                        "name": "Normalization",
+                        "operatorConfiguration": {
+                            "operatorType": "normalization",
+                            "normalization": {
+                                "option": "basic"
+                            }
+                        }
+                    }
+                ],
                 "syncCatalog": {
                     "streams": stream_schema
                 }
@@ -157,6 +173,7 @@ def create_data_source():
                 "db_type": db_mapper["db_type"],
             }
 
+        # TODO: Correct the database URI incase of the localhost db (replace docker.localhost)
         db_connection_uri = create_sqlalchemy_uri(**db_config)
         status = "connected"
 
@@ -173,14 +190,14 @@ def create_data_source():
             connectionConfig=connectionRecord,
             dbConfig={"tables": stream_tables, "db_connection_uri": db_connection_uri}
         )
-        new_connection.save()
+        new_connection.save(commit=True)
         msg = f"DataSource {new_connection.name} has been created successfully."
 
     except Exception as err_msg:
         print('-'*60)
         print(err_msg)
         msg = err_msg
-        import traceback; print(traceback.format_exc())
+        # import traceback; print(traceback.format_exc())
     return jsonify({"data": {}, "msg": msg, "status": status})
 
 

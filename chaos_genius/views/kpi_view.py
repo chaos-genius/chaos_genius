@@ -49,7 +49,7 @@ def kpi():
                 filters=data.get('filters'),
                 dimensions=data.get('dimensions')
             )
-            new_kpi.save()
+            new_kpi.save(commit=True)
             return jsonify({"message": f"DataSource {new_kpi.name} has been created successfully."})
         else:
             return jsonify({"error": "The request payload is not in JSON format"})

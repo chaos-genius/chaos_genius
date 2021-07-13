@@ -1,22 +1,15 @@
 
 import React from "react";
-import { Button, Container, Row, Col, Alert } from '@themesberg/react-bootstrap';
+import { Button } from '@themesberg/react-bootstrap';
 import {
-    DialogContent, DialogContentText, DialogActions,
     Card, CardContent, Grid, FormControl,
     TextField, InputLabel, Typography, Accordion, AccordionSummary, AccordionDetails,
     CircularProgress
 } from '@material-ui/core';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircle, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
-
-import Api from '../../Service/Api'
 import './../../assets/css/custom.css'
 
 import imgSuccess from './../../assets/img/imgSuccess.svg'
-import postgresql from './../../assets/img/postgresql.png'
-import mysql from './../../assets/img/mysql.png'
 
 import { tab1Fields, renderInputFields, renderlogs } from './HelperFunction'
 import { BASE_URL, DEFAULT_HEADERS } from '../../config/Constants'
@@ -188,8 +181,8 @@ class AddDataSources extends React.Component {
         fetch(`${BASE_URL}api/connection/create`, requestOptions)
             .then(response => response.json())
             .then(data => {
-                // console.log("response", data);
-                this.setState({ successModal: true, showDefault: false, formData: [], formError: [], submitLoader: false })
+                this.setState({ successModal: true, showDefault: false, formData: [], formError: [], submitLoader: false });
+                this.props.history.push('/datasource');
             }).catch(error => {
                 this.setState({ submitLoader: false })
                 console.log(error);

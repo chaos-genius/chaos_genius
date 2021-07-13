@@ -127,6 +127,7 @@ def create_data_source():
             for stream in stream_schema:
                 stream["config"].update(mapping_config)
 
+            # TODO: Make the prefix short since long table names truncated by default
             stripped_conn_type = "".join(re.findall("[a-zA-Z]+", conn_type))
             stripped_conn_name = "".join(re.findall("[a-zA-Z]+", conn_name))
             table_prefix = f"CG_{stripped_conn_type}_{stripped_conn_name}_"

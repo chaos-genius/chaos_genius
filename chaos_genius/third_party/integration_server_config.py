@@ -1,12 +1,12 @@
 
-# TODO: This is the default worksapce
+# This is the default worksapce
 # Check this link for more information on the same
 # https://github.com/airbytehq/airbyte/blob/07a45df4547fa5f12a170dff0bfc56c39c3d2e9f/airbyte-config/persistence/src/main/java/io/airbyte/config/persistence/PersistenceConstants.java
 DEFAULT_WORKSPACE_ID = "5ae6b09b-fdec-41af-aaf7-7d94cfc33ef6"
 
 # Destination for the third party data
 DESTINATION_DEF_ID = "25c5221d-dce2-4163-ade9-739ef790f503" # POSTGRES DB
-DESTINATION_TYPE = "postgresql"
+DESTINATION_TYPE = "postgres"
 
 # Mapping configuration from the source to database
 SOURCE_CONFIG_MAPPING = {
@@ -15,7 +15,14 @@ SOURCE_CONFIG_MAPPING = {
         "cursorField": [],
         "destinationSyncMode": "overwrite",
         "primaryKey": [],
-        "selected": True
+        "selected": True,
+    },
+    "39f092a6-8c87-4f6f-a8d9-5cef45b7dbe1": {
+        "syncMode": "incremental",
+        "cursorField": [],
+        "destinationSyncMode": "append",
+        "primaryKey": [],
+        "selected": True,
     }
 }
 

@@ -106,6 +106,7 @@ import CustomTable from './../components/CustomTable'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleDown, faAngleUp } from '@fortawesome/free-solid-svg-icons';
 
+
 class RcaAnalysisTable extends React.Component {
     constructor(props) {
         super(props)
@@ -124,9 +125,9 @@ class RcaAnalysisTable extends React.Component {
                 <Col xs={12} xl={12} className="px-0">
                     <small className="fw-bold">{size}%</small>
                 </Col>
-                <Col xs={12} xl={12} className="px-0">
+                {/* <Col xs={12} xl={12} className="px-0">
                     <ProgressBar variant="primary" className="progress-lg mb-0" now={size} min={0} max={100} />
-                </Col>
+                </Col> */}
             </Row>
         )
     }
@@ -176,7 +177,8 @@ class RcaAnalysisTable extends React.Component {
     render() {
         if (Object.keys(this.state.tableData).length > 1) {
             return (
-                <div className="custom-table">
+                <div className="custom-table custom-dash-table mt-5">                    
+                    {/* <p>These are the top 50 subgroups sorted by their Impact.</p> */}
                     <CustomTable
                         columns={this.state.tabCol}
                         data={this.state.tableData}
@@ -185,7 +187,6 @@ class RcaAnalysisTable extends React.Component {
                         options={{
                             paginationType: "stepped",
                             showTitle: false,
-                            searchFieldAlignment: 'left',
                             search:false,
                             paging: false
                         }}

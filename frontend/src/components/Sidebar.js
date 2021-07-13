@@ -13,6 +13,27 @@ import ReactHero from "../assets/img/bootstrap-5-logo.svg";
 import ProfilePicture from "../assets/img/profile-photo.jpeg";
 
 
+
+
+import logo from "../assets/img/logo.svg"
+import homeIcon from '../assets/img/navbaricons/home.svg'
+import homeIconActive from '../assets/img/navbaricons/homeactive.svg'
+
+import dashboardIcon from '../assets/img/navbaricons/dashboard.svg'
+import dashboardIconActive from '../assets/img/navbaricons/dashboardactive.svg'
+
+import kpiexplorerIcon from '../assets/img/navbaricons/kpiexplorer.svg'
+import kpiexplorerIconActive from '../assets/img/navbaricons/kpiexploreractive.svg'
+
+import anomoliesIcon from '../assets/img/navbaricons/anomolies.svg'
+import anomoliesIconActive from '../assets/img/navbaricons/anomoliesactive.svg'
+
+import datasourceIcon from '../assets/img/navbaricons/datasource.svg'
+import datasourceIconActive from '../assets/img/navbaricons/datasourceactive.svg'
+
+import alertsIcon from '../assets/img/navbaricons/alerts.svg'
+import alertsIconActive from '../assets/img/navbaricons/alertsactive.svg'
+
 export default (props = {}) => {
   const location = useLocation();
   const { pathname } = location;
@@ -31,6 +52,7 @@ export default (props = {}) => {
           <Accordion.Button as={Nav.Link} className="d-flex justify-content-between align-items-center">
             <span>
               <span className="sidebar-icon"><FontAwesomeIcon icon={icon} /> </span>
+              {/* <span className="sidebar-icon"><img src={logo} className="main-logo" /> </span> */}
               <span className="sidebar-text">{title}</span>
             </span>
           </Accordion.Button>
@@ -45,20 +67,20 @@ export default (props = {}) => {
   };
 
   const NavItem = (props) => {
-    const { title, link, external, target, icon, image, badgeText, badgeBg = "secondary", badgeColor = "primary" } = props;
+    const { title, link, external, target, icon, image,imageActive, badgeText, badgeBg = "secondary", badgeColor = "primary" } = props;
     const classNames = badgeText ? "d-flex justify-content-start align-items-center justify-content-between" : "";
     const navItemClassName = link === pathname ? "active" : "";
     const linkProps = external ? { href: link } : { as: Link, to: link };
-
+    const imageIcon = link === pathname ? imageActive : image;
     return (
       <Nav.Item className={navItemClassName} onClick={() => setShow(false)}>
         <Nav.Link {...linkProps} target={target} className={classNames}>
           <span>
             {icon ? <span className="sidebar-icon"><FontAwesomeIcon icon={icon} /> </span> : null}
-            {image ? <Image src={image} width={20} height={20} className="sidebar-icon svg-icon" /> : null}
-
-            <span className="sidebar-text">{title}</span>
+            {image ? <Image src={imageIcon} width={24} className="sidebar-icon svg-icon" /> : null}
+            {/* <span className="sidebar-icon"><img src={logo} className="main-logo" /> </span> */}          
           </span>
+          <h4 className="sidebar-title">{title}</h4>
           {badgeText ? (
             <Badge pill bg={badgeBg} text={badgeColor} className="badge-md notification-count ms-2">{badgeText}</Badge>
           ) : null}
@@ -79,7 +101,7 @@ export default (props = {}) => {
       </Navbar>
       <CSSTransition timeout={300} in={show} classNames="sidebar-transition">
         <SimpleBar className={`collapse ${showClass} contracted sidebar d-md-block bg-primary text-white`}>
-          <div className="sidebar-inner px-4 pt-3">
+          <div className="sidebar-inner pt-3">
             <div className="user-card d-flex d-md-none align-items-center justify-content-between justify-content-md-center pb-4">
               <div className="d-flex align-items-center">
                 <div className="user-avatar lg-avatar me-4">
@@ -97,23 +119,28 @@ export default (props = {}) => {
               </Nav.Link>
             </div>
             <Nav className="flex-column pt-3 pt-md-0">
-              <NavItem title="ChaosGenius" link={'#'} icon={faAlignCenter} />
+              <NavItem title="" link={'#'} image={logo}  />
               <Dropdown.Divider className="my-3 border-indigo" />
 
-              <NavItem title="Home" link={Routes.Home.path} icon={faHome} />
-              <NavItem title="Dashboards" link={Routes.Dashboards.path} icon={faPoll} />
-              <NavItem title="KPI Explorer" link={Routes.KpiExplorer.path} icon={faGlobe} />
-              <NavItem title="Actions Items" link={Routes.ActionItems.path} icon={faTasks} />
-              <NavItem title="Alerts" link={Routes.Alerts.path} icon={faBell} />
+              <NavItem title="Home" link={Routes.Home.path} image={homeIcon} imageActive={homeIconActive} />
+              <NavItem title="Dashboards" link={Routes.Dashboards.path} image={dashboardIcon} imageActive={dashboardIconActive} />
+              <NavItem title="KPI Explorer" link={Routes.KpiExplorer.path} image={kpiexplorerIcon} imageActive={kpiexplorerIconActive} />
+              <NavItem title="Anomolies" link={"#"} image={anomoliesIcon} imageActive={anomoliesIconActive} />
+              {/* <NavItem title="Actions Items" link={Routes.ActionItems.path} icon={faTasks} /> */}
+              {/* <NavItem title="Actions Items" link={Routes.ActionItems.path} icon={faTasks} /> */}
+              {/* <NavItem title="Alerts" link={Routes.Alerts.path} icon={faBell} /> */}
 
               <Dropdown.Divider className="my-3 border-indigo" />
 
-              <CollapsableNavItem eventKey="organisation/" title="Organisation" icon={faSitemap}>
+              {/* <CollapsableNavItem eventKey="organisation/" title="Organisation" icon={faSitemap}>
                 <NavItem title="Users" link={Routes.Users.path} icon={faUsers} />
                 <NavItem title="Data Sources" link={Routes.DataSources.path} icon={faCoins} />
                 <NavItem title="Settings" link={Routes.OrganisationSettings.path} icon={faCogs} />
-              </CollapsableNavItem>
-
+              </CollapsableNavItem> */}
+              <div className="bottom-nav">
+                <NavItem title="Data Sources" link={Routes.DataSources.path} image={datasourceIcon} imageActive={datasourceIconActive} />
+                <NavItem title="Alerts" link={Routes.Alerts.path} image={alertsIcon} imageActive={alertsIconActive} />
+              </div>
 
             </Nav>
           </div>

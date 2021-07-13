@@ -9,30 +9,60 @@ class MultidimensionTable extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            tableData: props.multiDimensionTableData,
+            tableData: [],            
         }
     }
-
+    ValueChange = (value) => {
+        // console.log("value", value)
+        const valueIcon = value < 0 ? faAngleDown : faAngleUp;
+        const valueTxtColor = value < 0 ? "text-danger" : "text-success";
+        // console.log(typeof value)
+        return (
+            (value) ? (
+                <span className={valueTxtColor}>
+                    <FontAwesomeIcon icon={valueIcon} />
+                    <span className="fw-bold ms-1">
+                        {Math.abs(value)}
+                    </span>
+                </span>
+            ) : ("--")
+        );
+    };
 
     render() {
-        const col = [{ title: "Subgroup", field: 'string' },
-                    { title: "Full Impact", field: "impact_full_group" }, 
-                    { title: "Non Overlap Impact", field: 'impact_non_overlap' }, 
-                    { title: "Data points in group", field: 'indices_in_group' }, 
-                    { title: "Non overlapping data points", field: 'non_overlap_indices' }]; 
-// console.log("tableData",this.state.tableData)
-        if (Object.keys(this.state.tableData).length > 0) {
+        // console.log("tableData",this.props.tableData)
+        if (Object.keys(this.props.tableData).length > 0) {
+            this.props.tableData.map((obj) => {
+                if (obj?.impact_full_group) {
+                    if(typeof obj.impact_full_group === "number"){
+                        obj.impact_full_group = this.ValueChange(obj.impact_full_group)
+                    }
+                }
+                if(obj?.impact_non_overlap){
+                    if(typeof obj.impact_non_overlap === "number"){
+                        obj.impact_non_overlap = this.ValueChange(obj.impact_non_overlap)
+                    }
+                }
+                if(obj?.impact){
+                    if(typeof obj.impact === "number"){
+                        obj.impact = this.ValueChange(obj.impact)
+                    }
+                }
+            })
+        }
+
+        if (Object.keys(this.props.tableData).length > 0) {
             return (
-                <div className="custom-table">
+                <div className="custom-table custom-multidimension-table">
                     <CustomTable
-                        columns={col}
-                        data={this.state.tableData}
+                        columns={this.props.dataCol}
+                        data={this.props.tableData}
                         title=""
                         options={{
                             paginationType: "stepped",
                             showTitle: false,
                             searchFieldAlignment: 'left',
-                            search:false,
+                            search: false,
                             paging: false
                         }}
                     />

@@ -69,7 +69,7 @@ function App() {
 
       <RouteWithSidebar exact path={Routes.Home.path} component={Home} />
       <RouteWithSidebar exact path={Routes.Dashboards.path} component={Dashboards} />
-      <RouteWithSidebar exact path={Routes.Dashboards.path} component={Dashboards} />
+      <RouteWithSidebar exact path={Routes.KpiExplorer.path} component={KpiExplorer} />
       <RouteWithSidebar exact path={Routes.AddKpi.path} component={AddKpi} />
       <RouteWithSidebar exact path={Routes.ActionItems.path} component={ActionItems} />
       <RouteWithSidebar exact path={Routes.Alerts.path} component={Alerts} />

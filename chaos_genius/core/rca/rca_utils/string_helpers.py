@@ -2,17 +2,18 @@
 
 import re
 import numpy as np
+from typing import Dict
 
 # TODO: Update docstrings to sphinx format
 
 
-def _parse_single_col_for_query_string(col: str, value: str) -> str:
+def _parse_single_col_for_query_string(col: str, value: str, binned: bool) -> str:
     # matches expressions like [-0.01, 0.001) representing limits for
     # binned numbers
     binned_number_match = re.match(
         r"([\(\[]+)([+-]?\d*\.?\d+), ([+-]?\d*\.?\d+)([\)\]]+)", value
     )
-    if binned_number_match:
+    if binned_number_match and binned:
         groups = binned_number_match.groups()
         query_string = str(groups[1])
         query_string += " <= " if groups[0] == "[" else " < "
@@ -24,7 +25,7 @@ def _parse_single_col_for_query_string(col: str, value: str) -> str:
     return query_string
 
 
-def convert_df_dims_to_query_strings(inp) -> str:
+def convert_df_dims_to_query_strings(inp, binned_cols: Dict) -> str:
     """Converts all given dimensions in df into query strings
 
     Args:
@@ -34,10 +35,13 @@ def convert_df_dims_to_query_strings(inp) -> str:
         str: Query strings
     """
 
-    query_string_lists = [
-        _parse_single_col_for_query_string(col, val) for col, val in
-        zip(inp.index, inp.values) if val is not np.nan
-    ]
+    query_string_lists = []
+    for col, val in zip(inp.index, inp.values):
+        if val is not np.nan:
+            if col in binned_cols:
+                query_string_lists.append(_parse_single_col_for_query_string(binned_cols[col], val, binned=True))
+            else:
+                query_string_lists.append(_parse_single_col_for_query_string(col, val, binned=False))
     return " and ".join(query_string_lists)
 
 

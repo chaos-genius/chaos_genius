@@ -11,7 +11,6 @@ from flask import (
     url_for,
     jsonify
 )
-from flask_cors import CORS
 
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.extensions import integration_connector as connector
@@ -27,7 +26,6 @@ from chaos_genius.databases.db_metadata import DbMetadata, get_metadata
 # from chaos_genius.utils import flash_errors
 
 blueprint = Blueprint("api_data_source", __name__, static_folder="../static")
-CORS(blueprint) # TODO: remove this
 
 CONNECTION_TYPES = [
     {'name': 'PostgreSQL', 'value': 'postgresql'},

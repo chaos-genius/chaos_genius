@@ -4,6 +4,7 @@ import logging
 import sys
 
 from flask import Flask, render_template
+from flask_cors import CORS
 
 from chaos_genius import commands
 from chaos_genius.views import data_source_view, kpi_view, public_view
@@ -33,6 +34,7 @@ def create_app(config_object="chaos_genius.settings"):
     register_shellcontext(app)
     register_commands(app)
     configure_logger(app)
+    CORS(app) # TODO: Remove this
     return app
 
 

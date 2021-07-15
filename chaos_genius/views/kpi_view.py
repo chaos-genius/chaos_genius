@@ -22,6 +22,7 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.core.rca import RootCauseAnalysis
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
+from chaos_genius.core.anomaly.constants import date_output, no_date_output
 
 
 blueprint = Blueprint("api_kpi", __name__, static_folder="../static")
@@ -122,6 +123,21 @@ def kpi_rca_hierarchical_data(kpi_id):
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("RCA Analysis Done")
+    return jsonify({"data": data, "msg": ""})
+
+@blueprint.route("/<int:kpi_id>/anomaly-detection", methods=["GET"])
+def kpi_anomaly_detection(kpi_id):
+    current_app.logger.info(f"Anomaly Detection Started for KPI ID: {kpi_id}")
+    data = []
+    try:
+        date = request.args.get("date", None)
+        if date is None:
+            data = no_date_output
+        else:
+            data = date_output
+    except Exception as err:
+        current_app.logger.info(f"Error Found: {err}")
+    current_app.logger.info("Anomaly Detection Done")
     return jsonify({"data": data, "msg": ""})
 
 

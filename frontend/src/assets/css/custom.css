@@ -479,6 +479,7 @@ div.label-switch {
 .sidebar.contracted .nav-item > .nav-link{
     color: #BDBDBD;
     border: unset !important;
+    padding: 10px 0;
 }
 .sidebar.contracted .nav-item.active > .nav-link{
     background-color: unset !important;
@@ -491,8 +492,11 @@ div.label-switch {
     font-family: "Inter",sans-serif !important;
     font-weight: normal;
     font-size: 12px;
-    letter-spacing: 0.2px;
-    padding-top: 5px;
+    letter-spacing: 0.2px;    
+}
+.dropdown-divider{
+    border-top: unset !important;
+    height: 0 !important;
 }
 .sidebar.contracted .nav-item.active > .nav-link .sidebar-title{
     font-weight: 600;
@@ -503,6 +507,90 @@ div.label-switch {
 .sidebar.contracted .nav-item .nav-link:hover{
     background-color: unset !important;
     color: #BDBDBD !important; 
+}
+.sidebar .nav-link:focus{
+    box-shadow: unset !important;
+}
+.sidebar-inner{
+    min-height: 100vh;
+}
+.sidebar-inner .bottom-nav{
+    bottom: 70px;
+    position: absolute;
+    left: 5px;
+}
+.home-page h2.main-title{
+    font-weight: 600;
+    font-size: 24px;
+    color: #222222;
+    letter-spacing: 0.4px;
+}
+.home-page .custom-progress-bar .MuiLinearProgress-colorPrimary{
+    background-color: #BDBDBD;
+    opacity: 0.5;
+    border-radius: 50px;
+    height: 11px;
+}
+.home-page .custom-progress-bar > span{
+    font-weight: normal;
+    font-size: 12px;
+    color: #222222;
+    letter-spacing: 0.2px;
+}
+.home-page .setup-cards{
+    color: #222222;
+    background: #FFFFFF ;
+    box-shadow: 4px 6px 32px -2px rgba(226, 226, 234, 0.24) !important;
+    border-radius: 20px !important;
+    min-height: 290px;
+}
+.home-page .setup-cards.active{
+    background: url('./../img/homepage/background.svg');
+    background-size: cover;
+    color: #FFFFFF;
+
+}
+.home-page .setup-cards .MuiCardContent-root{
+    padding: 40px  !important;
+}
+.home-page .setup-cards .MuiCardContent-root h4.title{
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 22px;
+    color: inherit !important;
+    margin-top:32px !important;
+}
+.home-page .setup-cards .MuiCardContent-root h4.sub-title{
+    font-weight: normal;
+    font-size: 14px;
+    color: inherit  !important;
+    line-height: 22px;
+    opacity: 0.7;
+}
+.home-page .setup-cards .MuiCardContent-root .MuiButton-root{
+    border-radius: 10px;
+    box-shadow: unset;
+    text-transform: unset;
+    font-weight: 500;
+    font-size: 14px;
+}
+.home-page .setup-cards .MuiCardContent-root .MuiButton-root.button-disabled{
+    background: #FFFFFF;
+    border: 1px solid #BDBDBD;
+    color: #BDBDBD;
+}
+.home-page .setup-cards .MuiCardContent-root .MuiButton-root.button-active{
+    background: linear-gradient(101.44deg, #DEFB9D 0%, #71F79E 37%, #38F9D7 70%, #89C4FE 100%);
+    color: #222222;
+}
+.home-page .setup-cards .MuiCardContent-root .MuiButton-root.button-success{
+    color: #FFFFFF;
+    background: #222222;
+}
+@media (min-width: 768px){
+    .sidebar.contracted {
+        max-width: 90px !important;
+    }
 }
 @media (min-width: 600px){
 

@@ -9,6 +9,7 @@ export const Routes = {
 
     // Main Menu
     Home: { path: "/" },
+    HomePage: { path: "/home" },
     Dashboards: { path: "/dashboard" },
     KpiExplorer: { path: "/kpi" },
     AddKpi: { path: "/kpi/new" },

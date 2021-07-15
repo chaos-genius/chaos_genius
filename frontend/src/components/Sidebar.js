@@ -80,7 +80,7 @@ export default (props = {}) => {
             {image ? <Image src={imageIcon} width={24} className="sidebar-icon svg-icon" /> : null}
             {/* <span className="sidebar-icon"><img src={logo} className="main-logo" /> </span> */}          
           </span>
-          <h4 className="sidebar-title">{title}</h4>
+          <h4 className="sidebar-title mb-0">{title}</h4>
           {badgeText ? (
             <Badge pill bg={badgeBg} text={badgeColor} className="badge-md notification-count ms-2">{badgeText}</Badge>
           ) : null}
@@ -101,7 +101,7 @@ export default (props = {}) => {
       </Navbar>
       <CSSTransition timeout={300} in={show} classNames="sidebar-transition">
         <SimpleBar className={`collapse ${showClass} contracted sidebar d-md-block bg-primary text-white`}>
-          <div className="sidebar-inner pt-3">
+          <div className="sidebar-inner">
             <div className="user-card d-flex d-md-none align-items-center justify-content-between justify-content-md-center pb-4">
               <div className="d-flex align-items-center">
                 <div className="user-avatar lg-avatar me-4">

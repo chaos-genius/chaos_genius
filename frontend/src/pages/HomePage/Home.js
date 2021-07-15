@@ -3,7 +3,7 @@ import React from "react";
 import { Alert } from '@themesberg/react-bootstrap';
 import { Col, Row, Button, Card, Form, InputGroup } from '@themesberg/react-bootstrap';
 
-import { RcaAnalysisTable } from '../components/Tables';
+import { RcaAnalysisTable } from '../../components/Tables';
 
 // Am4charts
 import * as am4core from "@amcharts/amcharts4/core";
@@ -12,7 +12,7 @@ import am4themes_animated from "@amcharts/amcharts4/themes/animated";
 am4core.useTheme(am4themes_animated);
 
 
-class Home extends React.Component {
+class HomePage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -311,4 +311,4 @@ class Home extends React.Component {
   }
 }
 
-export default Home;
+export default HomePage;

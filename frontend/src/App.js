@@ -10,7 +10,8 @@ import Navbar from './components/Navbar';
 import UserOnboarding from './pages/UserOnboarding';
 import UserProfile from './pages/UserProfile';
 import UserSettings from './pages/UserSettings';
-import Home from './pages/Home';
+import Home from './pages/HomePage/';
+import HomePage from './pages/HomePage/Home';
 import Dashboards from './pages/Dashboard';
 import KpiExplorer from './pages/Kpi';
 import AddKpi from './pages/Kpi/AddKpi';
@@ -68,6 +69,7 @@ function App() {
       <RouteWithSidebar exact path={Routes.UserSettings.path} component={UserSettings} />
 
       <RouteWithSidebar exact path={Routes.Home.path} component={Home} />
+      <RouteWithSidebar exact path={Routes.HomePage.path} component={HomePage} />
       <RouteWithSidebar exact path={Routes.Dashboards.path} component={Dashboards} />
       <RouteWithSidebar exact path={Routes.KpiExplorer.path} component={KpiExplorer} />
       <RouteWithSidebar exact path={Routes.AddKpi.path} component={AddKpi} />

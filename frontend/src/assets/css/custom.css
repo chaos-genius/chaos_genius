@@ -1,6 +1,6 @@
 body{
     font-family: "Inter","Helvetica","Apple Color Emoji","Segoe UI Emoji","NotoColorEmoji","Noto Color Emoji","Segoe UI Symbol","Android Emoji","EmojiSymbols","-apple-system","BlinkMacSystemFont","Segoe UI","Roboto","Helvetica Neue","Noto Sans",sans-serif !important;
-    background-color: #F5F5F5 !important;
+    background-color: #f5f5f5 !important;
     color: #222222;
 }
 
@@ -12,11 +12,12 @@ body{
     color: #262b40 !important;
 }
 
-
+main.content{
+    padding: 0 !important;
+}
 .custom-table .MuiPaper-root,.MuiPaper-root.MuiAccordion-root {
     box-shadow: unset;
 }
-
 .custom-table  .MuiTableBody-root td.MuiTableCell-root{
     font-family: "Inter",sans-serif !important;
     border-bottom: unset;
@@ -586,6 +587,88 @@ div.label-switch {
 .home-page .setup-cards .MuiCardContent-root .MuiButton-root.button-success{
     color: #FFFFFF;
     background: #222222;
+}
+
+.custom-stepper .MuiStepIcon-root{
+    color: #F7F7F7;
+    border:1px solid #BDBDBD;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    padding-top: 4px;
+}
+.custom-stepper .MuiStepIcon-root.MuiStepIcon-active {
+    color: transparent;
+    border: 1px solid #222222;
+    border-radius: 50%;
+    
+}
+.custom-stepper .MuiStepIcon-text{
+    font-size: 16px;
+    font-weight: 500;
+    font-family: "Inter", sans-serif;
+    fill: #7A7A7A;
+}
+
+.custom-stepper .MuiStepIcon-active .MuiStepIcon-text {
+    fill: #222222;
+
+}
+.custom-stepper .MuiStepConnector-alternativeLabel {
+    top: 17px;
+    left: calc(-50% + 17px);
+    right: calc(50% + 17px);
+}
+.custom-stepper .MuiStepLabel-label.MuiStepLabel-active{
+    color: #222222;
+}
+.custom-stepper .MuiStepLabel-label.MuiStepLabel-alternativeLabel {
+    font-weight: 500;
+    font-size: 12px;
+    font-family: "Inter", sans-serif;
+    letter-spacing: 0.4px;
+    color: #BDBDBD;
+}
+.custom-stepper .MuiStepLabel-label.MuiStepLabel-active{
+    color: #222222;
+}
+.custom-stepper .MuiStepConnector-lineHorizontal{
+    border-top-style: dashed;
+    border-top-width: 0.3px;
+}
+.custom-breadcrumb.MuiBreadcrumbs-root .MuiBreadcrumbs-li .MuiTypography-root{
+    font-weight: normal;
+    font-size: 14px;
+    font-family: "Inter", sans-serif;
+    letter-spacing: 0.2px;
+    color: #0597F2;
+}
+.custom-breadcrumb.MuiBreadcrumbs-root .MuiBreadcrumbs-li .MuiTypography-root.MuiTypography-colorTextPrimary{
+    color: #BDBDBD;
+}
+.custom-breadcrumb.MuiBreadcrumbs-root .MuiBreadcrumbs-separator{
+    font-weight: normal;
+    font-size: 14px;
+    font-family: "Inter", sans-serif;
+    color: #BDBDBD;
+}
+.custom-nav-appbar{
+    padding-left: 24px;
+}
+.breadcrumb-nav.MuiTypography-root{
+    font-family: "Inter", sans-serif;
+    letter-spacing: 0.2px;
+    font-weight: 600;
+    font-size: 20px;
+    color: #222222 !important;
+    cursor: pointer;
+    margin-top: 10px !important;
+}
+.breadcrumb-nav.MuiTypography-root .MuiSvgIcon-root{
+    font-size: 24px;
+    vertical-align: top;
+    margin-right: 5px;
+    margin-left: -2px;
 }
 @media (min-width: 768px){
     .sidebar.contracted {

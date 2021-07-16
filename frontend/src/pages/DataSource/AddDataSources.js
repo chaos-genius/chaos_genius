@@ -4,7 +4,7 @@ import { Button } from '@themesberg/react-bootstrap';
 import {
     Card, CardContent, Grid, FormControl,
     TextField, InputLabel, Typography, Accordion, AccordionSummary, AccordionDetails,
-    CircularProgress
+    CircularProgress, Container
 } from '@material-ui/core';
 
 import './../../assets/css/custom.css'
@@ -268,7 +268,7 @@ class AddDataSources extends React.Component {
         return (
             <Grid container spacing={2}>
                 <Grid item xs={2} className="display-flex-center pl-0 pr-0">
-                    <Typography component="h4"><span className="mr-2"><ArrowBack />Add DataSource</span></Typography>
+
                 </Grid>
                 <Grid item xs={8} className="text-center">
                     <StepTabs index={0} />
@@ -277,58 +277,62 @@ class AddDataSources extends React.Component {
         )
     }
 
-    render() {    
+    render() {
         return (
             <>
-                <BreadCrumb />
-
-                {this.renderAppBar()}
-                <Grid container spacing={3} justify="center">
-                    <Grid item xs={6}>
-                        <Card>
-                            <CardContent>
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12}>
-                                        <FormControl variant="outlined" style={{ width: '100%' }}>
-                                            <InputLabel htmlFor="connectionName">Connection Name</InputLabel>
-                                            <TextField
-                                                error={(this.state.connectionNameError) ? (true) : (false)}
-                                                value={this.state.connectionName}
-                                                id="connectionName"
-                                                type="text"
-                                                variant="outlined"
-                                                onChange={(e) => this.handleNormalInputChange(e, "connectionName")}
-                                                helperText={this.state.connectionNameError}
-                                            />
-                                        </FormControl>
+                <div className="custom-nav-appbar">
+                    <BreadCrumb />
+                    <Typography component="h4" className="breadcrumb-nav"><span className="mr-2"><ArrowBack />Add DataSource</span></Typography>
+                </div>
+                <Container maxWidth="md">
+                    {this.renderAppBar()}
+                    <Grid container spacing={3} justify="center">
+                        <Grid item xs={6}>
+                            <Card>
+                                <CardContent>
+                                    <Grid container spacing={3}>
+                                        <Grid item xs={12}>
+                                            <FormControl variant="outlined" style={{ width: '100%' }}>
+                                                <InputLabel htmlFor="connectionName">Connection Name</InputLabel>
+                                                <TextField
+                                                    error={(this.state.connectionNameError) ? (true) : (false)}
+                                                    value={this.state.connectionName}
+                                                    id="connectionName"
+                                                    type="text"
+                                                    variant="outlined"
+                                                    onChange={(e) => this.handleNormalInputChange(e, "connectionName")}
+                                                    helperText={this.state.connectionNameError}
+                                                />
+                                            </FormControl>
+                                        </Grid>
+                                        {((Object.keys(this.state.connectionTypes).length > 0)) ? (tab1Fields(this.state, this.handleAutoComplete, this.handleInputAutoComplete)) : ("")}
+                                        {(Object.keys(this.state.properties).length > 0) ? (renderInputFields(this.state, this.handleInputChange, this.handleBooleanChange)) : ("")}
+                                        <Grid item xs={12} className="mt-4">
+                                            {this.state.testMessage !== null && (<div><strong>Connection Status:</strong> {this.state.testMessage}</div>)}
+                                            {(this.state.testConnection === "succeeded") ? (<div><strong>Connection Status:</strong> Succeeded</div>) : ("")}
+                                        </Grid>
                                     </Grid>
-                                    {((Object.keys(this.state.connectionTypes).length > 0)) ? (tab1Fields(this.state, this.handleAutoComplete, this.handleInputAutoComplete)) : ("")}
-                                    {(Object.keys(this.state.properties).length > 0) ? (renderInputFields(this.state, this.handleInputChange, this.handleBooleanChange)) : ("")}
-                                    <Grid item xs={12} className="mt-4">
-                                        {this.state.testMessage !== null && (<div><strong>Connection Status:</strong> {this.state.testMessage}</div>)}
-                                        {(this.state.testConnection === "succeeded") ? (<div><strong>Connection Status:</strong> Succeeded</div>) : ("")}
-                                    </Grid>
-                                </Grid>
-                                {(this.state.testConnection === "failed" && this.state.testLogs) ? (this.renderLogsUI()) : ("")}
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12} className="text-right">
-                                        <Button variant="warning" onClick={this.handleTestConnection}>{
-                                            (this.state.testLoader) ?
-                                                (<CircularProgress size={24} className="button-progress" />) :
-                                                (<>Test Connection</>)
-                                        }</Button>
-                                        <Button variant="primary" onClick={this.saveDataSource}>
-                                            {
-                                                (this.state.submitLoader) ?
+                                    {(this.state.testConnection === "failed" && this.state.testLogs) ? (this.renderLogsUI()) : ("")}
+                                    <Grid container spacing={3}>
+                                        <Grid item xs={12} className="text-right">
+                                            <Button variant="warning" onClick={this.handleTestConnection}>{
+                                                (this.state.testLoader) ?
                                                     (<CircularProgress size={24} className="button-progress" />) :
-                                                    (<>Submit</>)
+                                                    (<>Test Connection</>)
                                             }</Button>
+                                            <Button variant="primary" onClick={this.saveDataSource}>
+                                                {
+                                                    (this.state.submitLoader) ?
+                                                        (<CircularProgress size={24} className="button-progress" />) :
+                                                        (<>Submit</>)
+                                                }</Button>
+                                        </Grid>
                                     </Grid>
-                                </Grid>
-                            </CardContent>
-                        </Card>
+                                </CardContent>
+                            </Card>
+                        </Grid>
                     </Grid>
-                </Grid>
+                </Container>
             </>
         )
     }

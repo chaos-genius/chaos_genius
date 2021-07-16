@@ -27,7 +27,7 @@ export default function StepTabs(props) {
 
   return (
     <div className={classes.root}>
-      <Stepper alternativeLabel activeStep={activeStep}>
+      <Stepper alternativeLabel activeStep={activeStep} className="custom-stepper">
         {steps.map((label) => (
           <Step key={label}>
             <StepLabel>{label}</StepLabel>

@@ -101,7 +101,7 @@ fi
 
 if ! hash docker-compose; then
     printf "${BLUE}-->${NC} Chaos Genius requires docker-compose. It is not installed\n"
-    printf "${RED}-->${NC} You can install it by 'brew install docker-compose'\n"
+    printf "${RED}-->${NC} You can install it by visiting 'https://docs.docker.com/docker-for-mac/install/'\n"
     exit 1
 else
     printf "${BLUE}-->${NC} Found docker-compose\n"
@@ -121,6 +121,7 @@ if ! hash psql; then
         printf "${RED}-->${NC} Try installing it with 'brew install postgresql'\n"
         exit 1
     fi
+    brew services start postgresql
     printf "${BLUE}-->${NC} Configuring postgres.\n"
     source ~/.bashrc
     createdb chaosgenius

@@ -108,6 +108,16 @@ else
 fi
 
 
+# Check the wget
+if ! hash wget; then
+    printf "${RED}-->${NC} Chaos Genius requires wget. It is not installed\n"
+    printf "${RED}-->${NC} You can install it by 'brew install wget'\n"
+    exit 1
+else
+    printf "${BLUE}-->${NC} Found docker\n"
+fi
+
+
 # Check & install DB
 printf "\n${GREEN}-->${NC} Installing database & data connectors \n"
 if ! hash psql; then

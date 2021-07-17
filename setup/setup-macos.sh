@@ -114,7 +114,7 @@ if ! hash wget; then
     printf "${RED}-->${NC} You can install it by 'brew install wget'\n"
     exit 1
 else
-    printf "${BLUE}-->${NC} Found docker\n"
+    printf "${BLUE}-->${NC} Found wget\n"
 fi
 
 

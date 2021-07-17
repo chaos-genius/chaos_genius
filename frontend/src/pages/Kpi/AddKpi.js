@@ -1,7 +1,7 @@
 
 import React from "react";
 import {
-    DialogContent, DialogContentText, DialogActions, ListItemText,
+    Container, DialogContentText, DialogActions, ListItemText,
     Card, CardContent, CardActions, Grid, FormControl, FormControlLabel, Chip,
     TextField, Checkbox, InputLabel, Typography, Button, Select, MenuItem, Input
 } from '@material-ui/core';
@@ -11,6 +11,7 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 
 import { ArrowBack } from "@material-ui/icons";
 import { BASE_URL, DEFAULT_HEADERS } from '../../config/Constants';
+import testQuery from './../../assets/img/test-query.svg'
 
 
 class AddKpi extends React.Component {
@@ -56,15 +57,15 @@ class AddKpi extends React.Component {
 
     fetchConnection = () => {
         fetch(`${BASE_URL}/api/connection`)
-        .then(response => response.json())
-        .then(data => {
-            if (data?.data) {
-                this.setState({
-                    dataSources: data.data
-                })
-            }
-        });
-      }
+            .then(response => response.json())
+            .then(data => {
+                if (data?.data) {
+                    this.setState({
+                        dataSources: data.data
+                    })
+                }
+            });
+    }
 
     handleInputChange = (e, key) => {
         const setObj = {}
@@ -158,13 +159,13 @@ class AddKpi extends React.Component {
             body: JSON.stringify(payload),
             headers: DEFAULT_HEADERS,
         };
-      
+
         fetch(`${BASE_URL}api/kpi/`, requestOptions)
             .then(response => response.json())
             .then(data => {
                 console.log(data);
             }).catch(error => {
-              console.log(error);
+                console.log(error);
             });
     }
 
@@ -174,13 +175,13 @@ class AddKpi extends React.Component {
             from_query: this.state.datasetType === 'table' ? false : true,
             query: this.state.query
         }
-      
+
         let requestOptions = {
             method: 'POST',
             body: JSON.stringify(payload),
             headers: DEFAULT_HEADERS,
         };
-      
+
         fetch(`${BASE_URL}api/connection/metadata`, requestOptions)
             .then(response => response.json())
             .then(data => {
@@ -188,7 +189,7 @@ class AddKpi extends React.Component {
                     this.setMetaInformation(data.data);
                 }
             }).catch(error => {
-              console.log(error);
+                console.log(error);
             });
     }
 
@@ -211,7 +212,7 @@ class AddKpi extends React.Component {
         }
     }
 
-    resetState = (resetQuery=true) => {
+    resetState = (resetQuery = true) => {
         const stateObj = {
             tableName: '',
             metric: '',
@@ -236,11 +237,8 @@ class AddKpi extends React.Component {
     renderAppBar = () => {
         return (
             <Grid container spacing={2}>
-                <Grid item xs={2} className="display-flex-center pl-0 pr-0"> 
-                    <Typography component="h4"><span className="mr-2"><ArrowBack />Add Kpi</span></Typography>
-                </Grid>
-                <Grid item xs={8} className="text-center">
-                    <StepTabs index={1}/>
+                <Grid item xs={12} alignItems="center" className="text-center">
+                    <StepTabs index={1} />
                 </Grid>
             </Grid>
         )
@@ -272,249 +270,253 @@ class AddKpi extends React.Component {
         const ITEM_PADDING_TOP = 8;
         const MenuProps = {
             PaperProps: {
-              style: {
-                maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-                width: 250,
-              },
+                style: {
+                    maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+                    width: 250,
+                },
             },
         };
-          
+
         const { kpiName, kpiNameError, defination, definationError, dataSource,
             dataSourceError, query, queryError, metric, metricError, aggregate, aggregateError } = this.state;
         return (
             <>
-                <BreadCrumb />
-
-                {this.renderAppBar()}
-                <Grid container spacing={3} justify="center">
-                    <Grid item xs={6}>
-                        <Card>
-                            <CardContent>
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12}>
-                                        <FormControl variant="outlined" style={{ width: '100%' }}>
-                                            <InputLabel htmlFor="kpiName">KPI Name *</InputLabel>
-                                            <TextField
-                                                error={(kpiNameError) ? (true) : (false)}
-                                                value={kpiName}
-                                                id="kpiName"
-                                                type="text"
-                                                variant="outlined"
-                                                placeholder="Name of your KPI"
-                                                onChange={(e) => this.handleInputChange(e, "kpiName")}
-                                                helperText={kpiNameError}
-                                            />
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <FormControlLabel
-                                            control={
-                                                <Checkbox
-                                                    checked={defination}
-                                                    onChange={(e) => this.handleInputChange(e, "defination")}
-                                                    name="defination"
-                                                    color="primary"
+                <div className="custom-nav-appbar">
+                    <BreadCrumb />
+                    <Button component="h4" href="/#/home" className="breadcrumb-nav btn btn-primary"><span className="mr-2"><ArrowBack />Add KPI</span></Button>
+                </div>
+                <Container maxWidth="md" >
+                    {this.renderAppBar()}
+                    <Grid container spacing={3} justify="center">
+                        <Grid item xs={7}>
+                            <Card>
+                                <CardContent>
+                                    <Grid container spacing={3}>
+                                        <Grid item xs={12}>
+                                            <FormControl variant="outlined" style={{ width: '100%' }}>
+                                                <InputLabel htmlFor="kpiName">KPI Name *</InputLabel>
+                                                <TextField
+                                                    error={(kpiNameError) ? (true) : (false)}
+                                                    value={kpiName}
+                                                    id="kpiName"
+                                                    type="text"
+                                                    variant="outlined"
+                                                    placeholder="Name of your KPI"
+                                                    onChange={(e) => this.handleInputChange(e, "kpiName")}
+                                                    helperText={kpiNameError}
                                                 />
-                                            }
-                                            label="Is the KPI definition certified *"
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <FormControl variant="outlined" style={{ width: '100%' }}>
-                                            <InputLabel htmlFor="data-source">Select Data Source *</InputLabel>
-                                            <TextField
-                                                id="data-source"
-                                                select
-                                                value={this.state.dataSource}
-                                                onChange={(e) => this.handleDataSource(e)}
-                                                variant="outlined"
-                                            >
-                                                {this.state.dataSources.map((option) => (
-                                                    <MenuItem key={option.id} value={option.id}>
-                                                    {option.name}
-                                                    </MenuItem>
-                                                ))}
-                                            </TextField>
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <FormControl variant="outlined" style={{ width: '100%' }}>
-                                            <InputLabel htmlFor="dataset-type">Select Dataset Type *</InputLabel>
-                                            <TextField
-                                                id="dataset-type"
-                                                select
-                                                value={this.state.datasetType}
-                                                onChange={(e) => this.handleDatasetType(e)}
-                                                variant="outlined"
-                                            >
-                                                <MenuItem key="table" value="table">Table</MenuItem>
-                                                <MenuItem key="query" value="query">Query</MenuItem>
-                                            </TextField>
-                                        </FormControl>
-                                    </Grid>
-                                    
-                                    { this.state.showTable && (
-                                    <Grid item xs={12}>
-                                        <FormControl variant="outlined" style={{ width: '100%' }}>
-                                            <InputLabel htmlFor="tableName">Table name</InputLabel>
-                                            <TextField
-                                                value={this.state.tableName}
-                                                id="tableName"
-                                                select
-                                                variant="outlined"
-                                                placeholder="Enter Table name"
-                                                onChange={(e) => this.handleTablename(e)}
-                                                helperText={queryError}
-                                            >
-                                                {this.state.tableNames.map((option) => (
-                                                    <MenuItem key={option} value={option}>
-                                                    {option}
-                                                    </MenuItem>
-                                                ))}
-                                            </TextField>
-                                        </FormControl>
-                                    </Grid>
-                                    )}
-
-                                    { this.state.showQuery && (
-                                    <Grid item xs={12}>
-                                        <FormControl variant="outlined" style={{ width: '100%' }}>
-                                            <InputLabel htmlFor="query">Query</InputLabel>
-                                            <TextField
-                                                error={(query) ? (true) : (false)}
-                                                value={this.state.query}
-                                                id="query"
-                                                type="text"
-                                                multiline
-                                                rows={4}
-                                                variant="outlined"
-                                                placeholder="Enter Query"
-                                                onChange={(e) => this.handleInputChange(e, "query")}
-                                                helperText={queryError}
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        checked={defination}
+                                                        onChange={(e) => this.handleInputChange(e, "defination")}
+                                                        name="defination"
+                                                        color="primary"
+                                                    />
+                                                }
+                                                label="Is the KPI definition certified *"
+                                                className="custom-checkbox"
                                             />
-                                        </FormControl>
-                                        <Button variant="outlined" size="small" color="primary" onClick={this.fethcMetaData} style={{justifyContent: 'center'}}>Test Query</Button>
-                                    </Grid>
-                                    )}
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <FormControl variant="outlined" style={{ width: '100%' }}>
+                                                <InputLabel htmlFor="data-source">Select Data Source *</InputLabel>
+                                                <TextField
+                                                    id="data-source"
+                                                    select
+                                                    value={this.state.dataSource}
+                                                    onChange={(e) => this.handleDataSource(e)}
+                                                    variant="outlined"
+                                                >
+                                                    {this.state.dataSources.map((option) => (
+                                                        <MenuItem key={option.id} value={option.id}>
+                                                            {option.name}
+                                                        </MenuItem>
+                                                    ))}
+                                                </TextField>
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <FormControl variant="outlined" style={{ width: '100%' }}>
+                                                <InputLabel htmlFor="dataset-type">Select Dataset Type *</InputLabel>
+                                                <TextField
+                                                    id="dataset-type"
+                                                    select
+                                                    value={this.state.datasetType}
+                                                    onChange={(e) => this.handleDatasetType(e)}
+                                                    variant="outlined"
+                                                >
+                                                    <MenuItem key="table" value="table">Table</MenuItem>
+                                                    <MenuItem key="query" value="query">Query</MenuItem>
+                                                </TextField>
+                                            </FormControl>
+                                        </Grid>
 
-                                    {/* { this.state.showQuery && (
+                                        {this.state.showTable && (
+                                            <Grid item xs={12}>
+                                                <FormControl variant="outlined" style={{ width: '100%' }}>
+                                                    <InputLabel htmlFor="tableName">Table name</InputLabel>
+                                                    <TextField
+                                                        value={this.state.tableName}
+                                                        id="tableName"
+                                                        select
+                                                        variant="outlined"
+                                                        placeholder="Enter Table name"
+                                                        onChange={(e) => this.handleTablename(e)}
+                                                        helperText={queryError}
+                                                    >
+                                                        {this.state.tableNames.map((option) => (
+                                                            <MenuItem key={option} value={option}>
+                                                                {option}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </TextField>
+                                                </FormControl>
+                                            </Grid>
+                                        )}
+
+                                        {this.state.showQuery && (
+                                            <Grid item xs={12}>
+                                                <FormControl variant="outlined" style={{ width: '100%' }}>
+                                                    <InputLabel htmlFor="query">Query</InputLabel>
+                                                    <TextField
+                                                        error={(query) ? (true) : (false)}
+                                                        value={this.state.query}
+                                                        id="query"
+                                                        type="text"
+                                                        multiline
+                                                        rows={4}
+                                                        variant="outlined"
+                                                        placeholder="Enter Query"
+                                                        onChange={(e) => this.handleInputChange(e, "query")}
+                                                        helperText={queryError}
+                                                    />
+                                                </FormControl>
+                                                <Button color="seconday" onClick={this.fethcMetaData} style={{ justifyContent: 'center' }} className="btn-simple-link"><img src={testQuery} alt="test-icon" /> Test Query</Button>
+                                            </Grid>
+                                        )}
+
+                                        {/* { this.state.showQuery && (
                                     <Grid item xs={12}>
                                     </Grid>
                                     )} */}
 
 
-                                    <Grid item xs={12}>
-                                        <FormControl variant="outlined" style={{ width: '100%' }}>
-                                            <InputLabel htmlFor="metric">Metric Column *</InputLabel>
-                                            <TextField
-                                                value={this.state.metric}
-                                                id="metric"
-                                                select
-                                                variant="outlined"
-                                                placeholder="Enter Metric Column"
-                                                onChange={(e) => this.handleInputChange(e, "metric")}
-                                            >
-                                                {this.state.metricColumns.map((option) => (
-                                                    <MenuItem key={option} value={option}>
-                                                    {option}
-                                                    </MenuItem>
-                                                ))}
-                                            </TextField>
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <FormControl variant="outlined" style={{ width: '100%' }}>
-                                            <InputLabel htmlFor="aggregate">Aggregate by *</InputLabel>
-                                            <TextField
-                                                id="aggregate"
-                                                select
-                                                value={this.state.aggregate}
-                                                onChange={(e) => this.handleInputChange(e, "aggregate")}
-                                                SelectProps={{
-                                                    native: true,
-                                                }}
-                                                error={(aggregateError) ? (true) : (false)}
-                                                helperText={aggregateError}
-                                                variant="outlined"
-                                            >
-                                                <option key="mean" value="mean">Mean</option>
-                                                <option key="count" value="count">Count</option>
-                                                <option key="sum" value="sum">Sum</option>
-                                            </TextField>
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <FormControl variant="outlined" style={{ width: '100%' }}>
-                                            <InputLabel htmlFor="datetimeMetric">Datetime Columns *</InputLabel>
-                                            <TextField
-                                                value={this.state.datetimeMetric}
-                                                id="datetimeMetric"
-                                                select
-                                                variant="outlined"
-                                                placeholder="Enter Datetime Column"
-                                                onChange={(e) => this.handleInputChange(e, "datetimeMetric")}
-                                            >
-                                                {this.state.dateTimeColumns.map((option) => (
-                                                    <MenuItem key={option} value={option}>
-                                                    {option}
-                                                    </MenuItem>
-                                                ))}
-                                            </TextField>
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <FormControl variant="outlined" style={{ width: '100%' }}>
-                                            <InputLabel htmlFor="dimensionMetric">Dimension Columns *</InputLabel>
-
-                                            <Select
-                                                value={this.state.dimensionMetric}
-                                                id="dimensionMetric"
-                                                labelId="dimensionMetric"
-                                                variant="outlined"
-                                                multiple
-                                                value={this.state.dimensionMetric}
-                                                onChange={(e) => this.handleInputChange(e, "dimensionMetric")}
-                                                input={<Input id="select-multiple-chip" />}
-                                                renderValue={(selected) => (
-                                                    <div style={{ display: 'flex', flexwrap: 'wrap' }}>
-                                                    {selected.map((value) => (
-                                                        <Chip key={value} label={value} style={{margin: 2}} />
+                                        <Grid item xs={12}>
+                                            <FormControl variant="outlined" style={{ width: '100%' }}>
+                                                <InputLabel htmlFor="metric">Metric Column *</InputLabel>
+                                                <TextField
+                                                    value={this.state.metric}
+                                                    id="metric"
+                                                    select
+                                                    variant="outlined"
+                                                    placeholder="Enter Metric Column"
+                                                    onChange={(e) => this.handleInputChange(e, "metric")}
+                                                >
+                                                    {this.state.metricColumns.map((option) => (
+                                                        <MenuItem key={option} value={option}>
+                                                            {option}
+                                                        </MenuItem>
                                                     ))}
-                                                    </div>
-                                                )}
+                                                </TextField>
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <FormControl variant="outlined" style={{ width: '100%' }}>
+                                                <InputLabel htmlFor="aggregate">Aggregate by *</InputLabel>
+                                                <TextField
+                                                    id="aggregate"
+                                                    select
+                                                    value={this.state.aggregate}
+                                                    onChange={(e) => this.handleInputChange(e, "aggregate")}
+                                                    SelectProps={{
+                                                        native: true,
+                                                    }}
+                                                    error={(aggregateError) ? (true) : (false)}
+                                                    helperText={aggregateError}
+                                                    variant="outlined"
+                                                >
+                                                    <option key="mean" value="mean">Mean</option>
+                                                    <option key="count" value="count">Count</option>
+                                                    <option key="sum" value="sum">Sum</option>
+                                                </TextField>
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <FormControl variant="outlined" style={{ width: '100%' }}>
+                                                <InputLabel htmlFor="datetimeMetric">Datetime Columns *</InputLabel>
+                                                <TextField
+                                                    value={this.state.datetimeMetric}
+                                                    id="datetimeMetric"
+                                                    select
+                                                    variant="outlined"
+                                                    placeholder="Enter Datetime Column"
+                                                    onChange={(e) => this.handleInputChange(e, "datetimeMetric")}
+                                                >
+                                                    {this.state.dateTimeColumns.map((option) => (
+                                                        <MenuItem key={option} value={option}>
+                                                            {option}
+                                                        </MenuItem>
+                                                    ))}
+                                                </TextField>
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <FormControl variant="outlined" style={{ width: '100%' }}>
+                                                <InputLabel htmlFor="dimensionMetric">Dimension Columns *</InputLabel>
+
+                                                <Select
+                                                    value={this.state.dimensionMetric}
+                                                    id="dimensionMetric"
+                                                    labelId="dimensionMetric"
+                                                    variant="outlined"
+                                                    multiple
+                                                    value={this.state.dimensionMetric}
+                                                    onChange={(e) => this.handleInputChange(e, "dimensionMetric")}
+                                                    input={<Input id="select-multiple-chip" />}
+                                                    renderValue={(selected) => (
+                                                        <div style={{ display: 'flex', flexwrap: 'wrap' }}>
+                                                            {selected.map((value) => (
+                                                                <Chip key={value} label={value} style={{ margin: 2 }} />
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 // MenuProps={MenuProps}
-                                            >
-                                                {this.state.metricColumns.map((option) => (
+                                                >
+                                                    {this.state.metricColumns.map((option) => (
 
-                                                    <MenuItem key={option} value={option}>
-                                                    <Checkbox checked={this.state.dimensionMetric.indexOf(option) > -1} />
-                                                    <ListItemText primary={option} />
-                                                    </MenuItem>
+                                                        <MenuItem key={option} value={option}>
+                                                            <Checkbox checked={this.state.dimensionMetric.indexOf(option) > -1} />
+                                                            <ListItemText primary={option} />
+                                                        </MenuItem>
 
-                                                ))}
+                                                    ))}
 
-                                            </Select>
+                                                </Select>
 
-                                        </FormControl>
-                                    </Grid>
-                                </Grid>
-
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12}>
-                                        <Button color="default" className="pr-3">+ Add Filters</Button>
+                                            </FormControl>
+                                        </Grid>
                                     </Grid>
 
-                                </Grid>
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12} className="text-right">
-                                        <Button variant="outlined" color="default" className="mr-3">Cancel</Button>
-                                        <Button variant="contained" color="primary" onClick={this.handleSubmit}>Add KPI</Button>
+                                    <Grid container spacing={3}>
+                                        <Grid item xs={12}>
+                                            <Button className="pr-3 btn-simple-link">+ Add Filters</Button>
+                                        </Grid>
+
                                     </Grid>
-                                </Grid>
-                            </CardContent>
-                        </Card>
+                                    <Grid container spacing={3}>
+                                        <Grid item xs={12} className="text-right">
+                                            <Button variant="primary" onClick={this.handleSubmit} className="btn btn-primary">Add KPI</Button>
+                                        </Grid>
+                                    </Grid>
+                                </CardContent>
+                            </Card>
+                        </Grid>
                     </Grid>
-                </Grid>
+                </Container>
             </>
         )
     }

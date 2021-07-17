@@ -3,51 +3,116 @@ import React from "react";
 import {
   Redirect
 } from 'react-router-dom';
-import { Button, Container, Row, Col, Alert } from '@themesberg/react-bootstrap';
-import {  
-  Card, CardContent
+import {
+  Card, CardContent, Container, Grid, Button, Typography
 } from '@material-ui/core';
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircle, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 
 import CustomTable from '../../components/CustomTable'
 
 import postgresql from './../../assets/img/postgresql.png'
 import mysql from './../../assets/img/mysql.png'
 
+import SideBar from './../Dashboard/SideBar'
 
 import { BASE_URL, DEFAULT_HEADERS } from '../../config/Constants'
+
+import testConnection from './../../assets/img/test-connection.svg'
 
 class KpiList extends React.Component {
 
   constructor(props) {
     super(props)
 
-    this.state = {      
+    this.state = {
+      kpi: 0,
+      kpiName: "",
+      kpiData: [],
       tableData: [
         {
-          'name':'My SQL Demo',
-          'data-source':'Google Analytics',
-          'last-modified':'12/03/2020',
-          'certified':'Yes',
-          'owner':'Austin'
+          'name': 'My SQL Demo',
+          'data-source': 'Google Analytics',
+          'last-modified': '12/03/2020',
+          'certified': 'Yes',
+          'owner': 'Austin'
         }
-      ], 
-      isRedirect:false     
+      ],
+      isRedirect: false
     }
   }
 
 
   addActionButton = () => {
     return (
-      <span className="m-1 btn btn-tertiary" >New Data Source</span>
+      <span className="m-1 btn btn-tertiary" >New KPI</span>
     )
-  } 
+  }
+  fetchKPIData = () => {
+    // this.setState({ loading: true })
+    fetch(`${BASE_URL}/api/kpi/`)
+      .then(response => response.json())
+      .then(data => {
+        if (data?.data) {
+          if (data.data?.[0]['id']) {
+            this.setState({
+              kpi: data.data[0]['id'],
+              kpiName: data.data[0]['name'],
+              kpiData: data.data,
+              // loading: false
+            })
+          }
+        }
+      });
+  }
+  handleKpiChange = (e) => {
+    // const targetComponent = e.target;
+    // const componentValue = targetComponent.id;
 
+    // this.setState({
+    //   kpi: componentValue,
+    //   kpiName: targetComponent.innerText,
+    //   tabState: 0
+    // }, () => {
+    //   this.fetchKpiAggegation();
+    //   this.plotLineChart();
+    //   this.fetchDimensionData();
+    // })
+  }
+  renderTable = () => {
+    return (
+
+      <Grid container spacing={3}>
+        <Grid item xs={12} className="custom-table">
+          <CustomTable
+            columns={[
+              { title: 'KPI Name', field: 'name' },
+              { title: 'Data Source', field: 'data-source' },
+              { title: 'Last Modified', field: 'last-modified' },
+              { title: 'Certified', field: 'certified' },
+              { title: 'Owner', field: 'owner' }
+            ]}
+            data={this.state.tableData}
+            title=""
+            options={{
+              paginationType: "stepped",
+              showTitle: false,
+              search: false,
+              toolbar: false,
+              // searchFieldAlignment: 'left',
+              paging: false
+            }}
+          />
+        </Grid>
+      </Grid>
+
+
+    )
+  }
+  componentDidMount() {
+    this.fetchKPIData()
+  }
   render() {
-    if(this.state.isRedirect){
-      return(
+    if (this.state.isRedirect) {
+      return (
         <Redirect to={{
           pathname: '/kpi/new',
         }} />
@@ -55,41 +120,25 @@ class KpiList extends React.Component {
     }
 
     return (
-      <Container fluid>
-        <Card>
-          <CardContent>
-            <Row>
-              <Col className="custom-table">
-                <CustomTable
-                  columns={[
-                    { title: 'KPI Name', field: 'name' },
-                    { title: 'Data Source', field: 'data-source' },
-                    { title: 'Last Modified', field: 'last-modified' },
-                    { title: 'Certified', field: 'certified' },
-                    { title: 'Owner', field: 'owner' }
-                  ]}
-                  data={this.state.tableData}
-                  title=""
-                  options={{
-                    paginationType: "stepped",
-                    showTitle: false,
-                    searchFieldAlignment: 'left',
-                    paging: false
-                  }}
-                  actions={[
-                    {
-                      icon: () => this.addActionButton(),
-                      tooltip: 'Add New Data Source',
-                      isFreeAction: true,
-                      onClick: () => this.setState({isRedirect:true})
-                    }
-                  ]}
-                />
-              </Col>
-            </Row>
-          </CardContent>
-        </Card>
-        
+      <Container maxWidth="lg">
+        <Grid container spacing={3}>
+          <Grid item xs={9}>
+            <Typography conponent="h4" className="title">KPI Explorer</Typography>
+          </Grid>
+          <Grid item xs={3} alignItems="center">
+            <Button href="/#/kpi/new" variant="primary" className="btn btn-primary btn-toolbar"><img src={testConnection} alt="test-icon" /> New KPI</Button>
+          </Grid>
+        </Grid>
+        <Grid container spacing={2}>
+          <Grid item xs={3} className="custom-col-3">
+            {(Object.keys(this.state.kpiData).length > 0) ? (
+              <SideBar handleKpiChange={this.handleKpiChange} kpiData={this.state.kpiData} kpiID={this.state.kpi} />
+            ) : ("")}
+          </Grid>
+          <Grid item xs={9} className="tab-with-borders custom-col-9">
+            {this.renderTable()}
+          </Grid>
+        </Grid>
       </Container>
     )
   }

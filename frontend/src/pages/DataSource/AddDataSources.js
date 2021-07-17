@@ -19,6 +19,7 @@ import StepTabs from "../../components/StepTabs"
 import BreadCrumb from "../../components/BreadCrumb"
 
 import { ArrowBack } from "@material-ui/icons";
+import testConnection from './../../assets/img/test-connection.svg'
 
 
 class AddDataSources extends React.Component {
@@ -267,10 +268,7 @@ class AddDataSources extends React.Component {
     renderAppBar = () => {
         return (
             <Grid container spacing={2}>
-                <Grid item xs={2} className="display-flex-center pl-0 pr-0">
-
-                </Grid>
-                <Grid item xs={8} className="text-center">
+                <Grid item xs={12} alignItems="center" className="text-center">
                     <StepTabs index={0} />
                 </Grid>
             </Grid>
@@ -282,12 +280,12 @@ class AddDataSources extends React.Component {
             <>
                 <div className="custom-nav-appbar">
                     <BreadCrumb />
-                    <Typography component="h4" className="breadcrumb-nav"><span className="mr-2"><ArrowBack />Add DataSource</span></Typography>
+                    <Button component="h4" href="/#/home"  className="breadcrumb-nav"><span className="mr-2"><ArrowBack />Add DataSource</span></Button>
                 </div>
                 <Container maxWidth="md">
                     {this.renderAppBar()}
                     <Grid container spacing={3} justify="center">
-                        <Grid item xs={6}>
+                        <Grid item xs={7}>
                             <Card>
                                 <CardContent>
                                     <Grid container spacing={3}>
@@ -300,6 +298,7 @@ class AddDataSources extends React.Component {
                                                     id="connectionName"
                                                     type="text"
                                                     variant="outlined"
+                                                    placeholder="Enter Connection Name"
                                                     onChange={(e) => this.handleNormalInputChange(e, "connectionName")}
                                                     helperText={this.state.connectionNameError}
                                                 />
@@ -315,17 +314,23 @@ class AddDataSources extends React.Component {
                                     {(this.state.testConnection === "failed" && this.state.testLogs) ? (this.renderLogsUI()) : ("")}
                                     <Grid container spacing={3}>
                                         <Grid item xs={12} className="text-right">
-                                            <Button variant="warning" onClick={this.handleTestConnection}>{
-                                                (this.state.testLoader) ?
-                                                    (<CircularProgress size={24} className="button-progress" />) :
-                                                    (<>Test Connection</>)
-                                            }</Button>
-                                            <Button variant="primary" onClick={this.saveDataSource}>
-                                                {
-                                                    (this.state.submitLoader) ?
+                                            {(this.state.testConnection === "succeeded") ? (
+                                                <Button variant="primary" onClick={this.saveDataSource}>
+                                                    {
+                                                        (this.state.submitLoader) ?
+                                                            (<CircularProgress size={24} className="button-progress" />) :
+                                                            (<>Submit</>)
+                                                    }</Button>
+                                            ) : (
+                                                <Button variant="primary" onClick={this.handleTestConnection}>{
+                                                    (this.state.testLoader) ?
                                                         (<CircularProgress size={24} className="button-progress" />) :
-                                                        (<>Submit</>)
+                                                        (<><img src={testConnection} alt="test-icon" /> Test Connection</>)
                                                 }</Button>
+                                            )}
+
+
+
                                         </Grid>
                                     </Grid>
                                 </CardContent>

@@ -130,14 +130,27 @@ def kpi_anomaly_detection(kpi_id):
     current_app.logger.info(f"Anomaly Detection Started for KPI ID: {kpi_id}")
     data = []
     try:
-        date = request.args.get("date", None)
-        if date is None:
-            data = no_date_output
-        else:
-            data = date_output
+        data = no_date_output
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("Anomaly Detection Done")
+    return jsonify({"data": data, "msg": ""})
+
+
+@blueprint.route("/<int:kpi_id>/anomaly-drilldown", methods=["GET"])
+def kpi_anomaly_drilldown(kpi_id):
+    current_app.logger.info(f"Anomaly Drilldown Started for KPI ID: {kpi_id}")
+    data = []
+    try:
+        date = request.args.get("date", None)
+        if date is None:
+            raise ValueError(f"Date is not provided")
+        else:
+            date_selection_index = int(date.split("-")[0]) % 2
+            data = date_output[date_selection_index]
+    except Exception as err:
+        current_app.logger.info(f"Error Found: {err}")
+    current_app.logger.info("Anomaly Drilldown Done")
     return jsonify({"data": data, "msg": ""})
 
 

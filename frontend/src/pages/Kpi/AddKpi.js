@@ -159,11 +159,11 @@ class AddKpi extends React.Component {
             body: JSON.stringify(payload),
             headers: DEFAULT_HEADERS,
         };
-
         fetch(`${BASE_URL}api/kpi/`, requestOptions)
             .then(response => response.json())
             .then(data => {
                 console.log(data);
+                this.props.history.push('/kpi');
             }).catch(error => {
                 console.log(error);
             });
@@ -242,6 +242,10 @@ class AddKpi extends React.Component {
                 </Grid>
             </Grid>
         )
+    }
+
+    goBacktoKpi = () => {
+        this.props.history.push('/kpi');
     }
 
     extractColumns = () => {
@@ -505,7 +509,6 @@ class AddKpi extends React.Component {
                                         <Grid item xs={12}>
                                             <Button className="pr-3 btn-simple-link">+ Add Filters</Button>
                                         </Grid>
-
                                     </Grid>
                                     <Grid container spacing={3}>
                                         <Grid item xs={12} className="text-right">

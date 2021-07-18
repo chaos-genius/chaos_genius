@@ -64,18 +64,7 @@ class KpiList extends React.Component {
       });
   }
   handleKpiChange = (e) => {
-    // const targetComponent = e.target;
-    // const componentValue = targetComponent.id;
 
-    // this.setState({
-    //   kpi: componentValue,
-    //   kpiName: targetComponent.innerText,
-    //   tabState: 0
-    // }, () => {
-    //   this.fetchKpiAggegation();
-    //   this.plotLineChart();
-    //   this.fetchDimensionData();
-    // })
   }
   renderTable = () => {
     return (

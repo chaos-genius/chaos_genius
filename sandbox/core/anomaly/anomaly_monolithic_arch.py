@@ -109,11 +109,11 @@ def run_stddevi(df_prepped,
     :type target_column: str]
     :param num_devi: number of standard deviations beyond which the value should be
     categorized as an anomaly, defaults to 0
-    :type num_devi: int, optional
+    :type num_devi: float, optional
     :param num_devi_u: number of standard deviations above which the value should be an anomaly, defaults to None
-    :type num_devi_u: int, optional
+    :type num_devi_u: float, optional
     :param num_devi_l: number of standard deviations below which the value should be an anomaly, defaults to None
-    :type num_devi_l: int, optional
+    :type num_devi_l: float, optional
     :return: Returns a dataframe after running the standard deviation algorithm on the input data
     :rtype: pandas.core.frame.DataFrame
     """
@@ -136,7 +136,15 @@ def run_stddevi(df_prepped,
     return df_anomaly
 
 def compute_population_threshold(df_entire, base_population_threshold=500):
-    
+    """Computes a population threshold to use when deciding whether or not to display a sub-dimension's anomaly detection analysis
+
+    :param df_entire: Entire pandas DataFrame which anomaly detection is run on
+    :type df_entire: pandas.core.frame.DataFrame
+    :param base_population_threshold: Base/minimum population threshold to output, defaults to 500
+    :type base_population_threshold: int, optional
+    :return: Returns the computed population threshold
+    :rtype: float
+    """
     
     # TODO: experiment with algorithm dependent threshold
     population_threshold = base_population_threshold + (df_entire.shape[0]*0.01)
@@ -171,21 +179,21 @@ def compute_entire_multi_dim_anomaly(df_entire,
     :type date_column: str
     :param algo_used: the type of algorithm used for anomaly detection, defaults to "prophet"
     :type algo_used: str, optional
-    :param num_deviation: number of standard deviation above which, an anomaly occurs. 
-    This param to be specified which using the stddevi algorithm, defaults to None
-    :type num_deviation: int, optional
-    :param num_deviation_lower: [description], defaults to None
+    :param num_deviation: number of standard deviations beyond which, an anomaly occurs. 
+    This param to be specified when using the stddevi algorithm, defaults to None
+    :type num_deviation: float, optional
+    :param num_deviation_lower: number of standard deviations below which the value should be an anomaly, defaults to None
     :type num_deviation_lower: float, optional
-    :param num_deviation_upper: [desc], defaults to None
+    :param num_deviation_upper: number of standard deviations above which the value should be an anomaly, defaults to None
     :type num_deviation_upper: float, optional
     :param interval_width: confidence interval width for the algorithm (prophet), defaults to None
     :type interval_width: float, optional
-    :param seasonality: [description], defaults to "auto"
+    :param seasonality: Seasonality of the data, defaults to "auto"
     :type seasonality: str, optional
-    :param frequency: [description], defaults to 'D'
+    :param frequency: Aggregation frequency key using pandas standards (https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases), defaults to 'D'
     :type frequency: str, optional
-    :return: [description]
-    :rtype: [type]
+    :return: Returns the dataframe describing the anomalies across all subdimensions
+    :rtype: pandas.core.frame.DataFrame
     """
     # """Computes the entire multi-dimensionality anomaly dataframe
 
@@ -268,6 +276,19 @@ def prepare_dataframe_for_anomaly(df_sub_dim,
                                  date_column,
                                  agg_dict,
                                  frequency='D'):
+    """Performs resampling and aggregation to prepare the input DataFrame to be used for Anomaly Detection
+
+    :param df_sub_dim: A pandas DataFrame for some sub-dimension
+    :type df_sub_dim: pandas.core.frame.DataFrame
+    :param date_column: Name of the column containing the date/timeperiod 
+    :type date_column: str
+    :param agg_dict: Aggregation dictionary specifying the columns and aggregation functions to perform in resampling.
+    :type agg_dict: Dict
+    :param frequency: Aggregation frequency key using pandas standards (https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases), defaults to 'D'
+    :type frequency: str, optional
+    :return: Returns the resampled and aggregated pandas DataFrame.
+    :rtype: pandas.core.frame.DataFrame
+    """
     return df_sub_dim.set_index(date_column).resample(frequency).agg(agg_dict).reset_index()
 
 
@@ -280,6 +301,30 @@ def compute_subdim_anomaly_dataframe(df_prepped,
                                      num_devi=None,
                                      num_devi_u=None,
                                      num_devi_l=None):
+    """Computes the Anomaly dataframe for a single sub-dimension
+
+    :param df_prepped: the prepped pandas DataFrame after resampling, aggregation, etc.
+    :type df_prepped: pandas.core.frame.DataFrame
+    :param sub_dim_name: name of the current sub-dimension
+    :type sub_dim_name: str
+    :param date_column: name of the column containing the date/timeperiod 
+    :type date_column: str
+    :param kpi_name: name of the KPI column in the dataset
+    :type kpi_name: str
+    :param algo_used: the type of algorithm used for anomaly detection
+    :type algo_used: str
+    :param interval_width: confidence interval width for the algorithm (prophet), defaults to 0.8
+    :type interval_width: float, optional
+    :param num_devi: number of standard deviations beyond which, an anomaly occurs. 
+    This param to be specified when using the stddevi algorithm, defaults to None, defaults to None
+    :type num_devi: float, optional
+    :param num_devi_u: number of standard deviations above which the value should be an anomaly, defaults to None
+    :type num_devi_u: float, optional
+    :param num_devi_l: number of standard deviations below which the value should be an anomaly, defaults to None
+    :type num_devi_l: float, optional
+    :return: Returns the anomaly DataFrame for a single sub-dimension
+    :rtype: pandas.core.frame.DataFrame
+    """
 
     if algo_used == "prophet":
         df_subdim_anomaly = run_prophet(df_prepped, date_column, target_column=kpi_name, \

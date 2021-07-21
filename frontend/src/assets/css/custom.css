@@ -102,6 +102,9 @@ button.MuiIconButton-root.close-button {
     font-size: 18px !important;
     
 }
+.graph-info-cards h3.font-sm{
+    font-size: 16px !important;
+}
 .graph-info-cards h6.small{
     font-size: 14px !important;
     color: #222222 !important;

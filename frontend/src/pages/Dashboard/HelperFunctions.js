@@ -31,7 +31,10 @@ export const tab1Fields = (cardData, kpi, loader) => {
 
     const { grp1_metrics, grp2_metrics, impact } = cardData;
 
-
+    const grp1_metricsSumLength = (grp1_metrics?.sum)?(Math.floor(grp1_metrics.sum).toString().length):(0);
+    const grp2_metricsSumLength = (grp2_metrics?.sum)?(Math.floor(grp2_metrics.sum).toString().length):(0);
+    const impactSumLength = (impact?.sum)?(Math.floor(impact.sum).toString().length):(0);
+    const sumLengthClass = (grp1_metricsSumLength > 5 || grp2_metricsSumLength > 5 || impactSumLength > 5)?("font-sm"):("");
     if (loader) {
         return (
             <div className="loader">
@@ -58,7 +61,7 @@ export const tab1Fields = (cardData, kpi, loader) => {
                                 <CardContent>
                                     <Grid container spacing={1} className="text-center">
                                         <Grid item xs={12}>
-                                            <Typography component="h3" variant="h3" >{(grp1_metrics?.sum) ? (grp1_metrics.sum) : ('--')}</Typography>
+                                            <Typography component="h3" variant="h3" className={sumLengthClass} >{(grp1_metrics?.sum) ? (grp1_metrics.sum) : ('--')}</Typography>
                                         </Grid>
                                         <Grid item xs={12}>
                                             <Typography component="h6" variant="h6" className="small fw-bold mt-2" >{(grp1_metrics?.mean) ? (parseFloat(grp1_metrics.mean).toFixed(2)) : ('--')}</Typography>
@@ -86,7 +89,7 @@ export const tab1Fields = (cardData, kpi, loader) => {
                                 <CardContent>
                                     <Grid container spacing={1} className="text-center">
                                         <Grid item xs={12}>
-                                            <Typography component="h3" variant="h3" >{(grp2_metrics?.sum) ? (grp2_metrics.sum) : ('--')}</Typography>
+                                            <Typography component="h3" variant="h3" className={sumLengthClass} >{(grp2_metrics?.sum) ? (grp2_metrics.sum) : ('--')}</Typography>
                                         </Grid>
                                         <Grid item xs={12}>
                                             <Typography component="h6" variant="h6" className="small fw-bold mt-2" >{(grp2_metrics?.mean) ? (parseFloat(grp2_metrics.mean).toFixed(2)) : ('--')}</Typography>
@@ -113,7 +116,7 @@ export const tab1Fields = (cardData, kpi, loader) => {
                                 <CardContent>
                                     <Grid container spacing={1} className="text-center">
                                         <Grid item xs={12}>
-                                            <Typography component="h3" variant="h3" >{(impact?.sum) ? (renderImpact(impact.sum)) : ('--')}</Typography>
+                                            <Typography component="h3" variant="h3" className={sumLengthClass}>{(impact?.sum) ? (renderImpact(impact.sum)) : ('--')}</Typography>
                                         </Grid>
                                         <Grid item xs={12}>
                                             <Typography component="h6" variant="h6" className="small fw-bold mt-2" >{(impact?.mean) ? (renderImpact(impact.mean, false)) : ('--')}</Typography>

@@ -16,6 +16,9 @@ PyMySQL==1.0.2
 # Migrations
 Flask-Migrate==2.7.0
 
+# Alert
+slack-sdk==3.8.0
+
 # Data Analysis
 matplotlib==3.4.2
 numpy==1.20.3

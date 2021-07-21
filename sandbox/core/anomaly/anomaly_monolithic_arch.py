@@ -1,6 +1,8 @@
+from datetime import timedelta
 import pandas as pd
 import numpy as np
 from prophet import Prophet
+import altair as alt
 
 try:
     from IPython.display import display
@@ -336,7 +338,7 @@ def get_data_volume_dataframe(df_entire, date_column, kpi_name, freq='D'):
     
 def get_max_or_min_df(df_metric, date_column, kpi_name, dq_metric="max", freq='D'):
     print(f"Data Quality over the {dq_metric} values per {freq}")
-    return df_metric.set_index(date_column).resample('D').agg({kpi_name:dq_metric}).reset_index()
+    return df_metric.set_index(date_column).resample(freq).agg({kpi_name:dq_metric}).reset_index()
 
 from typing import Dict, List
 
@@ -423,16 +425,17 @@ def format_anomaly_data_for_js_graph(df_anomaly, algo_used, kpi_column_name, agg
         :param precision: Precision to round y and yhat values to, defaults to 2
         :type precision: int, optional
         """
-        timestamp = row['ds'].timestamp() * 1000 # Convert to milliseconds
-        # Create and append a point for the interval
-        interval = [timestamp, round(row['yhat_lower'], precision), round(row['yhat_upper'], precision)]
-        graph_data['intervals'].append(interval)
-        # Create and append a point for the value
-        value = [timestamp, round(row['y'])]
-        graph_data['values'].append(value)
-        # Create and append a point for the predicted_value
-        predicted_value = [timestamp, round(row['yhat'], precision)]
-        graph_data['predicted_values'].append(predicted_value)
+        if row.notna()['y']: # Do not include rows where there is no data
+            timestamp = row['ds'].timestamp() * 1000 # Convert to milliseconds for HighCharts
+            # Create and append a point for the interval
+            interval = [timestamp, round(row['yhat_lower'], precision), round(row['yhat_upper'], precision)]
+            graph_data['intervals'].append(interval)
+            # Create and append a point for the value
+            value = [timestamp, round(row['y'])]
+            graph_data['values'].append(value)
+            # Create and append a point for the predicted_value
+            predicted_value = [timestamp, round(row['yhat'], precision)]
+            graph_data['predicted_values'].append(predicted_value)
         
     print("ENTERING JSON FORMATTING FUNCTION")
     if dq_metric:
@@ -551,8 +554,10 @@ def get_dq_json(df_entire,
                 date_column,
                 kpi_name,
                 interval_width,
-                freq='D'):
+                freq='D',
+                plot_in_altair=False):
     df_entire = df_entire[[date_column,kpi_name]]
+    cut_df = cut_dataframe(df_entire, start_date, end_date)
     
     
     
@@ -561,8 +566,8 @@ def get_dq_json(df_entire,
         if i != "volume" and i != "missing":
             print(i)
             df_dq_metric = compute_data_quality_metrics_dataframe(\
-                                                get_max_or_min_df(df_entire, date_column, kpi_name, 
-                                                                  dq_metric=i, freq='D'),
+                                                get_max_or_min_df(cut_df, date_column, kpi_name, 
+                                                                  dq_metric=i, freq=freq),
                                   date_column,
                                   kpi_name,
                                   algo_used,
@@ -573,34 +578,38 @@ def get_dq_json(df_entire,
                                               agg_type=i, 
                                               freq=freq,
                                               dq_metric=f"DQ-{i} of Data"))
-        else:
-            if i == "volume":
-                df_dq_metric = compute_data_quality_metrics_dataframe(
-                                            get_data_volume_dataframe(df_entire, 
-                                                                      date_column, 
-                                                                      kpi_name),
-                              date_column,
-                              kpi_name,
-                              algo_used,
-                              interval_width=interval_width)
-                graphs.append(format_anomaly_data_for_js_graph(df_dq_metric, 
-                                          algo_used, kpi_name, 
-                                          agg_type="count", 
-                                          freq=freq,
-                                          dq_metric="DQ-Data Volume"))
-                if i == "missing":
-                    df_dq_metric = compute_data_quality_metrics_dataframe(
-                                        get_missing_df(df_entire, date_column, kpi_name, freq="D"),
-                                        date_column,
-                                        kpi_name,
-                                        algo_used,
-                                        interval_width=interval_width) 
-                                   
-                    graphs.append(format_anomaly_data_for_js_graph(df_dq_metric, 
-                                              algo_used, kpi_name, 
-                                              agg_type="Number of Missing Values", 
-                                              freq=freq,
-                                              dq_metric="DQ-Missing Data"))
+        elif i == "volume":
+            df_dq_metric = compute_data_quality_metrics_dataframe(
+                                        get_data_volume_dataframe(cut_df, 
+                                                                    date_column, 
+                                                                    kpi_name, freq=freq),
+                            date_column,
+                            kpi_name,
+                            algo_used,
+                            interval_width=interval_width)
+            graphs.append(format_anomaly_data_for_js_graph(df_dq_metric, 
+                                        algo_used, kpi_name, 
+                                        agg_type="count", 
+                                        freq=freq,
+                                        dq_metric="DQ-Data Volume"))
+        elif i == "missing":
+            df_dq_metric = compute_data_quality_metrics_dataframe(
+                                get_missing_df(cut_df, date_column, kpi_name, freq=freq),
+                                date_column,
+                                kpi_name,
+                                algo_used,
+                                interval_width=interval_width) 
+                            
+            graphs.append(format_anomaly_data_for_js_graph(df_dq_metric, 
+                                        algo_used, kpi_name, 
+                                        agg_type="Number of Missing Values", 
+                                        freq=freq,
+                                        dq_metric="DQ-Missing Data"))
+
+        if plot_in_altair:
+                # Drop na so we don't skip points which don't exist
+                display(plot_sorted_anomalies_df(df_dq_metric.dropna(subset=['y']),
+                                    kpi_name, f"DQ-{i} of Data", 'prophet', start_date, end_date))
 
         
     return graphs
@@ -699,3 +708,190 @@ def run_ets(df_prepped,
     
     
 
+
+# PLOTTING CODE
+# 
+# 
+# 
+def plot_top_n_anomalies(df_anomaly, kpi_name, algo_used,
+                   start_date, end_date, num_graphs=5):
+    """Plot all the relavent graphs for the data.
+
+    :param df_anomaly: multi-dimensional anomaly dataframe
+    :type df_anomaly: pandas.core.frame.DataFrame
+    :param kpi_name: name of the KPI
+    :type kpi_name: str
+    :param algo_used: name of the algorithm used
+    :type algo_used: str
+    :param start_date: start date of entries in the cut dataframe
+    :type start_date: str
+    :param end_date: end date of entries in the cut dataframe
+    :type end_date: str
+    """
+
+    display(plot_sorted_anomalies_df(df_anomaly[df_anomaly['sub_dimension']=="overall KPI"],
+                       kpi_name, "overall KPI", algo_used, start_date, end_date))
+
+    largest_anomaly_contribution = []
+    
+    for sub_dim in df_anomaly.sort_values(by='importance', ascending=False)['sub_dimension'].unique():
+        if sub_dim != "overall KPI" and len(largest_anomaly_contribution) <= num_graphs:
+            
+            display(plot_sorted_anomalies_df(df_anomaly[df_anomaly['sub_dimension']==sub_dim],
+                        kpi_name, sub_dim, algo_used, start_date, end_date))
+            largest_anomaly_contribution.append(sub_dim)
+
+
+def plot_sorted_anomalies_df(df_anomaly,
+                   kpi,
+                   sub_dimension,
+                   algo_used = "Prophet",
+                   start_date = None,
+                   end_date = None):
+    """Plots all the relavent graphs for the dataset
+
+    :param forecasted: dataframe which the run_{algorithm} function returns
+    :type forecasted: pandas.core.frame.DataFrame
+    :param kpi: name of the KPI we are running the analysis for
+    :type kpi: str
+    :param sub_dimension: sub dimension name on which we are running the analysis
+    :type sub_dimension: str
+    :param algo_used: The algorith used to run the analysis, defaults to "Prophet"
+    :type algo_used: str, optional
+    :param start_date: Start date of the dataframe entries, defaults to None
+    :type start_date: str, optional
+    :param end_date: End date of the dataframe entries, defaults to None
+    :type end_date: str, optional
+    :return: does not return any value, displays all the relavent graphs and highlights the 'important' points.
+    :rtype: NoneType
+    """
+    fact = alt.Chart(df_anomaly).mark_line(size=1.5, opacity=0.8,color="Black",point=True).encode(
+        x='ds:T',
+        y=alt.Y('y'),
+        tooltip=['ds', 'y', 'yhat_lower', 'yhat_upper', 'importance'],
+    ).interactive()
+
+
+    anomalies = alt.Chart(df_anomaly[df_anomaly.anomaly != 0]).\
+        mark_circle(size=150, color = 'Red', filled=False).\
+            encode(
+                x='ds:T',
+                y=alt.Y('y', title=kpi),
+                tooltip=['ds', 'y', 'yhat_lower', 'yhat_upper', 'importance']
+
+        ).interactive()
+
+
+    if algo_used != "stddevi":
+        interval = alt.Chart(df_anomaly).mark_area(interpolate="basis", color = '#98FB98').encode(
+            x=alt.X('ds:T',  title ='date'),
+            y='yhat_upper',
+            y2='yhat_lower',
+            tooltip=['ds', 'y', 'yhat_lower', 'yhat_upper', 'importance']
+            ).interactive().properties(
+            title= f'Anomaly: {sub_dimension} {algo_used}; {start_date} to {end_date}'
+        )
+
+        return alt.layer(interval, fact, anomalies).\
+            properties(width=870,height=450).configure_title(fontSize=20)
+
+
+    interval_upper = alt.Chart(df_anomaly).mark_line(color='black',strokeDash=[3,5]).encode(
+        x=alt.X('ds:T',  title ='date'),
+        y='yhat_upper',
+        tooltip=['ds', 'y', 'yhat_lower', 'yhat_upper', 'importance']
+        ).interactive().properties(
+            title= f'Anomaly: {sub_dimension} {algo_used}; {start_date} to {end_date}'
+        )
+
+    interval_lower = alt.Chart(forecasted).mark_line(color='black',strokeDash=[3,5]).encode(
+        x=alt.X('ds:T',  title ='date'),
+        y='yhat_lower',
+        tooltip=['ds', 'y', 'yhat_lower', 'yhat_upper', 'importance']
+        ).interactive().properties(
+            title= f'Anomaly: {sub_dimension} {algo_used}; {start_date} to {end_date}'
+        )
+    return alt.layer(interval_upper, interval_lower, fact, anomalies).\
+                            properties(width=870, height=450).configure_title(fontSize=20)
+
+def get_top_n_correlated_anomalies(df_anomaly, no_of_days_around_anomaly, top_n_correlated_anomaly):
+    """Returns the dataframe which contains the top 'n' anomalies in the sub dimensions that
+    are corelated with the overall KPI.
+
+    :param df_anomaly: multi-dimensional anomaly dataframe
+    :type df_anomaly: pandas.core.frame.Dataframe
+    :param no_of_days_around_anomaly: number of days around the detected overall KPI anomaly
+    we want to check in the sub-dimensional anomalies
+    :type no_of_days_around_anomaly: int
+    :param top_n_correlated_anomaly: the number of anomalies in the overall KPI
+    :type top_n_correlated_anomaly: int
+    :return: dataframe with the top 'n' correlated anomalies based on their importance
+    :rtype: pandas.core.frame.Dataframe
+    """
+    df_kpi = df_anomaly[df_anomaly['sub_dimension'] == "overall KPI"]
+    dates_row_no = get_top_n_anomalies_independent(df_kpi, top_n_correlated_anomaly, True)
+
+    kpi_anomaly_dates_list = df_anomaly.loc[dates_row_no]['ds'].tolist()
+    dates_list_kpi = [i.date() for i in kpi_anomaly_dates_list]
+#     display(kpi_anomaly_dates_list)
+
+    dates_list = computes_dates_correlated_anomaly(dates_list_kpi, no_of_days_around_anomaly)
+#     display(dates_list)
+
+
+    df_kpi['isImp'] = 0
+    df_kpi.loc[df_kpi[df_kpi['ds'].isin(kpi_anomaly_dates_list)].index, "isImp"] = 1
+
+
+    dt_list = pd.DataFrame(dates_list)[0].tolist()
+
+    # -----------------------------------------------
+    # todo: need to optimize
+    df_all_subdim = df_anomaly[df_anomaly['sub_dimension'] != "overall KPI"]
+    df_all_subdim = df_all_subdim[df_all_subdim['anomaly'] != 0]
+    df_all_subdim = df_all_subdim[df_all_subdim['ds'].isin(dt_list)]
+    df_all_subdim['isImp'] = 1
+    
+    df_all_subdim.loc[df_all_subdim[~df_all_subdim['ds'].isin(dt_list)].index,"isImp"] = 0
+
+    df_anomaly = df_anomaly.merge(df_all_subdim, how="outer").merge(df_kpi, how="outer").fillna(int(0))
+    df_anomaly.loc[df_anomaly[~df_anomaly['ds'].isin(dt_list)].index,"isImp"] = 0
+
+    return df_anomaly
+
+def get_top_n_anomalies_independent(df_anomaly, top_n_anomalies, corr =False):
+    """Returns the top 'n' independent anomalies in a given dataframe.
+
+    :param df_anomaly: the multi-dimensional anomaly dataframe
+    :type df_anomaly: pandas.core.frame.DataFrame
+    :param top_n_anomalies: the top 'n' anomalies in the dataset
+    :type top_n_anomalies: int
+    :param corr: parameter to run correlated anomaly detection, defaults to True
+    :type corr: bool, optional
+    :return: returns a dataframe with the anomalies of importance or index numbers of anomalies of importance depending on the `corr` parameter.
+    :rtype: pandas.core.frame.DataFrame or pandas.core.indexes.numeric.Int64Index
+    """
+    if not corr:
+        df_anomaly.nlargest(top_n_anomalies, "importance")
+        df_anomaly['isImp'] = 0
+        df_anomaly.loc[df_anomaly.nlargest(top_n_anomalies,"importance").index, "isImp"] = 1
+        return df_anomaly
+    return df_anomaly.nlargest(top_n_anomalies, "importance").index
+
+def computes_dates_correlated_anomaly(dates_list, no_of_days_around_anomaly):
+    """Computes all the dates near an anomaly of importance
+
+    :param dates_list: list of dates of anomalies occuring in overall KPI
+    :type dates_list: list
+    :param no_of_days_around_anomaly: number of days of interest around the anomaly
+    :type no_of_days_around_anomaly: int
+    :return: list of dates where imortant anomalies occur
+    :rtype: list
+    """
+    for date in dates_list.copy():
+        date_inc = date_dec = date
+        for _ in range(no_of_days_around_anomaly):
+            date_inc += timedelta(days=1)
+            date_dec -= timedelta(days=1)
+            dates_list.extend([date_dec, date_inc])
+    return dates_list

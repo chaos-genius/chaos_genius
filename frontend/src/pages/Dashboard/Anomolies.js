@@ -1,6 +1,11 @@
 import React, { Component } from "react";
 
 import { BASE_URL, DEFAULT_HEADERS } from '../../config/Constants'
+import {
+    Accordion, AccordionSummary, AccordionDetails,
+    Typography, Grid, FormControl, Select, Card, CardContent
+} from '@material-ui/core';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import DrillDown from './DrillDown'
 import moment from 'moment'
@@ -118,6 +123,9 @@ class Anomolies extends Component {
                 },
                 plotOptions: {
                     series: {
+                        marker: {
+                            enabled: false
+                        },
                         cursor: 'pointer',
                         point: {
                             events: {
@@ -131,17 +139,17 @@ class Anomolies extends Component {
                         }
                     }
                 },
-                // legend: {
-                //     enabled: true,
-                //     borderWidth: 1,
-                //     padding: 20,
-                //     title: {
-                //         text: 'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
-                //         style: {
-                //             fontStyle: "italic",
-                //         },
-                //     },
-                // },
+                legend: {
+                    enabled: false,
+                    borderWidth: 1,
+                    padding: 20,
+                    title: {
+                        text: 'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
+                        style: {
+                            fontStyle: "italic",
+                        },
+                    },
+                },
                 series: [
                     {
                         name: "Confidence Interval",
@@ -237,34 +245,67 @@ class Anomolies extends Component {
         this.fetchAnomoly()
     }
 
-    renderDrillDown = () => {
+    render() {
         const { drillDown } = this.state;
-        let itemList=[]
+        let itemList = []
 
-        if(Object.keys(drillDown).length === 0){
-            return null
-        }
-        drillDown.map((obj) =>{
+        drillDown.map((obj) => {
             itemList.push(<DrillDown drillDown={obj} />)
         })
-
-        return(
-            <>
-                {itemList}
-            </>
-        )
-    }
-
-
-    render() {
         console.log("chartdata", this.state.chartData[0])
         return (
             <>
-                <HighchartsReact
-                    highcharts={Highcharts}
-                    options={this.state.chartData[0]}
-                />
-                {this.renderDrillDown()}
+                <Card className="chart-tab-card">
+                    <CardContent>
+                        <Grid container spacing={2} justify="flex-end" className="custom-dash-select">
+                            <Grid item xs={12} md={2}>
+                                <FormControl variant="outlined" style={{ width: '100%' }}>
+                                    {/*onChange={(e) => this.handleTimelineChange(e)}*/}
+                                    <Select native defaultValue={this.props.timeline} id="analysisTimeline" >
+                                        <option value="dataquality">Data quality</option>
+                                        <option value="multidimensional">Multidimensional</option>
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            {/* <Grid item xs={12} md={3}>
+                                <FormControl variant="outlined" style={{ width: '100%' }}>
+                                    <Select native defaultValue={this.props.timeline} id="analysisTimeline" >
+                                        <option value="mom">Display Window</option>
+                                    </Select>
+                                </FormControl>
+                            </Grid> */}
+                        </Grid>
+                        <HighchartsReact
+                            highcharts={Highcharts}
+                            options={this.state.chartData[0]}
+                        />
+                    </CardContent>
+                </Card>
+                <Accordion className="custom-dash-accordian" defaultExpanded={false}>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="panel1a-content"
+                        id="panel1a-header"
+                    >
+                        <Typography component="h4" className="title">Drill Downs</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        {itemList}
+                    </AccordionDetails>
+                </Accordion>
+                <Accordion className="custom-dash-accordian" defaultExpanded={false}>
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="panel1a-content"
+                        id="panel1a-header"
+                    >
+                        <Typography component="h4" className="title">Correlation</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        {itemList}
+                    </AccordionDetails>
+                </Accordion>
+
             </>
         );
     }

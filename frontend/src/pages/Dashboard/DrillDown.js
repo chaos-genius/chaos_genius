@@ -153,6 +153,7 @@ class Anomolies extends Component {
                             lineWidth: 1,
                             lineColor: "grey",
                             symbol: "circle",
+                            enabled:false
                         },
                     },
                     {
@@ -187,7 +188,11 @@ class Anomolies extends Component {
 
 
     }
-    
+    componentDidUpdate(prevProps){
+        if (this.props.drillDown !== prevProps.drillDown) {
+            this.renderChart()
+        }
+    }
     componentDidMount() {
         this.renderChart()
     }

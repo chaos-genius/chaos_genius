@@ -453,7 +453,7 @@ class Dashboard extends React.Component {
         { title: "Non Overlap Impact", field: 'impact_non_overlap' },]
 
         let overLapTableCol = (!this.state.overlap) ? (this.state.dataCol) : (columns);
-        let tableData = (!this.state.overlap) ? (this.state.overlapTableData) : (this.state.multiDimensionTableData);
+        let tableData = (!this.state.overlap) ? (this.state.overlapTableData.slice(0, 50)) : (this.state.multiDimensionTableData.slice(0, 50));
 
         return (
             <>

@@ -175,6 +175,7 @@ class RcaAnalysisTable extends React.Component {
     }
 
     render() {
+        console.log("tableData",this.state.tableData)
         if (Object.keys(this.state.tableData).length > 1) {
             return (
                 <div className="custom-table custom-dash-table mt-5">                    

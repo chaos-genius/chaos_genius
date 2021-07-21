@@ -65,7 +65,7 @@ def kpi():
 def kpi_get_dimensions(kpi_id):
     dimensions = []
     try:
-        kpi_info = KPI_DATA[kpi_id-1]
+        kpi_info = get_kpi_data_from_id(kpi_id)
         dimensions = DB_DIMS[kpi_info["kpi_query"]]
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")
@@ -75,7 +75,7 @@ def kpi_get_dimensions(kpi_id):
 def kpi_get_aggregation(kpi_id):
     data = []
     try:
-        kpi_info = KPI_DATA[kpi_id-1]
+        kpi_info = get_kpi_data_from_id(kpi_id)
         connection_info = DataSource.get_by_id(kpi_info["data_source"])
         timeline = request.args.get("timeline")
         data = kpi_aggregation(kpi_info, connection_info.as_dict, timeline)
@@ -87,7 +87,7 @@ def kpi_get_aggregation(kpi_id):
 def kpi_get_line_data(kpi_id):
     data = []
     try:
-        kpi_info = KPI_DATA[kpi_id-1]
+        kpi_info = get_kpi_data_from_id(kpi_id)
         connection_info = DataSource.get_by_id(kpi_info["data_source"])
         timeline = request.args.get("timeline")
         data = kpi_line_data(kpi_info, connection_info.as_dict, timeline)
@@ -100,7 +100,7 @@ def kpi_rca_analysis(kpi_id):
     current_app.logger.info(f"RCA Analysis Started for KPI ID: {kpi_id}")
     data = []
     try:
-        kpi_info = KPI_DATA[kpi_id-1]
+        kpi_info = get_kpi_data_from_id(kpi_id)
         connection_info = DataSource.get_by_id(kpi_info["data_source"])
         timeline = request.args.get("timeline")
         dimension = request.args.get("dimension", None)
@@ -115,7 +115,7 @@ def kpi_rca_hierarchical_data(kpi_id):
     current_app.logger.info(f"RCA Analysis Started for KPI ID: {kpi_id}")
     data = []
     try:
-        kpi_info = KPI_DATA[kpi_id-1]
+        kpi_info = get_kpi_data_from_id(kpi_id)
         connection_info = DataSource.get_by_id(kpi_info["data_source"])
         timeline = request.args.get("timeline")
         dimension = request.args.get("dimension", None)
@@ -350,6 +350,26 @@ def rca_hierarchical_data(kpi_info, connection_info, timeline="mom", dimension= 
             "data_table": []
         }
     return final_data
+
+
+def get_kpi_data_from_id(n: int) -> dict:
+    """Returns the corresponding KPI data for the given KPI ID 
+    from KPI_DATA.
+
+    :param n: ID of KPI
+    :type n: int
+
+    :raises: ValueError
+
+    :returns: KPI data
+    :rtype: dict
+    """
+
+    for kpi_data in KPI_DATA:
+        if kpi_data["id"] == n:
+            return kpi_data
+    raise ValueError(f"KPI ID {n} not found in KPI_DATA")
+
 
 KPI_DATA = [
     {"id": 1, "name": "Call/day", "kpi_query": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "sum_calls", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},

@@ -368,8 +368,8 @@ KPI_DATA = [
     {"id": 14, "name": "Avg call duration for admin job (MySQL)", "kpi_query": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["admin."]}, "dimensions": ["marital","education","housing","loan"]},
     {"id": 15, "name": "Avg call duration for blue collar job (MySQL)", "kpi_query": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["blue-collar"]}, "dimensions": ["marital","education","housing","loan"]},
     {"id": 16, "name": "Avg call duration for management job (MySQL)", "kpi_query": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["management"]}, "dimensions": ["marital","education","housing","loan"]},
-    {"id": 17, "name": "E-Com - Total Sales", "kpi_query": "ecom_retail", "data_source": 17, "datetime_column": "date", "metric": "ItemTotalPrice", "metric_precision": 2, "aggregation": "sum", "filters": {}, "dimensions": ["DayOfWeek", "PurchaseTime", "Country"]},
-    {"id": 18, "name": "E-Com - Average Sales", "kpi_query": "ecom_retail", "data_source": 17, "datetime_column": "date", "metric": "ItemTotalPrice", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["DayOfWeek", "PurchaseTime", "Country"]},
+    {"id": 17, "name": "E-Com - Total Sales", "kpi_query": "ecom_retail", "data_source": 22, "datetime_column": "date", "metric": "ItemTotalPrice", "metric_precision": 2, "aggregation": "sum", "filters": {}, "dimensions": ["DayOfWeek", "PurchaseTime", "Country"]},
+    {"id": 18, "name": "E-Com - Average Sales", "kpi_query": "ecom_retail", "data_source": 22, "datetime_column": "date", "metric": "ItemTotalPrice", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["DayOfWeek", "PurchaseTime", "Country"]},
 ]
 
 DB_DIMS = {

@@ -13,6 +13,7 @@ if (isLocalhost === true) {
     site_url = "https://chaosgenius.mayhemdata.com/";
 }
 export const BASE_URL = "";
+// export const BASE_URL = site_url;
 
 
 let myHeaders = new Headers();

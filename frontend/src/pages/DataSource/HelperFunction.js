@@ -49,6 +49,7 @@ const renderBooleanField = (field, textType, formData, formError, handleBooleanC
                     />
                 }
                 label={(field[1]?.['title']) ? (field[1]['title']) : ("")}
+                className="custom-checkbox"
             />
             {/* <FormControl variant="outlined" style={{ width: '100%' }}>
                 <InputLabel htmlFor={textID} >{(field[1]?.['title']) ? (field[1]['title']) : ("")}</InputLabel>

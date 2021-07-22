@@ -130,7 +130,10 @@ def kpi_anomaly_detection(kpi_id):
     current_app.logger.info(f"Anomaly Detection Started for KPI ID: {kpi_id}")
     data = []
     try:
+        kpi_info = KPI_DATA[kpi_id]
+        connection_info = DataSource.get_by_id(kpi_info["data_source"])
         data = no_date_output
+        df = get_anomaly_df(kpi_info, connection_info.as_dict)
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("Anomaly Detection Done")
@@ -171,7 +174,6 @@ def get_baseline_and_rca_df(kpi_info, connection_info, timeline="mom"):
     mid_dt_obj = today - timedelta(days=num_days)
     mid_dt = str(mid_dt_obj.date())
     cur_dt = str(today.date())
-        
 
     base_filter = f" where {indentifier}{kpi_info['datetime_column']}{indentifier} > '{base_dt}' and {indentifier}{kpi_info['datetime_column']}{indentifier} <= '{mid_dt}' "
     rca_filter = f" where {indentifier}{kpi_info['datetime_column']}{indentifier} > '{mid_dt}' and {indentifier}{kpi_info['datetime_column']}{indentifier}<= '{cur_dt}' "
@@ -193,6 +195,37 @@ def get_baseline_and_rca_df(kpi_info, connection_info, timeline="mom"):
     rca_df = get_df_from_db_uri(connection_info["db_uri"], rca_query)
 
     return base_df, rca_df
+
+
+def get_anomaly_df(kpi_info, connection_info, days_range=90):
+    indentifier = ''
+    if connection_info["connection_type"] == "mysql":
+        indentifier = '`'
+    elif connection_info["connection_type"] == "postgresql":
+        indentifier = '"'
+
+    today = datetime.today()
+    num_days = days_range
+    base_dt_obj = today - timedelta(days=num_days)
+    base_dt = str(base_dt_obj.date())
+
+    base_filter = f" where {indentifier}{kpi_info['datetime_column']}{indentifier} > '{base_dt}' "
+
+    kpi_filters = kpi_info['filters']
+    kpi_filters_query = " "
+    if kpi_filters:
+        kpi_filters_query = " "
+        for key, values in kpi_filters.items():
+            if values:
+                # TODO: Bad Hack to remove the last comma, fix it
+                values_str = str(tuple(values))
+                values_str = values_str[:-2] + ')'
+                kpi_filters_query += f" and {indentifier}{key}{indentifier} in {values_str}"
+
+    base_query = f"select * from {kpi_info['kpi_query']} {base_filter} {kpi_filters_query} "
+    base_df = get_df_from_db_uri(connection_info["db_uri"], base_query)
+
+    return base_df
 
 
 def process_rca_output(chart_data, kpi_info):

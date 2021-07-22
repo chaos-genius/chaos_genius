@@ -16,10 +16,10 @@ except ModuleNotFoundError:
     display = print
 
 DEFAULT_SENSITIVITY_THRESHOLDS = {
-    "Low": 0.8,
+    "Low": 0.95,
     "Medium": 0.9,
-    "High": 0.95,
-    "Chaos": 0.99
+    "High": 0.8,
+    "Chaos": 0.7
 }
 
 
@@ -78,8 +78,7 @@ def run_prophet(
     target_column,
     interval_width=0.80,
     weekly_seasonality='auto',
-    yearly_seasonality=False,
-    sensitivity_thresholds=DEFAULT_SENSITIVITY_THRESHOLDS
+    yearly_seasonality=False
 ):
     """Run prophet on the desired dataframe and return the predictions
 
@@ -116,7 +115,6 @@ def run_prophet(
     forecast = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']]
     forecast = forecast.merge(df_prepped)
     df_anomaly = detect_anomalies(forecast)
-    df_anomaly = detect_sensitivity(df_anomaly, sensitivity_thresholds)
     df_anomaly = detect_severity(df_anomaly)
     return df_anomaly
 
@@ -127,7 +125,8 @@ def run_stddevi(
     target_column,
     num_devi=0,
     num_devi_u=None,
-    num_devi_l=None
+    num_devi_l=None,
+    interval_width=0.80,
 ):
     """Run standard deviation on the desired dataframe and return the predictions
 
@@ -164,8 +163,8 @@ def run_stddevi(
 
     threshold_u = mean + (num_devi_u * stddevi)
     threshold_l = mean - (num_devi_l * stddevi)
-    df_prepped['yhat_lower'] = threshold_l
-    df_prepped['yhat_upper'] = threshold_u
+    df_prepped['yhat_lower'] = threshold_l * interval_width
+    df_prepped['yhat_upper'] = threshold_u * interval_width
     df_prepped['yhat'] = (threshold_l + threshold_u)/2
     df_anomaly = detect_anomalies(df_prepped)
     return df_anomaly
@@ -200,8 +199,7 @@ def compute_entire_multi_dim_anomaly(
     num_deviation_upper=None,
     interval_width=None,
     seasonality="auto",
-    frequency='D',
-    sensitivity_thresholds=DEFAULT_SENSITIVITY_THRESHOLDS
+    frequency='D'
 ):
     """Computes the entire multi-dimensionality anomaly dataframe
 
@@ -330,8 +328,7 @@ def compute_subdim_anomaly_dataframe(
     interval_width=0.8,
     num_devi=None,
     num_devi_u=None,
-    num_devi_l=None,
-    sensitivity_thresholds=DEFAULT_SENSITIVITY_THRESHOLDS
+    num_devi_l=None
 ):
     """Computes the Anomaly dataframe for a single sub-dimension
 
@@ -363,8 +360,7 @@ def compute_subdim_anomaly_dataframe(
             df_prepped,
             date_column,
             target_column=kpi_name,
-            interval_width=interval_width,
-            sensitivity_thresholds=sensitivity_thresholds
+            interval_width=interval_width
         )
         df_subdim_anomaly['sub_dimension'] = sub_dim_name
 
@@ -380,7 +376,7 @@ def compute_subdim_anomaly_dataframe(
             num_devi=num_devi,
             num_devi_u=num_devi_u,
             num_devi_l=num_devi_l,
-            sensitivity_thresholds=sensitivity_thresholds
+            interval_width=interval_width
         )
         df_subdim_anomaly['sub_dimension'] = sub_dim_name
 
@@ -421,8 +417,7 @@ def anomaly_detection(
     plot_in_altair: bool = False,
     anomaly_date=False,
     dq_metric=False,
-    top_n_subdim=5,
-    sensitivity_thresholds=DEFAULT_SENSITIVITY_THRESHOLDS,
+    top_n_subdim=5
 ):
 
     # cut_df wont be in the final implementation, will be replaced by a data ingestion function wrtten by backend team
@@ -442,8 +437,7 @@ def anomaly_detection(
         num_deviation_upper=None,
         interval_width=interval_width,
         seasonality="auto",
-        frequency=frequency,
-        sensitivity_thresholds=sensitivity_thresholds
+        frequency=frequency
     )
 
     # Get data for JS plotting
@@ -524,9 +518,6 @@ def format_anomaly_data_for_js_graph(
             # Create and append a point for the predicted_value
             predicted_value = [timestamp, round(row['yhat'], precision)]
             graph_data['predicted_values'].append(predicted_value)
-            sensitivity = [timestamp, row['sensitivity']]
-            graph_data['sensitivities'].append(sensitivity)
-            # graph_data['sensitivities'][timestamp] = row['sensitivity']
 
     print("ENTERING JSON FORMATTING FUNCTION")
     if dq_metric:
@@ -889,75 +880,6 @@ def detect_severity(df_anomaly):
     return df_anomaly
 
 
-def compute_sensitivity(
-    sensitivity_dict,
-    y,
-    yhat_lower,
-    yhat_upper,
-    anomaly
-):
-
-    if anomaly == 1:
-        base_x = yhat_upper/sensitivity_dict['Low']
-
-        sensitivity_threshold = base_x + (base_x * sensitivity_dict['Chaos'])
-        if y > sensitivity_threshold:
-            return "Chaos"
-
-        sensitivity_threshold = base_x + (base_x * sensitivity_dict['High'])
-        if y > sensitivity_threshold:
-            return "High"
-
-        sensitivity_threshold = base_x + (base_x * sensitivity_dict['Medium'])
-        if y > sensitivity_threshold:
-            return "Medium"
-
-        else:
-            return "Low"
-
-    elif anomaly == -1:
-        base_x = yhat_lower/sensitivity_dict['Low']
-
-        sensitivity_threshold = base_x - (base_x * sensitivity_dict['Chaos'])
-        if y < sensitivity_threshold:
-            return "Chaos"
-
-        sensitivity_threshold = base_x - (base_x * sensitivity_dict['High'])
-        if y < sensitivity_threshold:
-            return "High"
-
-        sensitivity_threshold = base_x - (base_x * sensitivity_dict['Medium'])
-        if y < sensitivity_threshold:
-            return "Medium"
-
-        else:
-            return "Low"
-
-    else:
-        return None
-
-
-def detect_sensitivity(
-    forecasted,
-    sensitivity_thresholds=DEFAULT_SENSITIVITY_THRESHOLDS
-):
-
-    # call this function only after calling detect_anomalies function
-
-    forecasted["sensitivity"] = forecasted[['yhat_lower', 'yhat_upper', 'y', 'anomaly']].\
-        apply(
-            lambda x: compute_sensitivity(
-                sensitivity_thresholds, x["y"],
-                x["yhat_lower"],
-                x["yhat_upper"],
-                x["anomaly"]
-            ),
-            axis=1
-    )
-    display(forecasted)
-    return forecasted
-
-
 # PLOTTING CODE
 #
 #
@@ -1192,9 +1114,8 @@ def computes_dates_correlated_anomaly(dates_list, no_of_days_around_anomaly):
 #     date_column_name='date',
 #     frequency='D',
 #     algo_used='prophet',
-#     intervat_width=sensitivity_dict[sensitivity_class],
+#     intervat_width=DEFAULT_SENSITIVITY_THRESHOLDS[sensitivity_class],
 #     num_days_around_kpi_anomaly=1,
 #     num_anomalies_kpi=15,
-#     plot_in_altair=False,
-#     severity_thresholds = DEFAULT_SENSITIVITY_THRESHOLDS
+#     plot_in_altair=False
 # )

@@ -99,6 +99,7 @@ def run_prophet(df_prepped,
     forecast = forecast.merge(df_prepped)
     df_anomaly = detect_anomalies(forecast)
     df_anomaly = detect_sensitivity(df_anomaly, sensitivity_threshold_dict)
+    df_anomaly = detect_severity(df_anomaly)
     return df_anomaly
 
 def run_stddevi(df_prepped,
@@ -462,6 +463,9 @@ def format_anomaly_data_for_js_graph(df_anomaly, algo_used, kpi_column_name, agg
             # Create and append a point for the predicted_value
             predicted_value = [timestamp, round(row['yhat'], precision)]
             graph_data['predicted_values'].append(predicted_value)
+            sensitivity = [timestamp, row['sensitivity']]
+            graph_data['sensitivities'].append(sensitivity)
+            # graph_data['sensitivities'][timestamp] = row['sensitivity']
             
         
     print("ENTERING JSON FORMATTING FUNCTION")
@@ -473,7 +477,8 @@ def format_anomaly_data_for_js_graph(df_anomaly, algo_used, kpi_column_name, agg
                         'sub_dimension': dq_metric, 
                         'intervals': [], 
                         'values': [], 
-                        'predicted_values': []}
+                        'predicted_values': [],
+                        'sensitivities': []}
 
         df_anomaly.apply(lambda row: fill_graph_data(row, graph_data, precision), axis=1)
 
@@ -488,7 +493,8 @@ def format_anomaly_data_for_js_graph(df_anomaly, algo_used, kpi_column_name, agg
                             'sub_dimension': "overall KPI", 
                             'intervals': [], 
                             'values': [], 
-                            'predicted_values': []}
+                            'predicted_values': [],
+                            'sensitivities': []}
 
         sub_dim_df = df_anomaly.loc[df_anomaly['sub_dimension'] == "overall KPI"]
         sub_dim_df.apply(lambda row: fill_graph_data(row, graph_data, precision), axis=1)
@@ -507,7 +513,8 @@ def format_anomaly_data_for_js_graph(df_anomaly, algo_used, kpi_column_name, agg
                     'sub_dimension': sub_dim, 
                     'intervals': [], 
                     'values': [], 
-                    'predicted_values': []
+                    'predicted_values': [],
+                    'sensitivities': []
                 }
 
                 # Fill intervals, values, predicted_values lists
@@ -536,7 +543,8 @@ def format_anomaly_data_for_js_graph(df_anomaly, algo_used, kpi_column_name, agg
                     'sub_dimension': sub_dim, 
                     'intervals': [], 
                     'values': [], 
-                    'predicted_values': []
+                    'predicted_values': [],
+                    'sensitivities': []
                 }
                 # Fill intervals, values, predicted_values lists
                 sub_dim_df = df_anomaly.loc[df_anomaly['sub_dimension'] == sub_dim]
@@ -728,8 +736,34 @@ def run_ets(df_prepped,
     pred_df = pred_df.reset_index().rename(columns={'index': 'ds'})
     return detect_anomalies(pred_df.merge(df_prepped, how="inner", on="ds"))
 
-        
+
+def compute_severity(row, std_dev):
+    # Calculate z-score
+    if row['anomaly'] == 0:
+        # No anomaly. Severity is 0 ;)
+        return 0
+    elif row['anomaly'] == 1:
+        # Check num deviations from upper bound of CI
+        zscore = (row['y'] - row['yhat_upper']) / std_dev
+    elif row['anomaly'] == -1:
+        # Check num deviations from lower bound of CI
+        zscore = (row['y'] - row['yhat_lower']) / std_dev
+
+    ZSCORE_UPPER_BOUND = 4
+    # Scale zscore where 4 scales to 100; -4 scales to -100
+    severity = zscore * 100 / ZSCORE_UPPER_BOUND
     
+    # Bound between min and max score
+    # If above 100, we return 100; If below -100, we return -100
+    bound_between = lambda min_val, val, max_val: min(max(val, min_val), max_val)
+    return bound_between(-100, severity, 100)
+
+
+def detect_severity(df_anomaly):
+    std_dev = df_anomaly['y'].std()
+    df_anomaly['severity'] = df_anomaly.apply(lambda row: compute_severity(row, std_dev), axis=1)
+    return df_anomaly
+
 def compute_sensitivity(sensitivity_dict, 
                         y, 
                         yhat_lower, 
@@ -755,7 +789,7 @@ def compute_sensitivity(sensitivity_dict,
             return "Low"
         
     elif anomaly == -1:
-        base_x = yhat_lower/0.8
+        base_x = yhat_lower/sensitivity_dict['Low']
         
         sensitivity_threshold = base_x - (base_x * sensitivity_dict['Chaos'])
         if y < sensitivity_threshold:
@@ -773,7 +807,7 @@ def compute_sensitivity(sensitivity_dict,
             return "Low"
         
     else:
-        return "None"
+        return None
     
     
 def detect_sensitivity(forecasted,

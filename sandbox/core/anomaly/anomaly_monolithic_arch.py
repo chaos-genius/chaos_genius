@@ -4,6 +4,8 @@ import pandas as pd
 import numpy as np
 from prophet import Prophet
 import altair as alt
+import statsmodels.api as sm
+from statsmodels.tsa.exponential_smoothing.ets import ETSModel
 
 # TODO: Add prophet and altair as requirements
 # TODO: Add debug checks and logging

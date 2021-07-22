@@ -373,6 +373,7 @@ def anomaly_detection(
     date_column_name: str,
     frequency: str,
     algo_used: str,
+    interval_width: float = 0.8,
     num_days_around_kpi_anomaly: int = 1,
     num_anomalies_kpi: int = 15,
     debug: bool = False,
@@ -380,7 +381,7 @@ def anomaly_detection(
     anomaly_date=False,
     dq_metric=False,
     top_n_subdim=5,
-    sensitivity_threshold_dict = {
+    severity_threshold_dict = {
                                                 "Low":0.8,
                                                 "Medium":0.9,
                                                 "High":0.95,
@@ -403,10 +404,10 @@ def anomaly_detection(
         num_deviation=None,
         num_deviation_lower=None,
         num_deviation_upper=None,
-        interval_width=0.80,
+        interval_width=interval_width,
         seasonality="auto",
         frequency=frequency,
-        sensitivity_threshold_dict=sensitivity_threshold_dict)
+        severity_threshold_dict=severity_threshold_dict)
     
     # Get data for JS plotting     
     graphs = format_anomaly_data_for_js_graph(df_anomaly=df_anomaly, algo_used=algo_used, 
@@ -1019,3 +1020,39 @@ def computes_dates_correlated_anomaly(dates_list, no_of_days_around_anomaly):
             dates_list.extend([date_dec, date_inc])
     return dates_list
 
+
+
+################################
+
+# Code for testing
+
+
+# sensitivity_class = "High"
+# sensitivity_dict = {
+#                     "Low":0.95,
+#                     "Medium":0.8,
+#                     "High":0.6
+# }
+
+
+# graphs = anomaly_detection(
+#                                 df_entire=df.rename(columns={'InvoiceNo': 'num_purchases'}), 
+#                                 start_date='2021-06-15', 
+#                                 end_date='2021-09-15', 
+#                                 kpi_column_name='num_purchases', 
+#                                 agg_dict={'num_purchases': 'count'}, 
+#                                 sub_dimensions=['Country', 'PurchaseTime'], 
+#                                 date_column_name='date', 
+#                                 frequency='D', 
+#                                 algo_used='prophet',
+#                                 intervat_width=sensitivity_dict[sensitivity_class]
+#                                 num_days_around_kpi_anomaly=1,
+#                                 num_anomalies_kpi=15, 
+#                                 plot_in_altair=False,
+#                                 severity_threshold_dict = {
+#                                                         "Low":0.8,
+#                                                         "Medium":0.9,
+#                                                         "High":0.95,
+#                                                         "Chaos":0.99
+#                                                     }
+#             )

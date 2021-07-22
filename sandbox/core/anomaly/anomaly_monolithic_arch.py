@@ -1,18 +1,32 @@
+from typing import Dict, List
 from datetime import timedelta
 import pandas as pd
 import numpy as np
 from prophet import Prophet
 import altair as alt
 
+# TODO: Add prophet and altair as requirements
+# TODO: Add debug checks and logging
+
 try:
     from IPython.display import display
 except ModuleNotFoundError:
     display = print
-    
-def cut_dataframe(df_entire,
-                  start_date,
-                  end_date,
-                  date_column = "date"):
+
+DEFAULT_SENSITIVITY_THRESHOLDS = {
+    "Low": 0.8,
+    "Medium": 0.9,
+    "High": 0.95,
+    "Chaos": 0.99
+}
+
+
+def cut_dataframe(
+    df_entire,
+    start_date,
+    end_date,
+    date_column="date"
+):
     """Cuts a dataframe to a desired date range
 
     :param df_entire: The dataframe to cut
@@ -26,8 +40,10 @@ def cut_dataframe(df_entire,
     :return: Returns the dataframe with entries only between inclusive boundaries of the mentioned dates
     :rtype: pandas.core.frame.DataFrame
     """
-    mask = (df_entire[date_column] > start_date) & (df_entire[date_column] <= end_date)
+    mask = (df_entire[date_column] > start_date) & (
+        df_entire[date_column] <= end_date)
     return df_entire.loc[mask]
+
 
 def detect_anomalies(forecasted):
     """This function takes input from any anomaly detection algorithm and
@@ -44,29 +60,25 @@ def detect_anomalies(forecasted):
     forecasted.loc[forecasted['y'] > forecasted['yhat_upper'], 'anomaly'] = 1
     forecasted.loc[forecasted['y'] < forecasted['yhat_lower'], 'anomaly'] = -1
 
-    #anomaly importances
+    # anomaly importances
     forecasted['importance'] = 0
-    forecasted.loc[forecasted['anomaly'] ==1, 'importance'] = \
+    forecasted.loc[forecasted['anomaly'] == 1, 'importance'] = \
         (forecasted['y'] - forecasted['yhat_upper'])/forecasted['y']
-    forecasted.loc[forecasted['anomaly'] ==-1, 'importance'] = \
+    forecasted.loc[forecasted['anomaly'] == -1, 'importance'] = \
         (forecasted['yhat_lower'] - forecasted['y'])/forecasted['y']
 
     return forecasted
 
 
-def run_prophet(df_prepped,
-                date_column,
-                target_column,
-                interval_width  = 0.80,
-                weekly_seasonality = 'auto',
-                yearly_seasonality = False,
-                sensitivity_threshold_dict = {
-                                                "Low":0.8,
-                                                "Medium":0.9,
-                                                "High":0.95,
-                                                "Chaos":0.99
-                                            }
-                ):
+def run_prophet(
+    df_prepped,
+    date_column,
+    target_column,
+    interval_width=0.80,
+    weekly_seasonality='auto',
+    yearly_seasonality=False,
+    sensitivity_thresholds=DEFAULT_SENSITIVITY_THRESHOLDS
+):
     """Run prophet on the desired dataframe and return the predictions
 
     :param df_prepped: dataframe to run prophet on. It needs to have only 2 columns; date and target
@@ -86,28 +98,35 @@ def run_prophet(df_prepped,
     :return: Returns a dataframe after running the prophet algorithm on the input data
     :rtype: pandas.core.frame.DataFrame
     """
-    df_prepped.rename(columns={date_column:'ds',
-                       target_column:'y'},
-              inplace=True)
-    model = Prophet(interval_width = interval_width,
-                    yearly_seasonality = yearly_seasonality,
+    df_prepped.rename(
+        columns={
+            date_column: 'ds',
+            target_column: 'y'
+        },
+        inplace=True
+    )
+    model = Prophet(interval_width=interval_width,
+                    yearly_seasonality=yearly_seasonality,
                     weekly_seasonality=weekly_seasonality)
-    model.fit(df_prepped)    
+    model.fit(df_prepped)
     future = model.make_future_dataframe(periods=0)
     forecast = model.predict(future)
     forecast = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']]
     forecast = forecast.merge(df_prepped)
     df_anomaly = detect_anomalies(forecast)
-    df_anomaly = detect_sensitivity(df_anomaly, sensitivity_threshold_dict)
+    df_anomaly = detect_sensitivity(df_anomaly, sensitivity_thresholds)
     df_anomaly = detect_severity(df_anomaly)
     return df_anomaly
 
-def run_stddevi(df_prepped,
-               date_column,
-               target_column,
-               num_devi = 0,
-               num_devi_u = None,
-               num_devi_l = None):
+
+def run_stddevi(
+    df_prepped,
+    date_column,
+    target_column,
+    num_devi=0,
+    num_devi_u=None,
+    num_devi_l=None
+):
     """Run standard deviation on the desired dataframe and return the predictions
 
     :param df_prepped: Dataframe to run standard deviation on.
@@ -127,23 +146,28 @@ def run_stddevi(df_prepped,
     :return: Returns a dataframe after running the standard deviation algorithm on the input data
     :rtype: pandas.core.frame.DataFrame
     """
-    df_prepped.rename(columns={date_column:'ds',
-                       target_column:'y'},
-              inplace=True)
+    df_prepped.rename(
+        columns={
+            date_column: 'ds',
+            target_column: 'y'
+        },
+        inplace=True
+    )
 
     mean = df_prepped["y"].mean()
-    stddevi =  df_prepped["y"].std()
+    stddevi = df_prepped["y"].std()
 
     if num_devi:
         num_devi_u = num_devi_l = num_devi
 
     threshold_u = mean + (num_devi_u * stddevi)
     threshold_l = mean - (num_devi_l * stddevi)
-    df_prepped['yhat_lower'] =  threshold_l
+    df_prepped['yhat_lower'] = threshold_l
     df_prepped['yhat_upper'] = threshold_u
     df_prepped['yhat'] = (threshold_l + threshold_u)/2
     df_anomaly = detect_anomalies(df_prepped)
     return df_anomaly
+
 
 def compute_population_threshold(df_entire, base_population_threshold=500):
     """Computes a population threshold to use when deciding whether or not to display a sub-dimension's anomaly detection analysis
@@ -155,30 +179,28 @@ def compute_population_threshold(df_entire, base_population_threshold=500):
     :return: Returns the computed population threshold
     :rtype: float
     """
-    
+
     # TODO: experiment with algorithm dependent threshold
-    population_threshold = base_population_threshold + (df_entire.shape[0]*0.01)
+    population_threshold = base_population_threshold + \
+        (df_entire.shape[0]*0.01)
     return population_threshold
-    
-def compute_entire_multi_dim_anomaly(df_entire,
-                                     kpi_name,
-                                     agg_dict,
-                                     sub_dim_column,
-                                     date_column,
-                                     algo_used="prophet",
-                                     num_deviation=None,
-                                     num_deviation_lower=None,
-                                     num_deviation_upper=None,
-                                     interval_width=None,
-                                     seasonality="auto",
-                                     frequency='D',
-                                     sensitivity_threshold_dict = {
-                                                "Low":0.8,
-                                                "Medium":0.9,
-                                                "High":0.95,
-                                                "Chaos":0.99
-                                            }
-                                     ):
+
+
+def compute_entire_multi_dim_anomaly(
+    df_entire,
+    kpi_name,
+    agg_dict,
+    sub_dim_column,
+    date_column,
+    algo_used="prophet",
+    num_deviation=None,
+    num_deviation_lower=None,
+    num_deviation_upper=None,
+    interval_width=None,
+    seasonality="auto",
+    frequency='D',
+    sensitivity_thresholds=DEFAULT_SENSITIVITY_THRESHOLDS
+):
     """Computes the entire multi-dimensionality anomaly dataframe
 
     :param df_entire: entire dataframe after pre-processing
@@ -191,11 +213,11 @@ def compute_entire_multi_dim_anomaly(df_entire,
     :type agg_dict: dict
     :param sub_dim_column: list of sub dimension columns
     :type sub_dim_column: list, maximum of 3 values in the list
-    :param date_column: name of the column containing the date/timeperiod 
+    :param date_column: name of the column containing the date/timeperiod
     :type date_column: str
     :param algo_used: the type of algorithm used for anomaly detection, defaults to "prophet"
     :type algo_used: str, optional
-    :param num_deviation: number of standard deviations beyond which, an anomaly occurs. 
+    :param num_deviation: number of standard deviations beyond which, an anomaly occurs.
     This param to be specified when using the stddevi algorithm, defaults to None
     :type num_deviation: float, optional
     :param num_deviation_lower: number of standard deviations below which the value should be an anomaly, defaults to None
@@ -212,73 +234,80 @@ def compute_entire_multi_dim_anomaly(df_entire,
     :rtype: pandas.core.frame.DataFrame
     """
 
-    #if you using different pre-processing, like interpolating, etc yhe below code must be modified
-    
+    # if you using different pre-processing, like interpolating, etc yhe below code must be modified
+
     df_prepped = prepare_dataframe_for_anomaly(
-                    df_entire[[date_column, kpi_name]], 
-                    date_column, 
-                    agg_dict, 
-                    frequency
-                )
+        df_entire[[date_column, kpi_name]],
+        date_column,
+        agg_dict,
+        frequency
+    )
 
     df_anomaly = compute_subdim_anomaly_dataframe(
-                    df_prepped=df_prepped,
-                    sub_dim_name="overall KPI",
-                    date_column=date_column,
-                    kpi_name=kpi_name,
-                    algo_used=algo_used,
-                    interval_width=interval_width,
-                    num_devi=num_deviation,
-                    num_devi_u=num_deviation_upper,
-                    num_devi_l=num_deviation_lower
-                )
-    
-    # TODO: handling missing values in subdims
-    
-#     subdim = '-'.join(sub_dim_column)
-#     df_entire[sub_dim_column] = df_entire[sub_dim_column].fillna(value="unknown")
-#     df_entire[subdim] = df_entire[sub_dim_column].apply(lambda x: '-'.join(x), axis=1)
-#     df_entire  = df_entire.drop(columns=sub_dim_column)
+        df_prepped=df_prepped,
+        sub_dim_name="overall KPI",
+        date_column=date_column,
+        kpi_name=kpi_name,
+        algo_used=algo_used,
+        interval_width=interval_width,
+        num_devi=num_deviation,
+        num_devi_u=num_deviation_upper,
+        num_devi_l=num_deviation_lower
+    )
 
-    population_threshold = compute_population_threshold(df_entire, base_population_threshold=500)
-    
+    # TODO: handling missing values in subdims
+
+    # subdim = '-'.join(sub_dim_column)
+    # df_entire[sub_dim_column] = df_entire[sub_dim_column].fillna(value="unknown")
+    # df_entire[subdim] = df_entire[sub_dim_column].apply(lambda x: '-'.join(x), axis=1)
+    # df_entire  = df_entire.drop(columns=sub_dim_column)
+
+    population_threshold = compute_population_threshold(
+        df_entire, base_population_threshold=500)
+
     for subdim in sub_dim_column:
         print(f"Current Dimension {subdim}")
         for sub_dim in df_entire[subdim].unique():
-            df_sub_dim = df_entire[df_entire[subdim]==sub_dim][[date_column, kpi_name]]
-            
+            df_sub_dim = df_entire[df_entire[subdim] == sub_dim]
+            df_sub_dim = df_sub_dim[[date_column, kpi_name]]
+
             if df_sub_dim.shape[0] > population_threshold:
                 print(f"Processing SubDim: {sub_dim}")
                 # for a distributed arch, just call these in individual workers
-                df_prepped_sub_dim = prepare_dataframe_for_anomaly(df_sub_dim, date_column, agg_dict, frequency)
+                df_prepped_sub_dim = prepare_dataframe_for_anomaly(
+                    df_sub_dim, date_column, agg_dict, frequency)
 
                 df_anomaly_subdim = compute_subdim_anomaly_dataframe(
-                                        df_prepped_sub_dim,
-                                        sub_dim,
-                                        date_column,
-                                        kpi_name,
-                                        algo_used,
-                                        interval_width,
-                                        num_deviation,
-                                        num_deviation_upper,
-                                        num_deviation_lower
-                                    )   
-                
+                    df_prepped_sub_dim,
+                    sub_dim,
+                    date_column,
+                    kpi_name,
+                    algo_used,
+                    interval_width,
+                    num_deviation,
+                    num_deviation_upper,
+                    num_deviation_lower
+                )
+
                 # the appending bit
                 # TODO: make a list of df, then pd.concat them
-                df_anomaly = df_anomaly.append(df_anomaly_subdim, ignore_index=True)
-                
+                df_anomaly = df_anomaly.append(
+                    df_anomaly_subdim, ignore_index=True)
+
     return df_anomaly
 
-def prepare_dataframe_for_anomaly(df_sub_dim,
-                                 date_column,
-                                 agg_dict,
-                                 frequency='D'):
+
+def prepare_dataframe_for_anomaly(
+    df_sub_dim,
+    date_column,
+    agg_dict,
+    frequency='D'
+):
     """Performs resampling and aggregation to prepare the input DataFrame to be used for Anomaly Detection
 
     :param df_sub_dim: A pandas DataFrame for some sub-dimension
     :type df_sub_dim: pandas.core.frame.DataFrame
-    :param date_column: Name of the column containing the date/timeperiod 
+    :param date_column: Name of the column containing the date/timeperiod
     :type date_column: str
     :param agg_dict: Aggregation dictionary specifying the columns and aggregation functions to perform in resampling.
     :type agg_dict: Dict
@@ -290,28 +319,25 @@ def prepare_dataframe_for_anomaly(df_sub_dim,
     return df_sub_dim.set_index(date_column).resample(frequency).agg(agg_dict).reset_index()
 
 
-def compute_subdim_anomaly_dataframe(df_prepped,
-                                     sub_dim_name,
-                                     date_column,
-                                     kpi_name,
-                                     algo_used,
-                                     interval_width=0.8,
-                                     num_devi=None,
-                                     num_devi_u=None,
-                                     num_devi_l=None,
-                                     sensitivity_threshold_dict = {
-                                                "Low":0.8,
-                                                "Medium":0.9,
-                                                "High":0.95,
-                                                "Chaos":0.99
-                                            }):
+def compute_subdim_anomaly_dataframe(
+    df_prepped,
+    sub_dim_name,
+    date_column,
+    kpi_name,
+    algo_used,
+    interval_width=0.8,
+    num_devi=None,
+    num_devi_u=None,
+    num_devi_l=None,
+    sensitivity_thresholds=DEFAULT_SENSITIVITY_THRESHOLDS
+):
     """Computes the Anomaly dataframe for a single sub-dimension
 
     :param df_prepped: the prepped pandas DataFrame after resampling, aggregation, etc.
     :type df_prepped: pandas.core.frame.DataFrame
     :param sub_dim_name: name of the current sub-dimension
     :type sub_dim_name: str
-    :param date_column: name of the column containing the date/timeperiod 
+    :param date_column: name of the column containing the date/timeperiod
     :type date_column: str
     :param kpi_name: name of the KPI column in the dataset
     :type kpi_name: str
@@ -319,7 +345,7 @@ def compute_subdim_anomaly_dataframe(df_prepped,
     :type algo_used: str
     :param interval_width: confidence interval width for the algorithm (prophet), defaults to 0.8
     :type interval_width: float, optional
-    :param num_devi: number of standard deviations beyond which, an anomaly occurs. 
+    :param num_devi: number of standard deviations beyond which, an anomaly occurs.
     This param to be specified when using the stddevi algorithm, defaults to None, defaults to None
     :type num_devi: float, optional
     :param num_devi_u: number of standard deviations above which the value should be an anomaly, defaults to None
@@ -331,21 +357,33 @@ def compute_subdim_anomaly_dataframe(df_prepped,
     """
 
     if algo_used == "prophet":
-        df_subdim_anomaly = run_prophet(df_prepped, date_column, target_column=kpi_name, \
-                    interval_width = interval_width,sensitivity_threshold_dict=sensitivity_threshold_dict)
+        df_subdim_anomaly = run_prophet(
+            df_prepped,
+            date_column,
+            target_column=kpi_name,
+            interval_width=interval_width,
+            sensitivity_thresholds=sensitivity_thresholds
+        )
         df_subdim_anomaly['sub_dimension'] = sub_dim_name
-        
-#     elif algo_used == "ets":
-#         df_anomaly_subdim = run_ets(df_prepped, date_column, target_column=kpi_name, \
-#                     interval_width = interval_width, seasonality=2)
+
+    # elif algo_used == "ets":
+    #     df_anomaly_subdim = run_ets(df_prepped, date_column, target_column=kpi_name, \
+    #                 interval_width = interval_width, seasonality=2)
 
     elif algo_used == "stddevi":
-        df_subdim_anomaly = run_stddevi(df_prepped, date_column, target_column=kpi_name, \
-                        num_devi=num_devi, num_devi_u=num_devi_u,
-                        num_devi_l=num_devi_l, sensitivity_threshold_dict=sensitivity_threshold_dict)
+        df_subdim_anomaly = run_stddevi(
+            df_prepped,
+            date_column,
+            target_column=kpi_name,
+            num_devi=num_devi,
+            num_devi_u=num_devi_u,
+            num_devi_l=num_devi_l,
+            sensitivity_thresholds=sensitivity_thresholds
+        )
         df_subdim_anomaly['sub_dimension'] = sub_dim_name
-        
+
     return df_subdim_anomaly
+
 
 def get_missing_dates(df_entire, date_column, start_date, end_date):
     return pd.date_range(start=start_date, end=end_date).difference(df_entire.set_index(date_column).index)
@@ -354,14 +392,15 @@ def get_missing_dates(df_entire, date_column, start_date, end_date):
 def get_missing_df(df_entire, date_column, kpi_column, freq="D"):
     return df_entire.set_index(date_column)[kpi_column].isna().resample(freq, level=date_column).sum(min_count=1).dropna().reset_index()
 
+
 def get_data_volume_dataframe(df_entire, date_column, kpi_name, freq='D'):
-    return df_entire.set_index(date_column).resample(freq).agg({kpi_name:'count'}).reset_index()
-    
+    return df_entire.set_index(date_column).resample(freq).agg({kpi_name: 'count'}).reset_index()
+
+
 def get_max_or_min_df(df_metric, date_column, kpi_name, dq_metric="max", freq='D'):
     print(f"Data Quality over the {dq_metric} values per {freq}")
-    return df_metric.set_index(date_column).resample(freq).agg({kpi_name:dq_metric}).reset_index()
+    return df_metric.set_index(date_column).resample(freq).agg({kpi_name: dq_metric}).reset_index()
 
-from typing import Dict, List
 
 def anomaly_detection(
     df_entire: pd.DataFrame,
@@ -381,25 +420,20 @@ def anomaly_detection(
     anomaly_date=False,
     dq_metric=False,
     top_n_subdim=5,
-    severity_threshold_dict = {
-                                                "Low":0.8,
-                                                "Medium":0.9,
-                                                "High":0.95,
-                                                "Chaos":0.99
-                                            }
+    sensitivity_thresholds=DEFAULT_SENSITIVITY_THRESHOLDS,
 ):
-    
+
     # cut_df wont be in the final implementation, will be replaced by a data ingestion function wrtten by backend team
     cut_df = cut_dataframe(df_entire, start_date, end_date)
-    
+
     # TODO: Verbosity parameter for prophet. Verbosity = 0 if not debug.
     # Compute/Find anomalies
     df_anomaly = compute_entire_multi_dim_anomaly(
-        cut_df, 
-        kpi_column_name, 
-        agg_dict, 
-        sub_dimensions, 
-        date_column=date_column_name, 
+        cut_df,
+        kpi_column_name,
+        agg_dict,
+        sub_dimensions,
+        date_column=date_column_name,
         algo_used=algo_used,
         num_deviation=None,
         num_deviation_lower=None,
@@ -407,25 +441,47 @@ def anomaly_detection(
         interval_width=interval_width,
         seasonality="auto",
         frequency=frequency,
-        severity_threshold_dict=severity_threshold_dict)
-    
-    # Get data for JS plotting     
-    graphs = format_anomaly_data_for_js_graph(df_anomaly=df_anomaly, algo_used=algo_used, 
-                                              kpi_column_name=kpi_column_name, 
-                                              agg_type=agg_dict[kpi_column_name], 
-                                              freq=frequency, anomaly_date=anomaly_date, dq_metric=dq_metric,
-                                             top_n_subdim=top_n_subdim)
+        sensitivity_thresholds=sensitivity_thresholds
+    )
+
+    # Get data for JS plotting
+    graphs = format_anomaly_data_for_js_graph(
+        df_anomaly=df_anomaly, algo_used=algo_used,
+        kpi_column_name=kpi_column_name,
+        agg_type=agg_dict[kpi_column_name],
+        freq=frequency, anomaly_date=anomaly_date, dq_metric=dq_metric,
+        top_n_subdim=top_n_subdim
+    )
 
     if plot_in_altair:
         # Plot in Altair
-        plot_top_n_anomalies(get_top_n_correlated_anomalies(df_anomaly, num_days_around_kpi_anomaly, 
-                                                            num_anomalies_kpi), kpi_column_name, 
-                             algo_used, start_date, end_date)
+        top_n_correlated_anomalies = get_top_n_correlated_anomalies(
+            df_anomaly,
+            num_days_around_kpi_anomaly,
+            num_anomalies_kpi
+        )
+        plot_top_n_anomalies(
+            top_n_correlated_anomalies,
+            kpi_column_name,
+            algo_used,
+            start_date,
+            end_date
+        )
 
     return graphs
 
-def format_anomaly_data_for_js_graph(df_anomaly, algo_used, kpi_column_name, agg_type, freq, anomaly_date=False,
-                                     dq_metric=False,top_n_subdim=5,precision=2):
+
+def format_anomaly_data_for_js_graph(
+    df_anomaly,
+    algo_used,
+    kpi_column_name,
+    agg_type,
+    freq,
+    anomaly_date=False,
+    dq_metric=False,
+    top_n_subdim=5,
+    precision=2
+):
     """Prepares and formats anomaly data to be graphed on frontend.
 
     :param df_anomaly: Anomaly DataFrame output from the compute multi-dim anomaly function
@@ -440,7 +496,7 @@ def format_anomaly_data_for_js_graph(df_anomaly, algo_used, kpi_column_name, agg
     :type freq: str
     :param precision: Precision to round y and yhat values to, defaults to 2
     :type precision: int, optional
-    :return: List of Dicts where each Dict has the data for one sub-dimension graph 
+    :return: List of Dicts where each Dict has the data for one sub-dimension graph
     :rtype: List
     """
     def fill_graph_data(row, graph_data, precision=2):
@@ -453,10 +509,12 @@ def format_anomaly_data_for_js_graph(df_anomaly, algo_used, kpi_column_name, agg
         :param precision: Precision to round y and yhat values to, defaults to 2
         :type precision: int, optional
         """
-        if row.notna()['y']: # Do not include rows where there is no data
-            timestamp = row['ds'].timestamp() * 1000 # Convert to milliseconds for HighCharts
+        if row.notna()['y']:  # Do not include rows where there is no data
+            # Convert to milliseconds for HighCharts
+            timestamp = row['ds'].timestamp() * 1000
             # Create and append a point for the interval
-            interval = [timestamp, round(row['yhat_lower'], precision), round(row['yhat_upper'], precision)]
+            interval = [timestamp, round(row['yhat_lower'], precision), round(
+                row['yhat_upper'], precision)]
             graph_data['intervals'].append(interval)
             # Create and append a point for the value
             value = [timestamp, round(row['y'])]
@@ -467,187 +525,236 @@ def format_anomaly_data_for_js_graph(df_anomaly, algo_used, kpi_column_name, agg
             sensitivity = [timestamp, row['sensitivity']]
             graph_data['sensitivities'].append(sensitivity)
             # graph_data['sensitivities'][timestamp] = row['sensitivity']
-            
-        
+
     print("ENTERING JSON FORMATTING FUNCTION")
     if dq_metric:
         print("ENTERING DQ METRIC")
-        graph_data = {'title': f'{dq_metric} using {algo_used}', 
-                        'y_axis_label': f'{agg_type.capitalize()} of {freq} {kpi_column_name}', 
-                        'x_axis_label': 'Datetime', 
-                        'sub_dimension': dq_metric, 
-                        'intervals': [], 
-                        'values': [], 
-                        'predicted_values': [],
-                        'sensitivities': []}
+        graph_data = {
+            'title': f'{dq_metric} using {algo_used}',
+            'y_axis_label': f'{agg_type.capitalize()} of {freq} {kpi_column_name}',
+            'x_axis_label': 'Datetime',
+            'sub_dimension': dq_metric,
+            'intervals': [],
+            'values': [],
+            'predicted_values': [],
+            'sensitivities': []
+        }
 
-        df_anomaly.apply(lambda row: fill_graph_data(row, graph_data, precision), axis=1)
+        df_anomaly.apply(lambda row: fill_graph_data(
+            row, graph_data, precision), axis=1)
 
         return graph_data
-    
+
     else:
         print("Entering overall KPI")
-        graphs=[]
-        graph_data = {'title': f'overall KPI using {algo_used}', 
-                            'y_axis_label': f'{agg_type.capitalize()} of {freq} {kpi_column_name}', 
-                            'x_axis_label': 'Datetime', 
-                            'sub_dimension': "overall KPI", 
-                            'intervals': [], 
-                            'values': [], 
-                            'predicted_values': [],
-                            'sensitivities': []}
+        graphs = []
+        graph_data = {
+            'title': f'overall KPI using {algo_used}',
+            'y_axis_label': f'{agg_type.capitalize()} of {freq} {kpi_column_name}',
+            'x_axis_label': 'Datetime',
+            'sub_dimension': "overall KPI",
+            'intervals': [],
+            'values': [],
+            'predicted_values': [],
+            'sensitivities': []
+        }
 
-        sub_dim_df = df_anomaly.loc[df_anomaly['sub_dimension'] == "overall KPI"]
-        sub_dim_df.apply(lambda row: fill_graph_data(row, graph_data, precision), axis=1)
+        sub_dim_df = df_anomaly.loc[
+            df_anomaly['sub_dimension'] == "overall KPI"
+        ]
+        sub_dim_df.apply(lambda row: fill_graph_data(
+            row, graph_data, precision), axis=1)
         graphs.append(graph_data)
 
-    #     try:
+        # try:
 
         if anomaly_date == False:
             print("entering subdim anomaly")
-            df_anomaly = df_anomaly[df_anomaly['sub_dimension'] != "overall KPI"]
+            df_anomaly = df_anomaly[
+                df_anomaly['sub_dimension'] != "overall KPI"
+            ]
             for sub_dim in df_anomaly.sort_values(by="importance", ascending=False)['sub_dimension'].unique()[:top_n_subdim]:
                 graph_data = {
-                    'title': f'{sub_dim} using {algo_used}', 
-                    'y_axis_label': f'{agg_type.capitalize()} of {freq} {kpi_column_name}', 
-                    'x_axis_label': 'Datetime', 
-                    'sub_dimension': sub_dim, 
-                    'intervals': [], 
-                    'values': [], 
+                    'title': f'{sub_dim} using {algo_used}',
+                    'y_axis_label': f'{agg_type.capitalize()} of {freq} {kpi_column_name}',
+                    'x_axis_label': 'Datetime',
+                    'sub_dimension': sub_dim,
+                    'intervals': [],
+                    'values': [],
                     'predicted_values': [],
                     'sensitivities': []
                 }
 
                 # Fill intervals, values, predicted_values lists
                 sub_dim_df = df_anomaly.loc[df_anomaly['sub_dimension'] == sub_dim]
-                sub_dim_df.apply(lambda row: fill_graph_data(row, graph_data, precision), axis=1)
+                sub_dim_df.apply(lambda row: fill_graph_data(
+                    row, graph_data, precision), axis=1)
                 graphs.append(graph_data)
             return graphs
 
         if anomaly_date != False:
             print("entering anomaly date")
-            df_anomaly = df_anomaly[df_anomaly['sub_dimension'] != "overall KPI"]
+            df_anomaly = df_anomaly[
+                df_anomaly['sub_dimension'] != "overall KPI"
+            ]
             anomaly_date = pd.to_datetime(anomaly_date)
 
-            display(df_anomaly[df_anomaly['ds']==anomaly_date].\
-                            sort_values(by="importance",ascending=False))
-            anomaly_date_sub_dim = df_anomaly[df_anomaly['ds']==anomaly_date].\
-                            sort_values(by="importance",ascending=False)['sub_dimension'].unique()[:top_n_subdim]
+            display(df_anomaly[df_anomaly['ds'] == anomaly_date].
+                    sort_values(by="importance", ascending=False))
+            anomaly_date_sub_dim = df_anomaly[df_anomaly['ds'] == anomaly_date].\
+                sort_values(by="importance", ascending=False)[
+                'sub_dimension'].unique()[:top_n_subdim]
             print(anomaly_date_sub_dim)
 
-    #         graphs=[]
+            # graphs=[]
             for sub_dim in anomaly_date_sub_dim:
                 graph_data = {
-                    'title': f'{sub_dim} using {algo_used}', 
-                    'y_axis_label': f'{agg_type.capitalize()} of {freq} {kpi_column_name}', 
-                    'x_axis_label': 'Datetime', 
-                    'sub_dimension': sub_dim, 
-                    'intervals': [], 
-                    'values': [], 
+                    'title': f'{sub_dim} using {algo_used}',
+                    'y_axis_label': f'{agg_type.capitalize()} of {freq} {kpi_column_name}',
+                    'x_axis_label': 'Datetime',
+                    'sub_dimension': sub_dim,
+                    'intervals': [],
+                    'values': [],
                     'predicted_values': [],
                     'sensitivities': []
                 }
                 # Fill intervals, values, predicted_values lists
                 sub_dim_df = df_anomaly.loc[df_anomaly['sub_dimension'] == sub_dim]
-                sub_dim_df.apply(lambda row: fill_graph_data(row, graph_data, precision), axis=1)
+                sub_dim_df.apply(lambda row: fill_graph_data(
+                    row, graph_data, precision), axis=1)
                 graphs.append(graph_data)
 
-    #     except Exception as e:
+        # except Exception as e:
             graphs.append(graph_data)
             return graphs
-        
-def compute_data_quality_metrics_dataframe(df_dq, 
-                                          date_column,
-                                          kpi_name,
-                                          algo_used,
-                                          num_deviation=None,
-                                          num_deviation_lower=None,
-                                          num_deviation_upper=None,
-                                          interval_width=None,
-                                          seasonality="auto"
-                                         ):
+
+
+def compute_data_quality_metrics_dataframe(
+    df_dq,
+    date_column,
+    kpi_name,
+    algo_used,
+    num_deviation=None,
+    num_deviation_lower=None,
+    num_deviation_upper=None,
+    interval_width=None,
+    seasonality="auto"
+):
     if algo_used == "prophet":
-        df_dq_anomaly = run_prophet(df_dq, date_column, target_column=kpi_name, \
-                    interval_width = interval_width)
-        
+        df_dq_anomaly = run_prophet(
+            df_dq,
+            date_column,
+            target_column=kpi_name,
+            interval_width=interval_width
+        )
+
     elif algo_used == "ets":
         # given a random seasonality here
-        df_dq_anomaly = run_ets(df_dq, date_column, target_column=kpi_name, \
-                    interval_width = interval_width, seasonality=seasonality)
+        df_dq_anomaly = run_ets(
+            df_dq,
+            date_column,
+            target_column=kpi_name,
+            interval_width=interval_width,
+            seasonality=seasonality
+        )
 
     elif algo_used == "stddevi":
-        df_dq_anomaly = run_stddevi(df_dq, date_column, target_column=kpi_name, \
-                        num_devi=num_deviation, num_devi_u=num_deviation_upper,
-                        num_devi_l=num_deviation_lower)
-#     display(df_dq_anomaly)
+        df_dq_anomaly = run_stddevi(
+            df_dq,
+            date_column,
+            target_column=kpi_name,
+            num_devi=num_deviation,
+            num_devi_u=num_deviation_upper,
+            num_devi_l=num_deviation_lower
+        )
+    # display(df_dq_anomaly)
     return df_dq_anomaly
 
 
-def get_dq_json(df_entire,
-                start_date,
-                end_date,
-                algo_used, 
-                date_column,
-                kpi_name,
-                interval_width,
-                freq='D',
-                plot_in_altair=False):
-    df_entire = df_entire[[date_column,kpi_name]]
+def get_dq_json(
+    df_entire,
+    start_date,
+    end_date,
+    algo_used,
+    date_column,
+    kpi_name,
+    interval_width,
+    freq='D',
+    plot_in_altair=False
+):
+    df_entire = df_entire[[date_column, kpi_name]]
     cut_df = cut_dataframe(df_entire, start_date, end_date)
-    
-    
-    
-    graphs=[]
-    for i in ['volume','max','min','mean','missing']:
+
+    graphs = []
+    for i in ['volume', 'max', 'min', 'mean', 'missing']:
         if i != "volume" and i != "missing":
             print(i)
-            df_dq_metric = compute_data_quality_metrics_dataframe(\
-                                                get_max_or_min_df(cut_df, date_column, kpi_name, 
-                                                                  dq_metric=i, freq=freq),
-                                  date_column,
-                                  kpi_name,
-                                  algo_used,
-                                  interval_width=interval_width)
-            
-            graphs.append(format_anomaly_data_for_js_graph(df_dq_metric, 
-                                              algo_used, kpi_name, 
-                                              agg_type=i, 
-                                              freq=freq,
-                                              dq_metric=f"DQ-{i} of Data"))
+            df_dq_metric = compute_data_quality_metrics_dataframe(
+                get_max_or_min_df(
+                    cut_df,
+                    date_column,
+                    kpi_name,
+                    dq_metric=i,
+                    freq=freq
+                ),
+                date_column,
+                kpi_name,
+                algo_used,
+                interval_width=interval_width
+            )
+
+            graphs.append(format_anomaly_data_for_js_graph(
+                df_dq_metric,
+                algo_used, kpi_name,
+                agg_type=i,
+                freq=freq,
+                dq_metric=f"DQ-{i} of Data"
+            ))
         elif i == "volume":
             df_dq_metric = compute_data_quality_metrics_dataframe(
-                                        get_data_volume_dataframe(cut_df, 
-                                                                    date_column, 
-                                                                    kpi_name, freq=freq),
-                            date_column,
-                            kpi_name,
-                            algo_used,
-                            interval_width=interval_width)
-            graphs.append(format_anomaly_data_for_js_graph(df_dq_metric, 
-                                        algo_used, kpi_name, 
-                                        agg_type="count", 
-                                        freq=freq,
-                                        dq_metric="DQ-Data Volume"))
+                get_data_volume_dataframe(
+                    cut_df,
+                    date_column,
+                    kpi_name, freq=freq
+                ),
+                date_column,
+                kpi_name,
+                algo_used,
+                interval_width=interval_width
+            )
+            graphs.append(format_anomaly_data_for_js_graph(
+                df_dq_metric,
+                algo_used, kpi_name,
+                agg_type="count",
+                freq=freq,
+                dq_metric="DQ-Data Volume"
+            ))
         elif i == "missing":
             df_dq_metric = compute_data_quality_metrics_dataframe(
-                                get_missing_df(cut_df, date_column, kpi_name, freq=freq),
-                                date_column,
-                                kpi_name,
-                                algo_used,
-                                interval_width=interval_width) 
-                            
-            graphs.append(format_anomaly_data_for_js_graph(df_dq_metric, 
-                                        algo_used, kpi_name, 
-                                        agg_type="Number of Missing Values", 
-                                        freq=freq,
-                                        dq_metric="DQ-Missing Data"))
+                get_missing_df(cut_df, date_column, kpi_name, freq=freq),
+                date_column,
+                kpi_name,
+                algo_used,
+                interval_width=interval_width)
+
+            graphs.append(format_anomaly_data_for_js_graph(
+                df_dq_metric,
+                algo_used, kpi_name,
+                agg_type="Number of Missing Values",
+                freq=freq,
+                dq_metric="DQ-Missing Data"
+            ))
 
         if plot_in_altair:
-                # Drop na so we don't skip points which don't exist
-                display(plot_sorted_anomalies_df(df_dq_metric.dropna(subset=['y']),
-                                    kpi_name, f"DQ-{i} of Data", 'prophet', start_date, end_date))
+            # Drop na so we don't skip points which don't exist
+            display(plot_sorted_anomalies_df(
+                df_dq_metric.dropna(subset=['y']),
+                kpi_name, f"DQ-{i} of Data",
+                'prophet',
+                start_date,
+                end_date
+            ))
 
-        
     return graphs
 
 
@@ -660,25 +767,29 @@ def compute_seasonality(sample_df):
     :rtype: [type]
     """
     decomposition = sm.tsa.seasonal_decompose(
-                    sample_df,
-                    model='additive'
-                  )
+        sample_df,
+        model='additive'
+    )
     value_dict = {}
-    for i in range(2,13):
-        difference = abs(sum((decomposition.seasonal - decomposition.seasonal.shift(i)).fillna(0)))
-        value_dict.update({i:difference})
+    for i in range(2, 13):
+        difference = abs(
+            sum((decomposition.seasonal - decomposition.seasonal.shift(i)).fillna(0)))
+        value_dict.update({i: difference})
     print("The seasonality matrix: ", value_dict)
     return min(value_dict, key=value_dict.get)
 
-def run_ets(df_prepped,
-            date_column,
-            target_column,
-            interval_width,
-            seasonality = "infer",
-            damp_trend = True,
-            trend_nature = "add",
-            error_nature = "add",
-            seasonal_nature = "add"):
+
+def run_ets(
+    df_prepped,
+    date_column,
+    target_column,
+    interval_width,
+    seasonality="infer",
+    damp_trend=True,
+    trend_nature="add",
+    error_nature="add",
+    seasonal_nature="add"
+):
     """[summary]
 
     :param df_prepped: [description]
@@ -703,37 +814,45 @@ def run_ets(df_prepped,
     :rtype: [type]
     """
 
-    df_prepped.rename(columns={date_column:'ds',
-                       target_column:'y'},
-              inplace=True)
+    df_prepped.rename(
+        columns={
+            date_column: 'ds',
+            target_column: 'y'
+        },
+        inplace=True
+    )
     df_prepped['y'] = df_prepped['y'].astype('float64')
-    df_prepped_ets = pd.Series(df_prepped['y'].tolist(), index=df_prepped['ds'].tolist())
+    df_prepped_ets = pd.Series(
+        df_prepped['y'].tolist(), index=df_prepped['ds'].tolist())
     if seasonality != "infer":
         model = ETSModel(
             df_prepped_ets,
-            error = error_nature,
-            trend = trend_nature,
-            seasonal = seasonal_nature,
-            damped_trend = damp_trend,
-            seasonal_periods = seasonality)
+            error=error_nature,
+            trend=trend_nature,
+            seasonal=seasonal_nature,
+            damped_trend=damp_trend,
+            seasonal_periods=seasonality)
 
     else:
         model = ETSModel(
             df_prepped_ets,
-            error = "add",
-            trend = "add",
-            seasonal = "add",
-            damped_trend = damp_trend,
-            seasonal_periods = compute_seasonality(df_prepped))
+            error="add",
+            trend="add",
+            seasonal="add",
+            damped_trend=damp_trend,
+            seasonal_periods=compute_seasonality(df_prepped))
 
     fit = model.fit()
     pred = fit.get_prediction(end=df_prepped.tail()['ds'].iloc[-1])
     pred_df = pred.summary_frame(alpha=1-interval_width,)
-    pred_df.rename(columns={"mean":'yhat',
-                           "pi_lower":'yhat_lower',
-                            "pi_upper":'yhat_upper'
-                           },
-                  inplace=True)
+    pred_df.rename(
+        columns={
+            "mean": 'yhat',
+            "pi_lower": 'yhat_lower',
+            "pi_upper": 'yhat_upper'
+        },
+        inplace=True
+    )
     pred_df = pred_df.reset_index().rename(columns={'index': 'ds'})
     return detect_anomalies(pred_df.merge(df_prepped, how="inner", on="ds"))
 
@@ -753,92 +872,102 @@ def compute_severity(row, std_dev):
     ZSCORE_UPPER_BOUND = 4
     # Scale zscore where 4 scales to 100; -4 scales to -100
     severity = zscore * 100 / ZSCORE_UPPER_BOUND
-    
+
     # Bound between min and max score
     # If above 100, we return 100; If below -100, we return -100
-    bound_between = lambda min_val, val, max_val: min(max(val, min_val), max_val)
+    def bound_between(min_val, val, max_val): return min(
+        max(val, min_val), max_val)
     return bound_between(-100, severity, 100)
 
 
 def detect_severity(df_anomaly):
     std_dev = df_anomaly['y'].std()
-    df_anomaly['severity'] = df_anomaly.apply(lambda row: compute_severity(row, std_dev), axis=1)
+    df_anomaly['severity'] = df_anomaly.apply(
+        lambda row: compute_severity(row, std_dev), axis=1)
     return df_anomaly
 
-def compute_sensitivity(sensitivity_dict, 
-                        y, 
-                        yhat_lower, 
-                        yhat_upper, 
-                        anomaly):
-    
+
+def compute_sensitivity(
+    sensitivity_dict,
+    y,
+    yhat_lower,
+    yhat_upper,
+    anomaly
+):
+
     if anomaly == 1:
         base_x = yhat_upper/sensitivity_dict['Low']
-        
+
         sensitivity_threshold = base_x + (base_x * sensitivity_dict['Chaos'])
         if y > sensitivity_threshold:
             return "Chaos"
-        
+
         sensitivity_threshold = base_x + (base_x * sensitivity_dict['High'])
         if y > sensitivity_threshold:
             return "High"
-        
+
         sensitivity_threshold = base_x + (base_x * sensitivity_dict['Medium'])
         if y > sensitivity_threshold:
             return "Medium"
-        
+
         else:
             return "Low"
-        
+
     elif anomaly == -1:
         base_x = yhat_lower/sensitivity_dict['Low']
-        
+
         sensitivity_threshold = base_x - (base_x * sensitivity_dict['Chaos'])
         if y < sensitivity_threshold:
             return "Chaos"
-        
+
         sensitivity_threshold = base_x - (base_x * sensitivity_dict['High'])
         if y < sensitivity_threshold:
             return "High"
-        
+
         sensitivity_threshold = base_x - (base_x * sensitivity_dict['Medium'])
         if y < sensitivity_threshold:
             return "Medium"
-        
+
         else:
             return "Low"
-        
+
     else:
         return None
-    
-    
-def detect_sensitivity(forecasted,
-                       sensitivity_threshold_dict = {
-                                                        "Low":0.8,
-                                                        "Medium":0.9,
-                                                        "High":0.95,
-                                                        "Chaos":0.99
-                                                    }
-                        ):
-    
-        ## call this function only after calling detect_anomalies function
-    
-        forecasted["sensitivity"] = forecasted[['yhat_lower', 'yhat_upper', 'y','anomaly']].\
-                                    apply(lambda x: compute_sensitivity(sensitivity_threshold_dict, x["y"], 
-                                                                        x["yhat_lower"], 
-                                                                        x["yhat_upper"],
-                                                                        x["anomaly"]
-                                                                       ), axis=1)
-        display(forecasted)
-        return forecasted   
-    
+
+
+def detect_sensitivity(
+    forecasted,
+    sensitivity_thresholds=DEFAULT_SENSITIVITY_THRESHOLDS
+):
+
+    # call this function only after calling detect_anomalies function
+
+    forecasted["sensitivity"] = forecasted[['yhat_lower', 'yhat_upper', 'y', 'anomaly']].\
+        apply(
+            lambda x: compute_sensitivity(
+                sensitivity_thresholds, x["y"],
+                x["yhat_lower"],
+                x["yhat_upper"],
+                x["anomaly"]
+            ),
+            axis=1
+    )
+    display(forecasted)
+    return forecasted
 
 
 # PLOTTING CODE
-# 
-# 
-# 
-def plot_top_n_anomalies(df_anomaly, kpi_name, algo_used,
-                   start_date, end_date, num_graphs=5):
+#
+#
+#
+def plot_top_n_anomalies(
+    df_anomaly,
+    kpi_name,
+    algo_used,
+    start_date,
+    end_date,
+    num_graphs=5
+):
     """Plot all the relavent graphs for the data.
 
     :param df_anomaly: multi-dimensional anomaly dataframe
@@ -853,25 +982,38 @@ def plot_top_n_anomalies(df_anomaly, kpi_name, algo_used,
     :type end_date: str
     """
 
-    display(plot_sorted_anomalies_df(df_anomaly[df_anomaly['sub_dimension']=="overall KPI"],
-                       kpi_name, "overall KPI", algo_used, start_date, end_date))
+    display(plot_sorted_anomalies_df(
+        df_anomaly[df_anomaly['sub_dimension'] == "overall KPI"],
+        kpi_name, "overall KPI",
+        algo_used,
+        start_date,
+        end_date
+    ))
 
     largest_anomaly_contribution = []
-    
+
     for sub_dim in df_anomaly.sort_values(by='importance', ascending=False)['sub_dimension'].unique():
         if sub_dim != "overall KPI" and len(largest_anomaly_contribution) <= num_graphs:
-            
-            display(plot_sorted_anomalies_df(df_anomaly[df_anomaly['sub_dimension']==sub_dim],
-                        kpi_name, sub_dim, algo_used, start_date, end_date))
+
+            display(plot_sorted_anomalies_df(
+                df_anomaly[df_anomaly['sub_dimension'] == sub_dim],
+                kpi_name,
+                sub_dim,
+                algo_used,
+                start_date,
+                end_date
+            ))
             largest_anomaly_contribution.append(sub_dim)
 
 
-def plot_sorted_anomalies_df(df_anomaly,
-                   kpi,
-                   sub_dimension,
-                   algo_used = "Prophet",
-                   start_date = None,
-                   end_date = None):
+def plot_sorted_anomalies_df(
+    df_anomaly,
+    kpi,
+    sub_dimension,
+    algo_used="Prophet",
+    start_date=None,
+    end_date=None
+):
     """Plots all the relavent graphs for the dataset
 
     :param forecasted: dataframe which the run_{algorithm} function returns
@@ -889,56 +1031,58 @@ def plot_sorted_anomalies_df(df_anomaly,
     :return: does not return any value, displays all the relavent graphs and highlights the 'important' points.
     :rtype: NoneType
     """
-    fact = alt.Chart(df_anomaly).mark_line(size=1.5, opacity=0.8,color="Black",point=True).encode(
+    fact = alt.Chart(df_anomaly).mark_line(size=1.5, opacity=0.8, color="Black", point=True).encode(
         x='ds:T',
         y=alt.Y('y'),
         tooltip=['ds', 'y', 'yhat_lower', 'yhat_upper', 'importance'],
     ).interactive()
 
-
     anomalies = alt.Chart(df_anomaly[df_anomaly.anomaly != 0]).\
-        mark_circle(size=150, color = 'Red', filled=False).\
-            encode(
-                x='ds:T',
-                y=alt.Y('y', title=kpi),
-                tooltip=['ds', 'y', 'yhat_lower', 'yhat_upper', 'importance']
+        mark_circle(size=150, color='Red', filled=False).\
+        encode(
+        x='ds:T',
+        y=alt.Y('y', title=kpi),
+        tooltip=['ds', 'y', 'yhat_lower', 'yhat_upper', 'importance']
 
-        ).interactive()
-
+    ).interactive()
 
     if algo_used != "stddevi":
-        interval = alt.Chart(df_anomaly).mark_area(interpolate="basis", color = '#98FB98').encode(
-            x=alt.X('ds:T',  title ='date'),
+        interval = alt.Chart(df_anomaly).mark_area(interpolate="basis", color='#98FB98').encode(
+            x=alt.X('ds:T',  title='date'),
             y='yhat_upper',
             y2='yhat_lower',
             tooltip=['ds', 'y', 'yhat_lower', 'yhat_upper', 'importance']
-            ).interactive().properties(
-            title= f'Anomaly: {sub_dimension} {algo_used}; {start_date} to {end_date}'
+        ).interactive().properties(
+            title=f'Anomaly: {sub_dimension} {algo_used}; {start_date} to {end_date}'
         )
 
         return alt.layer(interval, fact, anomalies).\
-            properties(width=870,height=450).configure_title(fontSize=20)
+            properties(width=870, height=450).configure_title(fontSize=20)
 
-
-    interval_upper = alt.Chart(df_anomaly).mark_line(color='black',strokeDash=[3,5]).encode(
-        x=alt.X('ds:T',  title ='date'),
+    interval_upper = alt.Chart(df_anomaly).mark_line(color='black', strokeDash=[3, 5]).encode(
+        x=alt.X('ds:T',  title='date'),
         y='yhat_upper',
         tooltip=['ds', 'y', 'yhat_lower', 'yhat_upper', 'importance']
-        ).interactive().properties(
-            title= f'Anomaly: {sub_dimension} {algo_used}; {start_date} to {end_date}'
-        )
+    ).interactive().properties(
+        title=f'Anomaly: {sub_dimension} {algo_used}; {start_date} to {end_date}'
+    )
 
-    interval_lower = alt.Chart(forecasted).mark_line(color='black',strokeDash=[3,5]).encode(
-        x=alt.X('ds:T',  title ='date'),
+    interval_lower = alt.Chart(forecasted).mark_line(color='black', strokeDash=[3, 5]).encode(
+        x=alt.X('ds:T',  title='date'),
         y='yhat_lower',
         tooltip=['ds', 'y', 'yhat_lower', 'yhat_upper', 'importance']
-        ).interactive().properties(
-            title= f'Anomaly: {sub_dimension} {algo_used}; {start_date} to {end_date}'
-        )
+    ).interactive().properties(
+        title=f'Anomaly: {sub_dimension} {algo_used}; {start_date} to {end_date}'
+    )
     return alt.layer(interval_upper, interval_lower, fact, anomalies).\
-                            properties(width=870, height=450).configure_title(fontSize=20)
+        properties(width=870, height=450).configure_title(fontSize=20)
 
-def get_top_n_correlated_anomalies(df_anomaly, no_of_days_around_anomaly, top_n_correlated_anomaly):
+
+def get_top_n_correlated_anomalies(
+    df_anomaly,
+    no_of_days_around_anomaly,
+    top_n_correlated_anomaly
+):
     """Returns the dataframe which contains the top 'n' anomalies in the sub dimensions that
     are corelated with the overall KPI.
 
@@ -953,19 +1097,20 @@ def get_top_n_correlated_anomalies(df_anomaly, no_of_days_around_anomaly, top_n_
     :rtype: pandas.core.frame.Dataframe
     """
     df_kpi = df_anomaly[df_anomaly['sub_dimension'] == "overall KPI"]
-    dates_row_no = get_top_n_anomalies_independent(df_kpi, top_n_correlated_anomaly, True)
+    dates_row_no = get_top_n_anomalies_independent(
+        df_kpi, top_n_correlated_anomaly, True)
 
     kpi_anomaly_dates_list = df_anomaly.loc[dates_row_no]['ds'].tolist()
     dates_list_kpi = [i.date() for i in kpi_anomaly_dates_list]
-#     display(kpi_anomaly_dates_list)
+    # display(kpi_anomaly_dates_list)
 
-    dates_list = computes_dates_correlated_anomaly(dates_list_kpi, no_of_days_around_anomaly)
-#     display(dates_list)
-
+    dates_list = computes_dates_correlated_anomaly(
+        dates_list_kpi, no_of_days_around_anomaly)
+    # display(dates_list)
 
     df_kpi['isImp'] = 0
-    df_kpi.loc[df_kpi[df_kpi['ds'].isin(kpi_anomaly_dates_list)].index, "isImp"] = 1
-
+    df_kpi.loc[df_kpi[df_kpi['ds'].isin(
+        kpi_anomaly_dates_list)].index, "isImp"] = 1
 
     dt_list = pd.DataFrame(dates_list)[0].tolist()
 
@@ -975,15 +1120,19 @@ def get_top_n_correlated_anomalies(df_anomaly, no_of_days_around_anomaly, top_n_
     df_all_subdim = df_all_subdim[df_all_subdim['anomaly'] != 0]
     df_all_subdim = df_all_subdim[df_all_subdim['ds'].isin(dt_list)]
     df_all_subdim['isImp'] = 1
-    
-    df_all_subdim.loc[df_all_subdim[~df_all_subdim['ds'].isin(dt_list)].index,"isImp"] = 0
 
-    df_anomaly = df_anomaly.merge(df_all_subdim, how="outer").merge(df_kpi, how="outer").fillna(int(0))
-    df_anomaly.loc[df_anomaly[~df_anomaly['ds'].isin(dt_list)].index,"isImp"] = 0
+    df_all_subdim.loc[df_all_subdim[~df_all_subdim['ds'].isin(
+        dt_list)].index, "isImp"] = 0
+
+    df_anomaly = df_anomaly.merge(df_all_subdim, how="outer").merge(
+        df_kpi, how="outer").fillna(int(0))
+    df_anomaly.loc[df_anomaly[~df_anomaly['ds'].isin(
+        dt_list)].index, "isImp"] = 0
 
     return df_anomaly
 
-def get_top_n_anomalies_independent(df_anomaly, top_n_anomalies, corr =False):
+
+def get_top_n_anomalies_independent(df_anomaly, top_n_anomalies, corr=False):
     """Returns the top 'n' independent anomalies in a given dataframe.
 
     :param df_anomaly: the multi-dimensional anomaly dataframe
@@ -998,9 +1147,11 @@ def get_top_n_anomalies_independent(df_anomaly, top_n_anomalies, corr =False):
     if not corr:
         df_anomaly.nlargest(top_n_anomalies, "importance")
         df_anomaly['isImp'] = 0
-        df_anomaly.loc[df_anomaly.nlargest(top_n_anomalies,"importance").index, "isImp"] = 1
+        df_anomaly.loc[df_anomaly.nlargest(
+            top_n_anomalies, "importance").index, "isImp"] = 1
         return df_anomaly
     return df_anomaly.nlargest(top_n_anomalies, "importance").index
+
 
 def computes_dates_correlated_anomaly(dates_list, no_of_days_around_anomaly):
     """Computes all the dates near an anomaly of importance
@@ -1021,38 +1172,27 @@ def computes_dates_correlated_anomaly(dates_list, no_of_days_around_anomaly):
     return dates_list
 
 
-
 ################################
 
 # Code for testing
 
 
 # sensitivity_class = "High"
-# sensitivity_dict = {
-#                     "Low":0.95,
-#                     "Medium":0.8,
-#                     "High":0.6
-# }
 
 
 # graphs = anomaly_detection(
-#                                 df_entire=df.rename(columns={'InvoiceNo': 'num_purchases'}), 
-#                                 start_date='2021-06-15', 
-#                                 end_date='2021-09-15', 
-#                                 kpi_column_name='num_purchases', 
-#                                 agg_dict={'num_purchases': 'count'}, 
-#                                 sub_dimensions=['Country', 'PurchaseTime'], 
-#                                 date_column_name='date', 
-#                                 frequency='D', 
-#                                 algo_used='prophet',
-#                                 intervat_width=sensitivity_dict[sensitivity_class]
-#                                 num_days_around_kpi_anomaly=1,
-#                                 num_anomalies_kpi=15, 
-#                                 plot_in_altair=False,
-#                                 severity_threshold_dict = {
-#                                                         "Low":0.8,
-#                                                         "Medium":0.9,
-#                                                         "High":0.95,
-#                                                         "Chaos":0.99
-#                                                     }
-#             )
+#     df_entire=df.rename(columns={'InvoiceNo': 'num_purchases'}),
+#     start_date='2021-06-15',
+#     end_date='2021-09-15',
+#     kpi_column_name='num_purchases',
+#     agg_dict={'num_purchases': 'count'},
+#     sub_dimensions=['Country', 'PurchaseTime'],
+#     date_column_name='date',
+#     frequency='D',
+#     algo_used='prophet',
+#     intervat_width=sensitivity_dict[sensitivity_class],
+#     num_days_around_kpi_anomaly=1,
+#     num_anomalies_kpi=15,
+#     plot_in_altair=False,
+#     severity_thresholds = DEFAULT_SENSITIVITY_THRESHOLDS
+# )

@@ -865,15 +865,16 @@ def compute_severity(row, std_dev):
         # Check num deviations from lower bound of CI
         zscore = (row['y'] - row['yhat_lower']) / std_dev
 
-    ZSCORE_UPPER_BOUND = 4
+    ZSCORE_UPPER_BOUND = 2.5
     # Scale zscore where 4 scales to 100; -4 scales to -100
     severity = zscore * 100 / ZSCORE_UPPER_BOUND
+    severity = abs(severity)
 
     # Bound between min and max score
     # If above 100, we return 100; If below -100, we return -100
     def bound_between(min_val, val, max_val): return min(
         max(val, min_val), max_val)
-    return bound_between(-100, severity, 100)
+    return bound_between(0, severity, 100)
 
 
 def detect_severity(df_anomaly):

@@ -1,4 +1,8 @@
-# Argos
+# Chaos Genius
+
+Documentation Build Status
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/1a934fc6-f09d-46ab-9ce5-3a521323b2b6/deploy-status)](https://app.netlify.com/sites/practical-wescoff-5294ef/deploys)
 
 ## Prerequisite
 
@@ -22,16 +26,5 @@ Backend
 - Activate the environment `source .venv/bin/activate`
 - Install the dependancy `pip install -r requirements/dev.txt`
 - Run the dev server `bash dev_server.sh`
-
-
-
-
-
-TODO
-
-- [ ] Manage the ENV config in better way
-- [ ] Add the central error handler
-- [ ] ...
-
 
 

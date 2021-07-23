@@ -14,7 +14,7 @@ Or **try Docusaurus immediately** with **[new.docusaurus.io](https://new.docusau
 
 ## Architecture
 
-![image](img/cg-high-level-arch.png)
+![image](/img/cg-high-level-arch.png)
 
 Generate a new Docusaurus site using the **classic template**:
 

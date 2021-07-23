@@ -2,9 +2,9 @@
 sidebar_position: 1
 ---
 
-# Tutorial Intro
+# What is Chaos Genius
 
-Let's discover **Docusaurus in less than 5 minutes**.
+Let's discover **Chaos Genius in less than 5 minutes**.
 
 ## Getting Started
 
@@ -12,7 +12,9 @@ Get started by **creating a new site**.
 
 Or **try Docusaurus immediately** with **[new.docusaurus.io](https://new.docusaurus.io)**.
 
-## Generate a new site
+## Architecture
+
+![image](img/cg-high-level-arch.png)
 
 Generate a new Docusaurus site using the **classic template**:
 

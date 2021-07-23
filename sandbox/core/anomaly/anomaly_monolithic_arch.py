@@ -518,6 +518,9 @@ def format_anomaly_data_for_js_graph(
             # Create and append a point for the predicted_value
             predicted_value = [timestamp, round(row['yhat'], precision)]
             graph_data['predicted_values'].append(predicted_value)
+            # Create and append a point for the severity
+            severity = [timestamp, round(row['severity'], precision)]
+            graph_data['severity'].append(severity)
 
     print("ENTERING JSON FORMATTING FUNCTION")
     if dq_metric:
@@ -530,7 +533,7 @@ def format_anomaly_data_for_js_graph(
             'intervals': [],
             'values': [],
             'predicted_values': [],
-            'sensitivities': []
+            'severity': []
         }
 
         df_anomaly.apply(lambda row: fill_graph_data(
@@ -549,7 +552,7 @@ def format_anomaly_data_for_js_graph(
             'intervals': [],
             'values': [],
             'predicted_values': [],
-            'sensitivities': []
+            'severity': []
         }
 
         sub_dim_df = df_anomaly.loc[
@@ -575,7 +578,7 @@ def format_anomaly_data_for_js_graph(
                     'intervals': [],
                     'values': [],
                     'predicted_values': [],
-                    'sensitivities': []
+                    'severity': []
                 }
 
                 # Fill intervals, values, predicted_values lists
@@ -609,7 +612,7 @@ def format_anomaly_data_for_js_graph(
                     'intervals': [],
                     'values': [],
                     'predicted_values': [],
-                    'sensitivities': []
+                    'severity': []
                 }
                 # Fill intervals, values, predicted_values lists
                 sub_dim_df = df_anomaly.loc[df_anomaly['sub_dimension'] == sub_dim]

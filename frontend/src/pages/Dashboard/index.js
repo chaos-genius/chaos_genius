@@ -80,13 +80,13 @@ class Dashboard extends React.Component {
     }];
 
     return (
-      <Grid container spacing={2}>
-        <Grid item xs={3} className="custom-col-3">
+      <Grid container spacing={2} className="custom-width-grid">
+        <Grid item  xs={3} className="custom-col-3">
           {(Object.keys(this.state.kpiData).length > 0) ? (
             <SideBar handleKpiChange={this.handleKpiChange} kpiData={this.state.kpiData} kpiID={this.state.kpi} />
           ) : ("")}
         </Grid>
-        <Grid item xs={9} className="tab-with-borders custom-col-9">
+        <Grid item xs={9}  className="tab-with-borders custom-col-9">
           <CustomTabs tabs={tabChartData} />
           {/* <AutoRCA /> */}
         </Grid>

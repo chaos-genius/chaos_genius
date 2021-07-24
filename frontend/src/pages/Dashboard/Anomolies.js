@@ -241,6 +241,11 @@ class Anomolies extends Component {
             });
         console.log("slectedDate", unixDate, newDate)
     }
+    componentDidUpdate(preProps) {
+        if(this.props.kpi !== preProps.kpi){
+            this.fetchAnomoly()
+        }
+    }
     componentDidMount() {
         this.fetchAnomoly()
     }

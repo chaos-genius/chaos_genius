@@ -6,17 +6,13 @@ import {
 import {
   Card, CardContent, Container, Grid, Button, Typography
 } from '@material-ui/core';
+import {ControlPoint} from '@material-ui/icons'
 
 import CustomTable from '../../components/CustomTable'
-
-import postgresql from './../../assets/img/postgresql.png'
-import mysql from './../../assets/img/mysql.png'
 
 import SideBar from './../Dashboard/SideBar'
 
 import { BASE_URL, DEFAULT_HEADERS } from '../../config/Constants'
-
-import testConnection from './../../assets/img/test-connection.svg'
 
 class KpiList extends React.Component {
 
@@ -112,10 +108,10 @@ class KpiList extends React.Component {
       <Container maxWidth="lg">
         <Grid container spacing={3}>
           <Grid item xs={9}>
-            <Typography conponent="h4" className="title">KPI Explorer</Typography>
+            <Typography component="h4" className="page-title">KPI Explorer</Typography>
           </Grid>
-          <Grid item xs={3} alignItems="center">
-            <Button href="/#/kpi/new" variant="primary" className="btn btn-primary btn-toolbar"><img src={testConnection} alt="test-icon" /> New KPI</Button>
+          <Grid item xs={3} justify="flex-end">
+            <Button href="/#/kpi/new" variant="primary" className="btn btn-primary btn-toolbar pull-right" ><ControlPoint className="btn-icon" /> New KPI</Button>
           </Grid>
         </Grid>
         <Grid container spacing={2}>

@@ -189,8 +189,8 @@ def get_baseline_and_rca_df(kpi_info, connection_info, timeline="mom"):
                 values_str = values_str[:-2] + ')'
                 kpi_filters_query += f" and {indentifier}{key}{indentifier} in {values_str}"
 
-    base_query = f"select * from {kpi_info['kpi_query']} {base_filter} {kpi_filters_query} "
-    rca_query = f"select * from {kpi_info['kpi_query']} {rca_filter} {kpi_filters_query} "
+    base_query = f"select * from {kpi_info['table_name']} {base_filter} {kpi_filters_query} "
+    rca_query = f"select * from {kpi_info['table_name']} {rca_filter} {kpi_filters_query} "
     base_df = get_df_from_db_uri(connection_info["db_uri"], base_query)
     rca_df = get_df_from_db_uri(connection_info["db_uri"], rca_query)
 
@@ -222,7 +222,7 @@ def get_anomaly_df(kpi_info, connection_info, days_range=90):
                 values_str = values_str[:-2] + ')'
                 kpi_filters_query += f" and {indentifier}{key}{indentifier} in {values_str}"
 
-    base_query = f"select * from {kpi_info['kpi_query']} {base_filter} {kpi_filters_query} "
+    base_query = f"select * from {kpi_info['table_name']} {base_filter} {kpi_filters_query} "
     base_df = get_df_from_db_uri(connection_info["db_uri"], base_query)
 
     return base_df
@@ -405,24 +405,24 @@ def get_kpi_data_from_id(n: int) -> dict:
 
 
 KPI_DATA = [
-    {"id": 1, "name": "Call/day", "kpi_query": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "sum_calls", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
-    {"id": 2, "name": "Conversion per day", "kpi_query": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "sum_conversion", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
-    # {"id": 3, "name": "Avg call duration", "kpi_query": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
-    {"id": 4, "name": "Avg call duration for admin job", "kpi_query": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["admin."]}, "dimensions": ["marital","education","housing","loan"]},
-    {"id": 5, "name": "Avg call duration for blue collar job", "kpi_query": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["blue-collar"]}, "dimensions": ["marital","education","housing","loan"]},
-    {"id": 6, "name": "Avg call duration for management job", "kpi_query": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["management"]}, "dimensions": ["marital","education","housing","loan"]},
-    # {"id": 7, "name": "Total price", "kpi_query": "mh_food_prices", "data_source": 4, "datetime_column": "date", "metric": "modal_price", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["Commodity", "APMC", "district_name"]},
-    # {"id": 8, "name": "Total price for onion", "kpi_query": "mh_food_prices", "data_source": 4, "datetime_column": "date", "metric": "modal_price", "metric_precision": 2, "aggregation": "mean", "filters": {"Commodity": ["Onion"]}, "dimensions": ["APMC", "district_name"]},
-    # {"id": 9, "name": "Total price for maize", "kpi_query": "mh_food_prices", "data_source": 4, "datetime_column": "date", "metric": "modal_price", "metric_precision": 2, "aggregation": "mean", "filters": {"Commodity": ["Maize"]}, "dimensions": ["APMC", "district_name"]},
-    # {"id": 10, "name": "Total price for green chilli", "kpi_query": "mh_food_prices", "data_source": 4, "datetime_column": "date", "metric": "modal_price", "metric_precision": 2, "aggregation": "mean", "filters": {"Commodity": ["Green Chilli"]}, "dimensions": ["APMC", "district_name"]},
-    {"id": 11, "name": "Call/day (MySQL)", "kpi_query": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "sum_calls", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
-    {"id": 12, "name": "Conversion per day (MySQL)", "kpi_query": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "sum_conversion", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
-    {"id": 13, "name": "Avg call duration (MySQL)", "kpi_query": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
-    # {"id": 14, "name": "Avg call duration for admin job (MySQL)", "kpi_query": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["admin."]}, "dimensions": ["marital","education","housing","loan"]},
-    # {"id": 15, "name": "Avg call duration for blue collar job (MySQL)", "kpi_query": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["blue-collar"]}, "dimensions": ["marital","education","housing","loan"]},
-    # {"id": 16, "name": "Avg call duration for management job (MySQL)", "kpi_query": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["management"]}, "dimensions": ["marital","education","housing","loan"]},
-    {"id": 17, "name": "E-Com - Total Sales", "kpi_query": "ecom_retail", "data_source": 22, "datetime_column": "date", "metric": "ItemTotalPrice", "metric_precision": 2, "aggregation": "sum", "filters": {}, "dimensions": ["DayOfWeek", "PurchaseTime", "Country"]},
-    {"id": 18, "name": "E-Com - Average Sales", "kpi_query": "ecom_retail", "data_source": 22, "datetime_column": "date", "metric": "ItemTotalPrice", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["DayOfWeek", "PurchaseTime", "Country"]},
+    {"id": 1, "is_certified": True, "kpi_type": "table", "name": "Call/day", "table_name": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "sum_calls", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
+    {"id": 2, "is_certified": True, "kpi_type": "table", "name": "Conversion per day", "table_name": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "sum_conversion", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
+  # {"id": 3, "is_certified": True, "kpi_type": "table", "name": "Avg call duration", "table_name": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
+    {"id": 4, "is_certified": True, "kpi_type": "table", "name": "Avg call duration for admin job", "table_name": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["admin."]}, "dimensions": ["marital","education","housing","loan"]},
+    {"id": 5, "is_certified": True, "kpi_type": "table", "name": "Avg call duration for blue collar job", "table_name": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["blue-collar"]}, "dimensions": ["marital","education","housing","loan"]},
+    {"id": 6, "is_certified": True, "kpi_type": "table", "name": "Avg call duration for management job", "table_name": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["management"]}, "dimensions": ["marital","education","housing","loan"]},
+  # {"id": 7, "is_certified": True, "kpi_type": "table", "name": "Total price", "table_name": "mh_food_prices", "data_source": 4, "datetime_column": "date", "metric": "modal_price", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["Commodity", "APMC", "district_name"]},
+  # {"id": 8, "is_certified": True, "kpi_type": "table", "name": "Total price for onion", "table_name": "mh_food_prices", "data_source": 4, "datetime_column": "date", "metric": "modal_price", "metric_precision": 2, "aggregation": "mean", "filters": {"Commodity": ["Onion"]}, "dimensions": ["APMC", "district_name"]},
+  # {"id": 9, "is_certified": True, "kpi_type": "table", "name": "Total price for maize", "table_name": "mh_food_prices", "data_source": 4, "datetime_column": "date", "metric": "modal_price", "metric_precision": 2, "aggregation": "mean", "filters": {"Commodity": ["Maize"]}, "dimensions": ["APMC", "district_name"]},
+  # {"id": 10, "is_certified": True, "kpi_type": "table", "name": "Total price for green chilli", "table_name": "mh_food_prices", "data_source": 4, "datetime_column": "date", "metric": "modal_price", "metric_precision": 2, "aggregation": "mean", "filters": {"Commodity": ["Green Chilli"]}, "dimensions": ["APMC", "district_name"]},
+    {"id": 11, "is_certified": True, "kpi_type": "table", "name": "Call/day (MySQL)", "table_name": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "sum_calls", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
+    {"id": 12, "is_certified": True, "kpi_type": "table", "name": "Conversion per day (MySQL)", "table_name": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "sum_conversion", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
+    {"id": 13, "is_certified": True, "kpi_type": "table", "name": "Avg call duration (MySQL)", "table_name": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
+  # {"id": 14, "is_certified": True, "kpi_type": "table", "name": "Avg call duration for admin job (MySQL)", "table_name": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["admin."]}, "dimensions": ["marital","education","housing","loan"]},
+  # {"id": 15, "is_certified": True, "kpi_type": "table", "name": "Avg call duration for blue collar job (MySQL)", "table_name": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["blue-collar"]}, "dimensions": ["marital","education","housing","loan"]},
+  # {"id": 16, "is_certified": True, "kpi_type": "table", "name": "Avg call duration for management job (MySQL)", "table_name": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["management"]}, "dimensions": ["marital","education","housing","loan"]},
+    {"id": 17, "is_certified": True, "kpi_type": "table", "name": "E-Com - Total Sales", "table_name": "ecom_retail", "data_source": 22, "datetime_column": "date", "metric": "ItemTotalPrice", "metric_precision": 2, "aggregation": "sum", "filters": {}, "dimensions": ["DayOfWeek", "PurchaseTime", "Country"]},
+    {"id": 18, "is_certified": True, "kpi_type": "table", "name": "E-Com - Average Sales", "table_name": "ecom_retail", "data_source": 22, "datetime_column": "date", "metric": "ItemTotalPrice", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["DayOfWeek", "PurchaseTime", "Country"]},
 ]
 
 DB_DIMS = {

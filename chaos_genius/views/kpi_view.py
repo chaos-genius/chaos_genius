@@ -130,7 +130,7 @@ def kpi_anomaly_detection(kpi_id):
     current_app.logger.info(f"Anomaly Detection Started for KPI ID: {kpi_id}")
     data = []
     try:
-        kpi_info = KPI_DATA[kpi_id]
+        kpi_info = get_kpi_data_from_id(kpi_id)
         connection_info = DataSource.get_by_id(kpi_info["data_source"])
         data = no_date_output
         df = get_anomaly_df(kpi_info, connection_info.as_dict)

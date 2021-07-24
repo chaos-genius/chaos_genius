@@ -413,13 +413,10 @@ def anomaly_detection(
     top_n_subdim=5
 ):
 
-    # cut_df wont be in the final implementation, will be replaced by a data ingestion function wrtten by backend team
-    cut_df = cut_dataframe(df_entire, start_date, end_date)
-
     # TODO: Verbosity parameter for prophet. Verbosity = 0 if not debug.
     # Compute/Find anomalies
     df_anomaly = compute_entire_multi_dim_anomaly(
-        cut_df,
+        df_entire,
         kpi_column_name,
         agg_dict,
         sub_dimensions,
@@ -562,7 +559,7 @@ def format_anomaly_data_for_js_graph(
             df_anomaly = df_anomaly[
                 df_anomaly['sub_dimension'] != "overall_kpi"
             ]
-            for sub_dim in df_anomaly.sort_values(by="importance", ascending=False)['sub_dimension'].unique()[:top_n_subdim]:
+            for sub_dim in df_anomaly.sort_values(by="severity", ascending=False)['sub_dimension'].unique()[:top_n_subdim]:
                 graph_data = {
                     'title': f'{sub_dim} using {algo_used}',
                     'y_axis_label': f'{agg_type.capitalize()} of {freq} {kpi_column_name}',
@@ -662,8 +659,6 @@ def compute_data_quality_metrics_dataframe(
 
 def get_dq_json(
     df_entire,
-    start_date,
-    end_date,
     algo_used,
     date_column,
     kpi_name,
@@ -672,7 +667,6 @@ def get_dq_json(
     plot_in_altair=False
 ):
     df_entire = df_entire[[date_column, kpi_name]]
-    cut_df = cut_dataframe(df_entire, start_date, end_date)
     
     df_all = pd.DataFrame(columns=['ds', 'yhat', 'yhat_lower', 'yhat_upper', 'y', 'anomaly'
                                    , 'severity', 'sub_dimension'])
@@ -683,7 +677,7 @@ def get_dq_json(
             print(i)
             df_dq_metric = compute_data_quality_metrics_dataframe(
                 get_max_or_min_df(
-                    cut_df,
+                    df_entire,
                     date_column,
                     kpi_name,
                     dq_metric=i,
@@ -707,7 +701,7 @@ def get_dq_json(
         elif i == "volume":
             df_dq_metric = compute_data_quality_metrics_dataframe(
                 get_data_volume_dataframe(
-                    cut_df,
+                    df_entire,
                     date_column,
                     kpi_name, freq=freq
                 ),
@@ -728,7 +722,7 @@ def get_dq_json(
             df_all = df_all.append(df_dq_metric)
         elif i == "missing":
             df_dq_metric = compute_data_quality_metrics_dataframe(
-                get_missing_df(cut_df, date_column, kpi_name, freq=freq),
+                get_missing_df(df_entire, date_column, kpi_name, freq=freq),
                 date_column,
                 kpi_name,
                 algo_used,
@@ -743,7 +737,7 @@ def get_dq_json(
                 dq_metric="DQ-Missing Data"
             ))
             df_all = df_all.append(df_dq_metric)
-#         display(df_dq_metric.head())
+        # display(df_dq_metric.head())
         if plot_in_altair:
             # Drop na so we don't skip points which don't exist
             display(plot_sorted_anomalies_df(
@@ -1107,9 +1101,35 @@ def computes_dates_correlated_anomaly(dates_list, no_of_days_around_anomaly):
 
 # Code for testing
 
+# import os
+# from sqlalchemy import create_engine
+# engine  = create_engine(os.environ['DATABASE_URL'])
+# connection = engine.connect()
+# import pandas as pd
+# start_date = "2021-06-15"
+# end_date = "2021-09-15"
+# df = pd.read_sql(f"SELECT * from ecom_retail where date > '{start_date}' and date < '{end_date}'", connection)
+# df.drop(columns=['index'], inplace=True)
+
+# df = cut_dataframe(df, start_date, end_date)
 
 # sensitivity_class = "High"
 
+
+# df_anomaly = compute_entire_multi_dim_anomaly(
+#     df.rename(columns={'InvoiceNo': 'num_purchases'}),
+#     'num_purchases',
+#     {'num_purchases': 'count'},
+#     ['Country', 'PurchaseTime'],
+#     date_column='date',
+#     algo_used='prophet',
+#     num_deviation=None,
+#     num_deviation_lower=None,
+#     num_deviation_upper=None,
+#     interval_width=DEFAULT_SENSITIVITY_THRESHOLDS[sensitivity_class],
+#     seasonality="auto",
+#     frequency='D'
+# )
 
 # graphs = anomaly_detection(
 #     df_entire=df.rename(columns={'InvoiceNo': 'num_purchases'}),
@@ -1121,17 +1141,19 @@ def computes_dates_correlated_anomaly(dates_list, no_of_days_around_anomaly):
 #     date_column_name='date',
 #     frequency='D',
 #     algo_used='prophet',
-#     intervat_width=DEFAULT_SENSITIVITY_THRESHOLDS[sensitivity_class],
+#     interval_width=DEFAULT_SENSITIVITY_THRESHOLDS[sensitivity_class],
 #     num_days_around_kpi_anomaly=1,
 #     num_anomalies_kpi=15,
 #     plot_in_altair=False
 # )
 
-# df_all, graphs_dq = get_dq_json(df.rename(columns={'InvoiceNo': 'num_purchases'}), 
-#                 '2021-06-15', 
-#                 '2021-09-15', 
-#                 "prophet", 
-#                 "date",
-#                 "num_purchases",
-#                 0.8,
-#                 'D')
+# df_all, graphs_dq = get_dq_json(
+#     df.rename(columns={'InvoiceNo': 'num_purchases'}),
+#     "prophet", 
+#     "date",
+#     "num_purchases",
+#     0.8,
+#     'D'
+# )
+
+# print(df_anomaly)

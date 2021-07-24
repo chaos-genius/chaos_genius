@@ -5,6 +5,8 @@ from glob import glob
 from subprocess import call
 
 import click
+from flask.cli import with_appcontext
+
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.join(HERE, os.pardir)
@@ -78,3 +80,14 @@ def integration_connector():
         click.echo(f"Third Party Setup: Connector initialised successfully.")
     else:
         click.echo(f"Third Party Setup: Connector initialisation failed.")
+
+
+@click.command()
+@with_appcontext
+@click.option('--kpi', required=True, type=int, help="Perform the anomaly detection for given KPI.")
+def run_anomaly(kpi):
+    """Perform the anomaly detection for given KPI."""
+    click.echo(f"Starting the anomaly for KPI ID: {kpi}.")
+    from chaos_genius.controllers.kpi_controller import run_anomaly_for_kpi
+    status = run_anomaly_for_kpi(kpi)
+    click.echo(f"Completed the anomaly for KPI ID: {kpi}.")

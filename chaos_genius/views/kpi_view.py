@@ -66,7 +66,7 @@ def kpi_get_dimensions(kpi_id):
     dimensions = []
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
-        dimensions = DB_DIMS[kpi_info["kpi_query"]]
+        dimensions = kpi_info["dimensions"]
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")
     return jsonify({"dimensions": dimensions, "msg": ""})

@@ -90,6 +90,7 @@ def register_commands(app):
     app.cli.add_command(commands.test)
     app.cli.add_command(commands.lint)
     app.cli.add_command(commands.integration_connector)
+    app.cli.add_command(commands.run_anomaly)
 
 
 def configure_logger(app):

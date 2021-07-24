@@ -34,6 +34,15 @@ const renderTextField = (field, textType, formData, formError, handleInputChange
         </Grid>
     )
 }
+const countryToFlag = (option) => {
+    let textHtml = option.icon;
+    return(
+        <span>
+            <span dangerouslySetInnerHTML={{ __html: textHtml }} className="datasource-svgicon" />
+            {option.name}
+        </span>
+    )
+}
 const renderBooleanField = (field, textType, formData, formError, handleBooleanChange) => {
     const textID = field[0];
     const textError = (formError?.[textID]) ? (formError[textID]) : ("")
@@ -120,7 +129,8 @@ export const tab1Fields = (props, handleAutoComplete, handleInputAutoComplete) =
                     getOptionSelected={(option, value) => option.name === value}
                     renderOption={(option) => (
                         <React.Fragment>
-                            {(option?.name) ? (option.name) : ("")}
+                            <span>{countryToFlag(option)}</span>
+                            {/* {(option?.name) ? (option.name) : ("")} */}
                         </React.Fragment>
                     )}
                     renderInput={(params) => (<TextField {...params} variant="outlined" inputProps={{...params.inputProps,autoComplete: 'new-password' }} />)}

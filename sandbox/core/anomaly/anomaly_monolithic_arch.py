@@ -7,6 +7,8 @@ import altair as alt
 import statsmodels.api as sm
 from statsmodels.tsa.exponential_smoothing.ets import ETSModel
 
+from chaos_genius.core.utils import suppress_stdout_stderr
+
 # TODO: Add prophet and altair as requirements
 # TODO: Add debug checks and logging
 
@@ -99,10 +101,11 @@ def run_prophet(
         },
         inplace=True
     )
-    model = Prophet(interval_width=interval_width,
-                    yearly_seasonality=yearly_seasonality,
-                    weekly_seasonality=weekly_seasonality)
-    model.fit(df_prepped)
+    with suppress_stdout_stderr():
+        model = Prophet(interval_width=interval_width,
+                        yearly_seasonality=yearly_seasonality,
+                        weekly_seasonality=weekly_seasonality)
+        model.fit(df_prepped)
     future = model.make_future_dataframe(periods=0)
     forecast = model.predict(future)
     forecast = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']]
@@ -586,9 +589,9 @@ def format_anomaly_data_for_js_graph(
             anomaly_date = pd.to_datetime(anomaly_date)
 
             display(df_anomaly[df_anomaly['ds'] == anomaly_date].
-                    sort_values(by="importance", ascending=False))
+                    sort_values(by="severity", ascending=False))
             anomaly_date_sub_dim = df_anomaly[df_anomaly['ds'] == anomaly_date].\
-                sort_values(by="importance", ascending=False)[
+                sort_values(by="severity", ascending=False)[
                 'sub_dimension'].unique()[:top_n_subdim]
             print(anomaly_date_sub_dim)
 
@@ -1070,12 +1073,12 @@ def get_top_n_anomalies_independent(df_anomaly, top_n_anomalies, corr=False):
     :rtype: pandas.core.frame.DataFrame or pandas.core.indexes.numeric.Int64Index
     """
     if not corr:
-        df_anomaly.nlargest(top_n_anomalies, "importance")
+        df_anomaly.nlargest(top_n_anomalies, "severity")
         df_anomaly['isImp'] = 0
         df_anomaly.loc[df_anomaly.nlargest(
-            top_n_anomalies, "importance").index, "isImp"] = 1
+            top_n_anomalies, "severity").index, "isImp"] = 1
         return df_anomaly
-    return df_anomaly.nlargest(top_n_anomalies, "importance").index
+    return df_anomaly.nlargest(top_n_anomalies, "severity").index
 
 
 def computes_dates_correlated_anomaly(dates_list, no_of_days_around_anomaly):

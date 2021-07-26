@@ -209,7 +209,8 @@ def get_anomaly_df(kpi_info, connection_info, days_range=90):
     base_dt_obj = today - timedelta(days=num_days)
     base_dt = str(base_dt_obj.date())
 
-    base_filter = f" where {indentifier}{kpi_info['datetime_column']}{indentifier} > '{base_dt}' "
+    cur_dt = str(today.date())
+    base_filter = f" where {indentifier}{kpi_info['datetime_column']}{indentifier} > '{base_dt}' and {indentifier}{kpi_info['datetime_column']}{indentifier} <= '{cur_dt}' "
 
     kpi_filters = kpi_info['filters']
     kpi_filters_query = " "

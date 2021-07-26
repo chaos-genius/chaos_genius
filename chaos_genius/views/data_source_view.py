@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """DataSource views for creating and viewing the data source."""
 import re
+from uuid import uuid4
+import random
+from datetime import datetime
 from flask import (
     Blueprint,
     current_app,
@@ -12,6 +15,7 @@ from flask import (
     jsonify
 )
 
+from chaos_genius.utils.connector_helper import DATA_SOURCE_ABBREVIATION
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.extensions import integration_connector as connector
 from chaos_genius.third_party.integration_server_config import (
@@ -26,11 +30,6 @@ from chaos_genius.databases.db_metadata import DbMetadata, get_metadata
 # from chaos_genius.utils import flash_errors
 
 blueprint = Blueprint("api_data_source", __name__, static_folder="../static")
-
-CONNECTION_TYPES = [
-    {'name': 'PostgreSQL', 'value': 'postgresql'},
-    {'name': 'MySQL', 'value': 'mysql'}
-]
 
 
 @blueprint.route("/", methods=["GET", "POST"])
@@ -52,15 +51,15 @@ def data_source():
 
     elif request.method == 'GET':
         data_sources = DataSource.query.all()
-        results = [conn.safe_dict for conn in data_sources]
-        results = sorted(results, reverse=True, key=lambda x: x["id"]) # TODO: Remove this and do in the query
+        results = []
+        for conn in data_sources:
+            # TODO: Add the kpi_count, real sync details and sorting info
+            conn_detail = conn.safe_dict
+            conn_detail['last_sync'] = datetime.now()
+            conn_detail['kpi_count'] = random.randint(1,4)
+            results.append(conn_detail)
+        results = sorted(results, reverse=True, key=lambda x: x["id"])
         return jsonify({"count": len(results), "data": results})
-
-
-@blueprint.route("/connection-types", methods=["GET", "POST"])
-def data_source_types():
-    """DataSource Type view."""
-    return jsonify({"data": CONNECTION_TYPES})
 
 
 @blueprint.route("/types", methods=["GET"])
@@ -125,10 +124,9 @@ def create_data_source():
             for stream in stream_schema:
                 stream["config"].update(mapping_config)
 
-            # TODO: Make the prefix short since long table names truncated by default
-            stripped_conn_type = "".join(re.findall("[a-zA-Z]+", conn_type))
-            stripped_conn_name = "".join(re.findall("[a-zA-Z]+", conn_name))
-            table_prefix = f"CG_{stripped_conn_type}_{stripped_conn_name}_"
+            abbv_conn_type = DATA_SOURCE_ABBREVIATION[conn_type]
+            random_conn_name = str(uuid4())[:4]
+            table_prefix = f"{abbv_conn_type}_{random_conn_name}_"
             table_prefix = table_prefix.lower()
             conn_payload = {
                 "sourceId": sourceRecord["sourceId"],

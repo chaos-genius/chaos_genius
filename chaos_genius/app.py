@@ -34,7 +34,7 @@ def create_app(config_object="chaos_genius.settings"):
     register_shellcontext(app)
     register_commands(app)
     configure_logger(app)
-    CORS(app) # TODO: Remove this
+    CORS(app) # TODO: Remove the CORS in v1 release
     return app
 
 

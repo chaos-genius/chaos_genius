@@ -23,6 +23,8 @@ class Kpi(PkModel):
     filters = Column(db.JSON)
     dimensions = Column(db.JSON)
 
+    run_anomaly = Column(db.Boolean(), default=True)
+
     active = Column(db.Boolean(), default=False)
     created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
 

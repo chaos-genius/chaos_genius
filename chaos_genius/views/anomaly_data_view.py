@@ -18,5 +18,7 @@ blueprint = Blueprint("anomaly_data", __name__, static_folder="../static")
 @blueprint.route("/", methods=["GET"])
 def list_anomaly_data():
     """List the anomaly data."""
-    return jsonify({})
+    data = AnomalyData.query.all()
+    results = [point.as_dict for point in data]
+    return jsonify({"data": results})
 

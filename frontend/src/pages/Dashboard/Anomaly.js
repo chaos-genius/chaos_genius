@@ -164,11 +164,14 @@ class Anomaly extends Component {
                     color: "#29A374",
                     fillOpacity: 0.2,
                     zIndex: 0,
-                    marker: {
-                        fillColor: "grey",
-                        enabled: false,
-                        symbol: "diamond",
-                    },
+                    states: {
+                        inactive: {
+                            opacity: 0
+                        },
+                        hover: {
+                            enabled: false,
+                        }
+                    }
                 },
                 {
                     name: "Value",

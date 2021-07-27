@@ -137,6 +137,14 @@ class Anomaly extends Component {
                         enabled: false,
                         symbol: "diamond",
                     },
+                    states: {
+                        inactive: {
+                            opacity: 0
+                        },
+                        hover: {
+                            enabled: false,
+                        }
+                    }
                 },
                 {
                     name: "Value",

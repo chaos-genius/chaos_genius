@@ -42,12 +42,12 @@ def get_onboarding_status():
         #     "step_done": dashboards
         # },
         {
-            "step_no": 4,
+            "step_no": 3,
             "step_name": "Activate Analytics",
             "step_done": analytics
         },
         {
-            "step_no": 5,
+            "step_no": 4,
             "step_name": "Setup Smart Alert",
             "step_done": alerts
         }

@@ -64,6 +64,10 @@ class Kpi(PkModel):
             "table_name": self.table_name,
             "metric": self.metric,
             "aggregation": self.aggregation,
+            "datetime_column": self.datetime_column,
+            "filters": self.filters,
+            "dimensions": self.dimensions,
+            "run_anomaly": self.run_anomaly,
             "active": self.active,
             "created_at": self.created_at
         }

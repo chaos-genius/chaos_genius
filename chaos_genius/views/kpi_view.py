@@ -24,7 +24,7 @@ from chaos_genius.core.rca import RootCauseAnalysis
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 
 
-blueprint = Blueprint("api_kpi", __name__, static_folder="../static")
+blueprint = Blueprint("api_kpi", __name__)
 
 
 @blueprint.route("/", methods=["GET", "POST"])
@@ -55,9 +55,8 @@ def kpi():
             return jsonify({"error": "The request payload is not in JSON format"})
 
     elif request.method == 'GET':
-        # kpis = Kpi.query.all()
-        # results = [kpi.safe_dict for kpi in kpis]
-        results = KPI_DATA
+        kpis = Kpi.query.all()
+        results = [kpi.safe_dict for kpi in kpis]
         return jsonify({"count": len(results), "data": results})
 
 @blueprint.route("/<int:kpi_id>/get-dimensions", methods=["GET"])
@@ -203,10 +202,8 @@ def kpi_aggregation(kpi_info, connection_info, timeline="mom"):
             "insights": []
         }
 
-        print(final_data)
-
     except Exception as err:
-        # print(traceback.format_exc())
+        # sprint(traceback.format_exc())
         current_app.logger.error(f"Error in RCA Analysis: {err}")
         final_data = {
             "panel_metrics": [],
@@ -335,12 +332,12 @@ def get_kpi_data_from_id(n: int) -> dict:
     :rtype: dict
     """
 
-    for kpi_data in KPI_DATA:
-        if kpi_data["id"] == n:
-            return kpi_data
+    kpi_info = Kpi.get_by_id(n)
+    if kpi_info.as_dict:
+        return kpi_info.as_dict
     raise ValueError(f"KPI ID {n} not found in KPI_DATA")
 
-
+'''
 KPI_DATA = [
     {"id": 1, "is_certified": True, "kpi_type": "table", "name": "Call/day", "table_name": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "sum_calls", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
     {"id": 2, "is_certified": True, "kpi_type": "table", "name": "Conversion per day", "table_name": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "sum_conversion", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
@@ -361,9 +358,4 @@ KPI_DATA = [
     {"id": 17, "is_certified": True, "kpi_type": "table", "name": "E-Com - Total Sales", "table_name": "ecom_retail", "data_source": 22, "datetime_column": "date", "metric": "ItemTotalPrice", "metric_precision": 2, "aggregation": "sum", "filters": {}, "dimensions": ["DayOfWeek", "PurchaseTime", "Country"]},
     {"id": 18, "is_certified": True, "kpi_type": "table", "name": "E-Com - Average Sales", "table_name": "ecom_retail", "data_source": 22, "datetime_column": "date", "metric": "ItemTotalPrice", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["DayOfWeek", "PurchaseTime", "Country"]},
 ]
-
-DB_DIMS = {
-    "marketing_records": ["job","marital","education","housing","loan"],
-    "mh_food_prices": ["Commodity", "APMC", "district_name"],
-    "ecom_retail": ["DayOfWeek", "PurchaseTime", "Country"]
-}
+'''

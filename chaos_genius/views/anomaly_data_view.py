@@ -35,10 +35,14 @@ def kpi_anomaly_detection(kpi_id):
     current_app.logger.info(f"Anomaly Detection Started for KPI ID: {kpi_id}")
     data = []
     try:
-        kpi_info = get_kpi_data_from_id(kpi_id)
-        connection_info = DataSource.get_by_id(kpi_info["data_source"])
-        data = no_date_output
-        df = get_anomaly_df(kpi_info, connection_info.as_dict)
+        anom_data = AnomalyData.query.filter_by(
+            kpi_id=kpi_id, 
+            anomaly_type="overall"
+        ).order_by(AnomalyData.id.desc()).first().as_dict
+        data = {
+            "chart_data": anom_data["chart_data"],
+            "base_anomaly_id": anom_data["id"]
+        }
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("Anomaly Detection Done")
@@ -50,12 +54,40 @@ def kpi_anomaly_drilldown(kpi_id):
     current_app.logger.info(f"Anomaly Drilldown Started for KPI ID: {kpi_id}")
     data = []
     try:
+        base_anomaly_id = request.args.get("base_anomaly_id", None)
         date = request.args.get("date", None)
+        if base_anomaly_id is None:
+            raise ValueError(f"base_anomaly_id is not provided")
         if date is None:
             raise ValueError(f"Date is not provided")
         else:
-            date_selection_index = int(date.split("-")[0]) % 2
-            data = date_output[date_selection_index]
+            anom_data = AnomalyData.query.filter_by(
+                kpi_id=kpi_id, 
+                anomaly_type="drilldown",
+                base_anomaly_id=base_anomaly_id,
+                anomaly_timestamp=date
+            ).order_by(AnomalyData.id).all()
+            data = [i.as_dict["chart_data"] for i in anom_data]
+    except Exception as err:
+        current_app.logger.info(f"Error Found: {err}")
+    current_app.logger.info("Anomaly Drilldown Done")
+    return jsonify({"data": data, "msg": ""})
+
+
+@blueprint.route("/<int:kpi_id>/anomaly-data-quality", methods=["GET"])
+def kpi_anomaly_data_quality(kpi_id):
+    current_app.logger.info(f"Anomaly Drilldown Started for KPI ID: {kpi_id}")
+    data = []
+    try:
+        base_anomaly_id = request.args.get("base_anomaly_id", None)
+        if base_anomaly_id is None:
+            raise ValueError(f"base_anomaly_id is not provided")
+        anom_data = AnomalyData.query.filter_by(
+            kpi_id=kpi_id,
+            base_anomaly_id=base_anomaly_id, 
+            anomaly_type="data_quality"
+        ).order_by(AnomalyData.id).all()
+        data = [i.as_dict["chart_data"] for i in anom_data]
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("Anomaly Drilldown Done")

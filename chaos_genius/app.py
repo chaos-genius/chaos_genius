@@ -7,7 +7,13 @@ from flask import Flask, render_template
 from flask_cors import CORS
 
 from chaos_genius import commands
-from chaos_genius.views import data_source_view, kpi_view, public_view, anomaly_data_view
+from chaos_genius.views import (
+    data_source_view,
+    kpi_view,
+    public_view,
+    anomaly_data_view,
+    config_setting_view
+)
 from chaos_genius.extensions import (
     bcrypt,
     cache,
@@ -55,6 +61,7 @@ def register_extensions(app):
 def register_blueprints(app):
     """Register Flask blueprints."""
     app.register_blueprint(public_view.blueprint, url_prefix='/')
+    app.register_blueprint(config_setting_view.blueprint, url_prefix='/api/config')
     # TODO: Rename the api endpoint to data source
     app.register_blueprint(data_source_view.blueprint, url_prefix='/api/connection')
     app.register_blueprint(kpi_view.blueprint, url_prefix='/api/kpi')
@@ -92,6 +99,8 @@ def register_commands(app):
     app.cli.add_command(commands.lint)
     app.cli.add_command(commands.integration_connector)
     app.cli.add_command(commands.run_anomaly)
+    app.cli.add_command(commands.reinstall_db)
+    app.cli.add_command(commands.insert_demo_data)
 
 
 def configure_logger(app):

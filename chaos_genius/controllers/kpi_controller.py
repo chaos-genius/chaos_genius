@@ -3,9 +3,10 @@ import pandas as pd
 
 from chaos_genius.databases.models.anomaly_data_model import AnomalyData
 from chaos_genius.databases.models.data_source_model import DataSource
-from chaos_genius.views.kpi_view import get_anomaly_df, get_kpi_data_from_id
+from chaos_genius.views.kpi_view import get_kpi_data_from_id
+from chaos_genius.views.anomaly_data_view import get_anomaly_df
 
-from sandbox.core.anomaly.anomaly_monolithic_arch import anomaly_detection, compute_entire_multi_dim_anomaly
+from sandbox.core.anomaly.anomaly_monolithic_arch import anomaly_detection
 from sandbox.core.anomaly.anomaly_monolithic_arch import get_dq_json
 from sandbox.core.anomaly.anomaly_monolithic_arch import DEFAULT_SENSITIVITY_THRESHOLDS
 

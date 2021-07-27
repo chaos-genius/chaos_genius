@@ -29,7 +29,7 @@ from chaos_genius.databases.db_metadata import DbMetadata, get_metadata
 
 # from chaos_genius.utils import flash_errors
 
-blueprint = Blueprint("api_data_source", __name__, static_folder="../static")
+blueprint = Blueprint("api_data_source", __name__)
 
 
 @blueprint.route("/", methods=["GET", "POST"])

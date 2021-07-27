@@ -153,7 +153,6 @@ class AddKpi extends React.Component {
     }
 
     saveKpi = (payload) => {
-        console.log('--payload--', payload);
         let requestOptions = {
             method: 'POST',
             body: JSON.stringify(payload),
@@ -162,7 +161,6 @@ class AddKpi extends React.Component {
         fetch(`${BASE_URL}api/kpi/`, requestOptions)
             .then(response => response.json())
             .then(data => {
-                console.log(data);
                 this.props.history.push('/kpi');
             }).catch(error => {
                 console.log(error);

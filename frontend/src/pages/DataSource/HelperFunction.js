@@ -78,11 +78,9 @@ const renderBooleanField = (field, textType, formData, formError, handleBooleanC
 }
 export const renderInputFields = (props, handleInputChange, handleBooleanChange) => {
     const { properties, formData, formError } = props;
-    // console.log("formData",formData)
     let fields = [];
     if (Object.keys(properties).length > 0) {
         Object.entries(properties).forEach((obj) => {
-            // console.log("objjj", obj)
             switch (obj[1]['type']) {
                 case "string":
                     fields.push(renderTextField(obj, "text", formData, formError, handleInputChange))
@@ -98,7 +96,6 @@ export const renderInputFields = (props, handleInputChange, handleBooleanChange)
             }
         })
     }
-    // console.log(fields)
     return (
         <>
             {fields}
@@ -142,7 +139,6 @@ export const tab1Fields = (props, handleAutoComplete, handleInputAutoComplete) =
     )
 }
 export const renderlogs = (logs) => {
-    // console.log("logs", logs.logLines)
     const logsfield = []
 
     logs.logLines.map((obj) => {

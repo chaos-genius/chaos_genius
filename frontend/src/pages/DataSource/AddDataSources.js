@@ -58,7 +58,6 @@ class AddDataSources extends React.Component {
     }
 
     handleInputChange = (e, key) => {
-        // console.log(e.target)
         const value = e.target.value;
         const setObj = this.state.formData;
 
@@ -96,7 +95,6 @@ class AddDataSources extends React.Component {
 
     filterProperties = () => {
         const { connectionTypes, connection } = this.state;
-        // console.log("connectionTypes",connectionTypes)
         let renderData = [];
         if (Object.keys(connectionTypes).length > 0) {
             renderData = connectionTypes.filter((obj) => {

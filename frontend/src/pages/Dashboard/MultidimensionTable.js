@@ -13,10 +13,8 @@ class MultidimensionTable extends React.Component {
         }
     }
     ValueChange = (value) => {
-        // console.log("value", value)
         const valueIcon = value < 0 ? faAngleDown : faAngleUp;
         const valueTxtColor = value < 0 ? "text-danger" : "text-success";
-        // console.log(typeof value)
         return (
             (value) ? (
                 <span className={valueTxtColor}>
@@ -30,7 +28,6 @@ class MultidimensionTable extends React.Component {
     };
 
     render() {
-        // console.log("tableData",this.props.tableData)
         if (Object.keys(this.props.tableData).length > 0) {
             this.props.tableData.map((obj) => {
                 if (obj?.impact_full_group) {

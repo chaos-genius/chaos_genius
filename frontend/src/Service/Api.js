@@ -61,10 +61,8 @@ export default class Api {
     });
     service.interceptors.response.use(handleSuccess, handleError);
     this.service = service;
-    // console.log('this._source', this.service);
   }
   get(path) {
-    // console.log('store',store);
     return this.service.get(path);
   }
   delete(path, payload) {

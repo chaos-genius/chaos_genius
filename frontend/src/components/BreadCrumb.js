@@ -21,7 +21,6 @@ function toTitleCase(value) {
 export default function BreadCrumb() {
     let location = useLocation();
     const pathnames = location.pathname.split('/').filter((x) => x);
-    console.log("pathnames", pathnames)
     return (
         <Breadcrumbs aria-label="breadcrumb" className="custom-breadcrumb">
             <Link color="inherit" href="/" >Home</Link>

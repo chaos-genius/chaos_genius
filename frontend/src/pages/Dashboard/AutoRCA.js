@@ -366,7 +366,6 @@ class Dashboard extends React.Component {
     }
     handleChangeOverlap = (e) => {
         const isChecked = e.target.checked;
-        // console.log("isChecked",isChecked)
         this.setState({
             overlap: isChecked
         })

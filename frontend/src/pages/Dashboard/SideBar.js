@@ -29,7 +29,6 @@ class SideBar extends React.Component {
     render() {
         // const {kpiData}=this.state;
         const { handleKpiChange, kpiData, kpiID } = this.props;
-        // console.log("kpi", kpiID)
         return (
             <Card className="kpi-sidebar">
                 <CardContent>

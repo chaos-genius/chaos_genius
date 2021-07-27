@@ -27,8 +27,6 @@ import { ThreeSixty } from "@material-ui/icons";
 am4core.useTheme(am4themes_animated);
 
 
-
-
 const AntSwitch = withStyles((theme) =>
     createStyles({
         root: {
@@ -63,6 +61,7 @@ const AntSwitch = withStyles((theme) =>
         checked: {},
     }),
 )(Switch);
+
 class Dashboard extends React.Component {
 
     constructor(props) {
@@ -86,16 +85,15 @@ class Dashboard extends React.Component {
             overlap: false,
             overlapTableData: [],
             dataCol: []
-
         }
-
     }
+
     fetchKpiAggegation = () => {
         const { kpi, timeline } = this.props;
         if (kpi !== 0) {
             this.setState({
                 cardDataLoader: true
-            })
+            });
             fetch(`${BASE_URL}/api/kpi/${kpi}/kpi-aggregations?timeline=${timeline}`)
                 .then(response => response.json())
                 .then(respData => {
@@ -103,15 +101,15 @@ class Dashboard extends React.Component {
                     if (data?.panel_metrics) {
                         this.setState({
                             cardData: data.panel_metrics,
-                        })
+                        });
                     }
                     this.setState({
                         cardDataLoader: false
-                    })
+                    });
                 });
             this.setState({
                 cardDataLoader: true
-            })
+            });
             fetch(`${BASE_URL}/api/kpi/${kpi}/kpi-line-data?timeline=${timeline}`)
                 .then(response => response.json())
                 .then(respData => {
@@ -121,16 +119,15 @@ class Dashboard extends React.Component {
                             lineChartData: data,
                         }, () => {
                             this.plotLineChart();
-                        })
+                        });
                     }
                     this.setState({
                         cardDataLoader: false
-                    })
+                    });
                 });
-
-
         }
     }
+
     handleKpiChange = (e) => {
         const targetComponent = e.target;
         const componentValue = targetComponent.id;
@@ -143,21 +140,24 @@ class Dashboard extends React.Component {
             this.fetchKpiAggegation();
             this.plotLineChart();
             this.fetchDimensionData();
-        })
+        });
     }
+
     handleDimensionType = (e) => {
         const targetComponent = e.target;
         this.setState({
             dimensionType: targetComponent.value
         }, () => {
             this.fetchDimensionData();
-        })
+        });
     }
+
     handleTimelineChange = (e) => {
-        this.props.handleTimelineChange(e)
+        this.props.handleTimelineChange(e);
     }
+
     fetchDimensionData = () => {
-        this.setState({ loading: true })
+        this.setState({ loading: true });
         fetch(`${BASE_URL}/api/kpi/${this.props.kpi}/get-dimensions`)
             .then(response => response.json())
             .then(data => {
@@ -171,7 +171,8 @@ class Dashboard extends React.Component {
                     this.fetchAnalysisData();
                 })
             });
-    }
+    };
+
     handleDimensionChange = (e, type, newValue) => {
         const targetComponent = e.target;
         let targetValue = this.state.dimension;
@@ -185,23 +186,23 @@ class Dashboard extends React.Component {
                 })
             }
         }
-
         this.setState({
             dimension: targetValue,
             tableData: []
         }, () => {
             this.fetchAnalysisData();
-        })
+        });
     }
+
     fetchAnalysisData = () => {
-        const {kpi, timeline} =this.props
+        const {kpi, timeline} =this.props;
         const {  dimension, tabState, dimensionType } = this.state;
         let dimensionStr = ""
         if (dimensionType !== "multidimension") {
             dimensionStr = `&dimension=${dimension}`
         }
         if (kpi !== 0) {
-            this.setState({ loading: true })
+            this.setState({ loading: true });
             fetch(`${BASE_URL}/api/kpi/${kpi}/rca-hierarchical-data?timeline=${timeline}${dimensionStr}`)
                 .then(response => response.json())
                 .then(respData => {
@@ -213,9 +214,6 @@ class Dashboard extends React.Component {
                         })
                     }
                 });
-
-
-            this.setState({ loading: true })
             fetch(`${BASE_URL}/api/kpi/${kpi}/rca-analysis?timeline=${timeline}${dimensionStr}`)
                 .then(response => response.json())
                 .then(respData => {
@@ -230,10 +228,9 @@ class Dashboard extends React.Component {
                             loading: false
                         }, () => {
                             this.plotChart();
-                        })
+                        });
                     }
                 });
-
         }
     }
 
@@ -345,6 +342,7 @@ class Dashboard extends React.Component {
             ]
         });
     }
+
     componentDidUpdate(prevProps){
         if (this.props.kpi !== prevProps.kpi || this.props.timeline !== prevProps.timeline) {
             this.fetchKpiAggegation();
@@ -353,17 +351,20 @@ class Dashboard extends React.Component {
             this.setDataColumns();
         }
     }
+
     componentDidMount() {
         this.fetchKpiAggegation();
         this.fetchDimensionData();
         this.fetchAnalysisData();
         this.setDataColumns();
     }
+
     tabHousingChart = () => {
         return (
             <div id="chartdivWaterfall" style={{ width: "100%", height: "500px", paddingTop: "60px" }}></div>
         )
     }
+
     handleChangeOverlap = (e) => {
         const isChecked = e.target.checked;
         this.setState({
@@ -435,6 +436,7 @@ class Dashboard extends React.Component {
         }
 
     }
+
     render() {
         const tabChartData = [];
         if (this.state.dimensionData) {

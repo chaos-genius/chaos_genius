@@ -71,7 +71,6 @@ def kpi_get_dimensions(kpi_id):
     return jsonify({"dimensions": dimensions, "msg": ""})
 
 @blueprint.route("/<int:kpi_id>/kpi-aggregations", methods=["GET"])
-@cache.memoize(timeout=30000)
 def kpi_get_aggregation(kpi_id):
     data = []
     try:
@@ -84,7 +83,6 @@ def kpi_get_aggregation(kpi_id):
     return jsonify({"data": data, "msg": ""})
 
 @blueprint.route("/<int:kpi_id>/kpi-line-data", methods=["GET"])
-@cache.memoize(timeout=30000)
 def kpi_get_line_data(kpi_id):
     data = []
     try:
@@ -97,7 +95,6 @@ def kpi_get_line_data(kpi_id):
     return jsonify({"data": data, "msg": ""})
 
 @blueprint.route("/<int:kpi_id>/rca-analysis", methods=["GET"])
-@cache.memoize(timeout=30000)
 def kpi_rca_analysis(kpi_id):
     current_app.logger.info(f"RCA Analysis Started for KPI ID: {kpi_id}")
     data = []
@@ -113,7 +110,6 @@ def kpi_rca_analysis(kpi_id):
     return jsonify({"data": data, "msg": ""})
 
 @blueprint.route("/<int:kpi_id>/rca-hierarchical-data", methods=["GET"])
-@cache.memoize(timeout=30000)
 def kpi_rca_hierarchical_data(kpi_id):
     current_app.logger.info(f"RCA Analysis Started for KPI ID: {kpi_id}")
     data = []
@@ -187,6 +183,8 @@ def process_rca_output(chart_data, kpi_info):
     df = df.fillna(np.nan).replace([np.nan], [None])
     return df.to_dict(orient= "records")
 
+
+@cache.memoize(timeout=30000)
 def kpi_aggregation(kpi_info, connection_info, timeline="mom"):
     try:
         base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, timeline)
@@ -218,6 +216,7 @@ def kpi_aggregation(kpi_info, connection_info, timeline="mom"):
     return final_data
 
 
+@cache.memoize(timeout=30000)
 def kpi_line_data(kpi_info, connection_info, timeline="mom"):
     metric = kpi_info["metric"]
     dt_col = kpi_info["datetime_column"]
@@ -248,6 +247,7 @@ def kpi_line_data(kpi_info, connection_info, timeline="mom"):
     return output.to_dict(orient="records")
 
 
+@cache.memoize(timeout=30000)
 def rca_analysis(kpi_info, connection_info, timeline="mom", dimension= None):
     try:
         base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, timeline)
@@ -291,6 +291,8 @@ def rca_analysis(kpi_info, connection_info, timeline="mom", dimension= None):
         }
     return final_data
 
+
+@cache.memoize(timeout=30000)
 def rca_hierarchical_data(kpi_info, connection_info, timeline="mom", dimension= None):
     try:
         base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, timeline)

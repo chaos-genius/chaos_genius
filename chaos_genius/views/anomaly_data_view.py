@@ -53,7 +53,6 @@ def kpi_anomaly_detection(kpi_id):
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-drilldown", methods=["GET"])
-@cache.memoize(timeout=30000)
 def kpi_anomaly_drilldown(kpi_id):
     current_app.logger.info(f"Anomaly Drilldown Started for KPI ID: {kpi_id}")
     data = []
@@ -79,7 +78,6 @@ def kpi_anomaly_drilldown(kpi_id):
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-data-quality", methods=["GET"])
-@cache.memoize(timeout=30000)
 def kpi_anomaly_data_quality(kpi_id):
     current_app.logger.info(f"Anomaly Drilldown Started for KPI ID: {kpi_id}")
     data = []

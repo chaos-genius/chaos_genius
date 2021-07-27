@@ -17,7 +17,7 @@ import RcaAnalysisTable from '../../components/DashboardTable';
 import { BASE_URL, DEFAULT_HEADERS } from '../../config/Constants'
 import { withStyles, Theme, createStyles } from '@material-ui/core/styles';
 
-import Anomolies from './Anomolies';
+import Anomaly from './Anomaly';
 // Am4charts
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";

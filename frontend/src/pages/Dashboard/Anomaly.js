@@ -99,119 +99,114 @@ class Anomaly extends Component {
         let chartdata = [];
         const { graphData } = this.state;
 
-        graphData.forEach((graphData, i) => {
-            let zones = this.findAnomalyZones(graphData.intervals, graphData.values);
-
-            let demoChart = {
-                chart: {
-                    zoomType: "x,y",
-                    selectionMarkerFill: "rgba(37, 204, 123, 0.25)",
-                },
+        let demoChart = {
+            chart: {
+                zoomType: "x,y",
+                selectionMarkerFill: "rgba(37, 204, 123, 0.25)",
+            },
+            title: {
+                text: graphData.title,
+            },
+            xAxis: {
+                type: "datetime",
                 title: {
-                    text: graphData.title,
+                    text: graphData.x_axis_label,
                 },
-                xAxis: {
-                    type: "datetime",
-                    title: {
-                        text: graphData.x_axis_label,
+            },
+            yAxis: {
+                title: {
+                    text: graphData.y_axis_label,
+                },
+            },
+            tooltip: {
+                crosshairs: true,
+                shared: true,
+                valueSuffix: null,
+            },
+            plotOptions: {
+                series: {
+                    marker: {
+                        enabled: false
                     },
-                },
-                yAxis: {
-                    title: {
-                        text: graphData.y_axis_label,
-                    },
-                },
-                tooltip: {
-                    crosshairs: true,
-                    shared: true,
-                    valueSuffix: null,
-                },
-                plotOptions: {
-                    series: {
-                        marker: {
-                            enabled: false
-                        },
-                        cursor: 'pointer',
-                        point: {
-                            events: {
-                                click: (event) => this.handleGraphClick(event),
-                                // click:  function () {
-                                //     // alert('title: ' + this);
-                                //     console.log("this",this)
-                                // //    this.handleGraphClick(this.x)
-                                // }
-                            }
+                    cursor: 'pointer',
+                    point: {
+                        events: {
+                            click: (event) => this.handleGraphClick(event),
+                            // click:  function () {
+                            //     // alert('title: ' + this);
+                            //     console.log("this",this)
+                            // //    this.handleGraphClick(this.x)
+                            // }
                         }
                     }
-                },
-                legend: {
-                    enabled: false,
-                    borderWidth: 1,
-                    padding: 20,
-                    title: {
-                        text: 'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
-                        style: {
-                            fontStyle: "italic",
-                        },
+                }
+            },
+            legend: {
+                enabled: false,
+                borderWidth: 1,
+                padding: 20,
+                title: {
+                    text: 'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
+                    style: {
+                        fontStyle: "italic",
                     },
                 },
-                series: [
-                    {
-                        name: "Confidence Interval",
-                        id: "Confidence Interval",
-                        data: graphData.intervals,
-                        type: "arearange",
-                        lineWidth: 0,
-                        linkedTo: ":previous",
-                        color: "#29A374",
-                        fillOpacity: 0.2,
-                        zIndex: 0,
-                        marker: {
-                            fillColor: "grey",
-                            enabled: false,
-                            symbol: "diamond",
-                        },
+            },
+            series: [
+                {
+                    name: "Confidence Interval",
+                    id: "Confidence Interval",
+                    data: graphData.intervals,
+                    type: "arearange",
+                    lineWidth: 0,
+                    linkedTo: ":previous",
+                    color: "#29A374",
+                    fillOpacity: 0.2,
+                    zIndex: 0,
+                    marker: {
+                        fillColor: "grey",
+                        enabled: false,
+                        symbol: "diamond",
                     },
-                    {
-                        name: "Value",
-                        id: "value",
-                        zoneAxis: "x",
-                        zones: zones,
-                        data: graphData.values,
-                        zIndex: 2,
-                        color: "#25cc7b",
-                        marker: {
-                            fillColor: "white",
-                            lineWidth: 1,
-                            lineColor: "grey",
-                            symbol: "circle",
-                        },
+                },
+                {
+                    name: "Value",
+                    id: "value",
+                    zoneAxis: "x",
+                    zones: zones,
+                    data: graphData.values,
+                    zIndex: 2,
+                    color: "#25cc7b",
+                    marker: {
+                        fillColor: "white",
+                        lineWidth: 1,
+                        lineColor: "grey",
+                        symbol: "circle",
                     },
-                    {
-                        name: "Predicted Value",
-                        id: "predicted_value",
-                        visible: false,
-                        type: "line",
-                        data: graphData.predicted_values,
-                        zIndex: 1,
-                        color: "#02964e",
-                        dashStyle: "Dash",
-                        opacity: 0.5,
-                        marker: {
-                            fillColor: "gray",
-                            lineWidth: 1,
-                            radius: 2,
-                            lineColor: "white",
-                            enabled: false,
-                            symbol: "circle",
-                        },
+                },
+                {
+                    name: "Predicted Value",
+                    id: "predicted_value",
+                    visible: false,
+                    type: "line",
+                    data: graphData.predicted_values,
+                    zIndex: 1,
+                    color: "#02964e",
+                    dashStyle: "Dash",
+                    opacity: 0.5,
+                    marker: {
+                        fillColor: "gray",
+                        lineWidth: 1,
+                        radius: 2,
+                        lineColor: "white",
+                        enabled: false,
+                        symbol: "circle",
                     },
-                ],
-            }
-            chartdata.push(demoChart)
-        })
+                },
+            ],
+        }
         this.setState({
-            chartData: chartdata
+            chartData: demoChart
         });
     }
 
@@ -303,7 +298,7 @@ class Anomaly extends Component {
                         </Grid>
                         <HighchartsReact
                             highcharts={Highcharts}
-                            options={this.state.chartData[0]}
+                            options={this.state.chartData}
                         />
                     </CardContent>
                 </Card>

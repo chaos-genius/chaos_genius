@@ -20,7 +20,7 @@ from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.views.kpi_view import get_kpi_data_from_id
 
 
-blueprint = Blueprint("anomaly_data", __name__, static_folder="../static")
+blueprint = Blueprint("anomaly_data", __name__)
 
 
 @blueprint.route("/", methods=["GET"])

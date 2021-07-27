@@ -13,6 +13,7 @@ from flask import (
     jsonify
 )
 
+from chaos_genius.extensions import cache
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.core.anomaly.constants import date_output, no_date_output
 from chaos_genius.databases.models.anomaly_data_model import AnomalyData
@@ -24,6 +25,7 @@ blueprint = Blueprint("anomaly_data", __name__)
 
 
 @blueprint.route("/", methods=["GET"])
+@cache.cached(timeout=30000)
 def list_anomaly_data():
     """List the anomaly data."""
     data = AnomalyData.query.all()
@@ -31,6 +33,7 @@ def list_anomaly_data():
     return jsonify({"data": results})
 
 @blueprint.route("/<int:kpi_id>/anomaly-detection", methods=["GET"])
+@cache.cached(timeout=30000)
 def kpi_anomaly_detection(kpi_id):
     current_app.logger.info(f"Anomaly Detection Started for KPI ID: {kpi_id}")
     data = []
@@ -50,6 +53,7 @@ def kpi_anomaly_detection(kpi_id):
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-drilldown", methods=["GET"])
+@cache.cached(timeout=30000)
 def kpi_anomaly_drilldown(kpi_id):
     current_app.logger.info(f"Anomaly Drilldown Started for KPI ID: {kpi_id}")
     data = []
@@ -75,6 +79,7 @@ def kpi_anomaly_drilldown(kpi_id):
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-data-quality", methods=["GET"])
+@cache.cached(timeout=30000)
 def kpi_anomaly_data_quality(kpi_id):
     current_app.logger.info(f"Anomaly Drilldown Started for KPI ID: {kpi_id}")
     data = []

@@ -17,7 +17,7 @@ from flask import (
 import numpy as np
 import pandas as pd
 
-# from chaos_genius.utils import flash_errors
+from chaos_genius.extensions import cache
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.core.rca import RootCauseAnalysis
@@ -60,6 +60,7 @@ def kpi():
         return jsonify({"count": len(results), "data": results})
 
 @blueprint.route("/<int:kpi_id>/get-dimensions", methods=["GET"])
+@cache.cached(timeout=30000)
 def kpi_get_dimensions(kpi_id):
     dimensions = []
     try:
@@ -70,6 +71,7 @@ def kpi_get_dimensions(kpi_id):
     return jsonify({"dimensions": dimensions, "msg": ""})
 
 @blueprint.route("/<int:kpi_id>/kpi-aggregations", methods=["GET"])
+@cache.cached(timeout=30000)
 def kpi_get_aggregation(kpi_id):
     data = []
     try:
@@ -82,6 +84,7 @@ def kpi_get_aggregation(kpi_id):
     return jsonify({"data": data, "msg": ""})
 
 @blueprint.route("/<int:kpi_id>/kpi-line-data", methods=["GET"])
+@cache.cached(timeout=30000)
 def kpi_get_line_data(kpi_id):
     data = []
     try:
@@ -94,6 +97,7 @@ def kpi_get_line_data(kpi_id):
     return jsonify({"data": data, "msg": ""})
 
 @blueprint.route("/<int:kpi_id>/rca-analysis", methods=["GET"])
+@cache.cached(timeout=30000)
 def kpi_rca_analysis(kpi_id):
     current_app.logger.info(f"RCA Analysis Started for KPI ID: {kpi_id}")
     data = []
@@ -109,6 +113,7 @@ def kpi_rca_analysis(kpi_id):
     return jsonify({"data": data, "msg": ""})
 
 @blueprint.route("/<int:kpi_id>/rca-hierarchical-data", methods=["GET"])
+@cache.cached(timeout=30000)
 def kpi_rca_hierarchical_data(kpi_id):
     current_app.logger.info(f"RCA Analysis Started for KPI ID: {kpi_id}")
     data = []

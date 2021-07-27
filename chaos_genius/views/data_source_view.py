@@ -15,6 +15,7 @@ from flask import (
     jsonify
 )
 
+from chaos_genius.extensions import cache
 from chaos_genius.utils.connector_helper import DATA_SOURCE_ABBREVIATION
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.extensions import integration_connector as connector
@@ -63,6 +64,7 @@ def data_source():
 
 
 @blueprint.route("/types", methods=["GET"])
+@cache.cached(timeout=30000)
 def list_data_source_type():
     """DataSource Type view."""
     connection_types, msg = [], ""

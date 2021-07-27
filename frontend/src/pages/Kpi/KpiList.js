@@ -20,18 +20,7 @@ class KpiList extends React.Component {
     super(props)
 
     this.state = {
-      kpi: 0,
-      kpiName: "",
       kpiData: [],
-      tableData: [
-        {
-          'name': 'My SQL Demo',
-          'data-source': 'Google Analytics',
-          'last-modified': '12/03/2020',
-          'certified': 'Yes',
-          'owner': 'Austin'
-        }
-      ],
       isRedirect: false
     }
   }
@@ -48,20 +37,17 @@ class KpiList extends React.Component {
       .then(response => response.json())
       .then(data => {
         if (data?.data) {
-          if (data.data?.[0]['id']) {
-            this.setState({
-              kpi: data.data[0]['id'],
-              kpiName: data.data[0]['name'],
-              kpiData: data.data,
-              // loading: false
-            })
-          }
+          console.log(data.data);
+          this.setState({
+            kpiData: data.data
+          })
         }
       });
   }
-  handleKpiChange = (e) => {
 
+  handleKpiChange = (e) => {
   }
+
   renderTable = () => {
     return (
 
@@ -70,19 +56,17 @@ class KpiList extends React.Component {
           <CustomTable
             columns={[
               { title: 'KPI Name', field: 'name' },
-              { title: 'Data Source', field: 'data-source' },
-              { title: 'Last Modified', field: 'last-modified' },
-              { title: 'Certified', field: 'certified' },
-              { title: 'Owner', field: 'owner' }
+              { title: 'Data Source ID', field: 'data_source' },
+              { title: 'Certified', field: 'is_certified' },
+              { title: 'Created At', field: 'created_at' }
             ]}
-            data={this.state.tableData}
+            data={this.state.kpiData}
             title=""
             options={{
               paginationType: "stepped",
               showTitle: false,
               search: false,
               toolbar: false,
-              // searchFieldAlignment: 'left',
               paging: false
             }}
           />
@@ -108,7 +92,7 @@ class KpiList extends React.Component {
       <Container maxWidth="lg">
         <Grid container spacing={3}>
           <Grid item xs={9}>
-            <Typography component="h4" className="page-title">KPI Explorer</Typography>
+            <Typography component="h4" className="page-title">KPI</Typography>
           </Grid>
           <Grid item xs={3} justify="flex-end">
             <Button href="/#/kpi/new" variant="primary" className="btn btn-primary btn-toolbar pull-right" ><ControlPoint className="btn-icon" /> New KPI</Button>
@@ -117,7 +101,7 @@ class KpiList extends React.Component {
         <Grid container spacing={2}>
           <Grid item xs={3} className="custom-col-3">
             {(Object.keys(this.state.kpiData).length > 0) ? (
-              <SideBar handleKpiChange={this.handleKpiChange} kpiData={this.state.kpiData} kpiID={this.state.kpi} />
+              <SideBar handleKpiChange={this.handleKpiChange} key={this.state.kpiData} kpiData={this.state.kpiData}/>
             ) : ("")}
           </Grid>
           <Grid item xs={9} className="tab-with-borders custom-col-9">

@@ -18,9 +18,9 @@ class AnomalyData(PkModel):
     anomaly_timestamp = Column(db.BigInteger)
     created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
 
-    def __init__(self, name, **kwargs):
+    def __init__(self, **kwargs):
         """Create instance."""
-        super().__init__(name=name, **kwargs)
+        super().__init__(**kwargs)
 
     def __repr__(self):
         """Represent instance as a unique string."""

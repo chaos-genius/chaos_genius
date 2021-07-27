@@ -17,7 +17,7 @@ import RcaAnalysisTable from '../../components/DashboardTable';
 import { BASE_URL, DEFAULT_HEADERS } from '../../config/Constants'
 import { withStyles, Theme, createStyles } from '@material-ui/core/styles';
 
-import Anomolies from './Anomolies';
+import Anomaly from './Anomaly';
 import AutoRCA from './AutoRCA';
 
 class Dashboard extends React.Component {
@@ -75,8 +75,8 @@ class Dashboard extends React.Component {
       "title": "AutoRCA",
       "body": (this.state.kpi > 0)?(<AutoRCA kpi={this.state.kpi} timeline={this.state.timeline} kpiName={this.state.kpiName} handleTimelineChange={this.handleTimelineChange}  />):("")
     },{
-      "title": "Anomolies",
-      "body": (this.state.kpi > 0)?(<Anomolies kpi={this.state.kpi} timeline={this.state.timeline} />):("")
+      "title": "Anomaly",
+      "body": (this.state.kpi > 0)?(<Anomaly kpi={this.state.kpi} timeline={this.state.timeline} />):("")
     }];
 
     return (

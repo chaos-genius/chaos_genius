@@ -6,6 +6,7 @@ Flask==2.0.0
 Werkzeug==2.0.0
 click>=7.0
 flask-cors==3.0.10 # TODO: Remove the CORS
+colorama==0.4.4
 
 # Database
 Flask-SQLAlchemy==2.5.1

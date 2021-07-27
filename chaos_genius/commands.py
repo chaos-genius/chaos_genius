@@ -91,3 +91,39 @@ def run_anomaly(kpi):
     from chaos_genius.controllers.kpi_controller import run_anomaly_for_kpi
     status = run_anomaly_for_kpi(kpi)
     click.echo(f"Completed the anomaly for KPI ID: {kpi}.")
+
+
+@click.command()
+@with_appcontext
+def reinstall_db():
+    """Delete the db and reinstall again."""
+    from chaos_genius.settings import META_DATABASE
+    from chaos_genius.extensions import db
+    from chaos_genius.databases.demo_data import install_demo_db
+    if click.confirm(click.style(f"Do you want to delete and reinstall the database: {META_DATABASE}?", fg="red", bold=True)):
+        click.echo('Deleting the database...')
+        db.drop_all()
+        db.create_all()
+        click.echo('Reinstalled the database')
+        install_demo_data()
+    else:
+        click.echo('Aborting the reinstall...')
+
+
+@click.command()
+@with_appcontext
+def insert_demo_data():
+    """Insert the demo data."""
+    install_demo_data()
+
+
+def install_demo_data():
+    from chaos_genius.databases.demo_data import install_demo_db
+    if click.confirm(click.style(f"Do you want to insert the demo data?")):
+        status = install_demo_db()
+        if status:
+            click.echo('Inserted the demo data')
+        else:
+            click.echo('Demo Data insertion failed')
+    else:
+        click.echo('Aborting the demo data insertion.')

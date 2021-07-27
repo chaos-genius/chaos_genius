@@ -519,9 +519,10 @@ def format_anomaly_data_for_js_graph(
     if dq_metric:
         print("ENTERING DQ METRIC")
         graph_data = {
-            'title': f'{dq_metric} using {algo_used}',
-            'y_axis_label': f'{agg_type.capitalize()} of {freq} {kpi_column_name}',
-            'x_axis_label': 'Datetime',
+            'title': f'{dq_metric}',
+            # 'y_axis_label': f'{agg_type.capitalize()} of {freq} {kpi_column_name}',
+            'y_axis_label': kpi_column_name,
+            'x_axis_label': 'Time',
             'sub_dimension': dq_metric,
             'intervals': [],
             'values': [],
@@ -538,9 +539,10 @@ def format_anomaly_data_for_js_graph(
         print("Entering overall KPI")
         graphs = []
         graph_data = {
-            'title': f'overall KPI using {algo_used}',
-            'y_axis_label': f'{agg_type.capitalize()} of {freq} {kpi_column_name}',
-            'x_axis_label': 'Datetime',
+            'title': f'Overall KPI',
+            # 'y_axis_label': f'{agg_type.capitalize()} of {freq} {kpi_column_name}',
+            'y_axis_label': kpi_column_name,
+            'x_axis_label': 'Time',
             'sub_dimension': "overall_kpi",
             'intervals': [],
             'values': [],
@@ -564,9 +566,10 @@ def format_anomaly_data_for_js_graph(
             ]
             for sub_dim in df_anomaly.sort_values(by="severity", ascending=False)['sub_dimension'].unique()[:top_n_subdim]:
                 graph_data = {
-                    'title': f'{sub_dim} using {algo_used}',
-                    'y_axis_label': f'{agg_type.capitalize()} of {freq} {kpi_column_name}',
-                    'x_axis_label': 'Datetime',
+                    'title': f'Drilldown: {sub_dim}',
+                    # 'y_axis_label': f'{agg_type.capitalize()} of {freq} {kpi_column_name}',
+                    'y_axis_label': kpi_column_name,
+                    'x_axis_label': 'Time',
                     'sub_dimension': sub_dim,
                     'intervals': [],
                     'values': [],
@@ -598,9 +601,10 @@ def format_anomaly_data_for_js_graph(
             # graphs=[]
             for sub_dim in anomaly_date_sub_dim:
                 graph_data = {
-                    'title': f'{sub_dim} using {algo_used}',
-                    'y_axis_label': f'{agg_type.capitalize()} of {freq} {kpi_column_name}',
-                    'x_axis_label': 'Datetime',
+                    'title': f'Drilldown: {sub_dim}',
+                    # 'y_axis_label': f'{agg_type.capitalize()} of {freq} {kpi_column_name}',
+                    'y_axis_label': kpi_column_name,
+                    'x_axis_label': 'Time',
                     'sub_dimension': sub_dim,
                     'intervals': [],
                     'values': [],

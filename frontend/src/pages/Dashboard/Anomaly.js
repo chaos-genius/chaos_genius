@@ -98,6 +98,7 @@ class Anomaly extends Component {
     renderChart = () => {
         let chartdata = [];
         const { graphData } = this.state;
+        let zones = this.findAnomalyZones(graphData.intervals, graphData.values);
 
         let demoChart = {
             chart: {

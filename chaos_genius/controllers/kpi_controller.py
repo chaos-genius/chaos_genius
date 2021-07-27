@@ -60,14 +60,13 @@ def run_anomaly_for_kpi(kpi_id: int) -> bool:
     overall_anom_data = AnomalyData(
         kpi_id = kpi_id,
         anomaly_type = "overall",
-        chart_data = overall_anom_graph,
+        chart_data = overall_anom_graph[0],
         severity_score = overall_anom_score
     )
     overall_anom_data.save(commit= True)
 
     # Get base id
-    base_id = 0
-    # base_id = overall_anom_data.id
+    base_id = overall_anom_data.id
 
     # find anomalous points
     anom_points = [i[0] for i in overall_severity if i[1] > 0]

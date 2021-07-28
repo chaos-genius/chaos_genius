@@ -1,4 +1,7 @@
 import os
+from typing import Union
+
+import pandas as pd
 
 # Required to supress pystan output while running facebook's prophet
 # from https://github.com/facebook/prophet/issues/223
@@ -29,3 +32,27 @@ class suppress_stdout_stderr(object):
         # Close the null files
         for fd in self.null_fds + self.save_fds:
             os.close(fd)
+
+
+def round_number(n: float) -> Union[int, float]:
+    abs_n = abs(n)
+    if abs_n >= 10000:
+        return round(n)
+    elif abs_n >= 100:
+        return round(n, 1)
+    elif abs_n >= 1:
+        return round(n, 2)
+    else:
+        return round(n, 3)
+
+def round_series(series: pd.Series) -> pd.Series:
+    if series.dtype != object:
+        return series.apply(lambda x: round_number(x))
+    else:
+        return series
+
+def round_df(df: pd.DataFrame) -> pd.DataFrame:
+    new_df = df.copy()
+    for col in new_df.columns:
+        new_df[col] = round_series(new_df[col])
+    return new_df

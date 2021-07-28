@@ -16,6 +16,8 @@ from .rca_utils.string_helpers import convert_query_string_to_user_string
 from .rca_utils.waterfall_utils import get_waterfall_ylims, waterfall_plot_mpl
 from .rca_utils.waterfall_utils import get_best_subgroups_using_superset_algo
 
+from chaos_genius.core.utils import round_df, round_number
+
 try:
     from IPython.display import display
 except ModuleNotFoundError:
@@ -478,15 +480,14 @@ class RootCauseAnalysis():
         d1_metrics, d2_metrics = panel_metrics
 
         panel_metrics = {
-            "grp1_metrics": {k: round(v, self._precision) for k, v in d1_metrics.items()},
-            "grp2_metrics": {k: round(v, self._precision) for k, v in d2_metrics.items()},
+            "grp1_metrics": {k: round_number(v) for k, v in d1_metrics.items()},
+            "grp2_metrics": {k: round_number(v) for k, v in d2_metrics.items()},
             "impact": OrderedDict()
         }
 
         for metric in panel_metrics["grp1_metrics"].keys():
             metric_impact = d2_metrics[metric] - d1_metrics[metric]
-            panel_metrics["impact"][metric] = round(
-                metric_impact, self._precision)
+            panel_metrics["impact"][metric] = round_number(metric_impact)
 
         return panel_metrics
 
@@ -506,7 +507,7 @@ class RootCauseAnalysis():
         impact_table["string"] = \
             impact_table["string"].apply(convert_query_string_to_user_string)
 
-        return impact_table.round(self._precision).to_dict("records")
+        return round_df(impact_table).to_dict("records")
 
     def get_impact_rows_with_columns(
         self, single_dim=None
@@ -546,7 +547,7 @@ class RootCauseAnalysis():
         best_subgroups["string"] = \
             best_subgroups["string"].apply(convert_query_string_to_user_string)
 
-        return best_subgroups.round(self._precision).to_dict("records")
+        return round_df(best_subgroups).to_dict("records")
 
     def get_waterfall_plot_data(
         self,
@@ -571,8 +572,8 @@ class RootCauseAnalysis():
             waterfall_df["category"].apply(convert_query_string_to_user_string)
 
         return (
-            waterfall_df.round(self._precision).to_dict("records"),
-            [round(i, self._precision) for i in y_axis_lims]
+            round_df(waterfall_df).to_dict("records"),
+            [round_number(i) for i in y_axis_lims]
         )
 
     def get_hierarchical_table(
@@ -617,7 +618,7 @@ class RootCauseAnalysis():
         output_table["string"] = \
             output_table["string"].apply(convert_query_string_to_user_string)
 
-        return output_table.round(self._precision).to_dict("records")
+        return round_df(output_table).to_dict("records")
 
 
 if __name__ == "__main__":

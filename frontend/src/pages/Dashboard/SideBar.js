@@ -5,7 +5,7 @@ import {
     Button, Typography, InputLabel, MenuItem,
     FormControl, Select, CircularProgress, TextField
 } from '@material-ui/core';
-import { ChevronRight } from '@material-ui/icons';
+import { ChevronRight, LensTwoTone } from '@material-ui/icons';
 
 
 
@@ -28,11 +28,14 @@ class SideBar extends React.Component {
 
     render() {
         // const {kpiData}=this.state;
-        const { handleKpiChange, kpiData, kpiID } = this.props;
+        let { handleKpiChange, kpiData, kpiID, sidebarName } = this.props;
+        if (!sidebarName) {
+            sidebarName = "KPI";
+        }
         return (
             <Card className="kpi-sidebar">
                 <CardContent>
-                    <Typography component="h4" className="sidebar-title">List of KPI’s (08)</Typography>
+                    <Typography component="h4" className="sidebar-title">List of {sidebarName} ({kpiData.length})</Typography>
                     <FormControl variant="outlined" style={{ width: '100%' }}>
                         <TextField
                             // error={(kpiNameError) ? (true) : (false)}

@@ -16,7 +16,8 @@ import Dashboards from './pages/Dashboard';
 import KpiExplorer from './pages/Kpi';
 import AddKpi from './pages/Kpi/AddKpi';
 import ActionItems from './pages/ActionItems';
-import Alerts from './pages/Alerts';
+import Alerts from './pages/Alert';
+import AddAlert from './pages/Alert/AddAlert';
 import Users from './pages/Users';
 import DataSources from './pages/DataSource';
 import AddDataSources from './pages/DataSource/AddDataSources';
@@ -75,6 +76,7 @@ function App() {
       <RouteWithSidebar exact path={Routes.AddKpi.path} component={AddKpi} />
       <RouteWithSidebar exact path={Routes.ActionItems.path} component={ActionItems} />
       <RouteWithSidebar exact path={Routes.Alerts.path} component={Alerts} />
+      <RouteWithSidebar exact path={Routes.AddAlerts.path} component={AddAlert} />
 
       <RouteWithSidebar exact path={Routes.Users.path} component={Users} />
       <RouteWithSidebar exact path={Routes.DataSources.path} component={DataSources} />

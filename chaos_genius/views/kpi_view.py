@@ -252,7 +252,7 @@ def rca_analysis(kpi_info, connection_info, timeline="mom", dimension= None):
     try:
         base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, timeline)
 
-        num_dim_combs_to_consider = list(range(1, min(3, len(kpi_info['dimensions']))))
+        num_dim_combs_to_consider = list(range(1, min(4, len(kpi_info['dimensions']) + 1)))
 
         rca = RootCauseAnalysis(
             base_df, rca_df, 
@@ -300,7 +300,7 @@ def rca_hierarchical_data(kpi_info, connection_info, timeline="mom", dimension= 
         if dimension not in kpi_info["dimensions"]:
             raise ValueError(f"{dimension} not in {kpi_info['dimensions']}")
 
-        num_dim_combs_to_consider = list(range(1, min(3, len(kpi_info['dimensions']))))
+        num_dim_combs_to_consider = list(range(1, min(4, len(kpi_info['dimensions']) + 1)))
 
         rca = RootCauseAnalysis(
             base_df, rca_df, 

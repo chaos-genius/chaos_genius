@@ -81,7 +81,7 @@ class RootCauseAnalysis():
         self._max_subgroups_considered = 100
 
     def _initialize_impact_table(self):
-        self._create_binned_columns(self._dims)
+        binned_cols = self._create_binned_columns()
         dim_combs_list = self._generate_all_dim_combinations()
 
         impacts = []
@@ -187,15 +187,20 @@ class RootCauseAnalysis():
                 raise ValueError(f"Column {col} not in data.")
 
     def _create_binned_columns(self):
+        binned_cols = []
+
         non_cat_cols = self._full_df.dtypes[self._dims][self._full_df.dtypes[self._dims] != object]
 
         for col in non_cat_cols.index:
             binned_values = pd.qcut(
                 self._full_df[col], 4, duplicates="drop").astype(str)
             self._full_df[col] = binned_values
+            binned_cols.append(col)
 
         self._grp1_df = self._full_df.loc[self._grp1_df.index]
         self._grp2_df = self._full_df.loc[self._grp2_df.index]
+
+        return binned_cols
 
 
     def _generate_all_dim_combinations(self) -> List[List[str]]:

@@ -39,7 +39,7 @@ def convert_df_dims_to_query_strings(inp, binned_cols: Dict) -> str:
     for col, val in zip(inp.index, inp.values):
         if val is not np.nan:
             if col in binned_cols:
-                query_string_lists.append(_parse_single_col_for_query_string(binned_cols[col], val, binned=True))
+                query_string_lists.append(_parse_single_col_for_query_string(col, val, binned=True))
             else:
                 query_string_lists.append(_parse_single_col_for_query_string(col, val, binned=False))
     return " and ".join(query_string_lists)

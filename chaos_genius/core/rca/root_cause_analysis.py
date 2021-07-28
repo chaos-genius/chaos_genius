@@ -81,7 +81,7 @@ class RootCauseAnalysis():
         self._max_subgroups_considered = 100
 
     def _initialize_impact_table(self):
-        self._dims, binned_cols = self._create_binned_columns(self._dims)
+        self._create_binned_columns(self._dims)
         dim_combs_list = self._generate_all_dim_combinations()
 
         impacts = []
@@ -186,24 +186,17 @@ class RootCauseAnalysis():
             if col not in self._full_df.columns:
                 raise ValueError(f"Column {col} not in data.")
 
-    def _create_binned_columns(self, dims):
-        new_dims = dims[:]
-        binned_cols = dict()
-
-        non_cat_cols = self._full_df.dtypes[dims][self._full_df.dtypes[dims] != object]
+    def _create_binned_columns(self):
+        non_cat_cols = self._full_df.dtypes[self._dims][self._full_df.dtypes[self._dims] != object]
 
         for col in non_cat_cols.index:
-            new_dims.remove(col)
             binned_values = pd.qcut(
                 self._full_df[col], 4, duplicates="drop").astype(str)
-            self._full_df[col+"_binned"] = binned_values
-            new_dims.append(col+"_binned")
-            binned_cols[col+"_binned"] = col
+            self._full_df[col] = binned_values
 
         self._grp1_df = self._full_df.loc[self._grp1_df.index]
         self._grp2_df = self._full_df.loc[self._grp2_df.index]
 
-        return new_dims, binned_cols
 
     def _generate_all_dim_combinations(self) -> List[List[str]]:
         """Creates a dictionary of all possible combinations of dims.
@@ -600,7 +593,7 @@ class RootCauseAnalysis():
             for index, row in parents.iterrows():
                 string = row["string"]
                 children = impact_table[impact_table["string"].str.contains(
-                    string)]
+                    string, regex= False)]
                 children = children[
                     children[other_dims].isna().sum(axis=1)
                     == len(other_dims) - depth

@@ -23,6 +23,11 @@ SOURCE_CONFIG_MAPPING = {
         "destinationSyncMode": "append",
         "primaryKey": [],
         "selected": True,
+    },
+    "9da77001-af33-4bcd-be46-6252bf9342b9": {
+        "syncMode": "full_refresh",
+        "destinationSyncMode": "append",
+        "selected": True,
     }
 }
 
@@ -32,7 +37,7 @@ SOURCE_WHITELIST_AND_TYPE = {
     "71607ba1-c0ac-4799-8049-7f4b90dd50f7": True, # Google Sheets
     "435bb9a5-7887-4809-aa58-28c27df0d7ad": False, # MySQL
     "decd338e-5647-4c0b-adf4-da0e75f5a750": False, # Postgres
-    # "b1892b11-788d-44bd-b9ec-3a436f7b54ce", # Shopify
+    "9da77001-af33-4bcd-be46-6252bf9342b9": True, # Shopify
     # "e094cb9a-26de-4645-8761-65c0c425d1de", # Stripe
     # "29b409d9-30a5-4cc8-ad50-886eb846fea3", # Quickbooks
 }

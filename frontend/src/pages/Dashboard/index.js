@@ -8,13 +8,12 @@ import {
 
 import CustomTabs from '../../components/CustomTabs'
 
-import { tab1Fields } from './HelperFunctions'
-import SideBar from './SideBar'
-import MultidimensionTable from './MultidimensionTable'
+import SideBar from './SideBar';
+import MultidimensionTable from './MultidimensionTable';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import RcaAnalysisTable from '../../components/DashboardTable';
-import { BASE_URL, DEFAULT_HEADERS } from '../../config/Constants'
+import { BASE_URL, DEFAULT_HEADERS } from '../../config/Constants';
 import { withStyles, Theme, createStyles } from '@material-ui/core/styles';
 
 import Anomaly from './Anomaly';
@@ -23,17 +22,18 @@ import AutoRCA from './AutoRCA';
 class Dashboard extends React.Component {
 
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       kpi: 0,
-      kpiName: "",      
+      kpiName: "",
       kpiData: [],
-      timeline:"mom"
-    }
-
+      timeline:"mom",
+      selectedKpiDetails: {}
+    };
   }
+
   fetchKPIData = () => {
-    this.setState({ loading: true })
+    this.setState({ loading: true });
     fetch(`${BASE_URL}/api/kpi/`)
       .then(response => response.json())
       .then(data => {
@@ -43,23 +43,25 @@ class Dashboard extends React.Component {
               kpi: data.data[0]['id'],
               kpiName: data.data[0]['name'],
               kpiData: data.data,
-              loading: false
-            })
+              loading: false,
+              selectedKpiDetails: data.data[0]
+            });
           }
         }
       });
   }
  
-  handleKpiChange = (e) => {
+  handleKpiChange = (e, kpiDetail) => {
     const targetComponent = e.target;
     const componentValue = targetComponent.id;
-
     this.setState({
       kpi: componentValue,
       kpiName: targetComponent.innerText,
-      tabState: 0
+      tabState: 0,
+      selectedKpiDetails: kpiDetail
     })
   }
+
   handleTimelineChange = (e) => {
     const targetComponent = e.target;
     this.setState({
@@ -70,13 +72,17 @@ class Dashboard extends React.Component {
   componentDidMount() {
     this.fetchKPIData();
   }
+
   render() {
-    const tabChartData = [{
-      "title": "AutoRCA",
-      "body": (this.state.kpi > 0)?(<AutoRCA kpi={this.state.kpi} timeline={this.state.timeline} kpiName={this.state.kpiName} handleTimelineChange={this.handleTimelineChange}  />):("")
-    },{
-      "title": "Anomaly",
-      "body": (this.state.kpi > 0)?(<Anomaly kpi={this.state.kpi} timeline={this.state.timeline} />):("")
+
+    const tabChartData = [
+      {
+        "title": "AutoRCA",
+        "body": (this.state.kpi > 0)?(<AutoRCA kpi={this.state.kpi} kpidetails={this.state.selectedKpiDetails} timeline={this.state.timeline} kpiName={this.state.kpiName} handleTimelineChange={this.handleTimelineChange}  />):("")
+      },
+      {
+        "title": "Anomaly",
+        "body": (this.state.kpi > 0)?(<Anomaly kpi={this.state.kpi} kpidetails={this.state.selectedKpiDetails} timeline={this.state.timeline} />):("")
     }];
 
     return (

@@ -8,7 +8,7 @@ import {
 
 import CustomTabs from '../../components/CustomTabs'
 
-import { tab1Fields } from './HelperFunctions'
+import { overallMetricStatsCard } from './HelperFunctions'
 import SideBar from './SideBar'
 import MultidimensionTable from './MultidimensionTable'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -65,12 +65,12 @@ const AntSwitch = withStyles((theme) =>
 class Dashboard extends React.Component {
 
     constructor(props) {
-        super(props)
-        this.state = {            
+        super(props);
+        this.state = {
             cardData: [],
             cardDataLoader: false,
             dimension: '',
-            dimensionType: 'multidimension',
+            dimensionType: 'singledimension',
             lineChartData: {},
             dimensionData: [],
             chartData: [],
@@ -474,12 +474,18 @@ class Dashboard extends React.Component {
 
                         <Grid container spacing={2} >
                             <Grid item xs={12} md={6}>
-                                {(this.state.cardData) ? (tab1Fields(this.state.cardData, this.props.kpiName, this.state.cardDataLoader)) : ("")}
+                                {(this.state.cardData) ? (
+                                    overallMetricStatsCard(
+                                        this.state.cardData,
+                                        this.props.kpidetails,
+                                        this.state.cardDataLoader,
+                                        this.props.timeline === 'mom'? 'Month' : 'Week'
+                                    )) : ("")}
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid item xs={12} md={6} style={{marginTop: '25px'}}>
                                 <Card className="line-chart-card">
                                     <CardContent>
-                                        <div id="lineChartDiv" style={{ width: "100%", height: "275px" }}></div>
+                                        <div id="lineChartDiv" style={{ width: "100%", height: "295px" }}></div>
                                     </CardContent>
                                 </Card>
                             </Grid>

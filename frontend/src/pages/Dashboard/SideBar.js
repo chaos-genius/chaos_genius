@@ -53,7 +53,9 @@ class SideBar extends React.Component {
                     {kpiData.map((obj) => {
                         return (
                             <Grid item xs={12}>
-                                <Button variation="outline" color="primary" className="btn-block custom-sidebar-button" id={obj.id} onClick={(e) => handleKpiChange(e)}>{obj.name} {(kpiID == obj.id) ? (<span className="right-icon"><ChevronRight /></span>) : ("")}</Button>
+                                <Button variation="outline" color="primary" className="btn-block custom-sidebar-button" id={obj.id} onClick={(e) => handleKpiChange(e, obj)}>
+                                    {obj.name} {(kpiID == obj.id) ? (<span className="right-icon"><ChevronRight /></span>) : ("")}
+                                </Button>
                             </Grid>
                         )
                     })}

@@ -16,12 +16,33 @@ class AlertList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      alertData: [{
-        "name": "High Traffic Alert",
-        "alert_type": "Event Based",
-        "active": true,
-        "created_at": "Wed, 28 Jul 2021 13:53:55 GMT",
-      }],
+      alertData: [
+        {
+          "name": "Website High Traffic Alert",
+          "alert_type": "Event Based",
+          "active": true,
+          "created_at": "Wed, 20 Jul 2021 13:53:55 GMT",
+        },
+        {
+          "name": "Alert for Anomaly in AOV",
+          "alert_type": "KPI Based",
+          "active": true,
+          "created_at": "Wed, 22 Jul 2021 20:33:55 GMT",
+        },
+        {
+          "name": "Alert for Low Net Sales",
+          "alert_type": "Event Based",
+          "active": true,
+          "created_at": "Wed, 24 Jul 2021 08:03:55 GMT",
+        },
+        {
+          "name": "Spike Alert in Ads Spend",
+          "alert_type": "KPI Based",
+          "active": true,
+          "created_at": "Wed, 21 Jul 2021 01:53:55 GMT",
+        }
+
+      ],
       isRedirect: false
     };
   }

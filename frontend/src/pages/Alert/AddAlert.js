@@ -2,7 +2,7 @@
 import React from "react";
 import {
     Container, DialogContentText, DialogActions, ListItemText, Divider, RadioGroup, Radio,
-    Card, CardContent, CardActions, Grid, FormControl, FormControlLabel, Chip,
+    Card, CardContent, CardActions, Grid, FormControl, FormControlLabel, Chip, Tooltip,
     TextField, Checkbox, InputLabel, Typography, Button, Select, MenuItem, Input
 } from '@material-ui/core';
 import StepTabs from "../../components/StepTabs"
@@ -383,27 +383,37 @@ class AddAlert extends React.Component {
                                         {!this.state.showKpi && (
                                         <Grid item xs={12}>
                                             <FormControl component="fieldset">
-                                                <InputLabel htmlFor="alertFrequency">Alert Settings</InputLabel>
+                                                <InputLabel component="legend">Alert Settings</InputLabel>
                                                 {/* <FormLabel component="legend">labelPlacement</FormLabel> */}
-                                                <RadioGroup row aria-label="position" name="position" defaultValue="top">
-                                                    <FormControlLabel
-                                                    value="new-entry"
-                                                    control={<Radio color="primary" />}
-                                                    label="New Entry"
-                                                    labelPlacement="bottom"
-                                                    />
-                                                    <FormControlLabel
-                                                    value="all-changes"
-                                                    control={<Radio color="primary" />}
-                                                    label="All Changes"
-                                                    labelPlacement="bottom"
-                                                    />
-                                                    <FormControlLabel
-                                                    value="always"
-                                                    control={<Radio color="primary" />}
-                                                    label="Always send"
-                                                    labelPlacement="bottom"
-                                                    />
+                                                <RadioGroup aria-label="position" name="position" defaultValue="top">
+                                                    <Tooltip title="Always send the query result even without any change. Ideal for status updates">
+                                                        <FormControlLabel
+                                                        value="Always Send an Alert"
+                                                        control={<Radio color="primary" />}
+                                                        label="Always Send an Alert"
+                                                        />
+                                                    </Tooltip>
+                                                    <Tooltip title="Alerts on all insertion/deletion/updation of the data">
+                                                        <FormControlLabel
+                                                        value="Send Alert on Changes"
+                                                        control={<Radio color="primary" />}
+                                                        label="Send Alert on Changes"
+                                                        />
+                                                    </Tooltip>
+                                                    <Tooltip title="Alert only on the insertion of the new data row">
+                                                        <FormControlLabel
+                                                        value="Send Alert on Addition"
+                                                        control={<Radio color="primary" />}
+                                                        label="Send Alert on Addition"
+                                                        />
+                                                    </Tooltip>
+                                                    <Tooltip title="Send alert for all the entries if condition is true">
+                                                        <FormControlLabel
+                                                        value="Send Alert on Condition"
+                                                        control={<Radio color="primary" />}
+                                                        label="Send Alert on Condition"
+                                                        />
+                                                    </Tooltip>
                                                 </RadioGroup>
                                             </FormControl>
                                         </Grid>

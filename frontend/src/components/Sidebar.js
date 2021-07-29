@@ -125,7 +125,7 @@ export default (props = {}) => {
               <NavItem title="Home" link={Routes.Home.path} image={homeIcon} imageActive={homeIconActive} />
               <NavItem title="Dashboards" link={Routes.Dashboards.path} image={dashboardIcon} imageActive={dashboardIconActive} />
               <NavItem title="KPI Explorer" link={Routes.KpiExplorer.path} image={kpiexplorerIcon} imageActive={kpiexplorerIconActive} />
-              <NavItem title="Alerts" link={Routes.Alerts.path} image={anomoliesIcon} imageActive={anomoliesIconActive} />
+              <NavItem title="Anomaly" link={'#'} image={anomoliesIcon} imageActive={anomoliesIconActive} />
               {/* <NavItem title="Actions Items" link={Routes.ActionItems.path} icon={faTasks} /> */}
               {/* <NavItem title="Actions Items" link={Routes.ActionItems.path} icon={faTasks} /> */}
               {/* <NavItem title="Alerts" link={Routes.Alerts.path} icon={faBell} /> */}

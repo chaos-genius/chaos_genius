@@ -33,6 +33,7 @@ class AddAlert extends React.Component {
             datetimeMetric: '',
             dimensionMetric: [],
             filters: [],
+            emailIds: '',
 
             // meta information
             dataSources: [],
@@ -455,8 +456,26 @@ class AddAlert extends React.Component {
                                                 </TextField>
                                             </FormControl>
                                         </Grid>
-                                    </Grid>
 
+                                        {this.state.alertDestination == 'email' && (
+                                            <Grid item xs={12}>
+                                                <FormControl variant="outlined" style={{ width: '100%' }}>
+                                                    <InputLabel htmlFor="emailIds">Enter Email Addresses</InputLabel>
+                                                    <TextField
+                                                        value={this.state.emailIds}
+                                                        id="emailIds"
+                                                        type="text"
+                                                        multiline
+                                                        rows={2}
+                                                        variant="outlined"
+                                                        placeholder="Enter comma seperated email ID"
+                                                        onChange={(e) => this.handleInputChange(e, "emailIds")}
+                                                    />
+                                                </FormControl>
+                                            </Grid>
+                                        )}
+
+                                    </Grid>
 
 
                                     <Grid container spacing={3}>

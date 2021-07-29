@@ -597,8 +597,14 @@ class RootCauseAnalysis():
             parents = output_table[output_table["depth"] == depth]
             for index, row in parents.iterrows():
                 string = row["string"]
-                children = impact_table[impact_table["string"].str.contains(
-                    string, regex= False)]
+                filters = string.split(" and ")
+                children = impact_table
+                for filter_string in filters:
+                    children = children[
+                        children["string"].str.contains(
+                            filter_string, regex= False
+                        )
+                    ]
                 children = children[
                     children[other_dims].isna().sum(axis=1)
                     == len(other_dims) - depth

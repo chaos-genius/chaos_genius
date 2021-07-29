@@ -4,6 +4,8 @@ import re
 import numpy as np
 from typing import Dict
 
+import pandas as pd
+
 # TODO: Update docstrings to sphinx format
 
 
@@ -12,7 +14,7 @@ def _parse_single_col_for_query_string(col: str, value: str) -> str:
     return query_string
 
 
-def convert_df_dims_to_query_strings(inp, binned_cols: Dict) -> str:
+def convert_df_dims_to_query_strings(inp: pd.DataFrame, binned_cols: Dict) -> str:
     """Converts all given dimensions in df into query strings
 
     Args:
@@ -23,7 +25,8 @@ def convert_df_dims_to_query_strings(inp, binned_cols: Dict) -> str:
     """
 
     query_string_lists = []
-    for col, val in zip(inp.index, inp.values):
+    for col in inp.index.sort_values():
+        val = inp[col]
         if val is not np.nan:
             query_string_lists.append(_parse_single_col_for_query_string(col, val))
     return " and ".join(query_string_lists)

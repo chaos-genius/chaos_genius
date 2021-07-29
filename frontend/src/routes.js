@@ -14,7 +14,8 @@ export const Routes = {
     KpiExplorer: { path: "/kpi" },
     AddKpi: { path: "/kpi/new" },
     ActionItems: { path: "/actionitems" },
-    Alerts: { path: "/alerts" },
+    Alerts: { path: "/alert" },
+    AddAlerts: { path: "/alert/new" },
 
     // Orgnisation Menu
     Users: { path: "/orgusers" },

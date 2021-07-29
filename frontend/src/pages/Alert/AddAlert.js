@@ -147,6 +147,38 @@ class AddAlert extends React.Component {
             });
     }
 
+
+    handleTestAlert = () => {
+        const alertInfo = {
+            name: this.state.alertName,
+            alertType: this.state.alertType,
+            kpiId: this.state.kpiId,
+            kpiAlertType: this.state.kpiAlertType,
+            dataSource: this.state.dataSource,
+            query: this.state.query,
+            alertFrequency: this.state.alertFrequency,
+            alertMessage: this.state.alertMessage,
+            alertDestination: this.state.alertDestination
+        }
+        console.log(alertInfo);
+        let requestOptions = {
+            method: 'POST',
+            body: JSON.stringify(alertInfo),
+            headers: DEFAULT_HEADERS,
+        };
+        fetch(`${BASE_URL}api/config/test-alert`, requestOptions)
+            .then(response => response.json())
+            .then(data => {
+                // this.props.history.push('/kpi');
+                console.log('-------');
+                console.log(data);
+            }).catch(error => {
+                console.log(error);
+            });
+
+    }
+
+
     fethcMetaData = () => {
         let payload = {
             data_source_id: this.state.dataSource,
@@ -419,7 +451,7 @@ class AddAlert extends React.Component {
 
                                     <Grid container spacing={3}>
                                         <Grid item xs={12} className="text-right">
-                                            <Button variant="primary" onClick={this.handleSubmit} className="btn btn-primary" style={{margin: '10px'}}>Test Alert</Button>
+                                            <Button variant="primary" onClick={this.handleTestAlert} className="btn btn-primary" style={{margin: '10px'}}>Test Alert</Button>
                                             <Button variant="primary" onClick={this.handleSubmit} className="btn btn-primary" style={{margin: '10px'}}>Add Alert</Button>
                                         </Grid>
                                     </Grid>

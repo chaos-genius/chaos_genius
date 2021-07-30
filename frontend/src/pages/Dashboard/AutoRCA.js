@@ -380,31 +380,38 @@ class Dashboard extends React.Component {
 
         let chart = am4core.create("lineChartDiv", am4charts.XYChart);
 
-        chart.legend = new am4charts.Legend();
-        chart.legend.position = "bottom";
+        // chart.legend = new am4charts.Legend();
+        // chart.legend.position = "bottom";
 
         chart.data = this.state.lineChartData;
 
         chart.fontSize = 12;
         chart.fontFamily = "Inter";
 
+        let title = chart.titles.create();
+        title.text = this.props.kpidetails.name;
+        title.fontSize = 16;
+        title.fontfamily = "Inter";
+        title.marginBottom = 10;
+        title.align = "center";
+
         // Create axes
-        let dateAxis = chart.xAxes.push(new am4charts.ValueAxis());
+        let dateAxis = chart.xAxes.push(new am4charts.DateAxis());
         dateAxis.renderer.minGridDistance = 50;
-        dateAxis.renderer.grid.template.disabled = true;
+        // dateAxis.renderer.grid.template.disabled = true;
 
         let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-        valueAxis.renderer.grid.template.disabled = true;
+        // valueAxis.renderer.grid.template.disabled = true;
 
         // Create series
         let series = chart.series.push(new am4charts.LineSeries());
-        series.legendSettings.labelText = "Current Values"
+        // series.legendSettings.labelText = "Values";
         series.dataFields.valueY = "value";
-        series.dataFields.valueX = "index";
+        series.dataFields.dateX = "date";
         series.stroke = am4core.color("#05A677");
         series.strokeWidth = 2.5;
         series.minBulletDistance = 10;
-        series.tooltipText = "[bold]{date.formatDate()}:[/] {value}\n[bold]{previousDate.formatDate()}:[/] {previousValue}";
+        series.tooltipText = "[bold]{date.formatDate()}:[/] {value}";
         series.tooltip.pointerOrientation = "vertical";
         series.tooltip.getFillFromObject = false;
         series.tooltip.background.fill = am4core.color("#778CA3");
@@ -412,29 +419,19 @@ class Dashboard extends React.Component {
         series.tooltip.label.fontFamily = "Inter";
         series.tooltip.label.fill = "#fff";
 
-        // Create series
-        let series2 = chart.series.push(new am4charts.LineSeries());
-        series2.legendSettings.labelText = "Previous Values"
-        series2.dataFields.valueY = "previousValue";
-        series2.dataFields.valueX = "index";
-        series2.stroke = am4core.color("#778CA3");
-        series2.strokeWidth = 2.5;
-        series2.strokeDasharray = "6, 4";
-
         // Add cursor
         chart.cursor = new am4charts.XYCursor();
 
         // Required to make tooltips function in an XY chart with both axes as ValueAxis
         // Taken from https://www.amcharts.com/docs/v4/tutorials/multiple-cursor-tooltips-on-scatter-chart/
-        am4charts.ValueAxis.prototype.getSeriesDataItem = function (series, position) {
-            var key = this.axisFieldName + this.axisLetter;
-            var value = this.positionToValue(position);
-            const dataItem = series.dataItems.getIndex(series.dataItems.findClosestIndex(value, function (x) {
-                return x[key] ? x[key] : undefined;
-            }, "any"));
-            return dataItem;
-        }
-
+        // am4charts.ValueAxis.prototype.getSeriesDataItem = function (series, position) {
+        //     var key = this.axisFieldName + this.axisLetter;
+        //     var value = this.positionToValue(position);
+        //     const dataItem = series.dataItems.getIndex(series.dataItems.findClosestIndex(value, function (x) {
+        //         return x[key] ? x[key] : undefined;
+        //     }, "any"));
+        //     return dataItem;
+        // }
     }
 
     render() {

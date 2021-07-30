@@ -88,8 +88,7 @@ def kpi_get_line_data(kpi_id):
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
         connection_info = DataSource.get_by_id(kpi_info["data_source"])
-        timeline = request.args.get("timeline")
-        data = kpi_line_data(kpi_info, connection_info.as_dict, timeline)
+        data = kpi_line_data(kpi_info, connection_info.as_dict)
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")
     return jsonify({"data": data, "msg": ""})
@@ -217,34 +216,23 @@ def kpi_aggregation(kpi_info, connection_info, timeline="mom"):
 
 
 @cache.memoize(timeout=30000)
-def kpi_line_data(kpi_info, connection_info, timeline="mom"):
+def kpi_line_data(kpi_info, connection_info):
     metric = kpi_info["metric"]
     dt_col = kpi_info["datetime_column"]
     agg = kpi_info["aggregation"]
     
-    dfs = get_baseline_and_rca_df(kpi_info, connection_info, "mom")
-    dfs = list(dfs)
+    _, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, "mom")
 
-    for i, df in enumerate(dfs):
-        df = df.resample("D", on= dt_col).agg({metric: agg}).reset_index().round(kpi_info.get("metric_precision", 3))
-        df["day"] = df["date"].dt.day
-        df[dt_col] = df[dt_col].dt.strftime('%Y/%m/%d %H:%M:%S')
-        dfs[i] = df
+    rca_df = rca_df.resample("D", on= dt_col).agg({metric: agg}).reset_index()
+    rca_df = rca_df.round(kpi_info.get("metric_precision", 3))
 
-    base_df, rca_df = dfs
+    rca_df[dt_col] = rca_df[dt_col].dt.strftime('%Y/%m/%d %H:%M:%S')
 
-    output = base_df.merge(rca_df, how="outer", on="day")
-    output = output.rename(columns= {
-        "date_x": "previousDate", 
-        "date_y": "date", 
-        f"{metric}_x": "previousValue",
-        f"{metric}_y": "value"
-    }) 
-    output["index"] = output.index
-    output = output.drop("day", axis= 1).iloc[:30]
-    output.dropna(inplace= True)
-
-    return output.to_dict(orient="records")
+    rca_df = rca_df.rename(columns= {
+        dt_col: "date", 
+        metric: "value"
+    })
+    return rca_df.to_dict(orient="records")
 
 
 @cache.memoize(timeout=30000)

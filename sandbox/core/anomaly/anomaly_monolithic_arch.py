@@ -679,7 +679,7 @@ def get_dq_json(
                                    , 'severity', 'sub_dimension'])
     
     graphs = []
-    for i in ['volume', 'max', 'min', 'mean', 'missing']:
+    for i in ['volume', 'max', 'mean', 'missing']:
         if i != "volume" and i != "missing":
             print(i)
             df_dq_metric = compute_data_quality_metrics_dataframe(

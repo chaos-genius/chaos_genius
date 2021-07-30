@@ -250,7 +250,6 @@ class ThirdPartyClient(object):
             "destinationDefinitionId": self.destination_def_id,
             "workspaceId": self.workspace_id,
             "connectionConfiguration": {
-                "basic_normalization": True,
                 "ssl": False,
                 "password": self.destination_db["password"],
                 "username": self.destination_db["username"],

@@ -16,7 +16,7 @@ from flask import (
 )
 
 from chaos_genius.extensions import cache
-from chaos_genius.utils.connector_helper import DATA_SOURCE_ABBREVIATION
+from chaos_genius.third_party.integration_server_config import DATA_SOURCE_ABBREVIATION
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.extensions import integration_connector as connector
 from chaos_genius.third_party.integration_server_config import (

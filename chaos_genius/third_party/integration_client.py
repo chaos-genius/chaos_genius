@@ -11,7 +11,8 @@ from chaos_genius.utils.io_helper import cg_print
 from chaos_genius.third_party.integration_server_config import (
     SOURCE_WHITELIST_AND_TYPE as SOURCE_DEF_ID,
     DESTINATION_DEF_ID,
-    DEFAULT_WORKSPACE_ID
+    DEFAULT_WORKSPACE_ID,
+    SOURCE_ICON_OVERRIDE
 )
 
 
@@ -71,6 +72,9 @@ class ThirdPartyClient(object):
             source_specs = self.get_source_def_specs(source["sourceDefinitionId"])
             source["connectionSpecification"] = source_specs["connectionSpecification"]
             source["isThirdParty"] = SOURCE_DEF_ID[source["sourceDefinitionId"]]
+            icon_found = SOURCE_ICON_OVERRIDE.get(source["sourceDefinitionId"])
+            if icon_found:
+                source['icon'] = icon_found
         self.source_conf = available_sources
 
     def create_workspace(self, payload):

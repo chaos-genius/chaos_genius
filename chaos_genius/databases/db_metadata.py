@@ -187,7 +187,7 @@ class DbMetadata:
 
 def get_metadata(data_source_details, from_query=False, query=''):
     metadata, err_msg = {}, ''
-    db_uri = data_source_details["dbConfig"]["db_connection_uri"]
+    db_uri = data_source_details["db_uri"]
     db_tables = data_source_details["dbConfig"]["tables"]
     if data_source_details["connection_type"].lower() == "mysql":
         db_name = db_uri.split('/')[-1]

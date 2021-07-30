@@ -36,7 +36,7 @@ class Home extends React.Component {
                             <CardContent className="text-left">
                                 <img src={dataSource} alt="data-source" />
                                 <Typography component="h4" className="title">Add Data Sources <img src={successTick} alt="tick-icon" /></Typography>
-                                <Typography component="h4" className="sub-title mt-2">Select the data you want to monitor and analyse </Typography>
+                                <Typography component="h4" className="sub-title mt-2">Select the Data Sources you want to add </Typography>
                                 <Button variant="contained" color="primary" fullWidth={true} className="button-success mt-3">Add Data Source</Button>
                             </CardContent>
                         </Card>
@@ -47,7 +47,7 @@ class Home extends React.Component {
                                 {/* <img src={kpi} alt="data-source" /> */}
                                 <img src={kpiActive} alt="data-source" />
                                 <Typography component="h4" className="title">Add KPI</Typography>
-                                <Typography component="h4" className="sub-title mt-2">Select the data you want to monitor and analyse</Typography>
+                                <Typography component="h4" className="sub-title mt-2">Define the KPIs you want to monitor and analyse</Typography>
                                 <Button variant="contained" color="primary" fullWidth={true} className="button-active mt-3" >Add KPI</Button>
                             </CardContent>
                         </Card>
@@ -57,7 +57,7 @@ class Home extends React.Component {
                             <CardContent>
                                 <img src={analytics} alt="data-source" />
                                 <Typography component="h4" className="title">Activate Analytics</Typography>
-                                <Typography component="h4" className="sub-title mt-2">Select the data you want to monitor and analyse</Typography>
+                                <Typography component="h4" className="sub-title mt-2">Setup Anomaly Detection & AutoRCA for your KPIs</Typography>
                                 <Button variant="contained" color="primary" fullWidth={true} disabled className="button-disabled mt-3">Activate Analytics</Button>
                             </CardContent>
                         </Card>
@@ -67,7 +67,7 @@ class Home extends React.Component {
                             <CardContent>
                                 <img src={dashboard} alt="data-source" />
                                 <Typography component="h4" className="title">Setup Smart Alerts</Typography>
-                                <Typography component="h4" className="sub-title mt-2">Select the data you want to monitor and analyse</Typography>
+                                <Typography component="h4" className="sub-title mt-2">Setup Alerts to get notified on changes in events & KPIs</Typography>
                                 <Button variant="contained" color="primary" fullWidth={true} disabled className="button-disabled mt-3">Setup Smart Alerts</Button>
                             </CardContent>
                         </Card>

@@ -136,6 +136,11 @@ def get_baseline_and_rca_df(kpi_info, connection_info, timeline="mom"):
         num_days = 30
     elif timeline == "wow":
         num_days = 7
+    elif timeline == "dod":
+        num_days = 1
+    else:
+        raise ValueError(f"Invalid timeline: {timeline}")
+    
     base_dt_obj = today - timedelta(days=2*num_days)
     base_dt = str(base_dt_obj.date())
     mid_dt_obj = today - timedelta(days=num_days)

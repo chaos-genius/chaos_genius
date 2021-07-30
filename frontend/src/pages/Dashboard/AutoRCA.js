@@ -464,6 +464,7 @@ class Dashboard extends React.Component {
                                     <Select native defaultValue={this.props.timeline} id="analysisTimeline" onChange={(e) => this.handleTimelineChange(e)}>
                                         <option value="mom">Current Month on Last Month</option>
                                         <option value="wow">Current Week on Last Week</option>
+                                        <option value="dod">Current Day on Last Day</option>
                                     </Select>
                                 </FormControl>
                             </Grid>

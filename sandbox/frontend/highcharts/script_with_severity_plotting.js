@@ -203,7 +203,8 @@ let graphs = [
       [1315699200000.0, 2027],
       [1315785600000.0, 1638],
       [1315872000000.0, 2428],
-      [1315958400000.0, 1333],
+      [1315958400000.0, 2533],
+      // [1315958400000.0, 1333],
     ],
     predicted_values: [
       [1308096000000.0, 1474.19],
@@ -391,7 +392,8 @@ let graphs = [
       [1315699200000.0, "Low"],
       [1315785600000.0, null],
       [1315872000000.0, "Low"],
-      [1315958400000.0, null],
+      [1315958400000.0, "Low"],
+      // [1315958400000.0, null],
     ],
   },
 ];
@@ -451,10 +453,15 @@ function findAnomalyZones(intervals, values) {
     prev = zone;
   }
 
-  zones.push({
-    value: Date.UTC(9999), // Some arbitrarily high date that will put a zone that goes until the end
-    color: validColor,
-  });
+  // Add last zone
+  if (zones.length > 0) {
+    let lastTimestamp = values[values.length - 1][0];
+    zones.push({
+      // Some timestamp far beyond the largest timestamp, so that the end of the graph is the right color
+      value: lastTimestamp * 2,
+      color: prev.color,
+    });
+  }
   return zones;
 }
 

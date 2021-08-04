@@ -56,10 +56,15 @@ class Anomaly extends Component {
             prev = zone;
         }
 
-        zones.push({
-            value: Date.UTC(9999), // Some arbitrarily high date that will put a zone that goes until the end
-            color: validColor,
-        });
+        // Add last zone
+        if (zones.length > 0) {
+            let lastTimestamp = values[values.length - 1][0];
+            zones.push({
+                // Some timestamp far beyond the largest timestamp, so that the end of the graph is the right color
+                value: lastTimestamp * 2,
+                color: prev.color,
+            });
+        }
         return zones;
     }
 

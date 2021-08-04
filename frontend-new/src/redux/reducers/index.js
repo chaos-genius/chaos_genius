@@ -6,14 +6,15 @@ import { dashboard } from './Dashboard';
 import { aggregation } from './Aggregation';
 import { dimension } from './Dimension';
 import { hierarchial } from './Hierarchical';
-
+import { onboarding } from './Onboarding';
 const rootReducer = combineReducers({
   dataSource: dataSource,
   kpiExplorer: kpiExplorer,
   dashboard: dashboard,
   aggregation: aggregation,
   dimension: dimension,
-  hierarchial: hierarchial
+  hierarchial: hierarchial,
+  onboarding: onboarding
 });
 
 export default rootReducer;

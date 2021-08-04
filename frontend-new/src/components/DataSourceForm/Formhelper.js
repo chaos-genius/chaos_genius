@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
-
 export const textBox = (
   element,
   type,
@@ -10,7 +8,7 @@ export const textBox = (
   const textID = element[0];
   const textError = formError?.[textID] ? formError[textID] : '';
   return (
-    <div className="form-group" key={uuidv4()}>
+    <div className="form-group">
       <label>{element[1]?.title ? element[1]?.title : element[0]}</label>
       <input
         type={element[1]?.['airbyte_secret'] ? 'password' : type}
@@ -31,7 +29,7 @@ export const textBox = (
 export const checkBox = (element, type, handleInputChange, formData) => {
   const textID = element[0];
   return (
-    <div className="form-check check-box" key={uuidv4()}>
+    <div className="form-check check-box">
       <input
         className="form-check-input"
         type={type}
@@ -57,27 +55,29 @@ export const renderTextFields = (
   const { properties } = connectionSpecification;
   let fields = [];
   if (Object.keys(properties).length > 0) {
-    Object.entries(properties).forEach((element) => {
-      switch (element[1]['type']) {
-        case 'string':
-          fields.push(
-            textBox(element, 'text', handleInputChange, formData, formError)
-          );
-          break;
-        case 'integer':
-          fields.push(
-            textBox(element, 'number', handleInputChange, formData, formError)
-          );
-          break;
-        case 'boolean':
-          fields.push(
-            checkBox(element, 'checkbox', handleCheckBoxChange, formData)
-          );
-          break;
-        default:
-          fields.push('');
-      }
-    });
+    Object.entries(properties)
+      .sort((a, b) => a[1].order - b[1].order)
+      .forEach((element) => {
+        switch (element[1]['type']) {
+          case 'string':
+            fields.push(
+              textBox(element, 'text', handleInputChange, formData, formError)
+            );
+            break;
+          case 'integer':
+            fields.push(
+              textBox(element, 'number', handleInputChange, formData, formError)
+            );
+            break;
+          case 'boolean':
+            fields.push(
+              checkBox(element, 'checkbox', handleCheckBoxChange, formData)
+            );
+            break;
+          default:
+            fields.push('');
+        }
+      });
   }
   return <>{fields}</>;
 };

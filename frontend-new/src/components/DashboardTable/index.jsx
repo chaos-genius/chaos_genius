@@ -1,24 +1,30 @@
 import React, { useEffect } from 'react';
+
 import { useSelector, useDispatch } from 'react-redux';
+
 import Up from '../../assets/images/up.svg';
 import Down from '../../assets/images/down.svg';
+
 import '../../assets/styles/table.scss';
+
 import {
   getDashboardRcaAnalysis,
   getAllDashboardHierarchical
 } from '../../redux/actions';
+
 const DashboardTable = ({ data, kpi, overlap, dimension, activeDimension }) => {
   const dispatch = useDispatch();
+
   useEffect(() => {
     getAllRCA();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, kpi, dimension, activeDimension]);
+
   const getAllRCA = () => {
     if (dimension === 'multidimension') {
       dispatch(
         getDashboardRcaAnalysis(kpi, {
-          timeline: data,
-          dimensions: activeDimension
+          timeline: data
         })
       );
     } else if (dimension === 'singledimension') {
@@ -28,23 +34,20 @@ const DashboardTable = ({ data, kpi, overlap, dimension, activeDimension }) => {
           dimension: activeDimension
         })
       );
-    } else {
-      dispatch(
-        getDashboardRcaAnalysis(kpi, {
-          timeline: data
-        })
-      );
     }
   };
+
   const { rcaAnalysisData } = useSelector((state) => state.dashboard);
   const { hierarchicalData } = useSelector((state) => state.hierarchial);
 
-  let tableData = !overlap
-    ? rcaAnalysisData && rcaAnalysisData.data_table
-    : null;
+  let tableData =
+    !overlap && dimension === 'multidimension'
+      ? rcaAnalysisData && rcaAnalysisData.data_table
+      : null;
   let overlapData = overlap
     ? rcaAnalysisData && rcaAnalysisData.chart.chart_table
     : null;
+
   let singleDimensionData =
     dimension === 'singledimension'
       ? hierarchicalData && hierarchicalData.data_table
@@ -70,7 +73,7 @@ const DashboardTable = ({ data, kpi, overlap, dimension, activeDimension }) => {
             <th>Non Overlap Impact</th>
           </tr>
         ) : null}
-        {/* {singleDimensionData ? (
+        {singleDimensionData !== null && activeDimension ? (
           <tr>
             <th>Subgroup Name</th>
             <th>Prev month Avg</th>
@@ -81,7 +84,7 @@ const DashboardTable = ({ data, kpi, overlap, dimension, activeDimension }) => {
             <th>Curr month Count</th>
             <th>Impact</th>
           </tr>
-        ) : null} */}
+        ) : null}
       </thead>
       <tbody>
         {tableData &&

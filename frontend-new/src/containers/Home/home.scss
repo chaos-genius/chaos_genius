@@ -1,0 +1,11 @@
+@import "../../assets/styles/variable.scss";
+
+.homepage-setup-card-wrapper{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    .setup-card{
+        width: 23.5%;
+    }
+}

@@ -1,0 +1,94 @@
+@import "../../assets/styles/variable.scss";
+
+.table-section {
+  background: $white;
+  border-radius: 10px;
+  min-height: 100vh;
+  margin-bottom: 20px;
+  overflow: hidden;
+  .table {
+    thead {
+      tr {
+        th {
+          background: $black_variation-2;
+          font-weight: $font-weight-600;
+          font-size: $font-size-12;
+          line-height: $line-height-18;
+          color: $white;
+          padding: 16px 6px 16px 24px;
+        }
+      }
+    }
+    tbody {
+      tr {
+        td {
+          font-weight: $font-weight-500;
+          font-size: $font-size-14;
+          line-height: $line-height-16;
+          letter-spacing: $letter-spacing;
+          text-transform: capitalize;
+          color: $black_variation-2;
+          height: 56px;
+          vertical-align: middle;
+          padding: 16px 6px 16px 24px;
+          .live-status {
+            span {
+              color: $green;
+            }
+          }
+          .broken-status {
+            span {
+              color: $red_variation_1;
+            }
+          }
+          .table-tips {
+            display: flex;
+            flex-direction: row;
+            li {
+              height: 24px;
+              margin-right: 8px;
+              background: $grey_variation-2;
+              border-radius: 4px;
+              display: flex;
+              align-items: center;
+              span {
+                font-weight: $font-weight-normal;
+                font-size: $font-size-12;
+                line-height: $line-height-14;
+                color: $black_variation-2;
+                padding: 5px 8px;
+              }
+            }
+          }
+          .source-type {
+            display: flex;
+            align-items: center;
+            img {
+              width: 26px;
+              height: 26px;
+              margin-right: 8px;
+            }
+            span {
+              font-weight: $font-weight-normal;
+            }
+          }
+          .edit-information {
+            visibility: hidden;
+            cursor: pointer;
+            img {
+              width: 24px;
+              height: 24px;
+              margin: 0px !important;
+            }
+          }
+        }
+        &:hover {
+          background-color: $green_variation-2;
+          .edit-information {
+            visibility: visible;
+          }
+        }
+      }
+    }
+  }
+}

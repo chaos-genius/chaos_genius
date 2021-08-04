@@ -1,0 +1,95 @@
+@import "../../assets/styles/variable.scss";
+
+.header-section {
+  position: fixed;
+  top: 0px;
+  width: calc(100% - 90px);
+  background-color: $white;
+  height: 70px;
+  z-index: 99;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 64px;
+  .dropdown {
+    cursor: pointer;
+    .userdetails {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      .user-avatar {
+        margin-right: 10px;
+        width: 39px;
+        height: 39px;
+        border: 1px solid transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 100%;
+        background: $green_variation-2;
+        font-weight: 500;
+        font-size: 20px;
+        line-height: 30px;
+        color: $green;
+        text-transform: capitalize;
+      }
+      .user-profile {
+        .profile-dropdown {
+          display: flex;
+          align-items: center;
+          img {
+            width: 12px;
+            height: 12px;
+            margin-left: 6px;
+          }
+        }
+        p {
+          font-weight: $font-weight-500;
+          font-size: $font-size-14;
+          line-height: $line-height-16;
+          letter-spacing: $letter-spacing;
+          color: $black;
+        }
+        label {
+          font-weight: $font-weight-normal;
+          font-size: $font-size-12;
+          line-height: $line-height-14;
+          letter-spacing: $letter-spacing-point4;
+          text-transform: capitalize;
+          color: $green_variation-3;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+  ul {
+    width: 200px;
+    margin: 0px 50px !important;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.16);
+    border-radius: 6px;
+    border: none;
+    transform: translate3d(0px, 50px, 0px) !important;
+    top: 15px !important;
+    &::before {
+      border-bottom: 10px solid $white;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      align-items: center;
+      content: "";
+      position: absolute;
+      right: 50%;
+      top: -10px;
+    }
+    li {
+      .dropdown-item {
+        font-size: $font-size-14;
+        line-height: $line-height-22;
+        display: flex;
+        align-items: center;
+        color: $black_variation-2;
+      }
+    }
+  }
+}

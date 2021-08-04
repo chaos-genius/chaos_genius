@@ -1,0 +1,22 @@
+@import "../../assets/styles/variable.scss";
+
+.common-filter-section {
+  background: $white;
+  border-radius: 10px;
+  min-height: 100vh;
+  margin-bottom: 20px;
+}
+.filter-layout {
+  padding: 15px 24px;
+  border-bottom: 1px solid rgba(34, 34, 34, 0.1);
+  h3 {
+    margin-bottom: 20px;
+    font-weight: $font-weight-600;
+    font-size: $font-size-14;
+    line-height: $line-height-18;
+    color: $black_variation-2;
+  }
+  .search-filter {
+    margin-bottom: 10px;
+  }
+}

@@ -1,0 +1,79 @@
+@import "~bootstrap/scss/bootstrap";
+@import "./variable.scss";
+
+.btn {
+  box-sizing: border-box;
+  border-radius: 10px;
+  padding: 2px 16px;
+  outline: 0 !important;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: 0 !important;
+  box-shadow: none !important;
+  span {
+    font-weight: $font-weight-500;
+    font-size: $font-size-14;
+    line-height: $line-height-16;
+    letter-spacing: $letter-spacing;
+    text-transform: capitalize;
+    margin-left: 10px;
+  }
+  img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+  }
+  &.black-button {
+    color: $black;
+    background-color: $black-variation-2;
+    border: 1px solid $black-variation-2;
+    span {
+      color: $white;
+    }
+  }
+  &.white-button {
+    color: $black_variation-2;
+    background-color: $white;
+    border: 1px solid $black-variation-2;
+    padding: 0px 26px;
+
+    span {
+      color: $black_variation-2;
+      margin-left: 0px;
+    }
+  }
+  &.grey-button {
+    background: $grey_variation-2;
+    color: $black_variation-2;
+    span {
+      color: $black_variation-2;
+    }
+  }
+  &.button-right-margin {
+    margin-right: 16px;
+  }
+  &.green-button {
+    border: none;
+    background: linear-gradient(
+      101.44deg,
+      #defb9d 0%,
+      #71f79e 37%,
+      #38f9d7 70%,
+      #89c4fe 100%
+    );
+    span {
+      color: $black;
+    }
+  }
+  &:disabled {
+    cursor: not-allowed;
+    pointer-events: all !important;
+    border: 1px solid $grey_variation-1;
+    background-color: transparent;
+    span {
+      color: $grey_variation-1;
+    }
+  }
+}

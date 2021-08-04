@@ -1,0 +1,63 @@
+@import "./variable.scss";
+
+.add-form-container {
+  background-color: $white;
+  border-radius: 10px;
+  padding: 40px;
+  width: 520px;
+  margin: 0 auto;
+  .form-action {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+  }
+  .query-form {
+    padding: 0px 8px;
+    .test-query-connection {
+      display: flex;
+      justify-content: space-between;
+      .test-query {
+        span {
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+          font-size: $font-size-14;
+          line-height: $line-height-16;
+          letter-spacing: $letter-spacing;
+          text-transform: capitalize;
+          color: $green;
+          img {
+            margin-right: 5px !important;
+          }
+        }
+      }
+    }
+  }
+
+  .optionlabel {
+    display: flex;
+    align-items: center;
+    img {
+      width: 11.5px;
+      height: 16px;
+      margin-right: 8px;
+    }
+  }
+  .add-options-wrapper {
+    .add-options {
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 19px;
+      letter-spacing: 0.15px;
+      color: #60ca9a;
+      margin-bottom: 24px;
+      cursor: pointer;
+      label {
+        cursor: pointer;
+      }
+      &:last-child {
+        margin-bottom: 0px;
+      }
+    }
+  }
+}

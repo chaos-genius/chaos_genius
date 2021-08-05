@@ -52,7 +52,7 @@ const DashboardFilter = ({ setKpi, data }) => {
       </div>
       <div className="filter-layout filter-tab">
         <ul>
-          {listData &&
+          {listData && listData.length !== 0 ? (
             listData.map((item) => {
               return (
                 <li
@@ -66,27 +66,10 @@ const DashboardFilter = ({ setKpi, data }) => {
                   <img src={GreenArrow} alt="GreenArrow Icon" />
                 </li>
               );
-            })}
-          {/* <li className="active">
-            DAU’s
-            <img src={GreenArrow} alt="GreenArrow Icon" />
-          </li>
-          <li>
-            Avg Engagements (min)
-            <img src={GreenArrow} alt="GreenArrow Icon" />
-          </li>
-          <li>
-            Order Value
-            <img src={GreenArrow} alt="GreenArrow Icon" />
-          </li>
-          <li>
-            Orders
-            <img src={GreenArrow} alt="GreenArrow Icon" />
-          </li>
-          <li>
-            Revenue
-            <img src={GreenArrow} alt="GreenArrow Icon" />
-          </li> */}
+            })
+          ) : (
+            <span>No Data Found</span>
+          )}
         </ul>
       </div>
     </div>

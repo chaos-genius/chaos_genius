@@ -44,8 +44,7 @@ const DataSourceTable = ({ tableData }, props) => {
         </tr>
       </thead>
       <tbody>
-        {tableData &&
-          tableData.length !== 0 &&
+        {tableData && tableData.length !== 0 ? (
           tableData.map((datasource) => {
             return (
               <tr key={uuidv4()}>
@@ -93,7 +92,12 @@ const DataSourceTable = ({ tableData }, props) => {
                 </td>
               </tr>
             );
-          })}
+          })
+        ) : (
+          <tr className="empty-table">
+            <td colSpan={6}>No Data Found</td>
+          </tr>
+        )}
       </tbody>
     </table>
   );

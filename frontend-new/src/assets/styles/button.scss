@@ -1,5 +1,5 @@
-@import "~bootstrap/scss/bootstrap";
-@import "./variable.scss";
+@import '~bootstrap/scss/bootstrap';
+@import './variable.scss';
 
 .btn {
   box-sizing: border-box;
@@ -75,5 +75,10 @@
     span {
       color: $grey_variation-1;
     }
+  }
+  .spinner-border {
+    width: 15px;
+    height: 15px;
+    color: $white;
   }
 }

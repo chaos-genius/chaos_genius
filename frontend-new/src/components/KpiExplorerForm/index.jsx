@@ -20,7 +20,8 @@ import '../../assets/styles/addform.scss';
 import {
   getAllKpiExplorerForm,
   getAllKpiExplorerField,
-  getAllKpiExplorerSubmit
+  getAllKpiExplorerSubmit,
+  getTestQuery
 } from '../../redux/actions';
 
 const datasettype = [
@@ -98,8 +99,14 @@ const KpiExplorerForm = () => {
 
   const [datasourceid, setDataSourceId] = useState('');
 
-  const { kpiFormLoading, kpiFormData, kpiFieldLoading, kpiField } =
-    useSelector((state) => state.kpiExplorer);
+  const {
+    kpiFormLoading,
+    kpiFormData,
+    kpiFieldLoading,
+    kpiField,
+    testQueryData,
+    kpiSubmitLoading
+  } = useSelector((state) => state.kpiExplorer);
 
   useEffect(() => {
     dispatchGetAllKpiExplorerForm();
@@ -321,10 +328,22 @@ const KpiExplorerForm = () => {
     dispatch(getAllKpiExplorerSubmit(kpiInfo));
   };
 
+  const onTestQuery = () => {
+    const data = {
+      data_source_id: datasourceid,
+      from_query: true,
+      query: formdata.query
+    };
+    dispatch(getTestQuery(data));
+  };
+
   if (kpiFormLoading) {
     return (
-      <div>
-        <h1>Loading...</h1>
+      <div className="loader">
+        <div className="loading-text">
+          <p>loading</p>
+          <span></span>
+        </div>
       </div>
     );
   } else {
@@ -406,25 +425,29 @@ const KpiExplorerForm = () => {
                 </div>
               ) : null}
               <div className="test-query-connection">
-                <div className="test-query">
+                <div className="test-query" onClick={() => onTestQuery()}>
                   <span>
                     <img src={Play} alt="Play" />
                     Test Query
                   </span>
                 </div>
                 <div>
-                  <div className="connection__success">
-                    <p>
-                      <img src={Success} alt="Success" />
-                      Test Connection Success
-                    </p>
-                  </div>
-                  <div className="connection__fail">
-                    <p>
-                      <img src={Fail} alt="Failed" />
-                      Test Connection Failed
-                    </p>
-                  </div>
+                  {testQueryData && testQueryData?.msg === 'success' && (
+                    <div className="connection__success">
+                      <p>
+                        <img src={Success} alt="Success" />
+                        Test Connection Success
+                      </p>
+                    </div>
+                  )}
+                  {testQueryData && testQueryData?.msg === 'failed' && (
+                    <div className="connection__fail">
+                      <p>
+                        <img src={Fail} alt="Failed" />
+                        Test Connection Failed
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -557,7 +580,16 @@ const KpiExplorerForm = () => {
                 <button
                   className="btn black-button"
                   onClick={() => handleSubmit()}>
-                  <span>Add KPI</span>
+                  {kpiSubmitLoading ? (
+                    <>
+                      <div className="spinner-border" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                      <span>Loading...</span>
+                    </>
+                  ) : (
+                    <span>Add KPI</span>
+                  )}
                 </button>
               ) : null}
               {queryAdditional.querydimension === true ||
@@ -571,7 +603,16 @@ const KpiExplorerForm = () => {
                   <button
                     className="btn black-button"
                     onClick={() => handleSubmit()}>
-                    <span>Save Changes</span>
+                    {kpiSubmitLoading ? (
+                      <>
+                        <div className="spinner-border" role="status">
+                          <span className="visually-hidden">Loading...</span>
+                        </div>
+                        <span>Loading...</span>
+                      </>
+                    ) : (
+                      <span>Save Changes</span>
+                    )}
                   </button>
                 </>
               ) : null}
@@ -720,7 +761,16 @@ const KpiExplorerForm = () => {
                 <button
                   className="btn black-button"
                   onClick={() => handleSubmit()}>
-                  <span>Add KPI</span>
+                  {kpiSubmitLoading ? (
+                    <>
+                      <div className="spinner-border" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                      <span>Loading...</span>
+                    </>
+                  ) : (
+                    <span>Add KPI</span>
+                  )}
                 </button>
               ) : null}
               {tableAdditional.tabledimension === true ||
@@ -734,7 +784,16 @@ const KpiExplorerForm = () => {
                   <button
                     className="btn black-button"
                     onClick={() => handleSubmit()}>
-                    <span>Save Changes</span>
+                    {kpiSubmitLoading ? (
+                      <>
+                        <div className="spinner-border" role="status">
+                          <span className="visually-hidden">Loading...</span>
+                        </div>
+                        <span>Loading...</span>
+                      </>
+                    ) : (
+                      <span>Save Changes</span>
+                    )}
                   </button>
                 </>
               ) : null}

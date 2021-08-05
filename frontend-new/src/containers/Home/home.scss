@@ -1,11 +1,70 @@
-@import "../../assets/styles/variable.scss";
+@import '../../assets/styles/variable.scss';
 
-.homepage-setup-card-wrapper{
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    .setup-card{
-        width: 23.5%;
+.homepage-setup-card-wrapper {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  .setup-card {
+    width: 23.5%;
+  }
+}
+.heading-option {
+  align-items: baseline;
+}
+.option-button {
+  progress {
+    width: 270px;
+    border: 0;
+    height: 11px;
+    border-radius: 50px;
+    background: $grey_variation-1;
+    border-radius: 50px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    &::-webkit-progress-bar {
+      background-color: $grey_variation-1;
+      border: 0;
+      height: 11px;
+      border-radius: 50px;
     }
+    &::-webkit-progress-value {
+      background: linear-gradient(
+        101.44deg,
+        #defb9d 0%,
+        #71f79e 37%,
+        #38f9d7 70%,
+        #89c4fe 100%
+      );
+      border: 0;
+      height: 11px;
+      border-radius: 50px;
+    }
+    &::-moz-progress-bar {
+      background-color: $grey_variation-1;
+      border: 0;
+      height: 11px;
+      border-radius: 50px;
+    }
+    &::-moz-progress-value {
+      background: linear-gradient(
+        101.44deg,
+        #defb9d 0%,
+        #71f79e 37%,
+        #38f9d7 70%,
+        #89c4fe 100%
+      );
+      border: 0;
+      height: 11px;
+      border-radius: 50px;
+    }
+  }
+  p {
+    font-size: $font-size-12;
+    line-height: $line-height-14;
+    letter-spacing: $letter-spacing;
+    color: $black_variation-2;
+    margin-top: 5px;
+  }
 }

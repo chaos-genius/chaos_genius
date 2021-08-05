@@ -10,13 +10,17 @@ import {
   KPIEXPLORERFIELDFAILURE,
   KPIEXPLORERSUBMITREQUEST,
   KPIEXPLORERSUBMITSUCCESS,
-  KPIEXPLORERSUBMITFAILURE
+  KPIEXPLORERSUBMITFAILURE,
+  TESTQUERYREQUEST,
+  TESTQUERYFAILURE,
+  TESTQUERYSUCCESS
 } from './ActionConstants';
 
 import {
   KPI_URL,
   CONNECTION_URL,
-  KPI_FORM_OPTION_URL
+  KPI_FORM_OPTION_URL,
+  TEST_QUERY_URL
 } from '../../utils/url-helper';
 
 import { getRequest, postRequest } from '../../utils/http-helper';
@@ -156,6 +160,40 @@ export const getAllKpiExplorerSubmit = (payload) => {
       dispatch(getAllKpiExplorerSubmitFailure);
     } else if (data && status === 200) {
       dispatch(getAllKpiExplorerSubmitSuccess(data));
+    }
+  };
+};
+
+export const getTestQueryRequested = () => {
+  return {
+    type: TESTQUERYREQUEST
+  };
+};
+
+export const getTestQueryFailure = () => {
+  return {
+    type: TESTQUERYFAILURE
+  };
+};
+
+export const getTestQuerySuccess = (response) => {
+  return {
+    type: TESTQUERYSUCCESS,
+    data: response
+  };
+};
+
+export const getTestQuery = (payload) => {
+  return async (dispatch) => {
+    dispatch(getTestQueryRequested());
+    const { data, error, status } = await postRequest({
+      url: TEST_QUERY_URL,
+      data: payload
+    });
+    if (error) {
+      dispatch(getTestQueryFailure());
+    } else if (data && status === 200) {
+      dispatch(getTestQuerySuccess(data));
     }
   };
 };

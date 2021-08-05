@@ -23,7 +23,9 @@
     .selectcategory__control {
       background: $grey_variation-2;
       border-radius: 6px;
+      border: none;
     }
+
     .selectcategory__placeholder,
     .selectcategory__single-value {
       font-weight: $font-weight-500;
@@ -32,7 +34,8 @@
       letter-spacing: $letter-spacing-point15;
       color: $black_variation-2;
     }
-    ​ .selectcategory__dropdown-indicator {
+    ​ .selectcategory__dropdown-indicator,
+    .css-tlfecz-indicatorContainer {
       color: $black_variation-2;
     }
   }
@@ -109,6 +112,12 @@
       .form-check-input {
         margin: 0px 8px 0px 0px;
         cursor: pointer;
+        width: 36px;
+        height: 18px;
+        &.form-check-input:checked {
+          background-color: $blue;
+          border-color: $blue;
+        }
       }
     }
   }

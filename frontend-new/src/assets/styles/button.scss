@@ -18,12 +18,12 @@
     line-height: $line-height-16;
     letter-spacing: $letter-spacing;
     text-transform: capitalize;
-    margin-left: 10px;
   }
   img {
     width: 16px;
     height: 16px;
     object-fit: contain;
+    margin-right: 10px;
   }
   &.black-button {
     color: $black;
@@ -65,6 +65,13 @@
     );
     span {
       color: $black;
+    }
+  }
+  &.green-variant-button {
+    background-color: $green;
+    color: $white;
+    span {
+      color: $white;
     }
   }
   &:disabled {

@@ -28,7 +28,7 @@
 <path opacity="0.4" d="M511.7 182.1C176.1 399.4 107 87.3 2.1001 103.4" stroke="#FDF2E2" stroke-width="1.2581" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 1"/>
 <path opacity="0.4" d="M512.4 177C171.2 399.9 100 81.9 1.6001 94" stroke="#FDF2E2" stroke-width="1.1935" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 1"/>
 <path opacity="0.4" d="M513 172C166.3 400.4 92.9001 76.6 1.1001 84.7" stroke="#FDF2E2" stroke-width="1.129" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 1"/>
-<path opacity="0.4" d="M513.7 166.9C161.3 400.9 85.9 71.1999 0.5 75.2999" stroke="#FDF2E2" stroke-width="1.0645" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 1"/>
+<path opacity="0.4" d="M513.7 166.9C161.3 400.9 85.9 71.2 0.5 75.3" stroke="#FDF2E2" stroke-width="1.0645" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 1"/>
 <path opacity="0.4" d="M514.4 161.8C156.4 401.4 78.8 65.8 0 66" stroke="#FDF2E2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 1"/>
 </g>
 <path d="M20 0H266C277 0 286 9 286 20V280C286 291 277 300 266 300H20C9 300 0 291 0 280V20C0 9 9 0 20 0Z" fill="url(#paint1_linear)" stroke="url(#paint2_linear)" stroke-miterlimit="10"/>

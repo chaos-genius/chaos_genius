@@ -98,7 +98,7 @@ const DataSource = () => {
             <h3>Data Source</h3>
           </div>
           <div className="option-button">
-            <Link to="/datasource/add" className="btn black-button">
+            <Link to="/datasource/add" className="btn green-variant-button">
               <img src={Plus} alt="Add" />
               <span>New Data Source</span>
             </Link>

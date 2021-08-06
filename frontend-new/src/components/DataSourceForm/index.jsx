@@ -37,9 +37,13 @@ const DataSourceForm = () => {
   const [dsFormData, setDsFormData] = useState({});
   const [error, setError] = useState('');
   const [formError, setFormError] = useState({});
-
-  const { isLoading, connectionType, testLoading, testConnectionResponse } =
-    useSelector((state) => state.dataSource);
+  const [status, setStatus] = useState('');
+  const {
+    isLoading,
+    connectionType,
+    testLoading,
+    testConnectionResponse
+  } = useSelector((state) => state.dataSource);
 
   useEffect(() => {
     dispatchGetConnectionType();
@@ -96,6 +100,11 @@ const DataSourceForm = () => {
     setFormError([]);
   };
 
+  useEffect(() => {
+    if (testConnectionResponse !== undefined) {
+      setStatus(testConnectionResponse);
+    }
+  }, [testConnectionResponse]);
   const handleCheckboxChange = (key, e) => {
     setDsFormData((prev) => {
       return {
@@ -113,14 +122,14 @@ const DataSourceForm = () => {
       required.map((obj) => {
         const errorText = dsFormData[obj];
         if (!errorText) {
-          newobj[obj] = 'Please Enter  ' + obj;
+          newobj[obj] = 'Please enter  ' + obj;
         }
         return newobj;
       });
       setFormError(newobj);
     }
     if (connectionName === '') {
-      setError('Please enter Connection name');
+      setError('Please enter connection name');
     }
     if (Object.keys(newobj).length === 0 && connectionName !== '') {
       checkTestConnection();
@@ -143,14 +152,14 @@ const DataSourceForm = () => {
       required.map((obj) => {
         const errorText = dsFormData[obj];
         if (!errorText) {
-          newobj[obj] = 'Please Enter' + obj;
+          newobj[obj] = 'Please enter' + obj;
         }
         return newobj;
       });
       setFormError(newobj);
     }
     if (connectionName === '') {
-      setError('Please enter Connection name');
+      setError('Please enter connection name');
     }
     if (Object.keys(newobj).length === 0 && connectionName !== '') {
       const payload = {
@@ -167,8 +176,11 @@ const DataSourceForm = () => {
 
   if (isLoading) {
     return (
-      <div>
-        <h1>Loading...</h1>
+      <div className="loader">
+        <div className="loading-text">
+          <p>loading</p>
+          <span></span>
+        </div>
       </div>
     );
   } else {
@@ -204,6 +216,7 @@ const DataSourceForm = () => {
               setFormError([]);
               setSourceDefinitionId(e.value.sourceDefinitionId);
               setDsFormData({});
+              setStatus('');
             }}
             components={{ SingleValue: customSingleValue }}
           />
@@ -233,7 +246,7 @@ const DataSourceForm = () => {
             </div>
           )}
         {/* test connection fail message */}
-        {testConnectionResponse && testConnectionResponse?.status === 'failed' && (
+        {status && status?.status === 'failed' && (
           <div className="connection__fail">
             <p>
               <img src={Fail} alt="Fail" />
@@ -242,23 +255,27 @@ const DataSourceForm = () => {
           </div>
         )}
         <div className="form-action">
-          {testConnectionResponse &&
-            testConnectionResponse?.status === 'success' && (
-              <button
-                className="btn black-button"
-                onClick={() => {
-                  saveDataSource();
-                }}>
-                <span>Add Data Source</span>
-              </button>
-            )}
+          {status && status?.status === 'success' && (
+            <button
+              className="btn black-button"
+              onClick={() => {
+                saveDataSource();
+              }}>
+              <span>Add Data Source</span>
+            </button>
+          )}
           <button
             className="btn black-button"
             type={'submit'}
             disabled={selectedDatasource !== undefined ? false : true}
             onClick={() => testConnection()}>
             {testLoading ? (
-              <div className="spinner-border"></div>
+              <>
+                <div className="spinner-border">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                <span>Loading...</span>
+              </>
             ) : (
               <>
                 <img

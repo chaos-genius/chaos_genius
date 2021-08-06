@@ -18,3 +18,5 @@ export const KPI_FORM_OPTION_URL = `${BASE_URL}/api/connection/metadata`;
 export const DELETE_DATASOURCE = `${BASE_URL}/api/connection/delete`;
 export const DASHBOARD_SIDEBAR_URL = `${BASE_URL}/api/kpi`;
 //export const DASHBOARD_DIMENSION = `${BASE_URL}/api/kpi//get-dimensions`;
+export const ONBOARDING_URL = `${BASE_URL}/api/config/onboarding-status`;
+export const TEST_QUERY_URL = `${BASE_URL}/api/connection/metadata`;

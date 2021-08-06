@@ -10,7 +10,8 @@ import {
   getAllKpiExplorer,
   getAllKpiExplorerForm,
   getAllKpiExplorerField,
-  getAllKpiExplorerSubmit
+  getAllKpiExplorerSubmit,
+  getTestQuery
 } from './KpiEplorer';
 import {
   getDashboardSidebar,
@@ -20,6 +21,7 @@ import {
   getAllDashboardDimension,
   getAllDashboardHierarchical
 } from './Dashboard';
+import { getOnboardingStatus } from './Onboarding';
 export {
   getAllDataSources,
   getConnectionType,
@@ -35,5 +37,7 @@ export {
   getDashboardLinechart,
   getDashboardRcaAnalysis,
   getAllDashboardDimension,
-  getAllDashboardHierarchical
+  getAllDashboardHierarchical,
+  getOnboardingStatus,
+  getTestQuery
 };

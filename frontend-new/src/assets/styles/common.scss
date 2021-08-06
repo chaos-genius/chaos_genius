@@ -74,10 +74,10 @@ a:hover {
         color: $blue;
       }
       &.active {
-        color: $grey_variation-1;
+        color: $grey_variation-3;
       }
       &::before {
-        color: inherit;
+        color: $grey_variation-3;
       }
     }
   }
@@ -158,7 +158,7 @@ a:hover {
     letter-spacing: $letter-spacing;
     text-transform: capitalize;
     color: $grey_variation-1;
-    font-weight: 300;
+    font-weight: $font-weight-300;
   }
   &.icon {
     position: relative;
@@ -169,6 +169,7 @@ a:hover {
         line-height: $line-height-14;
         letter-spacing: $letter-spacing;
         color: $grey_variation-1;
+        font-weight: $font-weight-normal;
       }
       &:-moz-placeholder {
         line-height: 25px;
@@ -179,7 +180,7 @@ a:hover {
     }
     span {
       position: absolute;
-      top: 7px;
+      top: 8px;
       left: 10px;
       img {
         width: 14px;
@@ -317,7 +318,7 @@ a:hover {
       text-transform: capitalize;
       color: $grey_variation-3;
       margin-bottom: 6px;
-      padding: 15px 24px;
+      padding: 20px 24px;
       border-left: 2px solid transparent;
       cursor: pointer;
       &.active {
@@ -370,6 +371,7 @@ a:hover {
       color: $black_variation-2;
       padding: 20px 24px;
       cursor: pointer;
+      margin-left: 8px;
       text-transform: capitalize;
       &.active {
         font-weight: $font-weight-600;
@@ -434,6 +436,11 @@ a:hover {
 .css-1wa3eu0-placeholder {
   margin: 0px !important;
   color: $black_variation-2 !important;
+  font-weight: $font-weight-500 !important;
+  font-size: $font-size-16 !important;
+  line-height: $line-height-16 !important;
+  letter-spacing: $letter-spacing !important;
+  text-transform: capitalize !important;
 }
 .css-tlfecz-indicatorContainer {
   color: $black_variation-2 !important;
@@ -564,5 +571,16 @@ a:hover {
         }
       }
     }
+  }
+}
+
+.multi-filter-selection {
+  display: flex;
+  justify-content: space-between;
+  .css-2b097c-container {
+    width: 37%;
+  }
+  .css-2b097c-container:nth-child(2) {
+    width: 18%;
   }
 }

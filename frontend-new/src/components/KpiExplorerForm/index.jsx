@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -14,6 +14,7 @@ import Postgre from '../../assets/images/postgre.svg';
 import GoogleAnalytics from '../../assets/images/googleanalytics.svg';
 import Amplitude from '../../assets/images/amplitude.svg';
 import MySQL from '../../assets/images/mysql.svg';
+import Cancel from '../../assets/images/cancel.svg';
 
 import '../../assets/styles/addform.scss';
 
@@ -52,6 +53,9 @@ const customSingleValue = ({ data }) => (
 
 const KpiExplorerForm = () => {
   const dispatch = useDispatch();
+
+  const history = useHistory();
+  const data = history.location.pathname.split('/');
 
   const [option, setOption] = useState({
     datasource: '',
@@ -517,21 +521,6 @@ const KpiExplorerForm = () => {
                 </div>
               ) : null}
             </div>
-            {queryAdditional.queryfilter === true ? (
-              <div className="form-group">
-                <label>Filters</label>
-                <Select
-                  options={option.metricOption}
-                  classNamePrefix="selectcategory"
-                  isMulti
-                  closeMenuOnSelect="true"
-                  placeholder="Select Filters"
-                  onChange={(e) =>
-                    setFormdata({ ...formdata, filter: e.value })
-                  }
-                />
-              </div>
-            ) : null}
             {queryAdditional.querydimension === true ? (
               <div className="form-group">
                 <label>Dimensions</label>
@@ -547,20 +536,48 @@ const KpiExplorerForm = () => {
                 />
               </div>
             ) : null}
+            {queryAdditional.queryfilter === true ? (
+              <div className="form-group">
+                <label>Filters</label>
+                <div className="multi-filter-selection">
+                  <Select
+                    classNamePrefix="selectcategory"
+                    isSearchable={false}
+                    closeMenuOnSelect="true"
+                    placeholder="Country"
+                    onChange={(e) => setFormdata({ ...formdata, filter: e })}
+                  />
+                  <Select
+                    classNamePrefix="selectcategory"
+                    isSearchable={false}
+                    closeMenuOnSelect="true"
+                    placeholder="="
+                    onChange={(e) => setFormdata({ ...formdata, filter: e })}
+                  />
+                  <Select
+                    classNamePrefix="selectcategory"
+                    isSearchable={false}
+                    closeMenuOnSelect="true"
+                    placeholder="France"
+                    onChange={(e) => setFormdata({ ...formdata, filter: e })}
+                  />
+                  <img src={Cancel} alt="Cancel" />
+                </div>
+              </div>
+            ) : null}
             {/* add option form */}
             <div className="add-options-wrapper">
-              {queryAdditional.queryfilter === false ? (
-                <div
-                  className="add-options"
-                  onClick={() =>
-                    setQueryAdditional({
-                      ...queryAdditional,
-                      queryfilter: true
-                    })
-                  }>
-                  <label>+ Add Filters</label>
-                </div>
-              ) : null}
+              <div
+                className="add-options"
+                onClick={() =>
+                  setQueryAdditional({
+                    ...queryAdditional,
+                    queryfilter: true
+                  })
+                }>
+                <label>+ Add Filters</label>
+              </div>
+
               {queryAdditional.querydimension === false ? (
                 <div
                   className="add-options"
@@ -575,47 +592,26 @@ const KpiExplorerForm = () => {
               ) : null}
             </div>
             <div className="form-action">
-              {queryAdditional.queryfilter === false &&
-              queryAdditional.querydimension === false ? (
-                <button
-                  className="btn black-button"
-                  onClick={() => handleSubmit()}>
-                  {kpiSubmitLoading ? (
-                    <>
-                      <div className="spinner-border" role="status">
-                        <span className="visually-hidden">Loading...</span>
-                      </div>
-                      <span>Loading...</span>
-                    </>
-                  ) : (
-                    <span>Add KPI</span>
-                  )}
-                </button>
-              ) : null}
-              {queryAdditional.querydimension === true ||
-              queryAdditional.queryfilter === true ? (
-                <>
-                  <Link to="/kpi">
-                    <button className="btn white-button button-right-margin">
-                      <span>Cancel</span>
-                    </button>
-                  </Link>
-                  <button
-                    className="btn black-button"
-                    onClick={() => handleSubmit()}>
-                    {kpiSubmitLoading ? (
-                      <>
-                        <div className="spinner-border" role="status">
-                          <span className="visually-hidden">Loading...</span>
-                        </div>
-                        <span>Loading...</span>
-                      </>
-                    ) : (
+              <button
+                className="btn black-button"
+                onClick={() => handleSubmit()}>
+                {kpiSubmitLoading ? (
+                  <>
+                    <div className="spinner-border" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <span>Loading...</span>
+                  </>
+                ) : (
+                  <>
+                    {data[2] === 'edit' ? (
                       <span>Save Changes</span>
+                    ) : (
+                      <span>Add KPI</span>
                     )}
-                  </button>
-                </>
-              ) : null}
+                  </>
+                )}
+              </button>
             </div>
           </div> // end of for query
         ) : (
@@ -701,26 +697,13 @@ const KpiExplorerForm = () => {
                 </div>
               ) : null}
             </div>
-            {tableAdditional.tablefilter === true ? (
-              <div className="form-group">
-                <label>Filters</label>
-                <Select
-                  options={option.metricOption}
-                  classNamePrefix="selectcategory"
-                  isMulti
-                  closeMenuOnSelect="true"
-                  placeholder="Select Filters"
-                  onChange={(e) => setFormdata({ ...formdata, filter: e })}
-                />
-              </div>
-            ) : null}
             {tableAdditional.tabledimension === true ? (
               <div className="form-group">
                 <label>Dimensions</label>
                 <Select
+                  isMulti
                   options={option.metricOption}
                   classNamePrefix="selectcategory"
-                  isMulti
                   closeMenuOnSelect="true"
                   placeholder="Select Dimensions"
                   menuPlacement="top"
@@ -728,20 +711,49 @@ const KpiExplorerForm = () => {
                 />
               </div>
             ) : null}
+            {tableAdditional.tablefilter === true ? (
+              <div className="form-group">
+                <label>Filters</label>
+                <div className="multi-filter-selection">
+                  <Select
+                    classNamePrefix="selectcategory"
+                    isSearchable={false}
+                    closeMenuOnSelect="true"
+                    placeholder="Country"
+                    onChange={(e) => setFormdata({ ...formdata, filter: e })}
+                  />
+                  <Select
+                    classNamePrefix="selectcategory"
+                    isSearchable={false}
+                    closeMenuOnSelect="true"
+                    placeholder="="
+                    onChange={(e) => setFormdata({ ...formdata, filter: e })}
+                  />
+                  <Select
+                    classNamePrefix="selectcategory"
+                    isSearchable={false}
+                    closeMenuOnSelect="true"
+                    placeholder="France"
+                    onChange={(e) => setFormdata({ ...formdata, filter: e })}
+                  />
+                  <img src={Cancel} alt="Cancel" />
+                </div>
+              </div>
+            ) : null}
+
             {/* add option form */}
             <div className="add-options-wrapper">
-              {tableAdditional.tablefilter === false ? (
-                <div
-                  className="add-options"
-                  onClick={() =>
-                    setTableAdditional({
-                      ...tableAdditional,
-                      tablefilter: true
-                    })
-                  }>
-                  <label>+ Add Filters</label>
-                </div>
-              ) : null}
+              <div
+                className="add-options"
+                onClick={() =>
+                  setTableAdditional({
+                    ...tableAdditional,
+                    tablefilter: true
+                  })
+                }>
+                <label>+ Add Filters</label>
+              </div>
+
               {tableAdditional.tabledimension === false ? (
                 <div
                   className="add-options"
@@ -756,47 +768,26 @@ const KpiExplorerForm = () => {
               ) : null}
             </div>
             <div className="form-action">
-              {tableAdditional.tablefilter === false &&
-              tableAdditional.tabledimension === false ? (
-                <button
-                  className="btn black-button"
-                  onClick={() => handleSubmit()}>
-                  {kpiSubmitLoading ? (
-                    <>
-                      <div className="spinner-border" role="status">
-                        <span className="visually-hidden">Loading...</span>
-                      </div>
-                      <span>Loading...</span>
-                    </>
-                  ) : (
-                    <span>Add KPI</span>
-                  )}
-                </button>
-              ) : null}
-              {tableAdditional.tabledimension === true ||
-              tableAdditional.tablefilter === true ? (
-                <>
-                  <Link to="/kpi">
-                    <button className="btn white-button button-right-margin">
-                      <span>Cancel</span>
-                    </button>
-                  </Link>
-                  <button
-                    className="btn black-button"
-                    onClick={() => handleSubmit()}>
-                    {kpiSubmitLoading ? (
-                      <>
-                        <div className="spinner-border" role="status">
-                          <span className="visually-hidden">Loading...</span>
-                        </div>
-                        <span>Loading...</span>
-                      </>
-                    ) : (
+              <button
+                className="btn black-button"
+                onClick={() => handleSubmit()}>
+                {kpiSubmitLoading ? (
+                  <>
+                    <div className="spinner-border" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <span>Loading...</span>
+                  </>
+                ) : (
+                  <>
+                    {data[2] === 'edit' ? (
                       <span>Save Changes</span>
+                    ) : (
+                      <span>Add KPI</span>
                     )}
-                  </button>
-                </>
-              ) : null}
+                  </>
+                )}
+              </button>
             </div>
           </div>
           // end of Table form

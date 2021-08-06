@@ -102,6 +102,16 @@
         color: $black_variation-2;
       }
     }
+    .overlap-check {
+      label {
+        font-weight: $font-weight-normal;
+        font-size: $font-size-14;
+        line-height: $line-height-18;
+        letter-spacing: $letter-spacing;
+        text-transform: capitalize;
+        color: $black_variation-2;
+      }
+    }
     .form-switch {
       display: flex;
       flex-direction: row;

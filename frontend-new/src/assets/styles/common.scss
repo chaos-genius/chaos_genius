@@ -333,14 +333,6 @@ a:hover {
         display: none;
       }
     }
-    span {
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
-      font-size: $font-size-14;
-      line-height: $line-height-16;
-      letter-spacing: $letter-spacing;
-    }
   }
 }
 
@@ -577,10 +569,20 @@ a:hover {
 .multi-filter-selection {
   display: flex;
   justify-content: space-between;
+  margin-bottom: 16px;
   .css-2b097c-container {
     width: 37%;
   }
   .css-2b097c-container:nth-child(2) {
     width: 18%;
   }
+}
+// No Data Found text
+.empty-content {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  font-size: $font-size-14;
+  line-height: $line-height-16;
+  letter-spacing: $letter-spacing;
 }

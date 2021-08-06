@@ -96,10 +96,10 @@ const KpiExplorerForm = () => {
     tabledimension: false
   });
 
-  const [queryAdditional, setQueryAdditional] = useState({
-    queryfilter: false,
-    querydimension: false
-  });
+  // const [queryAdditional, setQueryAdditional] = useState({
+  //   queryfilter: false,
+  //   querydimension: false
+  // });
 
   const [datasourceid, setDataSourceId] = useState('');
 
@@ -340,6 +340,23 @@ const KpiExplorerForm = () => {
     };
     dispatch(getTestQuery(data));
   };
+  const [inputList, setInputList] = useState([]);
+  const handleAddClick = () => {
+    setInputList([...inputList, { country: '', operator: '', value: '' }]);
+  };
+
+  const handleRemoveClick = (index) => {
+    const list = [...inputList];
+    list.splice(index, 1);
+    setInputList(list);
+  };
+
+  //  const handleInputChange = (e, index) => {
+  //   const { name, value } = e.target;
+  //   const list = [...inputList];
+  //   list[index][name] = value;
+  //   setInputList(list);
+  // };
 
   if (kpiFormLoading) {
     return (
@@ -455,343 +472,188 @@ const KpiExplorerForm = () => {
                 </div>
               </div>
             </div>
-            <div className="form-group">
-              <label>Metric Columns *</label>
-              <Select
-                options={option.metricOption}
-                classNamePrefix="selectcategory"
-                placeholder="Select Metric Columns"
-                onChange={(e) => {
-                  setFormdata({ ...formdata, metriccolumns: e.value });
-                  setErrorMsg((prev) => {
-                    return {
-                      ...prev,
-                      metriccolumns: false
-                    };
-                  });
-                }}
-              />
-              {errorMsg.metriccolumns === true ? (
-                <div className="connection__fail">
-                  <p>Select Metric Columns</p>
-                </div>
-              ) : null}
-            </div>
-            <div className="form-group">
-              <label>Aggregate by *</label>
-              <Select
-                options={aggregate}
-                classNamePrefix="selectcategory"
-                placeholder="Select Aggregate by"
-                onChange={(e) => {
-                  setFormdata({ ...formdata, aggregateby: e.value });
-                  setErrorMsg((prev) => {
-                    return {
-                      ...prev,
-                      aggregate: false
-                    };
-                  });
-                }}
-              />
-              {errorMsg.aggregate === true ? (
-                <div className="connection__fail">
-                  <p>Select Aggregate</p>
-                </div>
-              ) : null}
-            </div>
-            <div className="form-group">
-              <label>Datetime Columns *</label>
-              <Select
-                options={option.metricOption}
-                classNamePrefix="selectcategory"
-                placeholder="Select Datetime Columns"
-                onChange={(e) => {
-                  setFormdata({ ...formdata, datetimecolumns: e.value });
-                  setErrorMsg((prev) => {
-                    return {
-                      ...prev,
-                      datetimecolumns: false
-                    };
-                  });
-                }}
-              />
-              {errorMsg.datetimecolumns === true ? (
-                <div className="connection__fail">
-                  <p>Select Date Time Columns</p>
-                </div>
-              ) : null}
-            </div>
-            {queryAdditional.querydimension === true ? (
-              <div className="form-group">
-                <label>Dimensions</label>
-                <Select
-                  options={option.metricOption}
-                  classNamePrefix="selectcategory"
-                  isMulti
-                  closeMenuOnSelect="true"
-                  placeholder="Select Dimensions"
-                  onChange={(e) =>
-                    setFormdata({ ...formdata, dimension: e.value })
-                  }
-                />
-              </div>
-            ) : null}
-            {queryAdditional.queryfilter === true ? (
-              <div className="form-group">
-                <label>Filters</label>
-                <div className="multi-filter-selection">
-                  <Select
-                    classNamePrefix="selectcategory"
-                    isSearchable={false}
-                    closeMenuOnSelect="true"
-                    placeholder="Country"
-                    onChange={(e) => setFormdata({ ...formdata, filter: e })}
-                  />
-                  <Select
-                    classNamePrefix="selectcategory"
-                    isSearchable={false}
-                    closeMenuOnSelect="true"
-                    placeholder="="
-                    onChange={(e) => setFormdata({ ...formdata, filter: e })}
-                  />
-                  <Select
-                    classNamePrefix="selectcategory"
-                    isSearchable={false}
-                    closeMenuOnSelect="true"
-                    placeholder="France"
-                    onChange={(e) => setFormdata({ ...formdata, filter: e })}
-                  />
-                  <img src={Cancel} alt="Cancel" />
-                </div>
-              </div>
-            ) : null}
-            {/* add option form */}
-            <div className="add-options-wrapper">
-              <div
-                className="add-options"
-                onClick={() =>
-                  setQueryAdditional({
-                    ...queryAdditional,
-                    queryfilter: true
-                  })
-                }>
-                <label>+ Add Filters</label>
-              </div>
-
-              {queryAdditional.querydimension === false ? (
-                <div
-                  className="add-options"
-                  onClick={() =>
-                    setQueryAdditional({
-                      ...queryAdditional,
-                      querydimension: true
-                    })
-                  }>
-                  <label> + Add Dimensions</label>
-                </div>
-              ) : null}
-            </div>
-            <div className="form-action">
-              <button
-                className="btn black-button"
-                onClick={() => handleSubmit()}>
-                {kpiSubmitLoading ? (
-                  <>
-                    <div className="spinner-border" role="status">
-                      <span className="visually-hidden">Loading...</span>
-                    </div>
-                    <span>Loading...</span>
-                  </>
-                ) : (
-                  <>
-                    {data[2] === 'edit' ? (
-                      <span>Save Changes</span>
-                    ) : (
-                      <span>Add KPI</span>
-                    )}
-                  </>
-                )}
-              </button>
-            </div>
           </div> // end of for query
         ) : (
-          // For Table form
-          <div>
-            <div className="form-group">
-              <label>Table Name *</label>
-              <Select
-                options={option.tableoption}
-                classNamePrefix="selectcategory"
-                placeholder="Select Table"
-                onChange={(e) => tableName(e)}
-              />
-              {errorMsg.tablename === true ? (
-                <div className="connection__fail">
-                  <p>Select Table Name</p>
-                </div>
-              ) : null}
-            </div>
-            <div className="form-group">
-              <label>Metric Columns *</label>
-              <Select
-                options={option.metricOption}
-                classNamePrefix="selectcategory"
-                placeholder="Select Metric Columns"
-                onChange={(e) => {
-                  setFormdata({ ...formdata, metriccolumns: e.value });
-                  setErrorMsg((prev) => {
-                    return {
-                      ...prev,
-                      metriccolumns: false
-                    };
-                  });
-                }}
-              />
-              {errorMsg.metriccolumns === true ? (
-                <div className="connection__fail">
-                  <p>Select Metric Columns</p>
-                </div>
-              ) : null}
-            </div>
-            <div className="form-group">
-              <label>Aggregate by *</label>
-              <Select
-                options={aggregate}
-                classNamePrefix="selectcategory"
-                placeholder="Select Aggregate by"
-                onChange={(e) => {
-                  setFormdata({ ...formdata, aggregate: e.value });
-                  setErrorMsg((prev) => {
-                    return {
-                      ...prev,
-                      aggregate: false
-                    };
-                  });
-                }}
-              />
-              {errorMsg.aggregate === true ? (
-                <div className="connection__fail">
-                  <p>Select Aggregate</p>
-                </div>
-              ) : null}
-            </div>
-            <div className="form-group">
-              <label>Datetime Columns *</label>
-              <Select
-                options={option.metricOption}
-                classNamePrefix="selectcategory"
-                placeholder="Select Datetime Columns"
-                onChange={(e) => {
-                  setFormdata({ ...formdata, datetimecolumns: e.value });
-                  setErrorMsg((prev) => {
-                    return {
-                      ...prev,
-                      datetimecolumns: false
-                    };
-                  });
-                }}
-              />
-              {errorMsg.datetimecolumns === true ? (
-                <div className="connection__fail">
-                  <p>Select Date Time Columns</p>
-                </div>
-              ) : null}
-            </div>
-            {tableAdditional.tabledimension === true ? (
-              <div className="form-group">
-                <label>Dimensions</label>
-                <Select
-                  isMulti
-                  options={option.metricOption}
-                  classNamePrefix="selectcategory"
-                  closeMenuOnSelect="true"
-                  placeholder="Select Dimensions"
-                  menuPlacement="top"
-                  onChange={(e) => setFormdata({ ...formdata, e })}
-                />
+          <div className="form-group">
+            <label>Table Name *</label>
+            <Select
+              options={option.tableoption}
+              classNamePrefix="selectcategory"
+              placeholder="Select Table"
+              onChange={(e) => tableName(e)}
+            />
+            {errorMsg.tablename === true ? (
+              <div className="connection__fail">
+                <p>Select Table Name</p>
               </div>
             ) : null}
-            {tableAdditional.tablefilter === true ? (
-              <div className="form-group">
-                <label>Filters</label>
-                <div className="multi-filter-selection">
-                  <Select
-                    classNamePrefix="selectcategory"
-                    isSearchable={false}
-                    closeMenuOnSelect="true"
-                    placeholder="Country"
-                    onChange={(e) => setFormdata({ ...formdata, filter: e })}
-                  />
-                  <Select
-                    classNamePrefix="selectcategory"
-                    isSearchable={false}
-                    closeMenuOnSelect="true"
-                    placeholder="="
-                    onChange={(e) => setFormdata({ ...formdata, filter: e })}
-                  />
-                  <Select
-                    classNamePrefix="selectcategory"
-                    isSearchable={false}
-                    closeMenuOnSelect="true"
-                    placeholder="France"
-                    onChange={(e) => setFormdata({ ...formdata, filter: e })}
-                  />
-                  <img src={Cancel} alt="Cancel" />
-                </div>
+          </div>
+        )}
+        <div>
+          <div className="form-group">
+            <label>Metric Columns *</label>
+            <Select
+              options={option.metricOption}
+              classNamePrefix="selectcategory"
+              placeholder="Select Metric Columns"
+              onChange={(e) => {
+                setFormdata({ ...formdata, metriccolumns: e.value });
+                setErrorMsg((prev) => {
+                  return {
+                    ...prev,
+                    metriccolumns: false
+                  };
+                });
+              }}
+            />
+            {errorMsg.metriccolumns === true ? (
+              <div className="connection__fail">
+                <p>Select Metric Columns</p>
               </div>
             ) : null}
+          </div>
+          <div className="form-group">
+            <label>Aggregate by *</label>
+            <Select
+              options={aggregate}
+              classNamePrefix="selectcategory"
+              placeholder="Select Aggregate by"
+              onChange={(e) => {
+                setFormdata({ ...formdata, aggregate: e.value });
+                setErrorMsg((prev) => {
+                  return {
+                    ...prev,
+                    aggregate: false
+                  };
+                });
+              }}
+            />
+            {errorMsg.aggregate === true ? (
+              <div className="connection__fail">
+                <p>Select Aggregate</p>
+              </div>
+            ) : null}
+          </div>
+          <div className="form-group">
+            <label>Datetime Columns *</label>
+            <Select
+              options={option.metricOption}
+              classNamePrefix="selectcategory"
+              placeholder="Select Datetime Columns"
+              onChange={(e) => {
+                setFormdata({ ...formdata, datetimecolumns: e.value });
+                setErrorMsg((prev) => {
+                  return {
+                    ...prev,
+                    datetimecolumns: false
+                  };
+                });
+              }}
+            />
+            {errorMsg.datetimecolumns === true ? (
+              <div className="connection__fail">
+                <p>Select Date Time Columns</p>
+              </div>
+            ) : null}
+          </div>
+          {tableAdditional.tabledimension === true ? (
+            <div className="form-group">
+              <label>Dimensions</label>
+              <Select
+                isMulti
+                options={option.metricOption}
+                classNamePrefix="selectcategory"
+                closeMenuOnSelect="true"
+                placeholder="Select Dimensions"
+                // menuPlacement="top"
+                onChange={(e) => setFormdata({ ...formdata, e })}
+              />
+            </div>
+          ) : null}
 
-            {/* add option form */}
-            <div className="add-options-wrapper">
+          {inputList && inputList.length !== 0 && (
+            <div className="form-group">
+              <label>Filters</label>
+              {inputList.map((item, index) => {
+                return (
+                  <div className="multi-filter-selection">
+                    <Select
+                      classNamePrefix="selectcategory"
+                      isSearchable={false}
+                      closeMenuOnSelect="true"
+                      placeholder="Country"
+                    />
+                    <Select
+                      classNamePrefix="selectcategory"
+                      isSearchable={false}
+                      closeMenuOnSelect="true"
+                      placeholder="="
+                    />
+                    <Select
+                      classNamePrefix="selectcategory"
+                      isSearchable={false}
+                      closeMenuOnSelect="true"
+                      placeholder="France"
+                    />
+                    <img
+                      src={Cancel}
+                      alt="Cancel"
+                      onClick={() => handleRemoveClick(index)}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* add option form */}
+          <div className="add-options-wrapper">
+            <div
+              className="add-options"
+              onClick={() =>
+                // setTableAdditional({
+                //   ...tableAdditional,
+                //   tablefilter: true
+                // })
+                handleAddClick()
+              }>
+              <label>+ Add Filters</label>
+            </div>
+
+            {tableAdditional.tabledimension === false ? (
               <div
                 className="add-options"
                 onClick={() =>
                   setTableAdditional({
                     ...tableAdditional,
-                    tablefilter: true
+                    tabledimension: true
                   })
                 }>
-                <label>+ Add Filters</label>
+                <label> + Add Dimensions</label>
               </div>
-
-              {tableAdditional.tabledimension === false ? (
-                <div
-                  className="add-options"
-                  onClick={() =>
-                    setTableAdditional({
-                      ...tableAdditional,
-                      tabledimension: true
-                    })
-                  }>
-                  <label> + Add Dimensions</label>
-                </div>
-              ) : null}
-            </div>
-            <div className="form-action">
-              <button
-                className="btn black-button"
-                onClick={() => handleSubmit()}>
-                {kpiSubmitLoading ? (
-                  <>
-                    <div className="spinner-border" role="status">
-                      <span className="visually-hidden">Loading...</span>
-                    </div>
-                    <span>Loading...</span>
-                  </>
-                ) : (
-                  <>
-                    {data[2] === 'edit' ? (
-                      <span>Save Changes</span>
-                    ) : (
-                      <span>Add KPI</span>
-                    )}
-                  </>
-                )}
-              </button>
-            </div>
+            ) : null}
           </div>
-          // end of Table form
-        )}
+          <div className="form-action">
+            <button className="btn black-button" onClick={() => handleSubmit()}>
+              {kpiSubmitLoading ? (
+                <>
+                  <div className="spinner-border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                  <span>Loading...</span>
+                </>
+              ) : (
+                <>
+                  {data[2] === 'edit' ? (
+                    <span>Save Changes</span>
+                  ) : (
+                    <span>Add KPI</span>
+                  )}
+                </>
+              )}
+            </button>
+          </div>
+        </div>
       </div>
     );
   }

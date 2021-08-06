@@ -103,68 +103,8 @@ const DataSourceFilter = ({
             );
           })
         ) : (
-          <div>No data found</div>
+          <div className="empty-content">No Data Found</div>
         )}
-        {/* <div className="form-check check-box">
-          <input
-            className="form-check-input"
-            type="checkbox"
-            id="flexCheckDefault"
-            name="googleAnalytics"
-            onChange={(e) => onChangeFilter(e)}
-          />
-          <label className="form-check-label" htmlFor="flexCheckDefault">
-            Google Analytics
-          </label>
-        </div>
-        <div className="form-check check-box">
-          <input
-            className="form-check-input"
-            type="checkbox"
-            id="google-sheet"
-            name="google Sheets"
-            onChange={(e) => onChangeFilter(e)}
-          />
-          <label className="form-check-label" htmlFor="google-sheet">
-            Google Sheets
-          </label>
-        </div>
-        <div className="form-check check-box">
-          <input
-            className="form-check-input"
-            type="checkbox"
-            id="amplitude"
-            name="amplitude"
-            onChange={(e) => onChangeFilter(e)}
-          />
-          <label className="form-check-label" htmlFor="amplitude">
-            Amplitude
-          </label>
-        </div>
-        <div className="form-check check-box">
-          <input
-            className="form-check-input"
-            type="checkbox"
-            id="postgre"
-            name="postgres"
-            onChange={(e) => onChangeFilter(e)}
-          />
-          <label className="form-check-label" htmlFor="postgre">
-            Postgre
-          </label>
-        </div>
-        <div className="form-check check-box">
-          <input
-            className="form-check-input"
-            type="checkbox"
-            id="mysql"
-            name="mysql"
-            onChange={(e) => onChangeFilter(e)}
-          />
-          <label className="form-check-label" htmlFor="mysql">
-            MySQL
-          </label>
-        </div> */}
       </div>
     </div>
   );

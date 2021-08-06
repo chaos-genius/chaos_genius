@@ -21,8 +21,8 @@
     background: $grey_variation-1;
     border-radius: 50px;
     -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
+    // -moz-appearance: none;
+    // appearance: none;
     &::-webkit-progress-bar {
       background-color: $grey_variation-1;
       border: 0;

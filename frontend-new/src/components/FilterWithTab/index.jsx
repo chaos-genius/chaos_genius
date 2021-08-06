@@ -68,7 +68,7 @@ const DashboardFilter = ({ setKpi, data }) => {
               );
             })
           ) : (
-            <span>No Data Found</span>
+            <div className="empty-content">No Data Found</div>
           )}
         </ul>
       </div>

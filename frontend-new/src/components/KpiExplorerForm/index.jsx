@@ -502,7 +502,7 @@ const KpiExplorerForm = () => {
                   classNamePrefix="selectcategory"
                   isMulti
                   closeMenuOnSelect="true"
-                  placeholder="Select Dimensions"
+                  placeholder="Select Filters"
                   onChange={(e) =>
                     setFormdata({ ...formdata, filter: e.value })
                   }

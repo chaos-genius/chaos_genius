@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
 import '../../assets/styles/addform.scss';
 import Play from '../../assets/images/play.svg';
+import PlayDisable from '../../assets/images/play-disable.svg';
 import Success from '../../assets/images/success.svg';
 import Fail from '../../assets/images/fail.svg';
 import GoogleSheet from '../../assets/images/googlesheets.svg';
@@ -37,12 +38,8 @@ const DataSourceForm = () => {
   const [error, setError] = useState('');
   const [formError, setFormError] = useState({});
 
-  const {
-    isLoading,
-    connectionType,
-    testLoading,
-    testConnectionResponse
-  } = useSelector((state) => state.dataSource);
+  const { isLoading, connectionType, testLoading, testConnectionResponse } =
+    useSelector((state) => state.dataSource);
 
   useEffect(() => {
     dispatchGetConnectionType();
@@ -264,7 +261,10 @@ const DataSourceForm = () => {
               <div className="spinner-border"></div>
             ) : (
               <>
-                <img src={Play} alt="Play" />
+                <img
+                  src={selectedDatasource !== undefined ? Play : PlayDisable}
+                  alt="Play"
+                />
                 <span>Test Connection</span>
               </>
             )}

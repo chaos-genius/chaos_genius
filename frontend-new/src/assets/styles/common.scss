@@ -152,7 +152,7 @@ a:hover {
       height: 40px;
     }
   }
-  ::placeholder {
+  &::placeholder {
     font-size: $font-size-14;
     line-height: $line-height-16;
     letter-spacing: $letter-spacing;
@@ -164,6 +164,18 @@ a:hover {
     position: relative;
     .form-control {
       padding-left: 30px;
+      &::placeholder {
+        font-size: $font-size-12;
+        line-height: $line-height-14;
+        letter-spacing: $letter-spacing;
+        color: $grey_variation-1;
+      }
+      &:-moz-placeholder {
+        line-height: 25px;
+      }
+      &::-moz-placeholder {
+        line-height: 25px;
+      }
     }
     span {
       position: absolute;

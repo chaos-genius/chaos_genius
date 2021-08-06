@@ -1,4 +1,4 @@
-@import "../../assets/styles/variable.scss";
+@import '../../assets/styles/variable.scss';
 
 .common-filter-section {
   background: $white;
@@ -18,5 +18,9 @@
   }
   .search-filter {
     margin-bottom: 10px;
+  }
+  .form-check-input:checked {
+    background-color: $green;
+    border-color: $green;
   }
 }

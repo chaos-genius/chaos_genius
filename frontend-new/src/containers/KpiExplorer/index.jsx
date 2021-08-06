@@ -80,8 +80,11 @@ const KpiExplorer = () => {
 
   if (isLoading) {
     return (
-      <div>
-        <h1>Loading...</h1>
+      <div className="loader loader-page">
+        <div className="loading-text">
+          <p>loading</p>
+          <span></span>
+        </div>
       </div>
     );
   } else {
@@ -93,7 +96,7 @@ const KpiExplorer = () => {
             <h3>KPI Explorer</h3>
           </div>
           <div className="option-button">
-            <Link to="/kpiexplorer/add" className="btn black-button">
+            <Link to="/kpiexplorer/add" className="btn green-variant-button">
               <img src={Plus} alt="Add" />
               <span>New KPI</span>
             </Link>

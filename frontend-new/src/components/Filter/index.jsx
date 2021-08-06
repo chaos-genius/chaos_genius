@@ -78,51 +78,51 @@ const DataSourceFilter = ({
             Google Analytics
           </label>
         </div>
-        <div class="form-check check-box">
+        <div className="form-check check-box">
           <input
-            class="form-check-input"
+            className="form-check-input"
             type="checkbox"
             id="google-sheet"
             name="google Sheets"
             onChange={(e) => onChangeFilter(e)}
           />
-          <label class="form-check-label" for="google-sheet">
+          <label className="form-check-label" htmlFor="google-sheet">
             Google Sheets
           </label>
         </div>
-        <div class="form-check check-box">
+        <div className="form-check check-box">
           <input
-            class="form-check-input"
+            className="form-check-input"
             type="checkbox"
             id="amplitude"
             name="amplitude"
             onChange={(e) => onChangeFilter(e)}
           />
-          <label class="form-check-label" for="amplitude">
+          <label className="form-check-label" htmlFor="amplitude">
             Amplitude
           </label>
         </div>
-        <div class="form-check check-box">
+        <div className="form-check check-box">
           <input
-            class="form-check-input"
+            className="form-check-input"
             type="checkbox"
             id="postgre"
             name="postgres"
             onChange={(e) => onChangeFilter(e)}
           />
-          <label class="form-check-label" for="postgre">
+          <label className="form-check-label" htmlFor="postgre">
             Postgre
           </label>
         </div>
-        <div class="form-check check-box">
+        <div className="form-check check-box">
           <input
-            class="form-check-input"
+            className="form-check-input"
             type="checkbox"
             id="mysql"
             name="mysql"
             onChange={(e) => onChangeFilter(e)}
           />
-          <label class="form-check-label" for="mysql">
+          <label className="form-check-label" htmlFor="mysql">
             MySQL
           </label>
         </div>

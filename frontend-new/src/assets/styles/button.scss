@@ -1,5 +1,5 @@
-@import "~bootstrap/scss/bootstrap";
-@import "./variable.scss";
+@import '~bootstrap/scss/bootstrap';
+@import './variable.scss';
 
 .btn {
   box-sizing: border-box;
@@ -12,18 +12,19 @@
   justify-content: center;
   outline: 0 !important;
   box-shadow: none !important;
+  min-width: 120px;
   span {
     font-weight: $font-weight-500;
     font-size: $font-size-14;
     line-height: $line-height-16;
     letter-spacing: $letter-spacing;
     text-transform: capitalize;
-    margin-left: 10px;
   }
   img {
     width: 16px;
     height: 16px;
     object-fit: contain;
+    margin-right: 10px;
   }
   &.black-button {
     color: $black;
@@ -67,6 +68,13 @@
       color: $black;
     }
   }
+  &.green-variant-button {
+    background-color: $green;
+    color: $white;
+    span {
+      color: $white;
+    }
+  }
   &:disabled {
     cursor: not-allowed;
     pointer-events: all !important;
@@ -75,5 +83,10 @@
     span {
       color: $grey_variation-1;
     }
+  }
+  .spinner-border {
+    width: 15px;
+    height: 15px;
+    color: $white;
   }
 }

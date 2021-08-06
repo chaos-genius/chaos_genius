@@ -27,8 +27,11 @@ const Dashboardgraphcard = ({ kpi, data }) => {
 
   if (aggregationLoading) {
     return (
-      <div>
-        <h1>Loading...</h1>
+      <div className="loader">
+        <div className="loading-text">
+          <p>loading</p>
+          <span></span>
+        </div>
       </div>
     );
   } else {

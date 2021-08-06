@@ -1,4 +1,4 @@
-@import "../../assets/styles/variable.scss";
+@import '../../assets/styles/variable.scss';
 
 .header-section {
   position: fixed;
@@ -50,7 +50,7 @@
           font-size: $font-size-14;
           line-height: $line-height-16;
           letter-spacing: $letter-spacing;
-          color: $black;
+          color: $black_variation-2;
         }
         label {
           font-weight: $font-weight-normal;
@@ -77,7 +77,7 @@
       border-left: 10px solid transparent;
       border-right: 10px solid transparent;
       align-items: center;
-      content: "";
+      content: '';
       position: absolute;
       right: 50%;
       top: -10px;

@@ -28,8 +28,7 @@ const KPITable = ({ kpiData }) => {
         </tr>
       </thead>
       <tbody>
-        {kpiData &&
-          kpiData.length !== 0 &&
+        {kpiData && kpiData.length !== 0 ? (
           kpiData.map((kpi) => {
             return (
               <tr key={uuidv4()}>
@@ -77,7 +76,12 @@ const KPITable = ({ kpiData }) => {
                 </td>
               </tr>
             );
-          })}
+          })
+        ) : (
+          <tr className="empty-table">
+            <td colSpan={5}>No Data Found</td>
+          </tr>
+        )}
       </tbody>
     </table>
   );

@@ -1,4 +1,4 @@
-@import "./variable.scss";
+@import './variable.scss';
 
 .add-form-container {
   background-color: $white;
@@ -10,6 +10,12 @@
     display: flex;
     justify-content: flex-end;
     margin-top: 30px;
+  }
+  .form-check-input {
+    &:checked {
+      background-color: $green;
+      border-color: $green;
+    }
   }
   .query-form {
     padding: 0px 8px;
@@ -45,11 +51,11 @@
   }
   .add-options-wrapper {
     .add-options {
-      font-weight: 500;
-      font-size: 16px;
-      line-height: 19px;
-      letter-spacing: 0.15px;
-      color: #60ca9a;
+      font-weight: $font-weight-500;
+      font-size: $font-size-16;
+      line-height: $line-height-19;
+      letter-spacing: $letter-spacing-point15;
+      color: $green;
       margin-bottom: 24px;
       cursor: pointer;
       label {

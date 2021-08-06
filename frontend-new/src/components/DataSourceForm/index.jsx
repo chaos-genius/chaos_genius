@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
 import '../../assets/styles/addform.scss';
 import Play from '../../assets/images/play.svg';
+import PlayDisable from '../../assets/images/play-disable.svg';
 import Success from '../../assets/images/success.svg';
 import Fail from '../../assets/images/fail.svg';
 import GoogleSheet from '../../assets/images/googlesheets.svg';
@@ -277,7 +278,10 @@ const DataSourceForm = () => {
               </>
             ) : (
               <>
-                <img src={Play} alt="Play" />
+                <img
+                  src={selectedDatasource !== undefined ? Play : PlayDisable}
+                  alt="Play"
+                />
                 <span>Test Connection</span>
               </>
             )}

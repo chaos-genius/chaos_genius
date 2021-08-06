@@ -1,4 +1,4 @@
-@import "../../assets/styles/variable.scss";
+@import '../../assets/styles/variable.scss';
 
 .table-section {
   background: $white;
@@ -88,6 +88,11 @@
             visibility: visible;
           }
         }
+      }
+    }
+    .empty-table {
+      td {
+        text-align: center;
       }
     }
   }

@@ -4,6 +4,10 @@
 
 body {
   background-color: $grey_variation_2;
+  font-family: 'Inter', 'Helvetica', 'Apple Color Emoji', 'Segoe UI Emoji',
+    'NotoColorEmoji', 'Noto Color Emoji', 'Segoe UI Symbol', 'Android Emoji',
+    'EmojiSymbols', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto',
+    'Helvetica Neue', 'Noto Sans', sans-serif !important;
 }
 
 h1,
@@ -66,6 +70,9 @@ a:hover {
       line-height: 18px;
       letter-spacing: $letter-spacing;
       color: $blue;
+      Link {
+        color: $blue;
+      }
       &.active {
         color: $grey_variation-1;
       }
@@ -106,6 +113,7 @@ a:hover {
   margin: 15px 0px 30px 0px;
   .heading-title {
     h3 {
+      font-weight: $font-weight-600;
       font-size: $font-size-24;
       line-height: $line-height-26;
       letter-spacing: $letter-spacing-point4;
@@ -144,7 +152,7 @@ a:hover {
       height: 40px;
     }
   }
-  ::placeholder {
+  &::placeholder {
     font-size: $font-size-14;
     line-height: $line-height-16;
     letter-spacing: $letter-spacing;
@@ -156,6 +164,18 @@ a:hover {
     position: relative;
     .form-control {
       padding-left: 30px;
+      &::placeholder {
+        font-size: $font-size-12;
+        line-height: $line-height-14;
+        letter-spacing: $letter-spacing;
+        color: $grey_variation-1;
+      }
+      &:-moz-placeholder {
+        line-height: 25px;
+      }
+      &::-moz-placeholder {
+        line-height: 25px;
+      }
     }
     span {
       position: absolute;
@@ -312,6 +332,14 @@ a:hover {
         display: none;
       }
     }
+    span {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      font-size: $font-size-14;
+      line-height: $line-height-16;
+      letter-spacing: $letter-spacing;
+    }
   }
 }
 
@@ -342,6 +370,7 @@ a:hover {
       color: $black_variation-2;
       padding: 20px 24px;
       cursor: pointer;
+      text-transform: capitalize;
       &.active {
         font-weight: $font-weight-600;
         color: $green;
@@ -368,6 +397,7 @@ a:hover {
     color: $black_variation-2;
     background: $grey_variation-2;
     border-radius: 6px;
+    border: none;
   }
   .selectcategory__placeholder,
   .selectcategory__single-value {
@@ -378,7 +408,7 @@ a:hover {
     color: $black_variation-2;
   }
   .selectcategory__dropdown-indicator {
-    color: $black_variation-2;
+    color: $black_variation-2 !important;
   }
   .selectcategory__indicator-separator {
     display: none;
@@ -400,4 +430,139 @@ a:hover {
   box-shadow: none !important;
   border: 1px solid $black_variation-2 !important;
   outline: none !important;
+}
+.css-1wa3eu0-placeholder {
+  margin: 0px !important;
+  color: $black_variation-2 !important;
+}
+.css-tlfecz-indicatorContainer {
+  color: $black_variation-2 !important;
+}
+
+// loader
+.loader {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: $white;
+  &.loader-page {
+    height: 100vh;
+  }
+
+  .loading-text {
+    width: 80px;
+    height: 50px;
+    position: relative;
+    p {
+      top: 0;
+      padding: 0;
+      margin: 0;
+      animation: text 3.5s ease both infinite;
+      font-size: 12px;
+      letter-spacing: 1px;
+      color: $green;
+
+      @keyframes text {
+        0% {
+          letter-spacing: 1px;
+          transform: translateX(0px);
+        }
+
+        40% {
+          letter-spacing: 2px;
+          transform: translateX(26px);
+        }
+
+        80% {
+          letter-spacing: 1px;
+          transform: translateX(32px);
+        }
+
+        90% {
+          letter-spacing: 2px;
+          transform: translateX(0px);
+        }
+
+        100% {
+          letter-spacing: 1px;
+          transform: translateX(0px);
+        }
+      }
+    }
+    span {
+      background-color: $green_variation-2;
+      border-radius: 50px;
+      display: block;
+      height: 16px;
+      width: 16px;
+      bottom: 0;
+      position: absolute;
+      transform: translateX(64px);
+      animation: loading 3.5s ease both infinite;
+
+      &:before {
+        position: absolute;
+        content: '';
+        width: 100%;
+        height: 100%;
+        background-color: $green;
+        border-radius: inherit;
+        animation: loading2 3.5s ease both infinite;
+      }
+
+      @keyframes loading {
+        0% {
+          width: 16px;
+          transform: translateX(0px);
+        }
+
+        40% {
+          width: 100%;
+          transform: translateX(0px);
+        }
+
+        80% {
+          width: 16px;
+          transform: translateX(64px);
+        }
+
+        90% {
+          width: 100%;
+          transform: translateX(0px);
+        }
+
+        100% {
+          width: 16px;
+          transform: translateX(0px);
+        }
+      }
+      @keyframes loading2 {
+        0% {
+          transform: translateX(0px);
+          width: 16px;
+        }
+
+        40% {
+          transform: translateX(0%);
+          width: 80%;
+        }
+
+        80% {
+          width: 100%;
+          transform: translateX(0px);
+        }
+
+        90% {
+          width: 80%;
+          transform: translateX(15px);
+        }
+        100% {
+          transform: translateX(0px);
+          width: 16px;
+        }
+      }
+    }
+  }
 }

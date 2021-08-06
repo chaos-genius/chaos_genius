@@ -42,7 +42,13 @@
       border-radius: 50px;
     }
     &::-moz-progress-bar {
-      background-color: $grey_variation-1;
+      background: linear-gradient(
+        101.44deg,
+        #defb9d 0%,
+        #71f79e 37%,
+        #38f9d7 70%,
+        #89c4fe 100%
+      );
       border: 0;
       height: 11px;
       border-radius: 50px;

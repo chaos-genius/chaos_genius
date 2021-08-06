@@ -5,6 +5,13 @@ import './setupcard.scss';
 import DataSource from '../../assets/images/setupcard/data-source.svg';
 import DataSourceActive from '../../assets/images/setupcard/data-source-active.svg';
 import Succestick from '../../assets/images/setupcard/success-tick.svg';
+import Alerts from '../../assets/images/setupcard/alerts.svg';
+import AlertsActive from '../../assets/images/setupcard/alerts-active.svg';
+import Analytics from '../../assets/images/setupcard/analytics.svg';
+import AnalyticsActive from '../../assets/images/setupcard/analytics-active.svg';
+import Kpi from '../../assets/images/setupcard/kpi.svg';
+import KpiActive from '../../assets/images/setupcard/kpi-active.svg';
+
 const description = [
   'Select The Data You Want To Monitor And Analyse',
   'Define the KPIs you want to monitor and analyse',
@@ -39,8 +46,31 @@ const SetupCard = ({ heading, step, buttonText, active }) => {
           ? 'setup-card active'
           : 'setup-card'
       }>
-      <img src={DataSource} className="in-active" alt="DataSource" />
-      <img src={DataSourceActive} className="active" alt="DataSourceActive" />
+      {step === 1 ? (
+        <>
+          <img src={DataSource} className="in-active" alt="DataSource" />
+          <img
+            src={DataSourceActive}
+            className="active"
+            alt="DataSourceActive"
+          />
+        </>
+      ) : step === 2 ? (
+        <>
+          <img src={Kpi} className="in-active" alt="KPI" />
+          <img src={KpiActive} className="active" alt="KpiActive" />
+        </>
+      ) : step === 3 ? (
+        <>
+          <img src={Analytics} className="in-active" alt="Analytics" />
+          <img src={AnalyticsActive} className="active" alt="AnalyticsActive" />
+        </>
+      ) : (
+        <>
+          <img src={Alerts} className="in-active" alt="Alerts" />
+          <img src={AlertsActive} className="active" alt="AlertsActive" />
+        </>
+      )}
       <h1>
         {heading}{' '}
         {active === 'completed' && (

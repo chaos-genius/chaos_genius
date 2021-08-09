@@ -124,10 +124,17 @@
         cursor: pointer;
         width: 36px;
         height: 18px;
-
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgb(255, 255, 255)'/%3e%3c/svg%3e");
+        background-color: $grey_variation-1;
+        border: 1px solid $grey_variation-1;
+        box-sizing: border-box;
+        border-radius: 10px;
+        box-sizing: border-box;
         &.form-check-input:checked {
           background-color: $blue;
           border-color: $blue;
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgb(255, 255, 255)'/%3e%3c/svg%3e");
+          border: 1px solid $blue;
         }
       }
     }

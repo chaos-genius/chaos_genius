@@ -1,0 +1,67 @@
+@import '../../assets/styles/variable.scss';
+
+.onboarding-steps {
+  width: 65%;
+  margin: 0 auto 24px;
+  ul {
+    counter-reset: step;
+  }
+  li {
+    list-style-type: none;
+    width: 25%;
+    display: inline-block;
+    position: relative;
+    text-align: center;
+    color: $grey_variation-1;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 14px;
+    letter-spacing: 0.4px;
+    &::before {
+      content: counter(step);
+      counter-increment: step;
+      width: 36px;
+      height: 36px;
+      border: 1px solid $grey_variation-1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      margin: 0 auto 10px auto;
+      border-radius: 50%;
+      background-color: $grey_variation-5;
+    }
+    &::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 1px;
+      background-color: $white_variation-2;
+      border: 1px dashed;
+      top: 15px;
+      left: -50%;
+      z-index: -1;
+    }
+    &:first-child::after {
+      content: none;
+    }
+    &.active {
+      color: $black_variation-2;
+      &::before {
+        border-color: $black_variation-2;
+      }
+    }
+    &.selected {
+      color: $black_variation-2;
+      &::before {
+        content: url('../../assets/images/correct.svg');
+        background-color: black;
+        color: $white;
+      }
+    }
+    &.selected + li::after {
+      background-color: transparent;
+      border: 1px dashed;
+    }
+  }
+}

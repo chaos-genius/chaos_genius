@@ -7,10 +7,36 @@ import SetupCard from '../../components/SetupCard';
 import { getOnboardingStatus } from '../../redux/actions';
 import { useDispatch, useSelector } from 'react-redux';
 
+const onboardingList = {
+  completion_precentage: 50,
+  steps: [
+    {
+      step_done: true,
+      step_name: 'Add Data Source',
+      step_no: 1
+    },
+    {
+      step_done: true,
+      step_name: 'Add KPI',
+      step_no: 2
+    },
+    {
+      step_done: false,
+      step_name: 'Activate Analytics',
+      step_no: 3
+    },
+    {
+      step_done: false,
+      step_name: 'Setup Smart Alert',
+      step_no: 4
+    }
+  ]
+};
+
 const Home = () => {
   const dispatch = useDispatch();
 
-  const { onboardingList } = useSelector((state) => state.onboarding);
+  const { onboardingLis } = useSelector((state) => state.onboarding);
 
   useEffect(() => {
     dispatchOnboarding();

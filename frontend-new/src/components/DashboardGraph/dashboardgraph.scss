@@ -3,13 +3,7 @@
   background: $white;
   border-radius: 10px;
   margin-bottom: 12px;
-  .dashboard-subheader {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid rgba(34, 34, 34, 0.12);
-  }
+
   .dashboard-container {
     padding: 12px 24px;
   }
@@ -139,6 +133,7 @@
       }
     }
   }
+
   .common-drilldown-graph {
     height: 315px;
     margin: 48px 0px;
@@ -161,4 +156,11 @@
       }
     }
   }
+}
+.dashboard-subheader {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(34, 34, 34, 0.12);
 }

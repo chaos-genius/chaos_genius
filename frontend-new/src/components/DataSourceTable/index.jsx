@@ -89,18 +89,17 @@ const DataSourceTable = ({ tableData }, props) => {
                 <td>{formatDate(datasource.created_at)}</td>
                 <td>
                   <div className="table-actions">
-                    <div className="table-action-icon">
-                      <Link to="/datasource/edit">
+                    <Link to="/datasource/edit">
+                      <div className="table-action-icon">
                         <img src={Edit} alt="Edit" className="action-normal" />
-                      </Link>
-                      <Link to="/datasource/edit">
+
                         <img
                           src={EditActive}
                           alt="Edit"
                           className="action-active"
                         />
-                      </Link>
-                    </div>
+                      </div>
+                    </Link>
                     <div className="table-action-icon">
                       <img
                         src={Delete}
@@ -115,14 +114,20 @@ const DataSourceTable = ({ tableData }, props) => {
                         onClick={() => onDelete()}
                       />
                     </div>
-                    <div className="table-action-icon">
-                      <img src={Alert} alt="Alert" className="action-normal" />
-                      <img
-                        src={AlertActive}
-                        alt="Alert"
-                        className="action-active"
-                      />
-                    </div>
+                    <Link to="/alerts">
+                      <div className="table-action-icon">
+                        <img
+                          src={Alert}
+                          alt="Alert"
+                          className="action-normal"
+                        />
+                        <img
+                          src={AlertActive}
+                          alt="Alert"
+                          className="action-active"
+                        />
+                      </div>
+                    </Link>
                   </div>
                 </td>
               </tr>

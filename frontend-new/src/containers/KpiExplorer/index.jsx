@@ -107,7 +107,11 @@ const KpiExplorer = () => {
         <div className="explore-wrapper">
           {/* filter section */}
           <div className="filter-section">
-            <Filter setKpiSearch={setKpiSearch} setKpiFilter={setKpiFilter} />
+            <Filter
+              setKpiSearch={setKpiSearch}
+              setKpiFilter={setKpiFilter}
+              kpiList={kpiExplorerList}
+            />
           </div>
           {/* table section */}
           <div className="table-section">

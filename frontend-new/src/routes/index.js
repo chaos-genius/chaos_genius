@@ -35,6 +35,11 @@ const Routes = () => (
     />
     <PrivateRouteWithSidebar
       exact
+      path="/datasource/edit"
+      component={(props) => <AddDataSource {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
       path="/kpi"
       component={(props) => <KpiExplorer {...props} />}
     />

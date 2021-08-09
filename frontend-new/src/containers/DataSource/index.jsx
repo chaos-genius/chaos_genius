@@ -113,6 +113,7 @@ const DataSource = () => {
               datasource
               setSearch={setSearch}
               setDataSourceFilter={setDataSourceFilter}
+              datasourceList={dataSourcesList}
             />
           </div>
           {/* table section */}

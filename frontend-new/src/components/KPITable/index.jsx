@@ -7,7 +7,7 @@ import GoogleSheet from '../../assets/images/googlesheets.svg';
 import Postgre from '../../assets/images/postgre.svg';
 import Amplitude from '../../assets/images/amplitude.svg';
 import MySQL from '../../assets/images/mysql.svg';
-import Edit from '../../assets/images/edit.svg';
+import Edit from '../../assets/images/edit-active.svg';
 
 import '../../assets/styles/table.scss';
 

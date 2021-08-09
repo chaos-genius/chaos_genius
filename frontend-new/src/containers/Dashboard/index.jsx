@@ -55,7 +55,7 @@ const Dashboard = () => {
           <div className="backnavigation">
             <Link to="/">
               <img src={rightarrow} alt="Back" />
-              <span>Add Data Sources</span>{' '}
+              <span>Test Dashboard 1</span>{' '}
             </Link>
           </div>
         </div>

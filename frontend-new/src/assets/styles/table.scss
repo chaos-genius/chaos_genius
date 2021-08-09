@@ -15,7 +15,7 @@
           font-size: $font-size-12;
           line-height: $line-height-18;
           color: $white;
-          padding: 16px 6px 16px 24px;
+          padding: 16px;
         }
       }
     }
@@ -30,7 +30,7 @@
           color: $black_variation-2;
           height: 56px;
           vertical-align: middle;
-          padding: 16px 6px 16px 24px;
+          padding: 16px;
           .live-status {
             span {
               color: $green;
@@ -86,6 +86,28 @@
           background-color: $green_variation-2;
           .edit-information {
             visibility: visible;
+          }
+        }
+      }
+    }
+    .table-actions {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      .table-action-icon {
+        margin-right: 5px;
+        .action-normal {
+          display: block;
+        }
+        .action-active {
+          display: none;
+        }
+        &:hover {
+          .action-normal {
+            display: none;
+          }
+          .action-active {
+            display: block;
           }
         }
       }

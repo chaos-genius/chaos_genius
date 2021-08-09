@@ -7,9 +7,13 @@ const DataSourceFilter = ({
   setSearch,
   setKpiSearch,
   setKpiFilter,
-  setDataSourceFilter
+  setDataSourceFilter,
+  datasourceList,
+  kpiList
 }) => {
   const [checked, setChecked] = useState([]);
+  const [datasourceType, setDatasourceType] = useState([]);
+
   const onSearch = (e) => {
     if (datasource) {
       setSearch(e.target.value);
@@ -25,6 +29,19 @@ const DataSourceFilter = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checked]);
+
+  useEffect(() => {
+    if (datasourceList) {
+      setDatasourceType([
+        ...new Set(datasourceList.map((item) => item.connection_type))
+      ]);
+    }
+    if (kpiList) {
+      setDatasourceType([
+        ...new Set(kpiList.map((item) => item.connection_type))
+      ]);
+    }
+  }, [datasourceList, kpiList]);
 
   const onChangeFilter = (e) => {
     if (datasource) {
@@ -66,66 +83,28 @@ const DataSourceFilter = ({
       </div>
       <div className="filter-layout">
         <h3>Data Source Type</h3>
-        <div className="form-check check-box">
-          <input
-            className="form-check-input"
-            type="checkbox"
-            id="flexCheckDefault"
-            name="googleAnalytics"
-            onChange={(e) => onChangeFilter(e)}
-          />
-          <label className="form-check-label" htmlFor="flexCheckDefault">
-            Google Analytics
-          </label>
-        </div>
-        <div className="form-check check-box">
-          <input
-            className="form-check-input"
-            type="checkbox"
-            id="google-sheet"
-            name="google Sheets"
-            onChange={(e) => onChangeFilter(e)}
-          />
-          <label className="form-check-label" htmlFor="google-sheet">
-            Google Sheets
-          </label>
-        </div>
-        <div className="form-check check-box">
-          <input
-            className="form-check-input"
-            type="checkbox"
-            id="amplitude"
-            name="amplitude"
-            onChange={(e) => onChangeFilter(e)}
-          />
-          <label className="form-check-label" htmlFor="amplitude">
-            Amplitude
-          </label>
-        </div>
-        <div className="form-check check-box">
-          <input
-            className="form-check-input"
-            type="checkbox"
-            id="postgre"
-            name="postgres"
-            onChange={(e) => onChangeFilter(e)}
-          />
-          <label className="form-check-label" htmlFor="postgre">
-            Postgre
-          </label>
-        </div>
-        <div className="form-check check-box">
-          <input
-            className="form-check-input"
-            type="checkbox"
-            id="mysql"
-            name="mysql"
-            onChange={(e) => onChangeFilter(e)}
-          />
-          <label className="form-check-label" htmlFor="mysql">
-            MySQL
-          </label>
-        </div>
+        {datasourceType &&
+        datasourceType[0] !== undefined &&
+        datasourceType.length !== 0 ? (
+          datasourceType.map((type) => {
+            return (
+              <div className="form-check check-box">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id={type}
+                  name={type}
+                  onChange={(e) => onChangeFilter(e)}
+                />
+                <label className="form-check-label" htmlFor={type}>
+                  {type}
+                </label>
+              </div>
+            );
+          })
+        ) : (
+          <div className="empty-content">No Data Found</div>
+        )}
       </div>
     </div>
   );

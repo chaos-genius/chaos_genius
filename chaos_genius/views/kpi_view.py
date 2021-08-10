@@ -17,7 +17,7 @@ from flask import (
 import numpy as np
 import pandas as pd
 
-from chaos_genius.extensions import cache
+from chaos_genius.extensions import cache, db
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.core.rca import RootCauseAnalysis
@@ -55,9 +55,17 @@ def kpi():
             return jsonify({"error": "The request payload is not in JSON format"})
 
     elif request.method == 'GET':
-        kpis = Kpi.query.all()
-        results = [kpi.safe_dict for kpi in kpis]
-        return jsonify({"count": len(results), "data": results})
+        results = db.session.query(Kpi, DataSource) \
+                .join(DataSource, Kpi.data_source == DataSource.id) \
+                .order_by(Kpi.created_at) \
+                .all()
+        kpis = []
+        for row in results:
+            data_source = row[0].safe_dict
+            kpi = row[1].safe_dict
+            data_source.update(kpi)
+            kpis.append(data_source)
+        return jsonify({"count": len(kpis), "data": kpis})
 
 @blueprint.route("/<int:kpi_id>/get-dimensions", methods=["GET"])
 @cache.memoize(timeout=30000)

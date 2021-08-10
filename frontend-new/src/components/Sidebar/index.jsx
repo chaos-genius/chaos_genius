@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Link, useHistory } from 'react-router-dom';
 import './sidebar.scss';
 import logo from '../../assets/images/logo.svg';
 import home from '../../assets/images/sidebar/home.svg';
@@ -16,7 +16,9 @@ import alerts from '../../assets/images/sidebar/alerts.svg';
 import alertsactive from '../../assets/images/sidebar/alerts-active.svg';
 
 const Sidebar = () => {
-  const [active, setActive] = useState('home');
+  const history = useHistory();
+  const location = history.location.pathname.split('/');
+
   return (
     <div className="sidebar-menu">
       <div className="sidebar-logo">
@@ -26,34 +28,44 @@ const Sidebar = () => {
       </div>
       <div className="sidebar-options">
         <ul>
-          <li className={active === 'home' ? 'active' : ''}>
-            <Link to="/" onClick={() => setActive('home')}>
-              <img src={active === 'home' ? homeactive : home} alt="Home" />
+          <li
+            className={
+              location[1] === '' || location[1] === 'onboarding' ? 'active' : ''
+            }>
+            <Link to="/">
+              <img
+                src={
+                  location[1] === '' || location[1] === 'onboarding'
+                    ? homeactive
+                    : home
+                }
+                alt="Home"
+              />
               <span>Home</span>
             </Link>
           </li>
-          <li className={active === 'dashboard' ? 'active' : ''}>
-            <Link to="/dashboard" onClick={() => setActive('dashboard')}>
+          <li className={location[1] === 'dashboard' ? 'active' : ''}>
+            <Link to="/dashboard">
               <img
-                src={active === 'dashboard' ? dashboardactive : dashboard}
+                src={location[1] === 'dashboard' ? dashboardactive : dashboard}
                 alt="Dashboard"
               />
               <span>Dashboard</span>
             </Link>
           </li>
-          <li className={active === 'kpi' ? 'active' : ''}>
-            <Link to="/kpi" onClick={() => setActive('kpi')}>
+          <li className={location[1] === 'kpi' ? 'active' : ''}>
+            <Link to="/kpi">
               <img
-                src={active === 'kpi' ? kpiactive : kpi}
+                src={location[1] === 'kpi' ? kpiactive : kpi}
                 alt="KPI Explorer"
               />
               <span>KPI Explorer</span>
             </Link>
           </li>
-          <li className={active === 'anomolies' ? 'active' : ''}>
-            <Link to="/" onClick={() => setActive('anomolies')}>
+          <li className={location[1] === 'anomolies' ? 'active' : ''}>
+            <Link to="/anomolies">
               <img
-                src={active === 'anomolies' ? anomoliesactive : anomolies}
+                src={location[1] === 'anomolies' ? anomoliesactive : anomolies}
                 alt="Anomolies"
               />
               <span>Anomolies</span>
@@ -61,10 +73,12 @@ const Sidebar = () => {
           </li>
         </ul>
         <ul>
-          <li className={active === 'datasource' ? 'active' : ''}>
-            <Link to="/datasource" onClick={() => setActive('datasource')}>
+          <li className={location[1] === 'datasource' ? 'active' : ''}>
+            <Link to="/datasource">
               <img
-                src={active === 'datasource' ? datasourceactive : datasource}
+                src={
+                  location[1] === 'datasource' ? datasourceactive : datasource
+                }
                 alt="Data Source"
               />
               <span>Data Source</span>
@@ -72,11 +86,11 @@ const Sidebar = () => {
           </li>
           <li
             className={
-              active === 'alerts' ? 'alert-option active' : 'alert-option'
+              location[1] === 'alerts' ? 'alert-option active' : 'alert-option'
             }>
-            <Link to="/" onClick={() => setActive('alerts')}>
+            <Link to="/alerts">
               <img
-                src={active === 'alerts' ? alertsactive : alerts}
+                src={location[1] === 'alerts' ? alertsactive : alerts}
                 alt="Alerts"
               />
               <label>3</label>

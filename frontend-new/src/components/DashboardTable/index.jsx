@@ -47,9 +47,10 @@ const DashboardTable = ({ data, kpi, overlap, dimension, activeDimension }) => {
     !overlap && dimension === 'multidimension'
       ? rcaAnalysisData && rcaAnalysisData.data_table
       : null;
-  let overlapData = overlap
-    ? rcaAnalysisData && rcaAnalysisData.chart.chart_table
-    : null;
+  let overlapData =
+    overlap && dimension === 'multidimension'
+      ? rcaAnalysisData && rcaAnalysisData.chart.chart_table
+      : null;
 
   let singleDimensionData =
     dimension === 'singledimension'

@@ -4,10 +4,11 @@
 
 body {
   background-color: $grey_variation_2;
-  font-family: 'Inter', 'Helvetica', 'Apple Color Emoji', 'Segoe UI Emoji',
-    'NotoColorEmoji', 'Noto Color Emoji', 'Segoe UI Symbol', 'Android Emoji',
-    'EmojiSymbols', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto',
-    'Helvetica Neue', 'Noto Sans', sans-serif !important;
+  // font-family: 'Inter', 'Helvetica', 'Apple Color Emoji', 'Segoe UI Emoji',
+  //   'NotoColorEmoji', 'Noto Color Emoji', 'Segoe UI Symbol', 'Android Emoji',
+  //   'EmojiSymbols', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto',
+  //   'Helvetica Neue', 'Noto Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 h1,
@@ -302,6 +303,10 @@ a:hover {
     line-height: $line-height-16;
     color: $grey_variation-3;
   }
+  .form-check-input:checked {
+    background-color: $green;
+    border-color: $green;
+  }
 }
 
 // filter tab
@@ -575,6 +580,9 @@ a:hover {
   }
   .css-2b097c-container:nth-child(2) {
     width: 18%;
+  }
+  img {
+    cursor: pointer;
   }
 }
 // No Data Found text

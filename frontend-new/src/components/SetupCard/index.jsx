@@ -31,9 +31,21 @@ const SetupCard = ({ heading, step, buttonText, active }) => {
 
   const onNavigate = () => {
     if (active === 'completed') {
-      history.push(`/view`);
+      if (step === 1) {
+        history.push('/datasource');
+      } else if (step === 2) {
+        history.push('/kpi');
+      } else if (step === 3) {
+        history.push('/analytics');
+      } else if (step === 4) {
+        history.push('/alerts');
+      }
     } else {
-      history.push(`/${heading}`);
+      if (step === 4) {
+        history.push('/alerts');
+      } else {
+        history.push(`/onboarding/${step}`);
+      }
     }
   };
 

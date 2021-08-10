@@ -12,6 +12,7 @@ import Edit from '../../assets/images/edit-active.svg';
 import '../../assets/styles/table.scss';
 
 import { v4 as uuidv4 } from 'uuid';
+import Dimension from './dimension';
 
 const KPITable = ({ kpiData }) => {
   return (
@@ -34,14 +35,7 @@ const KPITable = ({ kpiData }) => {
               <tr key={uuidv4()}>
                 <td>{kpi.name}</td>
                 <td>
-                  <ul className="table-tips">
-                    {kpi.dimensions &&
-                      kpi.dimensions.map((dimension) => (
-                        <li key={uuidv4()}>
-                          <span>{dimension}</span>
-                        </li>
-                      ))}
-                  </ul>
+                  <Dimension data={kpi.dimensions}></Dimension>
                 </td>
                 <td>
                   <div className="source-type">
@@ -68,8 +62,11 @@ const KPITable = ({ kpiData }) => {
                 <td>{kpi.last_modified || '-'}</td>
                 <td>
                   <Link to={`/kpiexplorer/edit/${kpi.id}`}>
-                    {' '}
-                    <div className="edit-information">
+                    <div
+                      className="edit-information"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="bottom"
+                      title="Edit">
                       <img src={Edit} alt="Edit" />
                     </div>
                   </Link>

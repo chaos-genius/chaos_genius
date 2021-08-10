@@ -1,0 +1,11 @@
+@import '../../assets/styles/variable.scss';
+
+.form-container {
+  width: 50%;
+  padding: 40px;
+}
+.form-action {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 30px;
+}

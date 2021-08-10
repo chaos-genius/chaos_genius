@@ -10,6 +10,9 @@ import DataSource from '../containers/DataSource';
 import AddDataSource from '../containers/AddDataSource';
 import KpiExplorer from '../containers/KpiExplorer';
 import AddKpiExplorer from '../containers/AddKpiExplorer';
+import Onboarding from '../containers/Onboarding';
+import Alerts from '../containers/Alerts';
+import Anomolies from '../containers/Anomolies';
 
 const Routes = () => (
   <Switch>
@@ -52,6 +55,20 @@ const Routes = () => (
       exact
       path="/kpiexplorer/add"
       component={(props) => <AddKpiExplorer {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
+      path="/onboarding/:id"
+      component={(props) => <Onboarding {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
+      path="/alerts"
+      component={(props) => <Alerts {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
+      component={(props) => <Anomolies {...props} />}
     />
   </Switch>
 );

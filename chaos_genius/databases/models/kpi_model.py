@@ -24,6 +24,8 @@ class Kpi(PkModel):
     dimensions = Column(db.JSON)
 
     run_anomaly = Column(db.Boolean(), default=True)
+    is_static = Column(db.Boolean(), default=False)
+    static_params = Column(db.JSON)
 
     active = Column(db.Boolean(), default=False)
     created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
@@ -68,6 +70,8 @@ class Kpi(PkModel):
             "filters": self.filters,
             "dimensions": self.dimensions,
             "run_anomaly": self.run_anomaly,
+            "is_static": self.is_static,
+            "static_params": self.static_params,
             "active": self.active,
             "created_at": self.created_at
         }

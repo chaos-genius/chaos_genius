@@ -105,6 +105,10 @@ def get_anomaly_df(kpi_info, connection_info, days_range=90):
         indentifier = '"'
 
     today = datetime.today()
+    if kpi_info['is_static']:
+        end_date = kpi_info.get('static_params', {}).get('end_date', {})
+        if end_date:
+            today = datetime.strptime(end_date, '%Y-%m-%d')
     num_days = days_range
     base_dt_obj = today - timedelta(days=num_days)
     base_dt = str(base_dt_obj.date())

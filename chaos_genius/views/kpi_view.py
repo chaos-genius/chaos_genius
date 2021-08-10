@@ -126,6 +126,10 @@ def kpi_rca_hierarchical_data(kpi_id):
 
 def get_baseline_and_rca_df(kpi_info, connection_info, timeline="mom"):
     today = datetime.today()
+    if kpi_info['is_static']:
+        end_date = kpi_info.get('static_params', {}).get('end_date', {})
+        if end_date:
+            today = datetime.strptime(end_date, '%Y-%m-%d')
     indentifier = ''
     if connection_info["connection_type"] == "mysql":
         indentifier = '`'

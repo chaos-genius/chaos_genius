@@ -8,12 +8,11 @@ import Postgre from '../../assets/images/postgre.svg';
 import Amplitude from '../../assets/images/amplitude.svg';
 import MySQL from '../../assets/images/mysql.svg';
 import Edit from '../../assets/images/edit-active.svg';
-import Down from '../../assets/images/tipsdown.svg';
-import Up from '../../assets/images/tipsup.svg';
 
 import '../../assets/styles/table.scss';
 
 import { v4 as uuidv4 } from 'uuid';
+import Dimension from './dimension';
 
 const KPITable = ({ kpiData }) => {
   return (
@@ -36,36 +35,7 @@ const KPITable = ({ kpiData }) => {
               <tr key={uuidv4()}>
                 <td>{kpi.name}</td>
                 <td>
-                  <ul className="table-tips">
-                    {/* {kpi.dimensions &&
-                      kpi.dimensions.map((dimension) => (
-                        <li key={uuidv4()}>
-                          <span>{dimension}</span>
-                        </li>
-                      ))} */}
-                    <li>
-                      <span>report_start_date</span>
-                    </li>
-                    <li className="additional-tips">
-                      {/* additional-tips-hide */}
-                      <label>
-                        +2
-                        <img src={Down} alt="Down" />
-                      </label>
-                    </li>
-                    <li>
-                      <span>ga_users</span>
-                    </li>
-                    <li>
-                      <span>ga_users</span>
-                    </li>
-                    <li>
-                      <span>ga_users</span>
-                    </li>
-                    <li className="additional-tips">
-                      <img src={Up} alt="Up" />
-                    </li>
-                  </ul>
+                  <Dimension data={kpi.dimensions}></Dimension>
                 </td>
                 <td>
                   <div className="source-type">

@@ -70,6 +70,7 @@
               background: $white;
               border: 0.7px solid $grey_variation-1;
               border-radius: 4px;
+              cursor: pointer;
               label {
                 font-weight: $font-weight-500;
                 font-size: $font-size-12;
@@ -80,6 +81,7 @@
                 color: $green;
                 display: flex;
                 align-items: center;
+                cursor: pointer;
                 img {
                   margin-left: 4px;
                 }

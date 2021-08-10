@@ -44,9 +44,13 @@
           .table-tips {
             display: flex;
             flex-direction: row;
+            width: 250px;
+            flex-wrap: wrap;
+            margin-bottom: -8px;
             li {
               height: 24px;
               margin-right: 8px;
+              margin-bottom: 8px;
               background: $grey_variation-2;
               border-radius: 4px;
               display: flex;
@@ -57,6 +61,34 @@
                 line-height: $line-height-14;
                 color: $black_variation-2;
                 padding: 5px 8px;
+              }
+            }
+            .additional-tips-hide {
+              display: none;
+            }
+            .additional-tips {
+              background: $white;
+              border: 0.7px solid $grey_variation-1;
+              border-radius: 4px;
+              img {
+                width: 100%;
+                height: 100%;
+                padding: 0px 10px;
+              }
+              label {
+                font-weight: $font-weight-500;
+                font-size: $font-size-12;
+                line-height: $line-height-14;
+                padding: 5px 8px;
+                font-size: 12px;
+                line-height: 14px;
+                color: $green;
+                display: flex;
+                align-items: center;
+                img {
+                  margin-left: 4px;
+                  padding: 0px;
+                }
               }
             }
           }

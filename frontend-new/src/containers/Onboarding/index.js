@@ -73,13 +73,13 @@ const Onboarding = () => {
           </li>
           <li
             className={
-              data[2] === '3' ? 'active' : data[2] >= '3' ? 'selected' : null
+              data[2] === '4' ? 'active' : data[2] >= '4' ? 'selected' : null
             }>
             Create Dashboard
           </li>
           <li
             className={
-              data[2] === '4' ? 'active' : data[2] >= '4' ? 'selected' : null
+              data[2] === '3' ? 'active' : data[2] >= '3' ? 'selected' : null
             }>
             Activate Analytics
           </li>

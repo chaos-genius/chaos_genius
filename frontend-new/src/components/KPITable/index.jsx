@@ -62,8 +62,11 @@ const KPITable = ({ kpiData }) => {
                 <td>{kpi.last_modified || '-'}</td>
                 <td>
                   <Link to={`/kpiexplorer/edit/${kpi.id}`}>
-                    {' '}
-                    <div className="edit-information">
+                    <div
+                      className="edit-information"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="bottom"
+                      title="Edit">
                       <img src={Edit} alt="Edit" />
                     </div>
                   </Link>

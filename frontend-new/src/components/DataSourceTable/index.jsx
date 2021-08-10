@@ -90,7 +90,11 @@ const DataSourceTable = ({ tableData }, props) => {
                 <td>
                   <div className="table-actions">
                     <Link to="/datasource/edit">
-                      <div className="table-action-icon">
+                      <div
+                        className="table-action-icon"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        title="Edit">
                         <img src={Edit} alt="Edit" className="action-normal" />
 
                         <img
@@ -100,7 +104,11 @@ const DataSourceTable = ({ tableData }, props) => {
                         />
                       </div>
                     </Link>
-                    <div className="table-action-icon">
+                    <div
+                      className="table-action-icon"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="bottom"
+                      title="Delete">
                       <img
                         src={Delete}
                         alt="Delete"
@@ -115,7 +123,11 @@ const DataSourceTable = ({ tableData }, props) => {
                       />
                     </div>
                     <Link to="/alerts">
-                      <div className="table-action-icon">
+                      <div
+                        className="table-action-icon"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        title="Add Alert">
                         <img
                           src={Alert}
                           alt="Alert"

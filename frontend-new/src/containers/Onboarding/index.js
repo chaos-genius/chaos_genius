@@ -71,12 +71,12 @@ const Onboarding = () => {
             }>
             Add KPI
           </li>
-          <li
+          {/* <li
             className={
               data[2] === '4' ? 'active' : data[2] >= '4' ? 'selected' : null
             }>
             Create Dashboard
-          </li>
+          </li> */}
           <li
             className={
               data[2] === '3' ? 'active' : data[2] >= '3' ? 'selected' : null
@@ -85,15 +85,16 @@ const Onboarding = () => {
           </li>
         </ul>
       </div>
-      {data[2] !== '4' ? (
+      {data[2] !== '3' ? (
         <div className="add-form-container">
           {data[2] === '1' ? (
             <DataSourceForm />
           ) : data[2] === '2' ? (
             <KpiExplorerForm />
-          ) : data[2] === '3' ? (
-            <DashboardForm />
-          ) : null}
+          ) : // data[2] === '3' ? (
+          //   <DashboardForm />
+          // ) :
+          null}
         </div>
       ) : (
         <div className="explore-wrapper">

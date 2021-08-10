@@ -41,7 +41,11 @@ const SetupCard = ({ heading, step, buttonText, active }) => {
         history.push('/alerts');
       }
     } else {
-      history.push(`/onboarding/${step}`);
+      if (step === 4) {
+        history.push('/alerts');
+      } else {
+        history.push(`/onboarding/${step}`);
+      }
     }
   };
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Plus from '../../assets/images/plus.svg';
-import Frame from '../../assets/images/channelconfig.svg';
+import Frame from '../../assets/images/table/channelconfig.svg';
 import AlertTable from '../../components/AlertTable';
 import './alerts.scss';
 import AlertFilter from '../../components/AlertFilter';

@@ -20,7 +20,7 @@ const Alerts = () => {
             <img src={Frame} alt="Add" />
             <span>Channel Configuration</span>
           </Link>
-          <Link to="/setalerts" className="btn green-variant-button">
+          <Link to="/new-alert" className="btn green-variant-button">
             <img src={Plus} alt="Add" />
             <span>New Alert</span>
           </Link>

@@ -16,6 +16,7 @@ import Anomolies from '../containers/Anomolies';
 import Alerts from '../containers/Alerts';
 import AddAlerts from '../containers/AddAlerts';
 import SetAlerts from '../containers/SetAlerts';
+import AddKpiAlert from '../containers/AddKpiAlert';
 
 const Routes = () => (
   <Switch>
@@ -81,8 +82,13 @@ const Routes = () => (
     />
     <PrivateRouteWithSidebar
       exact
-      path="/setalerts"
+      path="/new-alert"
       component={(props) => <SetAlerts {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
+      path="/new-alert/kpi-alert"
+      component={(props) => <AddKpiAlert {...props} />}
     />
     <PrivateRouteWithSidebar
       exact

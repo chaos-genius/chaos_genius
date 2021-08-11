@@ -395,7 +395,7 @@ const Dashboardgraph = ({ kpi }) => {
                   <h3>Top Drivers</h3>
                 </div>
 
-                <div className="form-check form-switch overlap-check">
+                <div className="form-check form-switch">
                   <input
                     className="form-check-input"
                     type="checkbox"

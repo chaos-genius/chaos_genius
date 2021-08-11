@@ -6,9 +6,9 @@ import Request from '../../assets/images/request.svg';
 
 import AlertsCard from '../../components/AlertsCard';
 
-import './alerts.scss';
+import './channelconfiguration.scss';
 
-const Alerts = () => {
+const Channelconfiguration = () => {
   return (
     <>
       {/* common heading and options */}
@@ -47,4 +47,4 @@ const Alerts = () => {
     </>
   );
 };
-export default Alerts;
+export default Channelconfiguration;

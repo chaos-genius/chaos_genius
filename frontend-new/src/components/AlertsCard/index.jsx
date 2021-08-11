@@ -1,10 +1,12 @@
 import React from 'react';
 
-import Slack from '../../assets/images/setupcard/slack.svg';
-import Gmail from '../../assets/images/setupcard/gmail.svg';
-import Datadog from '../../assets/images/setupcard/datadog.svg';
-import Asana from '../../assets/images/setupcard/asana.svg';
-import Teams from '../../assets/images/setupcard/teams.svg';
+import { Link } from 'react-router-dom';
+
+import Slack from '../../assets/images/alerts/slack.svg';
+import Gmail from '../../assets/images/alerts/gmail.svg';
+import Datadog from '../../assets/images/alerts/datadog.svg';
+import Asana from '../../assets/images/alerts/asana.svg';
+import Teams from '../../assets/images/alerts/teams.svg';
 
 import '../SetupCard/setupcard.scss';
 
@@ -15,9 +17,14 @@ const AlertsCard = () => {
         <img src={Slack} className="in-active" alt="Slack" />
         <h1>Slack</h1>
         <p>Select the data you want to monitor and analyse</p>
-        <button className="btn white-button">
-          <span>Connect Slack</span>
-        </button>
+        <Link to="/alerts/slack">
+          {/* <button className="btn black-button">
+            <span>Edit Slack Connection</span>
+          </button> */}
+          <button className="btn white-button">
+            <span>Connect Slack</span>
+          </button>
+        </Link>
       </div>
       <div className="setup-card">
         <img src={Gmail} className="in-active" alt="Gmail" />

@@ -1,6 +1,8 @@
-@import '../../assets/styles/variable.scss';
+@import '../../assets/styles/filterlayout.scss';
 
-.alert-heading {
-  align-items: center;
-  margin: 20px 0px 24px 0px;
+.alert-option-button {
+  display: flex;
+  .btn {
+    margin-left: 16px;
+  }
 }

@@ -1,7 +1,11 @@
 import React from 'react';
+
 import { Link } from 'react-router-dom';
+
 import Slack from '../../assets/images/slack.svg';
 import Rectangle from '../../assets/images/rectangle.svg';
+
+import '../../assets/styles/table.scss';
 import './alerttable.scss';
 
 const AlertTable = () => {

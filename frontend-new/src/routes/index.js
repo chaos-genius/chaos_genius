@@ -13,9 +13,15 @@ import AddKpiExplorer from '../containers/AddKpiExplorer';
 import Onboarding from '../containers/Onboarding';
 import Alerts from '../containers/Alerts';
 import Anomolies from '../containers/Anomolies';
+import Alert from '../containers/Alert';
 
 const Routes = () => (
   <Switch>
+    <PrivateRouteWithSidebar
+      exact
+      path="/alert"
+      component={(props) => <Alert {...props} />}
+    />
     <PrivateRouteWithSidebar
       exact
       path="/"

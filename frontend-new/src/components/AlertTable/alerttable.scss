@@ -1,0 +1,22 @@
+@import '../../assets/styles/variable.scss';
+
+.alert-status {
+  display: flex;
+  align-items: center;
+  label {
+    font-weight: $font-weight-500;
+    font-size: $font-size-14;
+    line-height: $line-height-16;
+    letter-spacing: $letter-spacing;
+    text-transform: capitalize;
+    color: $black_variation-2;
+    vertical-align: middle;
+  }
+  .form-switch {
+    margin: 0px 0px 0px 21px;
+    .form-check-input {
+      width: 32px;
+      height: 18px;
+    }
+  }
+}

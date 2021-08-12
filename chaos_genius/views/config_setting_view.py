@@ -25,6 +25,7 @@ def get_onboarding_status():
     try:
         data_sources = True if DataSource.query.first() is not None else False
         kpis = True if Kpi.query.first() is not None else False
+        analytics = True
     except Exception as err_msg:
         print(err_msg)
     steps = [

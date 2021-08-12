@@ -1,0 +1,133 @@
+@import '../../assets/styles/variable.scss';
+
+.alerts-type-container {
+  display: flex;
+  flex-direction: row;
+  .alerts-type {
+    width: 120px;
+    height: 72px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: $white;
+    border: 1px solid $grey_variation-1;
+    box-sizing: border-box;
+    border-radius: 10px;
+    margin-right: 24px;
+    cursor: pointer;
+    .alert-image {
+      display: block;
+    }
+    .alert-image-active {
+      display: none;
+    }
+    span {
+      margin-top: 5px;
+      font-weight: normal;
+      font-size: 12px;
+      line-height: 14px;
+      text-align: center;
+      letter-spacing: 0.2px;
+      text-transform: capitalize;
+      color: $grey_variation-1;
+    }
+    &.active {
+      background: $green_variation-2;
+      border: 1px solid $green;
+      box-sizing: border-box;
+      border-radius: 10px;
+      .alert-image {
+        display: none;
+      }
+      .alert-image-active {
+        display: block;
+      }
+      span {
+        color: $green;
+      }
+    }
+  }
+}
+.alert-condition {
+  display: flex;
+  justify-content: space-between;
+  width: 75%;
+  .form-check {
+    label {
+      font-weight: $font-weight-500;
+      font-size: $font-size-14;
+      line-height: $line-height-16;
+      text-transform: capitalize;
+      color: $black_variation-2;
+      &.active {
+        color: #60ca9a;
+      }
+    }
+  }
+}
+.alert-textarea {
+  textarea {
+    margin-bottom: 0px;
+  }
+}
+.deviation-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  input {
+    width: 48%;
+  }
+  .css-2b097c-container {
+    width: 48%;
+  }
+}
+
+.form-group {
+  input[type='range'] {
+    height: 8px;
+    width: 100%;
+    outline: none;
+    border-radius: 20px;
+    -webkit-appearance: none;
+    background-color: white;
+
+    &:focus {
+      outline: none;
+    }
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border: 2px solid #60ca9a;
+      box-sizing: border-box;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    &::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      background: #ffffff;
+      border: 2px solid #60ca9a;
+      box-sizing: border-box;
+      // -webkit-appearance: none;
+      cursor: pointer;
+    }
+    &::-moz-range-progress {
+      height: 8px;
+      border-radius: 20px;
+      background: linear-gradient(
+        90deg,
+        #60ca9a 4.86%,
+        #fac06b 61.61%,
+        #e96560 117.38%
+      );
+    }
+    &::-moz-range-track {
+      height: 8px;
+      border-radius: 20px;
+      background: #efefef;
+    }
+  }
+}

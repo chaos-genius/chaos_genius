@@ -126,13 +126,13 @@ a:hover {
 // form
 .form-group {
   margin-bottom: 24px;
-  h3 {
-    font-weight: 600;
-    font-size: 16px;
-    line-height: 22px;
-
-    letter-spacing: 0.2px;
-    color: #222222;
+  h5 {
+    font-weight: $font-weight-600;
+    font-size: $font-size-16;
+    line-height: $line-height-22;
+    letter-spacing: $letter-spacing;
+    color: $black_variation-2;
+    margin-bottom: -8px;
   }
   textarea {
     width: 100%;

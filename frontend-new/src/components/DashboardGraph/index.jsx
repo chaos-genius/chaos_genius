@@ -116,7 +116,7 @@ const Dashboardgraph = ({ kpi }) => {
     chart.data = linechartData; //this.state.lineChartData;
 
     chart.fontSize = 12;
-    chart.fontFamily = 'Inter';
+    chart.fontFamily = 'Inter ,sans-serif';
 
     // Create axes
     let dateAxis = chart.xAxes.push(new am4charts.ValueAxis());
@@ -140,7 +140,7 @@ const Dashboardgraph = ({ kpi }) => {
     series.tooltip.getFillFromObject = false;
     series.tooltip.background.fill = am4core.color('#778CA3');
     series.tooltip.label.fontSize = 12;
-    series.tooltip.label.fontFamily = 'Inter';
+    series.tooltip.label.fontFamily = 'Inter ,sans-serif';
     series.tooltip.label.fill = '#fff';
 
     // Create series
@@ -187,7 +187,7 @@ const Dashboardgraph = ({ kpi }) => {
     // } else {
     let chart = am4core.create('chartdivWaterfall', am4charts.XYChart);
     chart.fontSize = 12;
-    chart.fontFamily = 'Inter';
+    chart.fontFamily = 'Inter ,sans-serif';
 
     chart.hiddenState.properties.opacity = 0; // this makes initial fade in effect
 
@@ -258,7 +258,7 @@ const Dashboardgraph = ({ kpi }) => {
 
     chart.cursor = new am4charts.XYCursor();
     chart.tooltip.label.fontSize = 12;
-    chart.tooltip.label.fontFamily = 'Inter';
+    chart.tooltip.label.fontFamily = 'Inter ,sans-serif';
     chart.cursor.behavior = 'none';
     // this.setState({
     //   amChart: chart

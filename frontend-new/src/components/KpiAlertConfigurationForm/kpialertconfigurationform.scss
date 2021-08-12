@@ -85,18 +85,24 @@
 
 .form-group {
   input[type='range'] {
-    height: 8px;
-    width: 100%;
-    outline: none;
-    border-radius: 20px;
+    // height: 8px;
+    // width: 100%;
+    // outline: none;
+    // border-radius: 20px;
+    // -webkit-appearance: none;
+    // background-color: $white;
     -webkit-appearance: none;
-    background-color: $white;
+    width: 100%;
+    height: 8px;
+    background: #ddd;
+    border-radius: 20px;
+    outline: none;
 
     &:focus {
       outline: none;
     }
     &::-webkit-slider-thumb {
-      // -webkit-appearance: none;
+      -webkit-appearance: none;
       width: 18px;
       height: 18px;
       background: $white;

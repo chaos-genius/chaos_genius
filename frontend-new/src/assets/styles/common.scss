@@ -89,13 +89,14 @@ a:hover {
         width: 24px;
         height: 24px;
         object-fit: contain;
+        margin-right: 5px;
       }
       span {
         font-size: $font-size-20;
         line-height: $line-height-16;
         letter-spacing: $letter-spacing;
         color: $black_variation-2;
-        margin-left: 5px;
+
         font-weight: $font-weight-600;
       }
     }

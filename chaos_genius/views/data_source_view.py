@@ -14,9 +14,10 @@ from flask import (
     url_for,
     jsonify
 )
-
-from chaos_genius.extensions import cache
+from sqlalchemy import func
+from chaos_genius.extensions import cache, db
 from chaos_genius.third_party.integration_client import get_localhost_host
+from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.extensions import integration_connector as connector
 from chaos_genius.third_party.integration_server_config import (
@@ -52,13 +53,21 @@ def data_source():
             return jsonify({"error": "The request payload is not in JSON format"})
 
     elif request.method == 'GET':
-        data_sources = DataSource.query.all()
+        data_sources = DataSource.query.order_by(DataSource.created_at.desc()).all()
+        ds_kpi_count = db.session.query(DataSource.id, func.count(Kpi.id)) \
+                    .join(Kpi, Kpi.data_source == DataSource.id) \
+                    .group_by(DataSource.id) \
+                    .order_by(DataSource.created_at.desc()) \
+                    .all()
+        data_source_kpi_map = {}
+        for row in ds_kpi_count:
+            data_source_kpi_map[row[0]] = row[1]
         results = []
         for conn in data_sources:
             # TODO: Add the kpi_count, real sync details and sorting info
             conn_detail = conn.safe_dict
             conn_detail['last_sync'] = datetime.now()
-            conn_detail['kpi_count'] = random.randint(1,4)
+            conn_detail['kpi_count'] = data_source_kpi_map.get(conn_detail['id'], 0)
             results.append(conn_detail)
         results = sorted(results, reverse=True, key=lambda x: x["id"])
         return jsonify({"count": len(results), "data": results})
@@ -174,7 +183,6 @@ def create_data_source():
                 "db_type": db_mapper["db_type"],
             }
 
-        # TODO: Correct the database URI incase of the localhost db (replace docker.localhost)
         db_connection_uri = create_sqlalchemy_uri(**db_config)
         status = "connected"
 

@@ -4,7 +4,6 @@ import datetime as dt
 
 from chaos_genius.databases.base_model import Column, PkModel, db
 
-# TODO: Update the as dict here 
 
 class Kpi(PkModel):
     """A KPI."""
@@ -50,6 +49,11 @@ class Kpi(PkModel):
             "table_name": self.table_name,
             "metric": self.metric,
             "aggregation": self.aggregation,
+            "datetime_column": self.datetime_column,
+            "dimensions": self.dimensions,
+            "run_anomaly": self.run_anomaly,
+            "is_static": self.is_static,
+            "static_params": self.static_params,
             "active": self.active,
             "created_at": self.created_at
         }

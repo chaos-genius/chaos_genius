@@ -30,7 +30,7 @@ class ThirdPartyClient(object):
         self.config = config
         self.server_uri = config.get("INTEGRATION_SERVER", server_uri)
         self.destination_db = {
-            "host": config["INTEGRATION_DB_HOST"],
+            "host": get_docker_host(config["INTEGRATION_DB_HOST"]),
             "port": int(config["INTEGRATION_DB_PORT"]),
             "username": config["INTEGRATION_DB_USERNAME"],
             "password": config["INTEGRATION_DB_PASSWORD"],
@@ -420,6 +420,9 @@ class ThirdPartyClient(object):
         return get_request(api_url)
 
     def test_connection(self, payload):
+        db_host = payload["connectionConfiguration"].get("host")
+        if db_host:
+            payload["connectionConfiguration"]["host"] = get_docker_host(db_host)
         api_url = f"{self.server_uri}/api/v1/scheduler/sources/check_connection"
         return post_request(api_url, payload)
 
@@ -469,15 +472,6 @@ def init_integration_server():
     the Postgres db for storing the third party data will be stored.
 
     """
-
-    config = dotenv_values(".env")
-    server_url = config["INTEGRATION_SERVER"]
-    db_host = config["INTEGRATION_DB_HOST"]
-    db_user = config["INTEGRATION_DB_USERNAME"]
-    db_password = config["INTEGRATION_DB_PASSWORD"]
-    db_port = config["INTEGRATION_DB_PORT"]
-    db_name = config["INTEGRATION_DATABASE"]
-
     client = ThirdPartyClient()
     status = client.get_server_health()
     if status.get('db', False):
@@ -496,3 +490,23 @@ def init_integration_server():
 
     status = client.get_server_health()
     return status.get('db', False)
+
+
+def get_docker_host(db_host):
+    """ convert the localhost for accessing inside the docker
+        localhost ---> host.docker.internal
+    """
+    converted_host = db_host
+    if db_host == 'localhost':
+        converted_host = 'host.docker.internal'
+    return converted_host
+
+
+def get_localhost_host(db_host):
+    """ convert the docker accessible host name to parent machine one
+        host.docker.internal ---> localhost
+    """
+    converted_host = db_host
+    if db_host == 'host.docker.internal':
+        converted_host = 'localhost'
+    return converted_host

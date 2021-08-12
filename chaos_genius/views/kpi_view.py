@@ -57,12 +57,12 @@ def kpi():
     elif request.method == 'GET':
         results = db.session.query(Kpi, DataSource) \
                 .join(DataSource, Kpi.data_source == DataSource.id) \
-                .order_by(Kpi.created_at) \
+                .order_by(Kpi.created_at.desc()) \
                 .all()
         kpis = []
         for row in results:
-            data_source = row[0].safe_dict
-            kpi = row[1].safe_dict
+            kpi = row[0].safe_dict
+            data_source = row[1].safe_dict
             data_source.update(kpi)
             kpis.append(data_source)
         return jsonify({"count": len(kpis), "data": kpis})
@@ -133,16 +133,13 @@ def kpi_rca_hierarchical_data(kpi_id):
 
 
 def get_baseline_and_rca_df(kpi_info, connection_info, timeline="mom"):
+    # TODO: Refactor this function to and move to the kpi service
     today = datetime.today()
+    datetime_col = kpi_info['datetime_column']
     if kpi_info['is_static']:
         end_date = kpi_info.get('static_params', {}).get('end_date', {})
         if end_date:
             today = datetime.strptime(end_date, '%Y-%m-%d')
-    indentifier = ''
-    if connection_info["connection_type"] == "mysql":
-        indentifier = '`'
-    elif connection_info["connection_type"] == "postgresql":
-        indentifier = '"'
 
     if timeline == "mom":
         num_days = 30
@@ -152,31 +149,44 @@ def get_baseline_and_rca_df(kpi_info, connection_info, timeline="mom"):
         num_days = 1
     else:
         raise ValueError(f"Invalid timeline: {timeline}")
-    
+
     base_dt_obj = today - timedelta(days=2*num_days)
     base_dt = str(base_dt_obj.date())
     mid_dt_obj = today - timedelta(days=num_days)
     mid_dt = str(mid_dt_obj.date())
     cur_dt = str(today.date())
 
-    base_filter = f" where {indentifier}{kpi_info['datetime_column']}{indentifier} > '{base_dt}' and {indentifier}{kpi_info['datetime_column']}{indentifier} <= '{mid_dt}' "
-    rca_filter = f" where {indentifier}{kpi_info['datetime_column']}{indentifier} > '{mid_dt}' and {indentifier}{kpi_info['datetime_column']}{indentifier}<= '{cur_dt}' "
+    if kpi_info['kpi_type'] == 'table':
+        indentifier = ''
+        if connection_info["connection_type"] == "mysql":
+            indentifier = '`'
+        elif connection_info["connection_type"] == "postgresql":
+            indentifier = '"'
 
-    kpi_filters = kpi_info['filters']
-    kpi_filters_query = " "
-    if kpi_filters:
+        base_filter = f" where {indentifier}{datetime_col}{indentifier} > '{base_dt}' and {indentifier}{datetime_col}{indentifier} <= '{mid_dt}' "
+        rca_filter = f" where {indentifier}{datetime_col}{indentifier} > '{mid_dt}' and {indentifier}{datetime_col}{indentifier}<= '{cur_dt}' "
+
+        kpi_filters = kpi_info['filters']
         kpi_filters_query = " "
-        for key, values in kpi_filters.items():
-            if values:
-                # TODO: Bad Hack to remove the last comma, fix it
-                values_str = str(tuple(values))
-                values_str = values_str[:-2] + ')'
-                kpi_filters_query += f" and {indentifier}{key}{indentifier} in {values_str}"
+        if kpi_filters:
+            kpi_filters_query = " "
+            for key, values in kpi_filters.items():
+                if values:
+                    # TODO: Bad Hack to remove the last comma, fix it
+                    values_str = str(tuple(values))
+                    values_str = values_str[:-2] + ')'
+                    kpi_filters_query += f" and {indentifier}{key}{indentifier} in {values_str}"
 
-    base_query = f"select * from {kpi_info['table_name']} {base_filter} {kpi_filters_query} "
-    rca_query = f"select * from {kpi_info['table_name']} {rca_filter} {kpi_filters_query} "
-    base_df = get_df_from_db_uri(connection_info["db_uri"], base_query)
-    rca_df = get_df_from_db_uri(connection_info["db_uri"], rca_query)
+        base_query = f"select * from {kpi_info['table_name']} {base_filter} {kpi_filters_query} "
+        rca_query = f"select * from {kpi_info['table_name']} {rca_filter} {kpi_filters_query} "
+        base_df = get_df_from_db_uri(connection_info["db_uri"], base_query)
+        rca_df = get_df_from_db_uri(connection_info["db_uri"], rca_query)
+    
+    elif kpi_info['kpi_type'] == 'query':
+        query_df = get_df_from_db_uri(connection_info["db_uri"], kpi_info['kpi_query'])
+        query_df[datetime_col] = pd.to_datetime(query_df[datetime_col])
+        base_df = query_df[(query_df[datetime_col] > base_dt_obj) & (query_df[datetime_col] <= mid_dt_obj)]
+        rca_df = query_df[(query_df[datetime_col] > mid_dt_obj) & (query_df[datetime_col] <= today)]
 
     return base_df, rca_df
 
@@ -222,7 +232,7 @@ def kpi_aggregation(kpi_info, connection_info, timeline="mom"):
         }
 
     except Exception as err:
-        # sprint(traceback.format_exc())
+        # print(traceback.format_exc())
         current_app.logger.error(f"Error in RCA Analysis: {err}")
         final_data = {
             "panel_metrics": [],
@@ -253,7 +263,7 @@ def kpi_line_data(kpi_info, connection_info):
 
 
 @cache.memoize(timeout=30000)
-def rca_analysis(kpi_info, connection_info, timeline="mom", dimension= None):
+def rca_analysis(kpi_info, connection_info, timeline="mom", dimension=None):
     try:
         base_df, rca_df = get_baseline_and_rca_df(kpi_info, connection_info, timeline)
 
@@ -348,26 +358,3 @@ def get_kpi_data_from_id(n: int) -> dict:
     if kpi_info.as_dict:
         return kpi_info.as_dict
     raise ValueError(f"KPI ID {n} not found in KPI_DATA")
-
-'''
-KPI_DATA = [
-    {"id": 1, "is_certified": True, "kpi_type": "table", "name": "Call/day", "table_name": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "sum_calls", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
-    {"id": 2, "is_certified": True, "kpi_type": "table", "name": "Conversion per day", "table_name": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "sum_conversion", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
-  # {"id": 3, "is_certified": True, "kpi_type": "table", "name": "Avg call duration", "table_name": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
-    {"id": 4, "is_certified": True, "kpi_type": "table", "name": "Avg call duration for admin job", "table_name": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["admin."]}, "dimensions": ["marital","education","housing","loan"]},
-    {"id": 5, "is_certified": True, "kpi_type": "table", "name": "Avg call duration for blue collar job", "table_name": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["blue-collar"]}, "dimensions": ["marital","education","housing","loan"]},
-    {"id": 6, "is_certified": True, "kpi_type": "table", "name": "Avg call duration for management job", "table_name": "marketing_records", "data_source": 2, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["management"]}, "dimensions": ["marital","education","housing","loan"]},
-  # {"id": 7, "is_certified": True, "kpi_type": "table", "name": "Total price", "table_name": "mh_food_prices", "data_source": 4, "datetime_column": "date", "metric": "modal_price", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["Commodity", "APMC", "district_name"]},
-  # {"id": 8, "is_certified": True, "kpi_type": "table", "name": "Total price for onion", "table_name": "mh_food_prices", "data_source": 4, "datetime_column": "date", "metric": "modal_price", "metric_precision": 2, "aggregation": "mean", "filters": {"Commodity": ["Onion"]}, "dimensions": ["APMC", "district_name"]},
-  # {"id": 9, "is_certified": True, "kpi_type": "table", "name": "Total price for maize", "table_name": "mh_food_prices", "data_source": 4, "datetime_column": "date", "metric": "modal_price", "metric_precision": 2, "aggregation": "mean", "filters": {"Commodity": ["Maize"]}, "dimensions": ["APMC", "district_name"]},
-  # {"id": 10, "is_certified": True, "kpi_type": "table", "name": "Total price for green chilli", "table_name": "mh_food_prices", "data_source": 4, "datetime_column": "date", "metric": "modal_price", "metric_precision": 2, "aggregation": "mean", "filters": {"Commodity": ["Green Chilli"]}, "dimensions": ["APMC", "district_name"]},
-    {"id": 11, "is_certified": True, "kpi_type": "table", "name": "Call/day (MySQL)", "table_name": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "sum_calls", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
-    {"id": 12, "is_certified": True, "kpi_type": "table", "name": "Conversion per day (MySQL)", "table_name": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "sum_conversion", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
-    {"id": 13, "is_certified": True, "kpi_type": "table", "name": "Avg call duration (MySQL)", "table_name": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["job","marital","education","housing","loan"]},
-  # {"id": 14, "is_certified": True, "kpi_type": "table", "name": "Avg call duration for admin job (MySQL)", "table_name": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["admin."]}, "dimensions": ["marital","education","housing","loan"]},
-  # {"id": 15, "is_certified": True, "kpi_type": "table", "name": "Avg call duration for blue collar job (MySQL)", "table_name": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["blue-collar"]}, "dimensions": ["marital","education","housing","loan"]},
-  # {"id": 16, "is_certified": True, "kpi_type": "table", "name": "Avg call duration for management job (MySQL)", "table_name": "marketing_records", "data_source": 5, "datetime_column": "date", "metric": "avg_duration", "metric_precision": 2, "aggregation": "mean", "filters": {"job": ["management"]}, "dimensions": ["marital","education","housing","loan"]},
-    {"id": 17, "is_certified": True, "kpi_type": "table", "name": "E-Com - Total Sales", "table_name": "ecom_retail", "data_source": 22, "datetime_column": "date", "metric": "ItemTotalPrice", "metric_precision": 2, "aggregation": "sum", "filters": {}, "dimensions": ["DayOfWeek", "PurchaseTime", "Country"]},
-    {"id": 18, "is_certified": True, "kpi_type": "table", "name": "E-Com - Average Sales", "table_name": "ecom_retail", "data_source": 22, "datetime_column": "date", "metric": "ItemTotalPrice", "metric_precision": 2, "aggregation": "mean", "filters": {}, "dimensions": ["DayOfWeek", "PurchaseTime", "Country"]},
-]
-'''

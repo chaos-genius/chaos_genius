@@ -16,14 +16,15 @@ from flask import (
 )
 
 from chaos_genius.extensions import cache
-from chaos_genius.third_party.integration_server_config import DATA_SOURCE_ABBREVIATION
+from chaos_genius.third_party.integration_client import get_localhost_host
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.extensions import integration_connector as connector
 from chaos_genius.third_party.integration_server_config import (
     SOURCE_CONFIG_MAPPING,
     SOURCE_WHITELIST_AND_TYPE,
     DATABASE_CONFIG_MAPPER,
-    DESTINATION_TYPE as db_type
+    DESTINATION_TYPE as db_type,
+    DATA_SOURCE_ABBREVIATION
 )
 from chaos_genius.databases.db_utils import create_sqlalchemy_uri
 from chaos_genius.databases.db_metadata import DbMetadata, get_metadata
@@ -158,6 +159,7 @@ def create_data_source():
             stream_tables = [stream["stream"]["name"] for stream in stream_schema]
             stream_tables = list(map(lambda x: f"{table_prefix}{x}", stream_tables))
             db_config = connector_client.destination_db
+            db_config["host"] = get_localhost_host(db_config["host"])
             db_config["db_type"] = db_type
         else:
             sourceRecord = sourceCreationPayload

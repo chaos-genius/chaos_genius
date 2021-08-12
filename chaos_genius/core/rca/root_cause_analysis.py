@@ -464,24 +464,28 @@ class RootCauseAnalysis():
         panel_metrics = []
         for data in [self._grp1_df, self._grp2_df]:
             len_data = len(data[self._metric])
-            # numerical data
-            if not self._metric_is_cat:
-                out_dict = OrderedDict({
-                    "mean": data[self._metric].mean().item(),
-                    "min": data[self._metric].min().item(),
-                    "median": data[self._metric].median().item(),
-                    "max": data[self._metric].max().item(),
-                    "sum": data[self._metric].sum().item(),
-                    "count": len_data,
-                    "null_count": len_data - data[self._metric].count().item(),
-                })
-            # categorical data
-            else:
-                out_dict = OrderedDict({
-                    "count": len_data,
-                    "null_count": len_data - data[self._metric].count().item(),
-                })
-            out_dict.move_to_end(self._agg, last=False)
+            out_dict = OrderedDict() 
+            try:
+                # numerical data
+                if not self._metric_is_cat:
+                    out_dict = OrderedDict({
+                        "mean": data[self._metric].mean().item(),
+                        "min": data[self._metric].min().item(),
+                        "median": data[self._metric].median().item(),
+                        "max": data[self._metric].max().item(),
+                        "sum": data[self._metric].sum().item(),
+                        "count": len_data,
+                        "null_count": len_data - data[self._metric].count().item(),
+                    })
+                # categorical data
+                else:
+                    out_dict = OrderedDict({
+                        "count": len_data,
+                        "null_count": len_data - data[self._metric].count().item(),
+                    })
+                out_dict.move_to_end(self._agg, last=False)
+            except Exception:
+                pass
             panel_metrics.append(out_dict)
 
         d1_metrics, d2_metrics = panel_metrics

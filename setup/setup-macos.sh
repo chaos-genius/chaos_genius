@@ -222,7 +222,7 @@ echo "META_DATABASE=chaosgenius" >> .env
 echo "DATABASE_URL='postgresql+psycopg2://$(whoami):@localhost/chaosgenius'" >> .env
 echo "" >> .env
 echo "INTEGRATION_SERVER='http://localhost:8001'" >> .env
-echo "INTEGRATION_DB_HOST='host.docker.internal'" >> .env
+echo "INTEGRATION_DB_HOST='localhost'" >> .env
 echo "INTEGRATION_DB_USERNAME=$(whoami)" >> .env
 echo "INTEGRATION_DB_PASSWORD=''" >> .env
 echo "INTEGRATION_DB_PORT=5432" >> .env

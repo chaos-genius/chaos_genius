@@ -6,20 +6,32 @@
   justify-content: space-between;
   justify-items: center;
   .form-check {
-    border: 1px solid #60ca9a;
-    background: #effaf5;
+    border: 1px solid $grey_variation-1;
+    background: $white;
     box-sizing: border-box;
     border-radius: 4px;
-    outline: 0 !important;
-    box-shadow: none !important;
-    //padding: 14px 6px 14px 8px;
     width: 136px;
     height: 48px;
-  }
-  input {
+    display: flex;
+    justify-content: center;
     align-items: center;
-  }
-  label {
-    margin-left: 10px;
+    label {
+      margin-left: 10px;
+      font-weight: $font-weight-500;
+      font-size: $font-size-14;
+      line-height: $line-height-16;
+      text-transform: capitalize;
+      color: $black_variation-2;
+    }
+    &.active {
+      border: 1px solid $green;
+      background: $green_variation-2;
+      label {
+        color: $green;
+      }
+    }
+    .form-check-input {
+      margin-top: 0px;
+    }
   }
 }

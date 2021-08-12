@@ -61,7 +61,7 @@
       text-transform: capitalize;
       color: $black_variation-2;
       &.active {
-        color: #60ca9a;
+        color: $green;
       }
     }
   }
@@ -90,7 +90,7 @@
     outline: none;
     border-radius: 20px;
     -webkit-appearance: none;
-    background-color: white;
+    background-color: $white;
 
     &:focus {
       outline: none;
@@ -99,8 +99,8 @@
       -webkit-appearance: none;
       width: 18px;
       height: 18px;
-      background: white;
-      border: 2px solid #60ca9a;
+      background: $white;
+      border: 2px solid $green;
       box-sizing: border-box;
       border-radius: 20px;
       cursor: pointer;
@@ -108,8 +108,8 @@
     &::-moz-range-thumb {
       width: 18px;
       height: 18px;
-      background: #ffffff;
-      border: 2px solid #60ca9a;
+      background: $white;
+      border: 2px solid $green;
       box-sizing: border-box;
       // -webkit-appearance: none;
       cursor: pointer;
@@ -127,7 +127,7 @@
     &::-moz-range-track {
       height: 8px;
       border-radius: 20px;
-      background: #efefef;
+      background: $grey_variation-5;
     }
   }
 }

@@ -34,7 +34,7 @@ const EventAlertForm = () => {
           components={{ SingleValue: customSingleValue }}
         />
       </div>
-      <div className="form-group">
+      <div className="form-group query-form">
         <label>Query *</label>
         <textarea placeholder="Enter Query"></textarea>
         <div className="test-query-connection">
@@ -54,7 +54,7 @@ const EventAlertForm = () => {
       <div className="form-group">
         <label>Alert Settings *</label>
         <div className="radio-group">
-          <div className="form-check">
+          <div className="form-check active">
             <input
               type="radio"
               name="setting"

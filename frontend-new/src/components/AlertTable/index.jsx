@@ -33,7 +33,7 @@ const AlertTable = () => {
           <td>
             <div className="alert-status">
               <label>Active</label>
-              <div className="form-check form-switch overlap-check">
+              <div className="form-check form-switch">
                 <input
                   className="form-check-input"
                   type="checkbox"
@@ -58,7 +58,7 @@ const AlertTable = () => {
           <td>
             <div className="alert-status">
               <label>Active</label>
-              <div className="form-check form-switch overlap-check">
+              <div className="form-check form-switch ">
                 <input
                   className="form-check-input"
                   type="checkbox"
@@ -86,7 +86,7 @@ const AlertTable = () => {
           <td>
             <div className="alert-status">
               <label>InActive</label>
-              <div className="form-check form-switch overlap-check">
+              <div className="form-check form-switch">
                 <input
                   className="form-check-input"
                   type="checkbox"
@@ -111,7 +111,7 @@ const AlertTable = () => {
           <td>
             <div className="alert-status">
               <label>Active</label>
-              <div className="form-check form-switch overlap-check">
+              <div className="form-check form-switch">
                 <input
                   className="form-check-input"
                   type="checkbox"
@@ -136,7 +136,7 @@ const AlertTable = () => {
           <td>
             <div className="alert-status">
               <label>Active</label>
-              <div className="form-check form-switch overlap-check">
+              <div className="form-check form-switch">
                 <input
                   className="form-check-input"
                   type="checkbox"

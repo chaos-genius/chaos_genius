@@ -1,0 +1,25 @@
+@import '../../assets/styles/addform.scss';
+
+.radio-group {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  justify-items: center;
+  .form-check {
+    border: 1px solid #60ca9a;
+    background: #effaf5;
+    box-sizing: border-box;
+    border-radius: 4px;
+    outline: 0 !important;
+    box-shadow: none !important;
+    //padding: 14px 6px 14px 8px;
+    width: 136px;
+    height: 48px;
+  }
+  input {
+    align-items: center;
+  }
+  label {
+    margin-left: 10px;
+  }
+}

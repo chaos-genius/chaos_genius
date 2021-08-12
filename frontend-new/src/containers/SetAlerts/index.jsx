@@ -20,10 +20,12 @@ const SetAlerts = () => {
           <h3>Event Alert</h3>
           <p>Tap ‘New Alert‘ button below to add your first alert</p>
           <div className="alert-button">
-            <button className="btn black-button">
-              <img src={Plus} alt="Plus" />
-              <span>New Alert</span>
-            </button>
+            <Link to="/new-alert/event-alert">
+              <button className="btn black-button">
+                <img src={Plus} alt="Plus" />
+                <span>New Alert</span>
+              </button>
+            </Link>
           </div>
         </div>
         <div className="alerts-card">

@@ -35,7 +35,7 @@ const Channelconfiguration = () => {
           </div>
         </div>
         <div className="option-button">
-          <Link to="/kpiexplorer/add" className="btn black-button">
+          <Link to="/new-alert" className="btn black-button">
             <img src={Request} alt="Request" />
             <span>Request a new channel</span>
           </Link>

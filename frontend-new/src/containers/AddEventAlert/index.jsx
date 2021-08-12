@@ -29,6 +29,12 @@ const AddEventAlert = () => {
           </Link>
         </div>
       </div>
+      <div className="onboarding-steps">
+        <ul>
+          <li className="selected">Alert Configuration</li>
+          <li className="active">Alert Destination</li>
+        </ul>
+      </div>
       <div className="add-form-container">
         <EventAlertForm />
       </div>

@@ -1,13 +1,10 @@
 @import '~bootstrap/scss/bootstrap';
 @import './variable.scss';
 @import './button.scss';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 body {
   background-color: $grey_variation_2;
-  // font-family: 'Inter', 'Helvetica', 'Apple Color Emoji', 'Segoe UI Emoji',
-  //   'NotoColorEmoji', 'Noto Color Emoji', 'Segoe UI Symbol', 'Android Emoji',
-  //   'EmojiSymbols', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto',
-  //   'Helvetica Neue', 'Noto Sans', sans-serif;
   font-family: 'Inter', sans-serif;
 }
 

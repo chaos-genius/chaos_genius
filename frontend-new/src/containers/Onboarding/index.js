@@ -6,7 +6,7 @@ import rightarrow from '../../assets/images/rightarrow.svg';
 
 import DataSourceForm from '../../components/DataSourceForm';
 import KpiExplorerForm from '../../components/KpiExplorerForm';
-import DashboardForm from '../../components/DashboardForm';
+//import DashboardForm from '../../components/DashboardForm';
 import FilterAnalystics from '../../components/FilterAnalystics';
 
 import './onboarding.scss';

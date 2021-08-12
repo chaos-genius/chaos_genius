@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import rightarrow from '../../assets/images/rightarrow.svg';
 
 import KpiAlertConfigurationForm from '../../components/KpiAlertConfigurationForm';
+import KpiAlertDestinationForm from '../../components/KpiAlertDestinationForm';
 
 const AddKpiAlert = () => {
   const [alert, setAlert] = useState('configuration');
@@ -22,7 +23,7 @@ const AddKpiAlert = () => {
               <Link to="/new-alert"> New Alert </Link>
             </li>
             <li className="breadcrumb-item active" aria-current="page">
-              KPI Alert
+              {alert === 'configuration' ? 'KPI Alert' : ' Alert Destination'}
             </li>
           </ol>
         </nav>
@@ -30,7 +31,10 @@ const AddKpiAlert = () => {
         <div className="backnavigation">
           <Link to="/new-alert">
             <img src={rightarrow} alt="Back" />
-            <span>KPI Alert</span>
+            <span>
+              {' '}
+              {alert === 'configuration' ? 'KPI Alert' : ' Alert Destination'}
+            </span>
           </Link>
         </div>
       </div>
@@ -50,7 +54,11 @@ const AddKpiAlert = () => {
       </div>
       {/* add KPI Alert form */}
       <div className="add-form-container">
-        {alert === 'configuration' ? <KpiAlertConfigurationForm /> : null}
+        {alert === 'configuration' ? (
+          <KpiAlertConfigurationForm />
+        ) : (
+          <KpiAlertDestinationForm />
+        )}
       </div>
     </>
   );

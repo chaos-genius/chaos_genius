@@ -34,10 +34,10 @@ const AlertFilter = () => {
           <input
             className="form-check-input"
             type="checkbox"
-            id="checkboxfilter1"
-            name="checkboxfilter1"
+            id="checkboxfilter2"
+            name="checkboxfilter2"
           />
-          <label className="form-check-label" htmlFor="checkboxfilter1">
+          <label className="form-check-label" htmlFor="checkboxfilter2">
             Email
           </label>
         </div>
@@ -45,10 +45,10 @@ const AlertFilter = () => {
           <input
             className="form-check-input"
             type="checkbox"
-            id="checkboxfilter1"
-            name="checkboxfilter1"
+            id="checkboxfilter3"
+            name="checkboxfilter3"
           />
-          <label className="form-check-label" htmlFor="checkboxfilter1">
+          <label className="form-check-label" htmlFor="checkboxfilter3">
             Datadog
           </label>
         </div>
@@ -56,10 +56,10 @@ const AlertFilter = () => {
           <input
             className="form-check-input"
             type="checkbox"
-            id="checkboxfilter1"
-            name="checkboxfilter1"
+            id="checkboxfilter4"
+            name="checkboxfilter4"
           />
-          <label className="form-check-label" htmlFor="checkboxfilter1">
+          <label className="form-check-label" htmlFor="checkboxfilter4">
             Asana
           </label>
         </div>
@@ -70,10 +70,10 @@ const AlertFilter = () => {
           <input
             className="form-check-input"
             type="checkbox"
-            id="checkboxfilter1"
-            name="checkboxfilter1"
+            id="checkboxfilter6"
+            name="checkboxfilter6"
           />
-          <label className="form-check-label" htmlFor="checkboxfilter1">
+          <label className="form-check-label" htmlFor="checkboxfilter6">
             Active
           </label>
         </div>
@@ -81,10 +81,10 @@ const AlertFilter = () => {
           <input
             className="form-check-input"
             type="checkbox"
-            id="checkboxfilter1"
-            name="checkboxfilter1"
+            id="checkboxfilter7"
+            name="checkboxfilter7"
           />
-          <label className="form-check-label" htmlFor="checkboxfilter1">
+          <label className="form-check-label" htmlFor="checkboxfilter7">
             In Active
           </label>
         </div>

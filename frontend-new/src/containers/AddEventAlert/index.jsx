@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { Link } from 'react-router-dom';
 
@@ -6,7 +6,10 @@ import rightarrow from '../../assets/images/rightarrow.svg';
 
 import EventAlertForm from '../../components/EventAlertForm';
 
+import KpiAlertDestinationForm from '../../components/KpiAlertDestinationForm';
+
 const AddEventAlert = () => {
+  const [steps, setSteps] = useState(1);
   return (
     <div>
       <div className="page-navigation">
@@ -17,7 +20,7 @@ const AddEventAlert = () => {
               <Link to="/new-alert">Alerts / New Alert</Link>
             </li>
             <li className="breadcrumb-item active" aria-current="page">
-              Event Alert
+              {steps === 2 ? 'Alert Destination' : 'Event Alert'}
             </li>
           </ol>
         </nav>
@@ -25,18 +28,24 @@ const AddEventAlert = () => {
         <div className="backnavigation">
           <Link to="/new-alert">
             <img src={rightarrow} alt="Back" />
-            Event Alert
+            <span>{steps === 2 ? 'Alert Destination' : 'Event Alert'}</span>
           </Link>
         </div>
       </div>
       <div className="onboarding-steps">
         <ul>
-          <li className="selected">Alert Configuration</li>
-          <li className="active">Alert Destination</li>
+          <li className={steps > 1 ? 'selected' : 'active'}>
+            Alert Configuration
+          </li>
+          <li className={steps === 2 ? 'active' : ''}>Alert Destination</li>
         </ul>
       </div>
       <div className="add-form-container">
-        <EventAlertForm />
+        {steps === 1 ? (
+          <EventAlertForm setSteps={setSteps} />
+        ) : (
+          <KpiAlertDestinationForm event setEventSteps={setSteps} />
+        )}
       </div>
     </div>
   );

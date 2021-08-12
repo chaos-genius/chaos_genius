@@ -14,7 +14,10 @@ const customSingleValue = ({ data }) => (
   </div>
 );
 
-const EventAlertForm = () => {
+const EventAlertForm = ({ setSteps }) => {
+  const onSubmit = () => {
+    setSteps(2);
+  };
   return (
     <div>
       <div className="form-group">
@@ -85,8 +88,8 @@ const EventAlertForm = () => {
         <textarea placeholder="Enter Message Here"></textarea>
       </div>
       <div className="form-action">
-        <button className="btn black-button">
-          <span>Add Alert</span>
+        <button className="btn black-button" onClick={() => onSubmit()}>
+          <span>Next Step</span>
         </button>
       </div>
     </div>

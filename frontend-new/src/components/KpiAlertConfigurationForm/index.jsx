@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
 import Select from 'react-select';
-import App from './rangebar';
 
 import Anomoly from '../../assets/images/alerts/anomoly.svg';
 import AnomolyActive from '../../assets/images/alerts/anomoly-active.svg';
@@ -10,9 +9,13 @@ import StaticActive from '../../assets/images/alerts/static-active.svg';
 
 import './kpialertconfigurationform.scss';
 
-const KpiAlertConfigurationForm = () => {
+const KpiAlertConfigurationForm = ({ setSteps }) => {
   const [type, setType] = useState('static');
   const [conditionType, setConditionType] = useState('');
+
+  const onSubmit = () => {
+    setSteps(2);
+  };
 
   return (
     <>
@@ -64,109 +67,92 @@ const KpiAlertConfigurationForm = () => {
       <div className="form-group">
         <h5>Alert Condition</h5>
       </div>
-      {
-        type === 'static' ? (
-          <>
-            <div className="form-group">
-              <label>Name of your Alert *</label>
-              <div className="alert-condition">
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    id="Spike"
-                    name="alert"
-                    value="spike"
-                    onChange={(e) => {
-                      setConditionType(e.target.value);
-                    }}
-                  />
-                  <label
-                    className={
-                      conditionType === 'spike'
-                        ? 'form-check-label active'
-                        : 'form-check-label'
-                    }
-                    for="Spike">
-                    Spike
-                  </label>
-                </div>
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    id="Drop"
-                    name="alert"
-                    value="drop"
-                    onChange={(e) => {
-                      setConditionType(e.target.value);
-                    }}
-                  />
-                  <label
-                    className={
-                      conditionType === 'drop'
-                        ? 'form-check-label active'
-                        : 'form-check-label'
-                    }
-                    for="Drop">
-                    Drop
-                  </label>
-                </div>
-                <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    id="Both"
-                    name="alert"
-                    value="both"
-                    onChange={(e) => setConditionType(e.target.value)}
-                  />
-                  <label
-                    className={
-                      conditionType === 'both'
-                        ? 'form-check-label active'
-                        : 'form-check-label'
-                    }
-                    for="Both">
-                    Both
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div className="form-group">
-              <label>Deviation Value *</label>
-              <div className="deviation-group">
+      {type === 'static' ? (
+        <>
+          <div className="form-group">
+            <label>Name of your Alert *</label>
+            <div className="alert-condition">
+              <div className="form-check">
                 <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Enter Value"
-                  required
+                  className="form-check-input"
+                  type="radio"
+                  id="Spike"
+                  name="alert"
+                  value="spike"
+                  onChange={(e) => {
+                    setConditionType(e.target.value);
+                  }}
                 />
-
-                <Select
-                  classNamePrefix="selectcategory"
-                  placeholder="Select Unit"
+                <label
+                  className={
+                    conditionType === 'spike'
+                      ? 'form-check-label active'
+                      : 'form-check-label'
+                  }
+                  for="Spike">
+                  Spike
+                </label>
+              </div>
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  id="Drop"
+                  name="alert"
+                  value="drop"
+                  onChange={(e) => {
+                    setConditionType(e.target.value);
+                  }}
                 />
+                <label
+                  className={
+                    conditionType === 'drop'
+                      ? 'form-check-label active'
+                      : 'form-check-label'
+                  }
+                  for="Drop">
+                  Drop
+                </label>
+              </div>
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  id="Both"
+                  name="alert"
+                  value="both"
+                  onChange={(e) => setConditionType(e.target.value)}
+                />
+                <label
+                  className={
+                    conditionType === 'both'
+                      ? 'form-check-label active'
+                      : 'form-check-label'
+                  }
+                  for="Both">
+                  Both
+                </label>
               </div>
             </div>
-          </>
-        ) : (
-          <>
-            <App />
-          </>
-        )
-        // <Range step="1" min="0" max="100" />
-        // <>
-        //   <div className="form-group">
-        //     <input
-        //       type="range"
-        //       min="0"
-        //       max="100"
-        //       // id="customRange3"
-        //     />
-        //   </div>
-        // </>
-      }
+          </div>
+          <div className="form-group">
+            <label>Deviation Value *</label>
+            <div className="deviation-group">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Enter Value"
+                required
+              />
+
+              <Select
+                classNamePrefix="selectcategory"
+                placeholder="Select Unit"
+              />
+            </div>
+          </div>
+        </>
+      ) : null}
       <div className="form-group">
         <label>Alert Frequency *</label>
         <Select classNamePrefix="selectcategory" placeholder="Daily" />
@@ -176,7 +162,7 @@ const KpiAlertConfigurationForm = () => {
         <textarea placeholder="Enter message here" />
       </div>
       <div className="form-action ">
-        <button className="btn black-button">
+        <button className="btn black-button" onClick={() => onSubmit()}>
           <span>Next Step</span>
         </button>
       </div>

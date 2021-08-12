@@ -1,6 +1,6 @@
 // URL CONSTANTS
 
-export const BASE_URL = 'https://chaosgenius.mayhemdata.com';
+export const BASE_URL = process.env.REACT_APP_BASE_URL;
 
 export const attachParams = (baseUrl, params) => {
   const url = new URL(baseUrl);

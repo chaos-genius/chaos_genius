@@ -8,7 +8,7 @@ import KpiAlertConfigurationForm from '../../components/KpiAlertConfigurationFor
 import KpiAlertDestinationForm from '../../components/KpiAlertDestinationForm';
 
 const AddKpiAlert = () => {
-  const [alert, setAlert] = useState('configuration');
+  const [steps, setSteps] = useState(1);
   return (
     <>
       {/* Page Navigation */}
@@ -23,7 +23,7 @@ const AddKpiAlert = () => {
               <Link to="/new-alert"> New Alert </Link>
             </li>
             <li className="breadcrumb-item active" aria-current="page">
-              {alert === 'configuration' ? 'KPI Alert' : ' Alert Destination'}
+              {steps === 1 ? 'KPI Alert' : ' Alert Destination'}
             </li>
           </ol>
         </nav>
@@ -31,33 +31,24 @@ const AddKpiAlert = () => {
         <div className="backnavigation">
           <Link to="/new-alert">
             <img src={rightarrow} alt="Back" />
-            <span>
-              {' '}
-              {alert === 'configuration' ? 'KPI Alert' : ' Alert Destination'}
-            </span>
+            <span> {steps === 1 ? 'KPI Alert' : ' Alert Destination'}</span>
           </Link>
         </div>
       </div>
       <div className="onboarding-steps">
         <ul>
-          <li
-            className={alert === 'configuration' ? 'active' : ''}
-            onClick={() => setAlert('configuration')}>
+          <li className={steps > 1 ? 'selected' : 'active'}>
             Alert Configuration
           </li>
-          <li
-            className={alert === 'destination' ? 'active' : ''}
-            onClick={() => setAlert('destination')}>
-            Alert Destination
-          </li>
+          <li className={steps === 2 ? 'active' : ''}>Alert Destination</li>
         </ul>
       </div>
       {/* add KPI Alert form */}
       <div className="add-form-container">
-        {alert === 'configuration' ? (
-          <KpiAlertConfigurationForm />
+        {steps === 1 ? (
+          <KpiAlertConfigurationForm setSteps={setSteps} />
         ) : (
-          <KpiAlertDestinationForm />
+          <KpiAlertDestinationForm setKpiSteps={setSteps} />
         )}
       </div>
     </>

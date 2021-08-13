@@ -50,9 +50,8 @@ const multidimensional = [
 const Dashboardgraph = ({ kpi }) => {
   const dispatch = useDispatch();
   const [active, setActive] = useState('');
-  const { linechartData, rcaAnalysisData } = useSelector(
-    (state) => state.dashboard
-  );
+  const { rcaAnalysisData } = useSelector((state) => state.dashboard);
+  const { linechartData } = useSelector((state) => state.lineChart);
   const { dimensionData, dimensionLoading } = useSelector(
     (state) => state.dimension
   );
@@ -105,7 +104,6 @@ const Dashboardgraph = ({ kpi }) => {
 
   const plotLineChart = () => {
     // https://www.amcharts.com/demos/comparing-different-date-values-google-analytics-style/?theme=frozen#code
-
     am4core.options.autoDispose = true;
 
     let chart = am4core.create('lineChartDiv', am4charts.XYChart);
@@ -177,100 +175,102 @@ const Dashboardgraph = ({ kpi }) => {
   };
 
   const plotChart = () => {
-    am4core.options.autoDispose = true;
+    if (rcaAnalysisData?.chart !== undefined) {
+      am4core.options.autoDispose = true;
 
-    // if (this.state.amChart) {
-    //   this.state.amChart.data = this.state.chartData;
-    //   let valueAxis = this.state.amChart.yAxes.getIndex(0);
-    //   valueAxis.min = this.state.yAxis[0];
-    //   valueAxis.max = this.state.yAxis[1];
-    // } else {
-    let chart = am4core.create('chartdivWaterfall', am4charts.XYChart);
-    chart.fontSize = 12;
-    chart.fontFamily = 'Inter ,sans-serif';
+      // if (this.state.amChart) {
+      //   this.state.amChart.data = this.state.chartData;
+      //   let valueAxis = this.state.amChart.yAxes.getIndex(0);
+      //   valueAxis.min = this.state.yAxis[0];
+      //   valueAxis.max = this.state.yAxis[1];
+      // } else {
+      let chart = am4core.create('chartdivWaterfall', am4charts.XYChart);
+      chart.fontSize = 12;
+      chart.fontFamily = 'Inter ,sans-serif';
 
-    chart.hiddenState.properties.opacity = 0; // this makes initial fade in effect
+      chart.hiddenState.properties.opacity = 0; // this makes initial fade in effect
 
-    // using math in the data instead of final values just to illustrate the idea of Waterfall chart
-    // a separate data field for step series is added because we don't need last step (notice, the last data item doesn't have stepValue)
-    chart.data = rcaAnalysisData.chart.chart_data; ///this.state.chartData;
+      // using math in the data instead of final values just to illustrate the idea of Waterfall chart
+      // a separate data field for step series is added because we don't need last step (notice, the last data item doesn't have stepValue)
+      chart.data = rcaAnalysisData.chart.chart_data; ///this.state.chartData;
 
-    let categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
-    categoryAxis.dataFields.category = 'category';
-    categoryAxis.renderer.minGridDistance = 40;
-    categoryAxis.renderer.grid.template.disabled = true;
+      let categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+      categoryAxis.dataFields.category = 'category';
+      categoryAxis.renderer.minGridDistance = 40;
+      categoryAxis.renderer.grid.template.disabled = true;
 
-    // Configure axis label
-    var xlabel = categoryAxis.renderer.labels.template;
-    xlabel.wrap = true;
-    xlabel.maxWidth = 120;
+      // Configure axis label
+      var xlabel = categoryAxis.renderer.labels.template;
+      xlabel.wrap = true;
+      xlabel.maxWidth = 120;
 
-    // Automatically figure out correct max width for labels
-    categoryAxis.events.on('sizechanged', function (ev) {
-      let axis = ev.target;
-      let cellWidth = axis.pixelWidth / (axis.endIndex - axis.startIndex);
-      axis.renderer.labels.template.maxWidth = cellWidth;
-    });
+      // Automatically figure out correct max width for labels
+      categoryAxis.events.on('sizechanged', function (ev) {
+        let axis = ev.target;
+        let cellWidth = axis.pixelWidth / (axis.endIndex - axis.startIndex);
+        axis.renderer.labels.template.maxWidth = cellWidth;
+      });
 
-    let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-    valueAxis.renderer.minGridDistance = 50;
-    valueAxis.renderer.grid.template.opacity = 0.6;
+      let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+      valueAxis.renderer.minGridDistance = 50;
+      valueAxis.renderer.grid.template.opacity = 0.6;
 
-    if (rcaAnalysisData?.chart?.y_axis_lim.length > 0) {
-      valueAxis.min = rcaAnalysisData?.chart?.y_axis_lim[0];
-      valueAxis.max = rcaAnalysisData?.chart?.y_axis_lim[1];
+      if (rcaAnalysisData?.chart?.y_axis_lim.length > 0) {
+        valueAxis.min = rcaAnalysisData?.chart?.y_axis_lim[0];
+        valueAxis.max = rcaAnalysisData?.chart?.y_axis_lim[1];
+      }
+
+      let columnSeries = chart.series.push(new am4charts.ColumnSeries());
+      columnSeries.dataFields.categoryX = 'category';
+      columnSeries.dataFields.valueY = 'value';
+      columnSeries.dataFields.openValueY = 'open';
+      columnSeries.fillOpacity = 0.8;
+      columnSeries.sequencedInterpolation = true;
+      columnSeries.interpolationDuration = 1500;
+
+      let columnTemplate = columnSeries.columns.template;
+      columnTemplate.strokeOpacity = 0;
+      columnTemplate.propertyFields.fill = 'color';
+
+      let label = columnTemplate.createChild(am4core.Label);
+      label.text = "{displayValue.formatNumber('###,###.##')}";
+      label.align = 'center';
+      label.valign = 'middle';
+      label.wrap = true;
+      label.maxWidth = 120;
+      label.fontWeight = 600;
+
+      let stepSeries = chart.series.push(new am4charts.StepLineSeries());
+      stepSeries.dataFields.categoryX = 'category';
+      stepSeries.dataFields.valueY = 'stepValue';
+      stepSeries.noRisers = true;
+      stepSeries.stroke = new am4core.InterfaceColorSet().getFor(
+        'alternativeBackground'
+      );
+      stepSeries.strokeDasharray = '3,3';
+      stepSeries.interpolationDuration = 2000;
+      stepSeries.sequencedInterpolation = true;
+
+      // because column width is 80%, we modify start/end locations so that step would start with column and end with next column
+      stepSeries.startLocation = 0.1;
+      stepSeries.endLocation = 1.1;
+
+      chart.cursor = new am4charts.XYCursor();
+      chart.tooltip.label.fontSize = 12;
+      chart.tooltip.label.fontFamily = 'Inter ,sans-serif';
+      chart.cursor.behavior = 'none';
+      // this.setState({
+      //   amChart: chart
+      // });
+
+      // }
     }
-
-    let columnSeries = chart.series.push(new am4charts.ColumnSeries());
-    columnSeries.dataFields.categoryX = 'category';
-    columnSeries.dataFields.valueY = 'value';
-    columnSeries.dataFields.openValueY = 'open';
-    columnSeries.fillOpacity = 0.8;
-    columnSeries.sequencedInterpolation = true;
-    columnSeries.interpolationDuration = 1500;
-
-    let columnTemplate = columnSeries.columns.template;
-    columnTemplate.strokeOpacity = 0;
-    columnTemplate.propertyFields.fill = 'color';
-
-    let label = columnTemplate.createChild(am4core.Label);
-    label.text = "{displayValue.formatNumber('###,###.##')}";
-    label.align = 'center';
-    label.valign = 'middle';
-    label.wrap = true;
-    label.maxWidth = 120;
-    label.fontWeight = 600;
-
-    let stepSeries = chart.series.push(new am4charts.StepLineSeries());
-    stepSeries.dataFields.categoryX = 'category';
-    stepSeries.dataFields.valueY = 'stepValue';
-    stepSeries.noRisers = true;
-    stepSeries.stroke = new am4core.InterfaceColorSet().getFor(
-      'alternativeBackground'
-    );
-    stepSeries.strokeDasharray = '3,3';
-    stepSeries.interpolationDuration = 2000;
-    stepSeries.sequencedInterpolation = true;
-
-    // because column width is 80%, we modify start/end locations so that step would start with column and end with next column
-    stepSeries.startLocation = 0.1;
-    stepSeries.endLocation = 1.1;
-
-    chart.cursor = new am4charts.XYCursor();
-    chart.tooltip.label.fontSize = 12;
-    chart.tooltip.label.fontFamily = 'Inter ,sans-serif';
-    chart.cursor.behavior = 'none';
-    // this.setState({
-    //   amChart: chart
-    // });
-
-    // }
   };
 
   useEffect(() => {
     getAllRCA();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active]);
+  }, [active, monthWeek.value]);
 
   const handleDimensionChange = (data) => {
     if (data.value === 'singledimension') {

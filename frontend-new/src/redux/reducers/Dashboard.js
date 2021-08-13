@@ -2,9 +2,6 @@ import {
   DASHBOARDAGGREGATIONREQUEST,
   DASHBOARDAGGREGATIONSUCCESS,
   DASHBOARDAGGREGATIONFAILURE,
-  DASHBOARDLINECHARTFAILURE,
-  DASHBOARDLINECHARTREQUEST,
-  DASHBOARDLINECHARTSUCCESS,
   DASHBOARDRCAANALYSISFAILURE,
   DASHBOARDRCAANALYSISREQUEST,
   DASHBOARDRCAANALYSISSUCCESS,
@@ -73,21 +70,7 @@ export const dashboard = (state = initialState, action) => {
         aggregationError: true
       };
     }
-    case DASHBOARDLINECHARTREQUEST: {
-      return {
-        linechartLoading: true,
-        linechartError: false
-      };
-    }
-    case DASHBOARDLINECHARTSUCCESS: {
-      return { linechartLoading: false, linechartData: action.data };
-    }
-    case DASHBOARDLINECHARTFAILURE: {
-      return {
-        linechartLoading: false,
-        linechartError: true
-      };
-    }
+
     case DASHBOARDRCAANALYSISREQUEST: {
       return {
         rcaAnalysisLoading: true,

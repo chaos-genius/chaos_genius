@@ -7,6 +7,7 @@ import { aggregation } from './Aggregation';
 import { dimension } from './Dimension';
 import { hierarchial } from './Hierarchical';
 import { onboarding } from './Onboarding';
+import { lineChart } from './LineChart';
 const rootReducer = combineReducers({
   dataSource: dataSource,
   kpiExplorer: kpiExplorer,
@@ -14,7 +15,8 @@ const rootReducer = combineReducers({
   aggregation: aggregation,
   dimension: dimension,
   hierarchial: hierarchial,
-  onboarding: onboarding
+  onboarding: onboarding,
+  lineChart: lineChart
 });
 
 export default rootReducer;

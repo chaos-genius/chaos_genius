@@ -85,8 +85,12 @@ const DataSourceTable = ({ tableData }, props) => {
                   </div>
                 </td>
                 <td>{datasource.kpi_count || '-'}</td>
-                <td>{formatDate(datasource.last_sync)}</td>
-                <td>{formatDate(datasource.created_at)}</td>
+                <td className="date-contained">
+                  {formatDate(datasource.last_sync)}
+                </td>
+                <td className="date-contained">
+                  {formatDate(datasource.created_at)}
+                </td>
                 <td>
                   <div className="table-actions">
                     <Link to="/datasource/edit">

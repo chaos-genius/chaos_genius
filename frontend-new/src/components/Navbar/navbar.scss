@@ -11,14 +11,13 @@
   flex-direction: row;
   align-items: center;
   justify-content: flex-end;
-  padding-right: 64px;
+  padding-right: 24px;
   .dropdown {
     cursor: pointer;
     .userdetails {
       display: flex;
       flex-direction: row;
       align-items: center;
-
       .user-avatar {
         margin-right: 10px;
         width: 39px;

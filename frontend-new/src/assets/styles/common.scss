@@ -1,13 +1,10 @@
 @import '~bootstrap/scss/bootstrap';
 @import './variable.scss';
 @import './button.scss';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 body {
   background-color: $grey_variation_2;
-  // font-family: 'Inter', 'Helvetica', 'Apple Color Emoji', 'Segoe UI Emoji',
-  //   'NotoColorEmoji', 'Noto Color Emoji', 'Segoe UI Symbol', 'Android Emoji',
-  //   'EmojiSymbols', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto',
-  //   'Helvetica Neue', 'Noto Sans', sans-serif;
   font-family: 'Inter', sans-serif;
 }
 
@@ -92,13 +89,14 @@ a:hover {
         width: 24px;
         height: 24px;
         object-fit: contain;
+        margin-right: 5px;
       }
       span {
         font-size: $font-size-20;
         line-height: $line-height-16;
         letter-spacing: $letter-spacing;
         color: $black_variation-2;
-        margin-left: 5px;
+
         font-weight: $font-weight-600;
       }
     }
@@ -111,7 +109,7 @@ a:hover {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin: 15px 0px 30px 0px;
+  margin: 16px 0px 24px 0px;
   .heading-title {
     h3 {
       font-weight: $font-weight-600;
@@ -126,6 +124,14 @@ a:hover {
 // form
 .form-group {
   margin-bottom: 24px;
+  h5 {
+    font-weight: $font-weight-600;
+    font-size: $font-size-16;
+    line-height: $line-height-22;
+    letter-spacing: $letter-spacing;
+    color: $black_variation-2;
+    margin-bottom: -8px;
+  }
   textarea {
     width: 100%;
     border: 1px solid $grey_variation-1;
@@ -290,6 +296,10 @@ a:hover {
 .form-check {
   margin-bottom: 20px;
   &.check-box {
+    margin-bottom: 24px;
+    &:last-child {
+      margin-bottom: 0px;
+    }
     .form-check-input {
       margin-top: 5.5px;
     }
@@ -308,7 +318,40 @@ a:hover {
     border-color: $green;
   }
 }
-
+.form-switch {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 0px;
+  padding: 0px;
+  cursor: pointer;
+  label {
+    font-weight: $font-weight-normal;
+    font-size: $font-size-14;
+    line-height: $line-height-18;
+    letter-spacing: $letter-spacing;
+    text-transform: capitalize;
+    color: $black_variation-2;
+  }
+  .form-check-input {
+    margin: 0px 8px 0px 0px;
+    cursor: pointer;
+    width: 36px;
+    height: 18px;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgb(255, 255, 255)'/%3e%3c/svg%3e") !important;
+    background-color: $grey_variation-1;
+    border: 1px solid $grey_variation-1;
+    box-sizing: border-box;
+    border-radius: 10px;
+    box-sizing: border-box;
+    &.form-check-input:checked {
+      background-color: $blue;
+      border-color: $blue;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgb(255, 255, 255)'/%3e%3c/svg%3e") !important;
+      border: 1px solid $blue;
+    }
+  }
+}
 // filter tab
 .filter-tab {
   padding: 0px !important;
@@ -583,6 +626,9 @@ a:hover {
   }
   img {
     cursor: pointer;
+  }
+  input {
+    width: 37%;
   }
 }
 // No Data Found text

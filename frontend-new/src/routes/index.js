@@ -11,8 +11,13 @@ import AddDataSource from '../containers/AddDataSource';
 import KpiExplorer from '../containers/KpiExplorer';
 import AddKpiExplorer from '../containers/AddKpiExplorer';
 import Onboarding from '../containers/Onboarding';
-import Alerts from '../containers/Alerts';
+import Channelconfiguration from '../containers/Channelconfiguration';
 import Anomolies from '../containers/Anomolies';
+import Alerts from '../containers/Alerts';
+import AddAlerts from '../containers/AddAlerts';
+import SetAlerts from '../containers/SetAlerts';
+import AddKpiAlert from '../containers/AddKpiAlert';
+import AddEventAlert from '../containers/AddEventAlert';
 
 const Routes = () => (
   <Switch>
@@ -65,6 +70,31 @@ const Routes = () => (
       exact
       path="/alerts"
       component={(props) => <Alerts {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
+      path="/alerts/channelconfiguration"
+      component={(props) => <Channelconfiguration {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
+      path="/alerts/:id"
+      component={(props) => <AddAlerts {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
+      path="/new-alert"
+      component={(props) => <SetAlerts {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
+      path="/new-alert/kpi-alert"
+      component={(props) => <AddKpiAlert {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
+      path="/new-alert/event-alert"
+      component={(props) => <AddEventAlert {...props} />}
     />
     <PrivateRouteWithSidebar
       exact

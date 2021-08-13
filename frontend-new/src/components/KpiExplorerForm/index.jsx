@@ -42,6 +42,14 @@ const aggregate = [
   { value: 'sum', label: 'Sum' }
 ];
 
+const operator = [
+  { value: '=', label: '=' },
+  { value: '+', label: '+' },
+  { value: '-', label: '-' },
+  { value: '/', label: '/' },
+  { value: '>', label: '>' },
+  { value: '<', label: '<' }
+];
 const customSingleValue = ({ data }) => (
   <div className="input-select">
     <div className="input-select__single-value">
@@ -95,11 +103,6 @@ const KpiExplorerForm = () => {
     tablefilter: false,
     tabledimension: false
   });
-
-  // const [queryAdditional, setQueryAdditional] = useState({
-  //   queryfilter: false,
-  //   querydimension: false
-  // });
 
   const [datasourceid, setDataSourceId] = useState('');
 
@@ -351,12 +354,18 @@ const KpiExplorerForm = () => {
     setInputList(list);
   };
 
-  //  const handleInputChange = (e, index) => {
-  //   const { name, value } = e.target;
-  //   const list = [...inputList];
-  //   list[index][name] = value;
-  //   setInputList(list);
-  // };
+  const handleInputChange = (e, index, name) => {
+    if (name === 'value') {
+      const { value } = e.target;
+      const list = [...inputList];
+      list[index][name] = value;
+      setInputList(list);
+    } else {
+      const list = [...inputList];
+      list[index][name] = e.value;
+      setInputList(list);
+    }
+  };
 
   if (kpiFormLoading) {
     return (
@@ -578,22 +587,27 @@ const KpiExplorerForm = () => {
                 return (
                   <div className="multi-filter-selection">
                     <Select
+                      options={option.metricOption}
                       classNamePrefix="selectcategory"
                       isSearchable={false}
                       closeMenuOnSelect="true"
                       placeholder="Country"
+                      onChange={(e) => handleInputChange(e, index, 'country')}
                     />
                     <Select
+                      options={operator}
                       classNamePrefix="selectcategory"
                       isSearchable={false}
                       closeMenuOnSelect="true"
                       placeholder="="
+                      name="operator"
+                      onChange={(e) => handleInputChange(e, index, 'operator')}
                     />
-                    <Select
-                      classNamePrefix="selectcategory"
-                      isSearchable={false}
-                      closeMenuOnSelect="true"
+                    <input
+                      className="form-control"
                       placeholder="France"
+                      name="value"
+                      onChange={(e) => handleInputChange(e, index, 'value')}
                     />
                     <img
                       src={Cancel}

@@ -96,34 +96,6 @@ const Home = () => {
             }
             return <></>;
           })}
-
-        {/* <SetupCard
-          heading="Add Data Sources"
-          description="Select the data you want to monitor and analyse"
-          buttonText="Add Data Source"
-          active={true}
-        />
-        <SetupCard
-          heading="Add KPI"
-          description="Select the data you want to monitor and analyse"
-          buttonText="Add KPI"
-        />
-        <SetupCard
-          heading="Create Dashboard"
-          description="Select the data you want to monitor and analyse"
-          buttonText="Create Dashboard"
-        />
-        <SetupCard
-          heading="Activate Analytics"
-          description="Select the data you want to monitor and analyse"
-          buttonText="Activate Analytics"
-        />
-        <SetupCard
-          heading="Setup Smart Alerts"
-          description="Select the data you want to monitor and analyse"
-          buttonText="Setup Smart Alerts"
-          optional={true}
-        /> */}
       </div>
     </div>
   );

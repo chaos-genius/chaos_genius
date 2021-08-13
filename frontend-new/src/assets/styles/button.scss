@@ -24,7 +24,7 @@
     width: 16px;
     height: 16px;
     object-fit: contain;
-    margin-right: 10px;
+    margin-right: 8px;
   }
   &.black-button {
     color: $black;
@@ -88,5 +88,8 @@
     width: 15px;
     height: 15px;
     color: $white;
+  }
+  &.btn-spacing {
+    margin-right: 16px;
   }
 }

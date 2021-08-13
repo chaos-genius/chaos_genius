@@ -1,0 +1,29 @@
+@import '../../assets/styles/variable.scss';
+
+.alert-status {
+  display: flex;
+  align-items: center;
+  label {
+    font-weight: $font-weight-500;
+    font-size: $font-size-14;
+    line-height: $line-height-16;
+    letter-spacing: $letter-spacing;
+    text-transform: capitalize;
+    color: $black_variation-2;
+    vertical-align: middle;
+    width: 50px;
+  }
+  .form-switch {
+    margin: 0px 0px 0px 21px;
+    .form-check-input {
+      width: 32px;
+      height: 18px;
+      &.form-check-input:checked {
+        background-color: $green;
+        border-color: $green;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgb(255, 255, 255)'/%3e%3c/svg%3e") !important;
+        border: 1px solid $green;
+      }
+    }
+  }
+}

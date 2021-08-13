@@ -6,6 +6,7 @@
   min-height: 100vh;
   margin-bottom: 20px;
   overflow: hidden;
+  min-height: fit-content;
   .table {
     thead {
       tr {
@@ -31,6 +32,9 @@
           height: 56px;
           vertical-align: middle;
           padding: 16px;
+          &.date-contained {
+            font-weight: $font-weight-400;
+          }
           .live-status {
             span {
               color: $green;
@@ -120,7 +124,7 @@
     }
     .table-actions {
       display: flex;
-      justify-content: center;
+      // justify-content: center;
       align-items: center;
       .table-action-icon {
         margin-right: 5px;

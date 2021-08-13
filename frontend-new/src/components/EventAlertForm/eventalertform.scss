@@ -1,0 +1,37 @@
+@import '../../assets/styles/addform.scss';
+
+.radio-group {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  justify-items: center;
+  .form-check {
+    border: 1px solid $grey_variation-1;
+    background: $white;
+    box-sizing: border-box;
+    border-radius: 4px;
+    width: 136px;
+    height: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    label {
+      margin-left: 10px;
+      font-weight: $font-weight-500;
+      font-size: $font-size-14;
+      line-height: $line-height-16;
+      text-transform: capitalize;
+      color: $black_variation-2;
+    }
+    &.active {
+      border: 1px solid $green;
+      background: $green_variation-2;
+      label {
+        color: $green;
+      }
+    }
+    .form-check-input {
+      margin-top: 0px;
+    }
+  }
+}

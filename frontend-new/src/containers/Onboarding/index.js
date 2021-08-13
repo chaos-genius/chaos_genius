@@ -31,9 +31,9 @@ const Onboarding = () => {
                 ? 'Add Data Sources'
                 : data[2] === '2'
                 ? 'Add KPI'
-                : data[2] === '3'
-                ? 'Add Dashboard'
                 : data[2] === '4'
+                ? 'Add Dashboard'
+                : data[2] === '3'
                 ? 'Configure AutoRCA'
                 : null}
             </li>
@@ -48,9 +48,9 @@ const Onboarding = () => {
                 ? 'Add Data Sources'
                 : data[2] === '2'
                 ? 'Add KPI'
-                : data[2] === '3'
-                ? 'Add Dashboard'
                 : data[2] === '4'
+                ? 'Add Dashboard'
+                : data[2] === '3'
                 ? 'Configure AutoRCA'
                 : null}
             </span>

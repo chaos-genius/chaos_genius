@@ -16,12 +16,12 @@ import {
 import {
   getDashboardSidebar,
   getDashboardAggregation,
-  getDashboardLinechart,
   getDashboardRcaAnalysis,
   getAllDashboardDimension,
   getAllDashboardHierarchical
 } from './Dashboard';
 import { getOnboardingStatus } from './Onboarding';
+import { getDashboardLinechart } from './LineChart';
 export {
   getAllDataSources,
   getConnectionType,

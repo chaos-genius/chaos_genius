@@ -209,10 +209,12 @@ a:hover {
   .css-yk16xz-control {
     @extend .form-control;
     display: flex;
+    min-height: 40px;
   }
   .css-1pahdxg-control {
     @extend .form-control;
     display: flex;
+    min-height: 48px;
   }
   .css-1okebmr-indicatorSeparator {
     display: none;
@@ -442,6 +444,7 @@ a:hover {
     background: $grey_variation-2;
     border-radius: 6px;
     border: none;
+    min-height: 40px;
   }
   .selectcategory__placeholder,
   .selectcategory__single-value {
@@ -489,10 +492,21 @@ a:hover {
   color: $black_variation-2 !important;
 }
 .css-1hwfws3 {
-  padding: 0px;
+  padding: 0px !important;
 }
 .css-1uccc91-singleValue {
-  margin: 0px;
+  margin: 0px !important;
+}
+.css-xb97g8:hover {
+  background-color: transparent !important;
+  color: transparent !important;
+  cursor: pointer !important;
+}
+.selectcategory__clear-indicator {
+  display: none !important;
+}
+.css-tlfecz-indicatorContainer {
+  padding: 0px !important;
 }
 
 // loader

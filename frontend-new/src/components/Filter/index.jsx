@@ -73,7 +73,7 @@ const DataSourceFilter = ({
           <input
             type="text"
             className="form-control h-40"
-            placeholder="Search"
+            placeholder={kpiList ? 'Search by KPI Name' : 'Search'}
             onChange={(e) => onSearch(e)}
           />
           <span>

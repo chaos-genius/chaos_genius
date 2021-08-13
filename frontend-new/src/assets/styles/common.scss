@@ -154,10 +154,10 @@ a:hover {
     border-radius: 6px;
     outline: 0 !important;
     box-shadow: none !important;
-    height: 48px;
+    min-height: 48px;
     font-size: $font-size-14;
     &.h-40 {
-      height: 40px;
+      min-height: 40px;
     }
   }
   &::placeholder {
@@ -209,7 +209,8 @@ a:hover {
   .css-yk16xz-control {
     @extend .form-control;
     display: flex;
-    min-height: 40px;
+    min-height: 48px;
+    height: auto !important;
   }
   .css-1pahdxg-control {
     @extend .form-control;
@@ -279,6 +280,8 @@ a:hover {
       color: $green;
       display: flex;
       align-items: center;
+      font-size: 14px;
+      margin-top: 2px;
       img {
         margin-right: 5px;
       }
@@ -289,6 +292,8 @@ a:hover {
       color: $red_variation_1;
       display: flex;
       align-items: center;
+      font-size: 14px;
+      margin-top: 2px;
       img {
         margin-right: 5px;
       }
@@ -507,6 +512,11 @@ a:hover {
 }
 .css-tlfecz-indicatorContainer {
   padding: 0px !important;
+}
+.css-1wa3eu0-placeholder{
+  font-size: $font-size-14 !important;
+  font-weight:  $font-weight-400 !important;
+  color:#7d848a !important;
 }
 
 // loader

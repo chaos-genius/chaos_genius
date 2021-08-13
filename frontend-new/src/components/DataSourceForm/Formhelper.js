@@ -29,7 +29,7 @@ export const textBox = (
 export const checkBox = (element, type, handleInputChange, formData) => {
   const textID = element[0];
   return (
-    <div className="form-check check-box">
+    <div className="form-check check-box check-label">
       <input
         className="form-check-input"
         type={type}

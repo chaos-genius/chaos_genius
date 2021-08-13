@@ -651,8 +651,8 @@ const KpiExplorerForm = () => {
             <button
               className={
                 kpiSubmitLoading
-                  ? 'btn black-button '
-                  : 'btn black-button btn-loading'
+                  ? 'btn black-button btn-loading'
+                  : 'btn black-button'
               }
               onClick={() => handleSubmit()}>
               <div className="btn-spinner">

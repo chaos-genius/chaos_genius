@@ -327,6 +327,9 @@ a:hover {
     background-color: $green;
     border-color: $green;
   }
+  &.check-label {
+    margin-top: -7px;
+  }
 }
 .form-switch {
   display: flex;

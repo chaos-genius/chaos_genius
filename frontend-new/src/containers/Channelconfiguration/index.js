@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 import Request from '../../assets/images/request.svg';
+import rightarrow from '../../assets/images/rightarrow.svg';
 
 import AlertsCard from '../../components/AlertsCard';
 
@@ -30,6 +31,7 @@ const Channelconfiguration = () => {
           {/* Back */}
           <div className="backnavigation">
             <Link to="/alerts">
+              <img src={rightarrow} alt="Back" />
               <span>Channel Configuration</span>
             </Link>
           </div>

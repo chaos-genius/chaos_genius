@@ -81,6 +81,7 @@ a:hover {
   }
   .backnavigation {
     margin-top: 12px;
+    display: flex;
     Link,
     a {
       display: flex !important;
@@ -413,7 +414,7 @@ a:hover {
     display: flex;
     flex-direction: row;
     li {
-      font-weight: $font-weight-normal;
+      font-weight: $font-weight-400;
       font-size: $font-size-18;
       line-height: $line-height-20;
       letter-spacing: $letter-spacing;
@@ -423,7 +424,7 @@ a:hover {
       margin-left: 8px;
       text-transform: capitalize;
       &.active {
-        font-weight: $font-weight-600;
+        font-weight: $font-weight-500;
         color: $green;
         border-bottom: 2px solid $green;
       }
@@ -510,13 +511,10 @@ a:hover {
 .selectcategory__clear-indicator {
   display: none !important;
 }
-.css-tlfecz-indicatorContainer {
-  padding: 0px !important;
-}
-.css-1wa3eu0-placeholder{
+.css-1wa3eu0-placeholder {
   font-size: $font-size-14 !important;
-  font-weight:  $font-weight-400 !important;
-  color:#7d848a !important;
+  font-weight: $font-weight-400 !important;
+  color: #7d848a !important;
 }
 
 // loader
@@ -672,4 +670,8 @@ a:hover {
   font-size: $font-size-14;
   line-height: $line-height-16;
   letter-spacing: $letter-spacing;
+}
+// Cursor Pointer
+.cursor-pointer {
+  cursor: pointer;
 }

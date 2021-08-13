@@ -1,7 +1,7 @@
 import React from 'react';
 import './navbar.scss';
-import { Link } from 'react-router-dom';
-import Profiledown from '../../assets/images/profile-down.svg';
+// import { Link } from 'react-router-dom';
+// import Profiledown from '../../assets/images/profile-down.svg';
 
 const Navbar = () => {
   return (

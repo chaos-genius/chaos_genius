@@ -38,12 +38,8 @@ const DataSourceForm = () => {
   const [error, setError] = useState('');
   const [formError, setFormError] = useState({});
   const [status, setStatus] = useState('');
-  const {
-    isLoading,
-    connectionType,
-    testLoading,
-    testConnectionResponse
-  } = useSelector((state) => state.dataSource);
+  const { isLoading, connectionType, testLoading, testConnectionResponse } =
+    useSelector((state) => state.dataSource);
 
   useEffect(() => {
     dispatchGetConnectionType();
@@ -76,7 +72,7 @@ const DataSourceForm = () => {
                     ? Amplitude
                     : ''
                 }
-                alt="datasource"
+                alt={item.name}
               />
               {item.name}
             </div>

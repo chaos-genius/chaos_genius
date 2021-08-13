@@ -151,7 +151,7 @@ const DataSourceTable = ({ tableData }, props) => {
           })
         ) : (
           <tr className="empty-table">
-            <td colSpan={6}>No Data Found</td>
+            <td colSpan={7}>No Data Found</td>
           </tr>
         )}
       </tbody>

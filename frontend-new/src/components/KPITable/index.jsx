@@ -14,6 +14,8 @@ import '../../assets/styles/table.scss';
 import { v4 as uuidv4 } from 'uuid';
 import Dimension from './dimension';
 
+import { formatDate } from '../../utils/date-helper';
+
 const KPITable = ({ kpiData }) => {
   return (
     <table className="table">
@@ -58,8 +60,8 @@ const KPITable = ({ kpiData }) => {
                     <span>{kpi.datasourceType || '-'}</span>
                   </div>
                 </td>
-                <td>{kpi.created_at || '-'}</td>
-                <td>{kpi.last_modified || '-'}</td>
+                <td>{formatDate(kpi.created_at) || '-'}</td>
+                <td>{formatDate(kpi.last_modified) || '-'}</td>
                 <td>
                   <Link to={`/kpiexplorer/edit/${kpi.id}`}>
                     <div
@@ -76,7 +78,7 @@ const KPITable = ({ kpiData }) => {
           })
         ) : (
           <tr className="empty-table">
-            <td colSpan={5}>No Data Found</td>
+            <td colSpan={6}>No Data Found</td>
           </tr>
         )}
       </tbody>

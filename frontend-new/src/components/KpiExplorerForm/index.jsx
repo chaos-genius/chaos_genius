@@ -648,23 +648,26 @@ const KpiExplorerForm = () => {
             ) : null}
           </div>
           <div className="form-action">
-            <button className="btn black-button" onClick={() => handleSubmit()}>
-              {kpiSubmitLoading ? (
-                <>
-                  <div className="spinner-border" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                  <span>Loading...</span>
-                </>
-              ) : (
-                <>
-                  {data[2] === 'edit' ? (
-                    <span>Save Changes</span>
-                  ) : (
-                    <span>Add KPI</span>
-                  )}
-                </>
-              )}
+            <button
+              className={
+                kpiSubmitLoading
+                  ? 'btn black-button '
+                  : 'btn black-button btn-loading'
+              }
+              onClick={() => handleSubmit()}>
+              <div className="btn-spinner">
+                <div className="spinner-border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                <span>Loading...</span>
+              </div>
+              <div className="btn-content">
+                {data[2] === 'edit' ? (
+                  <span>Save Changes</span>
+                ) : (
+                  <span>Add KPI</span>
+                )}
+              </div>
             </button>
           </div>
         </div>

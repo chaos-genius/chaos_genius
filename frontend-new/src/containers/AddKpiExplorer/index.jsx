@@ -16,7 +16,7 @@ const AddKpiExplorer = () => {
         <nav aria-label="breadcrumb">
           <ol className="breadcrumb">
             <li className="breadcrumb-item">
-              <Link to="/kpi">KPI Explorer </Link>
+              <Link to="/kpiexplorer">KPI Explorer </Link>
             </li>
 
             {data[2] === 'edit' ? (
@@ -33,12 +33,12 @@ const AddKpiExplorer = () => {
         {/* Back */}
         <div className="backnavigation">
           {data[2] === 'edit' ? (
-            <Link to="/kpi">
+            <Link to="/kpiexplorer">
               <img src={rightarrow} alt="Back" />
               <span>Edit KPI</span>
             </Link>
           ) : (
-            <Link to="/kpi">
+            <Link to="/kpiexplorer">
               <img src={rightarrow} alt="Back" />
               <span>Add KPI</span>
             </Link>

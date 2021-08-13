@@ -152,7 +152,13 @@ const KpiAlertConfigurationForm = ({ setSteps }) => {
             </div>
           </div>
         </>
-      ) : null}
+      ) : null
+      // <>
+      //   <div className="form-group">
+      //     <input type="range" max="100" min="0" />
+      //   </div>
+      // </>
+      }
       <div className="form-group">
         <label>Alert Frequency *</label>
         <Select classNamePrefix="selectcategory" placeholder="Daily" />

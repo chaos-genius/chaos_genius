@@ -296,6 +296,10 @@ a:hover {
 .form-check {
   margin-bottom: 20px;
   &.check-box {
+    margin-bottom: 24px;
+    &:last-child {
+      margin-bottom: 0px;
+    }
     .form-check-input {
       margin-top: 5.5px;
     }

@@ -155,6 +155,7 @@ a:hover {
     outline: 0 !important;
     box-shadow: none !important;
     height: 48px;
+    font-size: $font-size-14;
     &.h-40 {
       height: 40px;
     }
@@ -171,12 +172,13 @@ a:hover {
     position: relative;
     .form-control {
       padding-left: 30px;
+
       &::placeholder {
-        font-size: $font-size-12;
         line-height: $line-height-14;
         letter-spacing: $letter-spacing;
         color: $grey_variation-1;
         font-weight: $font-weight-normal;
+        font-size: $font-size-14;
       }
       &:-moz-placeholder {
         line-height: 25px;
@@ -187,7 +189,7 @@ a:hover {
     }
     span {
       position: absolute;
-      top: 8px;
+      top: 7px;
       left: 10px;
       img {
         width: 14px;
@@ -472,6 +474,7 @@ a:hover {
   box-shadow: none !important;
   border: 1px solid $black_variation-2 !important;
   outline: none !important;
+  font-size: $font-size-14 !important;
 }
 .css-1wa3eu0-placeholder {
   margin: 0px !important;
@@ -484,6 +487,12 @@ a:hover {
 }
 .css-tlfecz-indicatorContainer {
   color: $black_variation-2 !important;
+}
+.css-1hwfws3 {
+  padding: 0px;
+}
+.css-1uccc91-singleValue {
+  margin: 0px;
 }
 
 // loader

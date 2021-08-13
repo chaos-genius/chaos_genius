@@ -10,6 +10,7 @@
   &.active {
     background: url('../../assets/images/setupcard/setupcard-bg.svg') no-repeat;
     background-size: cover;
+    background-position-y: bottom;
     img {
       display: none;
       &.in-active {

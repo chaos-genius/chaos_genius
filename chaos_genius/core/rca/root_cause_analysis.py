@@ -591,7 +591,8 @@ class RootCauseAnalysis():
         self,
         single_dim: str,
         max_depth: int = 3,
-        max_children: int = 5
+        max_children: int = 5,
+        max_parents: int = 5
     ) -> Dict:
 
         other_dims = self._dims[:]
@@ -603,6 +604,8 @@ class RootCauseAnalysis():
         impact_table["depth"] = None
 
         output_table = self._get_single_dim_impact_table(single_dim)
+
+        output_table = output_table.iloc[:max_parents]
 
         output_table["depth"] = 1
 

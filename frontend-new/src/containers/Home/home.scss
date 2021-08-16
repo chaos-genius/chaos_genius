@@ -49,9 +49,9 @@
         #38f9d7 70%,
         #89c4fe 100%
       ) !important;
-      border: 0;
-      height: 11px;
-      border-radius: 50px;
+      border: 0 !important;
+      height: 11px !important;
+      border-radius: 50px !important;
     }
     &::-moz-progress-value {
       background: linear-gradient(
@@ -61,9 +61,9 @@
         #38f9d7 70%,
         #89c4fe 100%
       ) !important;
-      border: 0;
-      height: 11px;
-      border-radius: 50px;
+      border: 0 !important;
+      height: 11px !important;
+      border-radius: 50px !important;
     }
   }
   p {

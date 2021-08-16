@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { Link } from 'react-router-dom';
+import Modal from 'react-modal';
 
 import GoogleAnalytics from '../../assets/images/googleanalytics.svg';
 import GoogleSheet from '../../assets/images/googlesheets.svg';
@@ -13,27 +14,40 @@ import Alert from '../../assets/images/alert.svg';
 import AlertActive from '../../assets/images/alert-active.svg';
 import Delete from '../../assets/images/delete.svg';
 import DeleteActive from '../../assets/images/delete-active.svg';
+import Close from '../../assets/images/close.svg';
 
 import '../../assets/styles/table.scss';
+import '../Modal/modal.scss';
+import './datasourcetable.scss';
 
 import { formatDate } from '../../utils/date-helper';
 
-//import { deleteDatasource } from '../../redux/actions';
+import { deleteDatasource } from '../../redux/actions';
 
-//import { dispatch ,useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { v4 as uuidv4 } from 'uuid';
 
-const DataSourceTable = ({ tableData }, props) => {
-  // const dispatch = useDispatch();
+const DataSourceTable = ({ tableData, changeData }) => {
+  const dispatch = useDispatch();
 
-  //const { deleteDatasourceResponse } = useSelector((state) => state.datasource);
-
+  const { deleteDataSourceResponse } = useSelector((state) => state.dataSource);
+  const [isOpen, setIsOpen] = useState(false);
+  const [data, setData] = useState('');
+  const closeModal = () => {
+    setIsOpen(false);
+  };
+  useEffect(() => {
+    if (deleteDataSourceResponse) {
+      changeData((prev) => !prev);
+      setIsOpen(false);
+    }
+  }, [changeData, deleteDataSourceResponse]);
   const onDelete = (datasource) => {
-    // const payload = {
-    //   data_source_id: datasource.id
-    // };
-    //dispatch(deleteDatasource(payload));
+    const payload = {
+      data_source_id: datasource.id
+    };
+    dispatch(deleteDatasource(payload));
   };
 
   return (
@@ -112,18 +126,20 @@ const DataSourceTable = ({ tableData }, props) => {
                       className="table-action-icon"
                       data-bs-toggle="tooltip"
                       data-bs-placement="bottom"
-                      title="Delete">
+                      title="Delete"
+                      onClick={() => {
+                        setIsOpen(true);
+                        setData(datasource);
+                      }}>
                       <img
                         src={Delete}
                         alt="Delete"
                         className="action-normal"
-                        onClick={() => onDelete()}
                       />
                       <img
                         src={DeleteActive}
                         alt="Delete"
                         className="action-active"
-                        onClick={() => onDelete()}
                       />
                     </div>
                     <Link to="/alerts">
@@ -155,6 +171,27 @@ const DataSourceTable = ({ tableData }, props) => {
           </tr>
         )}
       </tbody>
+      <Modal isOpen={isOpen} shouldCloseOnOverlayClick={false}>
+        <div className="modal-close">
+          <img src={Close} alt="Close" onClick={closeModal} />
+        </div>
+        <div className="modal-body">
+          <div className="modal-contents">
+            <h3>Delete {data.name} ?</h3>
+            <p>Are you sure you want to delete </p>
+            <div className="next-step-navigate">
+              <button className="btn white-button" onClick={closeModal}>
+                <span>Cancel</span>
+              </button>
+              <button
+                className="btn black-button"
+                onClick={() => onDelete(data)}>
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </table>
   );
 };

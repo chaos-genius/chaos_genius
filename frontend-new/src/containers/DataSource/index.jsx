@@ -21,6 +21,7 @@ const DataSource = () => {
   const [search, setSearch] = useState('');
   const [dataSourceData, setDataSourceData] = useState([]);
   const [dataSourceFilter, setDataSourceFilter] = useState([]);
+  const [data, setData] = useState(false);
 
   const { isLoading, dataSourcesList } = useSelector(
     (state) => state.dataSource
@@ -29,7 +30,7 @@ const DataSource = () => {
   useEffect(() => {
     dispatchGetAllDataSources();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
+  }, [dispatch, data]);
 
   const dispatchGetAllDataSources = () => {
     dispatch(getAllDataSources());
@@ -118,7 +119,7 @@ const DataSource = () => {
           </div>
           {/* table section */}
           <div className="table-section">
-            <DataSourceTable tableData={dataSourceData} />
+            <DataSourceTable tableData={dataSourceData} changeData={setData} />
           </div>
         </div>
       </div>

@@ -17,7 +17,7 @@ const AddEventAlert = () => {
         <nav aria-label="breadcrumb">
           <ol className="breadcrumb">
             <li className="breadcrumb-item">
-              <Link to="/new-alert">Alerts / New Alert</Link>
+              <Link to="/alerts/new">Alerts / New Alert</Link>
             </li>
             <li className="breadcrumb-item active" aria-current="page">
               {steps === 2 ? 'Alert Destination' : 'Event Alert'}
@@ -26,7 +26,7 @@ const AddEventAlert = () => {
         </nav>
         {/* Back */}
         <div className="backnavigation">
-          <Link to="/new-alert">
+          <Link to="/alerts/new">
             <img src={rightarrow} alt="Back" />
             <span>{steps === 2 ? 'Alert Destination' : 'Event Alert'}</span>
           </Link>

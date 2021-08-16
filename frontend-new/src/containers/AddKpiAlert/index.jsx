@@ -20,7 +20,7 @@ const AddKpiAlert = () => {
               <Link to="/alerts"> Alerts </Link>
             </li>
             <li className="breadcrumb-item">
-              <Link to="/new-alert"> New Alert </Link>
+              <Link to="/alerts/new"> New Alert </Link>
             </li>
             <li className="breadcrumb-item active" aria-current="page">
               {steps === 1 ? 'KPI Alert' : ' Alert Destination'}
@@ -29,7 +29,7 @@ const AddKpiAlert = () => {
         </nav>
         {/* Back */}
         <div className="backnavigation">
-          <Link to="/new-alert">
+          <Link to="/alerts/new">
             <img src={rightarrow} alt="Back" />
             <span> {steps === 1 ? 'KPI Alert' : ' Alert Destination'}</span>
           </Link>

@@ -44,15 +44,16 @@
     display: flex;
     align-items: center;
     img {
-      width: 11.5px;
+      width: 16px;
       height: 16px;
+      margin-top: 1px;
       margin-right: 8px;
     }
   }
   .add-options-wrapper {
     .add-options {
       font-weight: $font-weight-500;
-      font-size: $font-size-16;
+      font-size: $font-size-14;
       line-height: $line-height-19;
       letter-spacing: $letter-spacing-point15;
       color: $green;

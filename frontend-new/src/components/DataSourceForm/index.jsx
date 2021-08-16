@@ -38,12 +38,8 @@ const DataSourceForm = () => {
   const [error, setError] = useState('');
   const [formError, setFormError] = useState({});
   const [status, setStatus] = useState('');
-  const {
-    isLoading,
-    connectionType,
-    testLoading,
-    testConnectionResponse
-  } = useSelector((state) => state.dataSource);
+  const { isLoading, connectionType, testLoading, testConnectionResponse } =
+    useSelector((state) => state.dataSource);
 
   useEffect(() => {
     dispatchGetConnectionType();
@@ -76,7 +72,7 @@ const DataSourceForm = () => {
                     ? Amplitude
                     : ''
                 }
-                alt="datasource"
+                alt={item.name}
               />
               {item.name}
             </div>
@@ -265,26 +261,25 @@ const DataSourceForm = () => {
             </button>
           )}
           <button
-            className="btn black-button"
+            className={
+              testLoading ? 'btn black-button btn-loading' : 'btn black-button'
+            }
             type={'submit'}
             disabled={selectedDatasource !== undefined ? false : true}
             onClick={() => testConnection()}>
-            {testLoading ? (
-              <>
-                <div className="spinner-border">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-                <span>Loading...</span>
-              </>
-            ) : (
-              <>
-                <img
-                  src={selectedDatasource !== undefined ? Play : PlayDisable}
-                  alt="Play"
-                />
-                <span>Test Connection</span>
-              </>
-            )}
+            <div className="btn-spinner">
+              <div className="spinner-border">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <span>Loading...</span>
+            </div>
+            <div className="btn-content">
+              <img
+                src={selectedDatasource !== undefined ? Play : PlayDisable}
+                alt="Play"
+              />
+              <span>Test Connection</span>
+            </div>
           </button>
         </div>
       </div>

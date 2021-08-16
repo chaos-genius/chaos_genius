@@ -53,10 +53,10 @@ const Sidebar = () => {
               <span>Dashboard</span>
             </Link>
           </li>
-          <li className={location[1] === 'kpi' ? 'active' : ''}>
-            <Link to="/kpi">
+          <li className={location[1] === 'kpiexplorer' ? 'active' : ''}>
+            <Link to="/kpiexplorer">
               <img
-                src={location[1] === 'kpi' ? kpiactive : kpi}
+                src={location[1] === 'kpiexplorer' ? kpiactive : kpi}
                 alt="KPI Explorer"
               />
               <span>KPI Explorer</span>

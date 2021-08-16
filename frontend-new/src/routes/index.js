@@ -48,7 +48,7 @@ const Routes = () => (
     />
     <PrivateRouteWithSidebar
       exact
-      path="/kpi"
+      path="/kpiexplorer"
       component={(props) => <KpiExplorer {...props} />}
     />
     <PrivateRouteWithSidebar
@@ -78,22 +78,22 @@ const Routes = () => (
     />
     <PrivateRouteWithSidebar
       exact
+      path="/alerts/new"
+      component={(props) => <SetAlerts {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
       path="/alerts/:id"
       component={(props) => <AddAlerts {...props} />}
     />
     <PrivateRouteWithSidebar
       exact
-      path="/new-alert"
-      component={(props) => <SetAlerts {...props} />}
-    />
-    <PrivateRouteWithSidebar
-      exact
-      path="/new-alert/kpi-alert"
+      path="/alerts/new/kpi-alert"
       component={(props) => <AddKpiAlert {...props} />}
     />
     <PrivateRouteWithSidebar
       exact
-      path="/new-alert/event-alert"
+      path="/alerts/new/event-alert"
       component={(props) => <AddEventAlert {...props} />}
     />
     <PrivateRouteWithSidebar

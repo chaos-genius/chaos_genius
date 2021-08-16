@@ -39,7 +39,8 @@ const Home = () => {
       </div>
       {/* homepage setup card wrapper */}
       <div className="homepage-setup-card-wrapper">
-        {onboardingList &&
+        {onboardingList ? (
+          onboardingList &&
           onboardingList.steps &&
           onboardingList.steps.map((item, index) => {
             if (index > 0) {
@@ -95,7 +96,15 @@ const Home = () => {
               }
             }
             return <></>;
-          })}
+          })
+        ) : (
+          <div className="loader loader-page">
+            <div className="loading-text">
+              <p>loading</p>
+              <span></span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

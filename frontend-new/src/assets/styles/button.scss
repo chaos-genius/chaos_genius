@@ -75,6 +75,7 @@
       color: $white;
     }
   }
+
   &:disabled {
     cursor: not-allowed;
     pointer-events: all !important;
@@ -88,6 +89,26 @@
     width: 15px;
     height: 15px;
     color: $white;
+    border-width: 2px;
+    margin-right: 5px;
+  }
+  &.btn-spacing {
+    margin-right: 16px;
+  }
+  &.btn-loading {
+    cursor: not-allowed;
+    .btn-spinner {
+      display: block !important;
+    }
+    .btn-content {
+      display: none !important;
+    }
+  }
+  .btn-spinner {
+    display: none;
+  }
+  .btn-content {
+    display: block;
   }
   &.btn-spacing {
     margin-right: 16px;

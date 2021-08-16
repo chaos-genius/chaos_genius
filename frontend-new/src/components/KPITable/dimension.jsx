@@ -22,7 +22,7 @@ const Dimension = ({ data }) => {
           </label>
         </li>
       )}
-      {show === data.length && (
+      {show === data.length && data.length !== 2 && (
         <li className="additional-tips" onClick={() => setShow(2)}>
           <span>
             <img src={Up} alt="Up" />

@@ -1,7 +1,7 @@
-import React from "react";
-import "./navbar.scss";
-import { Link } from "react-router-dom";
-import Profiledown from "../../assets/images/profile-down.svg";
+import React from 'react';
+import './navbar.scss';
+// import { Link } from 'react-router-dom';
+// import Profiledown from '../../assets/images/profile-down.svg';
 
 const Navbar = () => {
   return (
@@ -11,18 +11,17 @@ const Navbar = () => {
           id="userdetails"
           className="userdetails"
           data-bs-toggle="dropdown"
-          aria-expanded="false"
-        >
+          aria-expanded="false">
           <div className="user-avatar">m</div>
           <div className="user-profile">
             <div className="profile-dropdown">
               <p>mathew.thomas@gmail.com</p>
-              <img src={Profiledown} alt="profile" />
+              {/* <img src={Profiledown} alt="profile" /> */}
             </div>
             <label>Admin</label>
           </div>
         </div>
-        <ul className="dropdown-menu" aria-labelledby="userdetails">
+        {/* <ul className="dropdown-menu" aria-labelledby="userdetails">
           <li className="active">
             <Link to="" className="dropdown-item">
               My Account
@@ -33,7 +32,7 @@ const Navbar = () => {
               Sign Out
             </Link>
           </li>
-        </ul>
+        </ul> */}
       </div>
     </div>
   );

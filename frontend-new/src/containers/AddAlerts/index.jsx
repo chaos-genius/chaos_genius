@@ -1,11 +1,13 @@
 import React from 'react';
 
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 import rightarrow from '../../assets/images/rightarrow.svg';
 import AlertsForm from '../../components/AlertsForm';
 
 const AddAlerts = () => {
+  const history = useHistory();
+  const data = history.location.pathname.split('/');
   return (
     <>
       {/* Page Navigation */}
@@ -18,7 +20,7 @@ const AddAlerts = () => {
             </li>
             <li className="breadcrumb-item">Channel Configuration</li>
             <li className="breadcrumb-item active" aria-current="page">
-              Slack Setup
+              {data[2] === 'slack' ? 'Slack Setup' : 'Email Setup'}
             </li>
           </ol>
         </nav>
@@ -26,7 +28,7 @@ const AddAlerts = () => {
         <div className="backnavigation">
           <Link to="/alerts">
             <img src={rightarrow} alt="Back" />
-            <span>Slack Setup</span>
+            <span>{data[2] === 'slack' ? 'Slack Setup' : 'Email Setup'}</span>
           </Link>
         </div>
       </div>

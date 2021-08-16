@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import Select from 'react-select';
+import { Range, getTrackBackground } from 'react-range';
 
 import Anomoly from '../../assets/images/alerts/anomoly.svg';
 import AnomolyActive from '../../assets/images/alerts/anomoly-active.svg';
@@ -12,6 +13,7 @@ import './kpialertconfigurationform.scss';
 const KpiAlertConfigurationForm = ({ setSteps }) => {
   const [type, setType] = useState('static');
   const [conditionType, setConditionType] = useState('');
+  const [value, setValue] = useState([90]);
 
   const onSubmit = () => {
     setSteps(2);
@@ -152,13 +154,71 @@ const KpiAlertConfigurationForm = ({ setSteps }) => {
             </div>
           </div>
         </>
-      ) : null
-      // <>
-      //   <div className="form-group">
-      //     <input type="range" max="100" min="0" />
-      //   </div>
-      // </>
-      }
+      ) : (
+        <div className="form-group">
+          <label>Significance Score *</label>
+          <div className="score-range">
+            <div className="score-card">{value}</div>
+            <div className="range-selector">
+              <Range
+                values={value}
+                step={1}
+                min={0}
+                max={100}
+                onChange={(values) => setValue([values])}
+                renderTrack={({ props, children }) => (
+                  <div
+                    onMouseDown={props.onMouseDown}
+                    onTouchStart={props.onTouchStart}
+                    style={{
+                      ...props.style,
+                      display: 'flex',
+                      width: '100%'
+                    }}>
+                    <div
+                      ref={props.ref}
+                      style={{
+                        height: '8px',
+                        width: '100%',
+                        borderRadius: '4px',
+                        background: getTrackBackground({
+                          values: value,
+                          colors: [
+                            ['#60CA9A 0%', '#FAC06B', '#E96560'],
+                            '#EFEFEF'
+                          ],
+                          min: 0,
+                          max: 100
+                        }),
+                        alignSelf: 'center'
+                      }}>
+                      {children}
+                    </div>
+                  </div>
+                )}
+                renderThumb={({ props, isDragged }) => (
+                  <div
+                    {...props}
+                    style={{
+                      ...props.style,
+                      height: '18px',
+                      width: '18px',
+                      borderRadius: '50%',
+                      outline: 'none',
+                      background: '#FFFFFF',
+                      border: '2px solid #60CA9A',
+                      boxSizing: 'border-box',
+                      cursor: 'pointer'
+                    }}></div>
+                )}
+              />
+              <div className="range-category">
+                <span>Low</span> <span>Med</span> <span>High</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="form-group">
         <label>Alert Frequency *</label>
         <Select classNamePrefix="selectcategory" placeholder="Daily" />

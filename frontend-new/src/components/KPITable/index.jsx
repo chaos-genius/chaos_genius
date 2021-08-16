@@ -7,7 +7,8 @@ import GoogleSheet from '../../assets/images/googlesheets.svg';
 import Postgre from '../../assets/images/postgre.svg';
 import Amplitude from '../../assets/images/amplitude.svg';
 import MySQL from '../../assets/images/mysql.svg';
-import Edit from '../../assets/images/edit-active.svg';
+import Edit from '../../assets/images/edit.svg';
+import EditActive from '../../assets/images/edit-active.svg';
 
 import '../../assets/styles/table.scss';
 
@@ -43,33 +44,40 @@ const KPITable = ({ kpiData }) => {
                   <div className="source-type">
                     <img
                       src={
-                        kpi.connection_type === 'Google Analytics'
+                        kpi.datasourceType === 'Google Analytics'
                           ? GoogleAnalytics
-                          : kpi.connection_type === 'Postgres'
+                          : kpi.datasourceType === 'Postgres'
                           ? Postgre
-                          : kpi.connection_type === 'Google Sheets'
+                          : kpi.datasourceType === 'Google Sheets'
                           ? GoogleSheet
-                          : kpi.connection_type === 'MySQL'
+                          : kpi.datasourceType === 'MySQL'
                           ? MySQL
-                          : kpi.connection_type === 'Amplitude'
+                          : kpi.datasourceType === 'Amplitude'
                           ? Amplitude
                           : '-'
                       }
-                      alt={kpi.connection_type}
+                      alt={kpi.datasourceType}
                     />
-                    <span>{kpi.connection_type || '-'}</span>
+                    <span>{kpi.datasourceType || '-'}</span>
                   </div>
                 </td>
                 <td>{formatDate(kpi.created_at) || '-'}</td>
                 <td>{formatDate(kpi.last_modified) || '-'}</td>
                 <td>
                   <Link to={`/kpiexplorer/edit/${kpi.id}`}>
-                    <div
-                      className="edit-information"
-                      data-bs-toggle="tooltip"
-                      data-bs-placement="bottom"
-                      title="Edit">
-                      <img src={Edit} alt="Edit" />
+                    <div className="table-actions">
+                      <div
+                        className="table-action-icon"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        title="Edit">
+                        <img src={Edit} alt="Edit" className="action-normal" />
+                        <img
+                          src={EditActive}
+                          alt="Edit"
+                          className="action-active"
+                        />
+                      </div>
                     </div>
                   </Link>
                 </td>

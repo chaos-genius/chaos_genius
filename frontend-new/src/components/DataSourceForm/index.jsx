@@ -94,6 +94,7 @@ const DataSourceForm = () => {
       };
     });
     setFormError([]);
+    setStatus('');
   };
 
   useEffect(() => {
@@ -232,15 +233,14 @@ const DataSourceForm = () => {
         {/*Paste here*/}
         {/* end of Google Analytics */}
         {/* test connection sucess message */}
-        {testConnectionResponse &&
-          testConnectionResponse?.status === 'success' && (
-            <div className="connection__success">
-              <p>
-                <img src={Success} alt="Success" />
-                Test Connection Success
-              </p>
-            </div>
-          )}
+        {status && status?.status === 'succeeded' && (
+          <div className="connection__success">
+            <p>
+              <img src={Success} alt="Success" />
+              Test Connection Success
+            </p>
+          </div>
+        )}
         {/* test connection fail message */}
         {status && status?.status === 'failed' && (
           <div className="connection__fail">
@@ -251,7 +251,7 @@ const DataSourceForm = () => {
           </div>
         )}
         <div className="form-action">
-          {status && status?.status === 'success' && (
+          {status && status?.status === 'succeeded' && (
             <button
               className="btn black-button"
               onClick={() => {
@@ -260,27 +260,31 @@ const DataSourceForm = () => {
               <span>Add Data Source</span>
             </button>
           )}
-          <button
-            className={
-              testLoading ? 'btn black-button btn-loading' : 'btn black-button'
-            }
-            type={'submit'}
-            disabled={selectedDatasource !== undefined ? false : true}
-            onClick={() => testConnection()}>
-            <div className="btn-spinner">
-              <div className="spinner-border">
-                <span className="visually-hidden">Loading...</span>
+          {(status === '' || status?.status !== 'succeeded') && (
+            <button
+              className={
+                testLoading
+                  ? 'btn black-button btn-loading'
+                  : 'btn black-button'
+              }
+              type={'submit'}
+              disabled={selectedDatasource !== undefined ? false : true}
+              onClick={() => testConnection()}>
+              <div className="btn-spinner">
+                <div className="spinner-border">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                <span>Loading...</span>
               </div>
-              <span>Loading...</span>
-            </div>
-            <div className="btn-content">
-              <img
-                src={selectedDatasource !== undefined ? Play : PlayDisable}
-                alt="Play"
-              />
-              <span>Test Connection</span>
-            </div>
-          </button>
+              <div className="btn-content">
+                <img
+                  src={selectedDatasource !== undefined ? Play : PlayDisable}
+                  alt="Play"
+                />
+                <span>Test Connection</span>
+              </div>
+            </button>
+          )}
         </div>
       </div>
     );

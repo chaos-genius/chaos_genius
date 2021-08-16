@@ -10,8 +10,9 @@ const Navbar = () => {
         <div
           id="userdetails"
           className="userdetails"
-          data-bs-toggle="dropdown"
-          aria-expanded="false">
+          // data-bs-toggle="dropdown"
+          // aria-expanded="false"
+        >
           <div className="user-avatar">m</div>
           <div className="user-profile">
             <div className="profile-dropdown">

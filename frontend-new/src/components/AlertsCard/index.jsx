@@ -30,9 +30,11 @@ const AlertsCard = () => {
         <img src={Gmail} className="in-active" alt="Gmail" />
         <h1>Email</h1>
         <p>Select the data you want to monitor and analyse</p>
-        <button className="btn white-button">
-          <span>Connect Email</span>
-        </button>
+        <Link to="/alerts/email">
+          <button className="btn white-button">
+            <span>Connect Email</span>
+          </button>
+        </Link>
       </div>
       <div className="setup-card">
         <img src={Datadog} className="in-active" alt="Datadog" />

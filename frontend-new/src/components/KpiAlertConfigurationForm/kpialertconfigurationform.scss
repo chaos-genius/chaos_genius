@@ -82,58 +82,56 @@
     width: 48%;
   }
 }
-
-.form-group {
-  input[type='range'] {
-    // height: 8px;
-    // width: 100%;
-    // outline: none;
-    // border-radius: 20px;
-    // -webkit-appearance: none;
-    // background-color: $white;
-    -webkit-appearance: none;
-    width: 100%;
-    height: 8px;
-    background: #ddd;
-    border-radius: 20px;
-    outline: none;
-
-    &:focus {
-      outline: none;
-    }
-    &::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 18px;
-      height: 18px;
-      background: $white;
-      border: 2px solid $green;
-      box-sizing: border-box;
-      border-radius: 20px;
-      cursor: pointer;
-    }
-    &::-moz-range-thumb {
-      width: 18px;
-      height: 18px;
-      background: $white;
-      border: 2px solid $green;
-      box-sizing: border-box;
-      // -webkit-appearance: none;
-      cursor: pointer;
-    }
-    &::-moz-range-progress {
-      height: 8px;
-      border-radius: 20px;
-      background: linear-gradient(
-        90deg,
-        #60ca9a 4.86%,
-        #fac06b 61.61%,
-        #e96560 117.38%
-      );
-    }
-    &::-moz-range-track {
-      height: 8px;
-      border-radius: 20px;
-      background: $grey_variation-5;
+.score-range {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  .score-card {
+    background: $white;
+    border: 1px solid $grey_variation-1;
+    box-sizing: border-box;
+    border-radius: 6px;
+    width: 72px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: $font-weight-400;
+    font-size: $font-size-14;
+    line-height: $line-height-16;
+    letter-spacing: $letter-spacing;
+    text-transform: capitalize;
+    color: $black_variation-2;
+  }
+  .range-selector {
+    width: 70%;
+    position: relative;
+    .range-category {
+      display: flex;
+      justify-content: space-between;
+      text-align: center;
+      span {
+        font-weight: $font-weight-400;
+        font-size: $font-size-12;
+        line-height: $line-height-14;
+        letter-spacing: $letter-spacing-point15;
+        color: $grey_variation-3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        &::before {
+          content: '';
+          width: 1px;
+          height: 15px;
+          border: 1px solid $grey_variation-3;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 4px;
+        }
+      }
     }
   }
 }

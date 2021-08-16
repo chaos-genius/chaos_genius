@@ -43,21 +43,21 @@ const KPITable = ({ kpiData }) => {
                   <div className="source-type">
                     <img
                       src={
-                        kpi.datasourceType === 'Google Analytics'
+                        kpi.connection_type === 'Google Analytics'
                           ? GoogleAnalytics
-                          : kpi.datasourceType === 'Postgres'
+                          : kpi.connection_type === 'Postgres'
                           ? Postgre
-                          : kpi.datasourceType === 'Google Sheets'
+                          : kpi.connection_type === 'Google Sheets'
                           ? GoogleSheet
-                          : kpi.datasourceType === 'MySQL'
+                          : kpi.connection_type === 'MySQL'
                           ? MySQL
-                          : kpi.datasourceType === 'Amplitude'
+                          : kpi.connection_type === 'Amplitude'
                           ? Amplitude
                           : '-'
                       }
-                      alt={kpi.datasourceType}
+                      alt={kpi.connection_type}
                     />
-                    <span>{kpi.datasourceType || '-'}</span>
+                    <span>{kpi.connection_type || '-'}</span>
                   </div>
                 </td>
                 <td>{formatDate(kpi.created_at) || '-'}</td>

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import Select from 'react-select';
-import ModalPopUp from '../Modal';
+// import ModalPopUp from '../Modal';
 
 const DashboardForm = () => {
-  const [modal, setModal] = useState('false');
+  // const [modal, setModal] = useState('false');
   return (
     <>
       <div className="form-group">
@@ -55,7 +55,7 @@ const DashboardForm = () => {
           <span>Add Dashboard</span>
         </button>
       </div>
-      <ModalPopUp isOpen={modal} />
+      {/* <ModalPopUp isOpen={modal} /> */}
     </>
   );
 };

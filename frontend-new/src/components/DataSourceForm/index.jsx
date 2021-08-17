@@ -5,11 +5,7 @@ import Play from '../../assets/images/play.svg';
 import PlayDisable from '../../assets/images/play-disable.svg';
 import Success from '../../assets/images/success.svg';
 import Fail from '../../assets/images/fail.svg';
-import GoogleSheet from '../../assets/images/googlesheets.svg';
-import Postgre from '../../assets/images/postgre.svg';
-import GoogleAnalytics from '../../assets/images/googleanalytics.svg';
-import Amplitude from '../../assets/images/amplitude.svg';
-import MySQL from '../../assets/images/mysql.svg';
+
 import {
   createDataSource,
   getConnectionType,

@@ -5,11 +5,7 @@ import Play from '../../assets/images/play.svg';
 import PlayDisable from '../../assets/images/play-disable.svg';
 import Success from '../../assets/images/success.svg';
 import Fail from '../../assets/images/fail.svg';
-import GoogleSheet from '../../assets/images/googlesheets.svg';
-import Postgre from '../../assets/images/postgre.svg';
-import GoogleAnalytics from '../../assets/images/googleanalytics.svg';
-import Amplitude from '../../assets/images/amplitude.svg';
-import MySQL from '../../assets/images/mysql.svg';
+
 import {
   createDataSource,
   getConnectionType,
@@ -26,6 +22,19 @@ const customSingleValue = ({ data }) => (
     </div>
   </div>
 );
+
+const datasourceIcon = (type) => {
+  let textHtml = type.icon;
+  return (
+    <>
+      <span
+        dangerouslySetInnerHTML={{ __html: textHtml }}
+        className="datasource-svgicon"
+      />
+      {type.name}
+    </>
+  );
+};
 
 const DataSourceForm = () => {
   const dispatch = useDispatch();
@@ -56,27 +65,7 @@ const DataSourceForm = () => {
       connectionType.map((item) => {
         return arr.push({
           value: item,
-          label: (
-            <div className="optionlabel">
-              <img
-                src={
-                  item.name === 'Google Analytics'
-                    ? GoogleAnalytics
-                    : item.name === 'Postgres'
-                    ? Postgre
-                    : item.name === 'Google Sheets'
-                    ? GoogleSheet
-                    : item.name === 'MySQL'
-                    ? MySQL
-                    : item.name === 'Amplitude'
-                    ? Amplitude
-                    : ''
-                }
-                alt={item.name}
-              />
-              {item.name}
-            </div>
-          )
+          label: <div className="optionlabel">{datasourceIcon(item)}</div>
         });
       });
       setOption(arr);

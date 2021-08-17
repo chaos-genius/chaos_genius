@@ -5,7 +5,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 85vh;
+  min-height: 84vh;
   .common-heading {
     margin-bottom: 40px;
     h3 {
@@ -18,10 +18,11 @@
   }
   .common-container {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
+    width: 67%;
   }
   .alerts-card {
-    width: 48%;
+    width: 43%;
     padding: 40px 55px;
     text-align: center;
     background: $white;

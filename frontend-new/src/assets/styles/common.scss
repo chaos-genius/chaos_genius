@@ -149,6 +149,7 @@ a:hover {
     text-transform: capitalize;
     color: $black_variation-2;
     margin-bottom: 12px;
+    font-weight: $font-weight-400;
   }
   .form-control {
     border: 1px solid $grey_variation-1;
@@ -157,6 +158,7 @@ a:hover {
     box-shadow: none !important;
     min-height: 48px;
     font-size: $font-size-14;
+    font-weight: $font-weight-500;
     &.h-40 {
       min-height: 40px;
     }
@@ -500,9 +502,6 @@ a:hover {
 .css-tlfecz-indicatorContainer {
   color: $black_variation-2 !important;
 }
-.css-1hwfws3 {
-  padding: 0px !important;
-}
 .css-1uccc91-singleValue {
   margin: 0px !important;
 }
@@ -516,7 +515,7 @@ a:hover {
 }
 .css-1wa3eu0-placeholder {
   font-size: $font-size-14 !important;
-  font-weight: $font-weight-400 !important;
+  font-weight: $font-weight-500 !important;
   color: #7d848a !important;
 }
 

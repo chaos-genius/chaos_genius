@@ -9,61 +9,31 @@
     width: 23.5%;
   }
 }
-.heading-option {
-  align-items: baseline;
-}
-.option-button {
-  progress {
-    width: 270px;
-    border: 0;
-    height: 11px;
-    border-radius: 50px;
-    background: $grey-variation-6;
-    border-radius: 50px;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    // appearance: none;
-    &::-webkit-progress-bar {
-      background-color: $grey-variation-6;
-      border: 0;
-      height: 11px;
-      border-radius: 50px;
-    }
-    &::-webkit-progress-value {
-      background: linear-gradient(
-        101.44deg,
-        #defb9d 0%,
-        #71f79e 37%,
-        #38f9d7 70%,
-        #89c4fe 100%
-      );
-      border: 0;
-      height: 11px;
-      border-radius: 50px;
-    }
-    &::-moz-progress-bar {
-      background: linear-gradient(
-        101.44deg,
-        #defb9d 0%,
-        #71f79e 37%,
-        #38f9d7 70%,
-        #89c4fe 100%
-      ) !important;
+.progress-option {
+  width: 270px;
+  .progressbar {
+    div {
+      height: 11px !important;
+      background-color: $grey-variation-6 !important;
       border: 0 !important;
       height: 11px !important;
       border-radius: 50px !important;
-    }
-    &::-moz-progress-value {
-      background: linear-gradient(
-        101.44deg,
-        #defb9d 0%,
-        #71f79e 37%,
-        #38f9d7 70%,
-        #89c4fe 100%
-      ) !important;
-      border: 0 !important;
-      height: 11px !important;
-      border-radius: 50px !important;
+      div {
+        height: 11px !important;
+        background: linear-gradient(
+          101.44deg,
+          #defb9d 0%,
+          #71f79e 37%,
+          #38f9d7 70%,
+          #89c4fe 100%
+        ) !important;
+        border: 0 !important;
+        height: 11px !important;
+        border-radius: 50px !important;
+        span {
+          display: none !important;
+        }
+      }
     }
   }
   p {
@@ -71,6 +41,6 @@
     line-height: $line-height-14;
     letter-spacing: $letter-spacing;
     color: $black_variation-2;
-    margin-top: 5px;
+    margin-top: 12px;
   }
 }

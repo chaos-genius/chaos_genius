@@ -43,7 +43,8 @@
   .optionlabel {
     display: flex;
     align-items: center;
-    img {
+    img,
+    svg {
       width: 16px;
       height: 16px;
       margin-top: 1px;

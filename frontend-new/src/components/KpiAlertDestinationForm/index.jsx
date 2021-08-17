@@ -50,7 +50,7 @@ const KpiAlertDestinationForm = ({ event, setEventSteps, setKpiSteps }) => {
         <label>Add Recepients </label>
         <Select isMulti classNamePrefix="selectcategory" placeholder="Select" />
       </div>
-      <div className="add-options-wrapper">
+      <div className="add-options-wrapper options-spacing">
         <div className="add-options">
           <label>+ Add Another Channel</label>
         </div>

@@ -27,6 +27,19 @@ const customSingleValue = ({ data }) => (
   </div>
 );
 
+const datasourceIcon = (type) => {
+  let textHtml = type.icon;
+  return (
+    <>
+      <span
+        dangerouslySetInnerHTML={{ __html: textHtml }}
+        className="datasource-svgicon"
+      />
+      {type.name}
+    </>
+  );
+};
+
 const DataSourceForm = () => {
   const dispatch = useDispatch();
 
@@ -56,27 +69,7 @@ const DataSourceForm = () => {
       connectionType.map((item) => {
         return arr.push({
           value: item,
-          label: (
-            <div className="optionlabel">
-              <img
-                src={
-                  item.name === 'Google Analytics'
-                    ? GoogleAnalytics
-                    : item.name === 'Postgres'
-                    ? Postgre
-                    : item.name === 'Google Sheets'
-                    ? GoogleSheet
-                    : item.name === 'MySQL'
-                    ? MySQL
-                    : item.name === 'Amplitude'
-                    ? Amplitude
-                    : ''
-                }
-                alt={item.name}
-              />
-              {item.name}
-            </div>
-          )
+          label: <div className="optionlabel">{datasourceIcon(item)}</div>
         });
       });
       setOption(arr);

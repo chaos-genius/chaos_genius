@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Select from 'react-select';
 
 import './eventalertform.scss';
@@ -15,6 +15,7 @@ const customSingleValue = ({ data }) => (
 );
 
 const EventAlertForm = ({ setSteps }) => {
+  const [setting, setSetting] = useState('');
   const onSubmit = () => {
     setSteps(2);
   };
@@ -56,7 +57,71 @@ const EventAlertForm = ({ setSteps }) => {
 
       <div className="form-group">
         <label>Alert Settings *</label>
-        <div className="radio-group">
+        <div className="alert-setting">
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="radio"
+              id="newentry"
+              name="alert"
+              value="newentry"
+              onChange={(e) => {
+                setSetting(e.target.value);
+              }}
+            />
+            <label
+              className={
+                setting === 'newentry'
+                  ? 'form-check-label active'
+                  : 'form-check-label'
+              }
+              for="newentry">
+              New Entry
+            </label>
+          </div>
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="radio"
+              id="allchanges"
+              name="alert"
+              value="allchanges"
+              onChange={(e) => {
+                setSetting(e.target.value);
+              }}
+            />
+            <label
+              className={
+                setting === 'allchanges'
+                  ? 'form-check-label active'
+                  : 'form-check-label'
+              }
+              for="allchanges">
+              All Changes
+            </label>
+          </div>
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="radio"
+              id="alwayssend"
+              name="alert"
+              value="alwayssend"
+              onChange={(e) => setSetting(e.target.value)}
+            />
+            <label
+              className={
+                setting === 'alwayssend'
+                  ? 'form-check-label active'
+                  : 'form-check-label'
+              }
+              for="alwayssend">
+              Always Send
+            </label>
+          </div>
+        </div>
+
+        {/* <div className="radio-group">
           <div className="form-check active">
             <input
               type="radio"
@@ -81,7 +146,7 @@ const EventAlertForm = ({ setSteps }) => {
               className="form-check-input"></input>
             <label htmlFor="alwayssend">Always Send</label>
           </div>
-        </div>
+        </div> */}
       </div>
       <div className="form-group ">
         <label>Message Body *</label>

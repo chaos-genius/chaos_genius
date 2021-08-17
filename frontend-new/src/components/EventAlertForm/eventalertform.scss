@@ -35,3 +35,31 @@
     }
   }
 }
+.alert-setting {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  .form-check {
+    background: $white;
+    height: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    label {
+      margin-left: 10px;
+      font-weight: $font-weight-500;
+      font-size: $font-size-14;
+      line-height: $line-height-16;
+      text-transform: capitalize;
+      color: $black_variation-2;
+      &.active {
+        color: $green;
+      }
+    }
+    .form-check-input {
+      margin-top: 0px;
+    }
+  }
+}

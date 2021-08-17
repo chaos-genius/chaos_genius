@@ -1,11 +1,13 @@
 import React, { useEffect } from 'react';
 
-import './home.scss';
+import ProgressBar from '@ramonak/react-progress-bar';
 
 import SetupCard from '../../components/SetupCard';
 
 import { getOnboardingStatus } from '../../redux/actions';
 import { useDispatch, useSelector } from 'react-redux';
+
+import './home.scss';
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -28,11 +30,13 @@ const Home = () => {
         <div className="heading-title">
           <h3>Get Started with Chaos Genius setup</h3>
         </div>
+
         {onboardingList.completion_precentage && (
-          <div className="option-button">
-            <progress
-              value={onboardingList.completion_precentage}
-              max="100"></progress>
+          <div className="progress-option">
+            <ProgressBar
+              completed={onboardingList.completion_precentage}
+              className="progressbar"
+            />
             <p>{onboardingList.completion_precentage}% Completed</p>
           </div>
         )}

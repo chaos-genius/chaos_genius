@@ -7,8 +7,8 @@ import Fuse from 'fuse.js';
 
 import { v4 as uuidv4 } from 'uuid';
 
-const DashboardFilter = ({ setKpi, data }) => {
-  const [active, setActive] = useState('');
+const DashboardFilter = ({ setKpi, data, active, setActive }) => {
+  //const [active, setActive] = useState('');
   const [listData, setListData] = useState(data);
   const [searchData, setSearchData] = useState(data);
   useEffect(() => {

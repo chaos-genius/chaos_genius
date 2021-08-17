@@ -14,7 +14,6 @@ import {
   getTestQuery
 } from './KpiEplorer';
 import {
-  getDashboardSidebar,
   getDashboardAggregation,
   getDashboardRcaAnalysis,
   getAllDashboardDimension,
@@ -22,6 +21,7 @@ import {
 } from './Dashboard';
 import { getOnboardingStatus } from './Onboarding';
 import { getDashboardLinechart } from './LineChart';
+import { getDashboardSidebar } from './Sidebarlist';
 export {
   getAllDataSources,
   getConnectionType,

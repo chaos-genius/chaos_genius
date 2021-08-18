@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import { Link } from 'react-router-dom';
+
 import Search from '../../assets/images/search.svg';
 import GreenArrow from '../../assets/images/green-arrow.svg';
 
@@ -55,16 +57,18 @@ const DashboardFilter = ({ setKpi, data, active, setActive }) => {
           {listData && listData.length !== 0 ? (
             listData.map((item) => {
               return (
-                <li
-                  key={uuidv4()}
-                  className={active === item.name ? 'active' : ''}
-                  onClick={() => {
-                    setActive(item.name);
-                    setKpi(item.id);
-                  }}>
-                  {item.name}
-                  <img src={GreenArrow} alt="GreenArrow Icon" />
-                </li>
+                <Link to={`/dashboard/autorca/${item.name}`}>
+                  <li
+                    key={uuidv4()}
+                    className={active === item.name ? 'active' : ''}
+                    onClick={() => {
+                      setActive(item.name);
+                      setKpi(item.id);
+                    }}>
+                    {item.name}
+                    <img src={GreenArrow} alt="GreenArrow Icon" />
+                  </li>
+                </Link>
               );
             })
           ) : (

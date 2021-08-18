@@ -242,15 +242,20 @@ a:hover {
       height: 16px;
     }
   }
+  // option menu select
   .selectcategory__option {
     background-color: $white !important;
     color: $black_variation-2 !important;
-    font-size: small;
     height: 48px;
+    font-weight: $font-weight-400 !important;
+    font-size: $font-size-16 !important;
+    line-height: $line-height-16 !important;
+    letter-spacing: $letter-spacing !important;
     &--is-focused {
       background-color: $green_variation-2 !important;
     }
   }
+
   .selectcategory__multi-value {
     background-color: $grey_variation-2;
     .selectcategory__multi-value__label {
@@ -478,6 +483,10 @@ a:hover {
   background-color: $white !important;
   color: $black_variation-2 !important;
   height: 48px;
+  font-weight: $font-weight-400 !important;
+  font-size: $font-size-16 !important;
+  line-height: $line-height-16 !important;
+  letter-spacing: $letter-spacing !important;
   &--is-focused {
     background-color: $green_variation-2 !important;
   }

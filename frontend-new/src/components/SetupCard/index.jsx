@@ -36,7 +36,7 @@ const SetupCard = ({ heading, step, buttonText, active }) => {
       } else if (step === 2) {
         history.push('/kpiexplorer');
       } else if (step === 3) {
-        history.push('/dashboard');
+        history.push('/dashboard/autorca');
       } else if (step === 4) {
         history.push('/alerts');
       }

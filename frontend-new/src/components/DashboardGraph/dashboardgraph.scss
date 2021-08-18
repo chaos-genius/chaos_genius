@@ -19,6 +19,33 @@
       border-radius: 6px;
       border: none;
     }
+    .css-1hwfws3 {
+      padding: 2px 8px !important;
+    }
+    .css-9gakcf-option {
+      background-color: $green_variation-2 !important;
+      color: $black_variation-2 !important;
+      height: 48px;
+      font-weight: $font-weight-400 !important;
+      font-size: $font-size-16 !important;
+      line-height: $line-height-16 !important;
+      letter-spacing: $letter-spacing !important;
+      &--is-focused {
+        background-color: $green_variation-2 !important;
+      }
+    }
+    .css-yt9ioa-option {
+      background-color: $white !important;
+      color: $black_variation-2 !important;
+      height: 48px;
+      font-weight: $font-weight-400 !important;
+      font-size: $font-size-16 !important;
+      line-height: $line-height-16 !important;
+      letter-spacing: $letter-spacing !important;
+      &--is-focused {
+        background-color: $green_variation-2 !important;
+      }
+    }
 
     .selectcategory__placeholder,
     .selectcategory__single-value {

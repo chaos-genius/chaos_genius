@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 import Select from 'react-select';
 
@@ -86,6 +86,8 @@ const Dashboardgraph = ({ kpi }) => {
   const getAllLinechart = () => {
     dispatch(getDashboardLinechart(kpi, { timeline: monthWeek.value }));
   };
+
+  const location = useHistory().location.pathname.split('/');
 
   useEffect(() => {
     if (kpi !== undefined) {
@@ -280,10 +282,14 @@ const Dashboardgraph = ({ kpi }) => {
           <div className="common-tab">
             <ul>
               <Link to="/dashboard/autorca">
-                <li className="active">AutoRCA</li>
+                <li className={location[2] === 'autorca' ? 'active' : ''}>
+                  AutoRCA
+                </li>
               </Link>
               <Link to="/dashboard/anomolies">
-                <li>Anomolies</li>
+                <li className={location[2] === 'anomolies' ? 'active' : ''}>
+                  Anomolies
+                </li>
               </Link>
             </ul>
           </div>
@@ -403,19 +409,6 @@ const Dashboardgraph = ({ kpi }) => {
                         </li>
                       ) : null}
                     </>
-                    // dimensionData &&
-                    // dimensionData.dimensions.length !== 0 &&
-                    // dimensionData.dimensions.map((data) => {
-                    //   return (
-                    //     <li
-                    //       className={activeDimension === data ? 'active' : ''}
-                    //       onClick={() => {
-                    //         setActiveDimension(data);
-                    //       }}>
-                    //       {data}
-                    //     </li>
-                    //   );
-                    // })
                   )}
                 </ul>
               </div>

@@ -6,22 +6,8 @@ import Down from '../../assets/images/down.svg';
 import '../../assets/styles/table.scss';
 import { useState } from 'react';
 
-const DashboardTable = ({ rcaAnalysisData, dimension }) => {
+const DashboardTable = ({ rcaAnalysisData }) => {
   const [overlap, setOverlap] = useState(false);
-
-  // let tableData =
-  //   !overlap && dimension.value === 'multidimension'
-  //     ? rcaAnalysisData && rcaAnalysisData.data_table
-  //     : null;
-  // let overlapData =
-  //   overlap && dimension.value === 'multidimension'
-  //     ? rcaAnalysisData && rcaAnalysisData.chart.chart_table
-  //     : null;
-
-  // let singleDimensionData =
-  //   dimension.value === 'singledimension'
-  //     ? hierarchicalData && hierarchicalData.data_table
-  //     : null;
 
   return (
     <>

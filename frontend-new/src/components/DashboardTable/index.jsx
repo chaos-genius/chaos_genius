@@ -112,7 +112,7 @@ const DashboardTable = ({ rcaAnalysisData }) => {
             </thead>
             <tbody>
               {rcaAnalysisData &&
-                rcaAnalysisData.data_table.map((data, index) => {
+                rcaAnalysisData.data_table.slice(0, 50).map((data, index) => {
                   return (
                     <tr key={index}>
                       <td>{data.subgroup}</td>

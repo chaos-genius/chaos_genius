@@ -10,12 +10,14 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
     <div className="graph-custom-card-container">
       <div className="graph-custom-card-titles">
         <div className="graph-titles">
-          <p>Sum</p>
-          <p>Mean</p>
-          <p>Count</p>
-          <p>Median</p>
-          <p>Max</p>
-          <p>Min</p>
+          <h5>Sum</h5>
+          <div className="titles-name">
+            <span>Mean</span>
+            <span>Count</span>
+            <span>Median</span>
+            <span>Max</span>
+            <span>Min</span>
+          </div>
         </div>
       </div>
       <div className="graph-custom-card">

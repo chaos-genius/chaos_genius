@@ -40,7 +40,7 @@
     padding-bottom: 23px;
     .common-graph {
       width: 49%;
-      height: 300px;
+      min-height: 300px;
       border: 1px solid $grey_variation-4;
       box-sizing: border-box;
       border-radius: 20px;
@@ -127,4 +127,10 @@
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid rgba(34, 34, 34, 0.12);
+}
+.disable-next {
+  visibility: hidden;
+}
+.previous-step {
+  transform: rotate(180deg);
 }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { useSelector, useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
 
 import Select from 'react-select';
 
@@ -13,6 +14,7 @@ import '../../assets/styles/table.scss';
 
 import Setting from '../../assets/images/setting.svg';
 import Toparrow from '../../assets/images/toparrow.svg';
+import Next from '../../assets/images/next.svg';
 
 import * as am4core from '@amcharts/amcharts4/core';
 import * as am4charts from '@amcharts/amcharts4/charts';
@@ -52,6 +54,7 @@ const Dashboardgraph = ({ kpi }) => {
 
   const [activeDimension, setActiveDimension] = useState('');
   const [collapse, setCollapse] = useState(true);
+  const [singleDimensionData, SetSingleDimensionData] = useState(0);
 
   const [monthWeek, setMonthWeek] = useState({
     value: 'mom',
@@ -276,7 +279,12 @@ const Dashboardgraph = ({ kpi }) => {
         <div className="dashboard-subheader">
           <div className="common-tab">
             <ul>
-              <li className="active">AutoRCA</li>
+              <Link to="/dashboard/autorca">
+                <li className="active">AutoRCA</li>
+              </Link>
+              <Link to="/dashboard/anomolies">
+                <li>Anomolies</li>
+              </Link>
             </ul>
           </div>
           <div className="common-option">
@@ -349,19 +357,65 @@ const Dashboardgraph = ({ kpi }) => {
                       </div>
                     </div>
                   ) : (
-                    dimensionData &&
-                    dimensionData.dimensions.length !== 0 &&
-                    dimensionData.dimensions.map((data) => {
-                      return (
+                    <>
+                      {singleDimensionData > 2 ? (
                         <li
-                          className={activeDimension === data ? 'active' : ''}
-                          onClick={() => {
-                            setActiveDimension(data);
-                          }}>
-                          {data}
+                          className="previous-step"
+                          onClick={() =>
+                            SetSingleDimensionData(singleDimensionData - 3)
+                          }>
+                          <img src={Next} alt="Previous" />
                         </li>
-                      );
-                    })
+                      ) : null}
+                      {dimensionData &&
+                        dimensionData.dimensions.length !== 0 &&
+                        dimensionData.dimensions
+                          .slice(
+                            0 + singleDimensionData,
+                            3 + singleDimensionData
+                          )
+                          .map((data) => {
+                            return (
+                              <li
+                                className={
+                                  activeDimension === data ? 'active' : ''
+                                }
+                                onClick={() => {
+                                  setActiveDimension(data);
+                                }}>
+                                {data}
+                              </li>
+                            );
+                          })}
+                      {dimensionData.dimensions.length > 3 &&
+                      dimensionData.dimensions.length !== 0 ? (
+                        <li
+                          className={
+                            singleDimensionData + 1 >=
+                            dimensionData.dimensions.length
+                              ? 'disable-next'
+                              : ''
+                          }
+                          onClick={() =>
+                            SetSingleDimensionData(singleDimensionData + 3)
+                          }>
+                          <img src={Next} alt="Next" />
+                        </li>
+                      ) : null}
+                    </>
+                    // dimensionData &&
+                    // dimensionData.dimensions.length !== 0 &&
+                    // dimensionData.dimensions.map((data) => {
+                    //   return (
+                    //     <li
+                    //       className={activeDimension === data ? 'active' : ''}
+                    //       onClick={() => {
+                    //         setActiveDimension(data);
+                    //       }}>
+                    //       {data}
+                    //     </li>
+                    //   );
+                    // })
                   )}
                 </ul>
               </div>

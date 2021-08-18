@@ -245,6 +245,7 @@ a:hover {
   .selectcategory__option {
     background-color: $white !important;
     color: $black_variation-2 !important;
+    font-size: small;
     height: 48px;
     &--is-focused {
       background-color: $green_variation-2 !important;
@@ -517,6 +518,9 @@ a:hover {
   font-size: $font-size-14 !important;
   font-weight: $font-weight-500 !important;
   color: #7d848a !important;
+}
+.css-1hwfws3 {
+  padding: 0px !important;
 }
 
 // loader

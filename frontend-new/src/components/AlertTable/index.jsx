@@ -15,9 +15,7 @@ const AlertTable = () => {
         <tr>
           <th>Alert Name</th>
           <th>Alert Type</th>
-          <th className="cursor-pointer">
-            Last Modified <img src={Rectangle} alt="down arrow" />
-          </th>
+          <th>Last Modified</th>
           <th>Status</th>
           <th className="cursor-pointer">
             Triggered <img src={Rectangle} alt="down arrow" />

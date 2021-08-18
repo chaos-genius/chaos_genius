@@ -33,6 +33,11 @@ const Routes = () => (
     />
     <PrivateRouteWithSidebar
       exact
+      path="/dashboard/:id"
+      component={(props) => <Dashboard {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
       path="/datasource"
       component={(props) => <DataSource {...props} />}
     />

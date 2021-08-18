@@ -18,7 +18,11 @@ const AddAlerts = () => {
             <li className="breadcrumb-item">
               <Link to="/alerts"> Alerts </Link>
             </li>
-            <li className="breadcrumb-item">Channel Configuration</li>
+            <li className="breadcrumb-item">
+              <Link to="/alerts/channelconfiguration">
+                Channel Configuration
+              </Link>
+            </li>
             <li className="breadcrumb-item active" aria-current="page">
               {data[2] === 'slack' ? 'Slack Setup' : 'Email Setup'}
             </li>
@@ -26,7 +30,7 @@ const AddAlerts = () => {
         </nav>
         {/* Back */}
         <div className="backnavigation">
-          <Link to="/alerts">
+          <Link to="/alerts/channelconfiguration">
             <img src={rightarrow} alt="Back" />
             <span>{data[2] === 'slack' ? 'Slack Setup' : 'Email Setup'}</span>
           </Link>

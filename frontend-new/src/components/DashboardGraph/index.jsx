@@ -7,7 +7,7 @@ import Select from 'react-select';
 
 import DashboardTable from '../DashboardTable';
 import Dashboardgraphcard from '../DashboardGraphCard';
-import SingleDimensionTable from './SingleDimensionTable';
+//import SingleDimensionTable from './SingleDimensionTable';
 
 import './dashboardgraph.scss';
 import '../../assets/styles/table.scss';
@@ -19,6 +19,9 @@ import Next from '../../assets/images/next.svg';
 import * as am4core from '@amcharts/amcharts4/core';
 import * as am4charts from '@amcharts/amcharts4/charts';
 
+//import NewTable from './NewTable';
+
+import HierarchicalTable from '../HierarchicalTable';
 import {
   getDashboardAggregation,
   getDashboardLinechart,
@@ -97,15 +100,34 @@ const Dashboardgraph = ({ kpi }) => {
       getAllLinechart();
       getAllRCA();
       if (dimension.value === 'singledimension') {
-        getAllDashboardDimension();
+        dispatchGetAllDashboardDimension();
       }
     }
-    if (dimensionData && dimensionData?.dimensions && activeDimension === '') {
-      setActiveDimension(dimensionData.dimensions[0]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kpi, monthWeek.value]);
+
+  useEffect(() => {
+    if (dimensionData && dimensionData?.dimensions) {
+      setActiveDimension(dimensionData?.dimensions[0]);
+      getSingleDimensioData(dimensionData?.dimensions[0]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpi, dimension, activeDimension, monthWeek.value, dimensionData]);
+  }, [dimensionData]);
 
+  const getSingleDimensioData = (value) => {
+    dispatch(
+      getDashboardRcaAnalysis(kpi, {
+        timeline: monthWeek.value,
+        dimension: value
+      })
+    );
+    dispatch(
+      getAllDashboardHierarchical(kpi, {
+        timeline: monthWeek.value,
+        dimension: value
+      })
+    );
+  };
   function getAllRCA() {
     if (dimension.value === 'singledimension') {
       dispatch(
@@ -271,9 +293,32 @@ const Dashboardgraph = ({ kpi }) => {
   };
 
   const handleDimensionChange = (data) => {
+    setDimension(data);
     if (data.value === 'singledimension') {
       dispatchGetAllDashboardDimension();
+    } else {
+      dispatch(
+        getDashboardRcaAnalysis(kpi, {
+          timeline: monthWeek.value
+        })
+      );
     }
+  };
+
+  const onActiveDimensionClick = (data) => {
+    setActiveDimension(data);
+    dispatch(
+      getDashboardRcaAnalysis(kpi, {
+        timeline: monthWeek.value,
+        dimension: data
+      })
+    );
+    dispatch(
+      getAllDashboardHierarchical(kpi, {
+        timeline: monthWeek.value,
+        dimension: data
+      })
+    );
   };
 
   return (
@@ -403,7 +448,7 @@ const Dashboardgraph = ({ kpi }) => {
                                     activeDimension === data ? 'active' : ''
                                   }
                                   onClick={() => {
-                                    setActiveDimension(data);
+                                    onActiveDimensionClick(data);
                                   }}>
                                   {data}
                                 </li>
@@ -437,7 +482,6 @@ const Dashboardgraph = ({ kpi }) => {
                     value={dimension}
                     onChange={(e) => {
                       handleDimensionChange(e);
-                      setDimension(e);
                     }}
                   />
                 </div>
@@ -476,8 +520,56 @@ const Dashboardgraph = ({ kpi }) => {
                     <>
                       {hierarchicalData &&
                         hierarchicalData?.data_table.length !== 0 && (
-                          <SingleDimensionTable
-                            hierarchicalData={hierarchicalData}
+                          // <SingleDimensionTable
+                          //   hierarchicalData={hierarchicalData}
+                          // />
+                          // <NewTable hierarchicalData={hierarchicalData} />
+                          <HierarchicalTable
+                            columns={[
+                              {
+                                field: 'subgroup',
+                                title: 'Subgroup Name'
+                              },
+                              {
+                                field: 'g1_agg',
+                                title: 'Prev Month Agg'
+                              },
+                              {
+                                field: 'g1_count',
+                                title: 'Prev Month Count'
+                              },
+                              {
+                                field: 'g2_agg',
+                                title: 'Current Month Agg'
+                              },
+                              {
+                                field: 'g1_size',
+                                title: 'Prev Month Size'
+                              },
+                              {
+                                field: 'g2_count',
+                                title: 'Current Month Count'
+                              },
+                              {
+                                field: 'g2_size',
+                                title: 'Current Month Size'
+                              },
+                              {
+                                field: 'impact',
+                                title: 'Impact'
+                              }
+                            ]}
+                            data={hierarchicalData.data_table}
+                            title=""
+                            parentChildData={(row, rows) =>
+                              rows.find((a) => a.id === row.parentId)
+                            }
+                            options={{
+                              paginationType: 'stepped',
+                              showTitle: false,
+                              search: false,
+                              paging: false
+                            }}
                           />
                         )}
                     </>

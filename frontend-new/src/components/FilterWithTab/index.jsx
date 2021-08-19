@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { useHistory } from 'react-router-dom';
+// import { useHistory } from 'react-router-dom';
 
 import Search from '../../assets/images/search.svg';
 import GreenArrow from '../../assets/images/green-arrow.svg';
@@ -13,7 +13,7 @@ const DashboardFilter = ({ setKpi, data, active, setActive }) => {
   //const [active, setActive] = useState('');
   const [listData, setListData] = useState(data);
   const [searchData, setSearchData] = useState(data);
-  const history = useHistory();
+  // const history = useHistory();
   useEffect(() => {
     if (data) {
       setListData(data);
@@ -37,15 +37,15 @@ const DashboardFilter = ({ setKpi, data, active, setActive }) => {
       setListData(searchData);
     }
   };
-  useEffect(() => {
-    const location = history.location.pathname.split('/');
-    if (active && location[2] === 'autorca') {
-      history.push(`/dashboard/autorca/${active}`);
-    } else if (active && location[2] === 'anomolies') {
-      history.push(`/dashboard/anomolies/${active}`);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active]);
+  // useEffect(() => {
+  //   const location = history.location.pathname.split('/');
+  //   if (active && location[2] === 'autorca') {
+  //     history.push(`/dashboard/autorca/${active}`);
+  //   } else if (active && location[2] === 'anomolies') {
+  //     history.push(`/dashboard/anomolies/${active}`);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [active]);
   return (
     <div className="common-filter-section">
       <div className="filter-layout">

@@ -36,21 +36,21 @@ const Routes = () => (
       path="/dashboard/autorca"
       component={(props) => <Dashboard {...props} />}
     />
-    <PrivateRouteWithSidebar
+    {/* <PrivateRouteWithSidebar
       exact
       path="/dashboard/autorca/:kpi"
       component={(props) => <Dashboard {...props} />}
-    />
+    /> */}
     <PrivateRouteWithSidebar
       exact
       path="/dashboard/anomolies"
       component={(props) => <Dashboard {...props} />}
     />
-    <PrivateRouteWithSidebar
+    {/* <PrivateRouteWithSidebar
       exact
       path="/dashboard/anomolies/:kpi"
       component={(props) => <Dashboard {...props} />}
-    />
+    /> */}
     <PrivateRouteWithSidebar
       exact
       path="/datasource"

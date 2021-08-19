@@ -7,7 +7,6 @@ import Select from 'react-select';
 
 import DashboardTable from '../DashboardTable';
 import Dashboardgraphcard from '../DashboardGraphCard';
-//import SingleDimensionTable from './SingleDimensionTable';
 
 import './dashboardgraph.scss';
 import '../../assets/styles/table.scss';
@@ -19,9 +18,8 @@ import Next from '../../assets/images/next.svg';
 import * as am4core from '@amcharts/amcharts4/core';
 import * as am4charts from '@amcharts/amcharts4/charts';
 
-//import NewTable from './NewTable';
-
 import HierarchicalTable from '../HierarchicalTable';
+
 import {
   getDashboardAggregation,
   getDashboardLinechart,
@@ -520,10 +518,6 @@ const Dashboardgraph = ({ kpi }) => {
                     <>
                       {hierarchicalData &&
                         hierarchicalData?.data_table.length !== 0 && (
-                          // <SingleDimensionTable
-                          //   hierarchicalData={hierarchicalData}
-                          // />
-                          // <NewTable hierarchicalData={hierarchicalData} />
                           <HierarchicalTable
                             columns={[
                               {
@@ -532,27 +526,27 @@ const Dashboardgraph = ({ kpi }) => {
                               },
                               {
                                 field: 'g1_agg',
-                                title: 'Prev Month Agg'
+                                title: 'Prev Month Avg'
                               },
                               {
                                 field: 'g1_count',
-                                title: 'Prev Month Count'
-                              },
-                              {
-                                field: 'g2_agg',
-                                title: 'Current Month Agg'
-                              },
-                              {
-                                field: 'g1_size',
                                 title: 'Prev Month Size'
                               },
                               {
+                                field: 'g2_agg',
+                                title: 'Prev Month Count'
+                              },
+                              {
+                                field: 'g1_size',
+                                title: 'Curr Month Avg'
+                              },
+                              {
                                 field: 'g2_count',
-                                title: 'Current Month Count'
+                                title: 'Curr Month  Size'
                               },
                               {
                                 field: 'g2_size',
-                                title: 'Current Month Size'
+                                title: 'Curr Month Count'
                               },
                               {
                                 field: 'impact',
@@ -568,7 +562,9 @@ const Dashboardgraph = ({ kpi }) => {
                               paginationType: 'stepped',
                               showTitle: false,
                               search: false,
-                              paging: false
+                              paging: false,
+                              sorting: false,
+                              draggable: false
                             }}
                           />
                         )}

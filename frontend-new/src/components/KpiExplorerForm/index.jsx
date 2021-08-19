@@ -450,7 +450,7 @@ const KpiExplorerForm = () => {
                   });
                 }}></textarea>
               {errorMsg.query === true ? (
-                <div className="connection__fail">
+                <div className="connection__fail query_fail">
                   <p>Enter Query</p>
                 </div>
               ) : null}

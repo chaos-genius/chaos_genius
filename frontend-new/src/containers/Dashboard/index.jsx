@@ -1,27 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import './dashboard.scss';
-import rightarrow from '../../assets/images/rightarrow.svg';
-import FilterWithTab from '../../components/FilterWithTab';
-import Dashboardgraph from '../../components/DashboardGraph';
+
 import { useSelector, useDispatch } from 'react-redux';
+
+import { Link } from 'react-router-dom';
+
+import './dashboard.scss';
+
+import rightarrow from '../../assets/images/rightarrow.svg';
+
+import Dashboardgraph from '../../components/DashboardGraph';
+import FilterWithTab from '../../components/FilterWithTab';
+
 import { getDashboardSidebar } from '../../redux/actions';
+
 const Dashboard = () => {
   const dispatch = useDispatch();
-  const [kpi, setKpi] = useState(1);
+  const [active, setActive] = useState('');
+  const [kpi, setKpi] = useState();
 
   const { sidebarLoading, sidebarList } = useSelector((state) => {
-    return state.dashboard;
+    return state.sidebar;
   });
 
   useEffect(() => {
     getAllDashboardSidebar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpi]);
+  }, []);
 
   const getAllDashboardSidebar = () => {
     dispatch(getDashboardSidebar());
   };
+
+  useEffect(() => {
+    if (sidebarList && sidebarList.length !== 0 && kpi === undefined) {
+      setActive(sidebarList[0]?.name);
+      setKpi(sidebarList[0]?.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sidebarList]);
 
   if (sidebarLoading) {
     return (
@@ -64,11 +80,18 @@ const Dashboard = () => {
         <div className="explore-wrapper">
           {/* filter section */}
           <div className="filter-section">
-            <FilterWithTab setKpi={setKpi} data={sidebarList} />
+            {sidebarList && (
+              <FilterWithTab
+                setKpi={setKpi}
+                data={sidebarList}
+                active={active}
+                setActive={setActive}
+              />
+            )}
           </div>{' '}
           {/* Graph Section*/}
           <div className="graph-section">
-            <Dashboardgraph kpi={kpi} />
+            {kpi && <Dashboardgraph kpi={kpi} />}
           </div>
         </div>
       </div>

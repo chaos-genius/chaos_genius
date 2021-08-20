@@ -10,7 +10,7 @@ const AlertFilter = () => {
           <input
             type="text"
             className="form-control h-40"
-            placeholder="Search by Alert Name"
+            placeholder="Search Alert"
           />
           <span>
             <img src={Search} alt="Search Icon" />

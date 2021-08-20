@@ -3,11 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Modal from 'react-modal';
 
-import GoogleAnalytics from '../../assets/images/googleanalytics.svg';
-import GoogleSheet from '../../assets/images/googlesheets.svg';
-import Postgre from '../../assets/images/postgre.svg';
-import Amplitude from '../../assets/images/amplitude.svg';
-import MySQL from '../../assets/images/mysql.svg';
+// import GoogleAnalytics from '../../assets/images/googleanalytics.svg';
+// import GoogleSheet from '../../assets/images/googlesheets.svg';
+// import Postgre from '../../assets/images/postgre.svg';
+// import Amplitude from '../../assets/images/amplitude.svg';
+// import MySQL from '../../assets/images/mysql.svg';
 import Edit from '../../assets/images/edit.svg';
 import EditActive from '../../assets/images/edit-active.svg';
 import Alert from '../../assets/images/alert.svg';
@@ -28,12 +28,13 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { v4 as uuidv4 } from 'uuid';
 
-const DataSourceTable = ({ tableData, changeData }) => {
+const DataSourceTable = ({ tableData, changeData, connectionType }) => {
   const dispatch = useDispatch();
 
   const { deleteDataSourceResponse } = useSelector((state) => state.dataSource);
   const [isOpen, setIsOpen] = useState(false);
   const [data, setData] = useState('');
+
   const closeModal = () => {
     setIsOpen(false);
   };
@@ -42,12 +43,32 @@ const DataSourceTable = ({ tableData, changeData }) => {
       changeData((prev) => !prev);
       setIsOpen(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [changeData, deleteDataSourceResponse]);
+
   const onDelete = (datasource) => {
     const payload = {
       data_source_id: datasource.id
     };
     dispatch(deleteDatasource(payload));
+  };
+  const datasourceIcon = (type) => {
+    let textHtml;
+    connectionType.find((item) => {
+      if (item.name === type) {
+        textHtml = item.icon;
+      }
+      return '';
+    });
+    return (
+      <>
+        <span
+          dangerouslySetInnerHTML={{ __html: textHtml }}
+          className="datasource-svgicon"
+        />
+        <span>{type || '-'}</span>
+      </>
+    );
   };
 
   return (
@@ -64,7 +85,7 @@ const DataSourceTable = ({ tableData, changeData }) => {
         </tr>
       </thead>
       <tbody>
-        {tableData && tableData.length !== 0 ? (
+        {tableData && connectionType && tableData.length !== 0 ? (
           tableData.map((datasource) => {
             return (
               <tr key={uuidv4()}>
@@ -79,23 +100,8 @@ const DataSourceTable = ({ tableData, changeData }) => {
                 </td>
                 <td>
                   <div className="source-type">
-                    <img
-                      src={
-                        datasource.connection_type === 'Google Analytics'
-                          ? GoogleAnalytics
-                          : datasource.connection_type === 'Postgres'
-                          ? Postgre
-                          : datasource.connection_type === 'Google Sheets'
-                          ? GoogleSheet
-                          : datasource.connection_type === 'MySQL'
-                          ? MySQL
-                          : datasource.connection_type === 'Amplitude'
-                          ? Amplitude
-                          : ''
-                      }
-                      alt={datasource.connection_type}
-                    />
-                    <span>{datasource.connection_type}</span>
+                    {connectionType &&
+                      datasourceIcon(datasource.connection_type)}
                   </div>
                 </td>
                 <td>{datasource.kpi_count || '-'}</td>

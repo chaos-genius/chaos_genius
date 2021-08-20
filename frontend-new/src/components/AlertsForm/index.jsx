@@ -78,7 +78,7 @@ const AlertsForm = () => {
             <span>Cancel</span>
           </button>
         </Link> */}
-        <button className="btn black-button">
+        <button className="btn black-button" disabled>
           <span>Save</span>
         </button>
       </div>

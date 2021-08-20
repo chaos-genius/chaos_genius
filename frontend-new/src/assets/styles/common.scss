@@ -139,7 +139,6 @@ a:hover {
     border-radius: 6px;
     outline: 0 !important;
     box-shadow: none !important;
-    margin-bottom: 16px;
     padding: 15px;
   }
   label {
@@ -242,14 +241,20 @@ a:hover {
       height: 16px;
     }
   }
+  // option menu select
   .selectcategory__option {
     background-color: $white !important;
     color: $black_variation-2 !important;
     height: 48px;
+    font-weight: $font-weight-400 !important;
+    font-size: $font-size-16 !important;
+    line-height: $line-height-16 !important;
+    letter-spacing: $letter-spacing !important;
     &--is-focused {
       background-color: $green_variation-2 !important;
     }
   }
+
   .selectcategory__multi-value {
     background-color: $grey_variation-2;
     .selectcategory__multi-value__label {
@@ -302,6 +307,9 @@ a:hover {
       }
     }
   }
+}
+.query_fail {
+  margin-bottom: 10px;
 }
 
 // checkbox
@@ -477,6 +485,10 @@ a:hover {
   background-color: $white !important;
   color: $black_variation-2 !important;
   height: 48px;
+  font-weight: $font-weight-400 !important;
+  font-size: $font-size-16 !important;
+  line-height: $line-height-16 !important;
+  letter-spacing: $letter-spacing !important;
   &--is-focused {
     background-color: $green_variation-2 !important;
   }
@@ -517,6 +529,9 @@ a:hover {
   font-size: $font-size-14 !important;
   font-weight: $font-weight-500 !important;
   color: #7d848a !important;
+}
+.css-1hwfws3 {
+  padding: 0px !important;
 }
 
 // loader

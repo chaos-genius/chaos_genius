@@ -2,11 +2,11 @@ import React from 'react';
 
 import { Link } from 'react-router-dom';
 
-import GoogleAnalytics from '../../assets/images/googleanalytics.svg';
-import GoogleSheet from '../../assets/images/googlesheets.svg';
-import Postgre from '../../assets/images/postgre.svg';
-import Amplitude from '../../assets/images/amplitude.svg';
-import MySQL from '../../assets/images/mysql.svg';
+// import GoogleAnalytics from '../../assets/images/googleanalytics.svg';
+// import GoogleSheet from '../../assets/images/googlesheets.svg';
+// import Postgre from '../../assets/images/postgre.svg';
+// import Amplitude from '../../assets/images/amplitude.svg';
+// import MySQL from '../../assets/images/mysql.svg';
 import Edit from '../../assets/images/edit.svg';
 import EditActive from '../../assets/images/edit-active.svg';
 
@@ -17,7 +17,26 @@ import Dimension from './dimension';
 
 import { formatDate } from '../../utils/date-helper';
 
-const KPITable = ({ kpiData }) => {
+const KPITable = ({ kpiData, connectionType }) => {
+  const datasourceIcon = (type) => {
+    let textHtml;
+    connectionType.find((item) => {
+      if (item.name === type) {
+        textHtml = item.icon;
+      }
+      return '';
+    });
+    return (
+      <>
+        <span
+          dangerouslySetInnerHTML={{ __html: textHtml }}
+          className="datasource-svgicon"
+        />
+        <span>{type || '-'}</span>
+      </>
+    );
+  };
+
   return (
     <table className="table">
       <thead>
@@ -32,7 +51,7 @@ const KPITable = ({ kpiData }) => {
         </tr>
       </thead>
       <tbody>
-        {kpiData && kpiData.length !== 0 ? (
+        {kpiData && connectionType && kpiData.length !== 0 ? (
           kpiData.map((kpi) => {
             return (
               <tr key={uuidv4()}>
@@ -42,23 +61,7 @@ const KPITable = ({ kpiData }) => {
                 </td>
                 <td>
                   <div className="source-type">
-                    <img
-                      src={
-                        kpi.connection_type === 'Google Analytics'
-                          ? GoogleAnalytics
-                          : kpi.connection_type === 'Postgres'
-                          ? Postgre
-                          : kpi.connection_type === 'Google Sheets'
-                          ? GoogleSheet
-                          : kpi.connection_type === 'MySQL'
-                          ? MySQL
-                          : kpi.connection_type === 'Amplitude'
-                          ? Amplitude
-                          : '-'
-                      }
-                      alt={kpi.connection_type}
-                    />
-                    <span>{kpi.connection_type || '-'}</span>
+                    {connectionType && datasourceIcon(kpi.connection_type)}
                   </div>
                 </td>
                 <td className="date-formated">

@@ -45,7 +45,7 @@ const Sidebar = () => {
             </Link>
           </li>
           <li className={location[1] === 'dashboard' ? 'active' : ''}>
-            <Link to="/dashboard">
+            <Link to="/dashboard/autorca">
               <img
                 src={location[1] === 'dashboard' ? dashboardactive : dashboard}
                 alt="Dashboard"

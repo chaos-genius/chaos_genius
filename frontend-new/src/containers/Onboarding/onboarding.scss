@@ -56,8 +56,9 @@
       color: $black_variation-2;
       &::before {
         content: url('../../assets/images/correct.svg');
-        background-color: black;
+        background-color: $black_variation-2;
         color: $white;
+        border: 1px solid $black_variation-2;
       }
     }
     &.selected + li::after {

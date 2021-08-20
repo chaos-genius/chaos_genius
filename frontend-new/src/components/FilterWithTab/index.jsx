@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+// import { useHistory } from 'react-router-dom';
+
 import Search from '../../assets/images/search.svg';
 import GreenArrow from '../../assets/images/green-arrow.svg';
 
@@ -7,10 +9,11 @@ import Fuse from 'fuse.js';
 
 import { v4 as uuidv4 } from 'uuid';
 
-const DashboardFilter = ({ setKpi, data }) => {
-  const [active, setActive] = useState('');
+const DashboardFilter = ({ setKpi, data, active, setActive }) => {
+  //const [active, setActive] = useState('');
   const [listData, setListData] = useState(data);
   const [searchData, setSearchData] = useState(data);
+  // const history = useHistory();
   useEffect(() => {
     if (data) {
       setListData(data);
@@ -34,10 +37,19 @@ const DashboardFilter = ({ setKpi, data }) => {
       setListData(searchData);
     }
   };
+  // useEffect(() => {
+  //   const location = history.location.pathname.split('/');
+  //   if (active && location[2] === 'autorca') {
+  //     history.push(`/dashboard/autorca/${active}`);
+  //   } else if (active && location[2] === 'anomolies') {
+  //     history.push(`/dashboard/anomolies/${active}`);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [active]);
   return (
     <div className="common-filter-section">
       <div className="filter-layout">
-        {searchData && <h3>List of KPI’s ({searchData.length})</h3>}
+        {searchData && <h3>List of KPI's ({searchData.length})</h3>}
         <div className="form-group icon search-filter">
           <input
             type="text"
@@ -63,7 +75,7 @@ const DashboardFilter = ({ setKpi, data }) => {
                     setKpi(item.id);
                   }}>
                   {item.name}
-                  <img src={GreenArrow} alt="GreenArrow Icon" />
+                  <img src={GreenArrow} alt="Arrow" />
                 </li>
               );
             })

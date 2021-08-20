@@ -26,11 +26,31 @@ const Routes = () => (
       path="/"
       component={(props) => <Home {...props} />}
     />
-    <PrivateRouteWithSidebar
+    {/* <PrivateRouteWithSidebar
       exact
       path="/dashboard"
       component={(props) => <Dashboard {...props} />}
+    /> */}
+    <PrivateRouteWithSidebar
+      exact
+      path="/dashboard/autorca"
+      component={(props) => <Dashboard {...props} />}
     />
+    {/* <PrivateRouteWithSidebar
+      exact
+      path="/dashboard/autorca/:kpi"
+      component={(props) => <Dashboard {...props} />}
+    /> */}
+    <PrivateRouteWithSidebar
+      exact
+      path="/dashboard/anomolies"
+      component={(props) => <Dashboard {...props} />}
+    />
+    {/* <PrivateRouteWithSidebar
+      exact
+      path="/dashboard/anomolies/:kpi"
+      component={(props) => <Dashboard {...props} />}
+    /> */}
     <PrivateRouteWithSidebar
       exact
       path="/datasource"

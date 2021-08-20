@@ -1,29 +1,32 @@
 import React, { useEffect, useState } from 'react';
 
+import { useSelector, useDispatch } from 'react-redux';
+import { Link, useHistory } from 'react-router-dom';
+
 import Select from 'react-select';
-
-import { useDispatch, useSelector } from 'react-redux';
-
-import * as am4core from '@amcharts/amcharts4/core';
-import * as am4charts from '@amcharts/amcharts4/charts';
-
-import Setting from '../../assets/images/setting.svg';
-import Toparrow from '../../assets/images/toparrow.svg';
-
-// import { analysisData, y_axis_lim } from './constant';
 
 import DashboardTable from '../DashboardTable';
 import Dashboardgraphcard from '../DashboardGraphCard';
 
 import './dashboardgraph.scss';
+import '../../assets/styles/table.scss';
+
+import Setting from '../../assets/images/setting.svg';
+import Toparrow from '../../assets/images/toparrow.svg';
+import Next from '../../assets/images/next.svg';
+
+import * as am4core from '@amcharts/amcharts4/core';
+import * as am4charts from '@amcharts/amcharts4/charts';
+
+import HierarchicalTable from '../HierarchicalTable';
 
 import {
+  getDashboardAggregation,
   getDashboardLinechart,
   getAllDashboardDimension,
-  getDashboardRcaAnalysis
+  getDashboardRcaAnalysis,
+  getAllDashboardHierarchical
 } from '../../redux/actions';
-
-import { v4 as uuidv4 } from 'uuid';
 
 const data = [
   {
@@ -49,91 +52,140 @@ const multidimensional = [
 
 const Dashboardgraph = ({ kpi }) => {
   const dispatch = useDispatch();
-  const [active, setActive] = useState('');
-  const { rcaAnalysisData } = useSelector((state) => state.dashboard);
-  const { linechartData } = useSelector((state) => state.lineChart);
-  const { dimensionData, dimensionLoading } = useSelector(
-    (state) => state.dimension
-  );
+
+  const [activeDimension, setActiveDimension] = useState('');
+  const [collapse, setCollapse] = useState(true);
+  const [singleDimensionData, SetSingleDimensionData] = useState(0);
+
   const [monthWeek, setMonthWeek] = useState({
     value: 'mom',
     label: 'Current Month on Last Month'
   });
+  const [dimension, setDimension] = useState({
+    value: 'multidimension',
+    label: 'Multidimension'
+  });
 
-  const [tableData, SetTableData] = useState('mom');
-  const [collapse, setCollapse] = useState(true);
-  const [overlap, setOverlap] = useState('');
-  const [dimension, setDimension] = useState('multidimension');
+  const { aggregationData, aggregationLoading } = useSelector(
+    (state) => state.aggregation
+  );
 
-  useEffect(() => {
-    getAllLinechart();
-    dispatchGetAllDashboardDimension();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpi, monthWeek.value]);
+  const { linechartData } = useSelector((state) => state.lineChart);
+
+  const { hierarchicalLoading, hierarchicalData } = useSelector(
+    (state) => state.hierarchial
+  );
+
+  const { rcaAnalysisData } = useSelector((state) => state.dashboard);
+
+  const { dimensionData, dimensionLoading } = useSelector(
+    (state) => state.dimension
+  );
+
+  const getAllAggregationData = () => {
+    dispatch(getDashboardAggregation(kpi, { timeline: monthWeek.value }));
+  };
 
   const getAllLinechart = () => {
     dispatch(getDashboardLinechart(kpi, { timeline: monthWeek.value }));
   };
 
-  const dispatchGetAllDashboardDimension = () => {
-    dispatch(getAllDashboardDimension(kpi));
-  };
+  const location = useHistory().location.pathname.split('/');
 
-  const getAllRCA = () => {
-    if (dimension === 'multidimension') {
-      dispatch(getDashboardRcaAnalysis(kpi, { timeline: monthWeek.value }));
-    } else {
+  useEffect(() => {
+    if (kpi !== undefined) {
+      getAllAggregationData();
+      getAllLinechart();
+      getAllRCA();
+      if (dimension.value === 'singledimension') {
+        dispatchGetAllDashboardDimension();
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kpi, monthWeek.value]);
+
+  useEffect(() => {
+    if (dimensionData && dimensionData?.dimensions) {
+      setActiveDimension(dimensionData?.dimensions[0]);
+      getSingleDimensioData(dimensionData?.dimensions[0]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dimensionData]);
+
+  const getSingleDimensioData = (value) => {
+    dispatch(
+      getDashboardRcaAnalysis(kpi, {
+        timeline: monthWeek.value,
+        dimension: value
+      })
+    );
+    dispatch(
+      getAllDashboardHierarchical(kpi, {
+        timeline: monthWeek.value,
+        dimension: value
+      })
+    );
+  };
+  function getAllRCA() {
+    if (dimension.value === 'singledimension') {
       dispatch(
         getDashboardRcaAnalysis(kpi, {
           timeline: monthWeek.value,
-          dimension: active
+          dimension: activeDimension
+        })
+      );
+      dispatch(
+        getAllDashboardHierarchical(kpi, {
+          timeline: monthWeek.value,
+          dimension: activeDimension
+        })
+      );
+    } else {
+      dispatch(
+        getDashboardRcaAnalysis(kpi, {
+          timeline: monthWeek.value
         })
       );
     }
-  };
-
-  useEffect(() => {
-    if (linechartData) {
-      plotLineChart();
-    }
-    if (rcaAnalysisData) {
-      plotChart();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [linechartData, rcaAnalysisData, dimensionData]);
+  }
 
   const plotLineChart = () => {
-    // https://www.amcharts.com/demos/comparing-different-date-values-google-analytics-style/?theme=frozen#code
     am4core.options.autoDispose = true;
 
     let chart = am4core.create('lineChartDiv', am4charts.XYChart);
 
-    chart.legend = new am4charts.Legend();
-    chart.legend.position = 'bottom';
+    // chart.legend = new am4charts.Legend();
+    // chart.legend.position = "bottom";
 
-    chart.data = linechartData; //this.state.lineChartData;
+    chart.data = linechartData;
 
     chart.fontSize = 12;
     chart.fontFamily = 'Inter ,sans-serif';
 
-    // Create axes
-    let dateAxis = chart.xAxes.push(new am4charts.ValueAxis());
-    dateAxis.renderer.minGridDistance = 50;
-    dateAxis.renderer.grid.template.disabled = true;
+    // let title = chart.titles.create();
+    // title.text = this.props.kpidetails.name;
+    // title.fontSize = 16;
+    // title.fontfamily = 'Inter';
+    // title.marginBottom = 10;
+    // title.align = 'center';
 
-    let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-    valueAxis.renderer.grid.template.disabled = true;
+    // Create axes
+    let dateAxis = chart.xAxes.push(new am4charts.DateAxis());
+    dateAxis.renderer.minGridDistance = 50;
+    // dateAxis.renderer.grid.template.disabled = true;
+
+    chart.yAxes.push(new am4charts.ValueAxis());
+    //valueAxis.renderer.grid.template.disabled = true;
 
     // Create series
     let series = chart.series.push(new am4charts.LineSeries());
-    series.legendSettings.labelText = 'Current Values';
+    // series.legendSettings.labelText = "Values";
     series.dataFields.valueY = 'value';
-    series.dataFields.valueX = 'index';
+    series.dataFields.dateX = 'date';
     series.stroke = am4core.color('#05A677');
     series.strokeWidth = 2.5;
     series.minBulletDistance = 10;
-    series.tooltipText =
-      '[bold]{date.formatDate()}:[/] {value}\n[bold]{previousDate.formatDate()}:[/] {previousValue}';
+    series.tooltipText = '[bold]{date.formatDate()}:[/] {value}';
     series.tooltip.pointerOrientation = 'vertical';
     series.tooltip.getFillFromObject = false;
     series.tooltip.background.fill = am4core.color('#778CA3');
@@ -141,49 +193,14 @@ const Dashboardgraph = ({ kpi }) => {
     series.tooltip.label.fontFamily = 'Inter ,sans-serif';
     series.tooltip.label.fill = '#fff';
 
-    // Create series
-    let series2 = chart.series.push(new am4charts.LineSeries());
-    series2.legendSettings.labelText = 'Previous Values';
-    series2.dataFields.valueY = 'previousValue';
-    series2.dataFields.valueX = 'index';
-    series2.stroke = am4core.color('#778CA3');
-    series2.strokeWidth = 2.5;
-    series2.strokeDasharray = '6, 4';
-
     // Add cursor
     chart.cursor = new am4charts.XYCursor();
-
-    // Required to make tooltips function in an XY chart with both axes as ValueAxis
-    // Taken from https://www.amcharts.com/docs/v4/tutorials/multiple-cursor-tooltips-on-scatter-chart/
-    am4charts.ValueAxis.prototype.getSeriesDataItem = function (
-      series,
-      position
-    ) {
-      var key = this.axisFieldName + this.axisLetter;
-      var value = this.positionToValue(position);
-      const dataItem = series.dataItems.getIndex(
-        series.dataItems.findClosestIndex(
-          value,
-          function (x) {
-            return x[key] ? x[key] : undefined;
-          },
-          'any'
-        )
-      );
-      return dataItem;
-    };
   };
 
   const plotChart = () => {
-    if (rcaAnalysisData?.chart !== undefined) {
+    if (rcaAnalysisData?.chart) {
       am4core.options.autoDispose = true;
 
-      // if (this.state.amChart) {
-      //   this.state.amChart.data = this.state.chartData;
-      //   let valueAxis = this.state.amChart.yAxes.getIndex(0);
-      //   valueAxis.min = this.state.yAxis[0];
-      //   valueAxis.max = this.state.yAxis[1];
-      // } else {
       let chart = am4core.create('chartdivWaterfall', am4charts.XYChart);
       chart.fontSize = 12;
       chart.fontFamily = 'Inter ,sans-serif';
@@ -259,23 +276,47 @@ const Dashboardgraph = ({ kpi }) => {
       chart.tooltip.label.fontSize = 12;
       chart.tooltip.label.fontFamily = 'Inter ,sans-serif';
       chart.cursor.behavior = 'none';
-      // this.setState({
-      //   amChart: chart
-      // });
-
-      // }
     }
   };
 
-  useEffect(() => {
-    getAllRCA();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active, monthWeek.value]);
+  if (linechartData) {
+    plotLineChart();
+  }
+  if (rcaAnalysisData) {
+    plotChart();
+  }
+
+  const dispatchGetAllDashboardDimension = () => {
+    dispatch(getAllDashboardDimension(kpi));
+  };
 
   const handleDimensionChange = (data) => {
+    setDimension(data);
     if (data.value === 'singledimension') {
       dispatchGetAllDashboardDimension();
+    } else {
+      dispatch(
+        getDashboardRcaAnalysis(kpi, {
+          timeline: monthWeek.value
+        })
+      );
     }
+  };
+
+  const onActiveDimensionClick = (data) => {
+    setActiveDimension(data);
+    dispatch(
+      getDashboardRcaAnalysis(kpi, {
+        timeline: monthWeek.value,
+        dimension: data
+      })
+    );
+    dispatch(
+      getAllDashboardHierarchical(kpi, {
+        timeline: monthWeek.value,
+        dimension: data
+      })
+    );
   };
 
   return (
@@ -285,7 +326,16 @@ const Dashboardgraph = ({ kpi }) => {
         <div className="dashboard-subheader">
           <div className="common-tab">
             <ul>
-              <li className="active">AutoRCA</li>
+              <Link to="/dashboard/autorca">
+                <li className={location[2] === 'autorca' ? 'active' : ''}>
+                  AutoRCA
+                </li>
+              </Link>
+              <Link to="/dashboard/anomolies">
+                <li className={location[2] === 'anomolies' ? 'active' : ''}>
+                  Anomolies
+                </li>
+              </Link>
             </ul>
           </div>
           <div className="common-option">
@@ -295,133 +345,238 @@ const Dashboardgraph = ({ kpi }) => {
             </button>
           </div>
         </div>
-        <div className="dashboard-container">
-          <div className="dashboard-subcategory">
-            <Select
-              value={monthWeek}
-              options={data}
-              classNamePrefix="selectcategory"
-              placeholder="select"
-              isSearchable={false}
-              onChange={(e) => {
-                setMonthWeek(e);
-                SetTableData(e.value);
-              }}
-            />
-          </div>
-          {/* Graph Section */}
-          <div className="dashboard-graph-section">
-            <div className="common-graph">
-              {/* {aggregationData && (
-                <Dashboardgraphcard aggregation={aggregationData} />
-              )} */}
-              <Dashboardgraphcard kpi={kpi} data={tableData} />
+        {location[2] === 'autorca' ? (
+          <div className="dashboard-container">
+            <div className="dashboard-subcategory">
+              <Select
+                value={monthWeek}
+                options={data}
+                classNamePrefix="selectcategory"
+                placeholder="select"
+                isSearchable={false}
+                onChange={(e) => {
+                  setMonthWeek(e);
+                }}
+              />
             </div>
-            <div className="common-graph" id="lineChartDiv"></div>
+            {/* Graph Section */}
+            <div className="dashboard-graph-section">
+              <div className="common-graph">
+                {aggregationLoading ? (
+                  <div className="loader">
+                    <div className="loading-text">
+                      <p>loading</p>
+                      <span></span>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {aggregationData && (
+                      <Dashboardgraphcard
+                        aggregationData={aggregationData}
+                        monthWeek={monthWeek}
+                      />
+                    )}
+                  </>
+                )}
+              </div>
+              <div className="common-graph" id="lineChartDiv"></div>
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
-      <div className="dashboard-layout">
-        <div
-          className={
-            !collapse
-              ? 'dashboard-header-wrapper header-wrapper-disable'
-              : 'dashboard-header-wrapper'
-          }>
-          <div className="dashboard-header">
-            <h3>Drill Downs</h3>
-          </div>
+      {location[2] === 'autorca' ? (
+        <div className="dashboard-layout">
           <div
             className={
-              !collapse ? 'header-collapse header-disable' : 'header-collapse'
-            }
-            onClick={() => setCollapse(!collapse)}>
-            <img src={Toparrow} alt="CollapseOpen" />
+              !collapse
+                ? 'dashboard-header-wrapper header-wrapper-disable'
+                : 'dashboard-header-wrapper'
+            }>
+            <div className="dashboard-header">
+              <h3>Drill Downs</h3>
+            </div>
+            <div
+              className={
+                !collapse ? 'header-collapse header-disable' : 'header-collapse'
+              }
+              onClick={() => setCollapse(!collapse)}>
+              <img src={Toparrow} alt="CollapseOpen" />
+            </div>
           </div>
-        </div>
-        {collapse ? (
-          <div className="dashboard-container">
-            <div className="dashboard-subheader">
+          {collapse ? (
+            <div className="dashboard-container">
+              <div className="dashboard-subheader">
+                <div
+                  className={
+                    dimension.value !== 'multidimension'
+                      ? ' common-tab'
+                      : 'common-tab common-tab-hide'
+                  }>
+                  <ul>
+                    {dimensionLoading ? (
+                      <div className="loader">
+                        <div className="loading-text">
+                          <p>loading</p>
+                          <span></span>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {singleDimensionData > 2 ? (
+                          <li
+                            className="previous-step"
+                            onClick={() =>
+                              SetSingleDimensionData(singleDimensionData - 3)
+                            }>
+                            <img src={Next} alt="Previous" />
+                          </li>
+                        ) : null}
+                        {dimensionData &&
+                          dimensionData.dimensions.length !== 0 &&
+                          dimensionData.dimensions
+                            .slice(
+                              0 + singleDimensionData,
+                              3 + singleDimensionData
+                            )
+                            .map((data) => {
+                              return (
+                                <li
+                                  className={
+                                    activeDimension === data ? 'active' : ''
+                                  }
+                                  onClick={() => {
+                                    onActiveDimensionClick(data);
+                                  }}>
+                                  {data}
+                                </li>
+                              );
+                            })}
+                        {dimensionData.dimensions.length > 3 &&
+                        dimensionData.dimensions.length !== 0 ? (
+                          <li
+                            className={
+                              singleDimensionData + 1 >=
+                              dimensionData.dimensions.length
+                                ? 'disable-next'
+                                : ''
+                            }
+                            onClick={() =>
+                              SetSingleDimensionData(singleDimensionData + 3)
+                            }>
+                            <img src={Next} alt="Next" />
+                          </li>
+                        ) : null}
+                      </>
+                    )}
+                  </ul>
+                </div>
+                <div className="common-option">
+                  <Select
+                    options={multidimensional}
+                    classNamePrefix="selectcategory"
+                    placeholder="Multidimensional"
+                    isSearchable={false}
+                    value={dimension}
+                    onChange={(e) => {
+                      handleDimensionChange(e);
+                    }}
+                  />
+                </div>
+              </div>
+              {/*Drill down chart*/}
               <div
-                className={
-                  dimension !== 'multidimension'
-                    ? ' common-tab'
-                    : 'common-tab common-tab-hide'
-                }>
-                <ul>
-                  {dimensionLoading ? (
-                    <div className="loader">
+                className="common-drilldown-graph"
+                id="chartdivWaterfall"></div>
+
+              {dimension.value === 'multidimension' ? (
+                <>
+                  {rcaAnalysisData ? (
+                    <DashboardTable
+                      rcaAnalysisData={rcaAnalysisData}
+                      dimension={dimension}
+                    />
+                  ) : (
+                    <div className="loader loader-page">
+                      <div className="loading-text">
+                        <p>loading</p>
+                        <span></span>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  {hierarchicalLoading ? (
+                    <div className="loader loader-page">
                       <div className="loading-text">
                         <p>loading</p>
                         <span></span>
                       </div>
                     </div>
                   ) : (
-                    dimensionData &&
-                    dimensionData.dimensions.map((data) => {
-                      return (
-                        <li
-                          key={uuidv4()}
-                          className={active === data ? 'active' : ''}
-                          onClick={() => setActive(data)}>
-                          {data}
-                        </li>
-                      );
-                    })
+                    <>
+                      {hierarchicalData &&
+                        hierarchicalData?.data_table.length !== 0 && (
+                          <HierarchicalTable
+                            columns={[
+                              {
+                                field: 'subgroup',
+                                title: 'Subgroup Name'
+                              },
+                              {
+                                field: 'g1_agg',
+                                title: 'Prev Month Avg'
+                              },
+                              {
+                                field: 'g1_count',
+                                title: 'Prev Month Size'
+                              },
+                              {
+                                field: 'g2_agg',
+                                title: 'Prev Month Count'
+                              },
+                              {
+                                field: 'g1_size',
+                                title: 'Curr Month Avg'
+                              },
+                              {
+                                field: 'g2_count',
+                                title: 'Curr Month  Size'
+                              },
+                              {
+                                field: 'g2_size',
+                                title: 'Curr Month Count'
+                              },
+                              {
+                                field: 'impact',
+                                title: 'Impact'
+                              }
+                            ]}
+                            data={hierarchicalData.data_table}
+                            title=""
+                            parentChildData={(row, rows) =>
+                              rows.find((a) => a.id === row.parentId)
+                            }
+                            options={{
+                              paginationType: 'stepped',
+                              showTitle: false,
+                              search: false,
+                              paging: false,
+                              sorting: false,
+                              draggable: false
+                            }}
+                          />
+                        )}
+                    </>
                   )}
-                </ul>
-              </div>
-              <div className="common-option">
-                <Select
-                  options={multidimensional}
-                  classNamePrefix="selectcategory"
-                  placeholder="Multidimensional"
-                  isSearchable={false}
-                  onChange={(e) => {
-                    handleDimensionChange(e);
-                    setDimension(e.value);
-                  }}
-                />
-              </div>
+                </>
+              )}
             </div>
-            {/*Drill down chart*/}
-            <div
-              className="common-drilldown-graph"
-              id="chartdivWaterfall"></div>
-
-            {dimension === 'multidimension' && (
-              <div className="common-subsection">
-                <div className="subsection-heading">
-                  <h3>Top Drivers</h3>
-                </div>
-
-                <div className="form-check form-switch">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="removeoverlap"
-                    onChange={(e) => setOverlap(e.target.checked)}
-                  />
-                  <label className="form-check-label" htmlFor="removeoverlap">
-                    Remove Overlap
-                  </label>
-                </div>
-              </div>
-            )}
-            <div className="common-drilldown-table table-section">
-              <DashboardTable
-                data={tableData}
-                kpi={kpi}
-                overlap={overlap}
-                dimension={dimension}
-                activeDimension={active}
-              />
-            </div>
-          </div>
-        ) : null}
-      </div>
+          ) : null}
+        </div>
+      ) : null}{' '}
     </div>
   );
 };
-
 export default Dashboardgraph;

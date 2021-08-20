@@ -19,6 +19,33 @@
       border-radius: 6px;
       border: none;
     }
+    .css-1hwfws3 {
+      padding: 2px 8px !important;
+    }
+    .css-9gakcf-option {
+      background-color: $green_variation-2 !important;
+      color: $black_variation-2 !important;
+      height: 48px;
+      font-weight: $font-weight-400 !important;
+      font-size: $font-size-16 !important;
+      line-height: $line-height-16 !important;
+      letter-spacing: $letter-spacing !important;
+      &--is-focused {
+        background-color: $green_variation-2 !important;
+      }
+    }
+    .css-yt9ioa-option {
+      background-color: $white !important;
+      color: $black_variation-2 !important;
+      height: 48px;
+      font-weight: $font-weight-400 !important;
+      font-size: $font-size-16 !important;
+      line-height: $line-height-16 !important;
+      letter-spacing: $letter-spacing !important;
+      &--is-focused {
+        background-color: $green_variation-2 !important;
+      }
+    }
 
     .selectcategory__placeholder,
     .selectcategory__single-value {
@@ -40,7 +67,7 @@
     padding-bottom: 23px;
     .common-graph {
       width: 49%;
-      height: 300px;
+      min-height: 300px;
       border: 1px solid $grey_variation-4;
       box-sizing: border-box;
       border-radius: 20px;
@@ -127,4 +154,10 @@
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid rgba(34, 34, 34, 0.12);
+}
+.disable-next {
+  visibility: hidden;
+}
+.previous-step {
+  transform: rotate(180deg);
 }

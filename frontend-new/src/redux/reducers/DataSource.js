@@ -22,8 +22,8 @@ const initialState = {
   testConnectionResponse: [],
   createDatasourceResponse: [],
   deleteDataSourceResponse: [],
-  isLoading: true,
-  testLoading: true,
+  isLoading: false,
+  testLoading: false,
   error: false
 };
 
@@ -31,12 +31,14 @@ export const dataSource = (state = initialState, action) => {
   switch (action.type) {
     case DATASOURCEREQUEST: {
       return {
+        ...state,
         isLoading: true,
         error: false
       };
     }
     case DATASOURCESUCCESS: {
       return {
+        ...state,
         isLoading: false,
         dataSourcesList: action.data,
         error: false
@@ -44,6 +46,7 @@ export const dataSource = (state = initialState, action) => {
     }
     case DATASOURCEFAILURE: {
       return {
+        ...state,
         isLoading: false,
         dataSourcesList: [],
         error: true
@@ -51,73 +54,77 @@ export const dataSource = (state = initialState, action) => {
     }
     case CONNECTIONTYPEREQUEST: {
       return {
-        isLoading: true,
+        ...state,
+
         error: false
       };
     }
     case CONNECTIONTYPESUCCESS: {
       return {
-        isLoading: false,
+        ...state,
         connectionType: action.data
       };
     }
     case CONNECTIONTYPEFAILURE: {
       return {
-        isLoading: false,
+        ...state,
         error: true
       };
     }
     case TESTCONNECTIONREQUEST: {
       return {
+        ...state,
         testLoading: true,
         error: false
       };
     }
     case TESTCONNECTIONSUCCESS: {
       return {
+        ...state,
         testLoading: false,
         testConnectionResponse: action.data
       };
     }
     case TESTCONNECTIONFAILURE: {
       return {
+        ...state,
         testLoading: false,
         error: true
       };
     }
     case CREATEDATASOURCEREQUEST: {
       return {
-        isLoading: true,
         error: false
       };
     }
     case CREATEDATASOURCESUCCESS: {
       return {
-        isLoading: false,
+        ...state,
+
         createDatasourceResponse: action.data
       };
     }
     case CREATEDATASOURCEFAILURE: {
       return {
-        isLoading: false,
+        ...state,
+
         error: true
       };
     }
     case DELETEDATASOURCEREQUEST: {
       return {
-        isLoading: true,
         error: false
       };
     }
     case DELETEDATASOURCESUCSESS: {
       return {
-        isLoading: false,
+        ...state,
         deleteDataSourceResponse: action.data
       };
     }
     case DELETEDATASOURCEFAILURE: {
       return {
-        isLoading: false,
+        ...state,
         error: true
       };
     }

@@ -95,6 +95,7 @@
           .source-type {
             display: flex;
             align-items: center;
+
             img {
               width: 26px;
               height: 26px;
@@ -102,6 +103,11 @@
             }
             span {
               font-weight: $font-weight-normal;
+            }
+            svg {
+              width: 26px;
+              height: 26px;
+              margin-right: 8px;
             }
           }
           .edit-information {

@@ -6,8 +6,10 @@ Most configuration is set via environment variables.
 For local development, use a .env file to set
 environment variables.
 """
+import os
 from environs import Env
 
+CWD = os.getcwd()
 env = Env()
 env.read_env()
 
@@ -19,5 +21,7 @@ SEND_FILE_MAX_AGE_DEFAULT = env.int("SEND_FILE_MAX_AGE_DEFAULT")
 BCRYPT_LOG_ROUNDS = env.int("BCRYPT_LOG_ROUNDS", default=13)
 DEBUG_TB_ENABLED = DEBUG
 DEBUG_TB_INTERCEPT_REDIRECTS = False
-CACHE_TYPE = "simple"  # Can be "memcached", "redis", etc.
+CACHE_TYPE = "FileSystemCache"  # Can be "memcached", "redis", etc.
+CACHE_DEFAULT_TIMEOUT = 3600
+CACHE_DIR = f"{CWD}/.cache"
 SQLALCHEMY_TRACK_MODIFICATIONS = False

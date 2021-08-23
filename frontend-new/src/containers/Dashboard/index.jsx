@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import { useSelector, useDispatch } from 'react-redux';
 
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 import './dashboard.scss';
 
@@ -17,6 +17,8 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const [active, setActive] = useState('');
   const [kpi, setKpi] = useState();
+
+  const location = useHistory().location.pathname.split('/');
 
   const { sidebarLoading, sidebarList } = useSelector((state) => {
     return state.sidebar;
@@ -88,7 +90,8 @@ const Dashboard = () => {
                 setActive={setActive}
               />
             )}
-          </div>{' '}
+          </div>
+
           {/* Graph Section*/}
           <div className="graph-section">
             {kpi && <Dashboardgraph kpi={kpi} />}

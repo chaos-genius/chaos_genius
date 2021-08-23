@@ -7,6 +7,7 @@ import Select from 'react-select';
 
 import DashboardTable from '../DashboardTable';
 import Dashboardgraphcard from '../DashboardGraphCard';
+import Anomaly from '../Anomaly';
 
 import './dashboardgraph.scss';
 import '../../assets/styles/table.scss';
@@ -385,7 +386,9 @@ const Dashboardgraph = ({ kpi }) => {
           </div>
         ) : (
           <div className="dashboard-container">
-            <div className="dashboard-graph-section"></div>
+            <div className="dashboard-graph-section">
+              <Anomaly />
+            </div>
           </div>
         )}
       </div>

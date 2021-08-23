@@ -11,6 +11,7 @@
     display: flex;
     justify-content: flex-end;
     margin-bottom: 13px;
+
     .css-2b097c-container {
       width: 266px;
     }
@@ -22,6 +23,7 @@
     .css-1hwfws3 {
       padding: 2px 8px !important;
     }
+
     .css-9gakcf-option {
       background-color: $green_variation-2 !important;
       color: $black_variation-2 !important;
@@ -154,6 +156,9 @@
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid rgba(34, 34, 34, 0.12);
+  .css-1hwfws3 {
+    padding: 2px 8px !important;
+  }
 }
 .disable-next {
   visibility: hidden;

@@ -383,7 +383,11 @@ const Dashboardgraph = ({ kpi }) => {
               <div className="common-graph" id="lineChartDiv"></div>
             </div>
           </div>
-        ) : null}
+        ) : (
+          <div className="dashboard-container">
+            <div className="dashboard-graph-section"></div>
+          </div>
+        )}
       </div>
       {location[2] === 'autorca' ? (
         <div className="dashboard-layout">

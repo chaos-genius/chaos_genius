@@ -697,3 +697,18 @@ a:hover {
 .cursor-pointer {
   cursor: pointer;
 }
+.highcharts-container {
+  width: 100% !important;
+  svg {
+    font-family: 'Inter', sans-serif !important;
+  }
+}
+.highcharts-yaxis-labels,
+.highcharts-axis-labels {
+  text {
+    font-size: $font-size-12 !important;
+    line-height: $line-height-20 !important;
+    fill: $grey_variation-3 !important;
+    font-weight: $font-weight-normal !important;
+  }
+}

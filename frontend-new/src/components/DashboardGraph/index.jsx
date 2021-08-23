@@ -385,11 +385,9 @@ const Dashboardgraph = ({ kpi }) => {
             </div>
           </div>
         ) : (
-          <div className="dashboard-container">
-            <div className="dashboard-graph-section">
-              <Anomaly kpi={kpi} />
-            </div>
-          </div>
+          <>
+            <Anomaly kpi={kpi} />
+          </>
         )}
       </div>
       {location[2] === 'autorca' ? (
@@ -411,18 +409,113 @@ const Dashboardgraph = ({ kpi }) => {
               <img src={Toparrow} alt="CollapseOpen" />
             </div>
           </div>
-          {collapse ? (
-            <div className="dashboard-container">
-              <div className="dashboard-subheader">
+
+          <>
+            {collapse ? (
+              <div className="dashboard-container">
+                <div className="dashboard-subheader">
+                  <div
+                    className={
+                      dimension.value !== 'multidimension'
+                        ? ' common-tab'
+                        : 'common-tab common-tab-hide'
+                    }>
+                    <ul>
+                      {dimensionLoading ? (
+                        <div className="loader">
+                          <div className="loading-text">
+                            <p>loading</p>
+                            <span></span>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          {singleDimensionData > 2 ? (
+                            <li
+                              className="previous-step"
+                              onClick={() =>
+                                SetSingleDimensionData(singleDimensionData - 3)
+                              }>
+                              <img src={Next} alt="Previous" />
+                            </li>
+                          ) : null}
+                          {dimensionData &&
+                            dimensionData.dimensions.length !== 0 &&
+                            dimensionData.dimensions
+                              .slice(
+                                0 + singleDimensionData,
+                                3 + singleDimensionData
+                              )
+                              .map((data) => {
+                                return (
+                                  <li
+                                    className={
+                                      activeDimension === data ? 'active' : ''
+                                    }
+                                    onClick={() => {
+                                      onActiveDimensionClick(data);
+                                    }}>
+                                    {data}
+                                  </li>
+                                );
+                              })}
+                          {dimensionData.dimensions.length > 3 &&
+                          dimensionData.dimensions.length !== 0 ? (
+                            <li
+                              className={
+                                singleDimensionData + 1 >=
+                                dimensionData.dimensions.length
+                                  ? 'disable-next'
+                                  : ''
+                              }
+                              onClick={() =>
+                                SetSingleDimensionData(singleDimensionData + 3)
+                              }>
+                              <img src={Next} alt="Next" />
+                            </li>
+                          ) : null}
+                        </>
+                      )}
+                    </ul>
+                  </div>
+                  <div className="common-option">
+                    <Select
+                      options={multidimensional}
+                      classNamePrefix="selectcategory"
+                      placeholder="Multidimensional"
+                      isSearchable={false}
+                      value={dimension}
+                      onChange={(e) => {
+                        handleDimensionChange(e);
+                      }}
+                    />
+                  </div>
+                </div>
+                {/*Drill down chart*/}
                 <div
-                  className={
-                    dimension.value !== 'multidimension'
-                      ? ' common-tab'
-                      : 'common-tab common-tab-hide'
-                  }>
-                  <ul>
-                    {dimensionLoading ? (
-                      <div className="loader">
+                  className="common-drilldown-graph"
+                  id="chartdivWaterfall"></div>
+
+                {dimension.value === 'multidimension' ? (
+                  <>
+                    {rcaAnalysisData ? (
+                      <DashboardTable
+                        rcaAnalysisData={rcaAnalysisData}
+                        dimension={dimension}
+                      />
+                    ) : (
+                      <div className="loader loader-page">
+                        <div className="loading-text">
+                          <p>loading</p>
+                          <span></span>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {hierarchicalLoading ? (
+                      <div className="loader loader-page">
                         <div className="loading-text">
                           <p>loading</p>
                           <span></span>
@@ -430,113 +523,21 @@ const Dashboardgraph = ({ kpi }) => {
                       </div>
                     ) : (
                       <>
-                        {singleDimensionData > 2 ? (
-                          <li
-                            className="previous-step"
-                            onClick={() =>
-                              SetSingleDimensionData(singleDimensionData - 3)
-                            }>
-                            <img src={Next} alt="Previous" />
-                          </li>
-                        ) : null}
-                        {dimensionData &&
-                          dimensionData.dimensions.length !== 0 &&
-                          dimensionData.dimensions
-                            .slice(
-                              0 + singleDimensionData,
-                              3 + singleDimensionData
-                            )
-                            .map((data) => {
-                              return (
-                                <li
-                                  className={
-                                    activeDimension === data ? 'active' : ''
-                                  }
-                                  onClick={() => {
-                                    onActiveDimensionClick(data);
-                                  }}>
-                                  {data}
-                                </li>
-                              );
-                            })}
-                        {dimensionData.dimensions.length > 3 &&
-                        dimensionData.dimensions.length !== 0 ? (
-                          <li
-                            className={
-                              singleDimensionData + 1 >=
-                              dimensionData.dimensions.length
-                                ? 'disable-next'
-                                : ''
-                            }
-                            onClick={() =>
-                              SetSingleDimensionData(singleDimensionData + 3)
-                            }>
-                            <img src={Next} alt="Next" />
-                          </li>
-                        ) : null}
+                        {hierarchicalData &&
+                          hierarchicalData?.data_table.length !== 0 && (
+                            <HierarchicalTable
+                              hierarchicalData={hierarchicalData.data_table}
+                            />
+                          )}
                       </>
                     )}
-                  </ul>
-                </div>
-                <div className="common-option">
-                  <Select
-                    options={multidimensional}
-                    classNamePrefix="selectcategory"
-                    placeholder="Multidimensional"
-                    isSearchable={false}
-                    value={dimension}
-                    onChange={(e) => {
-                      handleDimensionChange(e);
-                    }}
-                  />
-                </div>
+                  </>
+                )}
               </div>
-              {/*Drill down chart*/}
-              <div
-                className="common-drilldown-graph"
-                id="chartdivWaterfall"></div>
-
-              {dimension.value === 'multidimension' ? (
-                <>
-                  {rcaAnalysisData ? (
-                    <DashboardTable
-                      rcaAnalysisData={rcaAnalysisData}
-                      dimension={dimension}
-                    />
-                  ) : (
-                    <div className="loader loader-page">
-                      <div className="loading-text">
-                        <p>loading</p>
-                        <span></span>
-                      </div>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  {hierarchicalLoading ? (
-                    <div className="loader loader-page">
-                      <div className="loading-text">
-                        <p>loading</p>
-                        <span></span>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      {hierarchicalData &&
-                        hierarchicalData?.data_table.length !== 0 && (
-                          <HierarchicalTable
-                            hierarchicalData={hierarchicalData.data_table}
-                          />
-                        )}
-                    </>
-                  )}
-                </>
-              )}
-            </div>
-          ) : null}
+            ) : null}
+          </>
         </div>
-      ) : null}{' '}
+      ) : null}
     </div>
   );
 };

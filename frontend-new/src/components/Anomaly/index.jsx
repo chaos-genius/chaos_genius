@@ -2,19 +2,25 @@ import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import highchartsMore from 'highcharts/highcharts-more';
-import { anomalyDetection } from '../../redux/actions';
+import {
+  anomalyDetection,
+  anomalyDrilldown,
+  getAnomalyQualityData
+} from '../../redux/actions';
 import { useSelector, useDispatch } from 'react-redux';
+import Anomalygraph from '../Anomalygraph';
 highchartsMore(Highcharts);
 
 const Anomaly = ({ kpi }) => {
   const dispatch = useDispatch();
-  const [graphData, setGraphData] = useState([]);
+  // const [graphData, setGraphData] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [anomalyId, setAnomalyId] = useState('');
 
-  const { anomalyDetectionData } = useSelector((state) => {
-    return state.anomaly;
-  });
+  const { anomalyDetectionData, anomalyDrilldownData, anomalyQualityData } =
+    useSelector((state) => {
+      return state.anomaly;
+    });
 
   useEffect(() => {
     getAnomaly();
@@ -27,13 +33,28 @@ const Anomaly = ({ kpi }) => {
   useEffect(() => {
     if (anomalyDetectionData) {
       setAnomalyId(anomalyDetectionData.base_anomaly_id);
-      setGraphData(anomalyDetectionData.chart_data);
-      renderChart();
+      // setGraphData(anomalyDetectionData.chart_data);
+      renderChart(anomalyDetectionData.chart_data);
+      handleDataQuality(anomalyDetectionData.base_anomaly_id);
     }
   }, [anomalyDetectionData]);
-  console.log(anomalyDetectionData);
-  console.log(anomalyId);
-  const renderChart = () => {
+
+  let itemList = [];
+  if (anomalyDrilldownData && anomalyDrilldownData.length !== 0) {
+    anomalyDrilldownData.map((obj) => {
+      itemList.push(<Anomalygraph key={`dl-${obj.title}`} drilldown={obj} />);
+    });
+  }
+  let dataQualityList = [];
+  if (anomalyQualityData && anomalyQualityData.length !== 0) {
+    anomalyQualityData.map((obj) => {
+      dataQualityList.push(
+        <Anomalygraph key={`dl-${obj.title}`} drilldown={obj} />
+      );
+    });
+  }
+
+  const renderChart = (graphData) => {
     if (graphData !== undefined) {
       let zones = findAnomalyZones(graphData.intervals, graphData.values);
 
@@ -84,8 +105,7 @@ const Anomaly = ({ kpi }) => {
           borderWidth: 1,
           padding: 20,
           title: {
-            text:
-              'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
+            text: 'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
             style: {
               fontStyle: 'italic'
             }
@@ -225,28 +245,50 @@ const Anomaly = ({ kpi }) => {
       y
     };
   };
-
   const handleGraphClick = (event) => {
     const unixDate = event.point.x;
-    //  fetch(
-    //    `${BASE_URL}api/anomaly-data/${this.state.kpi}/anomaly-drilldown?date=${unixDate}&base_anomaly_id=${this.state.base_anomaly_id}`
-    //  )
-    //    .then((response) => response.json())
-    //    .then((data) => {
-    //      if (data?.data) {
-    //        this.setState({
-    //          drillDown: data.data
-    //        });
-    //      }
-    //    });
+
+    dispatch(
+      anomalyDrilldown(kpi, {
+        date: unixDate,
+        base_anomaly_id: anomalyId
+      })
+    );
   };
 
+  const handleDataQuality = (id) => {
+    dispatch(
+      getAnomalyQualityData(kpi, {
+        base_anomaly_id: id
+      })
+    );
+  };
   return (
-    <div>
-      {chartData && (
-        <HighchartsReact highcharts={Highcharts} options={chartData} />
-      )}
-    </div>
+    <>
+      <div className="dashboard-container">
+        {chartData && (
+          <HighchartsReact highcharts={Highcharts} options={chartData} />
+        )}
+      </div>
+      <div className="dashboard-layout">
+        <div className="dashboard-header-wrapper">
+          <div className="dashboard-header">
+            <h3>Drill Downs</h3>
+          </div>
+          <div>{/* <img src={Toparrow} alt="CollapseOpen" /> */}</div>
+        </div>
+        <div className="dashboard-container">{itemList}</div>
+      </div>
+      <div className="dashboard-layout">
+        <div className="dashboard-header-wrapper">
+          <div className="dashboard-header">
+            <h3>Data Quality</h3>
+          </div>
+          <div>{/* <img src={Toparrow} alt="CollapseOpen" /> */}</div>
+        </div>
+        <div className="dashboard-container">{dataQualityList}</div>
+      </div>
+    </>
   );
 };
 

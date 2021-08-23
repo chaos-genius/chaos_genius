@@ -4,7 +4,10 @@ import {
   ANOMALYDATAQUALITYSUCCESS,
   ANOMALYDETECTIONFAILURE,
   ANOMALYDETECTIONREQUEST,
-  ANOMALYDETECTIONSUCCESS
+  ANOMALYDETECTIONSUCCESS,
+  ANOMALYDRILLDOWNREQUEST,
+  ANOMALYDRILLDOWNSUCCESS,
+  ANOMALYDRILLDOWNFAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -13,7 +16,10 @@ const initialState = {
   anomalyDetectionError: false,
   anomalyQualityData: [],
   anomalyQualityDataLoading: true,
-  anomalyQualityDataError: false
+  anomalyQualityDataError: false,
+  anomalyDrilldownLoading: true,
+  anomalyDrilldownData: [],
+  anomalyDrilldownError: false
 };
 
 export const anomaly = (state = initialState, action) => {
@@ -58,6 +64,27 @@ export const anomaly = (state = initialState, action) => {
         ...state,
         anomalyQualityDataError: true,
         anomalyQualityDataLoading: false
+      };
+    }
+    case ANOMALYDRILLDOWNREQUEST: {
+      return {
+        ...state,
+        anomalyDrilldownLoading: true,
+        anomalyDrilldownError: false
+      };
+    }
+    case ANOMALYDRILLDOWNSUCCESS: {
+      return {
+        ...state,
+        anomalyDrilldownLoading: false,
+        anomalyDrilldownData: action.data
+      };
+    }
+    case ANOMALYDRILLDOWNFAILURE: {
+      return {
+        ...state,
+        anomalyDrilldownLoading: true,
+        anomalyDrilldownError: false
       };
     }
     default:

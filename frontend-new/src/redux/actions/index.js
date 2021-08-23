@@ -22,6 +22,7 @@ import {
 import { getOnboardingStatus } from './Onboarding';
 import { getDashboardLinechart } from './LineChart';
 import { getDashboardSidebar } from './Sidebarlist';
+import { anomalyDetection, anomalyQualityData } from './Anomaly';
 export {
   getAllDataSources,
   getConnectionType,
@@ -39,5 +40,7 @@ export {
   getAllDashboardDimension,
   getAllDashboardHierarchical,
   getOnboardingStatus,
-  getTestQuery
+  getTestQuery,
+  anomalyDetection,
+  anomalyQualityData
 };

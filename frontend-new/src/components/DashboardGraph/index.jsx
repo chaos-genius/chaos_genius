@@ -387,7 +387,7 @@ const Dashboardgraph = ({ kpi }) => {
         ) : (
           <div className="dashboard-container">
             <div className="dashboard-graph-section">
-              <Anomaly />
+              <Anomaly kpi={kpi} />
             </div>
           </div>
         )}

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import Up from '../../assets/images/up.svg';
 import Down from '../../assets/images/down.svg';
-import Close from '../../assets/images/next.svg';
+import Next from '../../assets/images/next.svg';
 
 import '../../assets/styles/table.scss';
 
@@ -80,14 +80,7 @@ const TreeNode = ({ node, child }) => {
         <td
           onClick={() => setChildVisiblity((v) => !v)}
           className={childVisible ? 'child-show' : child ? 'child-row' : ''}>
-          {hasChild && (
-            <div
-              className={`d-inline d-tree-toggler ${
-                childVisible ? 'active' : ''
-              }`}>
-              <img src={Close} alt="arrow"></img>
-            </div>
-          )}
+          {hasChild && <img src={Next} alt="arrow"></img>}
         </td>
         <td>{node.subgroup}</td>
         <td>{node.g1_agg}</td>

@@ -519,53 +519,7 @@ const Dashboardgraph = ({ kpi }) => {
                       {hierarchicalData &&
                         hierarchicalData?.data_table.length !== 0 && (
                           <HierarchicalTable
-                            columns={[
-                              {
-                                field: 'subgroup',
-                                title: 'Subgroup Name'
-                              },
-                              {
-                                field: 'g1_agg',
-                                title: 'Prev Month Avg'
-                              },
-                              {
-                                field: 'g1_count',
-                                title: 'Prev Month Size'
-                              },
-                              {
-                                field: 'g2_agg',
-                                title: 'Prev Month Count'
-                              },
-                              {
-                                field: 'g1_size',
-                                title: 'Curr Month Avg'
-                              },
-                              {
-                                field: 'g2_count',
-                                title: 'Curr Month  Size'
-                              },
-                              {
-                                field: 'g2_size',
-                                title: 'Curr Month Count'
-                              },
-                              {
-                                field: 'impact',
-                                title: 'Impact'
-                              }
-                            ]}
-                            data={hierarchicalData.data_table}
-                            title=""
-                            parentChildData={(row, rows) =>
-                              rows.find((a) => a.id === row.parentId)
-                            }
-                            options={{
-                              paginationType: 'stepped',
-                              showTitle: false,
-                              search: false,
-                              paging: false,
-                              sorting: false,
-                              draggable: false
-                            }}
+                            hierarchicalData={hierarchicalData.data_table}
                           />
                         )}
                     </>

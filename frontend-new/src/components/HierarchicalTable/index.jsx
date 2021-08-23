@@ -1,59 +1,121 @@
-import React, { useEffect, useState } from 'react';
-
-import MaterialTable from 'material-table';
+import React, { useState } from 'react';
 
 import Up from '../../assets/images/up.svg';
 import Down from '../../assets/images/down.svg';
+import Close from '../../assets/images/next.svg';
 
-import './hierarchical.scss';
+import '../../assets/styles/table.scss';
 
-const HierarchicalTable = (props) => {
-  const [data, setData] = useState('');
-  useEffect(() => {
-    gethierarchicalTableData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+const HierarchicalTable = ({ hierarchicalData }) => {
+  const parentChildData = () => {
+    var map = {},
+      node,
+      roots = [],
+      i;
 
-  const ValueChange = (value) => {
-    return value ? (
-      <>
-        <div className={value > 0 ? 'connection__success' : 'connection__fail'}>
-          <p>
-            <img src={value > 0 ? Up : Down} alt="High" />
-            {Math.abs(value)}
-          </p>
-        </div>
-      </>
-    ) : (
-      '--'
-    );
+    for (i = 0; i < hierarchicalData.length; i += 1) {
+      map[hierarchicalData[i].id] = i;
+      hierarchicalData[i].children = [];
+    }
+
+    for (i = 0; i < hierarchicalData.length; i += 1) {
+      node = hierarchicalData[i];
+      if (node.parentId !== '0' && node.parentId !== null) {
+        hierarchicalData[map[node.parentId]].children.push(node);
+      } else {
+        roots.push(node);
+      }
+    }
+    return roots;
   };
-  const gethierarchicalTableData = () => {
-    const dataRow = [];
-    props.data.forEach((obj) => {
-      const dataum = {};
-      dataum['id'] = obj.id;
-      dataum['subgroup'] = obj.subgroup;
-      dataum['g1_agg'] = obj.g1_agg;
-      dataum['g1_count'] = obj.g1_count;
-      dataum['g1_size'] = obj.g1_size;
-      dataum['g2_agg'] = obj.g2_agg;
-      dataum['g2_count'] = obj.g2_count;
-      dataum['g2_size'] = obj.g2_size;
-      dataum['impact'] = ValueChange(obj.impact);
-      dataum['parentId'] = obj.parentId;
-      dataRow.push(dataum);
-    });
-    setData(dataRow);
-  };
+
   return (
-    <MaterialTable
-      columns={props.columns}
-      data={data}
-      options={props.options}
-      parentChildData={props.parentChildData}
-      title={props.title}
-    />
+    <div className="common-drilldown-table table-section">
+      <table className="table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Subgroup Name</th>
+            <th>Prev month Avg</th>
+            <th>Prev month Size</th>
+            <th>prev month Count</th>
+            <th>Curr month Avg</th>
+            <th>Curr month Size</th>
+            <th>Curr month Count</th>
+            <th>Impact</th>
+          </tr>
+        </thead>
+        <tbody>
+          {hierarchicalData && hierarchicalData.length !== 0 && (
+            <Tree data={parentChildData()} />
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+const Tree = ({ data, childVisible }) => {
+  return (
+    <>
+      {data.map((item) => {
+        return (
+          <>
+            <TreeNode node={item} child={childVisible} />
+          </>
+        );
+      })}
+    </>
+  );
+};
+
+const TreeNode = ({ node, child }) => {
+  const [childVisible, setChildVisiblity] = useState(false);
+
+  const hasChild = node.children.length ? true : false;
+
+  return (
+    <>
+      <tr>
+        <td
+          onClick={() => setChildVisiblity((v) => !v)}
+          className={childVisible ? 'child-show' : child ? 'child-row' : ''}>
+          {hasChild && (
+            <div
+              className={`d-inline d-tree-toggler ${
+                childVisible ? 'active' : ''
+              }`}>
+              <img src={Close} alt="arrow"></img>
+            </div>
+          )}
+        </td>
+        <td>{node.subgroup}</td>
+        <td>{node.g1_agg}</td>
+        <td>{node.g1_count}</td>
+        <td>{node.g2_agg}</td>
+        <td>{node.g1_size}</td>
+        <td>{node.g2_count}</td>
+        <td>{node.g2_size}</td>
+        <td>
+          {node.impact > 0 ? (
+            <div className="connection__success">
+              <p>
+                <img src={Up} alt="High" />
+                {Math.abs(node.impact)}
+              </p>
+            </div>
+          ) : (
+            <div className="connection__fail">
+              <p>
+                <img src={Down} alt="Low" />
+                {Math.abs(node.impact)}
+              </p>
+            </div>
+          )}
+        </td>
+      </tr>
+      {hasChild && childVisible && <Tree data={node.children} childVisible />}
+    </>
   );
 };
 

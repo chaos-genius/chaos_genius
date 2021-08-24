@@ -6,6 +6,9 @@
 
   .dashboard-container {
     padding: 12px 24px;
+    &.drilldown-disable {
+      display: none;
+    }
   }
 
   &.dashboard-header-tab {
@@ -46,6 +49,8 @@
       font-size: $font-size-14 !important;
       line-height: $line-height-16 !important;
       letter-spacing: $letter-spacing !important;
+      display: flex;
+      align-items: center;
       &--is-focused {
         background-color: $green_variation-2 !important;
       }
@@ -58,9 +63,15 @@
       font-size: $font-size-14 !important;
       line-height: $line-height-16 !important;
       letter-spacing: $letter-spacing !important;
+      display: flex;
+      align-items: center;
       &--is-focused {
         background-color: $green_variation-2 !important;
       }
+    }
+    .selectcategory__option {
+      display: flex !important;
+      align-items: center !important;
     }
 
     .selectcategory__placeholder,

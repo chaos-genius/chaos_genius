@@ -302,7 +302,7 @@ const Anomaly = ({ kpi }) => {
     <>
       <div className="dashboard-layout dashboard-layout-change">
         <div className="dashboard-container">
-          <div className="dashboard-subcategory">
+          <div className="dashboard-subcategory anomaly-subcategory">
             <Select
               value={category}
               options={data}
@@ -338,8 +338,15 @@ const Anomaly = ({ kpi }) => {
             <img src={Toparrow} alt="CollapseOpen" />
           </div>
         </div>
-        {drilldownCollapse && itemList.length !== 0 ? (
-          <div className="dashboard-container">{itemList}</div>
+        {itemList.length !== 0 ? (
+          <div
+            className={
+              drilldownCollapse
+                ? 'dashboard-container'
+                : 'dashboard-container drilldown-disable'
+            }>
+            {itemList}
+          </div>
         ) : null}
       </div>
       <div className="dashboard-layout">
@@ -362,8 +369,15 @@ const Anomaly = ({ kpi }) => {
             <img src={Toparrow} alt="CollapseOpen" />
           </div>
         </div>
-        {dataQualityCollapse && dataQualityList.length !== 0 ? (
-          <div className="dashboard-container">{dataQualityList}</div>
+        {dataQualityList.length !== 0 ? (
+          <div
+            className={
+              dataQualityCollapse
+                ? 'dashboard-container'
+                : 'dashboard-container drilldown-disable'
+            }>
+            {dataQualityList}
+          </div>
         ) : null}
       </div>
     </>

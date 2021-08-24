@@ -250,6 +250,8 @@ a:hover {
     font-size: $font-size-16 !important;
     line-height: $line-height-16 !important;
     letter-spacing: $letter-spacing !important;
+    display: flex !important;
+    align-items: center !important;
     &--is-focused {
       background-color: $green_variation-2 !important;
     }
@@ -489,6 +491,8 @@ a:hover {
   font-size: $font-size-14 !important;
   line-height: $line-height-16 !important;
   letter-spacing: $letter-spacing !important;
+  display: flex !important;
+  align-items: center !important;
   &--is-focused {
     background-color: $green_variation-2 !important;
   }
@@ -697,8 +701,11 @@ a:hover {
 .cursor-pointer {
   cursor: pointer;
 }
+
+// High charts
 .highcharts-container {
   width: 100% !important;
+  margin-bottom: 12px;
   svg {
     font-family: 'Inter', sans-serif !important;
   }
@@ -714,4 +721,32 @@ a:hover {
 }
 .highcharts-credits {
   display: none;
+}
+.highcharts-xaxis {
+  text {
+    fill: $grey_variation-3 !important;
+  }
+}
+.highcharts-yaxis {
+  text {
+    fill: $grey_variation-3 !important;
+  }
+}
+.highcharts-title {
+  fill: $black_variation-2 !important;
+  font-weight: $font-weight-500 !important;
+  font-size: $font-size-16 !important;
+  line-height: $line-height-18 !important;
+  letter-spacing: $letter-spacing !important;
+  text-transform: capitalize !important;
+}
+.highcharts-series-1 {
+  text {
+    fill: $black_variation-2 !important;
+  }
+}
+.highcharts-series-2 {
+  text {
+    fill: $grey_variation-1 !important;
+  }
 }

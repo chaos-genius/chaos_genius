@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 
 import Select from 'react-select';
 
 import DashboardTable from '../DashboardTable';
 import Dashboardgraphcard from '../DashboardGraphCard';
-import Anomaly from '../Anomaly';
 
 import './dashboardgraph.scss';
 import '../../assets/styles/table.scss';
@@ -89,8 +87,6 @@ const Dashboardgraph = ({ kpi }) => {
   const getAllLinechart = () => {
     dispatch(getDashboardLinechart(kpi, { timeline: monthWeek.value }));
   };
-
-  const location = useHistory().location.pathname.split('/');
 
   useEffect(() => {
     if (kpi !== undefined) {

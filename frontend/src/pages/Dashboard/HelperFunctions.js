@@ -125,7 +125,7 @@ export const overallMetricStatsCard = (cardData, kpidetails, loader, timeline) =
                                 <Grid container spacing={1} className="text-center">
                                     <Grid item xs={12}>
                                         <Typography component={getClass('sum')} variant={getClass('sum')} >
-                                            {(impact?.sum) ? (renderImpact(impact.sum, true)) : ('--')}
+                                            {(impact?.sum) ? (renderImpact(impact.sum, false)) : ('--')}
                                         </Typography>
                                     </Grid>
                                     <Grid item xs={12}>

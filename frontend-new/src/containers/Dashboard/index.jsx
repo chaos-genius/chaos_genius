@@ -7,6 +7,7 @@ import { Link, useHistory } from 'react-router-dom';
 import './dashboard.scss';
 
 import rightarrow from '../../assets/images/rightarrow.svg';
+import Setting from '../../assets/images/setting.svg';
 
 import Dashboardgraph from '../../components/DashboardGraph';
 import FilterWithTab from '../../components/FilterWithTab';
@@ -94,6 +95,33 @@ const Dashboard = () => {
 
           {/* Graph Section*/}
           <div className="graph-section">
+            {/* Dashboard Header */}
+            <div className="dashboard-layout dashboard-header-tab">
+              <div className="dashboard-subheader">
+                <div className="common-tab">
+                  <ul>
+                    <Link to="/dashboard/autorca">
+                      <li className={location[2] === 'autorca' ? 'active' : ''}>
+                        AutoRCA
+                      </li>
+                    </Link>
+                    <Link to="/dashboard/anomolies">
+                      <li
+                        className={location[2] === 'anomolies' ? 'active' : ''}>
+                        Anomolies
+                      </li>
+                    </Link>
+                  </ul>
+                </div>
+                <div className="common-option">
+                  <button className="btn grey-button">
+                    <img src={Setting} alt="Setting" />
+                    <span>Settings</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            {/* Dashboard main */}
             {kpi && <Dashboardgraph kpi={kpi} />}
           </div>
         </div>

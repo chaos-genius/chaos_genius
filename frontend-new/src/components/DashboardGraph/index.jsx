@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import Select from 'react-select';
 
@@ -12,7 +12,6 @@ import Anomaly from '../Anomaly';
 import './dashboardgraph.scss';
 import '../../assets/styles/table.scss';
 
-import Setting from '../../assets/images/setting.svg';
 import Toparrow from '../../assets/images/toparrow.svg';
 import Next from '../../assets/images/next.svg';
 
@@ -321,96 +320,70 @@ const Dashboardgraph = ({ kpi }) => {
   };
 
   return (
-    <div>
-      <div className="dashboard-layout">
-        {/* Dashboard tap */}
-        <div className="dashboard-subheader">
-          <div className="common-tab">
-            <ul>
-              <Link to="/dashboard/autorca">
-                <li className={location[2] === 'autorca' ? 'active' : ''}>
-                  AutoRCA
-                </li>
-              </Link>
-              <Link to="/dashboard/anomolies">
-                <li className={location[2] === 'anomolies' ? 'active' : ''}>
-                  Anomolies
-                </li>
-              </Link>
-            </ul>
-          </div>
-          <div className="common-option">
-            <button className="btn grey-button">
-              <img src={Setting} alt="Setting" />
-              <span>Settings</span>
-            </button>
-          </div>
-        </div>
-        {location[2] === 'autorca' ? (
-          <div className="dashboard-container">
-            <div className="dashboard-subcategory">
-              <Select
-                value={monthWeek}
-                options={data}
-                classNamePrefix="selectcategory"
-                placeholder="select"
-                isSearchable={false}
-                onChange={(e) => {
-                  setMonthWeek(e);
-                }}
-              />
-            </div>
-            {/* Graph Section */}
-            <div className="dashboard-graph-section">
-              <div className="common-graph">
-                {aggregationLoading ? (
-                  <div className="loader">
-                    <div className="loading-text">
-                      <p>loading</p>
-                      <span></span>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    {aggregationData && (
-                      <Dashboardgraphcard
-                        aggregationData={aggregationData}
-                        monthWeek={monthWeek}
-                      />
-                    )}
-                  </>
-                )}
-              </div>
-              <div className="common-graph" id="lineChartDiv"></div>
-            </div>
-          </div>
-        ) : (
-          <>
-            <Anomaly kpi={kpi} />
-          </>
-        )}
-      </div>
+    <>
+      {/* Dashboard tap */}
       {location[2] === 'autorca' ? (
-        <div className="dashboard-layout">
-          <div
-            className={
-              !collapse
-                ? 'dashboard-header-wrapper header-wrapper-disable'
-                : 'dashboard-header-wrapper'
-            }>
-            <div className="dashboard-header">
-              <h3>Drill Downs</h3>
+        <>
+          <div className="dashboard-layout dashboard-layout-change">
+            <div className="dashboard-container">
+              <div className="dashboard-subcategory">
+                <Select
+                  value={monthWeek}
+                  options={data}
+                  classNamePrefix="selectcategory"
+                  placeholder="select"
+                  isSearchable={false}
+                  onChange={(e) => {
+                    setMonthWeek(e);
+                  }}
+                />
+              </div>
+              {/* Graph Section */}
+              <div className="dashboard-graph-section">
+                <div className="common-graph">
+                  {aggregationLoading ? (
+                    <div className="loader">
+                      <div className="loading-text">
+                        <p>loading</p>
+                        <span></span>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {aggregationData && (
+                        <Dashboardgraphcard
+                          aggregationData={aggregationData}
+                          monthWeek={monthWeek}
+                        />
+                      )}
+                    </>
+                  )}
+                </div>
+                <div className="common-graph" id="lineChartDiv"></div>
+              </div>
             </div>
+          </div>
+          <div className="dashboard-layout">
             <div
               className={
-                !collapse ? 'header-collapse header-disable' : 'header-collapse'
-              }
-              onClick={() => setCollapse(!collapse)}>
-              <img src={Toparrow} alt="CollapseOpen" />
+                !collapse
+                  ? 'dashboard-header-wrapper header-wrapper-disable'
+                  : 'dashboard-header-wrapper'
+              }>
+              <div className="dashboard-header">
+                <h3>Drill Downs</h3>
+              </div>
+              <div
+                className={
+                  !collapse
+                    ? 'header-collapse header-disable'
+                    : 'header-collapse'
+                }
+                onClick={() => setCollapse(!collapse)}>
+                <img src={Toparrow} alt="CollapseOpen" />
+              </div>
             </div>
-          </div>
 
-          <>
             {collapse ? (
               <div className="dashboard-container">
                 <div className="dashboard-subheader">
@@ -535,10 +508,12 @@ const Dashboardgraph = ({ kpi }) => {
                 )}
               </div>
             ) : null}
-          </>
-        </div>
-      ) : null}
-    </div>
+          </div>
+        </>
+      ) : (
+        <Anomaly kpi={kpi} />
+      )}
+    </>
   );
 };
 export default Dashboardgraph;

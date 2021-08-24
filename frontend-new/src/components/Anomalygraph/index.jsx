@@ -1,23 +1,22 @@
 import React, { useEffect, useState } from 'react';
 
-import { useSelector, useDispatch } from 'react-redux';
-
-import { anomalyDrilldown } from '../../redux/actions';
-
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import highchartsMore from 'highcharts/highcharts-more';
+
+highchartsMore(Highcharts);
 
 const Anomalygraph = ({ key, drilldown }) => {
   const [chartdata, setChartData] = useState([]);
 
   useEffect(() => {
     renderChart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const findAnomalyZones = (intervals, values) => {
     let validColor = '#25cc7b',
       anomalyColor = '#ff5f5f';
-    let zones = Array();
+    let zones = [];
     let prev = null;
     let anomalyType = null; // 1 for above Confidence interval. -1 for below
     for (let i = 0; i < values.length; i++) {
@@ -47,7 +46,7 @@ const Anomalygraph = ({ key, drilldown }) => {
           [interval[0], [interval[interIdx]]]
         );
         let { m: m2, b: b2 } = findSlopeAndYIntercept(values[i - 1], value);
-        let { x, y } = findIntersection(m1, b1, m2, b2);
+        let { x } = findIntersection(m1, b1, m2, b2);
 
         prev.value = x;
         zones.push(prev);

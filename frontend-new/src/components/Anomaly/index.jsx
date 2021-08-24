@@ -1,21 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+
+import { useSelector, useDispatch } from 'react-redux';
+
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import highchartsMore from 'highcharts/highcharts-more';
+
+import Toparrow from '../../assets/images/toparrow.svg';
+
+import Anomalygraph from '../Anomalygraph';
+
 import {
   anomalyDetection,
   anomalyDrilldown,
   getAnomalyQualityData
 } from '../../redux/actions';
-import { useSelector, useDispatch } from 'react-redux';
-import Anomalygraph from '../Anomalygraph';
+
 highchartsMore(Highcharts);
 
 const Anomaly = ({ kpi }) => {
   const dispatch = useDispatch();
   // const [graphData, setGraphData] = useState([]);
   const [chartData, setChartData] = useState([]);
-  const [anomalyId, setAnomalyId] = useState('');
+  const [drilldownCollapse, setDrilldownCollapse] = useState(true);
+  const [dataQualityCollapse, setDataQualityCollapse] = useState(true);
+
+  const idRef = useRef(0);
 
   const { anomalyDetectionData, anomalyDrilldownData, anomalyQualityData } =
     useSelector((state) => {
@@ -24,6 +34,7 @@ const Anomaly = ({ kpi }) => {
 
   useEffect(() => {
     getAnomaly();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpi]);
 
   const getAnomaly = () => {
@@ -31,18 +42,21 @@ const Anomaly = ({ kpi }) => {
   };
 
   useEffect(() => {
-    if (anomalyDetectionData) {
-      setAnomalyId(anomalyDetectionData.base_anomaly_id);
-      // setGraphData(anomalyDetectionData.chart_data);
-      renderChart(anomalyDetectionData.chart_data);
-      handleDataQuality(anomalyDetectionData.base_anomaly_id);
-    }
+    idRef.current = anomalyDetectionData.base_anomaly_id;
+    renderChart(anomalyDetectionData.chart_data);
+    handleDataQuality(anomalyDetectionData.base_anomaly_id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anomalyDetectionData]);
 
   let itemList = [];
-  if (anomalyDrilldownData && anomalyDrilldownData.length !== 0) {
+  if (
+    anomalyDrilldownData &&
+    anomalyDrilldownData.length !== 0 &&
+    anomalyDetectionData?.chart_data
+  ) {
     anomalyDrilldownData.map((obj) => {
       itemList.push(<Anomalygraph key={`dl-${obj.title}`} drilldown={obj} />);
+      return '';
     });
   }
   let dataQualityList = [];
@@ -51,6 +65,7 @@ const Anomaly = ({ kpi }) => {
       dataQualityList.push(
         <Anomalygraph key={`dl-${obj.title}`} drilldown={obj} />
       );
+      return '';
     });
   }
 
@@ -171,13 +186,15 @@ const Anomaly = ({ kpi }) => {
       // this.setState({
       //   chartData: demoChart
       // });
+    } else {
+      setChartData([]);
     }
   };
 
   const findAnomalyZones = (intervals, values) => {
     let validColor = '#25cc7b',
       anomalyColor = '#ff5f5f';
-    let zones = Array();
+    let zones = [];
     let prev = null;
     let anomalyType = null; // 1 for above Confidence interval. -1 for below
     for (let i = 0; i < values.length; i++) {
@@ -200,14 +217,14 @@ const Anomaly = ({ kpi }) => {
 
       // Push prev zone if colors should be different
       // Update prev zone
-      if (prev != null && prev.color != zone.color) {
-        const interIdx = anomalyType == 1 ? 2 : 1;
+      if (prev !== null && prev.color !== zone.color) {
+        const interIdx = anomalyType === 1 ? 2 : 1;
         let { m: m1, b: b1 } = findSlopeAndYIntercept(
           [intervals[i - 1][0], intervals[i - 1][interIdx]],
           [interval[0], [interval[interIdx]]]
         );
         let { m: m2, b: b2 } = findSlopeAndYIntercept(values[i - 1], value);
-        let { x, y } = findIntersection(m1, b1, m2, b2);
+        let { x } = findIntersection(m1, b1, m2, b2);
 
         prev.value = x;
         zones.push(prev);
@@ -251,7 +268,7 @@ const Anomaly = ({ kpi }) => {
     dispatch(
       anomalyDrilldown(kpi, {
         date: unixDate,
-        base_anomaly_id: anomalyId
+        base_anomaly_id: idRef.current
       })
     );
   };
@@ -265,28 +282,60 @@ const Anomaly = ({ kpi }) => {
   };
   return (
     <>
-      <div className="dashboard-container">
-        {chartData && (
-          <HighchartsReact highcharts={Highcharts} options={chartData} />
-        )}
+      <div className="dashboard-layout dashboard-layout-change">
+        <div className="dashboard-container">
+          {chartData && chartData.length !== 0 && (
+            <HighchartsReact highcharts={Highcharts} options={chartData} />
+          )}
+        </div>
       </div>
       <div className="dashboard-layout">
-        <div className="dashboard-header-wrapper">
+        <div
+          className={
+            !drilldownCollapse
+              ? 'dashboard-header-wrapper header-wrapper-disable'
+              : 'dashboard-header-wrapper'
+          }>
           <div className="dashboard-header">
             <h3>Drill Downs</h3>
           </div>
-          <div>{/* <img src={Toparrow} alt="CollapseOpen" /> */}</div>
+          <div
+            className={
+              !drilldownCollapse
+                ? 'header-collapse header-disable'
+                : 'header-collapse'
+            }
+            onClick={() => setDrilldownCollapse(!drilldownCollapse)}>
+            <img src={Toparrow} alt="CollapseOpen" />
+          </div>
         </div>
-        <div className="dashboard-container">{itemList}</div>
+        {drilldownCollapse && itemList.length !== 0 ? (
+          <div className="dashboard-container">{itemList}</div>
+        ) : null}
       </div>
       <div className="dashboard-layout">
-        <div className="dashboard-header-wrapper">
+        <div
+          className={
+            !dataQualityCollapse
+              ? 'dashboard-header-wrapper header-wrapper-disable'
+              : 'dashboard-header-wrapper'
+          }>
           <div className="dashboard-header">
             <h3>Data Quality</h3>
           </div>
-          <div>{/* <img src={Toparrow} alt="CollapseOpen" /> */}</div>
+          <div
+            className={
+              !dataQualityCollapse
+                ? 'header-collapse header-disable'
+                : 'header-collapse'
+            }
+            onClick={() => setDataQualityCollapse(!dataQualityCollapse)}>
+            <img src={Toparrow} alt="CollapseOpen" />
+          </div>
         </div>
-        <div className="dashboard-container">{dataQualityList}</div>
+        {dataQualityCollapse && dataQualityList.length !== 0 ? (
+          <div className="dashboard-container">{dataQualityList}</div>
+        ) : null}
       </div>
     </>
   );

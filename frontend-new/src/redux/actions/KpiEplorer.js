@@ -147,14 +147,15 @@ export const getAllKpiExplorerSubmitSuccess = (response) => {
 export const getAllKpiExplorerSubmit = (payload) => {
   return async (dispatch) => {
     dispatch(getAllKpiExplorerSubmitRequested);
-    const headers = new Headers();
-    headers.append('Content-Type', 'application/json');
-    headers.append('Access-Control-Allow-Origin', '*');
-    headers.append('Access-Control-Allow-Credentials', true);
     const { data, error, status } = await postRequest({
-      url: KPI_URL,
+      url: KPI_URL + '/',
       data: JSON.stringify(payload),
-      headers: headers
+      headers: {
+        'Content-Type': 'application/json;charset=UTF-8',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true
+      },
+      noAuth: true
     });
     if (error) {
       dispatch(getAllKpiExplorerSubmitFailure);

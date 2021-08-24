@@ -1,1 +1,3 @@
 from anomaly_model import AnomalyModel
+from prophet_model import ProphetModel
+from stddevi_model import StdDeviModel

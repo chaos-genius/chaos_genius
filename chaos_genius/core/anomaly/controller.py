@@ -74,7 +74,7 @@ class AnomalyDetectionController(object):
 
     def _detect_anomaly(
         self,
-        model: AnomalyModel,
+        model_name: str,
         input_data: pd.DataFrame,
         last_date: datetime.datetime,
         series,
@@ -82,8 +82,8 @@ class AnomalyDetectionController(object):
     ) -> pd.DataFrame:
         """Detects anomaly in the given data
 
-        :param model: Model to use for anomaly detection
-        :type model: AnomalyModel
+        :param model_name: name of the model used for anomaly detection
+        :type model_name: str
         :param input_data: Dataframe with metric's data
         :type input_data: pd.DataFrame
         :param last_date: Last date for which we have output data
@@ -98,7 +98,7 @@ class AnomalyDetectionController(object):
         })
 
         processed_anomaly = ProcessAnomalyDetection(
-            model,
+            model_name,
             input_data,
             last_date,
             self.kpi_info["period"],
@@ -211,11 +211,14 @@ class AnomalyDetectionController(object):
         :rtype: list
         """
 
-        # TODO: Update temporary filter logic
-        # FIXME: Replace current temp logic with faster temp logic
+        grouped_input_data = input_data\
+            .groupby(self.kpi_info['dimensions'])\
+            .agg({self.kpi_info['metric']:"count"})
+        
         filtered_subgroups = []
+        
         for subgroup in subgroups:
-            if len(input_data.query(subgroup)) >= self.kpi_info["period"]:
+            if len(grouped_input_data.query(subgroup)) >= self.kpi_info["period"]:
                 filtered_subgroups.append(subgroup)
 
         return filtered_subgroups
@@ -269,16 +272,12 @@ class AnomalyDetectionController(object):
                 .resample(freq).agg({metric_col: agg})
 
         model_name = self.kpi_info["model_name"]
-        # FIXME: Model name and model seem to be used interchangably here
-        # How to fix that
+
         overall_anomaly_output = self._detect_anomaly(
             model_name, series_data, last_date, series, subgroup)
 
         self._save_anomaly_output(overall_anomaly_output, series, subgroup)
 
-        # FIXME: Fix saving placeholder
-        # if self.save_model:
-        #     self._save_model(overall_model, series, subgroup)
 
     def detect(self) -> None:
         # TODO: Docstring

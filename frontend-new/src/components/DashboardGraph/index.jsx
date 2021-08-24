@@ -321,27 +321,75 @@ const Dashboardgraph = ({ kpi }) => {
 
   return (
     <>
-      {/* Dashboard tap */}
-      {location[2] === 'autorca' ? (
-        <>
-          <div className="dashboard-layout dashboard-layout-change">
-            <div className="dashboard-container">
-              <div className="dashboard-subcategory">
-                <Select
-                  value={monthWeek}
-                  options={data}
-                  classNamePrefix="selectcategory"
-                  placeholder="select"
-                  isSearchable={false}
-                  onChange={(e) => {
-                    setMonthWeek(e);
-                  }}
-                />
-              </div>
-              {/* Graph Section */}
-              <div className="dashboard-graph-section">
-                <div className="common-graph">
-                  {aggregationLoading ? (
+      <div className="dashboard-layout dashboard-layout-change">
+        <div className="dashboard-container">
+          <div className="dashboard-subcategory">
+            <Select
+              value={monthWeek}
+              options={data}
+              classNamePrefix="selectcategory"
+              placeholder="select"
+              isSearchable={false}
+              onChange={(e) => {
+                setMonthWeek(e);
+              }}
+            />
+          </div>
+          {/* Graph Section */}
+          <div className="dashboard-graph-section">
+            <div className="common-graph">
+              {aggregationLoading ? (
+                <div className="loader">
+                  <div className="loading-text">
+                    <p>loading</p>
+                    <span></span>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {aggregationData && (
+                    <Dashboardgraphcard
+                      aggregationData={aggregationData}
+                      monthWeek={monthWeek}
+                    />
+                  )}
+                </>
+              )}
+            </div>
+            <div className="common-graph" id="lineChartDiv"></div>
+          </div>
+        </div>
+      </div>
+      <div className="dashboard-layout">
+        <div
+          className={
+            !collapse
+              ? 'dashboard-header-wrapper header-wrapper-disable'
+              : 'dashboard-header-wrapper'
+          }>
+          <div className="dashboard-header">
+            <h3>Drill Downs</h3>
+          </div>
+          <div
+            className={
+              !collapse ? 'header-collapse header-disable' : 'header-collapse'
+            }
+            onClick={() => setCollapse(!collapse)}>
+            <img src={Toparrow} alt="CollapseOpen" />
+          </div>
+        </div>
+
+        {collapse ? (
+          <div className="dashboard-container">
+            <div className="dashboard-subheader">
+              <div
+                className={
+                  dimension.value !== 'multidimension'
+                    ? ' common-tab'
+                    : 'common-tab common-tab-hide'
+                }>
+                <ul>
+                  {dimensionLoading ? (
                     <div className="loader">
                       <div className="loading-text">
                         <p>loading</p>
@@ -350,169 +398,112 @@ const Dashboardgraph = ({ kpi }) => {
                     </div>
                   ) : (
                     <>
-                      {aggregationData && (
-                        <Dashboardgraphcard
-                          aggregationData={aggregationData}
-                          monthWeek={monthWeek}
-                        />
-                      )}
+                      {singleDimensionData > 2 ? (
+                        <li
+                          className="previous-step"
+                          onClick={() =>
+                            SetSingleDimensionData(singleDimensionData - 3)
+                          }>
+                          <img src={Next} alt="Previous" />
+                        </li>
+                      ) : null}
+                      {dimensionData &&
+                        dimensionData.dimensions.length !== 0 &&
+                        dimensionData.dimensions
+                          .slice(
+                            0 + singleDimensionData,
+                            3 + singleDimensionData
+                          )
+                          .map((data) => {
+                            return (
+                              <li
+                                className={
+                                  activeDimension === data ? 'active' : ''
+                                }
+                                onClick={() => {
+                                  onActiveDimensionClick(data);
+                                }}>
+                                {data}
+                              </li>
+                            );
+                          })}
+                      {dimensionData.dimensions.length > 3 &&
+                      dimensionData.dimensions.length !== 0 ? (
+                        <li
+                          className={
+                            singleDimensionData + 1 >=
+                            dimensionData.dimensions.length
+                              ? 'disable-next'
+                              : ''
+                          }
+                          onClick={() =>
+                            SetSingleDimensionData(singleDimensionData + 3)
+                          }>
+                          <img src={Next} alt="Next" />
+                        </li>
+                      ) : null}
                     </>
                   )}
-                </div>
-                <div className="common-graph" id="lineChartDiv"></div>
+                </ul>
+              </div>
+              <div className="common-option">
+                <Select
+                  options={multidimensional}
+                  classNamePrefix="selectcategory"
+                  placeholder="Multidimensional"
+                  isSearchable={false}
+                  value={dimension}
+                  onChange={(e) => {
+                    handleDimensionChange(e);
+                  }}
+                />
               </div>
             </div>
-          </div>
-          <div className="dashboard-layout">
+            {/*Drill down chart*/}
             <div
-              className={
-                !collapse
-                  ? 'dashboard-header-wrapper header-wrapper-disable'
-                  : 'dashboard-header-wrapper'
-              }>
-              <div className="dashboard-header">
-                <h3>Drill Downs</h3>
-              </div>
-              <div
-                className={
-                  !collapse
-                    ? 'header-collapse header-disable'
-                    : 'header-collapse'
-                }
-                onClick={() => setCollapse(!collapse)}>
-                <img src={Toparrow} alt="CollapseOpen" />
-              </div>
-            </div>
+              className="common-drilldown-graph"
+              id="chartdivWaterfall"></div>
 
-            {collapse ? (
-              <div className="dashboard-container">
-                <div className="dashboard-subheader">
-                  <div
-                    className={
-                      dimension.value !== 'multidimension'
-                        ? ' common-tab'
-                        : 'common-tab common-tab-hide'
-                    }>
-                    <ul>
-                      {dimensionLoading ? (
-                        <div className="loader">
-                          <div className="loading-text">
-                            <p>loading</p>
-                            <span></span>
-                          </div>
-                        </div>
-                      ) : (
-                        <>
-                          {singleDimensionData > 2 ? (
-                            <li
-                              className="previous-step"
-                              onClick={() =>
-                                SetSingleDimensionData(singleDimensionData - 3)
-                              }>
-                              <img src={Next} alt="Previous" />
-                            </li>
-                          ) : null}
-                          {dimensionData &&
-                            dimensionData.dimensions.length !== 0 &&
-                            dimensionData.dimensions
-                              .slice(
-                                0 + singleDimensionData,
-                                3 + singleDimensionData
-                              )
-                              .map((data) => {
-                                return (
-                                  <li
-                                    className={
-                                      activeDimension === data ? 'active' : ''
-                                    }
-                                    onClick={() => {
-                                      onActiveDimensionClick(data);
-                                    }}>
-                                    {data}
-                                  </li>
-                                );
-                              })}
-                          {dimensionData.dimensions.length > 3 &&
-                          dimensionData.dimensions.length !== 0 ? (
-                            <li
-                              className={
-                                singleDimensionData + 1 >=
-                                dimensionData.dimensions.length
-                                  ? 'disable-next'
-                                  : ''
-                              }
-                              onClick={() =>
-                                SetSingleDimensionData(singleDimensionData + 3)
-                              }>
-                              <img src={Next} alt="Next" />
-                            </li>
-                          ) : null}
-                        </>
-                      )}
-                    </ul>
+            {dimension.value === 'multidimension' ? (
+              <>
+                {rcaAnalysisData ? (
+                  <DashboardTable
+                    rcaAnalysisData={rcaAnalysisData}
+                    dimension={dimension}
+                  />
+                ) : (
+                  <div className="loader loader-page">
+                    <div className="loading-text">
+                      <p>loading</p>
+                      <span></span>
+                    </div>
                   </div>
-                  <div className="common-option">
-                    <Select
-                      options={multidimensional}
-                      classNamePrefix="selectcategory"
-                      placeholder="Multidimensional"
-                      isSearchable={false}
-                      value={dimension}
-                      onChange={(e) => {
-                        handleDimensionChange(e);
-                      }}
-                    />
+                )}
+              </>
+            ) : (
+              <>
+                {hierarchicalLoading ? (
+                  <div className="loader loader-page">
+                    <div className="loading-text">
+                      <p>loading</p>
+                      <span></span>
+                    </div>
                   </div>
-                </div>
-                {/*Drill down chart*/}
-                <div
-                  className="common-drilldown-graph"
-                  id="chartdivWaterfall"></div>
-
-                {dimension.value === 'multidimension' ? (
-                  <>
-                    {rcaAnalysisData ? (
-                      <DashboardTable
-                        rcaAnalysisData={rcaAnalysisData}
-                        dimension={dimension}
-                      />
-                    ) : (
-                      <div className="loader loader-page">
-                        <div className="loading-text">
-                          <p>loading</p>
-                          <span></span>
-                        </div>
-                      </div>
-                    )}
-                  </>
                 ) : (
                   <>
-                    {hierarchicalLoading ? (
-                      <div className="loader loader-page">
-                        <div className="loading-text">
-                          <p>loading</p>
-                          <span></span>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        {hierarchicalData &&
-                          hierarchicalData?.data_table.length !== 0 && (
-                            <HierarchicalTable
-                              hierarchicalData={hierarchicalData.data_table}
-                            />
-                          )}
-                      </>
-                    )}
+                    {hierarchicalData &&
+                      hierarchicalData?.data_table.length !== 0 && (
+                        <HierarchicalTable
+                          hierarchicalData={hierarchicalData.data_table}
+                        />
+                      )}
                   </>
                 )}
-              </div>
-            ) : null}
+              </>
+            )}
           </div>
-        </>
-      ) : (
-        <Anomaly kpi={kpi} />
-      )}
+        ) : null}
+      </div>
     </>
   );
 };

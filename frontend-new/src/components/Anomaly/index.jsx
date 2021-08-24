@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 
 import { useSelector, useDispatch } from 'react-redux';
+import Select from 'react-select';
 
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
@@ -10,6 +11,8 @@ import Toparrow from '../../assets/images/toparrow.svg';
 
 import Anomalygraph from '../Anomalygraph';
 
+import './anomaly.scss';
+
 import {
   anomalyDetection,
   anomalyDrilldown,
@@ -18,12 +21,27 @@ import {
 
 highchartsMore(Highcharts);
 
+const data = [
+  {
+    value: 'dataquality',
+    label: 'Data Quality'
+  },
+  {
+    value: 'multidimensional',
+    label: 'Multi Dimensional'
+  }
+];
+
 const Anomaly = ({ kpi }) => {
   const dispatch = useDispatch();
   // const [graphData, setGraphData] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [drilldownCollapse, setDrilldownCollapse] = useState(true);
   const [dataQualityCollapse, setDataQualityCollapse] = useState(true);
+  const [category, setCategory] = useState({
+    value: 'dataquality',
+    label: 'Data Quality'
+  });
 
   const idRef = useRef(0);
 
@@ -284,6 +302,17 @@ const Anomaly = ({ kpi }) => {
     <>
       <div className="dashboard-layout dashboard-layout-change">
         <div className="dashboard-container">
+          <div className="dashboard-subcategory">
+            <Select
+              value={category}
+              options={data}
+              classNamePrefix="selectcategory"
+              placeholder="select"
+              isSearchable={false}
+              onChange={(e) => setCategory(e)}
+            />
+          </div>
+
           {chartData && chartData.length !== 0 && (
             <HighchartsReact highcharts={Highcharts} options={chartData} />
           )}

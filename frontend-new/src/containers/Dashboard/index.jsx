@@ -11,6 +11,7 @@ import Setting from '../../assets/images/setting.svg';
 
 import Dashboardgraph from '../../components/DashboardGraph';
 import FilterWithTab from '../../components/FilterWithTab';
+import Anomaly from '../../components/Anomaly';
 
 import { getDashboardSidebar } from '../../redux/actions';
 
@@ -121,8 +122,11 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
-            {/* Dashboard main */}
-            {kpi && <Dashboardgraph kpi={kpi} />}
+            {location[2] === 'autorca' ? (
+              <Dashboardgraph kpi={kpi} />
+            ) : (
+              <Anomaly kpi={kpi} />
+            )}
           </div>
         </div>
       </div>

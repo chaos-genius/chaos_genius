@@ -26,7 +26,7 @@ class Kpi(PkModel):
     is_static = Column(db.Boolean(), default=False)
     static_params = Column(db.JSON)
 
-    active = Column(db.Boolean(), default=False)
+    active = Column(db.Boolean(), default=True)
     created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
 
     def __init__(self, name, **kwargs):

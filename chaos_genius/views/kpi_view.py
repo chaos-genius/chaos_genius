@@ -64,7 +64,9 @@ def kpi():
             kpi = row[0].safe_dict
             data_source = row[1].safe_dict
             data_source.update(kpi)
-            kpis.append(data_source)
+            # TODO: Provision to active and deactivate the KPI
+            if data_source['active'] == True:
+                kpis.append(data_source)
         return jsonify({"count": len(kpis), "data": kpis})
 
 @blueprint.route("/<int:kpi_id>/get-dimensions", methods=["GET"])

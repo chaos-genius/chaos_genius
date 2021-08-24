@@ -3,14 +3,22 @@ import os
 import re
 
 import pandas as pd
+from sqlalchemy import create_engine
 
-from chaos_genius.core.anomaly.models import AnomalyModel
 from chaos_genius.core.anomaly.processor import ProcessAnomalyDetection
+from chaos_genius.core.anomaly.utils import get_anomaly_df, get_last_date_in_db
 
+from chaos_genius.databases.models.data_source_model import DataSource
 
 class AnomalyDetectionController(object):
     def __init__(self, kpi_info, save_model=False, debug=False):
         self.kpi_info = kpi_info
+
+        # TODO: Add these in kpi_info
+        self.kpi_info["freq"] = self.kpi_info.get("freq", "D")
+        self.kpi_info["period"] = self.kpi_info.get("period", 90)
+        self.kpi_info["model_name"] = self.kpi_info.get("model_name", "StdDeviModel")
+
         self.save_model = save_model
         self.debug = debug
 
@@ -23,17 +31,14 @@ class AnomalyDetectionController(object):
         :rtype: pd.DataFrame
         """
 
-        # FIXME: Fix csv loading to sql query
-        df = pd.read_csv(self.kpi_info["dataset_path"])
-        df[self.kpi_info['datetime_column']] = pd.to_datetime(
-            df[self.kpi_info['datetime_column']])
+        conn = DataSource.get_by_id(self.kpi_info["data_source"])
+        df = get_anomaly_df(self.kpi_info, conn.as_dict)
 
-        if self.debug:
-            return df[
-                df[self.kpi_info['datetime_column']]
-                < datetime.datetime(2021, 5, 1)]
-        else:
-            return df
+        dt_col = self.kpi_info['datetime_column']
+
+        df[dt_col] = pd.to_datetime(df[dt_col])
+
+        return df
 
     def _get_last_date_in_db(
         self,
@@ -50,27 +55,13 @@ class AnomalyDetectionController(object):
         :return: Last date for which we have data for the given series
         :rtype: datetime.datetime
         """
-        name = self.kpi_info['name']
-        table = self.kpi_info['table_name']
-        if series != 'overall':
-            parsed_subgroup = '_'.join(re.findall('"(.*?)"', subgroup))
-            read_path = f'./{name}/{table}_{series}_{parsed_subgroup}.csv'
-        else:
-            read_path = f'./{name}/{table}_{series}.csv'
-        try:
-            x = pd.read_csv(read_path)
-            x['dt'] = pd.to_datetime(x['dt'])
-            return x['dt'].iloc[-1]+datetime.timedelta(days=1)
-        except FileNotFoundError:
-            if series == 'subgroup':
-                x = self._load_anomaly_data.query(subgroup)
-            else:
-                x = self._load_anomaly_data()
+        
+        # FIXME: Deal with no prior data scenario
+        last_date = get_last_date_in_db(self.kpi_info["id"], series, subgroup)
 
-            timedelta = datetime.timedelta(days=self.kpi_info["period"])
-            date = x[self.kpi_info['datetime_column']].iloc[0]
+        # last_date = pd.to_datetime("2021-08-25") - pd.to_timedelta(90, unit="D")
 
-            return pd.to_datetime(date) + timedelta
+        return last_date
 
     def _detect_anomaly(
         self,
@@ -105,7 +96,7 @@ class AnomalyDetectionController(object):
             self.kpi_info["table_name"],
             series,
             subgroup,
-            self.kpi_info["model_kwargs"]
+            self.kpi_info.get("model_kwargs", {})
         ).predict()
 
         if self.debug:
@@ -137,32 +128,21 @@ class AnomalyDetectionController(object):
         table = self.kpi_info['table_name']
         model_name = self.kpi_info['model_name']
 
-        # FIXME: Reformat subdim name to be more UI friendly
-        if series == "subdim":
-            parsed_subgroup = '_'.join(re.findall('"([^"]*)"', subgroup))
-            output_read_path = f'./Processed/{table}/{model_name}/{series}_{parsed_subgroup}.csv'
-        elif series == "dq":
-            output_read_path = f'./Processed/{table}/{model_name}/{series}_{subgroup}.csv'
-        else:
-            output_read_path = f'./Processed/{table}/{model_name}/{series}.csv'
+        if self.debug:
+            print("SAVING")
+            print(name, table, model_name)
+            print(series, subgroup)
+            print(anomaly_output)
 
-        if self.debug == True:
-            output_read_path = './Test'+output_read_path[1:]
-
-        try:
-            os.makedirs(output_read_path.rsplit('/', 1)[0])
-        except FileExistsError:
-            pass
-
-        try:
-            save_file = pd.read_csv(output_read_path)
-            save_file = pd.concat([save_file, anomaly_output])
-        except FileNotFoundError:
-            save_file = pd.DataFrame(columns=[
-                'dt', 'y', 'yhat_lower', 'yhat_upper'])
-            save_file = anomaly_output
-
-        save_file.to_csv(output_read_path, index=False)
+        anomaly_output = anomaly_output.rename(columns={"dt": "data_datetime", "anomaly": "is_anomaly"})
+        anomaly_output["kpi_id"] = self.kpi_info["id"]
+        anomaly_output["anomaly_type"] = series
+        anomaly_output["series_type"] = subgroup
+        
+        # FIXME: Generalize storage and fetching of data
+        engine = create_engine("postgresql+psycopg2://postgres:chaosgenius@localhost/anomaly_testing_db")
+        conn = engine.connect()
+        anomaly_output.to_sql("anomaly_test_schema", conn, index= False, if_exists="append")
 
     def _get_subgroup_list(
         self,
@@ -239,7 +219,7 @@ class AnomalyDetectionController(object):
 
         dt_col = self.kpi_info['datetime_column']
         metric_col = self.kpi_info['metric']
-        freq = self.kpi_info['freq']
+        freq = self.kpi_info.get('freq', 'D')
         agg = self.kpi_info["aggregation"]
 
         last_date = self._get_last_date_in_db(series, subgroup)

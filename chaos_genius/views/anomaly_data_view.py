@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """anomaly data view."""
 from datetime import datetime, timedelta
+import traceback
 
 from flask import Blueprint, current_app, jsonify, request
 import pandas as pd
@@ -28,12 +29,13 @@ def kpi_anomaly_detection(kpi_id):
     try:
         anom_data = get_overall_data(kpi_id, datetime.today())
         data = {
-            "chart_data": anom_data["chart_data"],
+            "chart_data": anom_data,
             # TODO: base_anomaly_id not needed anymore
             # remove from here once updated in frontend
             "base_anomaly_id": kpi_id
         }
     except Exception as err:
+        print(traceback.format_exc())
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("Anomaly Detection Done")
     return jsonify({"data": data, "msg": ""})
@@ -74,7 +76,7 @@ def kpi_anomaly_data_quality(kpi_id):
     return jsonify({"data": data, "msg": ""})
 
 
-def convert_to_graph_json(results, kpi_id, anomaly_type = "overall", series_type="min", precision=2):
+def convert_to_graph_json(results, kpi_id, anomaly_type = "overall", series_type= None, precision=2):
     # results = pd.DataFrame.from_dict(results)
     def fill_graph_data(row, graph_data, precision=2):
         """Fills graph_data with intervals, values, and predicted_values for a given row.
@@ -106,8 +108,11 @@ def convert_to_graph_json(results, kpi_id, anomaly_type = "overall", series_type
             graph_data['severity'].append(severity)
 
     # TODO: Make this more human-friendly
-    title = anomaly_type + " " + series_type
-        #add id to name mapping here
+    title = anomaly_type
+    if series_type:
+        title += " " + series_type
+    
+    # add id to name mapping here
     kpi_name = kpi_id
     graph_data = {
             'title': title,
@@ -133,7 +138,7 @@ def get_overall_data(kpi_id, end_date: str, n=90):
 
     # FIXME: Find a better way of doing this
     table_name = "anomaly_test_schema"
-    dbUri = "postgresql+psycopg2://postgres:y5D87FnikqVHW7eg3NVQ@md-postgres-test-db-instance.cjzi0pwi8ki4.ap-south-1.rds.amazonaws.com/anomaly_testing_db"
+    dbUri = "postgresql+psycopg2://postgres:chaosgenius@localhost/anomaly_testing_db"
 
     sql_query = f"select * from {table_name} where kpi_id = {kpi_id} and data_datetime <= '{end_date}' and data_datetime >= '{start_date}' and anomaly_type='overall'"
     results = get_df_from_db_uri(dbUri, sql_query)
@@ -151,7 +156,7 @@ def dq_and_subdim_data(kpi_id, end_date, anomaly_type="dq", series_type="max", n
 
     # FIXME: Find a better way of doing this
     table_name = "anomaly_test_schema"
-    dbUri = "postgresql+psycopg2://postgres:y5D87FnikqVHW7eg3NVQ@md-postgres-test-db-instance.cjzi0pwi8ki4.ap-south-1.rds.amazonaws.com/anomaly_testing_db"
+    dbUri = "postgresql+psycopg2://postgres:chaosgenius@localhost/anomaly_testing_db"
     
     sql_query = f"select * from {table_name} where kpi_id = {kpi_id} and data_datetime <= '{end_date}' and data_datetime >= '{start_date}' and anomaly_type='{anomaly_type}' and series_type='{series_type}'"
     results = get_df_from_db_uri(dbUri, sql_query)

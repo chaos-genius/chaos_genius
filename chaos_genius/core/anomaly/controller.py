@@ -222,8 +222,6 @@ class AnomalyDetectionController(object):
         freq = self.kpi_info.get('freq', 'D')
         agg = self.kpi_info["aggregation"]
 
-        last_date = self._get_last_date_in_db(series, subgroup)
-
         series_data = None
 
         if series == 'dq':
@@ -252,6 +250,10 @@ class AnomalyDetectionController(object):
                 .resample(freq).agg({metric_col: agg})
 
         model_name = self.kpi_info["model_name"]
+
+        last_date = self._get_last_date_in_db(series, subgroup)
+        if last_date == None:
+            last_date = series_data.reset_index()[dt_col].iloc[0]
 
         overall_anomaly_output = self._detect_anomaly(
             model_name, series_data, last_date, series, subgroup)

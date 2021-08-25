@@ -68,7 +68,7 @@ const KPITable = ({ kpiData, connectionType }) => {
                   {formatDate(kpi.created_at) || '-'}
                 </td>
                 <td className="date-formated">
-                  {formatDate(kpi.last_sync) || '-'}
+                  {formatDate(kpi.created_at) || '-'}
                 </td>
                 <td>
                   <Link to={`/kpiexplorer/edit/${kpi.id}`}>

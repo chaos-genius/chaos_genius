@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 
 import { useSelector, useDispatch } from 'react-redux';
 
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 import './dashboard.scss';
 
 import rightarrow from '../../assets/images/rightarrow.svg';
+import Setting from '../../assets/images/setting.svg';
 
 import Dashboardgraph from '../../components/DashboardGraph';
 import FilterWithTab from '../../components/FilterWithTab';
+import Anomaly from '../../components/Anomaly';
 
 import { getDashboardSidebar } from '../../redux/actions';
 
@@ -17,6 +19,8 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const [active, setActive] = useState('');
   const [kpi, setKpi] = useState();
+
+  const location = useHistory().location.pathname.split('/');
 
   const { sidebarLoading, sidebarList } = useSelector((state) => {
     return state.sidebar;
@@ -88,10 +92,38 @@ const Dashboard = () => {
                 setActive={setActive}
               />
             )}
-          </div>{' '}
+          </div>
+
           {/* Graph Section*/}
           <div className="graph-section">
-            {kpi && <Dashboardgraph kpi={kpi} />}
+            {/* Dashboard Header */}
+            <div className="dashboard-layout dashboard-header-tab">
+              <div className="dashboard-subheader">
+                <div className="common-tab">
+                  <ul>
+                    <Link to="/dashboard/autorca">
+                      <li className={location[2] === 'autorca' ? 'active' : ''}>
+                        AutoRCA
+                      </li>
+                    </Link>
+                    <Link to="/dashboard/anomolies">
+                      <li
+                        className={location[2] === 'anomolies' ? 'active' : ''}>
+                        Anomolies
+                      </li>
+                    </Link>
+                  </ul>
+                </div>
+                <div className="common-option">
+                  <button className="btn grey-button">
+                    <img src={Setting} alt="Setting" />
+                    <span>Settings</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            {location[2] === 'autorca' && kpi && <Dashboardgraph kpi={kpi} />}
+            {location[2] === 'anomolies' && kpi && <Anomaly kpi={kpi} />}
           </div>
         </div>
       </div>

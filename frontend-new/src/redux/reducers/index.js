@@ -9,6 +9,8 @@ import { hierarchial } from './Hierarchical';
 import { onboarding } from './Onboarding';
 import { lineChart } from './LineChart';
 import { sidebar } from './Sidebarlist';
+import { anomaly } from './Anomaly';
+
 const rootReducer = combineReducers({
   dataSource: dataSource,
   kpiExplorer: kpiExplorer,
@@ -18,7 +20,8 @@ const rootReducer = combineReducers({
   hierarchial: hierarchial,
   onboarding: onboarding,
   lineChart: lineChart,
-  sidebar: sidebar
+  sidebar: sidebar,
+  anomaly: anomaly
 });
 
 export default rootReducer;

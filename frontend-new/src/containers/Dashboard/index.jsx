@@ -19,7 +19,7 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const [active, setActive] = useState('');
   const [kpi, setKpi] = useState();
-
+  const history = useHistory();
   const location = useHistory().location.pathname.split('/');
 
   const { sidebarLoading, sidebarList } = useSelector((state) => {
@@ -39,6 +39,7 @@ const Dashboard = () => {
     if (sidebarList && sidebarList.length !== 0 && kpi === undefined) {
       setActive(sidebarList[0]?.name);
       setKpi(sidebarList[0]?.id);
+      history.push(`/dashboard/${location[2]}/${sidebarList[0]?.id}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sidebarList]);
@@ -101,12 +102,12 @@ const Dashboard = () => {
               <div className="dashboard-subheader">
                 <div className="common-tab">
                   <ul>
-                    <Link to="/dashboard/autorca">
+                    <Link to={`/dashboard/autorca/${kpi}`}>
                       <li className={location[2] === 'autorca' ? 'active' : ''}>
                         AutoRCA
                       </li>
                     </Link>
-                    <Link to="/dashboard/anomolies">
+                    <Link to={`/dashboard/anomolies/${kpi}`}>
                       <li
                         className={location[2] === 'anomolies' ? 'active' : ''}>
                         Anomolies

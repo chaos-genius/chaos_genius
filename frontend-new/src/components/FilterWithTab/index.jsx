@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-// import { useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import Search from '../../assets/images/search.svg';
 import GreenArrow from '../../assets/images/green-arrow.svg';
@@ -13,7 +13,8 @@ const DashboardFilter = ({ setKpi, data, active, setActive }) => {
   //const [active, setActive] = useState('');
   const [listData, setListData] = useState(data);
   const [searchData, setSearchData] = useState(data);
-  // const history = useHistory();
+  const history = useHistory();
+  const location = useHistory().location.pathname.split('/');
   useEffect(() => {
     if (data) {
       setListData(data);
@@ -73,6 +74,7 @@ const DashboardFilter = ({ setKpi, data, active, setActive }) => {
                   onClick={() => {
                     setActive(item.name);
                     setKpi(item.id);
+                    history.push(`/dashboard/${location[2]}/${item.id}`);
                   }}>
                   {item.name}
                   <img src={GreenArrow} alt="Arrow" />

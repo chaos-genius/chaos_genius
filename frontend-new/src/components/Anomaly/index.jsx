@@ -36,8 +36,8 @@ const Anomaly = ({ kpi }) => {
   const dispatch = useDispatch();
   // const [graphData, setGraphData] = useState([]);
   const [chartData, setChartData] = useState([]);
-  const [drilldownCollapse, setDrilldownCollapse] = useState(true);
-  const [dataQualityCollapse, setDataQualityCollapse] = useState(true);
+  const [drilldownCollapse, setDrilldownCollapse] = useState(false);
+  const [dataQualityCollapse, setDataQualityCollapse] = useState(false);
   const [category, setCategory] = useState({
     value: 'dataquality',
     label: 'Data Quality'
@@ -45,10 +45,13 @@ const Anomaly = ({ kpi }) => {
 
   const idRef = useRef(0);
 
-  const { anomalyDetectionData, anomalyDrilldownData, anomalyQualityData } =
-    useSelector((state) => {
-      return state.anomaly;
-    });
+  const {
+    anomalyDetectionData,
+    anomalyDrilldownData,
+    anomalyQualityData
+  } = useSelector((state) => {
+    return state.anomaly;
+  });
 
   useEffect(() => {
     getAnomaly();
@@ -138,7 +141,8 @@ const Anomaly = ({ kpi }) => {
           borderWidth: 1,
           padding: 20,
           title: {
-            text: 'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
+            text:
+              'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
             style: {
               fontStyle: 'italic'
             }
@@ -338,7 +342,7 @@ const Anomaly = ({ kpi }) => {
             <img src={Toparrow} alt="CollapseOpen" />
           </div>
         </div>
-        {itemList.length !== 0 ? (
+        {drilldownCollapse ? (
           <div
             className={
               drilldownCollapse
@@ -369,7 +373,7 @@ const Anomaly = ({ kpi }) => {
             <img src={Toparrow} alt="CollapseOpen" />
           </div>
         </div>
-        {dataQualityList.length !== 0 ? (
+        {dataQualityCollapse ? (
           <div
             className={
               dataQualityCollapse

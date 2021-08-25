@@ -104,7 +104,6 @@ export const anomalyDrilldownFailure = () => {
 };
 
 export const anomalyDrilldown = (kpi, params) => {
-  console.log('Params:', params, kpi);
   return async (dispatch) => {
     dispatch(anomalyDrilldownRequest());
     const URL = attachParams(

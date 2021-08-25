@@ -70,9 +70,7 @@ const Dashboardgraph = ({ kpi }) => {
 
   const { linechartData } = useSelector((state) => state.lineChart);
 
-  const { hierarchicalLoading, hierarchicalData } = useSelector(
-    (state) => state.hierarchial
-  );
+  const { hierarchicalData } = useSelector((state) => state.hierarchial);
 
   const { rcaAnalysisData } = useSelector((state) => state.dashboard);
 
@@ -461,39 +459,21 @@ const Dashboardgraph = ({ kpi }) => {
 
           {dimension.value === 'multidimension' ? (
             <>
-              {rcaAnalysisData ? (
+              {rcaAnalysisData && rcaAnalysisData.data_table.length !== 0 && (
                 <DashboardTable
                   rcaAnalysisData={rcaAnalysisData}
                   dimension={dimension}
                 />
-              ) : (
-                <div className="loader loader-page">
-                  <div className="loading-text">
-                    <p>loading</p>
-                    <span></span>
-                  </div>
-                </div>
               )}
             </>
           ) : (
             <>
-              {hierarchicalLoading ? (
-                <div className="loader loader-page">
-                  <div className="loading-text">
-                    <p>loading</p>
-                    <span></span>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  {hierarchicalData &&
-                    hierarchicalData?.data_table.length !== 0 && (
-                      <HierarchicalTable
-                        hierarchicalData={hierarchicalData.data_table}
-                      />
-                    )}
-                </>
-              )}
+              {hierarchicalData &&
+                hierarchicalData?.data_table.length !== 0 && (
+                  <HierarchicalTable
+                    hierarchicalData={hierarchicalData.data_table}
+                  />
+                )}
             </>
           )}
         </div>

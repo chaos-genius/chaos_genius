@@ -18,8 +18,13 @@ import {
   anomalyDrilldown,
   getAnomalyQualityData
 } from '../../redux/actions';
+import store from '../../redux/store';
 
 highchartsMore(Highcharts);
+
+const RESET_ACTION = {
+  type: 'RESET'
+};
 
 const data = [
   {
@@ -45,13 +50,17 @@ const Anomaly = ({ kpi }) => {
 
   const idRef = useRef(0);
 
-  const { anomalyDetectionData, anomalyDrilldownData, anomalyQualityData } =
-    useSelector((state) => {
-      return state.anomaly;
-    });
+  const {
+    anomalyDetectionData,
+    anomalyDrilldownData,
+    anomalyQualityData
+  } = useSelector((state) => {
+    return state.anomaly;
+  });
 
   useEffect(() => {
     getAnomaly();
+    store.dispatch(RESET_ACTION);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpi]);
 
@@ -60,9 +69,11 @@ const Anomaly = ({ kpi }) => {
   };
 
   useEffect(() => {
-    idRef.current = anomalyDetectionData.base_anomaly_id;
-    renderChart(anomalyDetectionData.chart_data);
-    handleDataQuality(anomalyDetectionData.base_anomaly_id);
+    if (anomalyDetectionData) {
+      idRef.current = anomalyDetectionData?.base_anomaly_id;
+      renderChart(anomalyDetectionData?.chart_data);
+      handleDataQuality(anomalyDetectionData?.base_anomaly_id);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anomalyDetectionData]);
 
@@ -138,7 +149,8 @@ const Anomaly = ({ kpi }) => {
           borderWidth: 1,
           padding: 20,
           title: {
-            text: 'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
+            text:
+              'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
             style: {
               fontStyle: 'italic'
             }
@@ -298,6 +310,7 @@ const Anomaly = ({ kpi }) => {
       })
     );
   };
+
   return (
     <>
       {anomalyDetectionData && anomalyDetectionData.length !== 0 ? (

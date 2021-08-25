@@ -2,14 +2,23 @@
 
 export const BASE_URL = process.env.REACT_APP_BASE_URL || '';
 
-export const attachParams = (baseUrl, params) => {
-  const url = new URL(baseUrl);
+export const attachParams = (relativeUrl, params) => {
+  let baseUrl = BASE_URL;
+  if (baseUrl === '') {
+    if (window.location.hostname === 'localhost') {
+      baseUrl = 'http://localhost:5000';
+    } else {
+      baseUrl = window.location.origin;
+    }
+  }
+  const url = new URL(relativeUrl, baseUrl);
   url.search = new URLSearchParams(params).toString();
   return url;
 };
 
 export const DASHBOARD_URL = `${BASE_URL}/api/dashboard`;
 export const KPI_URL = `${BASE_URL}/api/kpi`;
+export const KPI_RELATIVE_URL = `/api/kpi`;
 export const CONNECTION_URL = `${BASE_URL}/api/connection`;
 export const CONNECTION_TYPE = `${BASE_URL}/api/connection/types`;
 export const CREATE_DATASOURCE = `${BASE_URL}/api/connection/create`;

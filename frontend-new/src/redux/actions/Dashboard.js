@@ -1,7 +1,7 @@
 import {
   attachParams,
   DASHBOARD_SIDEBAR_URL,
-  KPI_URL,
+  KPI_RELATIVE_URL,
   BASE_URL
 } from '../../utils/url-helper';
 import {
@@ -77,7 +77,7 @@ export const dashboardAggregationFailure = () => {
 
 export const getDashboardAggregation = (id, params) => {
   return async (dispatch) => {
-    const url = attachParams(`${KPI_URL}/${id}/kpi-aggregations`, params);
+    const url = attachParams(`${KPI_RELATIVE_URL}/${id}/kpi-aggregations`, params);
     dispatch(dashboardAggregationRequested());
     const { data, error, status } = await getRequest({
       url: url
@@ -111,7 +111,7 @@ export const dashboardRcaAnalysisFailure = () => {
 
 export const getDashboardRcaAnalysis = (id, params) => {
   return async (dispatch) => {
-    const url = attachParams(`${KPI_URL}/${id}/rca-analysis`, params);
+    const url = attachParams(`${KPI_RELATIVE_URL}/${id}/rca-analysis`, params);
     dispatch(dashboardRcaAnalysisRequested());
     const { data, error, status } = await getRequest({
       url: url
@@ -179,7 +179,7 @@ export const getAllHierarchicalFailure = () => {
 
 export const getAllDashboardHierarchical = (id, params) => {
   return async (dispatch) => {
-    const url = attachParams(`${KPI_URL}/${id}/rca-hierarchical-data`, params);
+    const url = attachParams(`${KPI_RELATIVE_URL}/${id}/rca-hierarchical-data`, params);
     dispatch(getAllHierarchicalRequest());
     const { data, error, status } = await getRequest({
       url: url

@@ -1,4 +1,4 @@
-import { attachParams, KPI_URL } from '../../utils/url-helper';
+import { attachParams, KPI_RELATIVE_URL } from '../../utils/url-helper';
 import {
   DASHBOARDLINECHARTREQUEST,
   DASHBOARDLINECHARTSUCCESS,
@@ -26,7 +26,7 @@ export const dashboardLinechartFailure = () => {
 
 export const getDashboardLinechart = (id, params) => {
   return async (dispatch) => {
-    const url = attachParams(`${KPI_URL}/${id}/kpi-line-data`, params);
+    const url = attachParams(`${KPI_RELATIVE_URL}/${id}/kpi-line-data`, params);
     dispatch(dashboardLinechartRequested());
     const { data, error, status } = await getRequest({
       url: url

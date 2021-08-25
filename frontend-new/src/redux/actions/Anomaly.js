@@ -70,7 +70,7 @@ export const getAnomalyQualityData = (kpi, params) => {
   return async (dispatch) => {
     dispatch(anomalyQualityDataRequest());
     const URL = attachParams(
-      `${BASE_URL}/api/anomaly-data/${kpi}/anomaly-data-quality`,
+      `/api/anomaly-data/${kpi}/anomaly-data-quality`,
       params
     );
     const { data, error, status } = await getRequest({
@@ -107,7 +107,7 @@ export const anomalyDrilldown = (kpi, params) => {
   return async (dispatch) => {
     dispatch(anomalyDrilldownRequest());
     const URL = attachParams(
-      `${BASE_URL}/api/anomaly-data/${kpi}/anomaly-drilldown`,
+      `/api/anomaly-data/${kpi}/anomaly-drilldown`,
       params
     );
     const { data, error, status } = await getRequest({

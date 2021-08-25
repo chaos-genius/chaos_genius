@@ -57,7 +57,11 @@ const KPITable = ({ kpiData, connectionType }) => {
               <tr key={uuidv4()}>
                 <td>{kpi.name}</td>
                 <td>
-                  <Dimension data={kpi.dimensions}></Dimension>
+                  {kpi.dimensions.length !== 0 ? (
+                    <Dimension data={kpi.dimensions}></Dimension>
+                  ) : (
+                    '-'
+                  )}
                 </td>
                 <td>
                   <div className="source-type">

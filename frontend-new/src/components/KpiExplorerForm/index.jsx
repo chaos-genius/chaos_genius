@@ -575,7 +575,12 @@ const KpiExplorerForm = () => {
                 closeMenuOnSelect="true"
                 placeholder="Select Dimensions"
                 // menuPlacement="top"
-                onChange={(e) => setFormdata({ ...formdata, e })}
+                onChange={(e) => {
+                  setFormdata({
+                    ...formdata,
+                    adddimentsions: e.map((el) => el.value)
+                  });
+                }}
               />
             </div>
           ) : null}

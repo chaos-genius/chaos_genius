@@ -105,10 +105,10 @@ const DataSourceTable = ({ tableData, changeData, connectionType }) => {
                   </div>
                 </td>
                 <td>{datasource.kpi_count || '-'}</td>
-                <td className="date-formated">
+                <td className="date-column-formated">
                   {formatDate(datasource.last_sync)}
                 </td>
-                <td className="date-formated">
+                <td className="date-column-formated">
                   {formatDate(datasource.created_at)}
                 </td>
                 <td>

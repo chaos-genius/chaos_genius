@@ -68,10 +68,10 @@ const KPITable = ({ kpiData, connectionType }) => {
                     {connectionType && datasourceIcon(kpi.connection_type)}
                   </div>
                 </td>
-                <td className="date-formated">
+                <td className="date-column-formated">
                   {formatDate(kpi.created_at) || '-'}
                 </td>
-                <td className="date-formated">
+                <td className="date-column-formated">
                   {formatDate(kpi.created_at) || '-'}
                 </td>
                 <td>

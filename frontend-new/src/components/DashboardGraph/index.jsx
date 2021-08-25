@@ -48,7 +48,7 @@ const multidimensional = [
   }
 ];
 
-const Dashboardgraph = ({ kpi }) => {
+const Dashboardgraph = ({ kpi, kpiName }) => {
   const dispatch = useDispatch();
 
   const [activeDimension, setActiveDimension] = useState('');
@@ -156,12 +156,15 @@ const Dashboardgraph = ({ kpi }) => {
     chart.fontSize = 12;
     chart.fontFamily = 'Inter ,sans-serif';
 
-    // let title = chart.titles.create();
-    // title.text = this.props.kpidetails.name;
-    // title.fontSize = 16;
-    // title.fontfamily = 'Inter';
-    // title.marginBottom = 10;
-    // title.align = 'center';
+    let title = chart.titles.create();
+    title.text = kpiName;
+    title.fontSize = 16;
+    title.fontfamily = 'Inter ,sans-serif';
+    title.lineheight = '18';
+    title.marginBottom = 10;
+    title.align = 'center';
+    title.fill = '#222222';
+    title.fontWeight = '500';
 
     // Create axes
     let dateAxis = chart.xAxes.push(new am4charts.DateAxis());
@@ -176,16 +179,16 @@ const Dashboardgraph = ({ kpi }) => {
     // series.legendSettings.labelText = "Values";
     series.dataFields.valueY = 'value';
     series.dataFields.dateX = 'date';
-    series.stroke = am4core.color('#05A677');
+    series.stroke = am4core.color('#60CA9A');
     series.strokeWidth = 2.5;
     series.minBulletDistance = 10;
     series.tooltipText = '[bold]{date.formatDate()}:[/] {value}';
     series.tooltip.pointerOrientation = 'vertical';
     series.tooltip.getFillFromObject = false;
-    series.tooltip.background.fill = am4core.color('#778CA3');
+    series.tooltip.background.fill = am4core.color('#F5F5F5');
     series.tooltip.label.fontSize = 12;
     series.tooltip.label.fontFamily = 'Inter ,sans-serif';
-    series.tooltip.label.fill = '#fff';
+    series.tooltip.label.fill = '#222222';
 
     // Add cursor
     chart.cursor = new am4charts.XYCursor();
@@ -383,7 +386,7 @@ const Dashboardgraph = ({ kpi }) => {
             <div
               className={
                 dimension.value !== 'multidimension'
-                  ? ' common-tab'
+                  ? ' common-tab common-drilldown-tab'
                   : 'common-tab common-tab-hide'
               }>
               <ul>

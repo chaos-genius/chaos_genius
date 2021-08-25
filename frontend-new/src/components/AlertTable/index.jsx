@@ -26,8 +26,8 @@ const AlertTable = () => {
       <tbody>
         <tr>
           <td>Changes In DAU's</td>
-          <td>KPI Based</td>
-          <td className="date-formated">12/06/2021</td>
+          <td className="date-column-formated">KPI Based</td>
+          <td className="date-column-formated">12/06/2021</td>
           <td>
             <div className="alert-status">
               <label>Active</label>
@@ -51,8 +51,8 @@ const AlertTable = () => {
         </tr>
         <tr>
           <td>Changes In DAU's</td>
-          <td>KPI Based</td>
-          <td className="date-formated">12/06/2021</td>
+          <td className="date-column-formated">KPI Based</td>
+          <td className="date-column-formated">12/06/2021</td>
           <td>
             <div className="alert-status">
               <label>Active</label>
@@ -79,8 +79,8 @@ const AlertTable = () => {
         </tr>
         <tr>
           <td>Anamoly Detected</td>
-          <td>Event Based</td>
-          <td className="date-formated">12/06/2021</td>
+          <td className="date-column-formated">Event Based</td>
+          <td className="date-column-formated">12/06/2021</td>
           <td>
             <div className="alert-status">
               <label>InActive</label>
@@ -104,8 +104,8 @@ const AlertTable = () => {
         </tr>
         <tr>
           <td>Changes In DAU's</td>
-          <td>KPI Based</td>
-          <td className="date-formated">12/06/2021</td>
+          <td className="date-column-formated">KPI Based</td>
+          <td className="date-column-formated">12/06/2021</td>
           <td>
             <div className="alert-status">
               <label>Active</label>
@@ -129,8 +129,8 @@ const AlertTable = () => {
         </tr>
         <tr>
           <td>Changes In DAU's</td>
-          <td>Event Based</td>
-          <td className="date-formated">12/06/2021</td>
+          <td className="date-column-formated">Event Based</td>
+          <td className="date-column-formated">12/06/2021</td>
           <td>
             <div className="alert-status">
               <label>Active</label>

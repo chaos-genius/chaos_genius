@@ -197,7 +197,6 @@ const DataSourceForm = () => {
             classNamePrefix="selectcategory"
             onChange={(e) => {
               setSelectedDatasource(e);
-              setConnectionName('');
               setError('');
               setFormError([]);
               setSourceDefinitionId(e.value.sourceDefinitionId);

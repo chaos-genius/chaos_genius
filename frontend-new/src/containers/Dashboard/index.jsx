@@ -123,7 +123,9 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
-            {location[2] === 'autorca' && kpi && <Dashboardgraph kpi={kpi} />}
+            {location[2] === 'autorca' && kpi && active && (
+              <Dashboardgraph kpi={kpi} kpiName={active} />
+            )}
             {location[2] === 'anomolies' && kpi && <Anomaly kpi={kpi} />}
           </div>
         </div>

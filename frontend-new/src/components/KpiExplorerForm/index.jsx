@@ -75,7 +75,7 @@ const KpiExplorerForm = () => {
     kpiname: '',
     datasource: '',
     selectDatasource: '',
-    dataset: 'Table',
+    dataset: 'table',
     tablename: '',
     query: '',
     metriccolumns: '',

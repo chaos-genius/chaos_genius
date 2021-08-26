@@ -55,22 +55,32 @@ class ProcessAnomalyDetection:
         input_first_date = input_data['dt'].iloc[0]
         max_period = datetime.timedelta(days = self.period)
 
-        while self.last_date <= input_last_date:
-            curr_period = self.last_date-input_first_date
+        if self.last_date == None:
+            #pass complete input data frame in here as pred_df
 
-            if not curr_period <= max_period:
-                df = input_data[
-                    (input_data['dt'] >= self.last_date-max_period) \
-                    & (input_data['dt'] <= self.last_date)
-                ]
-                
-                prediction = model.predict(df)
-                toAppend = prediction.iloc[-1].copy()
-                toAppend.loc['y'] = df.iloc[-1]['y']
-                
-                predSeries = predSeries.append(toAppend, ignore_index=True)
+            prediction = model.predict(input_data, pred_df = input_data)
             
-            self.last_date += datetime.timedelta(days = 1)
+            prediction['y'] = input_data['y']
+            predSeries = prediction
+        
+        else:
+        
+            while self.last_date <= input_last_date:
+                curr_period = self.last_date-input_first_date
+
+                if not curr_period <= max_period:
+                    df = input_data[
+                        (input_data['dt'] >= self.last_date-max_period) \
+                        & (input_data['dt'] <= self.last_date)
+                    ]
+                    
+                    prediction = model.predict(df)
+                    toAppend = prediction.iloc[-1].copy()
+                    toAppend.loc['y'] = df.iloc[-1]['y']
+                    
+                    predSeries = predSeries.append(toAppend, ignore_index=True)
+                
+                self.last_date += datetime.timedelta(days = 1)
         
         return predSeries
 

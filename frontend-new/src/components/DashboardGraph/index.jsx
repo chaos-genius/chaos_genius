@@ -158,7 +158,7 @@ const Dashboardgraph = ({ kpi, kpiName }) => {
 
     let title = chart.titles.create();
     title.text = kpiName;
-    title.fontSize = 16;
+    title.fontSize = 14;
     title.fontfamily = 'Inter ,sans-serif';
     title.lineheight = '18';
     title.marginBottom = 10;

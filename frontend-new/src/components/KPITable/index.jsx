@@ -36,7 +36,6 @@ const KPITable = ({ kpiData, connectionType }) => {
       </>
     );
   };
-
   return (
     <table className="table">
       <thead>

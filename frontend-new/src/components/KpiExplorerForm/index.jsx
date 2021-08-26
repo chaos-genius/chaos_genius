@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { useHistory } from 'react-router-dom';
+import { useHistory, Redirect } from 'react-router-dom';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -112,7 +112,8 @@ const KpiExplorerForm = () => {
     kpiFieldLoading,
     kpiField,
     testQueryData,
-    kpiSubmitLoading
+    kpiSubmitLoading,
+    kpiSubmit
   } = useSelector((state) => state.kpiExplorer);
 
   useEffect(() => {
@@ -135,7 +136,7 @@ const KpiExplorerForm = () => {
       kpiFormData &&
         kpiFormData.forEach((data) => {
           optionArr.push({
-            value: data.connection_type,
+            value: data.name,
             id: data.id,
             label: (
               <div className="optionlabel">
@@ -153,9 +154,9 @@ const KpiExplorerForm = () => {
                       ? Amplitude
                       : ''
                   }
-                  alt={data.connection_type}
+                  alt={data.name}
                 />
-                {data.connection_type}
+                {data.name}
               </div>
             )
           });
@@ -366,6 +367,9 @@ const KpiExplorerForm = () => {
       setInputList(list);
     }
   };
+  if (kpiSubmit) {
+    return <Redirect to="/kpiexplorer" />;
+  }
 
   if (kpiFormLoading) {
     return (

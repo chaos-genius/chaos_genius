@@ -108,7 +108,8 @@
     display: none;
   }
   .btn-content {
-    display: block;
+    display: flex;
+    align-items: center;
   }
   &.btn-spacing {
     margin-right: 16px;

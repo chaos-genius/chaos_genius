@@ -42,7 +42,7 @@ def kpi_anomaly_detection(kpi_id):
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-drilldown", methods=["GET"])
-def kpi_anomaly_drilldown(kpi_id):
+def kpi_anomaly_drilldown(kpi_id, drilldown_date = datetime.tpday()):
     current_app.logger.info(f"Anomaly Drilldown Started for KPI ID: {kpi_id}")
     data = []
     try:
@@ -51,11 +51,16 @@ def kpi_anomaly_drilldown(kpi_id):
         #   From anomaly output select all subdims for mentioned date
         #   Sort by severity (desc) and pick N series
         #   Query for full series and return charts
-        raise NotImplementedError
+        subdim_graphs = []
+        for sudbim in get_drilldown_seriest_type(kpi_id, drilldown_date):
+            results = dq_and_subdim_date(kpi_id, drilldown_date, "subdim", subdim)
+            results_graph_data =  convert_to_graph_json(results, kpi_id, "subdim", subdim)
+            subdim_graphs.append(results_graph_data)
+
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("Anomaly Drilldown Done")
-    return jsonify({"data": data, "msg": ""})
+    return jsonify({"data": subdim_graphs, "msg": ""})
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-data-quality", methods=["GET"])
@@ -148,8 +153,6 @@ def get_overall_data(kpi_id, end_date: str, n=90):
     return graphData
 
 def dq_and_subdim_data(kpi_id, end_date, anomaly_type="dq", series_type="max", n=90):
-    
-
     start_date = pd.to_datetime(end_date) - timedelta(days=n)
     start_date = start_date.strftime('%Y-%m-%d')
     end_date = end_date.strftime('%Y-%m-%d')
@@ -164,3 +167,18 @@ def dq_and_subdim_data(kpi_id, end_date, anomaly_type="dq", series_type="max", n
     graphData = convert_to_graph_json(results, kpi_id, anomaly_type, series_type)
 
     return graphData
+
+
+   
+
+def get_drilldowns_series_type(kpi_id, drilldown_date, no_of_graphs=5):
+    # FIXME: Find a better way of doing this
+    table_name = "anomaly_test_schema"
+    dbUri = "postgresql+psycopg2://postgres:chaosgenius@localhost/anomaly_testing_db"
+
+    sql_query = f"select series_type from {table_name} where data_datetime = '{drilldown_date}' and kpi_id = {kpi_id} and anomaly_type = 'subdim' order by severity desc limit 5"
+    
+    results = get_df_from_db_uri(dbUri, sql_query)
+    return results.series_type
+
+

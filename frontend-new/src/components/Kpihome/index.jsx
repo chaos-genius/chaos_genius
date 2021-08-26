@@ -5,7 +5,7 @@ import Select from 'react-select';
 import Search from '../../assets/images/search.svg';
 import Graph from '../../assets/images/kpi-graph.svg';
 import Up from '../../assets/images/up.svg';
-// import Down from '../../assets/images/down.svg';
+import Down from '../../assets/images/down.svg';
 
 import './kpihome.scss';
 
@@ -33,7 +33,6 @@ const Kpihome = () => {
         <div className="homepage-options">
           <Select
             // value={monthWeek}
-            options={data}
             classNamePrefix="selectcategory"
             placeholder="Sort by"
             isSearchable={false}
@@ -59,7 +58,7 @@ const Kpihome = () => {
           </div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-content kpi-content-change">
+          <div className="kpi-content kpi-content-label">
             <h3>Average Engagement</h3>
             <label>(Mins)</label>
           </div>
@@ -93,7 +92,7 @@ const Kpihome = () => {
           <div className="kpi-content kpi-details">Details</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-content kpi-content-change">
+          <div className="kpi-content kpi-content-label">
             <h3>New Spotify Streams</h3>
             <label>(Customers Tracking)</label>
           </div>
@@ -119,6 +118,39 @@ const Kpihome = () => {
             <label>Anomalies</label>
             <span>
               15 <label className="anomalies-period">(last week)</label>
+            </span>
+          </div>
+          <div className="kpi-content kpi-graph">
+            <img src={Graph} alt="Graph" />
+          </div>
+          <div className="kpi-content kpi-details">Details</div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-content kpi-content-label title-center">
+            <h3>Website Bouncerate</h3>
+          </div>
+          <div className="kpi-content">
+            <label>This Week</label>
+            <span>9658</span>
+          </div>
+          <div className="kpi-content">
+            <label>Previous Week</label>
+            <span>10596</span>
+          </div>
+          <div className="kpi-content">
+            <label>Change</label>
+            <span>
+              764
+              <label className="low-change">
+                <img src={Down} alt="Low" />
+                22.6%
+              </label>
+            </span>
+          </div>
+          <div className="kpi-content">
+            <label>Anomalies</label>
+            <span>
+              3 <label className="anomalies-period">(last week)</label>
             </span>
           </div>
           <div className="kpi-content kpi-graph">

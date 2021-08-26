@@ -78,6 +78,9 @@
         margin-left: 2px;
       }
     }
+    &.title-center {
+      margin-bottom: 0px;
+    }
   }
   .kpi-details {
     font-weight: $font-weight-500;
@@ -91,7 +94,7 @@
   .kpi-content {
     display: flex;
     flex-direction: column;
-    &.kpi-content-change {
+    &.kpi-content-label {
       label {
         margin-bottom: 0px;
       }

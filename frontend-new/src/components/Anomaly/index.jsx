@@ -50,13 +50,10 @@ const Anomaly = ({ kpi }) => {
 
   const idRef = useRef(0);
 
-  const {
-    anomalyDetectionData,
-    anomalyDrilldownData,
-    anomalyQualityData
-  } = useSelector((state) => {
-    return state.anomaly;
-  });
+  const { anomalyDetectionData, anomalyDrilldownData, anomalyQualityData } =
+    useSelector((state) => {
+      return state.anomaly;
+    });
 
   useEffect(() => {
     getAnomaly();
@@ -149,8 +146,7 @@ const Anomaly = ({ kpi }) => {
           borderWidth: 1,
           padding: 20,
           title: {
-            text:
-              'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
+            text: 'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
             style: {
               fontStyle: 'italic'
             }
@@ -336,9 +332,9 @@ const Anomaly = ({ kpi }) => {
           <div className="dashboard-layout">
             <div
               className={
-                !drilldownCollapse
-                  ? 'dashboard-header-wrapper header-wrapper-disable'
-                  : 'dashboard-header-wrapper'
+                drilldownCollapse && itemList.length !== 0
+                  ? 'dashboard-header-wrapper '
+                  : 'dashboard-header-wrapper header-wrapper-disable '
               }>
               <div className="dashboard-header">
                 <h3>Drill Downs</h3>
@@ -353,7 +349,7 @@ const Anomaly = ({ kpi }) => {
                 <img src={Toparrow} alt="CollapseOpen" />
               </div>
             </div>
-            {drilldownCollapse ? (
+            {drilldownCollapse && itemList.length !== 0 ? (
               <div
                 className={
                   drilldownCollapse

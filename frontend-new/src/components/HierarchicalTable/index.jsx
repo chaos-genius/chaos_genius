@@ -76,10 +76,10 @@ const TreeNode = ({ node, child }) => {
 
   return (
     <>
-      <tr>
+      <tr className={child ? 'child-row' : ''}>
         <td
           onClick={() => setChildVisiblity((v) => !v)}
-          className={childVisible ? 'child-show' : child ? 'child-row' : ''}>
+          className={childVisible ? 'child-show' : child ? 'child-arrow' : ''}>
           {hasChild && <img src={Next} alt="arrow"></img>}
         </td>
         <td>{node.subgroup}</td>

@@ -119,6 +119,14 @@ a:hover {
       letter-spacing: $letter-spacing-point4;
       color: $black-variation-2;
     }
+    p {
+      font-weight: $font-weight-400;
+      font-size: $font-size-14;
+      line-height: $line-height-18;
+      letter-spacing: $letter-spacing;
+      color: $grey_variation-3;
+      margin-top: 8px;
+    }
   }
 }
 
@@ -443,6 +451,13 @@ a:hover {
         color: $green;
         border-bottom: 2px solid $green;
       }
+    }
+  }
+}
+.common-drilldown-tab {
+  ul {
+    li {
+      font-size: $font-size-16;
     }
   }
 }

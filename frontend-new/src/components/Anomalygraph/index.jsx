@@ -14,8 +14,8 @@ const Anomalygraph = ({ key, drilldown }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const findAnomalyZones = (intervals, values) => {
-    let validColor = '#25cc7b',
-      anomalyColor = '#ff5f5f';
+    let validColor = '#60CA9A',
+      anomalyColor = '#EB5756';
     let zones = [];
     let prev = null;
     let anomalyType = null; // 1 for above Confidence interval. -1 for below
@@ -133,8 +133,8 @@ const Anomalygraph = ({ key, drilldown }) => {
             type: 'arearange',
             lineWidth: 0,
             linkedTo: ':previous',
-            color: '#29A374',
-            fillOpacity: 0.2,
+            color: '#60CA9A',
+            fillOpacity: 0.1,
             zIndex: 0,
             marker: {
               fillColor: 'grey',

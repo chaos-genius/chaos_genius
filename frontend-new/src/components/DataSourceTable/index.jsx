@@ -9,12 +9,15 @@ import Modal from 'react-modal';
 // import Amplitude from '../../assets/images/amplitude.svg';
 // import MySQL from '../../assets/images/mysql.svg';
 import Edit from '../../assets/images/edit.svg';
-import EditActive from '../../assets/images/edit-active.svg';
+import EditActive from '../../assets/images/datasourceedit-active.svg';
 import Alert from '../../assets/images/alert.svg';
 import AlertActive from '../../assets/images/alert-active.svg';
-import Delete from '../../assets/images/delete.svg';
 import DeleteActive from '../../assets/images/delete-active.svg';
 import Close from '../../assets/images/close.svg';
+import More from '../../assets/images/more.svg';
+import Moreactive from '../../assets/images/more-active.svg';
+import Viewlog from '../../assets/images/viewlog.svg';
+import ViewlogActive from '../../assets/images/viewlog-active.svg';
 
 import '../../assets/styles/table.scss';
 import '../Modal/modal.scss';
@@ -34,7 +37,6 @@ const DataSourceTable = ({ tableData, changeData, connectionType }) => {
   const { deleteDataSourceResponse } = useSelector((state) => state.dataSource);
   const [isOpen, setIsOpen] = useState(false);
   const [data, setData] = useState('');
-
   const closeModal = () => {
     setIsOpen(false);
   };
@@ -105,67 +107,89 @@ const DataSourceTable = ({ tableData, changeData, connectionType }) => {
                   </div>
                 </td>
                 <td>{datasource.kpi_count || '-'}</td>
-                <td className="date-formated">
+                <td className="date-column-formated">
                   {formatDate(datasource.last_sync)}
                 </td>
-                <td className="date-formated">
+                <td className="date-column-formated">
                   {formatDate(datasource.created_at)}
                 </td>
                 <td>
-                  <div className="table-actions">
-                    <Link to="/datasource/edit">
-                      <div
-                        className="table-action-icon"
+                  <div className="dropdown more-dropdown">
+                    <div
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                      aria-haspopup="true">
+                      <img
+                        src={More}
+                        alt="More"
+                        className="moreoption"
                         data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        title="Edit">
-                        <img src={Edit} alt="Edit" className="action-normal" />
-
-                        <img
-                          src={EditActive}
-                          alt="Edit"
-                          className="action-active"
-                        />
-                      </div>
-                    </Link>
-                    <div
-                      className="table-action-icon"
-                      data-bs-toggle="tooltip"
-                      data-bs-placement="bottom"
-                      title="Delete"
-                      onClick={() => {
-                        setIsOpen(true);
-                        setData(datasource);
-                      }}>
-                      <img
-                        src={Delete}
-                        alt="Delete"
-                        className="action-normal"
+                        title="Actions"
                       />
                       <img
-                        src={DeleteActive}
-                        alt="Delete"
-                        className="action-active"
+                        src={Moreactive}
+                        alt="More"
+                        className="moreoption-active"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        title="Actions"
                       />
                     </div>
-                    <Link to="/alerts">
-                      <div
-                        className="table-action-icon"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        title="Add Alert">
+                    <ul className="dropdown-menu">
+                      <Link to="/alerts">
+                        <li>
+                          <img
+                            src={Alert}
+                            alt="Alert"
+                            className="action-disable"
+                          />
+                          <img
+                            src={AlertActive}
+                            alt="Alert"
+                            className="action-active"
+                          />
+                          Set Alerts
+                        </li>
+                      </Link>
+                      <li>
                         <img
-                          src={Alert}
-                          alt="Alert"
-                          className="action-normal"
+                          src={Viewlog}
+                          alt="View Log"
+                          className="action-disable"
                         />
                         <img
-                          src={AlertActive}
-                          alt="Alert"
+                          src={ViewlogActive}
+                          alt="View Log"
                           className="action-active"
                         />
-                      </div>
-                    </Link>
+                        View Logs
+                      </li>
+                      <Link to="/datasource/edit">
+                        <li>
+                          <img
+                            src={Edit}
+                            alt="Edit"
+                            className="action-disable"
+                          />
+                          <img
+                            src={EditActive}
+                            alt="Edit"
+                            className="action-active"
+                          />
+                          Edit
+                        </li>
+                      </Link>
+                      <li
+                        className="delete-item"
+                        onClick={() => {
+                          setIsOpen(true);
+                          setData(datasource);
+                        }}>
+                        <img src={DeleteActive} alt="Delete" />
+                        Delete
+                      </li>
+                    </ul>
                   </div>
                 </td>
               </tr>

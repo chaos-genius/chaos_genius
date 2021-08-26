@@ -87,6 +87,12 @@ export const anomaly = (state = initialState, action) => {
         anomalyDrilldownError: false
       };
     }
+    case 'RESET': {
+      return {
+        ...state,
+        anomalyDrilldownData: []
+      };
+    }
     default:
       return state;
   }

@@ -76,20 +76,20 @@ const TreeNode = ({ node, child }) => {
 
   return (
     <>
-      <tr>
+      <tr className={child ? 'child-row' : ''}>
         <td
           onClick={() => setChildVisiblity((v) => !v)}
-          className={childVisible ? 'child-show' : child ? 'child-row' : ''}>
+          className={childVisible ? 'child-show' : child ? 'child-arrow' : ''}>
           {hasChild && <img src={Next} alt="arrow"></img>}
         </td>
         <td>{node.subgroup}</td>
-        <td>{node.g1_agg}</td>
-        <td>{node.g1_count}</td>
-        <td>{node.g2_agg}</td>
-        <td>{node.g1_size}</td>
-        <td>{node.g2_count}</td>
-        <td>{node.g2_size}</td>
-        <td>
+        <td className="date-column-formated">{node.g1_agg}</td>
+        <td className="date-column-formated">{node.g1_count}</td>
+        <td className="date-column-formated">{node.g2_agg}</td>
+        <td className="date-column-formated">{node.g1_size}</td>
+        <td className="date-column-formated">{node.g2_count}</td>
+        <td className="date-column-formated">{node.g2_size}</td>
+        <td className="date-column-formated">
           {node.impact > 0 ? (
             <div className="connection__success">
               <p>

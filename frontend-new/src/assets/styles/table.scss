@@ -22,6 +22,9 @@
     }
     tbody {
       tr {
+        &.child-row {
+          background-color: $grey_variation-2;
+        }
         td {
           font-weight: $font-weight-500;
           font-size: $font-size-14;
@@ -32,13 +35,13 @@
           height: 56px;
           vertical-align: middle;
           padding: 16px;
-          &.child-row {
+          &.child-arrow {
             padding-left: 21px;
           }
           &.child-show {
             transform: rotate(90deg);
           }
-          &.date-formated {
+          &.date-column-formated {
             font-weight: $font-weight-400;
           }
           .live-status {
@@ -126,10 +129,22 @@
             }
           }
         }
+        .moreoption {
+          display: block;
+        }
+        .moreoption-active {
+          display: none;
+        }
         &:hover {
           background-color: $green_variation-2;
           .edit-information {
             visibility: visible;
+          }
+          .moreoption {
+            display: none;
+          }
+          .moreoption-active {
+            display: block;
           }
         }
       }

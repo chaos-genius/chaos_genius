@@ -18,8 +18,13 @@ import {
   anomalyDrilldown,
   getAnomalyQualityData
 } from '../../redux/actions';
+import store from '../../redux/store';
 
 highchartsMore(Highcharts);
+
+const RESET_ACTION = {
+  type: 'RESET'
+};
 
 const data = [
   {
@@ -45,16 +50,14 @@ const Anomaly = ({ kpi }) => {
 
   const idRef = useRef(0);
 
-  const {
-    anomalyDetectionData,
-    anomalyDrilldownData,
-    anomalyQualityData
-  } = useSelector((state) => {
-    return state.anomaly;
-  });
+  const { anomalyDetectionData, anomalyDrilldownData, anomalyQualityData } =
+    useSelector((state) => {
+      return state.anomaly;
+    });
 
   useEffect(() => {
     getAnomaly();
+    store.dispatch(RESET_ACTION);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpi]);
 
@@ -63,9 +66,11 @@ const Anomaly = ({ kpi }) => {
   };
 
   useEffect(() => {
-    idRef.current = anomalyDetectionData.base_anomaly_id;
-    renderChart(anomalyDetectionData.chart_data);
-    handleDataQuality(anomalyDetectionData.base_anomaly_id);
+    if (anomalyDetectionData) {
+      idRef.current = anomalyDetectionData?.base_anomaly_id;
+      renderChart(anomalyDetectionData?.chart_data);
+      handleDataQuality(anomalyDetectionData?.base_anomaly_id);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anomalyDetectionData]);
 
@@ -141,8 +146,7 @@ const Anomaly = ({ kpi }) => {
           borderWidth: 1,
           padding: 20,
           title: {
-            text:
-              'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
+            text: 'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
             style: {
               fontStyle: 'italic'
             }
@@ -156,8 +160,8 @@ const Anomaly = ({ kpi }) => {
             type: 'arearange',
             lineWidth: 0,
             linkedTo: ':previous',
-            color: '#29A374',
-            fillOpacity: 0.2,
+            color: '#60CA9A',
+            fillOpacity: 0.1,
             zIndex: 0,
             states: {
               inactive: {
@@ -214,8 +218,8 @@ const Anomaly = ({ kpi }) => {
   };
 
   const findAnomalyZones = (intervals, values) => {
-    let validColor = '#25cc7b',
-      anomalyColor = '#ff5f5f';
+    let validColor = '#60CA9A',
+      anomalyColor = '#EB5756';
     let zones = [];
     let prev = null;
     let anomalyType = null; // 1 for above Confidence interval. -1 for below
@@ -302,88 +306,95 @@ const Anomaly = ({ kpi }) => {
       })
     );
   };
+
   return (
     <>
-      <div className="dashboard-layout dashboard-layout-change">
-        <div className="dashboard-container">
-          <div className="dashboard-subcategory anomaly-subcategory">
-            <Select
-              value={category}
-              options={data}
-              classNamePrefix="selectcategory"
-              placeholder="select"
-              isSearchable={false}
-              onChange={(e) => setCategory(e)}
-            />
-          </div>
+      {anomalyDetectionData && anomalyDetectionData.length !== 0 ? (
+        <>
+          <div className="dashboard-layout dashboard-layout-change">
+            <div className="dashboard-container">
+              <div className="dashboard-subcategory anomaly-subcategory">
+                <Select
+                  value={category}
+                  options={data}
+                  classNamePrefix="selectcategory"
+                  placeholder="select"
+                  isSearchable={false}
+                  onChange={(e) => setCategory(e)}
+                />
+              </div>
 
-          {chartData && chartData.length !== 0 && (
-            <HighchartsReact highcharts={Highcharts} options={chartData} />
-          )}
-        </div>
-      </div>
-      <div className="dashboard-layout">
-        <div
-          className={
-            !drilldownCollapse
-              ? 'dashboard-header-wrapper header-wrapper-disable'
-              : 'dashboard-header-wrapper'
-          }>
-          <div className="dashboard-header">
-            <h3>Drill Downs</h3>
+              {chartData && chartData.length !== 0 && (
+                <HighchartsReact highcharts={Highcharts} options={chartData} />
+              )}
+            </div>
           </div>
-          <div
-            className={
-              !drilldownCollapse
-                ? 'header-collapse header-disable'
-                : 'header-collapse'
-            }
-            onClick={() => setDrilldownCollapse(!drilldownCollapse)}>
-            <img src={Toparrow} alt="CollapseOpen" />
+          <div className="dashboard-layout">
+            <div
+              className={
+                drilldownCollapse && itemList.length !== 0
+                  ? 'dashboard-header-wrapper '
+                  : 'dashboard-header-wrapper header-wrapper-disable '
+              }>
+              <div className="dashboard-header">
+                <h3>Drill Downs</h3>
+              </div>
+              <div
+                className={
+                  !drilldownCollapse
+                    ? 'header-collapse header-disable'
+                    : 'header-collapse'
+                }
+                onClick={() => setDrilldownCollapse(!drilldownCollapse)}>
+                <img src={Toparrow} alt="CollapseOpen" />
+              </div>
+            </div>
+            {drilldownCollapse && itemList.length !== 0 ? (
+              <div
+                className={
+                  drilldownCollapse
+                    ? 'dashboard-container'
+                    : 'dashboard-container drilldown-disable'
+                }>
+                {itemList}
+              </div>
+            ) : null}
           </div>
-        </div>
-        {drilldownCollapse ? (
-          <div
-            className={
-              drilldownCollapse
-                ? 'dashboard-container'
-                : 'dashboard-container drilldown-disable'
-            }>
-            {itemList}
+          <div className="dashboard-layout">
+            <div
+              className={
+                !dataQualityCollapse
+                  ? 'dashboard-header-wrapper header-wrapper-disable'
+                  : 'dashboard-header-wrapper'
+              }>
+              <div className="dashboard-header">
+                <h3>Data Quality</h3>
+              </div>
+              <div
+                className={
+                  !dataQualityCollapse
+                    ? 'header-collapse header-disable'
+                    : 'header-collapse'
+                }
+                onClick={() => setDataQualityCollapse(!dataQualityCollapse)}>
+                <img src={Toparrow} alt="CollapseOpen" />
+              </div>
+            </div>
+            {dataQualityCollapse ? (
+              <div
+                className={
+                  dataQualityCollapse
+                    ? 'dashboard-container'
+                    : 'dashboard-container drilldown-disable'
+                }>
+                {dataQualityList}
+              </div>
+            ) : null}
           </div>
-        ) : null}
-      </div>
-      <div className="dashboard-layout">
-        <div
-          className={
-            !dataQualityCollapse
-              ? 'dashboard-header-wrapper header-wrapper-disable'
-              : 'dashboard-header-wrapper'
-          }>
-          <div className="dashboard-header">
-            <h3>Data Quality</h3>
-          </div>
-          <div
-            className={
-              !dataQualityCollapse
-                ? 'header-collapse header-disable'
-                : 'header-collapse'
-            }
-            onClick={() => setDataQualityCollapse(!dataQualityCollapse)}>
-            <img src={Toparrow} alt="CollapseOpen" />
-          </div>
-        </div>
-        {dataQualityCollapse ? (
-          <div
-            className={
-              dataQualityCollapse
-                ? 'dashboard-container'
-                : 'dashboard-container drilldown-disable'
-            }>
-            {dataQualityList}
-          </div>
-        ) : null}
-      </div>
+        </>
+      ) : (
+        ''
+      )}
     </>
   );
 };

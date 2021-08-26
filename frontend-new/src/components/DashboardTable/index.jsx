@@ -56,9 +56,13 @@ const DashboardTable = ({ rcaAnalysisData }) => {
                     return (
                       <tr key={index}>
                         <td>{data.string}</td>
-                        <td>{data.indices_in_group}</td>
-                        <td>{data.non_overlap_indices}</td>
-                        <td>
+                        <td className="date-column-formated">
+                          {data.indices_in_group}
+                        </td>
+                        <td className="date-column-formated">
+                          {data.non_overlap_indices}
+                        </td>
+                        <td className="date-column-formated">
                           {data.impact_full_group > 0 ? (
                             <div className="connection__success">
                               <p>
@@ -75,7 +79,7 @@ const DashboardTable = ({ rcaAnalysisData }) => {
                             </div>
                           )}
                         </td>
-                        <td>
+                        <td className="date-column-formated">
                           {data.impact_non_overlap > 0 ? (
                             <div className="connection__success">
                               <p>
@@ -116,13 +120,13 @@ const DashboardTable = ({ rcaAnalysisData }) => {
                   return (
                     <tr key={index}>
                       <td>{data.subgroup}</td>
-                      <td>{data.g1_agg}</td>
-                      <td>{data.g1_count}</td>
-                      <td>{data.g2_agg}</td>
-                      <td>{data.g1_size}</td>
-                      <td>{data.g2_count}</td>
-                      <td>{data.g2_size}</td>
-                      <td>
+                      <td className="date-column-formated">{data.g1_agg}</td>
+                      <td className="date-column-formated">{data.g1_count}</td>
+                      <td className="date-column-formated">{data.g2_agg}</td>
+                      <td className="date-column-formated">{data.g1_size}</td>
+                      <td className="date-column-formated">{data.g2_count}</td>
+                      <td className="date-column-formated">{data.g2_size}</td>
+                      <td className="date-column-formated">
                         {data.impact > 0 ? (
                           <div className="connection__success">
                             <p>

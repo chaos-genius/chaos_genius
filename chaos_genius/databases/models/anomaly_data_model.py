@@ -8,15 +8,18 @@ from chaos_genius.databases.base_model import Column, PkModel, db
 class AnomalyData(PkModel):
     """Anomaly Data."""
 
-    __tablename__ = "anomaly_data"
+    __tablename__ = "anomaly_test_schema"
+    index = Column(db.BigIntegeer, nullable=False)
     kpi_id = Column(db.Integer, nullable=False)
     anomaly_type = Column(db.String(80), nullable=False) # overall, drilldown, data_quality
-    base_anomaly_id = Column(db.Integer)
-    drilldown_dimensions = Column(db.JSON)
-    chart_data = Column(db.JSON)
-    severity_score = Column(db.Integer)
-    anomaly_timestamp = Column(db.BigInteger)
-    created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
+    series_type = Column(db.String(80))
+    y = Column(db.DoublePrecision)
+    yhat_lower = Column(db.DoublePrecision)
+    yhat_upper = Column(db.DoblePrecision)
+    #TODO: Need to make is_anomaly into boolean
+    is_anomaly = Column(db.BigInteger)
+    severity = Column(db.DoublePrecision)
+    data_datetime = Column(db.DateTime, default=dt.datetime.utcnow)
 
     def __init__(self, **kwargs):
         """Create instance."""
@@ -29,13 +32,14 @@ class AnomalyData(PkModel):
     @property
     def as_dict(self):
         return {
-            "id": self.id,
+            "index": self.index,
             "kpi_id": self.kpi_id,
             "anomaly_type": self.anomaly_type,
-            "base_anomaly_id": self.base_anomaly_id,
-            "drilldown_dimensions": self.drilldown_dimensions,
-            "chart_data": self.chart_data,
-            "severity_score": self.severity_score,
-            "anomaly_timestamp": self.anomaly_timestamp,
-            "created_at": self.created_at
+            "series_type": self.series_type,
+            "y": self.y,
+            "yhat_lower": self.yhat_lower,
+            "yhat_upper": self.yhat_upper,
+            "is_anomaly": self.is_anomaly,
+            "severity": self.severity,
+            "data_datetime": self.data_datetime
         }

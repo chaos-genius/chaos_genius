@@ -27,11 +27,11 @@ import {
 
 const datasettype = [
   {
-    value: 'Query',
+    value: 'query',
     label: 'Query'
   },
   {
-    value: 'Table',
+    value: 'table',
     label: 'Table'
   }
 ];

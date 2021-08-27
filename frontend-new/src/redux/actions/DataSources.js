@@ -147,13 +147,13 @@ export const createDatesourceFailure = () => {
 
 export const createDataSource = (formData) => {
   return async (dispatch) => {
-    dispatch(createDatasourceRequested);
+    dispatch(createDatasourceRequested());
     const { data, error, status } = await postRequest({
       url: CREATE_DATASOURCE,
       data: formData
     });
     if (error) {
-      dispatch(createDatesourceFailure);
+      dispatch(createDatesourceFailure());
     } else if (data && status === 200) {
       dispatch(createDatasourceSuccess(data));
     }

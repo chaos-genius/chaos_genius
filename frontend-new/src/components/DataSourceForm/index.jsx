@@ -183,7 +183,6 @@ const DataSourceForm = () => {
       dispatch(createDataSource(payload));
     }
   };
-
   if (isLoading) {
     return (
       <div className="loader">

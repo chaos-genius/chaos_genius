@@ -18,6 +18,7 @@ import AddAlerts from '../containers/AddAlerts';
 import SetAlerts from '../containers/SetAlerts';
 import AddKpiAlert from '../containers/AddKpiAlert';
 import AddEventAlert from '../containers/AddEventAlert';
+import Result from '../containers/Result';
 
 const Routes = () => (
   <Switch>
@@ -115,6 +116,11 @@ const Routes = () => (
       exact
       path="/alerts/new/event-alert"
       component={(props) => <AddEventAlert {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
+      path="/noresult"
+      component={(props) => <Result {...props} />}
     />
     <PrivateRouteWithSidebar
       exact

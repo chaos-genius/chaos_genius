@@ -20,7 +20,9 @@ const initialState = {
   dataSourcesList: [],
   connectionType: [],
   testConnectionResponse: [],
+  createDatasourceLoading: false,
   createDatasourceResponse: [],
+  createDatasourceError: false,
   deleteDataSourceResponse: [],
   isLoading: false,
   testLoading: false,
@@ -94,21 +96,22 @@ export const dataSource = (state = initialState, action) => {
     }
     case CREATEDATASOURCEREQUEST: {
       return {
-        error: false
+        ...state,
+        createDatasourceLoading: true
       };
     }
     case CREATEDATASOURCESUCCESS: {
       return {
         ...state,
-
+        createDatasourceLoading: false,
         createDatasourceResponse: action.data
       };
     }
     case CREATEDATASOURCEFAILURE: {
       return {
         ...state,
-
-        error: true
+        createDatasourceLoading: false,
+        createDatasourceError: true
       };
     }
     case DELETEDATASOURCEREQUEST: {

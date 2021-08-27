@@ -54,6 +54,12 @@
   justify-content: space-between;
   width: 75%;
   .form-check {
+    display: flex;
+    align-items: center;
+    .form-check-input {
+      margin-top: 0px;
+      margin-right: 10px;
+    }
     label {
       font-weight: $font-weight-500;
       font-size: $font-size-14;

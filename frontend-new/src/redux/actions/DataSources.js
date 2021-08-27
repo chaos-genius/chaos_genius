@@ -155,7 +155,7 @@ export const createDataSource = (formData) => {
     if (error) {
       dispatch(createDatesourceFailure);
     } else if (data && status === 200) {
-      dispatch(createDatasourceSuccess(data.data));
+      dispatch(createDatasourceSuccess(data));
     }
   };
 };

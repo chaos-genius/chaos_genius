@@ -99,13 +99,6 @@ class AnomalyDetectionController(object):
             self.kpi_info.get("model_kwargs", {})
         ).predict()
 
-        if self.debug:
-            input_data['yhat_upper'] = 0
-            input_data['yhat_lower'] = 0
-            input_data['anomaly'] = 0
-            input_data['severity'] = 0
-            processed_anomaly = pd.concat(
-                [input_data[:self.kpi_info["period"]], processed_anomaly])
 
         return processed_anomaly
 
@@ -252,8 +245,7 @@ class AnomalyDetectionController(object):
         model_name = self.kpi_info["model_name"]
 
         last_date = self._get_last_date_in_db(series, subgroup)
-        if last_date == None:
-            last_date = series_data.reset_index()[dt_col].iloc[0]
+        
 
         overall_anomaly_output = self._detect_anomaly(
             model_name, series_data, last_date, series, subgroup)

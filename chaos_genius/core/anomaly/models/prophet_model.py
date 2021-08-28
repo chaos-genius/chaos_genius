@@ -13,7 +13,7 @@ class ProphetModel(AnomalyModel):
         self.prevModel = None
         self.model_kwargs = model_kwargs
 
-    def predict(self, df: pd.DataFrame, ) -> pd.DataFrame:
+    def predict(self, df: pd.DataFrame, pred_df: pd.DataFrame = None) -> pd.DataFrame:
         """Takes in pd.DataFrame with 2 columns, dt and y, and returns a 
         pd.DataFrame with 3 columns, dt, y, and yhat_lower, yhat_upper.
 
@@ -35,7 +35,10 @@ class ProphetModel(AnomalyModel):
         #         yearly_seasonality=True,
         #         daily_seasonality=True
         #     ).fit(df, init=self.stan_init(self.model))
-        future = self.model.make_future_dataframe(periods=1)
+        if pred_df == None:
+            future = self.model.make_future_dataframe(periods=1)
+        else:
+            future = self.model.make_future_dataframe(periods=0)
         forecast = self.model.predict(future)
         forecast = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']]
         return forecast.rename(columns={

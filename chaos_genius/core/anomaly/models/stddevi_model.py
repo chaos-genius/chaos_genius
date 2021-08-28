@@ -6,7 +6,7 @@ class StdDeviModel(AnomalyModel):
     def __init__(self, *args, model_kwargs = {}, **kwargs):
         super().__init__(*args, **kwargs)
         self.model_kwargs = model_kwargs
-    def predict(self, df: pd.DataFrame) -> pd.DataFrame:
+    def predict(self, df: pd.DataFrame, pred_df: pd.DataFrame = None) -> pd.DataFrame:
         """Takes in pd.DataFrame with 2 columns, dt and y, and returns a 
         pd.DataFrame with 3 columns, dt, y, and yhat_lower, yhat_upper.
 

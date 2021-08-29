@@ -41,18 +41,15 @@ def kpi_anomaly_detection(kpi_id):
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-drilldown", methods=["GET"])
-def kpi_anomaly_drilldown(kpi_id, drilldown_date = datetime.tpday()):
+def kpi_anomaly_drilldown(kpi_id):
     current_app.logger.info(f"Anomaly Drilldown Started for KPI ID: {kpi_id}")
-    data = []
+    subdim_graphs = []
     try:
-        # FIXME: Figure out how to select subdim for an anomaly date
-        # Simple implementation as follows:
-        #   From anomaly output select all subdims for mentioned date
-        #   Sort by severity (desc) and pick N series
-        #   Query for full series and return charts
-        subdim_graphs = []
-        for sudbim in get_drilldown_seriest_type(kpi_id, drilldown_date):
-            results = dq_and_subdim_date(kpi_id, drilldown_date, "subdim", subdim)
+
+        drilldown_date = pd.to_datetime(request.args.get("date"), unit="ms")
+        
+        for subdim in get_drilldowns_series_type(kpi_id, drilldown_date):
+            results = dq_and_subdim_data(kpi_id, drilldown_date, "subdim", subdim)
             results_graph_data =  convert_to_graph_json(results, kpi_id, "subdim", subdim)
             subdim_graphs.append(results_graph_data)
 

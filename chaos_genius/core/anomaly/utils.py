@@ -1,3 +1,4 @@
+from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from datetime import datetime, timedelta
 
 import pandas as pd
@@ -44,24 +45,13 @@ def get_anomaly_df(kpi_info, connection_info, days_range=180):
     return base_df
 
 def get_last_date_in_db(kpi_id, series, subgroup= None):
-    # FIXME: Find a better way of doing this
-    table_name = "anomaly_test_schema"
-    dbUri = "postgresql+psycopg2://postgres:chaosgenius@localhost/anomaly_testing_db"
+    results = AnomalyDataOutput.query.filter(
+        (AnomalyDataOutput.kpi_id == kpi_id) \
+        & (AnomalyDataOutput.anomaly_type == series) \
+        & (AnomalyDataOutput.series_type == subgroup) \
+    ).order_by(AnomalyDataOutput.data_datetime.desc()).first()
 
-    sql_query = f"select * from {table_name} where kpi_id = {kpi_id} and anomaly_type='{series}'"
-    if subgroup is not None:
-        sql_query += f" and series_type='{subgroup}'"
-
-    sql_query += "order by data_datetime desc limit 1;"
-
-    print(sql_query)
-
-    try:
-        results = get_df_from_db_uri(dbUri, sql_query)
-    except:
-        results = []
-
-    if len(results) == 0:
-        return None
+    if results:
+        return results.data_datetime
     else:
-        return results["data_datetime"].values[0]
+        return None

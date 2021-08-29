@@ -32,7 +32,12 @@ class AnomalyDetectionController(object):
         """
 
         conn = DataSource.get_by_id(self.kpi_info["data_source"])
-        df = get_anomaly_df(self.kpi_info, conn.as_dict)
+
+        last_date = self._get_last_date_in_db("overall")
+
+        print(last_date)
+
+        df = get_anomaly_df(self.kpi_info, conn.as_dict, last_date)
 
         dt_col = self.kpi_info['datetime_column']
 

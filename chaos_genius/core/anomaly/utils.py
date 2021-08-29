@@ -9,23 +9,27 @@ from chaos_genius.connectors.base_connector import get_df_from_db_uri
 def bound_between(min_val, val, max_val): 
     return min(max(val, min_val), max_val)
 
-def get_anomaly_df(kpi_info, connection_info, days_range=180):
+def get_anomaly_df(kpi_info, connection_info, last_date= None, days_range=90):
     indentifier = ''
     if connection_info["connection_type"] == "mysql":
         indentifier = '`'
     elif connection_info["connection_type"] == "postgresql":
         indentifier = '"'
 
-    today = datetime.today()
-    if kpi_info['is_static']:
-        end_date = kpi_info.get('static_params', {}).get('end_date', {})
-        if end_date:
-            today = datetime.strptime(end_date, '%Y-%m-%d')
+    if last_date is None:
+        end_date = datetime.today()
+        if kpi_info['is_static']:
+            end_date = kpi_info.get('static_params', {}).get('end_date', {})
+            if end_date:
+                end_date = datetime.strptime(end_date, '%Y-%m-%d')
+    else:
+        end_date = last_date
+
     num_days = days_range
-    base_dt_obj = today - timedelta(days=num_days)
+    base_dt_obj = end_date - timedelta(days=num_days)
     base_dt = str(base_dt_obj.date())
 
-    cur_dt = str(today.date())
+    cur_dt = str(end_date.date())
     base_filter = f" where {indentifier}{kpi_info['datetime_column']}{indentifier} > '{base_dt}' and {indentifier}{kpi_info['datetime_column']}{indentifier} <= '{cur_dt}' "
 
     kpi_filters = kpi_info['filters']

@@ -1,6 +1,4 @@
 import datetime
-import os
-import re
 
 import pandas as pd
 from sqlalchemy import create_engine
@@ -61,10 +59,7 @@ class AnomalyDetectionController(object):
         :rtype: datetime.datetime
         """
         
-        # FIXME: Deal with no prior data scenario
         last_date = get_last_date_in_db(self.kpi_info["id"], series, subgroup)
-
-        # last_date = pd.to_datetime("2021-08-25") - pd.to_timedelta(90, unit="D")
 
         return last_date
 
@@ -138,9 +133,9 @@ class AnomalyDetectionController(object):
         anomaly_output["series_type"] = subgroup
         
         # FIXME: Generalize storage and fetching of data
-        engine = create_engine("postgresql+psycopg2://postgres:chaosgenius@localhost/anomaly_testing_db")
+        engine = create_engine("postgresql+psycopg2://postgres:chaosgenius@localhost/chaosgenius")
         conn = engine.connect()
-        anomaly_output.to_sql("anomaly_test_schema", conn, index= False, if_exists="append")
+        anomaly_output.to_sql("anomaly_data_output", conn, if_exists="append")
 
     def _get_subgroup_list(
         self,
@@ -192,9 +187,9 @@ class AnomalyDetectionController(object):
         grouped_input_data = input_data\
             .groupby(self.kpi_info['dimensions'])\
             .agg({self.kpi_info['metric']:"count"})
-        
+
         filtered_subgroups = []
-        
+
         for subgroup in subgroups:
             if len(grouped_input_data.query(subgroup)) >= self.kpi_info["period"]:
                 filtered_subgroups.append(subgroup)
@@ -272,6 +267,7 @@ class AnomalyDetectionController(object):
 
         subgroups = self._get_subgroup_list(input_data)
 
+        # FIXME: Fix filtering logic
         filtered_subgroups = self._filter_subgroups(subgroups, input_data)
 
         if self.debug:

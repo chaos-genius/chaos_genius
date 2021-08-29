@@ -5,21 +5,20 @@ import datetime as dt
 from chaos_genius.databases.base_model import Column, PkModel, db
 
 
-class AnomalyData(PkModel):
+class AnomalyDataOutput(PkModel):
     """Anomaly Data."""
 
-    __tablename__ = "anomaly_test_schema"
-    index = Column(db.BigIntegeer, nullable=False)
+    __tablename__ = "anomaly_data_output"
+    data_datetime = Column(db.DateTime, default=dt.datetime.utcnow)
+    y = Column(db.Float)
+    yhat_upper = Column(db.Float)
+    yhat_lower = Column(db.Float)
+    is_anomaly = Column(db.BigInteger)
+    severity = Column(db.Float)
     kpi_id = Column(db.Integer, nullable=False)
     anomaly_type = Column(db.String(80), nullable=False) # overall, drilldown, data_quality
     series_type = Column(db.String(80))
-    y = Column(db.DoublePrecision)
-    yhat_lower = Column(db.DoublePrecision)
-    yhat_upper = Column(db.DoblePrecision)
-    #TODO: Need to make is_anomaly into boolean
-    is_anomaly = Column(db.BigInteger)
-    severity = Column(db.DoublePrecision)
-    data_datetime = Column(db.DateTime, default=dt.datetime.utcnow)
+    index = Column(db.BigInteger, nullable=False)
 
     def __init__(self, **kwargs):
         """Create instance."""

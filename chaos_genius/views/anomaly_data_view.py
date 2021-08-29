@@ -8,8 +8,7 @@ import pandas as pd
 
 from chaos_genius.extensions import cache
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
-from chaos_genius.databases.models.data_source_model import DataSource
-from chaos_genius.views.kpi_view import get_kpi_data_from_id
+from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 
 
 blueprint = Blueprint("anomaly_data", __name__)
@@ -141,13 +140,15 @@ def get_overall_data(kpi_id, end_date: str, n=90):
     start_date = start_date.strftime('%Y-%m-%d')
     end_date = end_date.strftime('%Y-%m-%d')
 
-    # FIXME: Find a better way of doing this
-    table_name = "anomaly_test_schema"
-    dbUri = "postgresql+psycopg2://postgres:chaosgenius@localhost/anomaly_testing_db"
+    query = AnomalyDataOutput.query.filter(
+        (AnomalyDataOutput.kpi_id == kpi_id) \
+        & (AnomalyDataOutput.data_datetime <= end_date) \
+        & (AnomalyDataOutput.data_datetime >= start_date) \
+        & (AnomalyDataOutput.anomaly_type == "overall")
+    )
 
-    sql_query = f"select * from {table_name} where kpi_id = {kpi_id} and data_datetime <= '{end_date}' and data_datetime >= '{start_date}' and anomaly_type='overall'"
-    results = get_df_from_db_uri(dbUri, sql_query)
-    
+    results = pd.read_sql(query.statement, query.session.bind)
+
     graphData = convert_to_graph_json(results, kpi_id, "overall", None)
     
     return graphData
@@ -179,6 +180,15 @@ def get_drilldowns_series_type(kpi_id, drilldown_date, no_of_graphs=5):
     sql_query = f"select series_type from {table_name} where data_datetime = '{drilldown_date}' and kpi_id = {kpi_id} and anomaly_type = 'subdim' order by severity desc limit 5"
     
     results = get_df_from_db_uri(dbUri, sql_query)
+    
+    query = AnomalyDataOutput.query.filter(
+        (AnomalyDataOutput.kpi_id == kpi_id) \
+        & (AnomalyDataOutput.data_datetime == drilldown_date) \
+        & (AnomalyDataOutput.anomaly_type == "subdim")
+    ).order_by(AnomalyDataOutput.severity.desc()).limit(no_of_graphs)
+
+    results = pd.read_sql(query.statement, query.session.bind)
+    
     return results.series_type
 
 

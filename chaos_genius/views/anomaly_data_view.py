@@ -155,12 +155,13 @@ def dq_and_subdim_data(kpi_id, end_date, anomaly_type="dq", series_type="max", n
     start_date = start_date.strftime('%Y-%m-%d')
     end_date = end_date.strftime('%Y-%m-%d')
 
-    # FIXME: Find a better way of doing this
-    table_name = "anomaly_test_schema"
-    dbUri = "postgresql+psycopg2://postgres:chaosgenius@localhost/anomaly_testing_db"
-    
-    sql_query = f"select * from {table_name} where kpi_id = {kpi_id} and data_datetime <= '{end_date}' and data_datetime >= '{start_date}' and anomaly_type='{anomaly_type}' and series_type='{series_type}'"
-    results = get_df_from_db_uri(dbUri, sql_query)
+    results = AnomalyDataOutput.query.filter_by(
+        (AnomalyDataOutput.kpi_id == kpi_id) \
+        & (AnomalyDataOutput.data_datetime <= end_date) \
+        & (AnomalyDataOutput.data_datetime >= start_date) \
+        & (AnomalyDataOutput.anomaly_type == "overall") \
+        & (AnomalyDataOutput.series_type == series_type)
+    ).all()
 
     graphData = convert_to_graph_json(results, kpi_id, anomaly_type, series_type)
 

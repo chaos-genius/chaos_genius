@@ -8,6 +8,9 @@ import Modal from 'react-modal';
 // import Postgre from '../../assets/images/postgre.svg';
 // import Amplitude from '../../assets/images/amplitude.svg';
 // import MySQL from '../../assets/images/mysql.svg';
+
+import Noresult from '../Noresult';
+
 import Edit from '../../assets/images/edit.svg';
 import EditActive from '../../assets/images/datasourceedit-active.svg';
 import Alert from '../../assets/images/alert.svg';
@@ -197,7 +200,10 @@ const DataSourceTable = ({ tableData, changeData, connectionType }) => {
           })
         ) : (
           <tr className="empty-table">
-            <td colSpan={7}>No Data Found</td>
+            <td colSpan={7}>
+              {' '}
+              <Noresult />
+            </td>
           </tr>
         )}
       </tbody>

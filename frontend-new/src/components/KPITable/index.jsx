@@ -10,6 +10,8 @@ import { Link } from 'react-router-dom';
 import Edit from '../../assets/images/edit.svg';
 import EditActive from '../../assets/images/edit-active.svg';
 
+import Noresult from '../Noresult';
+
 import '../../assets/styles/table.scss';
 
 import { v4 as uuidv4 } from 'uuid';
@@ -96,7 +98,9 @@ const KPITable = ({ kpiData, connectionType }) => {
           })
         ) : (
           <tr className="empty-table">
-            <td colSpan={6}>No Data Found</td>
+            <td colSpan={6}>
+              <Noresult />
+            </td>
           </tr>
         )}
       </tbody>

@@ -175,6 +175,12 @@
     .empty-table {
       td {
         text-align: center;
+        border-bottom: 0;
+      }
+      .no-data-card {
+        width: 100%;
+        box-shadow: none;
+        background-color: transparent;
       }
     }
   }

@@ -13,7 +13,7 @@ import Kpi from '../../assets/images/setupcard/kpi.svg';
 import KpiActive from '../../assets/images/setupcard/kpi-active.svg';
 
 const description = [
-  'Select The Data You Want To Monitor And Analyse',
+  'Select the Data Sources you want to add',
   'Define the KPIs you want to monitor and analyse',
   'Setup Anomaly Detection & AutoRCA for your KPIs',
   'Setup Alerts to get notified on changes in events & KPIs'

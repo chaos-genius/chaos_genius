@@ -51,7 +51,7 @@
     }
   }
   h1 {
-    font-weight: $font-weight-600;
+    font-weight: $font-weight-500;
     font-size: $font-size-16;
     line-height: $line-height-22;
     letter-spacing: $letter-spacing;
@@ -69,8 +69,8 @@
     font-size: $font-size-14;
     line-height: $line-height-20;
     letter-spacing: $letter-spacing;
-    text-transform: capitalize;
     margin-bottom: 24px;
+    font-weight: $font-weight-normal;
   }
   .btn {
     width: 100%;

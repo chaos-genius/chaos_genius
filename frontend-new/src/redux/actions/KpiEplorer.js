@@ -86,7 +86,7 @@ export const getAllKpiExplorerForm = () => {
     if (error) {
       dispatch(getAllKpiExplorerFormFailure);
     } else if (data && status === 200) {
-      dispatch(getAllKpiExplorerFormSuccess(data.data));
+      dispatch(getAllKpiExplorerFormSuccess(data));
     }
   };
 };

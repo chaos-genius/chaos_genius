@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
+
 import Select from 'react-select';
+import { useHistory } from 'react-router-dom';
+
 import '../../assets/styles/addform.scss';
 import Play from '../../assets/images/play.svg';
 import PlayDisable from '../../assets/images/play-disable.svg';
@@ -11,7 +14,9 @@ import {
   getConnectionType,
   testDatasourceConnection
 } from '../../redux/actions';
+
 import { useDispatch, useSelector } from 'react-redux';
+
 import { renderTextFields } from './Formhelper';
 
 const customSingleValue = ({ data }) => (
@@ -47,8 +52,17 @@ const DataSourceForm = () => {
   const [error, setError] = useState('');
   const [formError, setFormError] = useState({});
   const [status, setStatus] = useState('');
-  const { isLoading, connectionType, testLoading, testConnectionResponse } =
-    useSelector((state) => state.dataSource);
+
+  const history = useHistory();
+
+  const {
+    isLoading,
+    connectionType,
+    testLoading,
+    testConnectionResponse,
+    createDatasourceResponse,
+    createDatasourceLoading
+  } = useSelector((state) => state.dataSource);
 
   useEffect(() => {
     dispatchGetConnectionType();
@@ -74,6 +88,16 @@ const DataSourceForm = () => {
       fetchData();
     }
   }, [connectionType]);
+
+  useEffect(() => {
+    if (
+      createDatasourceResponse &&
+      createDatasourceResponse.status === 'connected'
+    ) {
+      history.push('/datasource');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createDatasourceResponse]);
 
   const handleInputChange = (key, e) => {
     setDsFormData((prev) => {
@@ -159,7 +183,6 @@ const DataSourceForm = () => {
       dispatch(createDataSource(payload));
     }
   };
-
   if (isLoading) {
     return (
       <div className="loader">
@@ -241,11 +264,24 @@ const DataSourceForm = () => {
         <div className="form-action">
           {status && status?.status === 'succeeded' && (
             <button
-              className="btn black-button"
+              // className="btn black-button"
+              className={
+                createDatasourceLoading
+                  ? 'btn black-button btn-loading'
+                  : 'btn black-button'
+              }
               onClick={() => {
                 saveDataSource();
               }}>
-              <span>Add Data Source</span>
+              <div className="btn-spinner">
+                <div className="spinner-border">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                <span>Loading...</span>
+              </div>
+              <div className="btn-content">
+                <span>Add Data Source</span>
+              </div>
             </button>
           )}
           {(status === '' || status?.status !== 'succeeded') && (

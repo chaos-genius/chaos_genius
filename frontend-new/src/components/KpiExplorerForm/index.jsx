@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { useHistory, Redirect } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -130,11 +130,18 @@ const KpiExplorerForm = () => {
     dispatch(getAllKpiExplorerForm());
   };
 
+  useEffect(() => {
+    if (kpiSubmit && kpiSubmit.message) {
+      history.push('/kpiexplorer');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kpiSubmit]);
+
   const fieldData = () => {
     if (!kpiFormLoading) {
       var optionArr = [];
       kpiFormData &&
-        kpiFormData.forEach((data) => {
+        kpiFormData.data.forEach((data) => {
           optionArr.push({
             value: data.name,
             id: data.id,
@@ -367,9 +374,6 @@ const KpiExplorerForm = () => {
       setInputList(list);
     }
   };
-  if (kpiSubmit) {
-    return <Redirect to="/kpiexplorer" />;
-  }
 
   if (kpiFormLoading) {
     return (

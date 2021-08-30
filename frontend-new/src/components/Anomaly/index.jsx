@@ -329,37 +329,39 @@ const Anomaly = ({ kpi }) => {
               )}
             </div>
           </div>
-          <div className="dashboard-layout">
-            <div
-              className={
-                drilldownCollapse && itemList.length !== 0
-                  ? 'dashboard-header-wrapper '
-                  : 'dashboard-header-wrapper header-wrapper-disable '
-              }>
-              <div className="dashboard-header">
-                <h3>Drill Downs</h3>
-              </div>
+          {itemList && anomalyDrilldownData.length !== 0 ? (
+            <div className="dashboard-layout">
               <div
                 className={
-                  !drilldownCollapse
-                    ? 'header-collapse header-disable'
-                    : 'header-collapse'
-                }
-                onClick={() => setDrilldownCollapse(!drilldownCollapse)}>
-                <img src={Toparrow} alt="CollapseOpen" />
-              </div>
-            </div>
-            {drilldownCollapse && itemList.length !== 0 ? (
-              <div
-                className={
-                  drilldownCollapse
-                    ? 'dashboard-container'
-                    : 'dashboard-container drilldown-disable'
+                  drilldownCollapse && itemList.length !== 0
+                    ? 'dashboard-header-wrapper '
+                    : 'dashboard-header-wrapper header-wrapper-disable '
                 }>
-                {itemList}
+                <div className="dashboard-header">
+                  <h3>Drill Downs</h3>
+                </div>
+                <div
+                  className={
+                    !drilldownCollapse && itemList.length !== 0
+                      ? 'header-collapse header-disable'
+                      : 'header-collapse'
+                  }
+                  onClick={() => setDrilldownCollapse(!drilldownCollapse)}>
+                  <img src={Toparrow} alt="CollapseOpen" />
+                </div>
               </div>
-            ) : null}
-          </div>
+              {drilldownCollapse && itemList.length !== 0 ? (
+                <div
+                  className={
+                    drilldownCollapse
+                      ? 'dashboard-container'
+                      : 'dashboard-container drilldown-disable'
+                  }>
+                  {itemList}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
           <div className="dashboard-layout">
             <div
               className={

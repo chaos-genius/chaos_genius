@@ -187,13 +187,16 @@ class AnomalyDetectionController(object):
         grouped_input_data = input_data\
             .groupby(self.kpi_info['dimensions'])\
             .agg({self.kpi_info['metric']:"count"})
-
+        
         filtered_subgroups = []
 
         for subgroup in subgroups:
-            if len(grouped_input_data.query(subgroup)) >= self.kpi_info["period"]:
-                filtered_subgroups.append(subgroup)
-
+            try:
+                if grouped_input_data.query(subgroup)[self.kpi_info["metric"]]\
+                    .iloc[0] >= self.kpi_info["period"]:
+                    filtered_subgroups.append(subgroup)
+            except IndexError:
+                pass
         return filtered_subgroups
 
     def _run_anomaly_for_series(

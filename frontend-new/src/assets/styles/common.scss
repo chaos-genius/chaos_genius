@@ -433,6 +433,20 @@ a:hover {
   }
   .graph-section {
     width: 78%;
+    .no-data-card {
+      width: 100%;
+      min-height: 284px;
+      background: #ffffff;
+      box-shadow: none;
+      border-top-left-radius: 0px;
+      border-top-right-radius: 0px;
+      border-bottom-right-radius: 10px;
+      border-bottom-left-radius: 10px;
+      padding: 40px 80px;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+    }
   }
 }
 // Common Tab

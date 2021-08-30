@@ -173,6 +173,9 @@
       }
     }
     .empty-table {
+      &:hover {
+        background-color: transparent;
+      }
       td {
         text-align: center;
         border-bottom: 0;

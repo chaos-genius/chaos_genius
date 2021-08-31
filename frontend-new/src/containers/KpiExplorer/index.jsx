@@ -13,7 +13,6 @@ import KPITable from '../../components/KPITable';
 import './kpiexplorer.scss';
 
 import { getAllKpiExplorer } from '../../redux/actions';
-import { getConnectionType } from '../../redux/actions';
 
 const KpiExplorer = () => {
   const dispatch = useDispatch();
@@ -27,17 +26,10 @@ const KpiExplorer = () => {
     (state) => state.kpiExplorer
   );
 
-  const { connectionType } = useSelector((state) => state.dataSource);
-
   useEffect(() => {
     dispatchGetAllKpiExplorer();
-    dispatchGetConnectionType();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
-
-  const dispatchGetConnectionType = () => {
-    dispatch(getConnectionType());
-  };
 
   const dispatchGetAllKpiExplorer = () => {
     dispatch(getAllKpiExplorer());
@@ -124,10 +116,7 @@ const KpiExplorer = () => {
           </div>
           {/* table section */}
           <div className="table-section">
-            <KPITable
-              kpiData={kpiExplorerData}
-              connectionType={connectionType}
-            />
+            <KPITable kpiData={kpiExplorerData} />
           </div>
         </div>
       </div>

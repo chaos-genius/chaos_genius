@@ -11,7 +11,6 @@ import Fail from '../../assets/images/fail.svg';
 
 import {
   createDataSource,
-  getConnectionType,
   testDatasourceConnection
 } from '../../redux/actions';
 
@@ -54,24 +53,14 @@ const DataSourceForm = () => {
   const [status, setStatus] = useState('');
 
   const history = useHistory();
-
+  const connectionType = JSON.parse(localStorage.getItem('connectionType'));
   const {
     isLoading,
-    connectionType,
     testLoading,
     testConnectionResponse,
     createDatasourceResponse,
     createDatasourceLoading
   } = useSelector((state) => state.dataSource);
-
-  useEffect(() => {
-    dispatchGetConnectionType();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
-
-  const dispatchGetConnectionType = () => {
-    dispatch(getConnectionType());
-  };
 
   useEffect(() => {
     const fetchData = () => {
@@ -84,7 +73,7 @@ const DataSourceForm = () => {
       });
       setOption(arr);
     };
-    if (connectionType && connectionType.length !== 0) {
+    if (connectionType) {
       fetchData();
     }
   }, [connectionType]);

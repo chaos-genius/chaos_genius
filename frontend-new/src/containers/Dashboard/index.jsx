@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import { useSelector, useDispatch } from 'react-redux';
 
-import { Link, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import './dashboard.scss';
 
@@ -19,8 +19,7 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const [active, setActive] = useState('');
   const [kpi, setKpi] = useState();
-  const history = useHistory();
-  const location = useHistory().location.pathname.split('/');
+  const [tab, setTabs] = useState('autorca');
 
   const { sidebarLoading, sidebarList } = useSelector((state) => {
     return state.sidebar;
@@ -39,10 +38,20 @@ const Dashboard = () => {
     if (sidebarList && sidebarList.length !== 0 && kpi === undefined) {
       setActive(sidebarList[0]?.name);
       setKpi(sidebarList[0]?.id);
-      history.push(`/dashboard/${location[2]}/${sidebarList[0]?.id}`);
+
+      window.history.pushState(
+        '',
+        '',
+        `/#/dashboard/${tab}/${sidebarList[0]?.id}`
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sidebarList]);
+
+  const onTabClick = (tabs) => {
+    setTabs(tabs);
+    window.history.pushState('', '', `/#/dashboard/${tabs}/${kpi}`);
+  };
 
   if (sidebarLoading) {
     return (
@@ -87,9 +96,10 @@ const Dashboard = () => {
           <div className="filter-section">
             {sidebarList && (
               <FilterWithTab
+                tabs={tab}
+                kpi={kpi}
                 setKpi={setKpi}
                 data={sidebarList}
-                active={active}
                 setActive={setActive}
               />
             )}
@@ -102,17 +112,17 @@ const Dashboard = () => {
               <div className="dashboard-subheader">
                 <div className="common-tab">
                   <ul>
-                    <Link to={`/dashboard/autorca/${kpi}`}>
-                      <li className={location[2] === 'autorca' ? 'active' : ''}>
-                        AutoRCA
-                      </li>
-                    </Link>
-                    <Link to={`/dashboard/anomolies/${kpi}`}>
-                      <li
-                        className={location[2] === 'anomolies' ? 'active' : ''}>
-                        Anomolies
-                      </li>
-                    </Link>
+                    <li
+                      className={tab === 'autorca' ? 'active' : ''}
+                      onClick={() => onTabClick('autorca')}>
+                      AutoRCA
+                    </li>
+
+                    <li
+                      className={tab === 'anomolies' ? 'active' : ''}
+                      onClick={() => onTabClick('anomolies')}>
+                      Anomolies
+                    </li>
                   </ul>
                 </div>
                 <div className="common-option">
@@ -123,10 +133,10 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
-            {location[2] === 'autorca' && kpi && active && (
+            {tab === 'autorca' && kpi && active && (
               <Dashboardgraph kpi={kpi} kpiName={active} />
             )}
-            {location[2] === 'anomolies' && kpi && <Anomaly kpi={kpi} />}
+            {tab === 'anomolies' && kpi && <Anomaly kpi={kpi} />}
           </div>
         </div>
       </div>

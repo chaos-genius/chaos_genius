@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
 
-import { useHistory } from 'react-router-dom';
-
 import Search from '../../assets/images/search.svg';
 import GreenArrow from '../../assets/images/green-arrow.svg';
 
@@ -9,12 +7,11 @@ import Fuse from 'fuse.js';
 
 import { v4 as uuidv4 } from 'uuid';
 
-const DashboardFilter = ({ setKpi, data, active, setActive }) => {
+const DashboardFilter = ({ kpi, setKpi, data, setActive, tabs }) => {
   //const [active, setActive] = useState('');
   const [listData, setListData] = useState(data);
   const [searchData, setSearchData] = useState(data);
-  const history = useHistory();
-  const location = useHistory().location.pathname.split('/');
+
   useEffect(() => {
     if (data) {
       setListData(data);
@@ -22,6 +19,7 @@ const DashboardFilter = ({ setKpi, data, active, setActive }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
+
   const onSearch = (e) => {
     if (e.target.value) {
       const options = {
@@ -38,15 +36,6 @@ const DashboardFilter = ({ setKpi, data, active, setActive }) => {
       setListData(searchData);
     }
   };
-  // useEffect(() => {
-  //   const location = history.location.pathname.split('/');
-  //   if (active && location[2] === 'autorca') {
-  //     history.push(`/dashboard/autorca/${active}`);
-  //   } else if (active && location[2] === 'anomolies') {
-  //     history.push(`/dashboard/anomolies/${active}`);
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [active]);
   return (
     <div className="common-filter-section">
       <div className="filter-layout">
@@ -70,11 +59,15 @@ const DashboardFilter = ({ setKpi, data, active, setActive }) => {
               return (
                 <li
                   key={uuidv4()}
-                  className={active === item.name ? 'active' : ''}
+                  className={kpi === item.id ? 'active' : ''}
                   onClick={() => {
                     setActive(item.name);
                     setKpi(item.id);
-                    history.push(`/dashboard/${location[2]}/${item.id}`);
+                    window.history.pushState(
+                      '',
+                      '',
+                      `/#/dashboard/${tabs}/${item.id}`
+                    );
                   }}>
                   {item.name}
                   <img src={GreenArrow} alt="Arrow" />

@@ -9,11 +9,6 @@ import Select from 'react-select';
 import Play from '../../assets/images/play-green.png';
 import Success from '../../assets/images/success.svg';
 import Fail from '../../assets/images/fail.svg';
-import GoogleSheet from '../../assets/images/googlesheets.svg';
-import Postgre from '../../assets/images/postgre.svg';
-import GoogleAnalytics from '../../assets/images/googleanalytics.svg';
-import Amplitude from '../../assets/images/amplitude.svg';
-import MySQL from '../../assets/images/mysql.svg';
 import Cancel from '../../assets/images/cancel.svg';
 
 import '../../assets/styles/addform.scss';
@@ -64,6 +59,7 @@ const KpiExplorerForm = () => {
 
   const history = useHistory();
   const data = history.location.pathname.split('/');
+  const connectionType = JSON.parse(localStorage.getItem('connectionType'));
 
   const [option, setOption] = useState({
     datasource: '',
@@ -130,6 +126,26 @@ const KpiExplorerForm = () => {
     dispatch(getAllKpiExplorerForm());
   };
 
+  const datasourceIcon = (type) => {
+    let textHtml = '';
+    connectionType &&
+      connectionType.find((item) => {
+        if (item.name === type.connection_type) {
+          textHtml = item.icon;
+        }
+        return '';
+      });
+    return (
+      <>
+        <span
+          dangerouslySetInnerHTML={{ __html: textHtml }}
+          className="datasource-svgicon"
+        />
+        {type.name}
+      </>
+    );
+  };
+
   useEffect(() => {
     if (kpiSubmit && kpiSubmit.message) {
       history.push('/kpiexplorer');
@@ -145,27 +161,7 @@ const KpiExplorerForm = () => {
           optionArr.push({
             value: data.name,
             id: data.id,
-            label: (
-              <div className="optionlabel">
-                <img
-                  src={
-                    data.connection_type === 'Google Analytics'
-                      ? GoogleAnalytics
-                      : data.connection_type === 'Postgres'
-                      ? Postgre
-                      : data.connection_type === 'Google Sheets'
-                      ? GoogleSheet
-                      : data.connection_type === 'MySQL'
-                      ? MySQL
-                      : data.connection_type === 'Amplitude'
-                      ? Amplitude
-                      : ''
-                  }
-                  alt={data.name}
-                />
-                {data.name}
-              </div>
-            )
+            label: <div className="optionlabel">{datasourceIcon(data)}</div>
           });
           setOption({ datasource: optionArr });
         });

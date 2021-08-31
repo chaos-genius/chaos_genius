@@ -8,6 +8,9 @@ import Modal from 'react-modal';
 // import Postgre from '../../assets/images/postgre.svg';
 // import Amplitude from '../../assets/images/amplitude.svg';
 // import MySQL from '../../assets/images/mysql.svg';
+
+import Noresult from '../Noresult';
+
 import Edit from '../../assets/images/edit.svg';
 import EditActive from '../../assets/images/datasourceedit-active.svg';
 import Alert from '../../assets/images/alert.svg';
@@ -31,17 +34,20 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { v4 as uuidv4 } from 'uuid';
 
-const DataSourceTable = ({ tableData, changeData, connectionType }) => {
+const DataSourceTable = ({ tableData, changeData }) => {
   const dispatch = useDispatch();
-
-  const { deleteDataSourceResponse } = useSelector((state) => state.dataSource);
   const [isOpen, setIsOpen] = useState(false);
   const [data, setData] = useState('');
+  const connectionType = JSON.parse(localStorage.getItem('connectionType'));
+
+  const { deleteDataSourceResponse } = useSelector((state) => state.dataSource);
+
   const closeModal = () => {
     setIsOpen(false);
   };
+
   useEffect(() => {
-    if (deleteDataSourceResponse) {
+    if (deleteDataSourceResponse && deleteDataSourceResponse.length !== 0) {
       changeData((prev) => !prev);
       setIsOpen(false);
     }
@@ -54,14 +60,16 @@ const DataSourceTable = ({ tableData, changeData, connectionType }) => {
     };
     dispatch(deleteDatasource(payload));
   };
+
   const datasourceIcon = (type) => {
-    let textHtml;
+    let textHtml = '';
     connectionType.find((item) => {
       if (item.name === type) {
         textHtml = item.icon;
       }
       return '';
     });
+
     return (
       <>
         <span
@@ -87,7 +95,7 @@ const DataSourceTable = ({ tableData, changeData, connectionType }) => {
         </tr>
       </thead>
       <tbody>
-        {tableData && connectionType && tableData.length !== 0 ? (
+        {tableData && tableData.length !== 0 ? (
           tableData.map((datasource) => {
             return (
               <tr key={uuidv4()}>
@@ -102,8 +110,9 @@ const DataSourceTable = ({ tableData, changeData, connectionType }) => {
                 </td>
                 <td>
                   <div className="source-type">
-                    {connectionType &&
-                      datasourceIcon(datasource.connection_type)}
+                    {connectionType
+                      ? datasourceIcon(datasource.connection_type)
+                      : '-'}
                   </div>
                 </td>
                 <td>{datasource.kpi_count || '-'}</td>
@@ -197,7 +206,10 @@ const DataSourceTable = ({ tableData, changeData, connectionType }) => {
           })
         ) : (
           <tr className="empty-table">
-            <td colSpan={7}>No Data Found</td>
+            <td colSpan={7}>
+              {' '}
+              <Noresult />
+            </td>
           </tr>
         )}
       </tbody>

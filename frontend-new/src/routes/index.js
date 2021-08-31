@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Switch } from 'react-router-dom';
+import { Switch, Route } from 'react-router-dom';
 
 import PrivateRouteWithSidebar from './PrivateRouteWithSidebar';
 
@@ -19,39 +19,27 @@ import SetAlerts from '../containers/SetAlerts';
 import AddKpiAlert from '../containers/AddKpiAlert';
 import AddEventAlert from '../containers/AddEventAlert';
 import Result from '../containers/Result';
+import Login from '../containers/Login';
 
 const Routes = () => (
   <Switch>
+    <Route exact path="/login" component={Login}></Route>
+    <Route exact path="/verifylogin" component={Login}></Route>
     <PrivateRouteWithSidebar
       exact
       path="/"
       component={(props) => <Home {...props} />}
     />
-    {/* <PrivateRouteWithSidebar
-      exact
-      path="/dashboard"
-      component={(props) => <Dashboard {...props} />}
-    /> */}
     <PrivateRouteWithSidebar
       exact
-      path="/dashboard/autorca/:kpi"
+      path={['/dashboard/autorca/', '/dashboard/autorca/:kpi']}
       component={(props) => <Dashboard {...props} />}
     />
-    {/* <PrivateRouteWithSidebar
-      exact
-      path="/dashboard/autorca/:kpi"
-      component={(props) => <Dashboard {...props} />}
-    /> */}
     <PrivateRouteWithSidebar
       exact
       path="/dashboard/anomolies/:kpi"
       component={(props) => <Dashboard {...props} />}
     />
-    {/* <PrivateRouteWithSidebar
-      exact
-      path="/dashboard/anomolies/:kpi"
-      component={(props) => <Dashboard {...props} />}
-    /> */}
     <PrivateRouteWithSidebar
       exact
       path="/datasource"

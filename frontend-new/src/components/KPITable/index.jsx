@@ -2,11 +2,6 @@ import React from 'react';
 
 import { Link } from 'react-router-dom';
 
-// import GoogleAnalytics from '../../assets/images/googleanalytics.svg';
-// import GoogleSheet from '../../assets/images/googlesheets.svg';
-// import Postgre from '../../assets/images/postgre.svg';
-// import Amplitude from '../../assets/images/amplitude.svg';
-// import MySQL from '../../assets/images/mysql.svg';
 import Edit from '../../assets/images/edit.svg';
 import EditActive from '../../assets/images/edit-active.svg';
 
@@ -19,7 +14,9 @@ import Dimension from './dimension';
 
 import { formatDate } from '../../utils/date-helper';
 
-const KPITable = ({ kpiData, connectionType }) => {
+const KPITable = ({ kpiData }) => {
+  const connectionType = JSON.parse(localStorage.getItem('connectionType'));
+
   const datasourceIcon = (type) => {
     let textHtml;
     connectionType.find((item) => {
@@ -52,7 +49,7 @@ const KPITable = ({ kpiData, connectionType }) => {
         </tr>
       </thead>
       <tbody>
-        {kpiData && connectionType && kpiData.length !== 0 ? (
+        {kpiData && kpiData.length !== 0 ? (
           kpiData.map((kpi) => {
             return (
               <tr key={uuidv4()}>
@@ -66,7 +63,7 @@ const KPITable = ({ kpiData, connectionType }) => {
                 </td>
                 <td>
                   <div className="source-type">
-                    {connectionType && datasourceIcon(kpi.connection_type)}
+                    {connectionType ? datasourceIcon(kpi.connection_type) : '-'}
                   </div>
                 </td>
                 <td className="date-column-formated">

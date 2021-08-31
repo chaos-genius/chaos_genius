@@ -13,7 +13,7 @@ import DataSourceTable from '../../components/DataSourceTable';
 
 import './datasource.scss';
 
-import { getAllDataSources, getConnectionType } from '../../redux/actions';
+import { getAllDataSources } from '../../redux/actions';
 
 const DataSource = () => {
   const dispatch = useDispatch();
@@ -23,19 +23,14 @@ const DataSource = () => {
   const [dataSourceFilter, setDataSourceFilter] = useState([]);
   const [data, setData] = useState(false);
 
-  const { isLoading, dataSourcesList, connectionType } = useSelector(
+  const { isLoading, dataSourcesList } = useSelector(
     (state) => state.dataSource
   );
 
   useEffect(() => {
     dispatchGetAllDataSources();
-    dispatchGetConnectionType();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, data]);
-
-  const dispatchGetConnectionType = () => {
-    dispatch(getConnectionType());
-  };
+  }, [data]);
 
   const dispatchGetAllDataSources = () => {
     dispatch(getAllDataSources());
@@ -64,6 +59,7 @@ const DataSource = () => {
       })
     );
   };
+
   useEffect(() => {
     const fetchFilter = () => {
       if (dataSourceFilter.length === 0) {
@@ -124,11 +120,7 @@ const DataSource = () => {
           </div>
           {/* table section */}
           <div className="table-section">
-            <DataSourceTable
-              tableData={dataSourceData}
-              connectionType={connectionType}
-              changeData={setData}
-            />
+            <DataSourceTable tableData={dataSourceData} changeData={setData} />
           </div>
         </div>
       </div>

@@ -30,31 +30,16 @@ const Routes = () => (
       path="/"
       component={(props) => <Home {...props} />}
     />
-    {/* <PrivateRouteWithSidebar
-      exact
-      path="/dashboard"
-      component={(props) => <Dashboard {...props} />}
-    /> */}
     <PrivateRouteWithSidebar
       exact
-      path="/dashboard/autorca/:kpi"
+      path={['/dashboard/autorca/', '/dashboard/autorca/:kpi']}
       component={(props) => <Dashboard {...props} />}
     />
-    {/* <PrivateRouteWithSidebar
-      exact
-      path="/dashboard/autorca/:kpi"
-      component={(props) => <Dashboard {...props} />}
-    /> */}
     <PrivateRouteWithSidebar
       exact
       path="/dashboard/anomolies/:kpi"
       component={(props) => <Dashboard {...props} />}
     />
-    {/* <PrivateRouteWithSidebar
-      exact
-      path="/dashboard/anomolies/:kpi"
-      component={(props) => <Dashboard {...props} />}
-    /> */}
     <PrivateRouteWithSidebar
       exact
       path="/datasource"

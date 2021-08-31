@@ -50,9 +50,9 @@ def kpi():
                 dimensions=data.get('dimensions')
             )
             new_kpi.save(commit=True)
-            return jsonify({"message": f"DataSource {new_kpi.name} has been created successfully."})
+            return jsonify({"message": f"KPI {new_kpi.name} has been created successfully.", "status": "success"})
         else:
-            return jsonify({"error": "The request payload is not in JSON format"})
+            return jsonify({"error": "The request payload is not in JSON format", "status": "failure"})
 
     elif request.method == 'GET':
         results = db.session.query(Kpi, DataSource) \

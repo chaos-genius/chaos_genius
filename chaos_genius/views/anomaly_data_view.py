@@ -8,7 +8,7 @@ import pandas as pd
 
 from chaos_genius.extensions import cache
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
-from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
+from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, AnomalyData
 
 
 blueprint = Blueprint("anomaly_data", __name__)

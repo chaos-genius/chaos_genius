@@ -20,6 +20,7 @@ import AddKpiAlert from '../containers/AddKpiAlert';
 import AddEventAlert from '../containers/AddEventAlert';
 import Result from '../containers/Result';
 import Login from '../containers/Login';
+import Kpisetting from '../containers/KpiSetting';
 
 const Routes = () => (
   <Switch>
@@ -109,6 +110,11 @@ const Routes = () => (
       exact
       path="/noresult"
       component={(props) => <Result {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
+      path="/kpi/settings"
+      component={(props) => <Kpisetting {...props} />}
     />
     <PrivateRouteWithSidebar
       exact

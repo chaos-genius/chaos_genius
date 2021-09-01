@@ -8,9 +8,9 @@ import DataSourceForm from '../../components/DataSourceForm';
 import KpiExplorerForm from '../../components/KpiExplorerForm';
 //import DashboardForm from '../../components/DashboardForm';
 import FilterAnalystics from '../../components/FilterAnalystics';
+import Analystics from '../../components/Analystics';
 
 import './onboarding.scss';
-import Analystics from '../../components/Analystics';
 
 const Onboarding = () => {
   const history = useHistory();

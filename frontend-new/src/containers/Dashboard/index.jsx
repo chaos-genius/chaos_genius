@@ -67,7 +67,7 @@ const Dashboard = () => {
     );
   } else {
     return (
-      <div>
+      <>
         {/* Page Navigation */}
         <div className="page-navigation">
           {/* Breadcrumb */}
@@ -128,12 +128,14 @@ const Dashboard = () => {
                     </li>
                   </ul>
                 </div>
+                {/* <Link to="/kpi/settings"> */}
                 <div className="common-option">
                   <button className="btn grey-button">
                     <img src={Setting} alt="Setting" />
                     <span>Settings</span>
                   </button>
                 </div>
+                {/* </Link> */}
               </div>
             </div>
             {tab === 'autorca' && kpi && active && (
@@ -142,7 +144,7 @@ const Dashboard = () => {
             {tab === 'anomaly' && kpi && <Anomaly kpi={kpi} />}
           </div>
         </div>
-      </div>
+      </>
     );
   }
 };

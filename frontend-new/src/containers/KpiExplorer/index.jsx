@@ -116,7 +116,7 @@ const KpiExplorer = () => {
           </div>
           {/* table section */}
           <div className="table-section">
-            <KPITable kpiData={kpiExplorerData} />
+            <KPITable kpiData={kpiExplorerData} kpiSearch={kpiSearch} />
           </div>
         </div>
       </div>

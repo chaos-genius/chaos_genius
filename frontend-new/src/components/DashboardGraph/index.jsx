@@ -325,7 +325,9 @@ const Dashboardgraph = ({ kpi, kpiName }) => {
     if (line) {
       let demoChart = {
         chart: {
-          type: 'line'
+          type: 'line',
+          height: '308',
+          width: '400'
         },
         title: {
           text: kpiName
@@ -333,8 +335,9 @@ const Dashboardgraph = ({ kpi, kpiName }) => {
         xAxis: {
           type: 'datetime',
           categories: line.map((data) => new Date(data.date).getTime()),
-          gridLineWidth: 1,
+          // gridLineWidth: 1,
           labels: {
+            step: 6,
             formatter: function () {
               return Highcharts.dateFormat('%d %b', this.value);
             }
@@ -342,7 +345,8 @@ const Dashboardgraph = ({ kpi, kpiName }) => {
         },
         yAxis: {
           type: 'value',
-          gridLineWidth: 1
+          step: 1
+          // gridLineWidth: 1
         },
         plotOptions: {
           line: {

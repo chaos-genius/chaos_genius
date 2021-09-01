@@ -18,7 +18,7 @@ import Dimension from './dimension';
 
 import { formatDate } from '../../utils/date-helper';
 
-const KPITable = ({ kpiData }) => {
+const KPITable = ({ kpiData, kpiSearch }) => {
   const connectionType = JSON.parse(localStorage.getItem('connectionType'));
 
   const datasourceIcon = (type) => {
@@ -112,7 +112,7 @@ const KPITable = ({ kpiData }) => {
                             alt="Edit"
                             className="action-active"
                           />
-                          Settings
+                          Configure Analytics
                         </li>
                         <li>
                           <img
@@ -146,7 +146,7 @@ const KPITable = ({ kpiData }) => {
         ) : (
           <tr className="empty-table">
             <td colSpan={6}>
-              <Noresult />
+              <Noresult text={kpiSearch} />
             </td>
           </tr>
         )}

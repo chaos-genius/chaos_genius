@@ -16,6 +16,7 @@
 
 .ReactModal__Overlay {
   background: rgba(0, 0, 0, 0.5) !important;
+  z-index: 100;
 }
 .modal-close {
   display: flex;

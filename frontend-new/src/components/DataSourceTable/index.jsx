@@ -34,7 +34,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { v4 as uuidv4 } from 'uuid';
 
-const DataSourceTable = ({ tableData, changeData }) => {
+const DataSourceTable = ({ tableData, changeData, search }) => {
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
   const [data, setData] = useState('');
@@ -207,8 +207,7 @@ const DataSourceTable = ({ tableData, changeData }) => {
         ) : (
           <tr className="empty-table">
             <td colSpan={7}>
-              {' '}
-              <Noresult />
+              <Noresult text={search} />
             </td>
           </tr>
         )}

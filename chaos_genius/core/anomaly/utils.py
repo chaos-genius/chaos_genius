@@ -2,7 +2,6 @@ from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from datetime import datetime, timedelta
 
 import pandas as pd
-from sqlalchemy import exc
 
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 
@@ -59,3 +58,19 @@ def get_last_date_in_db(kpi_id, series, subgroup= None):
         return results.data_datetime
     else:
         return None
+
+def get_dq_missing_data(input_data, dt_col, metric_col):
+    data = input_data
+
+    data[dt_col] = pd.to_datetime(data[dt_col])
+    data = data.groupby(dt_col)[metric_col]
+
+    missing_data = [[g, data.get_group(g).isna().sum()]
+                    for g in data.groups]
+
+    missing_data = pd.DataFrame(
+        missing_data,
+        columns=[dt_col, metric_col]
+    ).set_index(dt_col)
+
+    return missing_data

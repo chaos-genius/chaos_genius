@@ -1,12 +1,16 @@
 import datetime
 
 import pandas as pd
-from sqlalchemy import create_engine
 
 from chaos_genius.core.anomaly.processor import ProcessAnomalyDetection
-from chaos_genius.core.anomaly.utils import get_anomaly_df, get_last_date_in_db
+from chaos_genius.core.anomaly.utils import (
+    get_anomaly_df, 
+    get_dq_missing_data, 
+    get_last_date_in_db
+)
 
 from chaos_genius.databases.models.data_source_model import DataSource
+from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, db
 
 class AnomalyDetectionController(object):
     def __init__(self, kpi_info, save_model=False, debug=False):
@@ -59,9 +63,7 @@ class AnomalyDetectionController(object):
         :rtype: datetime.datetime
         """
         
-        last_date = get_last_date_in_db(self.kpi_info["id"], series, subgroup)
-
-        return last_date
+        return get_last_date_in_db(self.kpi_info["id"], series, subgroup)
 
     def _detect_anomaly(
         self,
@@ -88,7 +90,7 @@ class AnomalyDetectionController(object):
             self.kpi_info['metric']: 'y'
         })
 
-        processed_anomaly = ProcessAnomalyDetection(
+        return ProcessAnomalyDetection(
             model_name,
             input_data,
             last_date,
@@ -98,9 +100,6 @@ class AnomalyDetectionController(object):
             subgroup,
             self.kpi_info.get("model_kwargs", {})
         ).predict()
-
-
-        return processed_anomaly
 
     def _save_anomaly_output(
         self,
@@ -219,20 +218,9 @@ class AnomalyDetectionController(object):
 
         if series == 'dq':
             if subgroup == 'missing':
-                data = input_data
-
-                data[dt_col] = pd.to_datetime(data[dt_col])
-                data = data.groupby(dt_col)[metric_col]
-
-                missing_data = [[g, data.get_group(g).isna().sum()]
-                                for g in data.groups]
-
-                missing_data = pd.DataFrame(
-                    missing_data,
-                    columns=[dt_col, metric_col]
-                ).set_index(dt_col)
-
-                series_data = missing_data
+                series_data = get_dq_missing_data(
+                    input_data, dt_col, metric_col
+                )
 
             else:
                 series_data = input_data.set_index(dt_col) \
@@ -245,12 +233,12 @@ class AnomalyDetectionController(object):
         model_name = self.kpi_info["model_name"]
 
         last_date = self._get_last_date_in_db(series, subgroup)
-        
+
 
         overall_anomaly_output = self._detect_anomaly(
             model_name, series_data, last_date, series, subgroup)
 
-        self._save_anomaly_output(overall_anomaly_output, series, subgroup)
+        self._save_anomaly_output(overall_anomaly_output, series, subgroup) 
 
 
     def detect(self) -> None:

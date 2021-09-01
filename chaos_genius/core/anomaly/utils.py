@@ -43,9 +43,7 @@ def get_anomaly_df(kpi_info, connection_info, last_date= None, days_range=90):
                 kpi_filters_query += f" and {indentifier}{key}{indentifier} in {values_str}"
 
     base_query = f"select * from {kpi_info['table_name']} {base_filter} {kpi_filters_query} "
-    base_df = get_df_from_db_uri(connection_info["db_uri"], base_query)
-
-    return base_df
+    return get_df_from_db_uri(connection_info["db_uri"], base_query)
 
 def get_last_date_in_db(kpi_id, series, subgroup= None):
     results = AnomalyDataOutput.query.filter(

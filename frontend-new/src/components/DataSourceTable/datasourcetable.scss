@@ -24,8 +24,8 @@
       text-transform: capitalize;
       color: $grey_variation-3;
       cursor: pointer;
+      padding: 0px 12px;
       img {
-        margin-left: 12px;
         margin-right: 8px;
       }
       &.delete-item {

@@ -26,6 +26,12 @@ import {
   getAllDashboardHierarchical
 } from '../../redux/actions';
 
+import Highcharts from 'highcharts';
+import HighchartsReact from 'highcharts-react-official';
+import highchartsMore from 'highcharts/highcharts-more';
+
+highchartsMore(Highcharts);
+
 const data = [
   {
     value: 'mom',
@@ -315,7 +321,42 @@ const Dashboardgraph = ({ kpi, kpiName }) => {
       })
     );
   };
-
+  const newHighChart = (line) => {
+    if (line) {
+      let demoChart = {
+        chart: {
+          type: 'line'
+        },
+        title: {
+          text: kpiName
+        },
+        xAxis: {
+          type: 'date',
+          // categories: line.map((data) => data.date),
+          gridLineWidth: 1,
+          dateTimeLabelFormats: true
+        },
+        yAxis: {
+          type: 'value',
+          gridLineWidth: 1
+        },
+        plotOptions: {
+          line: {
+            marker: {
+              enabled: false
+            }
+          }
+        },
+        legend: {
+          enabled: false
+        },
+        series: [
+          { color: '#60ca9a', data: line.map((linedata) => linedata.value) }
+        ]
+      };
+      return demoChart;
+    }
+  };
   return (
     <>
       <div className="dashboard-layout dashboard-layout-change">
@@ -353,7 +394,15 @@ const Dashboardgraph = ({ kpi, kpiName }) => {
                 </>
               )}
             </div>
-            <div className="common-graph" id="lineChartDiv"></div>
+            {/* <div className="common-graph" id="lineChartDiv"></div> */}
+            <div className="common-graph">
+              {linechartData && (
+                <HighchartsReact
+                  highcharts={Highcharts}
+                  options={newHighChart(linechartData)}
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>

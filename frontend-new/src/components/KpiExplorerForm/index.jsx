@@ -145,9 +145,8 @@ const KpiExplorerForm = () => {
       </>
     );
   };
-
   useEffect(() => {
-    if (kpiSubmit && kpiSubmit.message) {
+    if (kpiSubmit && kpiSubmit.status === 'success') {
       history.push('/kpiexplorer');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -437,7 +436,7 @@ const KpiExplorerForm = () => {
             </div>
           ) : null}
         </div>
-        {dataset.value === 'Query' ? (
+        {dataset.value === 'query' ? (
           // for of for query
           <div>
             <div className="form-group query-form">
@@ -635,8 +634,8 @@ const KpiExplorerForm = () => {
               className="add-options"
               onClick={() =>
                 // setTableAdditional({
-                //   ...tableAdditional,
-                //   tablefilter: true
+                // ...tableAdditional,
+                // tablefilter: true
                 // })
                 handleAddClick()
               }>

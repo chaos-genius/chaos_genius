@@ -54,8 +54,7 @@ def kpi_anomaly_drilldown(kpi_id):
 
         for subdim in subdims:
             results = get_dq_and_subdim_data(kpi_id, drilldown_date, "subdim", subdim)
-            results_graph_data =  convert_to_graph_json(results, kpi_id, "subdim", subdim)
-            subdim_graphs.append(results_graph_data)
+            subdim_graphs.append(results)
 
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")

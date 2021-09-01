@@ -228,9 +228,16 @@ class AnomalyDetectionController(object):
                 series_data = input_data.set_index(dt_col) \
                     .resample(freq).agg({metric_col: subgroup})
 
-        else:
+        elif series == "subdim":
+            series_data = input_data.query(subgroup).set_index(dt_col) \
+                .resample(freq).agg({metric_col: agg})
+
+        elif series == "overall":
             series_data = input_data.set_index(dt_col) \
                 .resample(freq).agg({metric_col: agg})
+        
+        else:
+            raise ValueError(f"series {series} not in ['dq', 'subdim', 'overall']")
 
         model_name = self.kpi_info["model_name"]
 

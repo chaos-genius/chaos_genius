@@ -9,7 +9,7 @@ import Select from 'react-select';
 import Play from '../../assets/images/play-green.png';
 import Success from '../../assets/images/success.svg';
 import Fail from '../../assets/images/fail.svg';
-import Cancel from '../../assets/images/cancel.svg';
+//import Cancel from '../../assets/images/cancel.svg';
 
 import '../../assets/styles/addform.scss';
 
@@ -37,14 +37,14 @@ const aggregate = [
   { value: 'sum', label: 'Sum' }
 ];
 
-const operator = [
-  { value: '=', label: '=' },
-  { value: '+', label: '+' },
-  { value: '-', label: '-' },
-  { value: '/', label: '/' },
-  { value: '>', label: '>' },
-  { value: '<', label: '<' }
-];
+// const operator = [
+//   { value: '=', label: '=' },
+//   { value: '+', label: '+' },
+//   { value: '-', label: '-' },
+//   { value: '/', label: '/' },
+//   { value: '>', label: '>' },
+//   { value: '<', label: '<' }
+// ];
 const customSingleValue = ({ data }) => (
   <div className="input-select">
     <div className="input-select__single-value">
@@ -67,6 +67,7 @@ const KpiExplorerForm = () => {
     metricOption: ''
   });
 
+  //const [inputList, setInputList] = useState([]);
   const [formdata, setFormdata] = useState({
     kpiname: '',
     datasource: '',
@@ -346,29 +347,28 @@ const KpiExplorerForm = () => {
     };
     dispatch(getTestQuery(data));
   };
-  const [inputList, setInputList] = useState([]);
-  const handleAddClick = () => {
-    setInputList([...inputList, { country: '', operator: '', value: '' }]);
-  };
+  // const handleAddClick = () => {
+  //   setInputList([...inputList, { country: '', operator: '', value: '' }]);
+  // };
 
-  const handleRemoveClick = (index) => {
-    const list = [...inputList];
-    list.splice(index, 1);
-    setInputList(list);
-  };
+  // const handleRemoveClick = (index) => {
+  //   const list = [...inputList];
+  //   list.splice(index, 1);
+  //   setInputList(list);
+  // };
 
-  const handleInputChange = (e, index, name) => {
-    if (name === 'value') {
-      const { value } = e.target;
-      const list = [...inputList];
-      list[index][name] = value;
-      setInputList(list);
-    } else {
-      const list = [...inputList];
-      list[index][name] = e.value;
-      setInputList(list);
-    }
-  };
+  // const handleInputChange = (e, index, name) => {
+  //   if (name === 'value') {
+  //     const { value } = e.target;
+  //     const list = [...inputList];
+  //     list[index][name] = value;
+  //     setInputList(list);
+  //   } else {
+  //     const list = [...inputList];
+  //     list[index][name] = e.value;
+  //     setInputList(list);
+  //   }
+  // };
 
   if (kpiFormLoading) {
     return (
@@ -588,7 +588,7 @@ const KpiExplorerForm = () => {
             </div>
           ) : null}
 
-          {inputList && inputList.length !== 0 && (
+          {/* {inputList && inputList.length !== 0 && (
             <div className="form-group">
               <label>Filters</label>
               {inputList.map((item, index) => {
@@ -626,11 +626,11 @@ const KpiExplorerForm = () => {
                 );
               })}
             </div>
-          )}
+          )} */}
 
           {/* add option form */}
           <div className="add-options-wrapper">
-            <div
+            {/* <div
               className="add-options"
               onClick={() =>
                 // setTableAdditional({
@@ -640,7 +640,7 @@ const KpiExplorerForm = () => {
                 handleAddClick()
               }>
               <label>+ Add Filters</label>
-            </div>
+            </div> */}
 
             {tableAdditional.tabledimension === false ? (
               <div

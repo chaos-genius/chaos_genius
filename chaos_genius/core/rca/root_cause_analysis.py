@@ -143,14 +143,7 @@ class RootCauseAnalysis():
         impact_table = self._impact_table.copy()
 
         if single_dim is not None:
-            other_dims = set(self._dims)
-            other_dims.remove(single_dim)
-            impact_table = impact_table[
-                (~impact_table[single_dim].isna())
-                & (impact_table[other_dims].isna().sum(axis=1) == len(other_dims))
-            ]
-
-            impact_table = impact_table.reset_index(drop=True)
+            impact_table = self._get_single_dim_impact_table(single_dim)
 
         # getting subgroups for waterfall
         best_subgroups = get_best_subgroups_using_superset_algo(
@@ -203,7 +196,6 @@ class RootCauseAnalysis():
 
         return binned_cols
 
-
     def _generate_all_dim_combinations(self) -> List[List[str]]:
         """Creates a dictionary of all possible combinations of dims.
 
@@ -225,9 +217,7 @@ class RootCauseAnalysis():
             value_numerator = data[agg_name] * data[count_name]
             value_denominator = data[count_name].sum() + EPSILON
             value = value_numerator / value_denominator
-        elif self._agg == "sum":
-            value = data[agg_name]
-        elif self._agg == "count":
+        elif self._agg in ["sum", "count"]:
             value = data[agg_name]
         else:
             raise ValueError(f"Aggregation {self._agg} is not defined.")
@@ -260,9 +250,7 @@ class RootCauseAnalysis():
                     combined_df[count_name]
                 value_denominator = combined_df[count_name].sum() + EPSILON
                 value = value_numerator / value_denominator
-            elif self._agg == "sum":
-                value = combined_df[agg_name]
-            elif self._agg == "count":
+            elif self._agg in ["sum", "count"]:
                 value = combined_df[agg_name]
             else:
                 raise ValueError(f"Aggregation {self._agg} is not defined.")
@@ -376,15 +364,13 @@ class RootCauseAnalysis():
                 ignore_index=True
             )
 
-        col_names_for_mpl = ["start"]
-        col_names_for_mpl.extend([
+        col_names_for_mpl = ["start", *[
             "\n".join(wrap(i, word_wrap_num))
             for i in waterfall_df["string"].values.tolist()
-        ])
-
-        col_values = [d1_agg]
-        col_values.extend(waterfall_df["impact_non_overlap"].values.tolist())
-
+        ]]
+        col_values = [
+            d1_agg, *waterfall_df["impact_non_overlap"].values.tolist()]
+            
         col_names_for_mpl.append("end")
         col_values.append(d2_agg)
 
@@ -464,7 +450,7 @@ class RootCauseAnalysis():
         panel_metrics = []
         for data in [self._grp1_df, self._grp2_df]:
             len_data = len(data[self._metric])
-            out_dict = OrderedDict() 
+            out_dict = OrderedDict()
             try:
                 # numerical data
                 if not self._metric_is_cat:
@@ -524,7 +510,8 @@ class RootCauseAnalysis():
         self, single_dim=None
     ) -> Tuple[List[Dict[str, object]], List[Dict[str, str]]]:
         impact_table = self.get_impact_rows(single_dim)
-        cols = ['g1_agg', 'g1_count', 'g1_size', 'g2_agg', 'g2_count', 'g2_size', 'impact', 'subgroup']
+        cols = ['g1_agg', 'g1_count', 'g1_size', 'g2_agg',
+                'g2_count', 'g2_size', 'impact', 'subgroup']
         mapping = [
             ("subgroup", "Subgroup Name"),
             ("g1_count", "Prev Month Count"),
@@ -542,7 +529,6 @@ class RootCauseAnalysis():
         mapping = [{"title": v, "field": k} for k, v in mapping]
 
         return impact_table, mapping
-
 
     def get_waterfall_table_rows(
         self,
@@ -618,7 +604,7 @@ class RootCauseAnalysis():
                 for filter_string in filters:
                     children = children[
                         children["string"].str.contains(
-                            filter_string, regex= False
+                            filter_string, regex=False
                         )
                     ]
                 children = children[

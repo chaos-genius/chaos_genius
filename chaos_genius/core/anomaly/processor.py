@@ -47,41 +47,41 @@ class ProcessAnomalyDetection:
         # TODO: Write docstrings for entire class
 
         input_data = self.input_data
-        
+
         predSeries = pd.DataFrame(columns = [
             'dt', 'y', 'yhat_lower', 'yhat_upper'])
-        
+
         input_last_date = input_data['dt'].iloc[-1]
         input_first_date = input_data['dt'].iloc[0]
         max_period = datetime.timedelta(days = self.period)
 
-        if self.last_date == None:
+        if self.last_date is None:
             #pass complete input data frame in here as pred_df
 
             prediction = model.predict(input_data, pred_df = input_data)
-            
+
             prediction['y'] = input_data['y']
             predSeries = prediction
-        
+
         else:
-        
+
             while self.last_date <= input_last_date:
                 curr_period = self.last_date-input_first_date
 
-                if not curr_period <= max_period:
+                if curr_period > max_period:
                     df = input_data[
                         (input_data['dt'] >= self.last_date-max_period) \
                         & (input_data['dt'] <= self.last_date)
                     ]
-                    
+
                     prediction = model.predict(df)
                     toAppend = prediction.iloc[-1].copy()
                     toAppend.loc['y'] = df.iloc[-1]['y']
-                    
+
                     predSeries = predSeries.append(toAppend, ignore_index=True)
-                
+
                 self.last_date += datetime.timedelta(days = 1)
-        
+
         return predSeries
 
     def _detect_anomalies(self, predictionSeries):

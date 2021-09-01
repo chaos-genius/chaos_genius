@@ -17,7 +17,7 @@ class AnomalyDataOutput(PkModel):
     severity = Column(db.Float)
     kpi_id = Column(db.Integer, nullable=False)
     anomaly_type = Column(db.String(80), nullable=False) # overall, drilldown, data_quality
-    series_type = Column(db.String(80))
+    series_type = Column(db.String(500))
     index = Column(db.BigInteger, nullable=False)
 
     def __init__(self, **kwargs):

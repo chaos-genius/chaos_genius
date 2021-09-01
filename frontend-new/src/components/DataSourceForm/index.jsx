@@ -76,7 +76,8 @@ const DataSourceForm = () => {
     if (connectionType) {
       fetchData();
     }
-  }, [connectionType]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (
@@ -104,6 +105,7 @@ const DataSourceForm = () => {
       setStatus(testConnectionResponse);
     }
   }, [testConnectionResponse]);
+
   const handleCheckboxChange = (key, e) => {
     setDsFormData((prev) => {
       return {

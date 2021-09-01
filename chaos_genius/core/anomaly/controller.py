@@ -143,7 +143,6 @@ class AnomalyDetectionController(object):
         :return: List of subgroups
         :rtype: list
         """
-
         subgroups = []
         for dim in self.kpi_info["dimensions"]:
             subgroup = []
@@ -162,12 +161,15 @@ class AnomalyDetectionController(object):
 
             ans = []
             for i in subgroups[level]:
+                ans.append(i)
+                ans.extend(gen_groups(level+1, k+1))
                 ans.extend(
-                    ' and '.join([i, x]) for x in gen_groups(level+1, k+1))
+                    ' and '.join([i, x]) for x in gen_groups(level+1, k+1))   
             dp[(level, k)] = ans
             return ans
 
-        return gen_groups()
+        groups =  list(set(gen_groups()))
+        return groups
 
     def _filter_subgroups(
         self, subgroups: list, input_data: pd.DataFrame

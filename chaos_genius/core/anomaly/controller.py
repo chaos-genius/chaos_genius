@@ -132,10 +132,7 @@ class AnomalyDetectionController(object):
         anomaly_output["anomaly_type"] = series
         anomaly_output["series_type"] = subgroup
         
-        # FIXME: Generalize storage and fetching of data
-        engine = create_engine("postgresql+psycopg2://postgres:chaosgenius@localhost/chaosgenius")
-        conn = engine.connect()
-        anomaly_output.to_sql("anomaly_data_output", conn, if_exists="append")
+        anomaly_output.to_sql(AnomalyDataOutput.__tablename__, db.engine, if_exists="append")
 
     def _get_subgroup_list(
         self,

@@ -46,10 +46,14 @@ def kpi_anomaly_drilldown(kpi_id):
     subdim_graphs = []
     try:
 
-        drilldown_date = pd.to_datetime(request.args.get("date"), unit="ms")
-        
-        for subdim in get_drilldowns_series_type(kpi_id, drilldown_date):
-            results = dq_and_subdim_data(kpi_id, drilldown_date, "subdim", subdim)
+        drilldown_date = pd.to_datetime(request.args.get("date"), unit="ms").date()
+
+        subdims = get_drilldowns_series_type(kpi_id, drilldown_date)
+
+        print(drilldown_date)
+
+        for subdim in subdims:
+            results = get_dq_and_subdim_data(kpi_id, drilldown_date, "subdim", subdim)
             results_graph_data =  convert_to_graph_json(results, kpi_id, "subdim", subdim)
             subdim_graphs.append(results_graph_data)
 
@@ -64,10 +68,9 @@ def kpi_anomaly_data_quality(kpi_id):
     current_app.logger.info(f"Anomaly Drilldown Started for KPI ID: {kpi_id}")
     
     data = []
-    try:
-        
+    try: 
         for dq in ["max", "mean", "count", "missing"]:
-            anom_data = dq_and_subdim_data(kpi_id, datetime.today(), "dq", dq)
+            anom_data = get_dq_and_subdim_data(kpi_id, datetime.today(), "dq", dq)
             data.append(anom_data)
 
     except Exception as err:
@@ -148,7 +151,7 @@ def get_overall_data(kpi_id, end_date: str, n=90):
 
     return convert_to_graph_json(results, kpi_id, "overall", None)
 
-def dq_and_subdim_data(kpi_id, end_date, anomaly_type="dq", series_type="max", n=90):
+def get_dq_and_subdim_data(kpi_id, end_date, anomaly_type="dq", series_type="max", n=90):
     start_date = pd.to_datetime(end_date) - timedelta(days=n)
     start_date = start_date.strftime('%Y-%m-%d')
     end_date = end_date.strftime('%Y-%m-%d')
@@ -157,7 +160,7 @@ def dq_and_subdim_data(kpi_id, end_date, anomaly_type="dq", series_type="max", n
         (AnomalyDataOutput.kpi_id == kpi_id) \
         & (AnomalyDataOutput.data_datetime <= end_date) \
         & (AnomalyDataOutput.data_datetime >= start_date) \
-        & (AnomalyDataOutput.anomaly_type == "overall") \
+        & (AnomalyDataOutput.anomaly_type == anomaly_type) \
         & (AnomalyDataOutput.series_type == series_type)
     )
 
@@ -165,18 +168,7 @@ def dq_and_subdim_data(kpi_id, end_date, anomaly_type="dq", series_type="max", n
 
     return convert_to_graph_json(results, kpi_id, anomaly_type, series_type)
 
-
-   
-
 def get_drilldowns_series_type(kpi_id, drilldown_date, no_of_graphs=5):
-    # FIXME: Find a better way of doing this
-    table_name = "anomaly_test_schema"
-    dbUri = "postgresql+psycopg2://postgres:chaosgenius@localhost/anomaly_testing_db"
-
-    sql_query = f"select series_type from {table_name} where data_datetime = '{drilldown_date}' and kpi_id = {kpi_id} and anomaly_type = 'subdim' order by severity desc limit 5"
-    
-    results = get_df_from_db_uri(dbUri, sql_query)
-    
     query = AnomalyDataOutput.query.filter(
         (AnomalyDataOutput.kpi_id == kpi_id) \
         & (AnomalyDataOutput.data_datetime == drilldown_date) \
@@ -186,5 +178,3 @@ def get_drilldowns_series_type(kpi_id, drilldown_date, no_of_graphs=5):
     results = pd.read_sql(query.statement, query.session.bind)
     
     return results.series_type
-
-

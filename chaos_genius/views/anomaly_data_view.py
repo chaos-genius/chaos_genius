@@ -33,7 +33,6 @@ def kpi_anomaly_detection(kpi_id):
             # remove from here once updated in frontend
             "base_anomaly_id": kpi_id
         }
-        # FIXME: Add dq data here as well
     except Exception as err:
         print(traceback.format_exc())
         current_app.logger.info(f"Error Found: {err}")
@@ -147,16 +146,14 @@ def get_overall_data(kpi_id, end_date: str, n=90):
 
     results = pd.read_sql(query.statement, query.session.bind)
 
-    graphData = convert_to_graph_json(results, kpi_id, "overall", None)
-    
-    return graphData
+    return convert_to_graph_json(results, kpi_id, "overall", None)
 
 def dq_and_subdim_data(kpi_id, end_date, anomaly_type="dq", series_type="max", n=90):
     start_date = pd.to_datetime(end_date) - timedelta(days=n)
     start_date = start_date.strftime('%Y-%m-%d')
     end_date = end_date.strftime('%Y-%m-%d')
 
-    results = AnomalyDataOutput.query.filter_by(
+    results = AnomalyDataOutput.query.filter(
         (AnomalyDataOutput.kpi_id == kpi_id) \
         & (AnomalyDataOutput.data_datetime <= end_date) \
         & (AnomalyDataOutput.data_datetime >= start_date) \
@@ -164,9 +161,7 @@ def dq_and_subdim_data(kpi_id, end_date, anomaly_type="dq", series_type="max", n
         & (AnomalyDataOutput.series_type == series_type)
     ).all()
 
-    graphData = convert_to_graph_json(results, kpi_id, anomaly_type, series_type)
-
-    return graphData
+    return convert_to_graph_json(results, kpi_id, anomaly_type, series_type)
 
 
    

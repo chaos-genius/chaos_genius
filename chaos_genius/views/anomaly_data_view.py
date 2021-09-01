@@ -153,13 +153,15 @@ def dq_and_subdim_data(kpi_id, end_date, anomaly_type="dq", series_type="max", n
     start_date = start_date.strftime('%Y-%m-%d')
     end_date = end_date.strftime('%Y-%m-%d')
 
-    results = AnomalyDataOutput.query.filter(
+    query = AnomalyDataOutput.query.filter(
         (AnomalyDataOutput.kpi_id == kpi_id) \
         & (AnomalyDataOutput.data_datetime <= end_date) \
         & (AnomalyDataOutput.data_datetime >= start_date) \
         & (AnomalyDataOutput.anomaly_type == "overall") \
         & (AnomalyDataOutput.series_type == series_type)
-    ).all()
+    )
+
+    results = pd.read_sql(query.statement, query.session.bind)
 
     return convert_to_graph_json(results, kpi_id, anomaly_type, series_type)
 

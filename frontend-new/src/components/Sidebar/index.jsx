@@ -44,10 +44,10 @@ const Sidebar = () => {
               <span>Home</span>
             </Link>
           </li>
-          <li className={location[1] === 'dashboard' ? 'active' : ''}>
+          <li className={location[2] === 'autorca' ? 'active' : ''}>
             <Link to="/dashboard/autorca/">
               <img
-                src={location[1] === 'dashboard' ? dashboardactive : dashboard}
+                src={location[2] === 'autorca' ? dashboardactive : dashboard}
                 alt="Dashboard"
               />
               <span>Dashboard</span>
@@ -62,10 +62,10 @@ const Sidebar = () => {
               <span>KPI Explorer</span>
             </Link>
           </li>
-          <li className={location[1] === 'anomolies' ? 'active' : ''}>
-            <Link to="/anomolies">
+          <li className={location[2] === 'anomaly' ? 'active' : ''}>
+            <Link to="/dashboard/anomaly/kpi">
               <img
-                src={location[1] === 'anomolies' ? anomoliesactive : anomolies}
+                src={location[2] === 'anomaly' ? anomoliesactive : anomolies}
                 alt="Anomolies"
               />
               <span>Anomolies</span>

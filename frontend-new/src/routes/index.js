@@ -37,7 +37,7 @@ const Routes = () => (
     />
     <PrivateRouteWithSidebar
       exact
-      path="/dashboard/anomolies/:kpi"
+      path="/dashboard/anomaly/:kpi"
       component={(props) => <Dashboard {...props} />}
     />
     <PrivateRouteWithSidebar

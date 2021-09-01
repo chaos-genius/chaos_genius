@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import { useSelector, useDispatch } from 'react-redux';
 
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 import './dashboard.scss';
 
@@ -17,10 +17,12 @@ import { getDashboardSidebar } from '../../redux/actions';
 
 const Dashboard = () => {
   const dispatch = useDispatch();
+  const history = useHistory();
+
   const [active, setActive] = useState('');
   const [kpi, setKpi] = useState();
   const [tab, setTabs] = useState('autorca');
-
+  const location = history.location.pathname.split('/');
   const { sidebarLoading, sidebarList } = useSelector((state) => {
     return state.sidebar;
   });
@@ -38,11 +40,12 @@ const Dashboard = () => {
     if (sidebarList && sidebarList.length !== 0 && kpi === undefined) {
       setActive(sidebarList[0]?.name);
       setKpi(sidebarList[0]?.id);
+      setTabs(location[2]);
 
       window.history.pushState(
         '',
         '',
-        `/#/dashboard/${tab}/${sidebarList[0]?.id}`
+        `/#/dashboard/${location[2]}/${sidebarList[0]?.id}`
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -119,8 +122,8 @@ const Dashboard = () => {
                     </li>
 
                     <li
-                      className={tab === 'anomolies' ? 'active' : ''}
-                      onClick={() => onTabClick('anomolies')}>
+                      className={tab === 'anomaly' ? 'active' : ''}
+                      onClick={() => onTabClick('anomaly')}>
                       Anomolies
                     </li>
                   </ul>
@@ -136,7 +139,7 @@ const Dashboard = () => {
             {tab === 'autorca' && kpi && active && (
               <Dashboardgraph kpi={kpi} kpiName={active} />
             )}
-            {tab === 'anomolies' && kpi && <Anomaly kpi={kpi} />}
+            {tab === 'anomaly' && kpi && <Anomaly kpi={kpi} />}
           </div>
         </div>
       </div>

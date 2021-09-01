@@ -331,10 +331,14 @@ const Dashboardgraph = ({ kpi, kpiName }) => {
           text: kpiName
         },
         xAxis: {
-          type: 'date',
-          // categories: line.map((data) => data.date),
+          type: 'datetime',
+          categories: line.map((data) => new Date(data.date).getTime()),
           gridLineWidth: 1,
-          dateTimeLabelFormats: true
+          labels: {
+            formatter: function () {
+              return Highcharts.dateFormat('%d %b', this.value);
+            }
+          }
         },
         yAxis: {
           type: 'value',
@@ -351,7 +355,10 @@ const Dashboardgraph = ({ kpi, kpiName }) => {
           enabled: false
         },
         series: [
-          { color: '#60ca9a', data: line.map((linedata) => linedata.value) }
+          {
+            color: '#60ca9a',
+            data: line.map((linedata) => linedata.value)
+          }
         ]
       };
       return demoChart;

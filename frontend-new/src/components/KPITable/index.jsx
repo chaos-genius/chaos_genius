@@ -3,11 +3,13 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 import Edit from '../../assets/images/edit.svg';
-import EditActive from '../../assets/images/edit-active.svg';
+import EditActive from '../../assets/images/datasourceedit-active.svg';
 import DeleteActive from '../../assets/images/delete-active.svg';
 import More from '../../assets/images/more.svg';
 import Moreactive from '../../assets/images/more-active.svg';
 import Noresult from '../Noresult';
+import Setting from '../../assets/images/table/setting.svg';
+import Settingactive from '../../assets/images/table/setting-active.svg';
 
 import '../../assets/styles/table.scss';
 
@@ -99,8 +101,19 @@ const KPITable = ({ kpiData }) => {
                     </div>
                     <ul className="dropdown-menu">
                       <Link to="/datasource/edit">
-                        <li>Configure AutoRCA</li>
-                        <li>Configure Anomaly</li>
+                        <li>
+                          <img
+                            src={Setting}
+                            alt="Edit"
+                            className="action-disable"
+                          />
+                          <img
+                            src={Settingactive}
+                            alt="Edit"
+                            className="action-active"
+                          />
+                          Settings
+                        </li>
                         <li>
                           <img
                             src={Edit}

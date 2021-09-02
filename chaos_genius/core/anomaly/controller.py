@@ -14,13 +14,14 @@ from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, db
 
 class AnomalyDetectionController(object):
-    def __init__(self, kpi_info, save_model=False, debug=False):
+    def __init__(self, kpi_info, save_model=False, end_date= None, debug=False):
         self.kpi_info = kpi_info
 
         # TODO: Add these in kpi_info
         self.kpi_info["freq"] = self.kpi_info.get("freq", "D")
 
         self.save_model = save_model
+        self.end_date = end_date
         self.debug = debug
 
     def _load_anomaly_data(self) -> pd.DataFrame:
@@ -34,7 +35,10 @@ class AnomalyDetectionController(object):
 
         conn = DataSource.get_by_id(self.kpi_info["data_source"])
 
-        last_date = self._get_last_date_in_db("overall")
+        if self.end_date is not None:
+            last_date = self._get_last_date_in_db("overall")
+        else:
+            last_date = self.end_date
 
         print(last_date)
 

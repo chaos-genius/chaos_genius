@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Click commands."""
 import os
+from datetime import datetime
 from glob import glob
 from subprocess import call
 
@@ -85,11 +86,19 @@ def integration_connector():
 @click.command()
 @with_appcontext
 @click.option('--kpi', required=True, type=int, help="Perform the anomaly detection for given KPI.")
-def run_anomaly(kpi):
+@click.option('--end_date', type=str, help="Perform the anomaly detection for given KPI.")
+def run_anomaly(kpi, end_date):
     """Perform the anomaly detection for given KPI."""
-    click.echo(f"Starting the anomaly for KPI ID: {kpi}.")
+
+    if end_date is not None:
+        try:
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        except:
+            raise ValueError("Invalid date.")
+
+    click.echo(f"Starting the anomaly for KPI ID: {kpi} with end date: {end_date}.")
     from chaos_genius.controllers.kpi_controller import run_anomaly_for_kpi
-    status = run_anomaly_for_kpi(kpi)
+    status = run_anomaly_for_kpi(kpi, end_date)
     click.echo(f"Completed the anomaly for KPI ID: {kpi}.")
 
 

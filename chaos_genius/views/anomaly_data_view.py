@@ -87,58 +87,58 @@ def kpi_anomaly_data_quality(kpi_id):
     current_app.logger.info("Anomaly Drilldown Done")
     return jsonify({"data": data, "msg": ""})
 
+def fill_graph_data(row, graph_data, precision=2):
+    """Fills graph_data with intervals, values, and predicted_values for a given row.
+
+    :param row: A single row from the anomaly dataframe
+    :type row: pandas.core.series.Series
+    :param graph_data: Dictionary object with the current graph
+    :type graph_data: Dict
+    :param precision: Precision to round y and yhat values to, defaults to 2
+    :type precision: int, optional
+    """
+    # Do not include rows where there is no data
+    if row.notna()['y']:  
+        # Convert to milliseconds for HighCharts
+        timestamp = row['data_datetime'].timestamp() * 1000
+        
+        # Create and append a point for the interval
+        interval = [timestamp, round(row['yhat_lower'], precision), round(
+            row['yhat_upper'], precision)]
+        graph_data['intervals'].append(interval)
+        
+        # Create and append a point for the value
+        value = [timestamp, round(row['y'])]
+        graph_data['values'].append(value)
+        
+        # Create and append a point for the severity
+        severity = [timestamp, round(row['severity'], precision)]
+        graph_data['severity'].append(severity)
+
+    
+
 
 def convert_to_graph_json(results, kpi_id, anomaly_type = "overall", series_type= None, precision=2):
-    # results = pd.DataFrame.from_dict(results)
-    def fill_graph_data(row, graph_data, precision=2):
-        """Fills graph_data with intervals, values, and predicted_values for a given row.
-
-        :param row: A single row from the anomaly dataframe
-        :type row: pandas.core.series.Series
-        :param graph_data: Dictionary object with the current graph
-        :type graph_data: Dict
-        :param precision: Precision to round y and yhat values to, defaults to 2
-        :type precision: int, optional
-        """
-        if row.notna()['y']:  # Do not include rows where there is no data
-            # Convert to milliseconds for HighCharts
-            timestamp = row['data_datetime'].timestamp() * 1000
-            # Create and append a point for the interval
-            interval = [timestamp, round(row['yhat_lower'], precision), round(
-                row['yhat_upper'], precision)]
-            graph_data['intervals'].append(interval)
-            # Create and append a point for the value
-            value = [timestamp, round(row['y'])]
-            graph_data['values'].append(value)
-            # Create and append a point for the predicted_value
-            
-            # predicted_value = [timestamp, round(row['yhat'], precision)]
-            # graph_data['predicted_values'].append(predicted_value)
-            
-            # Create and append a point for the severity
-            severity = [timestamp, round(row['severity'], precision)]
-            graph_data['severity'].append(severity)
-
-    # TODO: Make this more human-friendly
+    # TODO: Make the graph title more human-friendly
     title = anomaly_type
     if series_type:
         title += " " + series_type
     
-    # add id to name mapping here
     kpi_name = kpi_id
     graph_data = {
-            'title': title,
-            'y_axis_label': kpi_name,
-            'x_axis_label': 'Datetime',
-            'sub_dimension': anomaly_type,
-            'intervals': [],
-            'values': [],
-            # 'predicted_values': [],
-            'severity': []
-        }
-    # print(results)
-    results.apply(lambda row: fill_graph_data(
-            row, graph_data, precision), axis=1)
+        'title': title,
+        'y_axis_label': kpi_name,
+        'x_axis_label': 'Datetime',
+        'sub_dimension': anomaly_type,
+        'intervals': [],
+        'values': [],
+        'severity': []
+    }
+
+    results.apply(
+        lambda row: fill_graph_data(row, graph_data, precision), 
+        axis=1
+    )
         
     return graph_data
 

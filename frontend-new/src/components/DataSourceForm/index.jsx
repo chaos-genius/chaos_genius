@@ -51,7 +51,7 @@ const DataSourceForm = () => {
   const [error, setError] = useState('');
   const [formError, setFormError] = useState({});
   const [status, setStatus] = useState('');
-
+  var fields = [];
   const history = useHistory();
   const connectionType = JSON.parse(localStorage.getItem('connectionType'));
   const {
@@ -82,22 +82,34 @@ const DataSourceForm = () => {
   useEffect(() => {
     if (
       createDatasourceResponse &&
-      createDatasourceResponse.status === 'connected'
+      createDatasourceResponse.status === 'succeeded'
     ) {
       history.push('/datasource');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createDatasourceResponse]);
 
-  const handleInputChange = (key, e) => {
-    setDsFormData((prev) => {
-      return {
-        ...prev,
-        [key]: e.target.value
-      };
-    });
-    setFormError([]);
-    setStatus('');
+  const handleInputChange = (child, key, e) => {
+    if (child !== '') {
+      setDsFormData((prev) => {
+        return {
+          ...prev,
+          [child]: {
+            ...prev[child],
+            [key]: e.target.value
+          }
+        };
+      });
+    } else {
+      setDsFormData((prev) => {
+        return {
+          ...prev,
+          [key]: e.target.value
+        };
+      });
+      setFormError([]);
+      setStatus('');
+    }
   };
 
   useEffect(() => {
@@ -174,6 +186,7 @@ const DataSourceForm = () => {
       dispatch(createDataSource(payload));
     }
   };
+
   if (isLoading) {
     return (
       <div className="loader">
@@ -225,12 +238,14 @@ const DataSourceForm = () => {
           selectedDatasource !== undefined &&
           Object.keys(selectedDatasource.value).length > 0 &&
           renderTextFields(
-            selectedDatasource.value,
+            selectedDatasource.value.connectionSpecification,
             handleInputChange,
             handleCheckboxChange,
             dsFormData,
-            formError
+            formError,
+            fields
           )}
+        {fields}
         {/* for Google Sheet */}
         {/*Paste here*/}
         {/* end of Google Analytics */}

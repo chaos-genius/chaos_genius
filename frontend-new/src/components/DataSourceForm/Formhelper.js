@@ -3,7 +3,8 @@ export const textBox = (
   type,
   handleInputChange,
   formData,
-  formError
+  formError,
+  child
 ) => {
   const textID = element[0];
   const textError = formError?.[textID] ? formError[textID] : '';
@@ -13,9 +14,15 @@ export const textBox = (
       <input
         type={element[1]?.['airbyte_secret'] ? 'password' : type}
         className="form-control"
-        value={formData?.[textID] ? formData[textID] : ''}
+        value={
+          child !== ''
+            ? formData?.child?.textID
+            : formData?.[textID]
+            ? formData[textID]
+            : ''
+        }
         name={element[0]}
-        onChange={(e) => handleInputChange(element[0], e)}
+        onChange={(e) => handleInputChange(child, element[0], e)}
       />
       {textError && (
         <div className="connection__fail">
@@ -26,14 +33,20 @@ export const textBox = (
   );
 };
 
-export const checkBox = (element, type, handleInputChange, formData) => {
+export const checkBox = (element, type, handleInputChange, formData, child) => {
   const textID = element[0];
   return (
     <div className="form-check check-box check-label">
       <input
         className="form-check-input"
         type={type}
-        checked={formData[textID] ? formData[textID] : false}
+        checked={
+          child === ''
+            ? formData?.child?.textID
+            : formData[textID]
+            ? formData[textID]
+            : false
+        }
         id="flexCheckDefault"
         onChange={(e) => handleInputChange(element[0], e)}
       />
@@ -49,35 +62,73 @@ export const renderTextFields = (
   handleInputChange,
   handleCheckBoxChange,
   formData,
-  formError
+  formError,
+  fields,
+  child = ''
 ) => {
-  const { connectionSpecification } = obj;
-  const { properties } = connectionSpecification;
-  let fields = [];
-  if (Object.keys(properties).length > 0) {
+  //const { connectionSpecification } = obj;
+  const { properties } = obj;
+  if (properties && Object.keys(properties).length > 0) {
     Object.entries(properties)
       .sort((a, b) => a[1].order - b[1].order)
       .forEach((element) => {
-        switch (element[1]['type']) {
-          case 'string':
-            fields.push(
-              textBox(element, 'text', handleInputChange, formData, formError)
-            );
-            break;
-          case 'integer':
-            fields.push(
-              textBox(element, 'number', handleInputChange, formData, formError)
-            );
-            break;
-          case 'boolean':
-            fields.push(
-              checkBox(element, 'checkbox', handleCheckBoxChange, formData)
-            );
-            break;
-          default:
-            fields.push('');
-        }
+        renderObjectFields(
+          element,
+          handleInputChange,
+          handleCheckBoxChange,
+          formData,
+          formError,
+          fields,
+          child
+        );
       });
   }
-  return <>{fields}</>;
+};
+
+const renderObjectFields = (
+  element,
+  handleInputChange,
+  handleCheckBoxChange,
+  formData,
+  formError,
+  fields,
+  child
+) => {
+  switch (element[1]['type']) {
+    case 'string':
+      fields.push(
+        textBox(element, 'text', handleInputChange, formData, formError, child)
+      );
+      break;
+    case 'integer':
+      fields.push(
+        textBox(
+          element,
+          'number',
+          handleInputChange,
+          formData,
+          formError,
+          child
+        )
+      );
+      break;
+    case 'boolean':
+      fields.push(
+        checkBox(element, 'checkbox', handleCheckBoxChange, formData, child)
+      );
+      break;
+    case 'object':
+      renderTextFields(
+        element[1],
+        handleInputChange,
+        handleCheckBoxChange,
+        formData,
+        formError,
+        fields,
+        element[0]
+      );
+      break;
+    default:
+      fields.push('');
+  }
 };

@@ -29,6 +29,8 @@ pystan==2.19.1.1
 altair==4.1.0
 statsmodels==0.12.2
 prophet==1.0.1
+neuralprophet==0.2.7
+greykite==0.2.0
 
 # Forms
 email-validator==1.1.2

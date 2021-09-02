@@ -50,10 +50,10 @@ def kpi_anomaly_drilldown(kpi_id):
 
         subdims = get_drilldowns_series_type(kpi_id, drilldown_date)
 
-        print(drilldown_date)
+        today = datetime.today().date()
 
         for subdim in subdims:
-            results = get_dq_and_subdim_data(kpi_id, drilldown_date, "subdim", subdim)
+            results = get_dq_and_subdim_data(kpi_id, today, "subdim", subdim)
             subdim_graphs.append(results)
 
     except Exception as err:

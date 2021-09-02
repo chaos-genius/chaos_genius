@@ -5,10 +5,12 @@ import pandas as pd
 
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 
-def bound_between(min_val, val, max_val): 
+
+def bound_between(min_val, val, max_val):
     return min(max(val, min_val), max_val)
 
-def get_anomaly_df(kpi_info, connection_info, last_date= None, days_range=90):
+
+def get_anomaly_df(kpi_info, connection_info, last_date=None, days_range=90):
     indentifier = ''
     if connection_info["connection_type"] == "mysql":
         indentifier = '`'
@@ -29,7 +31,11 @@ def get_anomaly_df(kpi_info, connection_info, last_date= None, days_range=90):
     base_dt = str(base_dt_obj.date())
 
     cur_dt = str(end_date.date())
-    base_filter = f" where {indentifier}{kpi_info['datetime_column']}{indentifier} > '{base_dt}' and {indentifier}{kpi_info['datetime_column']}{indentifier} <= '{cur_dt}' "
+
+    dt_col_string = f"{indentifier}{kpi_info['datetime_column']}{indentifier}"
+    gt_string = f"{dt_col_string} > '{base_dt}'"
+    lt_string = f"{dt_col_string} <= '{cur_dt}'"
+    base_filter = f"where {gt_string} and {lt_string}"
 
     kpi_filters = kpi_info['filters']
     kpi_filters_query = " "
@@ -40,22 +46,29 @@ def get_anomaly_df(kpi_info, connection_info, last_date= None, days_range=90):
                 # TODO: Bad Hack to remove the last comma, fix it
                 values_str = str(tuple(values))
                 values_str = values_str[:-2] + ')'
-                kpi_filters_query += f" and {indentifier}{key}{indentifier} in {values_str}"
+                key_str = f"{indentifier}{key}{indentifier}"
+                kpi_filters_query += f" and {key_str} in {values_str}"
 
-    base_query = f"select * from {kpi_info['table_name']} {base_filter} {kpi_filters_query} "
+    base_query = " ".join([
+        f"select * from {kpi_info['table_name']}",
+        base_filter,
+        kpi_filters_query
+    ])
     return get_df_from_db_uri(connection_info["db_uri"], base_query)
 
-def get_last_date_in_db(kpi_id, series, subgroup= None):
+
+def get_last_date_in_db(kpi_id, series, subgroup=None):
     results = AnomalyDataOutput.query.filter(
-        (AnomalyDataOutput.kpi_id == kpi_id) \
-        & (AnomalyDataOutput.anomaly_type == series) \
-        & (AnomalyDataOutput.series_type == subgroup) \
+        (AnomalyDataOutput.kpi_id == kpi_id)
+        & (AnomalyDataOutput.anomaly_type == series)
+        & (AnomalyDataOutput.series_type == subgroup)
     ).order_by(AnomalyDataOutput.data_datetime.desc()).first()
 
     if results:
         return results.data_datetime
     else:
         return None
+
 
 def get_dq_missing_data(input_data, dt_col, metric_col):
     data = input_data

@@ -4,10 +4,8 @@ import pandas as pd
 from chaos_genius.views.kpi_view import get_kpi_data_from_id
 from chaos_genius.core.anomaly.controller import AnomalyDetectionController
 
-def run_anomaly_for_kpi(kpi_id: int) -> bool:
 
-    # TODO: Store entire df_anomaly and use sorting and filtering on
-    # that for drilldowns.
+def run_anomaly_for_kpi(kpi_id: int) -> bool:
 
     print("Printing the anomaly...")
 

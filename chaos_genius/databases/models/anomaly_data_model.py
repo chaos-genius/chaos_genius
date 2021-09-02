@@ -16,7 +16,8 @@ class AnomalyDataOutput(PkModel):
     is_anomaly = Column(db.BigInteger)
     severity = Column(db.Float)
     kpi_id = Column(db.Integer, nullable=False)
-    anomaly_type = Column(db.String(80), nullable=False) # overall, drilldown, data_quality
+    # overall, drilldown, data_quality
+    anomaly_type = Column(db.String(80), nullable=False)
     series_type = Column(db.String(500))
     index = Column(db.BigInteger, nullable=False)
 
@@ -31,32 +32,35 @@ class AnomalyDataOutput(PkModel):
     @property
     def as_dict(self):
         return {
-            "index": self.index,
+            "data_datetime": self.data_datetime,
+            "y": self.y,
+            "yhat_upper": self.yhat_upper,
+            "yhat_lower": self.yhat_lower,
+            "is_anomaly": self.is_anomaly,
+            "severity": self.severity,
             "kpi_id": self.kpi_id,
             "anomaly_type": self.anomaly_type,
             "series_type": self.series_type,
-            "y": self.y,
-            "yhat_lower": self.yhat_lower,
-            "yhat_upper": self.yhat_upper,
-            "is_anomaly": self.is_anomaly,
-            "severity": self.severity,
-            "data_datetime": self.data_datetime
+            "index": self.index,
         }
 
 # TODO: Delete model after a couple of weeks
+
 
 class AnomalyData(PkModel):
     """Anomaly Data."""
 
     __tablename__ = "anomaly_data"
     kpi_id = Column(db.Integer, nullable=False)
-    anomaly_type = Column(db.String(80), nullable=False) # overall, drilldown, data_quality
+    # overall, drilldown, data_quality
+    anomaly_type = Column(db.String(80), nullable=False)
     base_anomaly_id = Column(db.Integer)
     drilldown_dimensions = Column(db.JSON)
     chart_data = Column(db.JSON)
     severity_score = Column(db.Integer)
     anomaly_timestamp = Column(db.BigInteger)
-    created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
+    created_at = Column(db.DateTime, nullable=False,
+                        default=dt.datetime.utcnow)
 
     def __init__(self, **kwargs):
         """Create instance."""

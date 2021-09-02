@@ -5,6 +5,8 @@ import pandas as pd
 
 # Required to supress pystan output while running facebook's prophet
 # from https://github.com/facebook/prophet/issues/223
+
+
 class suppress_stdout_stderr(object):
     '''
     A context manager for doing a "deep suppression" of stdout and stderr in
@@ -14,6 +16,7 @@ class suppress_stdout_stderr(object):
     to stderr just before a script exits, and after the context manager has
     exited (at least, I think that is why it lets exceptions through).
     '''
+
     def __init__(self):
         # Open a pair of null files
         self.null_fds = [os.open(os.devnull, os.O_RDWR) for x in range(2)]
@@ -45,11 +48,13 @@ def round_number(n: float) -> Union[int, float]:
     else:
         return round(n, 3)
 
+
 def round_series(series: pd.Series) -> pd.Series:
     if series.dtype != object:
         return series.apply(lambda x: round_number(x))
     else:
         return series
+
 
 def round_df(df: pd.DataFrame) -> pd.DataFrame:
     new_df = df.copy()

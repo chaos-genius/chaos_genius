@@ -4,13 +4,14 @@ import pandas as pd
 
 from chaos_genius.core.anomaly.processor import ProcessAnomalyDetection
 from chaos_genius.core.anomaly.utils import (
-    get_anomaly_df, 
-    get_dq_missing_data, 
+    get_anomaly_df,
+    get_dq_missing_data,
     get_last_date_in_db
 )
 
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, db
+
 
 class AnomalyDetectionController(object):
     def __init__(self, kpi_info, save_model=False, debug=False):
@@ -19,16 +20,17 @@ class AnomalyDetectionController(object):
         # TODO: Add these in kpi_info
         self.kpi_info["freq"] = self.kpi_info.get("freq", "D")
         self.kpi_info["period"] = self.kpi_info.get("period", 90)
-        self.kpi_info["model_name"] = self.kpi_info.get("model_name", "StdDeviModel")
+        self.kpi_info["model_name"] = self.kpi_info.get(
+            "model_name", "StdDeviModel")
 
         self.save_model = save_model
         self.debug = debug
 
     def _load_anomaly_data(self) -> pd.DataFrame:
-        """Loads KPI data from its datastore, preprocesses it and 
-        returns it for anomaly detection 
+        """Loads KPI data from its datastore, preprocesses it and
+        returns it for anomaly detection
 
-        :return: Dataframe with all of KPI's data for the last 
+        :return: Dataframe with all of KPI's data for the last
         N days/hours
         :rtype: pd.DataFrame
         """
@@ -52,7 +54,7 @@ class AnomalyDetectionController(object):
         series: str,
         subgroup: str = None
     ) -> datetime.datetime:
-        """Returns the last date for which we have data for the given 
+        """Returns the last date for which we have data for the given
         series
 
         :param series: Type of series
@@ -62,7 +64,7 @@ class AnomalyDetectionController(object):
         :return: Last date for which we have data for the given series
         :rtype: datetime.datetime
         """
-        
+
         return get_last_date_in_db(self.kpi_info["id"], series, subgroup)
 
     def _detect_anomaly(
@@ -126,18 +128,20 @@ class AnomalyDetectionController(object):
             print(series, subgroup)
             print(anomaly_output)
 
-        anomaly_output = anomaly_output.rename(columns={"dt": "data_datetime", "anomaly": "is_anomaly"})
+        anomaly_output = anomaly_output.rename(
+            columns={"dt": "data_datetime", "anomaly": "is_anomaly"})
         anomaly_output["kpi_id"] = self.kpi_info["id"]
         anomaly_output["anomaly_type"] = series
         anomaly_output["series_type"] = subgroup
-        
-        anomaly_output.to_sql(AnomalyDataOutput.__tablename__, db.engine, if_exists="append")
+
+        anomaly_output.to_sql(AnomalyDataOutput.__tablename__,
+                              db.engine, if_exists="append")
 
     def _get_subgroup_list(
         self,
         input_data: pd.DataFrame
     ) -> list:
-        """Returns list of subgroups for which we want to run anomaly 
+        """Returns list of subgroups for which we want to run anomaly
         detection
 
         :return: List of subgroups
@@ -164,11 +168,11 @@ class AnomalyDetectionController(object):
                 ans.append(i)
                 ans.extend(gen_groups(level+1, k+1))
                 ans.extend(
-                    ' and '.join([i, x]) for x in gen_groups(level+1, k+1))   
+                    ' and '.join([i, x]) for x in gen_groups(level+1, k+1))
             dp[(level, k)] = ans
             return ans
 
-        groups =  list(set(gen_groups()))
+        groups = list(set(gen_groups()))
         return groups
 
     def _filter_subgroups(
@@ -184,14 +188,14 @@ class AnomalyDetectionController(object):
 
         grouped_input_data = input_data\
             .groupby(self.kpi_info['dimensions'])\
-            .agg({self.kpi_info['metric']:"count"})
-        
+            .agg({self.kpi_info['metric']: "count"})
+
         filtered_subgroups = []
 
         for subgroup in subgroups:
             try:
                 if grouped_input_data.query(subgroup)[self.kpi_info["metric"]]\
-                    .iloc[0] >= self.kpi_info["period"]:
+                        .iloc[0] >= self.kpi_info["period"]:
                     filtered_subgroups.append(subgroup)
             except IndexError:
                 pass
@@ -235,20 +239,19 @@ class AnomalyDetectionController(object):
         elif series == "overall":
             series_data = input_data.set_index(dt_col) \
                 .resample(freq).agg({metric_col: agg})
-        
+
         else:
-            raise ValueError(f"series {series} not in ['dq', 'subdim', 'overall']")
+            raise ValueError(
+                f"series {series} not in ['dq', 'subdim', 'overall']")
 
         model_name = self.kpi_info["model_name"]
 
         last_date = self._get_last_date_in_db(series, subgroup)
 
-
         overall_anomaly_output = self._detect_anomaly(
             model_name, series_data, last_date, series, subgroup)
 
-        self._save_anomaly_output(overall_anomaly_output, series, subgroup) 
-
+        self._save_anomaly_output(overall_anomaly_output, series, subgroup)
 
     def detect(self) -> None:
         # TODO: Docstring

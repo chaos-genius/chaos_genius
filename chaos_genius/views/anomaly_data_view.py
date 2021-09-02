@@ -21,6 +21,7 @@ def list_anomaly_data():
     # FIXME: Update home route
     return jsonify({"data": "Hello World!"})
 
+
 @blueprint.route("/<int:kpi_id>/anomaly-detection", methods=["GET"])
 @cache.memoize(timeout=30000)
 def kpi_anomaly_detection(kpi_id):
@@ -51,7 +52,11 @@ def kpi_anomaly_drilldown(kpi_id):
     subdim_graphs = []
     try:
 
-        drilldown_date = pd.to_datetime(request.args.get("date"), unit="ms").date()
+        drilldown_date = request.args.get("date")
+        if drilldown_date is None:
+            raise ValueError("date param is required.")
+
+        drilldown_date = pd.to_datetime(drilldown_date, unit="ms").date()
 
         subdims = get_drilldowns_series_type(kpi_id, drilldown_date)
 
@@ -59,7 +64,8 @@ def kpi_anomaly_drilldown(kpi_id):
         end_date = get_end_date(kpi_info)
 
         for subdim in subdims:
-            results = get_dq_and_subdim_data(kpi_id, end_date, "subdim", subdim)
+            results = get_dq_and_subdim_data(
+                kpi_id, end_date, "subdim", subdim)
             subdim_graphs.append(results)
 
     except Exception as err:
@@ -71,9 +77,9 @@ def kpi_anomaly_drilldown(kpi_id):
 @blueprint.route("/<int:kpi_id>/anomaly-data-quality", methods=["GET"])
 def kpi_anomaly_data_quality(kpi_id):
     current_app.logger.info(f"Anomaly Drilldown Started for KPI ID: {kpi_id}")
-    
+
     data = []
-    try: 
+    try:
         kpi_info = get_kpi_data_from_id(kpi_id)
         end_date = get_end_date(kpi_info)
 
@@ -83,47 +89,54 @@ def kpi_anomaly_data_quality(kpi_id):
 
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")
-    
+
     current_app.logger.info("Anomaly Drilldown Done")
     return jsonify({"data": data, "msg": ""})
 
+
 def fill_graph_data(row, graph_data, precision=2):
-    """Fills graph_data with intervals, values, and predicted_values for a given row.
+    """Fills graph_data with intervals, values, and predicted_values for
+    a given row.
 
     :param row: A single row from the anomaly dataframe
     :type row: pandas.core.series.Series
     :param graph_data: Dictionary object with the current graph
     :type graph_data: Dict
-    :param precision: Precision to round y and yhat values to, defaults to 2
+    :param precision: Precision to round y and yhat values to, defaults
+        to 2
     :type precision: int, optional
     """
     # Do not include rows where there is no data
-    if row.notna()['y']:  
+    if row.notna()['y']:
         # Convert to milliseconds for HighCharts
         timestamp = row['data_datetime'].timestamp() * 1000
-        
+
         # Create and append a point for the interval
         interval = [timestamp, round(row['yhat_lower'], precision), round(
             row['yhat_upper'], precision)]
         graph_data['intervals'].append(interval)
-        
+
         # Create and append a point for the value
         value = [timestamp, round(row['y'])]
         graph_data['values'].append(value)
-        
+
         # Create and append a point for the severity
         severity = [timestamp, round(row['severity'], precision)]
         graph_data['severity'].append(severity)
 
-    
 
-
-def convert_to_graph_json(results, kpi_id, anomaly_type = "overall", series_type= None, precision=2):
+def convert_to_graph_json(
+    results, 
+    kpi_id, 
+    anomaly_type="overall", 
+    series_type=None, 
+    precision=2
+):
     # TODO: Make the graph title more human-friendly
     title = anomaly_type
     if series_type:
         title += " " + series_type
-    
+
     kpi_name = kpi_id
     graph_data = {
         'title': title,
@@ -136,10 +149,10 @@ def convert_to_graph_json(results, kpi_id, anomaly_type = "overall", series_type
     }
 
     results.apply(
-        lambda row: fill_graph_data(row, graph_data, precision), 
+        lambda row: fill_graph_data(row, graph_data, precision),
         axis=1
     )
-        
+
     return graph_data
 
 
@@ -149,9 +162,9 @@ def get_overall_data(kpi_id, end_date: str, n=90):
     end_date = end_date.strftime('%Y-%m-%d')
 
     query = AnomalyDataOutput.query.filter(
-        (AnomalyDataOutput.kpi_id == kpi_id) \
-        & (AnomalyDataOutput.data_datetime <= end_date) \
-        & (AnomalyDataOutput.data_datetime >= start_date) \
+        (AnomalyDataOutput.kpi_id == kpi_id)
+        & (AnomalyDataOutput.data_datetime <= end_date)
+        & (AnomalyDataOutput.data_datetime >= start_date)
         & (AnomalyDataOutput.anomaly_type == "overall")
     )
 
@@ -159,16 +172,23 @@ def get_overall_data(kpi_id, end_date: str, n=90):
 
     return convert_to_graph_json(results, kpi_id, "overall", None)
 
-def get_dq_and_subdim_data(kpi_id, end_date, anomaly_type="dq", series_type="max", n=90):
+
+def get_dq_and_subdim_data(
+    kpi_id, 
+    end_date, 
+    anomaly_type="dq", 
+    series_type="max", 
+    n=90
+):
     start_date = pd.to_datetime(end_date) - timedelta(days=n)
     start_date = start_date.strftime('%Y-%m-%d')
     end_date = end_date.strftime('%Y-%m-%d')
 
     query = AnomalyDataOutput.query.filter(
-        (AnomalyDataOutput.kpi_id == kpi_id) \
-        & (AnomalyDataOutput.data_datetime <= end_date) \
-        & (AnomalyDataOutput.data_datetime >= start_date) \
-        & (AnomalyDataOutput.anomaly_type == anomaly_type) \
+        (AnomalyDataOutput.kpi_id == kpi_id)
+        & (AnomalyDataOutput.data_datetime <= end_date)
+        & (AnomalyDataOutput.data_datetime >= start_date)
+        & (AnomalyDataOutput.anomaly_type == anomaly_type)
         & (AnomalyDataOutput.series_type == series_type)
     )
 
@@ -176,19 +196,20 @@ def get_dq_and_subdim_data(kpi_id, end_date, anomaly_type="dq", series_type="max
 
     return convert_to_graph_json(results, kpi_id, anomaly_type, series_type)
 
+
 def get_drilldowns_series_type(kpi_id, drilldown_date, no_of_graphs=5):
     query = AnomalyDataOutput.query.filter(
-        (AnomalyDataOutput.kpi_id == kpi_id) \
-        & (AnomalyDataOutput.data_datetime == drilldown_date) \
+        (AnomalyDataOutput.kpi_id == kpi_id)
+        & (AnomalyDataOutput.data_datetime == drilldown_date)
         & (AnomalyDataOutput.anomaly_type == "subdim")
     ).order_by(AnomalyDataOutput.severity.desc()).limit(no_of_graphs)
 
     results = pd.read_sql(query.statement, query.session.bind)
-    
+
     return results.series_type
 
-def get_end_date(kpi_info: dict) -> datetime:
 
+def get_end_date(kpi_info: dict) -> datetime:
     """Checks if the KPI has a static end date and returns it. Otherwise
     returns today's date.
 
@@ -202,7 +223,7 @@ def get_end_date(kpi_info: dict) -> datetime:
         end_date = kpi_info.get('static_params', {}).get('end_date', None)
         if end_date is not None:
             end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
-    
+
     if end_date is None:
         end_date = datetime.today().date()
 

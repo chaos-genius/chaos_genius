@@ -70,14 +70,12 @@ def get_last_date_in_db(kpi_id, series, subgroup=None):
         return None
 
 
-def get_dq_missing_data(input_data, dt_col, metric_col):
+def get_dq_missing_data(input_data, dt_col, metric_col, freq):
     data = input_data
 
     data[dt_col] = pd.to_datetime(data[dt_col])
-    data = data.groupby(dt_col)[metric_col]
-
-    missing_data = [[g, data.get_group(g).isna().sum()]
-                    for g in data.groups]
+    missing_data = data.set_index(dt_col).isna()\
+        .resample(freq).sum()
 
     missing_data = pd.DataFrame(
         missing_data,

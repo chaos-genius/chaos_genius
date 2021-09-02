@@ -11,3 +11,13 @@ MODEL_MAPPER = {
     "NeuralProphetModel": NeuralProphetModel,
     "GreyKiteModel": GreyKiteModel
 }
+
+FREQUENCY_DELTA = {
+    "daily": {"days": 1},
+    "hourly": {"hours": 1}
+}
+
+RESAMPLE_FREQUENCY = {
+    "daily": "D",
+    "hourly": "H"
+}

@@ -2,7 +2,7 @@ import datetime
 
 import pandas as pd
 
-from chaos_genius.core.anomaly.constants import MODEL_MAPPER
+from chaos_genius.core.anomaly.constants import MODEL_MAPPER, FREQUENCY_DELTA
 from chaos_genius.core.anomaly.models import AnomalyModel
 from chaos_genius.core.anomaly.utils import bound_between
 
@@ -15,6 +15,7 @@ class ProcessAnomalyDetection:
         last_date: datetime.datetime,
         period: int,
         table_name: str,
+        freq: str,
         series: str,
         subgroup: str = None,
         model_kwargs={},
@@ -28,6 +29,7 @@ class ProcessAnomalyDetection:
         self.subgroup = subgroup
         self.model_path = self.gen_model_save_path()
         self.model_kwargs = model_kwargs
+        self.freq = freq
 
     def predict(self):
 
@@ -80,7 +82,7 @@ class ProcessAnomalyDetection:
 
                     predSeries = predSeries.append(toAppend, ignore_index=True)
 
-                self.last_date += datetime.timedelta(days=1)
+                self.last_date += datetime.timedelta(FREQUENCY_DELTA[self.freq])
 
         return predSeries
 

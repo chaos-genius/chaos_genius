@@ -8,10 +8,10 @@ from chaos_genius.core.anomaly.utils import (
     get_dq_missing_data,
     get_last_date_in_db
 )
+from chaos_genius.core.anomaly.constants import RESAMPLE_FREQUENCY
 
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, db
-
 
 class AnomalyDetectionController(object):
     def __init__(self, kpi_info, save_model=False, debug=False):
@@ -19,9 +19,6 @@ class AnomalyDetectionController(object):
 
         # TODO: Add these in kpi_info
         self.kpi_info["freq"] = self.kpi_info.get("freq", "D")
-        self.kpi_info["period"] = self.kpi_info.get("period", 90)
-        self.kpi_info["model_name"] = self.kpi_info.get(
-            "model_name", "StdDeviModel")
 
         self.save_model = save_model
         self.debug = debug
@@ -73,7 +70,8 @@ class AnomalyDetectionController(object):
         input_data: pd.DataFrame,
         last_date: datetime.datetime,
         series,
-        subgroup
+        subgroup,
+        freq
     ) -> pd.DataFrame:
         """Detects anomaly in the given data
 
@@ -96,8 +94,9 @@ class AnomalyDetectionController(object):
             model_name,
             input_data,
             last_date,
-            self.kpi_info["period"],
+            self.kpi_info["anomaly_params"]["period"],
             self.kpi_info["table_name"],
+            freq,
             series,
             subgroup,
             self.kpi_info.get("model_kwargs", {})
@@ -195,7 +194,7 @@ class AnomalyDetectionController(object):
         for subgroup in subgroups:
             try:
                 if grouped_input_data.query(subgroup)[self.kpi_info["metric"]]\
-                        .iloc[0] >= self.kpi_info["period"]:
+                        .iloc[0] >= self.kpi_info["anomaly_params"]["period"]:
                     filtered_subgroups.append(subgroup)
             except IndexError:
                 pass
@@ -217,7 +216,7 @@ class AnomalyDetectionController(object):
 
         dt_col = self.kpi_info['datetime_column']
         metric_col = self.kpi_info['metric']
-        freq = self.kpi_info.get('freq', 'D')
+        freq = self.kpi_info["anomaly_params"]["ts_frequency"]
         agg = self.kpi_info["aggregation"]
 
         series_data = None
@@ -225,38 +224,41 @@ class AnomalyDetectionController(object):
         if series == 'dq':
             if subgroup == 'missing':
                 series_data = get_dq_missing_data(
-                    input_data, dt_col, metric_col
+                    input_data, dt_col, metric_col, RESAMPLE_FREQUENCY["freq"]
                 )
 
             else:
                 series_data = input_data.set_index(dt_col) \
-                    .resample(freq).agg({metric_col: subgroup})
+                    .resample(RESAMPLE_FREQUENCY["freq"])\
+                    .agg({metric_col: subgroup})
 
         elif series == "subdim":
             series_data = input_data.query(subgroup).set_index(dt_col) \
-                .resample(freq).agg({metric_col: agg})
+                .resample(RESAMPLE_FREQUENCY["freq"])\
+                .agg({metric_col: agg})
 
         elif series == "overall":
             series_data = input_data.set_index(dt_col) \
-                .resample(freq).agg({metric_col: agg})
+                .resample(RESAMPLE_FREQUENCY["freq"])\
+                .agg({metric_col: agg})
 
         else:
             raise ValueError(
                 f"series {series} not in ['dq', 'subdim', 'overall']")
 
-        model_name = self.kpi_info["model_name"]
+        model_name = self.kpi_info["anomaly_params"]["model_name"]
 
         last_date = self._get_last_date_in_db(series, subgroup)
 
         overall_anomaly_output = self._detect_anomaly(
-            model_name, series_data, last_date, series, subgroup)
+            model_name, series_data, last_date, series, subgroup, freq)
 
         self._save_anomaly_output(overall_anomaly_output, series, subgroup)
 
     def detect(self) -> None:
         # TODO: Docstring
         if self.debug:
-            print(self.kpi_info["model_name"])
+            print(self.kpi_info["anomaly_params"]["model_name"])
 
         input_data = self._load_anomaly_data()
 

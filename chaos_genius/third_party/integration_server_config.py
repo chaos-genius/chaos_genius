@@ -36,7 +36,10 @@ SOURCE_CONFIG_MAPPING = {
     },
     "253487c0-2246-43ba-a21f-5116b20a2c50": {
         "syncMode": "incremental",
+        "cursorField": ["segments.date"],
         "destinationSyncMode": "append",
+        "primaryKey": [["ad_group_ad", "ad", "id"]],
+        "aliasName": "ad_group_ad_report",
         "selected": True
     },
     "e7778cfc-e97c-4458-9ecb-b4f2bba8946c": {

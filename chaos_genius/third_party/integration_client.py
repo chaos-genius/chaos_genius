@@ -421,9 +421,11 @@ class ThirdPartyClient(object):
 
     def test_connection(self, payload):
         db_host = payload["connectionConfiguration"].get("host")
-        payload["connectionConfiguration"]["port"] = int(payload["connectionConfiguration"]["port"])
         if db_host:
             payload["connectionConfiguration"]["host"] = get_docker_host(db_host)
+        db_port = payload["connectionConfiguration"].get("port")
+        if db_port:
+            payload["connectionConfiguration"]["port"] = int(db_port)
         api_url = f"{self.server_uri}/api/v1/scheduler/sources/check_connection"
         return post_request(api_url, payload)
 

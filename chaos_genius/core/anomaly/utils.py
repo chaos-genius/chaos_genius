@@ -74,7 +74,7 @@ def get_dq_missing_data(input_data, dt_col, metric_col, freq):
 
     data[dt_col] = pd.to_datetime(data[dt_col])
     missing_data = data.set_index(dt_col).isna()\
-        .resample(freq).sum()
+        .resample(freq).sum().reset_index()[[dt_col, metric_col]]
 
     missing_data = pd.DataFrame(
         missing_data,

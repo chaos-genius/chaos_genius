@@ -35,14 +35,24 @@ class AnomalyDetectionController(object):
 
         conn = DataSource.get_by_id(self.kpi_info["data_source"])
 
-        if self.end_date is not None:
-            last_date = self._get_last_date_in_db("overall")
+        # If end_date is passed to self, use that
+        # Otherwise check if kpi_info has end_date
+        # If that also fails, use today as end_date
+        end_date = None
+        if self.end_date is None:
+            if self.kpi_info['is_static']:
+                end_date = self.kpi_info.get('static_params', {}).get('end_date')
+                if end_date is not None:
+                    end_date = datetime.strptime(end_date, '%Y-%m-%d')
+
+            if end_date is None:
+                end_date = datetime.today()
         else:
-            last_date = self.end_date
+            end_date = self.end_date
 
-        print(last_date)
+        last_date_in_db = self._get_last_date_in_db("overall")
 
-        df = get_anomaly_df(self.kpi_info, conn.as_dict, last_date)
+        df = get_anomaly_df(self.kpi_info, conn.as_dict, last_date_in_db, end_date)
 
         dt_col = self.kpi_info['datetime_column']
 
@@ -123,13 +133,10 @@ class AnomalyDetectionController(object):
         """
         name = self.kpi_info['name']
         table = self.kpi_info['table_name']
-        model_name = self.kpi_info['model_name']
+        model_name = self.kpi_info["anomaly_params"]['model_name']
 
         if self.debug:
-            print("SAVING")
-            print(name, table, model_name)
-            print(series, subgroup)
-            print(anomaly_output)
+            print("SAVING", series, subgroup, len(anomaly_output))
 
         anomaly_output = anomaly_output.rename(
             columns={"dt": "data_datetime", "anomaly": "is_anomaly"})
@@ -228,22 +235,22 @@ class AnomalyDetectionController(object):
         if series == 'dq':
             if subgroup == 'missing':
                 series_data = get_dq_missing_data(
-                    input_data, dt_col, metric_col, RESAMPLE_FREQUENCY["freq"]
+                    input_data, dt_col, metric_col, RESAMPLE_FREQUENCY[freq]
                 )
 
             else:
                 series_data = input_data.set_index(dt_col) \
-                    .resample(RESAMPLE_FREQUENCY["freq"])\
+                    .resample(RESAMPLE_FREQUENCY[freq])\
                     .agg({metric_col: subgroup})
 
         elif series == "subdim":
             series_data = input_data.query(subgroup).set_index(dt_col) \
-                .resample(RESAMPLE_FREQUENCY["freq"])\
+                .resample(RESAMPLE_FREQUENCY[freq])\
                 .agg({metric_col: agg})
 
         elif series == "overall":
             series_data = input_data.set_index(dt_col) \
-                .resample(RESAMPLE_FREQUENCY["freq"])\
+                .resample(RESAMPLE_FREQUENCY[freq])\
                 .agg({metric_col: agg})
 
         else:

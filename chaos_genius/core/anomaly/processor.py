@@ -82,7 +82,7 @@ class ProcessAnomalyDetection:
 
                     predSeries = predSeries.append(toAppend, ignore_index=True)
 
-                self.last_date += datetime.timedelta(FREQUENCY_DELTA[self.freq])
+                self.last_date += datetime.timedelta(**FREQUENCY_DELTA[self.freq])
 
         return predSeries
 

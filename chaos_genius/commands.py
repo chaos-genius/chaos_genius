@@ -92,7 +92,7 @@ def run_anomaly(kpi, end_date):
 
     if end_date is not None:
         try:
-            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date, '%Y-%m-%d')
         except:
             raise ValueError("Invalid date.")
 

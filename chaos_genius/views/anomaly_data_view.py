@@ -202,6 +202,7 @@ def get_drilldowns_series_type(kpi_id, drilldown_date, no_of_graphs=5):
         (AnomalyDataOutput.kpi_id == kpi_id)
         & (AnomalyDataOutput.data_datetime == drilldown_date)
         & (AnomalyDataOutput.anomaly_type == "subdim")
+        & (AnomalyDataOutput.severity > 0)
     ).order_by(AnomalyDataOutput.severity.desc()).limit(no_of_graphs)
 
     results = pd.read_sql(query.statement, query.session.bind)

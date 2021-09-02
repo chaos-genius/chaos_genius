@@ -10,24 +10,23 @@ def bound_between(min_val, val, max_val):
     return min(max(val, min_val), max_val)
 
 
-def get_anomaly_df(kpi_info, connection_info, last_date=None, days_range=90):
+def get_anomaly_df(kpi_info, connection_info, last_date_in_db=None, end_date= None, days_range=90):
     indentifier = ''
     if connection_info["connection_type"] == "mysql":
         indentifier = '`'
     elif connection_info["connection_type"] == "postgresql":
         indentifier = '"'
 
-    if last_date is None:
+    if end_date is None:
         end_date = datetime.today()
-        if kpi_info['is_static']:
-            end_date = kpi_info.get('static_params', {}).get('end_date', {})
-            if end_date:
-                end_date = datetime.strptime(end_date, '%Y-%m-%d')
-    else:
-        end_date = last_date
-
+    
     num_days = days_range
-    base_dt_obj = end_date - timedelta(days=num_days)
+
+    if last_date_in_db is None:
+        base_dt_obj = end_date - timedelta(days=num_days)
+    else:
+        base_dt_obj = last_date_in_db - timedelta(days=num_days)
+
     base_dt = str(base_dt_obj.date())
 
     cur_dt = str(end_date.date())

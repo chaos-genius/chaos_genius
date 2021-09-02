@@ -19,7 +19,7 @@ const KpiExplorer = () => {
 
   const [kpiSearch, setKpiSearch] = useState('');
   const [kpiExplorerData, setKpiExplorerData] = useState([]);
-
+  const [data, setData] = useState(false);
   const [kpiFilter, setKpiFilter] = useState([]);
 
   const { isLoading, kpiExplorerList } = useSelector(
@@ -29,7 +29,7 @@ const KpiExplorer = () => {
   useEffect(() => {
     dispatchGetAllKpiExplorer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
+  }, [data]);
 
   const dispatchGetAllKpiExplorer = () => {
     dispatch(getAllKpiExplorer());
@@ -116,7 +116,11 @@ const KpiExplorer = () => {
           </div>
           {/* table section */}
           <div className="table-section">
-            <KPITable kpiData={kpiExplorerData} kpiSearch={kpiSearch} />
+            <KPITable
+              kpiData={kpiExplorerData}
+              kpiSearch={kpiSearch}
+              changeData={setData}
+            />
           </div>
         </div>
       </div>

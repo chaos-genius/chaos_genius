@@ -13,7 +13,10 @@ import {
   KPIEXPLORERSUBMITFAILURE,
   TESTQUERYSUCCESS,
   TESTQUERYFAILURE,
-  TESTQUERYREQUEST
+  TESTQUERYREQUEST,
+  KPIDISABLEREQUEST,
+  KPIDISABLESUCCESS,
+  KPIDISABLEFAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -31,7 +34,10 @@ const initialState = {
   kpiSubmitError: false,
   testQueryLoading: true,
   testQueryData: [],
-  testQueryError: false
+  testQueryError: false,
+  kpiDisableLoading: true,
+  kpiDisableData: [],
+  kpiDisableError: false
 };
 
 export const kpiExplorer = (state = initialState, action) => {
@@ -126,6 +132,24 @@ export const kpiExplorer = (state = initialState, action) => {
       return {
         testQueryError: true,
         testQueryLoading: false
+      };
+    }
+    case KPIDISABLEREQUEST: {
+      return {
+        kpiDisableLoading: true,
+        kpiDisableError: false
+      };
+    }
+    case KPIDISABLESUCCESS: {
+      return {
+        kpiDisableLoading: false,
+        kpiDisableData: action.data
+      };
+    }
+    case KPIDISABLEFAILURE: {
+      return {
+        kpiDisableLoading: false,
+        kpiDisableFailure: true
       };
     }
     default:

@@ -11,7 +11,8 @@ import {
   getAllKpiExplorerForm,
   getAllKpiExplorerField,
   getAllKpiExplorerSubmit,
-  getTestQuery
+  getTestQuery,
+  kpiDisable
 } from './KpiEplorer';
 import {
   getDashboardAggregation,
@@ -47,5 +48,6 @@ export {
   getTestQuery,
   anomalyDetection,
   getAnomalyQualityData,
-  anomalyDrilldown
+  anomalyDrilldown,
+  kpiDisable
 };

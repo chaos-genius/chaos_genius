@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { Link } from 'react-router-dom';
-
+import { useDispatch, useSelector } from 'react-redux';
 import Edit from '../../assets/images/edit.svg';
 import EditActive from '../../assets/images/datasourceedit-active.svg';
 import DeleteActive from '../../assets/images/delete-active.svg';
@@ -10,16 +10,38 @@ import Moreactive from '../../assets/images/more-active.svg';
 import Noresult from '../Noresult';
 import Setting from '../../assets/images/table/setting.svg';
 import Settingactive from '../../assets/images/table/setting-active.svg';
-
+import Modal from 'react-modal';
+import Close from '../../assets/images/close.svg';
 import '../../assets/styles/table.scss';
 
 import { v4 as uuidv4 } from 'uuid';
 import Dimension from './dimension';
 
 import { formatDate } from '../../utils/date-helper';
+import { kpiDisable } from '../../redux/actions';
 
-const KPITable = ({ kpiData, kpiSearch }) => {
+const KPITable = ({ kpiData, kpiSearch, changeData }) => {
   const connectionType = JSON.parse(localStorage.getItem('connectionType'));
+  const dispatch = useDispatch();
+  const [data, setData] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+
+  const { kpiDisableData } = useSelector((state) => state.kpiExplorer);
+  const closeModal = () => {
+    setIsOpen(false);
+  };
+
+  const onDelete = (kpi) => {
+    dispatch(kpiDisable(kpi.id));
+  };
+
+  useEffect(() => {
+    if (kpiDisableData && kpiDisableData.status === 'success') {
+      changeData((prev) => !prev);
+      setIsOpen(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [changeData, kpiDisableData]);
 
   const datasourceIcon = (type) => {
     let textHtml;
@@ -131,8 +153,8 @@ const KPITable = ({ kpiData, kpiSearch }) => {
                       <li
                         className="delete-item"
                         onClick={() => {
-                          // setIsOpen(true);
-                          // setData(datasource);
+                          setIsOpen(true);
+                          setData(kpi);
                         }}>
                         <img src={DeleteActive} alt="Delete" />
                         Delete
@@ -151,6 +173,27 @@ const KPITable = ({ kpiData, kpiSearch }) => {
           </tr>
         )}
       </tbody>
+      <Modal isOpen={isOpen} shouldCloseOnOverlayClick={false}>
+        <div className="modal-close">
+          <img src={Close} alt="Close" onClick={closeModal} />
+        </div>
+        <div className="modal-body">
+          <div className="modal-contents">
+            <h3>Delete {data.name} ?</h3>
+            <p>Are you sure you want to delete </p>
+            <div className="next-step-navigate">
+              <button className="btn white-button" onClick={closeModal}>
+                <span>Cancel</span>
+              </button>
+              <button
+                className="btn black-button"
+                onClick={() => onDelete(data)}>
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </table>
   );
 };

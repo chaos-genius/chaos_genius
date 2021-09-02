@@ -54,7 +54,7 @@ const customSingleValue = ({ data }) => (
   </div>
 );
 
-const KpiExplorerForm = () => {
+const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   const dispatch = useDispatch();
 
   const history = useHistory();
@@ -147,8 +147,15 @@ const KpiExplorerForm = () => {
     );
   };
   useEffect(() => {
-    if (kpiSubmit && kpiSubmit.status === 'success') {
+    if (kpiSubmit && kpiSubmit.status === 'success' && onboarding !== true) {
       history.push('/kpiexplorer');
+    } else if (
+      kpiSubmit &&
+      kpiSubmit.status === 'success' &&
+      onboarding === true
+    ) {
+      setModal(true);
+      setText('kpi');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSubmit]);
@@ -655,6 +662,7 @@ const KpiExplorerForm = () => {
               </div>
             ) : null}
           </div>
+
           <div className="form-action">
             <button
               className={
@@ -662,7 +670,9 @@ const KpiExplorerForm = () => {
                   ? 'btn black-button btn-loading'
                   : 'btn black-button'
               }
-              onClick={() => handleSubmit()}>
+              onClick={() => {
+                handleSubmit();
+              }}>
               <div className="btn-spinner">
                 <div className="spinner-border" role="status">
                   <span className="visually-hidden">Loading...</span>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { Link, useHistory } from 'react-router-dom';
 
@@ -11,10 +11,15 @@ import FilterAnalystics from '../../components/FilterAnalystics';
 import Analystics from '../../components/Analystics';
 
 import './onboarding.scss';
+import ModalPopUp from '../../components/Modal';
 
 const Onboarding = () => {
   const history = useHistory();
+
   const data = history.location.pathname.split('/');
+
+  const [modal, setModal] = useState(false);
+  const [text, setText] = useState('');
 
   return (
     <>
@@ -88,9 +93,17 @@ const Onboarding = () => {
       {data[2] !== '3' ? (
         <div className="add-form-container">
           {data[2] === '1' ? (
-            <DataSourceForm />
+            <DataSourceForm
+              onboarding={true}
+              setModal={setModal}
+              setText={setText}
+            />
           ) : data[2] === '2' ? (
-            <KpiExplorerForm />
+            <KpiExplorerForm
+              onboarding={true}
+              setModal={setModal}
+              setText={setText}
+            />
           ) : // data[2] === '3' ? (
           //   <DashboardForm />
           // ) :
@@ -108,6 +121,8 @@ const Onboarding = () => {
           </div>
         </div>
       )}
+
+      <ModalPopUp isOpen={modal} setIsOpen={setModal} text={text} />
     </>
   );
 };

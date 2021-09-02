@@ -173,7 +173,11 @@ const KPITable = ({ kpiData, kpiSearch, changeData }) => {
           </tr>
         )}
       </tbody>
-      <Modal isOpen={isOpen} shouldCloseOnOverlayClick={false}>
+
+      <Modal
+        isOpen={isOpen}
+        shouldCloseOnOverlayClick={false}
+        portalClassName="deletemodal">
         <div className="modal-close">
           <img src={Close} alt="Close" onClick={closeModal} />
         </div>

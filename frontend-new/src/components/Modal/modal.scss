@@ -87,9 +87,108 @@
       letter-spacing: $letter-spacing-point1;
       text-decoration-line: underline;
       color: $green;
+      margin-top: 16px;
     }
   }
 }
 .ReactModal__Body--open {
   overflow-y: hidden;
+}
+.deletemodal {
+  .ReactModal__Content {
+    height: 230px;
+    width: 360px;
+    position: inherit !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    border-radius: 10px !important;
+    background-color: $white;
+    padding: 20px;
+  }
+  .ReactModal__Overlay {
+    background: rgba(0, 0, 0, 0.5) !important;
+    z-index: 100;
+  }
+  .modal-close {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    cursor: pointer;
+  }
+  .modal-buttons {
+    display: flex;
+    margin-top: 32px;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+  }
+  .modal-body {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 16px;
+    .modal-success-image {
+      width: 64px;
+      height: 64px;
+      background: $green_variation-2;
+      border: 1.5px solid $green_variation-2;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      margin-bottom: 24px;
+      img {
+        width: 23.34px;
+        height: 16px;
+      }
+    }
+    .modal-contents {
+      h3 {
+        font-weight: $font-weight-600;
+        font-size: $font-size-18;
+        line-height: $line-height-20;
+        letter-spacing: $letter-spacing;
+        color: $black_variation-2;
+        margin-bottom: 12px;
+      }
+      p {
+        font-weight: $font-weight-normal;
+        font-size: $font-size-14;
+        line-height: $line-height-16;
+        text-align: center;
+        letter-spacing: $letter-spacing;
+        text-transform: capitalize;
+        color: $grey_variation-3;
+      }
+      .next-step-navigate {
+        display: flex;
+        justify-content: center;
+        margin-top: 32px;
+        // margin-bottom: 16px;
+        .black-button {
+          margin-left: 16px;
+        }
+      }
+      label {
+        font-weight: $font-weight-500;
+        font-size: $font-size-14;
+        line-height: $line-height-17;
+        letter-spacing: $letter-spacing-point1;
+        text-decoration-line: underline;
+        color: $green;
+        margin-top: 16px;
+      }
+    }
+  }
+  .ReactModal__Body--open {
+    overflow-y: hidden;
+  }
 }

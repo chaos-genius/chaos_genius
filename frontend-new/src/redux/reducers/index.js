@@ -10,6 +10,7 @@ import { onboarding } from './Onboarding';
 import { lineChart } from './LineChart';
 import { sidebar } from './Sidebarlist';
 import { anomaly } from './Anomaly';
+import { alert } from './Alert';
 
 const rootReducer = combineReducers({
   dataSource: dataSource,
@@ -21,7 +22,8 @@ const rootReducer = combineReducers({
   onboarding: onboarding,
   lineChart: lineChart,
   sidebar: sidebar,
-  anomaly: anomaly
+  anomaly: anomaly,
+  alert: alert
 });
 
 export default rootReducer;

@@ -8,7 +8,8 @@ import pandas as pd
 
 from chaos_genius.extensions import cache
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
-from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, AnomalyData
+from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
+from chaos_genius.views.kpi_view import get_kpi_data_from_id
 
 
 blueprint = Blueprint("anomaly_data", __name__)
@@ -26,7 +27,11 @@ def kpi_anomaly_detection(kpi_id):
     current_app.logger.info(f"Anomaly Detection Started for KPI ID: {kpi_id}")
     data = []
     try:
-        anom_data = get_overall_data(kpi_id, datetime.today())
+        kpi_info = get_kpi_data_from_id(kpi_id)
+        end_date = get_end_date(kpi_info)
+
+        anom_data = get_overall_data(kpi_id, end_date)
+
         data = {
             "chart_data": anom_data,
             # TODO: base_anomaly_id not needed anymore
@@ -50,10 +55,11 @@ def kpi_anomaly_drilldown(kpi_id):
 
         subdims = get_drilldowns_series_type(kpi_id, drilldown_date)
 
-        today = datetime.today().date()
+        kpi_info = get_kpi_data_from_id(kpi_id)
+        end_date = get_end_date(kpi_info)
 
         for subdim in subdims:
-            results = get_dq_and_subdim_data(kpi_id, today, "subdim", subdim)
+            results = get_dq_and_subdim_data(kpi_id, end_date, "subdim", subdim)
             subdim_graphs.append(results)
 
     except Exception as err:
@@ -68,8 +74,11 @@ def kpi_anomaly_data_quality(kpi_id):
     
     data = []
     try: 
+        kpi_info = get_kpi_data_from_id(kpi_id)
+        end_date = get_end_date(kpi_info)
+
         for dq in ["max", "mean", "count", "missing"]:
-            anom_data = get_dq_and_subdim_data(kpi_id, datetime.today(), "dq", dq)
+            anom_data = get_dq_and_subdim_data(kpi_id, end_date, "dq", dq)
             data.append(anom_data)
 
     except Exception as err:
@@ -177,3 +186,24 @@ def get_drilldowns_series_type(kpi_id, drilldown_date, no_of_graphs=5):
     results = pd.read_sql(query.statement, query.session.bind)
     
     return results.series_type
+
+def get_end_date(kpi_info: dict) -> datetime:
+
+    """Checks if the KPI has a static end date and returns it. Otherwise
+    returns today's date.
+
+    :return: end date for use with anomaly data output
+    :rtype: datetime
+    """
+
+    end_date = None
+
+    if kpi_info['is_static']:
+        end_date = kpi_info.get('static_params', {}).get('end_date', None)
+        if end_date is not None:
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+    
+    if end_date is None:
+        end_date = datetime.today().date()
+
+    return end_date

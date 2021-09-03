@@ -42,7 +42,6 @@ export const getAllAlertEmail = (details) => {
     if (error) {
       dispatch(getAlertEmailFailure());
     } else if (data && status === 200) {
-      console.log('EmailDATA:', data);
       dispatch(getAlertEmailSuccess(data));
     }
   };

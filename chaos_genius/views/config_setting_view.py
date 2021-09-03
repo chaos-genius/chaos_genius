@@ -62,13 +62,13 @@ def get_onboarding_status():
 
 @blueprint.route("/get-config", methods=["POST"])
 def get_config():
-    """Configuring the settings."""
+    """Getting the settings."""
     if request.is_json:
         data = request.get_json()
         name = data.get("config_name")
         config_obj = ConfigSetting.query.filter_by(name=name).first()
         if not config_obj:
-            return jsonify({"status": "success", "message": "Config doesn't exist"})
+            return jsonify({"status": "not_found", "message": "Config doesn't exist"})
         return jsonify({"data": config_obj.safe_dict, "status": "success"})
     else:
         return jsonify({"message": "The request payload is not in JSON format", "status": "failure"})
@@ -81,7 +81,7 @@ def set_config():
         data = request.get_json()
         config = data.get("config_name")
         if config not in ["email", "slack"]:
-            return jsonify({"status": "failure", "message": "Config doesn't exist"})
+            return jsonify({"status": "not_found", "message": "Config doesn't exist"})
         new_config = ConfigSetting(
             name=config,
             config_setting=data.get("config_settings", {})
@@ -90,6 +90,19 @@ def set_config():
         return jsonify({"message": f"Config {config} has been saved successfully.", "status": "success"})
     else:
         return jsonify({"message": "The request payload is not in JSON format", "status": "failure"})
+
+
+@blueprint.route("/get-all-config", methods=["GET"])
+def get_all_config():
+    """Getting all the setting."""
+    try:
+        result = []
+        configs = ConfigSetting.query.all()
+        for config in configs:
+            result.append(config.safe_dict)
+        return jsonify({"data": result, "status": "success"})
+    except Exception as err:
+        return jsonify({"message": err, "status": "failure"})
 
 
 @blueprint.route("/test-alert", methods=["POST"])

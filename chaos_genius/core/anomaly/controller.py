@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 import pandas as pd
 
@@ -14,7 +14,7 @@ from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, db
 
 class AnomalyDetectionController(object):
-    def __init__(self, kpi_info, save_model=False, end_date= None, debug=False):
+    def __init__(self, kpi_info, end_date= None, save_model=False, debug=False):
         self.kpi_info = kpi_info
 
         # TODO: Add these in kpi_info
@@ -64,7 +64,7 @@ class AnomalyDetectionController(object):
         self,
         series: str,
         subgroup: str = None
-    ) -> datetime.datetime:
+    ) -> datetime:
         """Returns the last date for which we have data for the given
         series
 
@@ -73,7 +73,7 @@ class AnomalyDetectionController(object):
         :param subgroup: Subtype of series
         :type subgroup: str
         :return: Last date for which we have data for the given series
-        :rtype: datetime.datetime
+        :rtype: datetime
         """
 
         return get_last_date_in_db(self.kpi_info["id"], series, subgroup)
@@ -82,7 +82,7 @@ class AnomalyDetectionController(object):
         self,
         model_name: str,
         input_data: pd.DataFrame,
-        last_date: datetime.datetime,
+        last_date: datetime,
         series,
         subgroup,
         freq
@@ -94,7 +94,7 @@ class AnomalyDetectionController(object):
         :param input_data: Dataframe with metric's data
         :type input_data: pd.DataFrame
         :param last_date: Last date for which we have output data
-        :type last_date: datetime.datetime
+        :type last_date: datetime
         :return: Dataframe with anomaly data
         :rtype: pd.DataFrame
         """
@@ -157,33 +157,41 @@ class AnomalyDetectionController(object):
         :return: List of subgroups
         :rtype: list
         """
-        subgroups = []
+        valid_subdims = []
         for dim in self.kpi_info["dimensions"]:
-            subgroup = []
-            for category in input_data[dim].unique():
-                subgroup.append(f"`{dim}`==\"{category}\"")
-            subgroups.append(subgroup)
+            if input_data[dim].dtype != "object":
+                print(f"{dim} is not a categorical column")
+                continue
+            else: valid_subdims.append(dim)
 
-        dp = {}
+        results = []
+        def querify(x):
+            q = []
+            for y in x:
+                q.append(f"`{y[0]}`==\"{y[1]}\"")
+            return ' and '.join(q)
 
-        def gen_groups(level=0, k=0):
-            if len(subgroups[level:]) == 1:
-                return subgroups[level]
 
-            if (level, k) in dp:
-                return dp[(level, k)]
+        def func(curr_values: list, curr_col_no: int, length_of_segment):
 
-            ans = []
-            for i in subgroups[level]:
-                ans.append(i)
-                ans.extend(gen_groups(level+1, k+1))
-                ans.extend(
-                    ' and '.join([i, x]) for x in gen_groups(level+1, k+1))
-            dp[(level, k)] = ans
-            return ans
+            if curr_col_no >= len(valid_subdims):
+                if len(curr_values) == length_of_segment:
+                    results.append(querify(curr_values))
+                return -1
 
-        groups = list(set(gen_groups()))
-        return groups
+            if len(curr_values) == length_of_segment:
+                results.append(querify(curr_values))
+                return -1
+
+            func(curr_values, curr_col_no + 1, length_of_segment)
+
+            for val in list(input_data.loc[:, valid_subdims[curr_col_no]].unique()):
+                func(curr_values + [(valid_subdims[curr_col_no],val)], curr_col_no + 1, length_of_segment)
+
+        for i in range(1, len(valid_subdims)+1):
+            func([], 0, i)
+
+        return results
 
     def _filter_subgroups(
         self, subgroups: list, input_data: pd.DataFrame
@@ -205,7 +213,7 @@ class AnomalyDetectionController(object):
         for subgroup in subgroups:
             try:
                 if grouped_input_data.query(subgroup)[self.kpi_info["metric"]]\
-                        .iloc[0] >= self.kpi_info["anomaly_params"]["period"]:
+                        .sum() >= self.kpi_info["anomaly_params"]["period"]:
                     filtered_subgroups.append(subgroup)
             except IndexError:
                 pass

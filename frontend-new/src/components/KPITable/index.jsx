@@ -135,7 +135,7 @@ const KPITable = ({ kpiData, kpiSearch, changeData }) => {
                         />
                         Configure Analytics
                       </li>
-                      <Link to="/datasource/edit">
+                      <Link to={`/kpiexplorer/edit/${kpi.id}`}>
                         <li>
                           <img
                             src={Edit}
@@ -168,7 +168,7 @@ const KPITable = ({ kpiData, kpiSearch, changeData }) => {
         ) : (
           <tr className="empty-table">
             <td colSpan={6}>
-              <Noresult text={kpiSearch} />
+              <Noresult text={kpiSearch} title="KPI" />
             </td>
           </tr>
         )}

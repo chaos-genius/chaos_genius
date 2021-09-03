@@ -1,5 +1,7 @@
 import React from 'react';
 
+import Select from 'react-select';
+
 import './analystics.scss';
 
 const Analystics = () => {
@@ -29,6 +31,30 @@ const Analystics = () => {
             className="form-control"
             placeholder="Daily"
             disabled
+          />
+        </div>
+        <div className="form-group">
+          <label>Select a Model</label>
+          <Select
+            classNamePrefix="selectcategory"
+            placeholder="select"
+            isSearchable={false}
+          />
+        </div>
+        <div className="form-group">
+          <label>Sensitivity</label>
+          <Select
+            classNamePrefix="selectcategory"
+            placeholder="select"
+            isSearchable={false}
+          />
+        </div>
+        <div className="form-group">
+          <label>Time Series Frequency</label>
+          <Select
+            classNamePrefix="selectcategory"
+            placeholder="select"
+            isSearchable={false}
           />
         </div>
       </div>

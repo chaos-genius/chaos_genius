@@ -402,7 +402,7 @@ const Anomaly = ({ kpi }) => {
           </div>
         </>
       ) : (
-        <Noresult />
+        <Noresult title="Anomaly" />
       )}
     </>
   );

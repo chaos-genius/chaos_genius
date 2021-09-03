@@ -208,7 +208,7 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
           ) : (
             <tr className="empty-table">
               <td colSpan={7}>
-                <Noresult text={search} />
+                <Noresult text={search} title="Data source" />
               </td>
             </tr>
           )}

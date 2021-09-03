@@ -1,21 +1,47 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { Link } from 'react-router-dom';
-
+import { useDispatch, useSelector } from 'react-redux';
 import Edit from '../../assets/images/edit.svg';
-import EditActive from '../../assets/images/edit-active.svg';
-
+import EditActive from '../../assets/images/datasourceedit-active.svg';
+import DeleteActive from '../../assets/images/delete-active.svg';
+import More from '../../assets/images/more.svg';
+import Moreactive from '../../assets/images/more-active.svg';
 import Noresult from '../Noresult';
-
+import Setting from '../../assets/images/table/setting.svg';
+import Settingactive from '../../assets/images/table/setting-active.svg';
+import Modal from 'react-modal';
+import Close from '../../assets/images/close.svg';
 import '../../assets/styles/table.scss';
 
 import { v4 as uuidv4 } from 'uuid';
 import Dimension from './dimension';
 
 import { formatDate } from '../../utils/date-helper';
+import { kpiDisable } from '../../redux/actions';
 
-const KPITable = ({ kpiData }) => {
+const KPITable = ({ kpiData, kpiSearch, changeData }) => {
   const connectionType = JSON.parse(localStorage.getItem('connectionType'));
+  const dispatch = useDispatch();
+  const [data, setData] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+
+  const { kpiDisableData } = useSelector((state) => state.kpiExplorer);
+  const closeModal = () => {
+    setIsOpen(false);
+  };
+
+  const onDelete = (kpi) => {
+    dispatch(kpiDisable(kpi.id));
+  };
+
+  useEffect(() => {
+    if (kpiDisableData && kpiDisableData.status === 'success') {
+      changeData((prev) => !prev);
+      setIsOpen(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [changeData, kpiDisableData]);
 
   const datasourceIcon = (type) => {
     let textHtml;
@@ -73,22 +99,68 @@ const KPITable = ({ kpiData }) => {
                   {formatDate(kpi.created_at) || '-'}
                 </td>
                 <td>
-                  <Link to={`/kpiexplorer/edit/${kpi.id}`}>
-                    <div className="table-actions">
-                      <div
-                        className="table-action-icon"
+                  <div className="dropdown more-dropdown">
+                    <div
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                      aria-haspopup="true">
+                      <img
+                        src={More}
+                        alt="More"
+                        className="moreoption"
                         data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
-                        title="Edit">
-                        <img src={Edit} alt="Edit" className="action-normal" />
-                        <img
-                          src={EditActive}
-                          alt="Edit"
-                          className="action-active"
-                        />
-                      </div>
+                        title="Actions"
+                      />
+                      <img
+                        src={Moreactive}
+                        alt="More"
+                        className="moreoption-active"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        title="Actions"
+                      />
                     </div>
-                  </Link>
+                    <ul className="dropdown-menu">
+                      <Link to="/datasource/edit">
+                        <li>
+                          <img
+                            src={Setting}
+                            alt="Edit"
+                            className="action-disable"
+                          />
+                          <img
+                            src={Settingactive}
+                            alt="Edit"
+                            className="action-active"
+                          />
+                          Configure Analytics
+                        </li>
+                        <li>
+                          <img
+                            src={Edit}
+                            alt="Edit"
+                            className="action-disable"
+                          />
+                          <img
+                            src={EditActive}
+                            alt="Edit"
+                            className="action-active"
+                          />
+                          Edit
+                        </li>
+                      </Link>
+                      <li
+                        className="delete-item"
+                        onClick={() => {
+                          setIsOpen(true);
+                          setData(kpi);
+                        }}>
+                        <img src={DeleteActive} alt="Delete" />
+                        Delete
+                      </li>
+                    </ul>
+                  </div>
                 </td>
               </tr>
             );
@@ -96,11 +168,36 @@ const KPITable = ({ kpiData }) => {
         ) : (
           <tr className="empty-table">
             <td colSpan={6}>
-              <Noresult />
+              <Noresult text={kpiSearch} />
             </td>
           </tr>
         )}
       </tbody>
+
+      <Modal
+        isOpen={isOpen}
+        shouldCloseOnOverlayClick={false}
+        portalClassName="deletemodal">
+        <div className="modal-close">
+          <img src={Close} alt="Close" onClick={closeModal} />
+        </div>
+        <div className="modal-body">
+          <div className="modal-contents">
+            <h3>Delete {data.name} ?</h3>
+            <p>Are you sure you want to delete </p>
+            <div className="next-step-navigate">
+              <button className="btn white-button" onClick={closeModal}>
+                <span>Cancel</span>
+              </button>
+              <button
+                className="btn black-button"
+                onClick={() => onDelete(data)}>
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </table>
   );
 };

@@ -1,12 +1,9 @@
 @import '../../assets/styles/variable.scss';
 
-.ReactModal__Content {
-  height: 230px;
-  width: 360px;
-}
 .more-dropdown {
   cursor: pointer;
   ul {
+    width: max-content;
     background-color: $white;
     border: 1px solid $grey_variation-2;
     box-sizing: border-box;
@@ -24,8 +21,8 @@
       text-transform: capitalize;
       color: $grey_variation-3;
       cursor: pointer;
+      padding: 0px 12px;
       img {
-        margin-left: 12px;
         margin-right: 8px;
       }
       &.delete-item {

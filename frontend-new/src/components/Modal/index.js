@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
+
+import { Link } from 'react-router-dom';
 
 import Modal from 'react-modal';
 
@@ -7,8 +9,8 @@ import Success from '../../assets/images/successful.svg';
 
 import './modal.scss';
 
-const ModalPopUp = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
+  // const [isOpen, setIsOpen] = useState(false);
   const closeModal = () => {
     setIsOpen(false);
   };
@@ -22,14 +24,48 @@ const ModalPopUp = () => {
           <img src={Success} alt="Success" />
         </div>
         <div className="modal-contents">
-          <h3>You have successfully Added a Data Source</h3>
-          <p>Next step is to set up KPI definitions.</p>
+          <h3>
+            You have successfully{' '}
+            {text === 'kpi'
+              ? 'Added a KPI'
+              : text === ' datasource'
+              ? 'Added a Data Source'
+              : 'created a Dashboard'}
+          </h3>
+          <p>
+            {text === 'kpi'
+              ? 'Next step is to create dashbaords for monitoring.'
+              : text === 'datasource'
+              ? 'Next step is to set up KPI definitions.'
+              : 'Next step is to Activate the Analytics'}
+          </p>
           <div className="next-step-navigate">
             <button className="btn black-button">
-              <span>Add KPI</span>
+              <span>
+                {text === 'kpi'
+                  ? 'Create Dashboard'
+                  : text === 'datasource'
+                  ? 'Add KPI'
+                  : 'Activate Analytics'}
+              </span>
             </button>
           </div>
-          <label>View added data source</label>
+          <Link
+            to={
+              text === 'kpi'
+                ? '/kpiexplorer'
+                : text === 'datasource'
+                ? '/datasource'
+                : ''
+            }>
+            <label>
+              {text === 'kpi'
+                ? 'View added KPI’s'
+                : text === 'datasource'
+                ? 'View added data source'
+                : 'View created dashboard'}
+            </label>
+          </Link>
         </div>
       </div>
     </Modal>

@@ -15,14 +15,11 @@ import { getConnectionType } from '../redux/actions';
 const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
   const dispatch = useDispatch();
   const { connectionType } = useSelector((state) => state.dataSource);
-  const types = localStorage.getItem('connectionType');
 
   useEffect(() => {
-    if (types === null) {
-      dispatchGetConnectionType();
-    }
+    dispatchGetConnectionType();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [types]);
+  }, []);
 
   const dispatchGetConnectionType = () => {
     dispatch(getConnectionType());

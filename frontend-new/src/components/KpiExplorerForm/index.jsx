@@ -9,7 +9,7 @@ import Select from 'react-select';
 import Play from '../../assets/images/play-green.png';
 import Success from '../../assets/images/success.svg';
 import Fail from '../../assets/images/fail.svg';
-import Cancel from '../../assets/images/cancel.svg';
+//import Cancel from '../../assets/images/cancel.svg';
 
 import '../../assets/styles/addform.scss';
 
@@ -37,14 +37,14 @@ const aggregate = [
   { value: 'sum', label: 'Sum' }
 ];
 
-const operator = [
-  { value: '=', label: '=' },
-  { value: '+', label: '+' },
-  { value: '-', label: '-' },
-  { value: '/', label: '/' },
-  { value: '>', label: '>' },
-  { value: '<', label: '<' }
-];
+// const operator = [
+//   { value: '=', label: '=' },
+//   { value: '+', label: '+' },
+//   { value: '-', label: '-' },
+//   { value: '/', label: '/' },
+//   { value: '>', label: '>' },
+//   { value: '<', label: '<' }
+// ];
 const customSingleValue = ({ data }) => (
   <div className="input-select">
     <div className="input-select__single-value">
@@ -54,7 +54,7 @@ const customSingleValue = ({ data }) => (
   </div>
 );
 
-const KpiExplorerForm = () => {
+const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   const dispatch = useDispatch();
 
   const history = useHistory();
@@ -67,6 +67,7 @@ const KpiExplorerForm = () => {
     metricOption: ''
   });
 
+  //const [inputList, setInputList] = useState([]);
   const [formdata, setFormdata] = useState({
     kpiname: '',
     datasource: '',
@@ -145,10 +146,16 @@ const KpiExplorerForm = () => {
       </>
     );
   };
-
   useEffect(() => {
-    if (kpiSubmit && kpiSubmit.message) {
+    if (kpiSubmit && kpiSubmit.status === 'success' && onboarding !== true) {
       history.push('/kpiexplorer');
+    } else if (
+      kpiSubmit &&
+      kpiSubmit.status === 'success' &&
+      onboarding === true
+    ) {
+      setModal(true);
+      setText('kpi');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSubmit]);
@@ -347,29 +354,28 @@ const KpiExplorerForm = () => {
     };
     dispatch(getTestQuery(data));
   };
-  const [inputList, setInputList] = useState([]);
-  const handleAddClick = () => {
-    setInputList([...inputList, { country: '', operator: '', value: '' }]);
-  };
+  // const handleAddClick = () => {
+  //   setInputList([...inputList, { country: '', operator: '', value: '' }]);
+  // };
 
-  const handleRemoveClick = (index) => {
-    const list = [...inputList];
-    list.splice(index, 1);
-    setInputList(list);
-  };
+  // const handleRemoveClick = (index) => {
+  //   const list = [...inputList];
+  //   list.splice(index, 1);
+  //   setInputList(list);
+  // };
 
-  const handleInputChange = (e, index, name) => {
-    if (name === 'value') {
-      const { value } = e.target;
-      const list = [...inputList];
-      list[index][name] = value;
-      setInputList(list);
-    } else {
-      const list = [...inputList];
-      list[index][name] = e.value;
-      setInputList(list);
-    }
-  };
+  // const handleInputChange = (e, index, name) => {
+  //   if (name === 'value') {
+  //     const { value } = e.target;
+  //     const list = [...inputList];
+  //     list[index][name] = value;
+  //     setInputList(list);
+  //   } else {
+  //     const list = [...inputList];
+  //     list[index][name] = e.value;
+  //     setInputList(list);
+  //   }
+  // };
 
   if (kpiFormLoading) {
     return (
@@ -437,7 +443,7 @@ const KpiExplorerForm = () => {
             </div>
           ) : null}
         </div>
-        {dataset.value === 'Query' ? (
+        {dataset.value === 'query' ? (
           // for of for query
           <div>
             <div className="form-group query-form">
@@ -589,7 +595,7 @@ const KpiExplorerForm = () => {
             </div>
           ) : null}
 
-          {inputList && inputList.length !== 0 && (
+          {/* {inputList && inputList.length !== 0 && (
             <div className="form-group">
               <label>Filters</label>
               {inputList.map((item, index) => {
@@ -627,21 +633,21 @@ const KpiExplorerForm = () => {
                 );
               })}
             </div>
-          )}
+          )} */}
 
           {/* add option form */}
           <div className="add-options-wrapper">
-            <div
+            {/* <div
               className="add-options"
               onClick={() =>
                 // setTableAdditional({
-                //   ...tableAdditional,
-                //   tablefilter: true
+                // ...tableAdditional,
+                // tablefilter: true
                 // })
                 handleAddClick()
               }>
               <label>+ Add Filters</label>
-            </div>
+            </div> */}
 
             {tableAdditional.tabledimension === false ? (
               <div
@@ -656,6 +662,7 @@ const KpiExplorerForm = () => {
               </div>
             ) : null}
           </div>
+
           <div className="form-action">
             <button
               className={
@@ -663,7 +670,9 @@ const KpiExplorerForm = () => {
                   ? 'btn black-button btn-loading'
                   : 'btn black-button'
               }
-              onClick={() => handleSubmit()}>
+              onClick={() => {
+                handleSubmit();
+              }}>
               <div className="btn-spinner">
                 <div className="spinner-border" role="status">
                   <span className="visually-hidden">Loading...</span>

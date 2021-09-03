@@ -120,7 +120,11 @@ const DataSource = () => {
           </div>
           {/* table section */}
           <div className="table-section">
-            <DataSourceTable tableData={dataSourceData} changeData={setData} />
+            <DataSourceTable
+              tableData={dataSourceData}
+              changeData={setData}
+              search={search}
+            />
           </div>
         </div>
       </div>

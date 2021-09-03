@@ -13,7 +13,10 @@ import {
   KPIEXPLORERSUBMITFAILURE,
   TESTQUERYREQUEST,
   TESTQUERYFAILURE,
-  TESTQUERYSUCCESS
+  TESTQUERYSUCCESS,
+  KPIDISABLEREQUEST,
+  KPIDISABLEFAILURE,
+  KPIDISABLESUCCESS
 } from './ActionConstants';
 
 import {
@@ -195,6 +198,39 @@ export const getTestQuery = (payload) => {
       dispatch(getTestQueryFailure());
     } else if (data && status === 200) {
       dispatch(getTestQuerySuccess(data));
+    }
+  };
+};
+
+export const kpiDisableRequest = () => {
+  return {
+    type: KPIDISABLEREQUEST
+  };
+};
+
+export const kpiDisableFailure = () => {
+  return {
+    type: KPIDISABLEFAILURE
+  };
+};
+
+export const kpiDisableSuccess = (response) => {
+  return {
+    type: KPIDISABLESUCCESS,
+    data: response
+  };
+};
+
+export const kpiDisable = (id) => {
+  return async (dispatch) => {
+    dispatch(kpiDisableRequest());
+    const { data, error, status } = await getRequest({
+      url: `${KPI_URL}/${id}/disable`
+    });
+    if (error) {
+      dispatch(kpiDisableFailure());
+    } else if (data && status === 200) {
+      dispatch(kpiDisableSuccess(data));
     }
   };
 };

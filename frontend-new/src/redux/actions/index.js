@@ -11,7 +11,8 @@ import {
   getAllKpiExplorerForm,
   getAllKpiExplorerField,
   getAllKpiExplorerSubmit,
-  getTestQuery
+  getTestQuery,
+  kpiDisable
 } from './KpiEplorer';
 import {
   getDashboardAggregation,
@@ -22,6 +23,7 @@ import {
 import { getOnboardingStatus } from './Onboarding';
 import { getDashboardLinechart } from './LineChart';
 import { getDashboardSidebar } from './Sidebarlist';
+import { getAllAlertEmail } from './Alert';
 import {
   anomalyDetection,
   getAnomalyQualityData,
@@ -47,5 +49,7 @@ export {
   getTestQuery,
   anomalyDetection,
   getAnomalyQualityData,
-  anomalyDrilldown
+  anomalyDrilldown,
+  kpiDisable,
+  getAllAlertEmail
 };

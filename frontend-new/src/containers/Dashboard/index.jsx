@@ -124,7 +124,7 @@ const Dashboard = () => {
                     <li
                       className={tab === 'anomaly' ? 'active' : ''}
                       onClick={() => onTabClick('anomaly')}>
-                      Anomolies
+                      Anomaly
                     </li>
                   </ul>
                 </div>

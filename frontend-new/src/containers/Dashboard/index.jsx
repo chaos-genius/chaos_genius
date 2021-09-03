@@ -58,9 +58,9 @@ const Dashboard = () => {
     setTabs(tabs);
     window.history.pushState('', '', `/#/dashboard/${tabs}/${kpi}`);
   };
-  const onSettingClick = (option) => {
-    history.push(`/dashboard/${option}/${kpi}`);
-  };
+  // const onSettingClick = (option) => {
+  //   history.push(`/kpi/settings/${kpi}`);
+  // };
   if (sidebarLoading) {
     return (
       <div className="loader loader-page">
@@ -78,16 +78,16 @@ const Dashboard = () => {
           {/* Breadcrumb */}
           <nav aria-label="breadcrumb">
             {/* <ol className="breadcrumb">
-<li className="breadcrumb-item">
-<Link to="/">Dashboard </Link>
-</li>
-<li className="breadcrumb-item">
-<Link to="/"> Test Dashboard 1 </Link>
-</li>
-<li className="breadcrumb-item active" aria-current="page">
-AutoRCA
-</li>
-</ol> */}
+              <li className="breadcrumb-item">
+                <Link to="/">Dashboard </Link>
+              </li>
+              <li className="breadcrumb-item">
+                <Link to="/"> Test Dashboard 1 </Link>
+              </li>
+              <li className="breadcrumb-item active" aria-current="page">
+                AutoRCA
+              </li>
+            </ol> */}
           </nav>
           {/* Back */}
           <div className="backnavigation">
@@ -133,16 +133,17 @@ AutoRCA
                       </li>
                     </ul>
                   </div>
-                  {/* <Link to="/kpi/settings"> */}
-                  <div
-                    className="common-option"
-                    onClick={() => onSettingClick('settings')}>
-                    <button className="btn grey-button">
-                      <img src={Setting} alt="Setting" />
-                      <span>Settings</span>
-                    </button>
-                  </div>
-                  {/* </Link> */}
+                  <Link to={`/kpi/settings/${kpi}`}>
+                    <div
+                      className="common-option"
+                      // onClick={() => onSettingClick('settings')}
+                    >
+                      <button className="btn grey-button">
+                        <img src={Setting} alt="Setting" />
+                        <span>Settings</span>
+                      </button>
+                    </div>
+                  </Link>
                 </div>
               </div>
             ) : (

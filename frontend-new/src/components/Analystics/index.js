@@ -1,8 +1,29 @@
 import React from 'react';
 
 import Select from 'react-select';
+import Tooltip from 'react-tooltip-lite';
+
+import Help from '../../assets/images/help.svg';
 
 import './analystics.scss';
+
+const modalOptions = [
+  { value: 'prophet', label: 'Prophet' },
+  { value: 'Standard Deviation', label: 'Standard Deviation' },
+  { value: 'NeuralProphet ', label: 'NeuralProphet ' },
+  { value: 'Greykite ', label: 'Greykite ' }
+];
+
+const sensitivityOptions = [
+  { value: 'High', label: 'High' },
+  { value: 'Medium', label: 'Medium' },
+  { value: 'Low', label: 'Low' }
+];
+
+const frequencyOptions = [
+  { value: 'daily', label: 'Daily' },
+  { value: 'hourly', label: 'Hourly' }
+];
 
 const Analystics = () => {
   return (
@@ -36,22 +57,50 @@ const Analystics = () => {
         <div className="form-group">
           <label>Select a Model</label>
           <Select
+            options={modalOptions}
             classNamePrefix="selectcategory"
             placeholder="select"
             isSearchable={false}
           />
         </div>
         <div className="form-group">
-          <label>Sensitivity</label>
+          <label className="help-label">
+            Sensitivity
+            <Tooltip
+              className="sensitivity-tooltip"
+              direction="right"
+              content={
+                <span>
+                  High sensitivity leads to high granularity detection leading
+                  and higher number of alerts
+                </span>
+              }>
+              <img src={Help} alt="Help" />
+            </Tooltip>
+          </label>
           <Select
+            options={sensitivityOptions}
             classNamePrefix="selectcategory"
             placeholder="select"
             isSearchable={false}
           />
         </div>
         <div className="form-group">
-          <label>Time Series Frequency</label>
+          <label className="help-label">
+            Time Series Frequency
+            <Tooltip
+              className="timeseriesfrequency-tooltip"
+              direction="right"
+              content={
+                <span>
+                  time series granularity to be considered for anomaly detection
+                </span>
+              }>
+              <img src={Help} alt="Help" />
+            </Tooltip>
+          </label>
           <Select
+            options={frequencyOptions}
             classNamePrefix="selectcategory"
             placeholder="select"
             isSearchable={false}

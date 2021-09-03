@@ -13,9 +13,11 @@ const AlertsForm = () => {
   const history = useHistory();
 
   const data = history.location.pathname.split('/');
+
   const { emailLoading, emailData } = useSelector((state) => {
     return state.alert;
   });
+
   const dispatch = useDispatch();
   const [webhookUrl, setWebhookUrl] = useState('');
   const [webhookUrlError, setWebhookUrlError] = useState(false);

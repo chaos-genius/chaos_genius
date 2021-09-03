@@ -58,6 +58,12 @@ export const alert = (state = initialState, action) => {
         channelStatusError: true
       };
     }
+    case 'RESET_EMAIL_DATA': {
+      return {
+        ...state,
+        emailData: []
+      };
+    }
     default:
       return state;
   }

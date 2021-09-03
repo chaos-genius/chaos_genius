@@ -122,20 +122,20 @@ const KPITable = ({ kpiData, kpiSearch, changeData }) => {
                       />
                     </div>
                     <ul className="dropdown-menu">
+                      <li>
+                        <img
+                          src={Setting}
+                          alt="Configure Analytics"
+                          className="action-disable"
+                        />
+                        <img
+                          src={Settingactive}
+                          alt="Configure Analytics"
+                          className="action-active"
+                        />
+                        Configure Analytics
+                      </li>
                       <Link to="/datasource/edit">
-                        <li>
-                          <img
-                            src={Setting}
-                            alt="Edit"
-                            className="action-disable"
-                          />
-                          <img
-                            src={Settingactive}
-                            alt="Edit"
-                            className="action-active"
-                          />
-                          Configure Analytics
-                        </li>
                         <li>
                           <img
                             src={Edit}

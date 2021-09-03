@@ -12,6 +12,7 @@ from flask import (
 )
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.kpi_model import Kpi
+from chaos_genius.databases.models.config_setting_model import ConfigSetting
 from chaos_genius.alerts.slack import trigger_overall_kpi_stats
 from chaos_genius.views.kpi_view import kpi_aggregation
 
@@ -57,6 +58,38 @@ def get_onboarding_status():
     ]
     completion_precentage = int(len([step for step in steps if step["step_done"]])/len(steps)*100)
     return jsonify({'data': {"steps": steps, "completion_precentage": completion_precentage}})
+
+
+@blueprint.route("/get-config", methods=["POST"])
+def get_config():
+    """Configuring the settings."""
+    if request.is_json:
+        data = request.get_json()
+        name = data.get("config_name")
+        config_obj = ConfigSetting.query.filter_by(name=name).first()
+        if not config_obj:
+            return jsonify({"status": "success", "message": "Config doesn't exist"})
+        return jsonify({"data": config_obj.safe_dict, "status": "success"})
+    else:
+        return jsonify({"message": "The request payload is not in JSON format", "status": "failure"})
+
+
+@blueprint.route("/set-config", methods=["POST"])
+def set_config():
+    """Configuring the settings."""
+    if request.is_json:
+        data = request.get_json()
+        config = data.get("config_name")
+        if config not in ["email", "slack"]:
+            return jsonify({"status": "failure", "message": "Config doesn't exist"})
+        new_config = ConfigSetting(
+            name=config,
+            config_setting=data.get("config_settings", {})
+        )
+        new_config.save(commit=True)
+        return jsonify({"message": f"Config {config} has been saved successfully.", "status": "success"})
+    else:
+        return jsonify({"message": "The request payload is not in JSON format", "status": "failure"})
 
 
 @blueprint.route("/test-alert", methods=["POST"])

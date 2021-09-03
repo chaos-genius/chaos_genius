@@ -1,11 +1,17 @@
-import { ALERT_EMAIL_URL } from '../../utils/url-helper';
+import {
+  ALERT_EMAIL_URL,
+  CHANNEL_CONFIGURATION_URL
+} from '../../utils/url-helper';
 
-import { postRequest } from '../../utils/http-helper';
+import { getRequest, postRequest } from '../../utils/http-helper';
 
 import {
   ALERTEMAILREQUEST,
   ALERTEMAILSUCCESS,
-  ALERTEMAILFAILURE
+  ALERTEMAILFAILURE,
+  CHANNELSTATUSSUCCESS,
+  CHANNERSTATUSFAILURE,
+  CHANNELSTATUSREQUEST
 } from './ActionConstants';
 
 export const getAlertEmailRequest = () => {
@@ -28,7 +34,6 @@ export const getAlertEmailSuccess = (response) => {
 };
 
 export const getAllAlertEmail = (details) => {
-  // console.log('Details:', JSON.stringify(details));
   return async (dispatch) => {
     dispatch(getAlertEmailRequest());
     const { data, error, status } = await postRequest({
@@ -43,6 +48,39 @@ export const getAllAlertEmail = (details) => {
       dispatch(getAlertEmailFailure());
     } else if (data && status === 200) {
       dispatch(getAlertEmailSuccess(data));
+    }
+  };
+};
+
+export const getChannelStatusRequest = () => {
+  return {
+    type: CHANNELSTATUSREQUEST
+  };
+};
+
+export const getChannelStatusFailure = () => {
+  return {
+    type: CHANNERSTATUSFAILURE
+  };
+};
+
+export const getChannelStatusSuccess = (response) => {
+  return {
+    type: CHANNELSTATUSSUCCESS,
+    data: response
+  };
+};
+
+export const getChannelStatus = () => {
+  return async (dispatch) => {
+    dispatch(getChannelStatusRequest());
+    const { data, error, status } = await getRequest({
+      url: CHANNEL_CONFIGURATION_URL
+    });
+    if (error) {
+      dispatch(getChannelStatusFailure());
+    } else if (data && status === 200) {
+      dispatch(getChannelStatusSuccess(data.data));
     }
   };
 };

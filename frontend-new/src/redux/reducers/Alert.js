@@ -1,13 +1,19 @@
 import {
   ALERTEMAILREQUEST,
   ALERTEMAILSUCCESS,
-  ALERTEMAILFAILURE
+  ALERTEMAILFAILURE,
+  CHANNELSTATUSREQUEST,
+  CHANNELSTATUSSUCCESS,
+  CHANNERSTATUSFAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
-  emailLoading: true,
+  emailLoading: false,
   emailData: [],
-  emailError: false
+  emailError: false,
+  channelStatusLoading: false,
+  channelStatusData: [],
+  channelStatusError: false
 };
 export const alert = (state = initialState, action) => {
   switch (action.type) {
@@ -30,6 +36,26 @@ export const alert = (state = initialState, action) => {
         ...state,
         emailLoading: false,
         emailError: true
+      };
+    }
+    case CHANNELSTATUSREQUEST: {
+      return {
+        ...state,
+        channelStatusLoading: true
+      };
+    }
+    case CHANNELSTATUSSUCCESS: {
+      return {
+        ...state,
+        channelStatusData: action.data,
+        channelStatusLoading: false
+      };
+    }
+    case CHANNERSTATUSFAILURE: {
+      return {
+        ...state,
+        channelStatusLoading: false,
+        channelStatusError: true
       };
     }
     default:

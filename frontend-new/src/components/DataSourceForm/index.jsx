@@ -40,7 +40,7 @@ const datasourceIcon = (type) => {
   );
 };
 
-const DataSourceForm = () => {
+const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const dispatch = useDispatch();
 
   const [option, setOption] = useState([]);
@@ -82,9 +82,17 @@ const DataSourceForm = () => {
   useEffect(() => {
     if (
       createDatasourceResponse &&
-      createDatasourceResponse.status === 'succeeded'
+      createDatasourceResponse.status === 'connected' &&
+      onboarding !== true
     ) {
       history.push('/datasource');
+    } else if (
+      createDatasourceResponse &&
+      createDatasourceResponse.status === 'connected' &&
+      onboarding === true
+    ) {
+      setModal(true);
+      setText('datasource');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createDatasourceResponse]);

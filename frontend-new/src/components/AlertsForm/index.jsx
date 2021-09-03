@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { useHistory } from 'react-router-dom';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import Slack from '../../assets/images/alerts/slack.svg';
 import Email from '../../assets/images/alerts/gmail.svg';
@@ -15,9 +15,6 @@ const AlertsForm = () => {
   const data = history.location.pathname.split('/');
 
   const dispatch = useDispatch();
-
-  const { emailData, emailLoading } = useSelector((state) => state.alert);
-  console.log('Loading:', emailLoading, 'emailData:', emailData);
 
   const [email, setEmail] = useState({
     smtp: '',
@@ -69,8 +66,8 @@ const AlertsForm = () => {
       const data = {
         config_name: 'email',
         config_settings: {
-          server: 'email-smtp.ap-south-1.amazonaws.com',
-          port: 587,
+          server: email.smtp,
+          port: email.port,
           username: email.username,
           password: email.password,
           sender_email: email.emailsender

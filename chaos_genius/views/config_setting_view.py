@@ -82,11 +82,16 @@ def set_config():
         config = data.get("config_name")
         if config not in ["email", "slack"]:
             return jsonify({"status": "not_found", "message": "Config doesn't exist"})
-        new_config = ConfigSetting(
-            name=config,
-            config_setting=data.get("config_settings", {})
-        )
-        new_config.save(commit=True)
+        config_obj = ConfigSetting.query.filter_by(name=name).first()
+        if config_obj:
+            config_obj.config_setting = data.get("config_settings", {})
+            config_obj.save(commit=True)
+        else:
+            new_config = ConfigSetting(
+                name=config,
+                config_setting=data.get("config_settings", {})
+            )
+            new_config.save(commit=True)
         return jsonify({"message": f"Config {config} has been saved successfully.", "status": "success"})
     else:
         return jsonify({"message": "The request payload is not in JSON format", "status": "failure"})

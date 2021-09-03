@@ -43,6 +43,11 @@ const Routes = () => (
     />
     <PrivateRouteWithSidebar
       exact
+      path="/kpi/settings/:id"
+      component={(props) => <Kpisetting {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
       path="/datasource"
       component={(props) => <DataSource {...props} />}
     />
@@ -111,11 +116,11 @@ const Routes = () => (
       path="/noresult"
       component={(props) => <Result {...props} />}
     />
-    <PrivateRouteWithSidebar
-      exact
-      path="/kpi/settings"
-      component={(props) => <Kpisetting {...props} />}
-    />
+    {/* <PrivateRouteWithSidebar
+exact
+path="/kpi/settings"
+component={(props) => <Kpisetting {...props} />}
+/> */}
     <PrivateRouteWithSidebar
       exact
       component={(props) => <Anomolies {...props} />}

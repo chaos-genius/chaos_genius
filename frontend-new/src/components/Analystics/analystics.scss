@@ -9,3 +9,100 @@
   justify-content: flex-end;
   margin-top: 30px;
 }
+.seasonality-setting {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  .check-box {
+    margin-bottom: 0px;
+  }
+}
+.analystics-button {
+  margin-top: 48px;
+}
+.form-group {
+  input[type='text']:disabled {
+    background: $grey_variation-2;
+    &::placeholder {
+      font-weight: $font-weight-500;
+      color: $black_variation-2;
+    }
+  }
+}
+.configure-tab {
+  ul {
+    li {
+      font-weight: $font-weight-600;
+      font-size: $font-size-18;
+      line-height: $line-height-24;
+      letter-spacing: $letter-spacing;
+      color: $black_variation-2;
+    }
+  }
+}
+.help-label {
+  display: flex;
+  align-items: center;
+  img {
+    margin-left: 5px;
+  }
+}
+// Tooltip
+.timeseriesfrequency-tooltip {
+  .react-tooltip-lite {
+    width: 228px;
+    padding: 8px 12px;
+    background: $black_variation-2;
+    border-radius: 6px;
+    color: $white;
+    span {
+      font-weight: $font-weight-400;
+      font-size: $font-size-12;
+      line-height: $line-height-18;
+      letter-spacing: $letter-spacing;
+      text-transform: capitalize;
+      color: $white;
+    }
+  }
+  .react-tooltip-lite-arrow {
+    border-color: $black_variation-2;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right-width: 10px;
+  }
+  .react-tooltip-lite-right-arrow {
+    border-color: $black_variation-2;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right-width: 10px;
+  }
+}
+.sensitivity-tooltip {
+  .react-tooltip-lite {
+    width: 228px;
+    padding: 8px 12px;
+    background: $black_variation-2;
+    border-radius: 6px;
+    color: $white;
+    span {
+      font-weight: $font-weight-400;
+      font-size: $font-size-12;
+      line-height: $line-height-18;
+      letter-spacing: $letter-spacing;
+      text-transform: capitalize;
+      color: $white;
+    }
+  }
+  .react-tooltip-lite-arrow {
+    border-color: $black_variation-2;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right-width: 10px;
+  }
+  .react-tooltip-lite-right-arrow {
+    border-color: $black_variation-2;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right-width: 10px;
+  }
+}

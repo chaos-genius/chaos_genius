@@ -128,14 +128,14 @@ const Dashboard = () => {
                     </li>
                   </ul>
                 </div>
-                {/* <Link to="/kpi/settings"> */}
-                <div className="common-option">
-                  <button className="btn grey-button">
-                    <img src={Setting} alt="Setting" />
-                    <span>Settings</span>
-                  </button>
-                </div>
-                {/* </Link> */}
+                <Link to="/kpi/settings">
+                  <div className="common-option">
+                    <button className="btn grey-button">
+                      <img src={Setting} alt="Setting" />
+                      <span>Settings</span>
+                    </button>
+                  </div>
+                </Link>
               </div>
             </div>
             {tab === 'autorca' && kpi && active && (

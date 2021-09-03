@@ -9,3 +9,34 @@
   justify-content: flex-end;
   margin-top: 30px;
 }
+.seasonality-setting {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  .check-box {
+    margin-bottom: 0px;
+  }
+}
+.analystics-button {
+  margin-top: 48px;
+}
+.form-group {
+  input[type='text']:disabled {
+    background: $grey_variation-2;
+    &::placeholder {
+      font-weight: $font-weight-500;
+      color: $black_variation-2;
+    }
+  }
+}
+.configure-tab {
+  ul {
+    li {
+      font-weight: $font-weight-600;
+      font-size: $font-size-18;
+      line-height: $line-height-24;
+      letter-spacing: $letter-spacing;
+      color: $black_variation-2;
+    }
+  }
+}

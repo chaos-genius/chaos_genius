@@ -20,7 +20,6 @@ import AddKpiAlert from '../containers/AddKpiAlert';
 import AddEventAlert from '../containers/AddEventAlert';
 import Result from '../containers/Result';
 import Login from '../containers/Login';
-import Kpisetting from '../containers/KpiSetting';
 
 const Routes = () => (
   <Switch>
@@ -39,6 +38,11 @@ const Routes = () => (
     <PrivateRouteWithSidebar
       exact
       path="/dashboard/anomaly/:kpi"
+      component={(props) => <Dashboard {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
+      path="/dashboard/settings/:id"
       component={(props) => <Dashboard {...props} />}
     />
     <PrivateRouteWithSidebar
@@ -111,11 +115,11 @@ const Routes = () => (
       path="/noresult"
       component={(props) => <Result {...props} />}
     />
-    <PrivateRouteWithSidebar
-      exact
-      path="/kpi/settings"
-      component={(props) => <Kpisetting {...props} />}
-    />
+    {/* <PrivateRouteWithSidebar
+exact
+path="/kpi/settings"
+component={(props) => <Kpisetting {...props} />}
+/> */}
     <PrivateRouteWithSidebar
       exact
       component={(props) => <Anomolies {...props} />}

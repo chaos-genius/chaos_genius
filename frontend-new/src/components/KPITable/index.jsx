@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
 import { Link } from 'react-router-dom';
+
 import { useDispatch, useSelector } from 'react-redux';
+
 import Edit from '../../assets/images/edit.svg';
 import EditActive from '../../assets/images/datasourceedit-active.svg';
 import DeleteActive from '../../assets/images/delete-active.svg';
@@ -12,6 +14,7 @@ import Setting from '../../assets/images/table/setting.svg';
 import Settingactive from '../../assets/images/table/setting-active.svg';
 import Modal from 'react-modal';
 import Close from '../../assets/images/close.svg';
+
 import '../../assets/styles/table.scss';
 
 import { v4 as uuidv4 } from 'uuid';
@@ -122,19 +125,21 @@ const KPITable = ({ kpiData, kpiSearch, changeData }) => {
                       />
                     </div>
                     <ul className="dropdown-menu">
-                      <li>
-                        <img
-                          src={Setting}
-                          alt="Configure Analytics"
-                          className="action-disable"
-                        />
-                        <img
-                          src={Settingactive}
-                          alt="Configure Analytics"
-                          className="action-active"
-                        />
-                        Configure Analytics
-                      </li>
+                      <Link to={`/dashboard/settings/${kpi.id}`}>
+                        <li>
+                          <img
+                            src={Setting}
+                            alt="Configure Analytics"
+                            className="action-disable"
+                          />
+                          <img
+                            src={Settingactive}
+                            alt="Configure Analytics"
+                            className="action-active"
+                          />
+                          Configure Analytics
+                        </li>
+                      </Link>
                       <Link to={`/kpiexplorer/edit/${kpi.id}`}>
                         <li>
                           <img

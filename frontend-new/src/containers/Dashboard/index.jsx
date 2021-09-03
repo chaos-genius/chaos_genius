@@ -12,6 +12,7 @@ import Setting from '../../assets/images/setting.svg';
 import Dashboardgraph from '../../components/DashboardGraph';
 import FilterWithTab from '../../components/FilterWithTab';
 import Anomaly from '../../components/Anomaly';
+import Analystics from '../../components/Analystics';
 
 import { getDashboardSidebar } from '../../redux/actions';
 
@@ -22,7 +23,9 @@ const Dashboard = () => {
   const [active, setActive] = useState('');
   const [kpi, setKpi] = useState();
   const [tab, setTabs] = useState('autorca');
+
   const location = history.location.pathname.split('/');
+
   const { sidebarLoading, sidebarList } = useSelector((state) => {
     return state.sidebar;
   });
@@ -55,7 +58,9 @@ const Dashboard = () => {
     setTabs(tabs);
     window.history.pushState('', '', `/#/dashboard/${tabs}/${kpi}`);
   };
-
+  const onSettingClick = (option) => {
+    history.push(`/dashboard/${option}/${kpi}`);
+  };
   if (sidebarLoading) {
     return (
       <div className="loader loader-page">
@@ -72,23 +77,23 @@ const Dashboard = () => {
         <div className="page-navigation">
           {/* Breadcrumb */}
           <nav aria-label="breadcrumb">
-            <ol className="breadcrumb">
-              <li className="breadcrumb-item">
-                <Link to="/">Dashboard </Link>
-              </li>
-              <li className="breadcrumb-item">
-                <Link to="/"> Test Dashboard 1 </Link>
-              </li>
-              <li className="breadcrumb-item active" aria-current="page">
-                AutoRCA
-              </li>
-            </ol>
+            {/* <ol className="breadcrumb">
+<li className="breadcrumb-item">
+<Link to="/">Dashboard </Link>
+</li>
+<li className="breadcrumb-item">
+<Link to="/"> Test Dashboard 1 </Link>
+</li>
+<li className="breadcrumb-item active" aria-current="page">
+AutoRCA
+</li>
+</ol> */}
           </nav>
           {/* Back */}
           <div className="backnavigation">
             <Link to="/">
               <img src={rightarrow} alt="Back" />
-              <span>Test Dashboard 1</span>{' '}
+              <span>Dashboard</span>
             </Link>
           </div>
         </div>
@@ -107,41 +112,52 @@ const Dashboard = () => {
               />
             )}
           </div>
-
           {/* Graph Section*/}
           <div className="graph-section">
             {/* Dashboard Header */}
-            <div className="dashboard-layout dashboard-header-tab">
-              <div className="dashboard-subheader">
-                <div className="common-tab">
-                  <ul>
-                    <li
-                      className={tab === 'autorca' ? 'active' : ''}
-                      onClick={() => onTabClick('autorca')}>
-                      AutoRCA
-                    </li>
+            {location[2] !== 'settings' ? (
+              <div className="dashboard-layout dashboard-header-tab">
+                <div className="dashboard-subheader">
+                  <div className="common-tab">
+                    <ul>
+                      <li
+                        className={tab === 'autorca' ? 'active' : ''}
+                        onClick={() => onTabClick('autorca')}>
+                        AutoRCA
+                      </li>
 
-                    <li
-                      className={tab === 'anomaly' ? 'active' : ''}
-                      onClick={() => onTabClick('anomaly')}>
-                      Anomolies
-                    </li>
-                  </ul>
-                </div>
-                <Link to="/kpi/settings">
-                  <div className="common-option">
+                      <li
+                        className={tab === 'anomaly' ? 'active' : ''}
+                        onClick={() => onTabClick('anomaly')}>
+                        Anomolies
+                      </li>
+                    </ul>
+                  </div>
+                  {/* <Link to="/kpi/settings"> */}
+                  <div
+                    className="common-option"
+                    onClick={() => onSettingClick('settings')}>
                     <button className="btn grey-button">
                       <img src={Setting} alt="Setting" />
                       <span>Settings</span>
                     </button>
                   </div>
-                </Link>
+                  {/* </Link> */}
+                </div>
               </div>
-            </div>
+            ) : (
+              ''
+            )}
             {tab === 'autorca' && kpi && active && (
               <Dashboardgraph kpi={kpi} kpiName={active} />
             )}
             {tab === 'anomaly' && kpi && <Anomaly kpi={kpi} />}
+
+            {location[2] === 'settings' && (
+              <div className="table-section setting-section">
+                <Analystics />
+              </div>
+            )}
           </div>
         </div>
       </>

@@ -14,7 +14,11 @@ import DataSourceTable from '../../components/DataSourceTable';
 import './datasource.scss';
 
 import { getAllDataSources } from '../../redux/actions';
+import store from '../../redux/store';
 
+const RESET_ACTION = {
+  type: 'CREATE_RESPONSE_RESET'
+};
 const DataSource = () => {
   const dispatch = useDispatch();
 
@@ -28,6 +32,7 @@ const DataSource = () => {
   );
 
   useEffect(() => {
+    store.dispatch(RESET_ACTION);
     dispatchGetAllDataSources();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);

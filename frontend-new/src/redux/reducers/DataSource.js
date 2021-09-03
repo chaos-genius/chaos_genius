@@ -131,6 +131,13 @@ export const dataSource = (state = initialState, action) => {
         error: true
       };
     }
+    case 'CREATE_RESPONSE_RESET': {
+      return {
+        ...state,
+        createDatasourceResponse: [],
+        testConnectionResponse: []
+      };
+    }
     default:
       return state;
   }

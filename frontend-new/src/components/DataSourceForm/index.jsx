@@ -104,7 +104,10 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
           ...prev,
           [child]: {
             ...prev[child],
-            [key]: e.target.value
+            [key]:
+              e.target.type === 'number'
+                ? parseInt(e.target.value)
+                : e.target.value
           }
         };
       });
@@ -112,7 +115,10 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       setDsFormData((prev) => {
         return {
           ...prev,
-          [key]: e.target.value
+          [key]:
+            e.target.type === 'number'
+              ? parseInt(e.target.value)
+              : e.target.value
         };
       });
       setFormError([]);

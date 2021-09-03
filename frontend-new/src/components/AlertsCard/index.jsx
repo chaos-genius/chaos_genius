@@ -12,6 +12,11 @@ import Teams from '../../assets/images/alerts/teams.svg';
 import Succestick from '../../assets/images/setupcard/success-tick.svg';
 import '../SetupCard/setupcard.scss';
 import { getChannelStatus } from '../../redux/actions';
+import store from '../../redux/store';
+
+const RESET_ACTION = {
+  type: 'RESET_EMAIL_DATA'
+};
 
 const AlertsCard = () => {
   const dispatch = useDispatch();
@@ -21,6 +26,7 @@ const AlertsCard = () => {
   });
 
   useEffect(() => {
+    store.dispatch(RESET_ACTION);
     dispatch(getChannelStatus());
   }, [dispatch]);
 

@@ -66,9 +66,9 @@ const Sidebar = () => {
             <Link to="/dashboard/anomaly/kpi">
               <img
                 src={location[2] === 'anomaly' ? anomoliesactive : anomolies}
-                alt="Anomolies"
+                alt="Anomaly"
               />
-              <span>Anomolies</span>
+              <span>Anomaly</span>
             </Link>
           </li>
         </ul>

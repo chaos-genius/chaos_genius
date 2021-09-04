@@ -4,6 +4,7 @@ import prophet as pt
 from prophet.serialize import model_to_json, model_from_json
 
 from chaos_genius.core.anomaly.models import AnomalyModel
+from chaos_genius.core.utils import suppress_stdout_stderr
 
 #FIXME: add accurate threshold values
 PROPHETSENS = {
@@ -37,11 +38,12 @@ class ProphetModel(AnomalyModel):
         df = df.rename(columns={"dt": "ds", "y": "y"})
 
         # TODO: Add seasonality to model kwargs
-        self.model = pt.Prophet(
-            yearly_seasonality=True,
-            daily_seasonality=True,
-            interval_width = PROPHETSENS[sensitivity],
-            **self.model_kwargs).fit(df)
+        with suppress_stdout_stderr():
+            self.model = pt.Prophet(
+                yearly_seasonality=True,
+                daily_seasonality=True,
+                interval_width = PROPHETSENS[sensitivity],
+                **self.model_kwargs).fit(df)
 
         if pred_df is None:
             future = self.model.make_future_dataframe(periods=1)

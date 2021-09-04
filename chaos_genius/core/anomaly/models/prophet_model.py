@@ -5,6 +5,12 @@ from prophet.serialize import model_to_json, model_from_json
 
 from chaos_genius.core.anomaly.models import AnomalyModel
 
+#FIXME: add accurate threshold values
+PROPHETSENS = {
+    "high": 0.7,
+    "medium": 0.85,
+    "low": 0.95
+}
 
 class ProphetModel(AnomalyModel):
     def __init__(self, *args, model_kwargs={}, **kwargs) -> None:
@@ -16,6 +22,7 @@ class ProphetModel(AnomalyModel):
     def predict(
         self,
         df: pd.DataFrame,
+        sensitivity, 
         pred_df: pd.DataFrame = None
     ) -> pd.DataFrame:
         """Takes in pd.DataFrame with 2 columns, dt and y, and returns a
@@ -33,6 +40,7 @@ class ProphetModel(AnomalyModel):
         self.model = pt.Prophet(
             yearly_seasonality=True,
             daily_seasonality=True,
+            interval_width = PROPHETSENS[sensitivity],
             **self.model_kwargs).fit(df)
 
         if pred_df is None:

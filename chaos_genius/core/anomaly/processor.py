@@ -16,6 +16,7 @@ class ProcessAnomalyDetection:
         period: int,
         table_name: str,
         freq: str,
+        sensitivity: str,
         series: str,
         subgroup: str = None,
         model_kwargs={},
@@ -30,6 +31,7 @@ class ProcessAnomalyDetection:
         self.model_path = self.gen_model_save_path()
         self.model_kwargs = model_kwargs
         self.freq = freq
+        self.sensitivity = sensitivity
 
     def predict(self):
 
@@ -60,7 +62,11 @@ class ProcessAnomalyDetection:
         if self.last_date is None:
             # pass complete input data frame in here as pred_df
 
-            prediction = model.predict(input_data, pred_df=input_data)
+            prediction = model.predict(
+                input_data,
+                self.sensitivity,
+                pred_df=input_data,
+            )
 
             prediction['y'] = input_data['y']
             predSeries = prediction
@@ -76,7 +82,10 @@ class ProcessAnomalyDetection:
                         & (input_data['dt'] <= self.last_date)
                     ]
 
-                    prediction = model.predict(df)
+                    prediction = model.predict(
+                        df,
+                        self.sensitivity
+                    )
                     toAppend = prediction.iloc[-1].copy()
                     toAppend.loc['y'] = df.iloc[-1]['y']
 

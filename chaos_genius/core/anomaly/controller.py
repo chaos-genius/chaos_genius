@@ -104,6 +104,9 @@ class AnomalyDetectionController(object):
             self.kpi_info['metric']: 'y'
         })
 
+        sensitivity = self.kpi_info['anomaly_params']\
+            .get('sensitivity', 'medium')
+
         return ProcessAnomalyDetection(
             model_name,
             input_data,
@@ -111,6 +114,7 @@ class AnomalyDetectionController(object):
             self.kpi_info["anomaly_params"]["period"],
             self.kpi_info["table_name"],
             freq,
+            sensitivity,
             series,
             subgroup,
             self.kpi_info.get("model_kwargs", {})

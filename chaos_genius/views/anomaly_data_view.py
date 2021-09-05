@@ -2,6 +2,7 @@
 """anomaly data view."""
 from datetime import datetime, timedelta
 import traceback
+from typing import cast
 
 from flask import Blueprint, current_app, jsonify, request
 import pandas as pd
@@ -9,6 +10,7 @@ import pandas as pd
 from chaos_genius.extensions import cache
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
+from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.views.kpi_view import get_kpi_data_from_id
 
 
@@ -92,6 +94,49 @@ def kpi_anomaly_data_quality(kpi_id):
 
     current_app.logger.info("Anomaly Drilldown Done")
     return jsonify({"data": data, "msg": ""})
+
+
+@blueprint.route("/<int:kpi_id>/anomaly-params", methods=["POST"])
+def kpi_anomaly_params(kpi_id: int):
+    current_app.logger.info(f"Updating anomaly parameters for KPI ID: {kpi_id}")
+
+    req_data: dict = cast(dict, request.get_json())
+
+    fields = {"anomaly_params", "anomaly_frequency"}
+
+    if fields.isdisjoint(set(req_data.keys())):
+        # we don't have any of the possible fields
+        return jsonify(
+            {"error": f"The request needs to have one of {', '.join(fields)} fields"}
+        ), 400
+
+    kpi = Kpi.get_by_id(kpi_id)
+
+    if kpi is None:
+        return jsonify(
+            {"error": f"Could not find KPI for ID: {kpi_id}"}
+        ), 400
+
+    resp = {
+        "msg": "Successfully updated Anomaly params",
+        "data": {},
+    }
+
+    if "anomaly_params" in req_data:
+        anomaly_params = req_data["anomaly_params"]
+
+        kpi.anomaly_params = anomaly_params
+
+        resp["data"]["anomaly_params"] = anomaly_params
+
+    if "anomaly_frequency" in req_data:
+        anomaly_frequency = req_data["anomaly_frequency"]
+
+        kpi.anomaly_frequency = anomaly_frequency
+
+        resp["data"]["anomaly_frequency"] = anomaly_frequency
+
+    return jsonify(resp)
 
 
 def fill_graph_data(row, graph_data, precision=2):

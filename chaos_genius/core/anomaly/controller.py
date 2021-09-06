@@ -163,9 +163,8 @@ class AnomalyDetectionController(object):
         """
         valid_subdims = []
         for dim in self.kpi_info["dimensions"]:
-            if input_data[dim].dtype != "object":
-                print(f"{dim} is not a categorical column")
-                continue
+            if len(input_data[dim].unique()) >= 100:
+                print(f"{dim} has a cardinality over 100 skipping {dim}")
             else: valid_subdims.append(dim)
 
         results = []

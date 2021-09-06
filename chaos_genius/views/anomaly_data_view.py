@@ -136,6 +136,8 @@ def kpi_anomaly_params(kpi_id: int):
 
         resp["data"]["anomaly_frequency"] = anomaly_frequency
 
+    kpi.save()
+
     return jsonify(resp)
 
 

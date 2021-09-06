@@ -100,6 +100,11 @@ def kpi_anomaly_data_quality(kpi_id):
 def kpi_anomaly_params(kpi_id: int):
     current_app.logger.info(f"Updating anomaly parameters for KPI ID: {kpi_id}")
 
+    if not request.is_json:
+        return jsonify(
+            {"error": "Request body must be a JSON (and Content-Type header must be set correctly)"}
+        ), 400
+
     req_data: dict = cast(dict, request.get_json())
 
     fields = {"anomaly_params", "anomaly_frequency"}

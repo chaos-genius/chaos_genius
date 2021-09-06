@@ -116,15 +116,39 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   useEffect(() => {
     dispatchGetAllKpiExplorerForm();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
+  }, []);
 
   useEffect(() => {
-    fieldData();
+    if (kpiFormData) {
+      fieldData();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiFormData]);
 
   const dispatchGetAllKpiExplorerForm = () => {
     dispatch(getAllKpiExplorerForm());
+  };
+  useEffect(() => {
+    if (testQueryData) {
+      queryFieldList();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [testQueryData]);
+
+  const queryFieldList = () => {
+    var arr = [];
+    if (testQueryData) {
+      testQueryData &&
+        testQueryData.forEach((item) => {
+          arr.push({
+            label: item.name,
+            value: item.name
+          });
+        });
+    } else {
+      arr = [];
+    }
+    setOption({ ...option, metricOption: arr });
   };
 
   const datasourceIcon = (type) => {
@@ -161,7 +185,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   }, [kpiSubmit]);
 
   const fieldData = () => {
-    if (!kpiFormLoading) {
+    if (kpiFormData && kpiFormLoading === false) {
       var optionArr = [];
       kpiFormData &&
         kpiFormData.data.forEach((data) => {
@@ -206,7 +230,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   };
 
   useEffect(() => {
-    tableOption();
+    if (kpiField) {
+      tableOption();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiField]);
 
@@ -227,29 +253,35 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   };
 
   const tableName = (e) => {
-    setErrorMsg({ tablename: false });
-    var optionValueArr = [];
-    for (const [key, value] of Object.entries(kpiField.tables)) {
-      const valueData = e.value.toLowerCase();
-      if (key === valueData) {
-        value.table_columns.forEach((data) => {
-          optionValueArr.push({
-            value: data.name,
-            label: data.name
+    if (kpiField && kpiFieldLoading === false) {
+      setErrorMsg({ tablename: false });
+      var optionValueArr = [];
+      for (const [key, value] of Object.entries(kpiField.tables)) {
+        const valueData = e.value.toLowerCase();
+        if (key === valueData) {
+          value.table_columns.forEach((data) => {
+            optionValueArr.push({
+              value: data.name,
+              label: data.name
+            });
           });
-        });
-        setOption({ ...option, metricOption: optionValueArr });
+
+          setOption({ ...option, metricOption: optionValueArr });
+        }
       }
+      setFormdata({ ...formdata, tablename: e.value });
     }
-    setFormdata({ ...formdata, tablename: e.value });
   };
 
   const handleDataset = (e) => {
     setDataset(e);
-    setOption({ ...option, dataset: e.value });
-    setFormdata({ ...formdata, dataset: e.value });
+    setOption({
+      ...option,
+      dataset: e.value,
+      metricOption: ''
+    });
+    setFormdata({ ...formdata, dataset: e.value, metriccolumns: '' });
   };
-
   const handleSubmit = () => {
     if (formdata.kpiname === '') {
       setErrorMsg((prev) => {
@@ -376,7 +408,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   //     setInputList(list);
   //   }
   // };
-
   if (kpiFormLoading) {
     return (
       <div className="loader">
@@ -445,7 +476,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         </div>
         {dataset.value === 'query' ? (
           // for of for query
-          <div>
+          <>
             <div className="form-group query-form">
               <label>Query *</label>
               <textarea
@@ -491,7 +522,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                 </div>
               </div>
             </div>
-          </div> // end of for query
+          </> // end of for query
         ) : (
           <div className="form-group">
             <label>Table Name *</label>
@@ -501,6 +532,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               placeholder="Select Table"
               onChange={(e) => tableName(e)}
             />
+
             {errorMsg.tablename === true ? (
               <div className="connection__fail">
                 <p>Select Table Name</p>
@@ -513,10 +545,17 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             <label>Metric Columns *</label>
             <Select
               options={option.metricOption}
+              value={
+                formdata.metriccolumns && {
+                  label: formdata.metriccolumns,
+                  value: formdata.metriccolumns
+                }
+              }
               classNamePrefix="selectcategory"
               placeholder="Select Metric Columns"
               onChange={(e) => {
                 setFormdata({ ...formdata, metriccolumns: e.value });
+
                 setErrorMsg((prev) => {
                   return {
                     ...prev,
@@ -525,6 +564,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                 });
               }}
             />
+
             {errorMsg.metriccolumns === true ? (
               <div className="connection__fail">
                 <p>Select Metric Columns</p>

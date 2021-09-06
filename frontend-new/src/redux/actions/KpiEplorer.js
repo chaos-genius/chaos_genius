@@ -197,7 +197,7 @@ export const getTestQuery = (payload) => {
     if (error) {
       dispatch(getTestQueryFailure());
     } else if (data && status === 200) {
-      dispatch(getTestQuerySuccess(data));
+      dispatch(getTestQuerySuccess(data.data.tables.query.table_columns));
     }
   };
 };

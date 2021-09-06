@@ -6,7 +6,6 @@ import { Link, useHistory } from 'react-router-dom';
 
 import './dashboard.scss';
 
-import rightarrow from '../../assets/images/rightarrow.svg';
 import Setting from '../../assets/images/setting.svg';
 
 import Dashboardgraph from '../../components/DashboardGraph';
@@ -73,31 +72,12 @@ const Dashboard = () => {
   } else {
     return (
       <>
-        {/* Page Navigation */}
-        <div className="page-navigation">
-          {/* Breadcrumb */}
-          <nav aria-label="breadcrumb">
-            {/* <ol className="breadcrumb">
-              <li className="breadcrumb-item">
-                <Link to="/">Dashboard </Link>
-              </li>
-              <li className="breadcrumb-item">
-                <Link to="/"> Test Dashboard 1 </Link>
-              </li>
-              <li className="breadcrumb-item active" aria-current="page">
-                AutoRCA
-              </li>
-            </ol> */}
-          </nav>
-          {/* Back */}
-          <div className="backnavigation">
-            <Link to="/">
-              <img src={rightarrow} alt="Back" />
-              <span>Dashboard</span>
-            </Link>
+        {/* common heading and options */}
+        <div className="heading-option">
+          <div className="heading-title">
+            <h3>Dashboard</h3>
           </div>
         </div>
-
         {/* explore wrapper */}
         <div className="explore-wrapper">
           {/* filter section */}

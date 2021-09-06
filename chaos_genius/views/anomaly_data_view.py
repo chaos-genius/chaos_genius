@@ -38,6 +38,7 @@ def kpi_anomaly_detection(kpi_id):
     current_app.logger.info(f"Anomaly Detection Started for KPI ID: {kpi_id}")
     data = []
     try:
+        kpi_info = get_kpi_data_from_id(kpi_id)
         anom_data = AnomalyData.query.filter_by(
             kpi_id=kpi_id, 
             anomaly_type="overall"
@@ -46,6 +47,7 @@ def kpi_anomaly_detection(kpi_id):
             "chart_data": anom_data["chart_data"],
             "base_anomaly_id": anom_data["id"]
         }
+        data["chart_data"]["title"] = kpi_info["name"]
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("Anomaly Detection Done")
@@ -71,6 +73,7 @@ def kpi_anomaly_drilldown(kpi_id):
                 anomaly_timestamp=date
             ).order_by(AnomalyData.id).all()
             data = [i.as_dict["chart_data"] for i in anom_data]
+            data = data[:-1]
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("Anomaly Drilldown Done")

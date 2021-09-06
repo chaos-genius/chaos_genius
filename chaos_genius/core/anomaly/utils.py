@@ -113,15 +113,17 @@ def fill_data(input_data, dt_col, metric_col, last_date, period, end_date, freq)
                     metric_col: [0]
                 }), 
                 input_data
-            ]) 
-    end_date_diff_1 = end_date - timedelta(**FREQUENCY_DELTA[freq])
-    if end_date_diff_1 not in input_data[dt_col]:
-        input_data = pd.concat([
-            pd.DataFrame({
-                dt_col: [end_date_diff_1], 
-                metric_col: [0]
-            }),
-            input_data
-        ])
+            ])
+
+    if end_date is not None:
+        end_date_diff_1 = end_date - timedelta(**FREQUENCY_DELTA[freq])
+        if end_date_diff_1 not in input_data[dt_col]:
+            input_data = pd.concat([
+                pd.DataFrame({
+                    dt_col: [end_date_diff_1], 
+                    metric_col: [0]
+                }),
+                input_data
+            ])
 
     return input_data

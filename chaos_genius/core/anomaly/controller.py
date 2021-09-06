@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pandas as pd
 
@@ -6,9 +6,10 @@ from chaos_genius.core.anomaly.processor import ProcessAnomalyDetection
 from chaos_genius.core.anomaly.utils import (
     get_anomaly_df,
     get_dq_missing_data,
-    get_last_date_in_db
+    get_last_date_in_db,
+    fill_data
 )
-from chaos_genius.core.anomaly.constants import RESAMPLE_FREQUENCY
+from chaos_genius.core.anomaly.constants import RESAMPLE_FREQUENCY, FREQUENCY_DELTA
 
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, db
@@ -240,27 +241,71 @@ class AnomalyDetectionController(object):
         metric_col = self.kpi_info['metric']
         freq = self.kpi_info["anomaly_params"]["ts_frequency"]
         agg = self.kpi_info["aggregation"]
+        period = self.kpi_info["anomaly_params"]["period"]
 
         series_data = None
 
+        last_date = self._get_last_date_in_db(series, subgroup)
+        # if last_date is None:
+        #     if "Tuesday" in subgroup:
+        #         print(f"None subg: {series}, {subgroup}")
+        
+        
+        def prepend_to_df(row_dict, df):
+            row_df = pd.DataFrame(row_dict)
+            return pd.concat([row_df, df]).reset_index(drop=True).sort_values(by=[dt_col])
+
         if series == 'dq':
+            temp_input_data = input_data[[dt_col, metric_col]]
+            temp_input_data = fill_data(
+                temp_input_data,
+                dt_col,
+                metric_col, 
+                last_date, 
+                period, 
+                self.end_date, 
+                freq
+            )
+
             if subgroup == 'missing':
                 series_data = get_dq_missing_data(
-                    input_data, dt_col, metric_col, RESAMPLE_FREQUENCY[freq]
+                    temp_input_data, dt_col, metric_col, RESAMPLE_FREQUENCY[freq]
                 )
 
             else:
-                series_data = input_data.set_index(dt_col) \
+                series_data = temp_input_data.set_index(dt_col) \
                     .resample(RESAMPLE_FREQUENCY[freq])\
                     .agg({metric_col: subgroup})
 
         elif series == "subdim":
-            series_data = input_data.query(subgroup).set_index(dt_col) \
+            temp_input_data = input_data.query(subgroup)[[dt_col, metric_col]]
+            temp_input_data = fill_data(
+                temp_input_data,
+                dt_col,
+                metric_col, 
+                last_date, 
+                period, 
+                self.end_date, 
+                freq
+            )
+
+            series_data = temp_input_data.set_index(dt_col) \
                 .resample(RESAMPLE_FREQUENCY[freq])\
                 .agg({metric_col: agg})
 
         elif series == "overall":
-            series_data = input_data.set_index(dt_col) \
+            temp_input_data = input_data[[dt_col, metric_col]]
+            temp_input_data = fill_data(
+                temp_input_data,
+                dt_col,
+                metric_col, 
+                last_date, 
+                period, 
+                self.end_date, 
+                freq
+            )
+
+            series_data = temp_input_data.set_index(dt_col) \
                 .resample(RESAMPLE_FREQUENCY[freq])\
                 .agg({metric_col: agg})
 
@@ -270,7 +315,6 @@ class AnomalyDetectionController(object):
 
         model_name = self.kpi_info["anomaly_params"]["model_name"]
 
-        last_date = self._get_last_date_in_db(series, subgroup)
 
         overall_anomaly_output = self._detect_anomaly(
             model_name, series_data, last_date, series, subgroup, freq)

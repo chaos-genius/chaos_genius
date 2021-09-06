@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
-
+from chaos_genius.core.anomaly.constants import FREQUENCY_DELTA
 
 def bound_between(min_val, val, max_val):
     return min(max(val, min_val), max_val)
@@ -82,3 +82,46 @@ def get_dq_missing_data(input_data, dt_col, metric_col, freq):
     ).set_index(dt_col)
 
     return missing_data
+
+
+def get_timedelta(freq, diff):
+    """Returns a timedelta obj with the diff assigned 
+    to the appopriate offset, i.e. days, hours etc.
+
+    :param freq: string denoting frequency "daily/hourly"
+    :type freq: string
+    :param diff: a numerical offset to be assigned 
+        the timedelta
+    :type diff: float
+    :return: timedelta object with the right offset
+    :rtype: timdelta"""
+
+    offset = {}
+    if freq == "daily":
+        offset['days'] = diff
+    elif freq == "hourly": offset['hours'] = diff
+    return timedelta(**offset)
+
+def fill_data(input_data, dt_col, metric_col, last_date, period, end_date, freq):
+    if last_date is not None:
+        last_date_diff_period = last_date - get_timedelta(freq, period)\
+            + get_timedelta(freq, 1)
+        if last_date_diff_period not in input_data[dt_col]:
+            input_data = pd.concat([
+                pd.DataFrame({
+                    dt_col: [last_date_diff_period],
+                    metric_col: [0]
+                }), 
+                input_data
+            ]) 
+    end_date_diff_1 = end_date - timedelta(**FREQUENCY_DELTA[freq])
+    if end_date_diff_1 not in input_data[dt_col]:
+        input_data = pd.concat([
+            pd.DataFrame({
+                dt_col: [end_date_diff_1], 
+                metric_col: [0]
+            }),
+            input_data
+        ])
+
+    return input_data

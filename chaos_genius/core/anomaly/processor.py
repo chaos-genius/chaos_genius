@@ -61,22 +61,22 @@ class ProcessAnomalyDetection:
 
         if self.last_date is None:
             # pass complete input data frame in here as pred_df
+            if len(input_data) >= self.period:
+                prediction = model.predict(
+                    input_data,
+                    self.sensitivity,
+                    pred_df=input_data,
+                )
 
-            prediction = model.predict(
-                input_data,
-                self.sensitivity,
-                pred_df=input_data,
-            )
-
-            prediction['y'] = input_data['y']
-            predSeries = prediction
+                prediction['y'] = input_data['y']
+                predSeries = prediction
 
         else:
 
             while self.last_date <= input_last_date:
                 curr_period = self.last_date-input_first_date
 
-                if curr_period > max_period:
+                if curr_period >= max_period:
                     df = input_data[
                         (input_data['dt'] >= self.last_date-max_period)
                         & (input_data['dt'] <= self.last_date)

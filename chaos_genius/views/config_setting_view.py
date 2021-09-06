@@ -15,6 +15,13 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.config_setting_model import ConfigSetting
 from chaos_genius.alerts.slack import trigger_overall_kpi_stats
 from chaos_genius.views.kpi_view import kpi_aggregation
+from chaos_genius.controllers.config_controller import (
+    get_configuration_request_json_verified,
+    get_configuration_request_not_json,
+    set_configuration_request_json_verified,
+    set_configuration_request_not_json,
+    get_all_configuration
+)
 
 blueprint = Blueprint("config_settings", __name__)
 
@@ -64,50 +71,24 @@ def get_onboarding_status():
 def get_config():
     """Getting the settings."""
     if request.is_json:
-        data = request.get_json()
-        name = data.get("config_name")
-        config_obj = ConfigSetting.query.filter_by(name=name).first()
-        if not config_obj:
-            return jsonify({"status": "not_found", "message": "Config doesn't exist"})
-        return jsonify({"data": config_obj.safe_dict, "status": "success"})
+        return get_configuration_request_json_verified()
     else:
-        return jsonify({"message": "The request payload is not in JSON format", "status": "failure"})
+        return get_configuration_request_not_json()
 
 
 @blueprint.route("/set-config", methods=["POST"])
 def set_config():
     """Configuring the settings."""
     if request.is_json:
-        data = request.get_json()
-        config = data.get("config_name")
-        if config not in ["email", "slack"]:
-            return jsonify({"status": "not_found", "message": "Config doesn't exist"})
-        config_obj = ConfigSetting.query.filter_by(name=config).first()
-        if config_obj:
-            config_obj.config_setting = data.get("config_settings", {})
-            config_obj.save(commit=True)
-        else:
-            new_config = ConfigSetting(
-                name=config,
-                config_setting=data.get("config_settings", {})
-            )
-            new_config.save(commit=True)
-        return jsonify({"message": f"Config {config} has been saved successfully.", "status": "success"})
+        return set_configuration_request_json_verified()
     else:
-        return jsonify({"message": "The request payload is not in JSON format", "status": "failure"})
+        return set_configuration_request_not_json()
 
 
 @blueprint.route("/get-all-config", methods=["GET"])
 def get_all_config():
     """Getting all the setting."""
-    try:
-        result = []
-        configs = ConfigSetting.query.all()
-        for config in configs:
-            result.append(config.safe_dict)
-        return jsonify({"data": result, "status": "success"})
-    except Exception as err:
-        return jsonify({"message": err, "status": "failure"})
+    return get_all_configuration()
 
 
 @blueprint.route("/test-alert", methods=["POST"])

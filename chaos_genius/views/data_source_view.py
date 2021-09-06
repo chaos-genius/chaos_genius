@@ -253,7 +253,7 @@ def metadata_data_source():
         data_source_obj = DataSource.get_by_id(data_source_id)
         if data_source_obj:
             ds_data = data_source_obj.as_dict
-            metadata, err_msg = get_metadata(ds_data, from_query, query)
+            metadata, msg = get_metadata(ds_data, from_query, query)
     except Exception as err_msg:
         print(err_msg)
         msg = err_msg

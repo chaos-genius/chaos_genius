@@ -1,6 +1,6 @@
 from flask import current_app, _app_ctx_stack
 from chaos_genius.third_party.integration_client import ThirdPartyClient
-
+# TODO: Refactor this
 
 class FlaskThirdParty(object):
     def __init__(self, app=None):

@@ -19,7 +19,6 @@ from chaos_genius.extensions import (
     cache,
     # csrf_protect,
     db,
-    debug_toolbar,
     flask_static_digest,
     login_manager,
     migrate,
@@ -51,7 +50,6 @@ def register_extensions(app):
     db.init_app(app)
     # csrf_protect.init_app(app)
     # login_manager.init_app(app)
-    debug_toolbar.init_app(app)
     migrate.init_app(app, db)
     flask_static_digest.init_app(app)
     integration_connector.init_app(app)

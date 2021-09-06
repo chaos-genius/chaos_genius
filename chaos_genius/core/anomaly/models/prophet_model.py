@@ -6,10 +6,9 @@ from prophet.serialize import model_to_json, model_from_json
 from chaos_genius.core.anomaly.models import AnomalyModel
 from chaos_genius.core.utils import suppress_stdout_stderr
 
-#FIXME: add accurate threshold values
 PROPHETSENS = {
-    "high": 0.7,
-    "medium": 0.85,
+    "high": 0.8,
+    "medium": 0.9,
     "low": 0.95
 }
 

@@ -112,7 +112,15 @@ const Anomalygraph = ({ key, drilldown }) => {
         tooltip: {
           crosshairs: true,
           shared: true,
-          valueSuffix: null
+          valueSuffix: null,
+          formatter: function () {
+            const intervals = graphData.intervals.find(row => row[0] === this.x);
+            const severity_score = graphData.severity.find(row => row[0] === this.x);
+            let s = 'Confidence Interval: <b>' + intervals[1] + " - " + intervals[2] + '</b>';
+            s = s + '<br>Value: <b>' + this.y + '</b>';
+            s = s + '<br>Severity: <b>' + severity_score[1] + '</b>';
+            return s;
+          }
         },
         // legend: {
         //     enabled: true,

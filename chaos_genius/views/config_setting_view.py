@@ -10,17 +10,14 @@ from flask import (
     url_for,
     jsonify
 )
+from copy import deepcopy
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.config_setting_model import ConfigSetting
 from chaos_genius.alerts.slack import trigger_overall_kpi_stats
 from chaos_genius.views.kpi_view import kpi_aggregation
 from chaos_genius.controllers.config_controller import (
-    get_configuration_request_json_verified,
-    get_configuration_request_not_json,
-    set_configuration_request_json_verified,
-    set_configuration_request_not_json,
-    get_all_configuration
+    get_modified_config_file,
 )
 
 blueprint = Blueprint("config_settings", __name__)
@@ -71,24 +68,57 @@ def get_onboarding_status():
 def get_config():
     """Getting the settings."""
     if request.is_json:
-        return get_configuration_request_json_verified()
+        data = request.get_json()
+        name = data.get("config_name")
+        config_obj = ConfigSetting.query.filter_by(name=name).first()
+        if not config_obj:
+            return jsonify({"status": "not_found", "message": "Config doesn't exist"})
+
+        config_state = deepcopy(config_obj.safe_dict)
+        get_modified_config_file(config_state, name)
+        return jsonify({"data": config_state, "status": "success"})
     else:
-        return get_configuration_request_not_json()
+        return jsonify({"message": "The request payload is not in JSON format", "status": "failure"})
 
 
 @blueprint.route("/set-config", methods=["POST"])
 def set_config():
     """Configuring the settings."""
     if request.is_json:
-        return set_configuration_request_json_verified()
+        data = request.get_json()
+        config = data.get("config_name")
+        if config not in ["email", "slack"]:
+            return jsonify({"status": "not_found", "message": "Config doesn't exist"})
+        config_obj = ConfigSetting.query.filter_by(name=config).first()
+        if config_obj:
+            config_obj.config_setting = data.get("config_settings", {})
+            config_obj.active=True
+            config_obj.save(commit=True)
+        else:
+            new_config = ConfigSetting(
+                name=config,
+                config_setting=data.get("config_settings", {}),
+                active=True
+            )
+            new_config.save(commit=True)
+        return jsonify({"message": f"Config {config} has been saved successfully.", "status": "success"})
     else:
-        return set_configuration_request_not_json()
+        return jsonify({"message": "The request payload is not in JSON format", "status": "failure"})
 
 
 @blueprint.route("/get-all-config", methods=["GET"])
 def get_all_config():
     """Getting all the setting."""
-    return get_all_configuration()
+    try:
+        result = []
+        configs = ConfigSetting.query.all()
+        for config in configs:
+            config_state = deepcopy(config.safe_dict)
+            get_modified_config_file(config_state, config.name)
+            result.append(config_state)
+        return jsonify({"data": result, "status": "success"})
+    except Exception as err:
+        return jsonify({"message": err, "status": "failure"})
 
 
 @blueprint.route("/test-alert", methods=["POST"])

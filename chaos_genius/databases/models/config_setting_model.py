@@ -27,6 +27,7 @@ class ConfigSetting(PkModel):
         return {
             "id": self.id,
             "name": self.name,
+            "config_setting": self.config_setting,
             "active": self.active,
             "created_at": self.created_at,
         }

@@ -115,13 +115,13 @@ export const getAllKpiExplorerFieldSuccess = (response) => {
 
 export const getAllKpiExplorerField = (option) => {
   return async (dispatch) => {
-    dispatch(getAllKpiExplorerFieldRequested);
+    dispatch(getAllKpiExplorerFieldRequested());
     const { data, error, status } = await postRequest({
       url: KPI_FORM_OPTION_URL,
       data: option
     });
     if (error) {
-      dispatch(getAllKpiExplorerFieldFailure);
+      dispatch(getAllKpiExplorerFieldFailure());
     } else if (data && status === 200) {
       dispatch(getAllKpiExplorerFieldSuccess(data.data));
     }

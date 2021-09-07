@@ -237,7 +237,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       tableOption();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpiField]);
+  }, [kpiField, formdata.tablename]);
 
   const tableOption = () => {
     if (kpiField && kpiFieldLoading === false) {
@@ -255,12 +255,21 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     }
   };
 
+  // useEffect(() => {
+  //   if (kpiField) {
+  //     tableName();
+  //   }
+  //   if (option.tableoption) {
+  //     console.log('Option :', option.tableoption.value);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [option.tableoption]);
   const tableName = (e) => {
-    if (kpiField && kpiFieldLoading === false) {
+    if (kpiField) {
       setErrorMsg({ tablename: false });
       var optionValueArr = [];
       for (const [key, value] of Object.entries(kpiField.tables)) {
-        const valueData = e.value.toLowerCase();
+        const valueData = key;
         if (key === valueData) {
           value.table_columns.forEach((data) => {
             optionValueArr.push({
@@ -271,8 +280,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
 
           setOption({ ...option, metricOption: optionValueArr });
         }
+        setFormdata({ ...formdata, tablename: valueData });
       }
-      setFormdata({ ...formdata, tablename: e.value });
+
+      // setFormdata({ ...formdata, tablename: e.value });
     }
   };
 
@@ -281,9 +292,15 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     setOption({
       ...option,
       dataset: e.value,
-      metricOption: ''
+      metricOption: []
     });
-    setFormdata({ ...formdata, dataset: e.value, metriccolumns: '' });
+    setFormdata({
+      ...formdata,
+      dataset: e.value,
+      metriccolumns: '',
+      aggregate: '',
+      datetimecolumns: ''
+    });
   };
   const handleSubmit = () => {
     if (formdata.kpiname === '') {
@@ -547,9 +564,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           <div className="form-group">
             <label>Metric Columns *</label>
             <Select
-              options={option.metricOption}
+              options={option.metricOption !== '' && option.metricOption}
               value={
-                formdata.metriccolumns && {
+                formdata.metriccolumns !== '' && {
                   label: formdata.metriccolumns,
                   value: formdata.metriccolumns
                 }
@@ -567,7 +584,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                 });
               }}
             />
-
             {errorMsg.metriccolumns === true ? (
               <div className="connection__fail">
                 <p>Select Metric Columns</p>
@@ -576,8 +592,17 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           </div>
           <div className="form-group">
             <label>Aggregate by *</label>
+
             <Select
               options={aggregate}
+              value={
+                formdata.aggregate !== ''
+                  ? {
+                      label: formdata.aggregate,
+                      value: formdata.aggregate
+                    }
+                  : null
+              }
               classNamePrefix="selectcategory"
               placeholder="Select Aggregate by"
               onChange={(e) => {
@@ -599,7 +624,13 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           <div className="form-group">
             <label>Datetime Columns *</label>
             <Select
-              options={option.metricOption}
+              options={option.metricOption !== '' && option.metricOption}
+              value={
+                formdata.datetimecolumns !== '' && {
+                  label: formdata.datetimecolumns,
+                  value: formdata.datetimecolumns
+                }
+              }
               classNamePrefix="selectcategory"
               placeholder="Select Datetime Columns"
               onChange={(e) => {
@@ -623,7 +654,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               <label>Dimensions</label>
               <Select
                 isMulti
-                options={option.metricOption}
+                options={option.metricOption !== '' && option.metricOption}
                 classNamePrefix="selectcategory"
                 closeMenuOnSelect="true"
                 placeholder="Select Dimensions"

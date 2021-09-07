@@ -64,7 +64,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   const [option, setOption] = useState({
     datasource: '',
     tableoption: '',
-    metricOption: ''
+    metricOption: '',
+    datetime_column: ''
   });
 
   //const [inputList, setInputList] = useState([]);
@@ -204,7 +205,20 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
 
   const formOption = (e) => {
     setDataSourceId(e.id);
-    setFormdata({ ...formdata, datasource: e.id });
+    setFormdata({
+      ...formdata,
+      datasource: e.id,
+      tablename: '',
+      query: '',
+      metriccolumns: '',
+      aggregate: '',
+      datetimecolumns: '',
+      adddimentsions: ''
+    });
+    setTableAdditional({
+      ...tableAdditional,
+      tabledimension: false
+    });
     setErrorMsg((prev) => {
       return {
         ...prev,
@@ -300,7 +314,12 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       metriccolumns: '',
       aggregate: '',
       datetimecolumns: '',
-      adddimentsions: []
+      adddimentsions: [],
+      tablename: ''
+    });
+    setTableAdditional({
+      ...tableAdditional,
+      tabledimension: false
     });
   };
   const handleSubmit = () => {
@@ -373,7 +392,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       (formdata.kpiname &&
         formdata.datasource &&
         formdata.dataset &&
-        formdata.tablename &&
         formdata.metriccolumns &&
         formdata.aggregate &&
         formdata.datetimecolumns) !== ''
@@ -483,10 +501,12 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           <label>Select Dataset Type*</label>
           <Select
             value={dataset}
-            onChange={(e) => handleDataset(e)}
             options={datasettype}
+            // options={datasettype}
+            // value={formdata.dataset !== '' ? dataset : null}
             classNamePrefix="selectcategory"
             placeholder="Select Dataset Type"
+            onChange={(e) => handleDataset(e)}
             isOptionSelected
           />
           {errorMsg.dataset === true ? (
@@ -501,6 +521,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             <div className="form-group query-form">
               <label>Query *</label>
               <textarea
+                value={formdata.query !== '' ? formdata.query : ''}
                 placeholder="Enter Query"
                 onChange={(e) => {
                   setFormdata({ ...formdata, query: e.target.value });
@@ -549,6 +570,12 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             <label>Table Name *</label>
             <Select
               options={option.tableoption}
+              value={
+                formdata.tablename !== '' && {
+                  label: formdata.tablename,
+                  value: formdata.tablename
+                }
+              }
               classNamePrefix="selectcategory"
               placeholder="Select Table"
               onChange={(e) => tableName(e)}
@@ -593,7 +620,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           </div>
           <div className="form-group">
             <label>Aggregate by *</label>
-
             <Select
               options={aggregate}
               value={
@@ -656,6 +682,11 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               <Select
                 isMulti
                 options={option.metricOption !== '' && option.metricOption}
+                value={
+                  formdata.adddimentsions.length !== 0
+                    ? option.datetime_column
+                    : ''
+                }
                 classNamePrefix="selectcategory"
                 closeMenuOnSelect="true"
                 placeholder="Select Dimensions"
@@ -665,6 +696,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                     ...formdata,
                     adddimentsions: e.map((el) => el.value)
                   });
+                  setOption({ ...option, datetime_column: e.value });
                 }}
               />
             </div>

@@ -153,7 +153,7 @@ def kpi_anomaly_params(kpi_id: int):
 
     anomaly_params = {k: v for k, v in req_data["anomaly_params"].items() if k in fields}
 
-    new_kpi = cast(Kpi, kpi.update(commit=True, anomaly_params=anomaly_params))
+    new_kpi = cast(Kpi, kpi.update(commit=True, anomaly_params=anomaly_params, run_anomaly=True))
 
     return jsonify({
         "msg": "Successfully updated Anomaly params",

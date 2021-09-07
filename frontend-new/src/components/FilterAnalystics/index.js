@@ -1,18 +1,49 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Search from '../../assets/images/search.svg';
 import GreenArrow from '../../assets/images/green-arrow.svg';
+import Fuse from 'fuse.js';
 
-const FilterAnalystics = () => {
+import { v4 as uuidv4 } from 'uuid';
+
+const FilterAnalystics = ({ kpi, setKpi, data }) => {
+  const [listData, setListData] = useState(data);
+  const [searchData, setSearchData] = useState(data);
+
+  useEffect(() => {
+    if (data) {
+      setListData(data);
+      setSearchData(data);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
+
+  const onSearch = (e) => {
+    if (e.target.value) {
+      const options = {
+        keys: ['name']
+      };
+      const fuse = new Fuse(listData, options);
+      const result = fuse.search(e.target.value);
+      setListData(
+        result.map((item) => {
+          return item.item;
+        })
+      );
+    } else {
+      setListData(searchData);
+    }
+  };
   return (
     <div className="common-filter-section">
       <div className="filter-layout">
-        <h3>List of KPI’s (02)</h3>
+        {searchData && <h3>List of KPI's ({searchData.length})</h3>}
         <div className="form-group icon search-filter">
           <input
             type="text"
             className="form-control h-40"
             placeholder="Search KPI"
+            onChange={(e) => onSearch(e)}
           />
           <span>
             <img src={Search} alt="Search Icon" />
@@ -21,12 +52,28 @@ const FilterAnalystics = () => {
       </div>
       <div className="filter-layout filter-tab">
         <ul>
-          <li className="active">
-            DAU’s <img src={GreenArrow} alt="Next" />
-          </li>
-          <li>
-            Avg Engagements (min) <img src={GreenArrow} alt="Next" />
-          </li>
+          {listData && listData.length !== 0 ? (
+            listData.map((item) => {
+              return (
+                <li
+                  key={uuidv4()}
+                  className={kpi === item.id ? 'active' : ''}
+                  onClick={() => {
+                    setKpi(item.id);
+                    window.history.pushState(
+                      '',
+                      '',
+                      `/#/kpi/settings/${item.id}`
+                    );
+                  }}>
+                  {item.name}
+                  <img src={GreenArrow} alt="Arrow" />
+                </li>
+              );
+            })
+          ) : (
+            <div className="empty-content">No Data Found</div>
+          )}
         </ul>
       </div>
     </div>

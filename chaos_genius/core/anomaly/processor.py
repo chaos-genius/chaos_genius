@@ -4,7 +4,7 @@ import pandas as pd
 
 from chaos_genius.core.anomaly.constants import MODEL_MAPPER, FREQUENCY_DELTA
 from chaos_genius.core.anomaly.models import AnomalyModel
-from chaos_genius.core.anomaly.utils import bound_between
+from chaos_genius.core.anomaly.utils import bound_between, get_timedelta
 
 
 class ProcessAnomalyDetection:
@@ -57,7 +57,7 @@ class ProcessAnomalyDetection:
 
         input_last_date = input_data['dt'].iloc[-1]
         input_first_date = input_data['dt'].iloc[0]
-        max_period = datetime.timedelta(days=self.period)
+        max_period = get_timedelta(self.freq, self.period)
 
         if self.last_date is None:
             # pass complete input data frame in here as pred_df

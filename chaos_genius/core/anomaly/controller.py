@@ -44,7 +44,7 @@ class AnomalyDetectionController(object):
             if self.kpi_info['is_static']:
                 end_date = self.kpi_info.get('static_params', {}).get('end_date')
                 if end_date is not None:
-                    end_date = datetime.strptime(end_date, '%Y-%m-%d')
+                    end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
 
             if end_date is None:
                 end_date = datetime.today()

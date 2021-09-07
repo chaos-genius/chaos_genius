@@ -22,14 +22,16 @@ def get_anomaly_df(kpi_info, connection_info, last_date_in_db=None, end_date= No
     
     num_days = days_range
 
+    freq = kpi_info['anomaly_params']['ts_frequency']
+
     if last_date_in_db is None:
-        base_dt_obj = end_date - timedelta(days=num_days)
+        base_dt_obj = end_date - get_timedelta(freq, num_days)
     else:
-        base_dt_obj = last_date_in_db - timedelta(days=num_days)
+        base_dt_obj = last_date_in_db - get_timedelta(freq, num_days)
 
-    base_dt = str(base_dt_obj.date())
+    base_dt = base_dt_obj.strftime("%Y-%m-%d %H:%M:%S")
 
-    cur_dt = str(end_date.date())
+    cur_dt = end_date.strftime("%Y-%m-%d %H:%M:%S")
 
     dt_col_string = f"{indentifier}{kpi_info['datetime_column']}{indentifier}"
     gt_string = f"{dt_col_string} > '{base_dt}'"
@@ -114,14 +116,16 @@ def fill_data(input_data, dt_col, metric_col, last_date, period, end_date, freq)
                 }), 
                 input_data
             ]) 
-    end_date_diff_1 = end_date - timedelta(**FREQUENCY_DELTA[freq])
-    if end_date_diff_1 not in input_data[dt_col]:
-        input_data = pd.concat([
-            pd.DataFrame({
-                dt_col: [end_date_diff_1], 
-                metric_col: [0]
-            }),
-            input_data
-        ])
+
+    if end_date is not None:
+        end_date_diff_1 = end_date - timedelta(**FREQUENCY_DELTA[freq])
+        if end_date_diff_1 not in input_data[dt_col]:
+            input_data = pd.concat([
+                pd.DataFrame({
+                    dt_col: [end_date_diff_1], 
+                    metric_col: [0]
+                }),
+                input_data
+            ])
 
     return input_data

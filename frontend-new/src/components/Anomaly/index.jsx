@@ -60,8 +60,8 @@ const Anomaly = ({ kpi }) => {
   });
 
   useEffect(() => {
-    getAnomaly();
     store.dispatch(RESET_ACTION);
+    getAnomaly();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpi]);
 

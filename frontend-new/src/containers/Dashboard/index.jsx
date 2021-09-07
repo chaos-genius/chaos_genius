@@ -21,6 +21,7 @@ const Dashboard = () => {
 
   const [active, setActive] = useState('');
   const [kpi, setKpi] = useState();
+  const [kpiAggregate, SetKpiAggregate] = useState('');
   const [tab, setTabs] = useState('autorca');
 
   const location = history.location.pathname.split('/');
@@ -43,6 +44,7 @@ const Dashboard = () => {
       setActive(sidebarList[0]?.name);
       setKpi(sidebarList[0]?.id);
       setTabs(location[2]);
+      SetKpiAggregate(sidebarList[0]?.aggregation);
 
       window.history.pushState(
         '',
@@ -60,6 +62,7 @@ const Dashboard = () => {
   // const onSettingClick = (option) => {
   //   history.push(`/kpi/settings/${kpi}`);
   // };
+
   if (sidebarLoading) {
     return (
       <div className="loader loader-page">
@@ -89,6 +92,7 @@ const Dashboard = () => {
                 setKpi={setKpi}
                 data={sidebarList}
                 setActive={setActive}
+                SetKpiAggregate={SetKpiAggregate}
               />
             )}
           </div>
@@ -130,7 +134,11 @@ const Dashboard = () => {
               ''
             )}
             {tab === 'autorca' && kpi && active && (
-              <Dashboardgraph kpi={kpi} kpiName={active} />
+              <Dashboardgraph
+                kpi={kpi}
+                kpiName={active}
+                kpiAggregate={kpiAggregate}
+              />
             )}
             {tab === 'anomaly' && kpi && <Anomaly kpi={kpi} />}
 

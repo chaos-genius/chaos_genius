@@ -7,7 +7,14 @@ import Fuse from 'fuse.js';
 
 import { v4 as uuidv4 } from 'uuid';
 
-const DashboardFilter = ({ kpi, setKpi, data, setActive, tabs }) => {
+const DashboardFilter = ({
+  kpi,
+  setKpi,
+  data,
+  setActive,
+  tabs,
+  SetKpiAggregate
+}) => {
   //const [active, setActive] = useState('');
   const [listData, setListData] = useState(data);
   const [searchData, setSearchData] = useState(data);
@@ -63,6 +70,7 @@ const DashboardFilter = ({ kpi, setKpi, data, setActive, tabs }) => {
                   onClick={() => {
                     setActive(item.name);
                     setKpi(item.id);
+                    SetKpiAggregate(item.aggregation);
                     window.history.pushState(
                       '',
                       '',

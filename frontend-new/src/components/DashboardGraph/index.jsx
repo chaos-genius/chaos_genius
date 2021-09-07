@@ -54,7 +54,7 @@ const multidimensional = [
   }
 ];
 
-const Dashboardgraph = ({ kpi, kpiName }) => {
+const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
   const dispatch = useDispatch();
 
   const [activeDimension, setActiveDimension] = useState('');
@@ -405,6 +405,9 @@ const Dashboardgraph = ({ kpi, kpiName }) => {
                     <Dashboardgraphcard
                       aggregationData={aggregationData}
                       monthWeek={monthWeek}
+                      kpi={kpi}
+                      kpiName={kpiName}
+                      kpiAggregate={kpiAggregate}
                     />
                   )}
                 </>

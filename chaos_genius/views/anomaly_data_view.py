@@ -224,7 +224,7 @@ def get_overall_data(kpi_id, end_date: str, n=90):
     start_date = pd.to_datetime(end_date) - timedelta(days=n)
     start_date = start_date.strftime('%Y-%m-%d %H:%M:%S')
     end_date = end_date.strftime('%Y-%m-%d %H:%M:%S')
-    
+
     query = AnomalyDataOutput.query.filter(
         (AnomalyDataOutput.kpi_id == kpi_id)
         & (AnomalyDataOutput.data_datetime <= end_date)
@@ -262,15 +262,25 @@ def get_dq_and_subdim_data(
 
 
 def get_drilldowns_series_type(kpi_id, drilldown_date, no_of_graphs=5):
+    start_date = drilldown_date - timedelta(days = 1)
+    end_date = drilldown_date + timedelta(days=1)
     query = AnomalyDataOutput.query.filter(
         (AnomalyDataOutput.kpi_id == kpi_id)
-        & (AnomalyDataOutput.data_datetime == drilldown_date)
+        & (AnomalyDataOutput.data_datetime <= end_date)
+        & (AnomalyDataOutput.data_datetime >= start_date)
         & (AnomalyDataOutput.anomaly_type == "subdim")
         & (AnomalyDataOutput.severity > 0)
-    ).order_by(AnomalyDataOutput.severity.desc()).limit(no_of_graphs)
+    )
 
     results = pd.read_sql(query.statement, query.session.bind)
 
+    # Sorting by distance from drilldown data (ascending) and severity of 
+    # anomaly (descending), created distance for this purpose only
+    results['distance'] = abs(results['data_datetime'] - pd.to_datetime(drilldown_date))
+    results.sort_values(['distance', 'severity'], ascending = [True, False], inplace = True)
+    results.drop('distance', axis = 1, inplace = True)
+    print(results)
+    results = results.iloc[:no_of_graphs]
     return results.series_type
 
 

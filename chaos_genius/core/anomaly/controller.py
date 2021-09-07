@@ -14,6 +14,10 @@ from chaos_genius.core.anomaly.constants import RESAMPLE_FREQUENCY, FREQUENCY_DE
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, db
 
+FILTER_MAX_SUBGROUPS = 100
+
+DEBUG_MAX_SUBGROUPS = 10
+
 class AnomalyDetectionController(object):
     def __init__(self, kpi_info, end_date= None, save_model=False, debug=False):
         self.kpi_info = kpi_info
@@ -216,12 +220,15 @@ class AnomalyDetectionController(object):
 
         for subgroup in subgroups:
             try:
-                if grouped_input_data.query(subgroup)[self.kpi_info["metric"]]\
-                        .sum() >= self.kpi_info["anomaly_params"]["period"]:
-                    filtered_subgroups.append(subgroup)
+                filter_data_len = grouped_input_data.query(subgroup)[self.kpi_info["metric"]].sum()
+                if filter_data_len >= self.kpi_info["anomaly_params"]["period"]:
+                    filtered_subgroups.append((subgroup, filter_data_len))
             except IndexError:
                 pass
-        return filtered_subgroups
+
+        filtered_subgroups.sort(key= lambda x: x[1], reverse= True)
+
+        return [x[0] for x in filtered_subgroups[:FILTER_MAX_SUBGROUPS]]
 
     def _run_anomaly_for_series(
         self,
@@ -250,11 +257,6 @@ class AnomalyDetectionController(object):
         #     if "Tuesday" in subgroup:
         #         print(f"None subg: {series}, {subgroup}")
         
-        
-        def prepend_to_df(row_dict, df):
-            row_df = pd.DataFrame(row_dict)
-            return pd.concat([row_df, df]).reset_index(drop=True).sort_values(by=[dt_col])
-
         if series == 'dq':
             temp_input_data = input_data[[dt_col, metric_col]]
             temp_input_data = fill_data(
@@ -335,17 +337,26 @@ class AnomalyDetectionController(object):
 
         subgroups = self._get_subgroup_list(input_data)
 
+        if self.debug:
+            print(f"Generated {len(subgroups)} subgroups")
+
         # FIXME: Fix filtering logic
         filtered_subgroups = self._filter_subgroups(subgroups, input_data)
 
         if self.debug:
-            filtered_subgroups = filtered_subgroups[:5]
+            print(f"Filtered {len(filtered_subgroups)} subgroups")
+
+        if self.debug:
+            filtered_subgroups = filtered_subgroups[:DEBUG_MAX_SUBGROUPS]
 
         for subgroup in filtered_subgroups:
             if self.debug:
                 print(subgroup)
 
-            self._run_anomaly_for_series(input_data, "subdim", subgroup)
+            try:
+                self._run_anomaly_for_series(input_data, "subdim", subgroup)
+            except Exception as e:
+                print(e)
 
         for dq_subgroup in ["max", "count", "mean", "missing"]:
             if self.debug:

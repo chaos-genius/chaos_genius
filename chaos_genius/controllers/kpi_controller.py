@@ -11,8 +11,15 @@ def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
 
     print("Printing the anomaly...")
 
-    kpi_info = get_kpi_data_from_id(kpi_id)
+    try:
 
-    adc = AnomalyDetectionController(kpi_info, end_date)
+        kpi_info = get_kpi_data_from_id(kpi_id)
 
-    adc.detect()
+        adc = AnomalyDetectionController(kpi_info, end_date)
+
+        adc.detect()
+
+    except:
+        return False
+
+    return True

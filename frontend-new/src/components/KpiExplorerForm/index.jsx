@@ -139,7 +139,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     var arr = [];
     if (testQueryData) {
       testQueryData &&
-        testQueryData.forEach((item) => {
+        testQueryData.data &&
+        testQueryData.data.tables &&
+        testQueryData.data.tables.query &&
+        testQueryData.data.tables.query.table_columns.forEach((item) => {
           arr.push({
             label: item.name,
             value: item.name

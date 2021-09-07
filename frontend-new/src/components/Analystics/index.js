@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import Select from 'react-select';
 import Tooltip from 'react-tooltip-lite';
@@ -6,6 +6,8 @@ import Tooltip from 'react-tooltip-lite';
 import Help from '../../assets/images/help.svg';
 
 import './analystics.scss';
+import { kpiSettingSetup } from '../../redux/actions';
+import { useDispatch, useSelector } from 'react-redux';
 
 const modalOptions = [
   { value: 'prophet', label: 'Prophet' },
@@ -25,7 +27,67 @@ const frequencyOptions = [
   { value: 'hourly', label: 'Hourly' }
 ];
 
-const Analystics = () => {
+const Analystics = ({ kpi }) => {
+  const dispatch = useDispatch();
+  const [modelName, setModalName] = useState('');
+  const [sensitivity, setSensitivity] = useState('');
+  const [frequency, setFrequency] = useState('');
+  const [seasonality, setSeasonality] = useState([]);
+  const [error, setError] = useState({
+    modelName: '',
+    sensitivity: '',
+    frequency: ''
+  });
+  const { kpiSettingLoading } = useSelector((state) => {
+    return state.setting;
+  });
+
+  const onSettingSave = () => {
+    var obj = { ...error };
+
+    if (modelName === '') {
+      obj['modelName'] = 'Enter Model';
+    }
+    if (sensitivity === '') {
+      obj['sensitivity'] = 'Enter Sensitivity';
+    }
+    if (frequency === '') {
+      obj['frequency'] = 'Enter Frequency';
+    }
+    setError(obj);
+    if (
+      obj.modelName === '' &&
+      obj.sensitivity === '' &&
+      obj.frequency === ''
+    ) {
+      const data = {
+        anomaly_params: {
+          anomaly_period: 90,
+          model_name: modelName,
+          sensitivity: sensitivity,
+          seasonality: seasonality,
+          frequency: frequency,
+          scheduler_params: {
+            time: '1 minute'
+          }
+        }
+      };
+      dispatch(kpiSettingSetup(kpi, data));
+    }
+  };
+
+  const onSeasonalityChange = (e) => {
+    if (e.target.checked) {
+      let selected = seasonality.concat(e.target.value);
+      setSeasonality(selected);
+    } else if (e.target.checked === false) {
+      const index = seasonality.indexOf(e.target.value);
+      if (index > -1) {
+        seasonality.splice(index, 1);
+      }
+    }
+  };
+
   return (
     <>
       <div className="dashboard-subheader">
@@ -61,7 +123,16 @@ const Analystics = () => {
             classNamePrefix="selectcategory"
             placeholder="select"
             isSearchable={false}
+            onChange={(e) => {
+              setModalName(e.value);
+              setError({ ...error, modelName: '' });
+            }}
           />
+          {error.modelName && (
+            <div className="connection__fail">
+              <p>{error.modelName}</p>
+            </div>
+          )}
         </div>
         <div className="form-group">
           <label className="help-label">
@@ -83,7 +154,16 @@ const Analystics = () => {
             classNamePrefix="selectcategory"
             placeholder="select"
             isSearchable={false}
+            onChange={(e) => {
+              setSensitivity(e.value);
+              setError({ ...error, sensitivity: '' });
+            }}
           />
+          {error.sensitivity && (
+            <div className="connection__fail">
+              <p>{error.sensitivity}</p>
+            </div>
+          )}
         </div>
         <div className="form-group">
           <label className="help-label">
@@ -104,7 +184,16 @@ const Analystics = () => {
             classNamePrefix="selectcategory"
             placeholder="select"
             isSearchable={false}
+            onChange={(e) => {
+              setFrequency(e.value);
+              setError({ ...error, frequency: '' });
+            }}
           />
+          {error.frequency && (
+            <div className="connection__fail">
+              <p>{error.frequency}</p>
+            </div>
+          )}
         </div>
         <div className="form-group">
           <label>Expected Seasonality in Data</label>
@@ -113,7 +202,11 @@ const Analystics = () => {
               <input
                 className="form-check-input"
                 type="checkbox"
-                value="Monthly"
+                value="M"
+                name="Month"
+                onChange={(e) => {
+                  onSeasonalityChange(e);
+                }}
               />
               <label for="Monthly">Monthly</label>
             </div>
@@ -121,7 +214,11 @@ const Analystics = () => {
               <input
                 className="form-check-input"
                 type="checkbox"
-                value="Weekly"
+                value="W"
+                name="week"
+                onChange={(e) => {
+                  onSeasonalityChange(e);
+                }}
               />
               <label for="Weekly">Weekly</label>
             </div>
@@ -129,15 +226,35 @@ const Analystics = () => {
               <input
                 className="form-check-input"
                 type="checkbox"
-                value="Daily"
+                value="D"
+                name="daily"
+                onChange={(e) => {
+                  onSeasonalityChange(e);
+                }}
               />
               <label for="Daily">Daily</label>
             </div>
           </div>
         </div>
         <div className="form-action analystics-button">
-          <button className="btn black-button">
-            <span>Set Up</span>
+          <button
+            className={
+              kpiSettingLoading
+                ? 'btn black-button btn-loading'
+                : 'btn black-button'
+            }
+            onClick={() => {
+              onSettingSave();
+            }}>
+            <div className="btn-spinner">
+              <div className="spinner-border" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <span>Loading...</span>
+            </div>
+            <div className="btn-content">
+              <span>Set Up</span>
+            </div>
           </button>
         </div>
       </div>

@@ -29,6 +29,7 @@ import {
   getAnomalyQualityData,
   anomalyDrilldown
 } from './Anomaly';
+import { kpiSettingSetup } from './setting';
 export {
   getAllDataSources,
   getConnectionType,
@@ -53,5 +54,6 @@ export {
   kpiDisable,
   getAllAlertEmail,
   getChannelStatus,
-  getEditChannel
+  getEditChannel,
+  kpiSettingSetup
 };

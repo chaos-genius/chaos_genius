@@ -1,6 +1,7 @@
 import {
   ALERT_EMAIL_URL,
-  CHANNEL_CONFIGURATION_URL
+  CHANNEL_CONFIGURATION_URL,
+  EDIT_CHANNEL_URL
 } from '../../utils/url-helper';
 
 import { getRequest, postRequest } from '../../utils/http-helper';
@@ -11,7 +12,10 @@ import {
   ALERTEMAILFAILURE,
   CHANNELSTATUSSUCCESS,
   CHANNERSTATUSFAILURE,
-  CHANNELSTATUSREQUEST
+  CHANNELSTATUSREQUEST,
+  EDITCHANNELSUCCESS,
+  EDITCHANNELFAILURE,
+  EDITCHANNELREQUEST
 } from './ActionConstants';
 
 export const getAlertEmailRequest = () => {
@@ -81,6 +85,44 @@ export const getChannelStatus = () => {
       dispatch(getChannelStatusFailure());
     } else if (data && status === 200) {
       dispatch(getChannelStatusSuccess(data.data));
+    }
+  };
+};
+
+export const getEditRequest = () => {
+  return {
+    type: EDITCHANNELREQUEST
+  };
+};
+
+export const getEditFailure = () => {
+  return {
+    type: EDITCHANNELFAILURE
+  };
+};
+
+export const getEditSuccess = (response) => {
+  return {
+    type: EDITCHANNELSUCCESS,
+    data: response
+  };
+};
+
+export const getEditChannel = (editData) => {
+  return async (dispatch) => {
+    dispatch(getEditRequest());
+    const { data, error, status } = await postRequest({
+      url: EDIT_CHANNEL_URL,
+      data: JSON.stringify(editData),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      noAuth: true
+    });
+    if (error) {
+      dispatch(getEditFailure());
+    } else if (data && status === 200) {
+      dispatch(getEditSuccess(data.data));
     }
   };
 };

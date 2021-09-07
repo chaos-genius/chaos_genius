@@ -53,7 +53,8 @@ const AlertsCard = () => {
           )}
         </h1>
         <p>Select the data you want to monitor and analyse</p>
-        <Link to="/alerts/slack">
+        <Link
+          to={statusChecking('slack') ? '/alerts/slack/edit' : '/alerts/slack'}>
           {/* <button className="btn black-button">
             <span>Edit Slack Connection</span>
           </button> */}
@@ -80,7 +81,8 @@ const AlertsCard = () => {
         </h1>
 
         <p>Select the data you want to monitor and analyse</p>
-        <Link to="/alerts/email">
+        <Link
+          to={statusChecking('email') ? '/alerts/email/edit' : '/alerts/email'}>
           <button
             className={
               statusChecking('email') ? 'btn black-button' : 'btn white-button'

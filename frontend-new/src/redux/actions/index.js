@@ -23,7 +23,7 @@ import {
 import { getOnboardingStatus } from './Onboarding';
 import { getDashboardLinechart } from './LineChart';
 import { getDashboardSidebar } from './Sidebarlist';
-import { getAllAlertEmail, getChannelStatus } from './Alert';
+import { getAllAlertEmail, getChannelStatus, getEditChannel } from './Alert';
 import {
   anomalyDetection,
   getAnomalyQualityData,
@@ -52,5 +52,6 @@ export {
   anomalyDrilldown,
   kpiDisable,
   getAllAlertEmail,
-  getChannelStatus
+  getChannelStatus,
+  getEditChannel
 };

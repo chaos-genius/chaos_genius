@@ -299,7 +299,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       dataset: e.value,
       metriccolumns: '',
       aggregate: '',
-      datetimecolumns: ''
+      datetimecolumns: '',
+      adddimentsions: []
     });
   };
   const handleSubmit = () => {

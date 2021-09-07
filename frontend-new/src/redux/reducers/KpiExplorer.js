@@ -30,7 +30,7 @@ const initialState = {
   kpiFieldLoading: true,
   kpiFieldError: false,
   kpiSubmit: [],
-  kpiSubmitLoading: true,
+  kpiSubmitLoading: false,
   kpiSubmitError: false,
   testQueryLoading: true,
   testQueryData: [],

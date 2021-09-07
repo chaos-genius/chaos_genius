@@ -1,13 +1,10 @@
-from copy import deepcopy
 
 from chaos_genius.databases.models.config_setting_model import ConfigSetting
 from chaos_genius.alerts.alert_config import modified_config_state
 
 
 def get_modified_config_file(safe_dict, name):
-    config_state = deepcopy(safe_dict)
-    modified_config_state(config_state, name)
-    return config_state
+    return modified_config_state(safe_dict)
 
 
 def get_config_object(name):

@@ -54,7 +54,7 @@ const multidimensional = [
   }
 ];
 
-const Dashboardgraph = ({ kpi, kpiName }) => {
+const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
   const dispatch = useDispatch();
 
   const [activeDimension, setActiveDimension] = useState('');
@@ -73,12 +73,17 @@ const Dashboardgraph = ({ kpi, kpiName }) => {
   const { aggregationData, aggregationLoading } = useSelector(
     (state) => state.aggregation
   );
+  const { linechartData, linechartLoading } = useSelector(
+    (state) => state.lineChart
+  );
 
-  const { linechartData } = useSelector((state) => state.lineChart);
+  const { hierarchicalData, hierarchialLoading } = useSelector(
+    (state) => state.hierarchial
+  );
 
-  const { hierarchicalData } = useSelector((state) => state.hierarchial);
-
-  const { rcaAnalysisData } = useSelector((state) => state.dashboard);
+  const { rcaAnalysisData, rcaAnalysisLoading } = useSelector(
+    (state) => state.dashboard
+  );
 
   const { dimensionData, dimensionLoading } = useSelector(
     (state) => state.dimension
@@ -400,18 +405,33 @@ const Dashboardgraph = ({ kpi, kpiName }) => {
                     <Dashboardgraphcard
                       aggregationData={aggregationData}
                       monthWeek={monthWeek}
+                      kpi={kpi}
+                      kpiName={kpiName}
+                      kpiAggregate={kpiAggregate}
                     />
                   )}
                 </>
               )}
             </div>
             {/* <div className="common-graph" id="lineChartDiv"></div> */}
+
             <div className="common-graph">
-              {linechartData && (
-                <HighchartsReact
-                  highcharts={Highcharts}
-                  options={newHighChart(linechartData)}
-                />
+              {linechartLoading ? (
+                <div className="loader">
+                  <div className="loading-text">
+                    <p>loading</p>
+                    <span></span>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {linechartData && (
+                    <HighchartsReact
+                      highcharts={Highcharts}
+                      options={newHighChart(linechartData)}
+                    />
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -518,25 +538,61 @@ const Dashboardgraph = ({ kpi, kpiName }) => {
             </div>
           </div>
           {/*Drill down chart*/}
+          {/* {rcaAnalysisLoading ? (
+            <div className="loader rca-graph-loader">
+              <div className="loading-text">
+                <p>loading</p>
+                <span></span>
+              </div>
+            </div>
+          ) : (
+            <>
+              {rcaAnalysisData && rcaAnalysisData.chart !== '' && ( */}
           <div className="common-drilldown-graph" id="chartdivWaterfall"></div>
+          {/* )}
+            </>
+          )} */}
 
           {dimension.value === 'multidimension' ? (
             <>
-              {rcaAnalysisData && rcaAnalysisData.data_table.length !== 0 && (
-                <DashboardTable
-                  rcaAnalysisData={rcaAnalysisData}
-                  dimension={dimension}
-                />
+              {rcaAnalysisLoading ? (
+                <div className="loader rca-graph-loader">
+                  <div className="loading-text">
+                    <p>loading</p>
+                    <span></span>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {rcaAnalysisData &&
+                    rcaAnalysisData.data_table.length !== 0 && (
+                      <DashboardTable
+                        rcaAnalysisData={rcaAnalysisData}
+                        dimension={dimension}
+                      />
+                    )}
+                </>
               )}
             </>
           ) : (
             <>
-              {hierarchicalData &&
-                hierarchicalData?.data_table.length !== 0 && (
-                  <HierarchicalTable
-                    hierarchicalData={hierarchicalData.data_table}
-                  />
-                )}
+              {hierarchialLoading ? (
+                <div className="loader rca-graph-loader">
+                  <div className="loading-text">
+                    <p>loading</p>
+                    <span></span>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {hierarchicalData &&
+                    hierarchicalData?.data_table.length !== 0 && (
+                      <HierarchicalTable
+                        hierarchicalData={hierarchicalData.data_table}
+                      />
+                    )}
+                </>
+              )}
             </>
           )}
         </div>

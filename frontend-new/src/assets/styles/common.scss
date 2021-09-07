@@ -588,6 +588,9 @@ a:hover {
   &.loader-page {
     height: 100vh;
   }
+  &.rca-graph-loader {
+    height: 45vh;
+  }
 
   .loading-text {
     width: 80px;

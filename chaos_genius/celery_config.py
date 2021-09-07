@@ -1,4 +1,5 @@
-from celery.schedules import crontab
+from datetime import timedelta
+from celery.schedules import crontab, schedule
 
 CELERY_IMPORTS = ("chaos_genius.jobs")
 CELERY_TASK_RESULT_EXPIRES = 30
@@ -9,15 +10,20 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 
 CELERYBEAT_SCHEDULE = {
-    #TODO: Add schedule here
-    # add all anomaly function here
-    'anomaly-task-every-minute': {
-        'task': 'chaos_genius.jobs.anomaly_tasks.add_together',
-        'schedule': crontab(minute="*"), # Every minutes
-        'args': (5,10,)
+    # TODO: Add schedule here
+    # 'anomaly-task-every-minute': {
+    #     'task': 'chaos_genius.jobs.anomaly_tasks.add_together',
+    #     'schedule': crontab(minute="*"), # Every minutes
+    #     'args': (5,10,)
+    # },
+    "anomaly-tasks-all-kpis": {
+        "task": "chaos_genius.jobs.anomaly_tasks.anomaly_kpi",
+        "schedule": crontab(hour=[11]),
+        # "schedule": schedule(timedelta(seconds=5)),  # for testing
+        "args": ()
     }
 }
-      
+
 # Scheduler runs every hour
 # looks at tasks in last n hour
 # if they are in processing in 24 hours, schedule them right away

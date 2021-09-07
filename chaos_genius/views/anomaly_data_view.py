@@ -2,6 +2,7 @@
 """anomaly data view."""
 from datetime import datetime, timedelta
 import traceback
+from typing import cast
 
 from flask import Blueprint, current_app, jsonify, request
 import pandas as pd
@@ -9,6 +10,7 @@ import pandas as pd
 from chaos_genius.extensions import cache
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
+from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.views.kpi_view import get_kpi_data_from_id
 
 
@@ -92,6 +94,61 @@ def kpi_anomaly_data_quality(kpi_id):
 
     current_app.logger.info("Anomaly Drilldown Done")
     return jsonify({"data": data, "msg": ""})
+
+
+@blueprint.route("/<int:kpi_id>/anomaly-params", methods=["POST"])
+def kpi_anomaly_params(kpi_id: int):
+    current_app.logger.info(f"Updating anomaly parameters for KPI ID: {kpi_id}")
+
+    if not request.is_json:
+        return jsonify(
+            {"error": "Request body must be a JSON (and Content-Type header must be set correctly)"}
+        ), 400
+
+    req_data: dict = cast(dict, request.get_json())
+
+    if "anomaly_params" not in req_data:
+        return jsonify(
+            {"error": "The request JSON needs to have anomaly_params as a field"}
+        ), 400
+
+    fields = {
+        "anomaly_period",
+        "model_name",
+        "sensitivity",
+        "seasonality",
+        "frequency",
+        "scheduler_params"
+    }
+
+    if fields.isdisjoint(set(req_data["anomaly_params"].keys())):
+        # we don't have any of the possible fields
+        return jsonify(
+            {"error": f"The request needs to have one of {', '.join(fields)} fields in anomaly_params"}
+        ), 400
+
+    extra_fields = req_data["anomaly_params"].keys() - fields
+    if extra_fields:
+        # some unexpected fields. Return an explicit error instead of ignoring them.
+        return jsonify(
+            {"error": f"Got extra fields in anomaly_params: {', '.join(extra_fields)}"}
+        ), 400
+
+    anomaly_params = {k: v for k, v in req_data["anomaly_params"].items() if k in fields}
+
+    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
+
+    if kpi is None:
+        return jsonify(
+            {"error": f"Could not find KPI for ID: {kpi_id}"}
+        ), 400
+
+    new_kpi = cast(Kpi, kpi.update(commit=True, anomaly_params=anomaly_params))
+
+    return jsonify({
+        "msg": "Successfully updated Anomaly params",
+        "anomaly_params": new_kpi.as_dict["anomaly_params"],
+    })
 
 
 def fill_graph_data(row, graph_data, precision=2):

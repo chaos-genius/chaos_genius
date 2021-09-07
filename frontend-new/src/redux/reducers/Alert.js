@@ -4,7 +4,10 @@ import {
   ALERTEMAILFAILURE,
   CHANNELSTATUSREQUEST,
   CHANNELSTATUSSUCCESS,
-  CHANNERSTATUSFAILURE
+  CHANNERSTATUSFAILURE,
+  EDITCHANNELREQUEST,
+  EDITCHANNELSUCCESS,
+  EDITCHANNELFAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -13,7 +16,10 @@ const initialState = {
   emailError: false,
   channelStatusLoading: false,
   channelStatusData: [],
-  channelStatusError: false
+  channelStatusError: false,
+  editData: [],
+  editLoading: false,
+  editError: false
 };
 export const alert = (state = initialState, action) => {
   switch (action.type) {
@@ -58,10 +64,31 @@ export const alert = (state = initialState, action) => {
         channelStatusError: true
       };
     }
+    case EDITCHANNELREQUEST: {
+      return {
+        ...state,
+        editLoading: true
+      };
+    }
+    case EDITCHANNELSUCCESS: {
+      return {
+        ...state,
+        editData: action.data,
+        editLoading: false
+      };
+    }
+    case EDITCHANNELFAILURE: {
+      return {
+        ...state,
+        editLoading: false,
+        editError: true
+      };
+    }
     case 'RESET_EMAIL_DATA': {
       return {
         ...state,
-        emailData: []
+        emailData: [],
+        editData: []
       };
     }
     default:

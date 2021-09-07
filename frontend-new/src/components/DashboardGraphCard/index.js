@@ -140,7 +140,7 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
               </h5>
             </div>
           ) : (
-            <span> {'-'}</span>
+            <h5> {'-'}</h5>
           )}
           {aggregationData &&
           aggregationData.panel_metrics?.impact?.mean !== undefined &&

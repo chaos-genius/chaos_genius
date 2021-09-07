@@ -132,11 +132,15 @@
       }
       span,
       h5 {
+        font-weight: $font-weight-400;
         font-size: $font-size-12;
         line-height: $line-height-14;
         letter-spacing: $letter-spacing;
         color: $grey_variation-3;
         text-align: right;
+      }
+      h5 {
+        font-weight: $font-weight-600;
       }
     }
   }

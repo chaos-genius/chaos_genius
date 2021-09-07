@@ -30,7 +30,7 @@ const initialState = {
   kpiFieldLoading: true,
   kpiFieldError: false,
   kpiSubmit: [],
-  kpiSubmitLoading: true,
+  kpiSubmitLoading: false,
   kpiSubmitError: false,
   testQueryLoading: true,
   testQueryData: [],
@@ -44,12 +44,14 @@ export const kpiExplorer = (state = initialState, action) => {
   switch (action.type) {
     case KPIEXPLORERREQUEST: {
       return {
+        ...state,
         isLoading: true,
         error: false
       };
     }
     case KPIEXPLORERSUCCESS: {
       return {
+        ...state,
         isLoading: false,
         kpiExplorerList: action.data,
         error: false
@@ -57,6 +59,7 @@ export const kpiExplorer = (state = initialState, action) => {
     }
     case KPIEXPLORERFAILURE: {
       return {
+        ...state,
         isLoading: false,
         kpiExplorerList: [],
         error: true
@@ -64,18 +67,21 @@ export const kpiExplorer = (state = initialState, action) => {
     }
     case KPIEXPLORERFORMREQUEST: {
       return {
+        ...state,
         kpiFormLoading: true,
         kpiFormError: false
       };
     }
     case KPIEXPLORERFORMSUCCESS: {
       return {
+        ...state,
         kpiFormLoading: false,
         kpiFormData: action.data
       };
     }
     case KPIEXPLORERFORMFAILURE: {
       return {
+        ...state,
         kpiFormLoading: false,
         kpiFormError: true
       };
@@ -87,70 +93,41 @@ export const kpiExplorer = (state = initialState, action) => {
       };
     }
     case KPIEXPLORERFIELDSUCCESS: {
-      return {
-        kpiFieldLoading: false,
-        kpiField: action.data
-      };
+      return { ...state, kpiFieldLoading: false, kpiField: action.data };
     }
     case KPIEXPLORERFIELDFAILURE: {
-      return {
-        kpiFieldLoading: false,
-        kpiFieldError: true
-      };
+      return { ...state, kpiFieldLoading: false, kpiFieldError: true };
     }
     case KPIEXPLORERSUBMITREQUEST: {
-      return {
-        kpiSubmitLoading: true,
-        kpiSubmitError: false
-      };
+      return { ...state, kpiSubmitLoading: true, kpiSubmitError: false };
     }
     case KPIEXPLORERSUBMITSUCCESS: {
-      return {
-        kpiSubmitLoading: false,
-        kpiSubmit: action.data
-      };
+      return { ...state, kpiSubmitLoading: false, kpiSubmit: action.data };
     }
     case KPIEXPLORERSUBMITFAILURE: {
-      return {
-        kpiSubmitLoading: false,
-        kpiSubmitError: true
-      };
+      return { ...state, kpiSubmitLoading: false, kpiSubmitError: true };
     }
     case TESTQUERYREQUEST: {
-      return {
-        testQueryLoading: true,
-        testQueryError: false
-      };
+      return { ...state, testQueryLoading: true, testQueryError: false };
     }
     case TESTQUERYSUCCESS: {
-      return {
-        testQueryLoading: false,
-        testQueryData: action.data
-      };
+      return { ...state, testQueryLoading: false, testQueryData: action.data };
     }
     case TESTQUERYFAILURE: {
-      return {
-        testQueryError: true,
-        testQueryLoading: false
-      };
+      return { ...state, testQueryError: true, testQueryLoading: false };
     }
     case KPIDISABLEREQUEST: {
-      return {
-        kpiDisableLoading: true,
-        kpiDisableError: false
-      };
+      return { ...state, kpiDisableLoading: true, kpiDisableError: false };
     }
     case KPIDISABLESUCCESS: {
       return {
+        ...state,
         kpiDisableLoading: false,
         kpiDisableData: action.data
       };
     }
     case KPIDISABLEFAILURE: {
-      return {
-        kpiDisableLoading: false,
-        kpiDisableFailure: true
-      };
+      return { ...state, kpiDisableLoading: false, kpiDisableFailure: true };
     }
     default:
       return state;

@@ -116,15 +116,42 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   useEffect(() => {
     dispatchGetAllKpiExplorerForm();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
+  }, []);
 
   useEffect(() => {
-    fieldData();
+    if (kpiFormData) {
+      fieldData();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiFormData]);
 
   const dispatchGetAllKpiExplorerForm = () => {
     dispatch(getAllKpiExplorerForm());
+  };
+  useEffect(() => {
+    if (testQueryData) {
+      queryFieldList();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [testQueryData]);
+
+  const queryFieldList = () => {
+    var arr = [];
+    if (testQueryData) {
+      testQueryData &&
+        testQueryData.data &&
+        testQueryData.data.tables &&
+        testQueryData.data.tables.query &&
+        testQueryData.data.tables.query.table_columns.forEach((item) => {
+          arr.push({
+            label: item.name,
+            value: item.name
+          });
+        });
+    } else {
+      arr = [];
+    }
+    setOption({ ...option, metricOption: arr });
   };
 
   const datasourceIcon = (type) => {
@@ -161,7 +188,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   }, [kpiSubmit]);
 
   const fieldData = () => {
-    if (!kpiFormLoading) {
+    if (kpiFormData && kpiFormLoading === false) {
       var optionArr = [];
       kpiFormData &&
         kpiFormData.data.forEach((data) => {
@@ -206,9 +233,11 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   };
 
   useEffect(() => {
-    tableOption();
+    if (kpiField) {
+      tableOption();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpiField]);
+  }, [kpiField, formdata.tablename]);
 
   const tableOption = () => {
     if (kpiField && kpiFieldLoading === false) {
@@ -226,30 +255,54 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     }
   };
 
+  // useEffect(() => {
+  //   if (kpiField) {
+  //     tableName();
+  //   }
+  //   if (option.tableoption) {
+  //     console.log('Option :', option.tableoption.value);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [option.tableoption]);
   const tableName = (e) => {
-    setErrorMsg({ tablename: false });
-    var optionValueArr = [];
-    for (const [key, value] of Object.entries(kpiField.tables)) {
-      const valueData = e.value.toLowerCase();
-      if (key === valueData) {
-        value.table_columns.forEach((data) => {
-          optionValueArr.push({
-            value: data.name,
-            label: data.name
+    if (kpiField) {
+      setErrorMsg({ tablename: false });
+      var optionValueArr = [];
+      for (const [key, value] of Object.entries(kpiField.tables)) {
+        const valueData = key;
+        if (key === valueData) {
+          value.table_columns.forEach((data) => {
+            optionValueArr.push({
+              value: data.name,
+              label: data.name
+            });
           });
-        });
-        setOption({ ...option, metricOption: optionValueArr });
+
+          setOption({ ...option, metricOption: optionValueArr });
+        }
+        setFormdata({ ...formdata, tablename: valueData });
       }
+
+      // setFormdata({ ...formdata, tablename: e.value });
     }
-    setFormdata({ ...formdata, tablename: e.value });
   };
 
   const handleDataset = (e) => {
     setDataset(e);
-    setOption({ ...option, dataset: e.value });
-    setFormdata({ ...formdata, dataset: e.value });
+    setOption({
+      ...option,
+      dataset: e.value,
+      metricOption: []
+    });
+    setFormdata({
+      ...formdata,
+      dataset: e.value,
+      metriccolumns: '',
+      aggregate: '',
+      datetimecolumns: '',
+      adddimentsions: []
+    });
   };
-
   const handleSubmit = () => {
     if (formdata.kpiname === '') {
       setErrorMsg((prev) => {
@@ -376,7 +429,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   //     setInputList(list);
   //   }
   // };
-
   if (kpiFormLoading) {
     return (
       <div className="loader">
@@ -445,7 +497,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         </div>
         {dataset.value === 'query' ? (
           // for of for query
-          <div>
+          <>
             <div className="form-group query-form">
               <label>Query *</label>
               <textarea
@@ -491,7 +543,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                 </div>
               </div>
             </div>
-          </div> // end of for query
+          </> // end of for query
         ) : (
           <div className="form-group">
             <label>Table Name *</label>
@@ -501,6 +553,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               placeholder="Select Table"
               onChange={(e) => tableName(e)}
             />
+
             {errorMsg.tablename === true ? (
               <div className="connection__fail">
                 <p>Select Table Name</p>
@@ -512,11 +565,18 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           <div className="form-group">
             <label>Metric Columns *</label>
             <Select
-              options={option.metricOption}
+              options={option.metricOption !== '' && option.metricOption}
+              value={
+                formdata.metriccolumns !== '' && {
+                  label: formdata.metriccolumns,
+                  value: formdata.metriccolumns
+                }
+              }
               classNamePrefix="selectcategory"
               placeholder="Select Metric Columns"
               onChange={(e) => {
                 setFormdata({ ...formdata, metriccolumns: e.value });
+
                 setErrorMsg((prev) => {
                   return {
                     ...prev,
@@ -533,8 +593,17 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           </div>
           <div className="form-group">
             <label>Aggregate by *</label>
+
             <Select
               options={aggregate}
+              value={
+                formdata.aggregate !== ''
+                  ? {
+                      label: formdata.aggregate,
+                      value: formdata.aggregate
+                    }
+                  : null
+              }
               classNamePrefix="selectcategory"
               placeholder="Select Aggregate by"
               onChange={(e) => {
@@ -556,7 +625,13 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           <div className="form-group">
             <label>Datetime Columns *</label>
             <Select
-              options={option.metricOption}
+              options={option.metricOption !== '' && option.metricOption}
+              value={
+                formdata.datetimecolumns !== '' && {
+                  label: formdata.datetimecolumns,
+                  value: formdata.datetimecolumns
+                }
+              }
               classNamePrefix="selectcategory"
               placeholder="Select Datetime Columns"
               onChange={(e) => {
@@ -580,7 +655,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               <label>Dimensions</label>
               <Select
                 isMulti
-                options={option.metricOption}
+                options={option.metricOption !== '' && option.metricOption}
                 classNamePrefix="selectcategory"
                 closeMenuOnSelect="true"
                 placeholder="Select Dimensions"

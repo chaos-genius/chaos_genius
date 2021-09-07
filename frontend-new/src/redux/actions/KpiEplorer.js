@@ -49,12 +49,12 @@ export const getAllKpiExplorerFailure = () => {
 
 export const getAllKpiExplorer = () => {
   return async (dispatch) => {
-    dispatch(getAllKpiExplorerRequested);
+    dispatch(getAllKpiExplorerRequested());
     const { data, error, status } = await getRequest({
       url: KPI_URL
     });
     if (error) {
-      dispatch(getAllKpiExplorerFailure);
+      dispatch(getAllKpiExplorerFailure());
     } else if (data && status === 200) {
       dispatch(getAllKpiExplorerSuccess(data.data));
     }
@@ -82,12 +82,12 @@ export const getAllKpiExplorerFormFailure = () => {
 
 export const getAllKpiExplorerForm = () => {
   return async (dispatch) => {
-    dispatch(getAllKpiExplorerFormRequested);
+    dispatch(getAllKpiExplorerFormRequested());
     const { data, error, status } = await getRequest({
       url: CONNECTION_URL
     });
     if (error) {
-      dispatch(getAllKpiExplorerFormFailure);
+      dispatch(getAllKpiExplorerFormFailure());
     } else if (data && status === 200) {
       dispatch(getAllKpiExplorerFormSuccess(data));
     }
@@ -115,13 +115,13 @@ export const getAllKpiExplorerFieldSuccess = (response) => {
 
 export const getAllKpiExplorerField = (option) => {
   return async (dispatch) => {
-    dispatch(getAllKpiExplorerFieldRequested);
+    dispatch(getAllKpiExplorerFieldRequested());
     const { data, error, status } = await postRequest({
       url: KPI_FORM_OPTION_URL,
       data: option
     });
     if (error) {
-      dispatch(getAllKpiExplorerFieldFailure);
+      dispatch(getAllKpiExplorerFieldFailure());
     } else if (data && status === 200) {
       dispatch(getAllKpiExplorerFieldSuccess(data.data));
     }
@@ -149,7 +149,7 @@ export const getAllKpiExplorerSubmitSuccess = (response) => {
 
 export const getAllKpiExplorerSubmit = (payload) => {
   return async (dispatch) => {
-    dispatch(getAllKpiExplorerSubmitRequested);
+    dispatch(getAllKpiExplorerSubmitRequested());
     const { data, error, status } = await postRequest({
       url: KPI_URL + '/',
       data: JSON.stringify(payload),
@@ -161,7 +161,7 @@ export const getAllKpiExplorerSubmit = (payload) => {
       noAuth: true
     });
     if (error) {
-      dispatch(getAllKpiExplorerSubmitFailure);
+      dispatch(getAllKpiExplorerSubmitFailure());
     } else if (data && status === 200) {
       dispatch(getAllKpiExplorerSubmitSuccess(data));
     }

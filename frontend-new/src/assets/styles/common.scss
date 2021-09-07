@@ -553,6 +553,7 @@ a:hover {
 }
 .css-1uccc91-singleValue {
   margin: 0px !important;
+  text-transform: capitalize;
 }
 .css-xb97g8:hover {
   background-color: transparent !important;
@@ -831,5 +832,31 @@ a:hover {
   }
   .btn {
     margin-top: 24px;
+  }
+}
+// Tooltip for action button
+.action-tooltip {
+  .react-tooltip-lite {
+    width: auto !important;
+    padding: 6px !important;
+    background: $black_variation-2;
+    border-radius: 6px;
+    color: $white;
+    display: flex !important;
+    align-items: center !important;
+    span {
+      font-weight: $font-weight-400;
+      font-size: $font-size-10;
+      line-height: $line-height-12;
+      letter-spacing: $letter-spacing;
+      text-transform: capitalize;
+      color: $white;
+    }
+  }
+  .react-tooltip-lite-arrow {
+    display: none;
+  }
+  .react-tooltip-lite-right-arrow {
+    display: none;
   }
 }

@@ -334,7 +334,7 @@ const Dashboardgraph = ({ kpi, kpiName }) => {
         },
         xAxis: {
           type: 'datetime',
-          categories: line.map((data) => new Date(data.date).getTime()),
+          categories: line.map((data) => new Date(data.date)),
           // gridLineWidth: 1,
           labels: {
             step: 6,

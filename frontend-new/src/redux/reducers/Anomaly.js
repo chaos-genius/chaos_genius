@@ -90,7 +90,8 @@ export const anomaly = (state = initialState, action) => {
     case 'RESET': {
       return {
         ...state,
-        anomalyDrilldownData: []
+        anomalyDrilldownData: [],
+        anomalyQualityData: []
       };
     }
     default:

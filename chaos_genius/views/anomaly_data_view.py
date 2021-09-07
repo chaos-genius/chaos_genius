@@ -99,8 +99,22 @@ def kpi_anomaly_data_quality(kpi_id):
     return jsonify({"data": data, "msg": ""})
 
 
-@blueprint.route("/<int:kpi_id>/anomaly-params", methods=["POST"])
+@blueprint.route("/<int:kpi_id>/anomaly-params", methods=["POST", "GET"])
 def kpi_anomaly_params(kpi_id: int):
+    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
+
+    if kpi is None:
+        return jsonify(
+            {"error": f"Could not find KPI for ID: {kpi_id}"}
+        ), 400
+
+    # when method is GET we just return the anomaly params
+    if request.method == "GET":
+        return jsonify({
+            "anomaly_params": kpi.as_dict["anomaly_params"],
+        })
+
+    # when it's POST, update anomaly params
     current_app.logger.info(f"Updating anomaly parameters for KPI ID: {kpi_id}")
 
     if not request.is_json:
@@ -138,13 +152,6 @@ def kpi_anomaly_params(kpi_id: int):
         ), 400
 
     anomaly_params = {k: v for k, v in req_data["anomaly_params"].items() if k in fields}
-
-    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
-
-    if kpi is None:
-        return jsonify(
-            {"error": f"Could not find KPI for ID: {kpi_id}"}
-        ), 400
 
     new_kpi = cast(Kpi, kpi.update(commit=True, anomaly_params=anomaly_params))
 

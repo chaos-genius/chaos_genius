@@ -16,10 +16,16 @@ CELERYBEAT_SCHEDULE = {
     #     'schedule': crontab(minute="*"), # Every minutes
     #     'args': (5,10,)
     # },
-    "anomaly-tasks-all-kpis": {
-        "task": "chaos_genius.jobs.anomaly_tasks.anomaly_kpi",
-        "schedule": crontab(hour=[11]),
-        # "schedule": schedule(timedelta(seconds=5)),  # for testing
+    # "anomaly-tasks-all-kpis": {
+    #     "task": "chaos_genius.jobs.anomaly_tasks.anomaly_kpi",
+    #     # "schedule": crontab(hour=[11]),
+    #     "schedule": schedule(timedelta(minutes=1)),  # for testing
+    #     "args": ()
+    # },
+    "anomaly-scheduler": {
+        "task": "chaos_genius.jobs.anomaly_tasks.anomaly_scheduler",
+        "schedule": schedule(timedelta(minutes=10)),
+        # "schedule": schedule(timedelta(seconds=10)),
         "args": ()
     }
 }

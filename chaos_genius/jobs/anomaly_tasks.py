@@ -1,7 +1,9 @@
+from datetime import datetime
 from typing import cast
 
 from celery import group
 from celery.app.base import Celery
+from sqlalchemy.orm.attributes import flag_modified
 
 from chaos_genius.controllers.kpi_controller import run_anomaly_for_kpi
 from chaos_genius.databases.models.kpi_model import Kpi
@@ -20,10 +22,19 @@ def add_together(a, b):
 @celery.task
 def anomaly_single_kpi(kpi_id, end_date=None):
     status = run_anomaly_for_kpi(kpi_id, end_date)
+    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
+    anomaly_params = kpi.anomaly_params
+
     if status:
         print(f"Completed the anomaly for KPI ID: {kpi_id}.")
+        anomaly_params["scheduler_params"]["status"] = "completed"
     else:
         print(f"Anomaly failed for the for KPI ID: {kpi_id}.")
+        anomaly_params["scheduler_params"]["status"] = "failed"
+
+    flag_modified(kpi, "anomaly_params")
+    kpi.update(commit=True, anomaly_params=anomaly_params)
+
     return status
 
 
@@ -36,6 +47,66 @@ def anomaly_kpi():
     for kpi in kpis:
         print(f"Starting anomaly task for KPI: {kpi.id}")
         task_group.append(anomaly_single_kpi.s(kpi.id))
+    g = group(task_group)
+    res = g.apply_async()
+    return res
+
+
+# runs every hour
+# if hour > scheduled hour, run task
+# last_scheduled_time -> if it's < specified hour of today's date, run task
+@celery.task
+def anomaly_scheduler():
+    # find KPIs
+    kpis: Kpi = Kpi.query.distinct("kpi_id").filter(
+        (Kpi.run_anomaly == True) & (Kpi.active == True)
+    )
+    task_group = []
+
+    for kpi in kpis:
+        kpi: Kpi
+        # get scheduler_params, will be None if it's not set
+        scheduler_params = kpi.anomaly_params.get("scheduler_params")
+
+        # assume 11am if it's not set
+        hour = 11
+        if scheduler_params is not None and "hour" in scheduler_params:
+            hour = scheduler_params["hour"]
+
+        scheduled_time = datetime.now()
+        # today's date, but at 11:00:00am
+        scheduled_time = scheduled_time.replace(hour=hour, minute=0, second=0)
+        current_time = datetime.now()
+
+        # check if it's already run
+        already_run = False
+        if (
+            scheduler_params is not None
+            and "last_scheduled_time" in scheduler_params
+            and datetime.fromisoformat(scheduler_params["last_scheduled_time"])
+            > scheduled_time
+        ):
+            already_run = True
+
+        if not already_run and current_time > scheduled_time:
+            print(f"Running anomaly for KPI: {kpi.id}")
+            task_group.append(anomaly_single_kpi.s(kpi.id))
+
+            new_scheduler_params = (
+                scheduler_params if scheduler_params is not None else {}
+            )
+            new_scheduler_params["last_scheduled_time"] = current_time.isoformat()
+            new_scheduler_params["status"] = "in-progress"
+            anomaly_params = kpi.anomaly_params
+            anomaly_params["scheduler_params"] = new_scheduler_params
+
+            flag_modified(kpi, "anomaly_params")
+            kpi.update(commit=True, anomaly_params=anomaly_params)
+
+    if not task_group:
+        print("Found no pending KPI tasks.")
+        return []
+
     g = group(task_group)
     res = g.apply_async()
     return res

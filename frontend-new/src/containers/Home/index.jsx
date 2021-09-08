@@ -17,8 +17,8 @@ const Home = () => {
   // const onboardingList = {
   //   completion_precentage: '0',
   //   steps: [
-  //     { step_done: true, step_name: 'Add Data Source', step_no: 1 },
-  //     { step_done: true, step_name: 'Add KPI', step_no: 2 },
+  //     { step_done: false, step_name: 'Add Data Source', step_no: 1 },
+  //     { step_done: false, step_name: 'Add KPI', step_no: 2 },
   //     { step_done: false, step_name: 'Activate Analytics', step_no: 3 },
   //     { step_done: false, step_name: 'Setup Smart Alert', step_no: 4 }
   //   ]

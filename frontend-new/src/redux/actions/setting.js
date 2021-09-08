@@ -1,5 +1,5 @@
 import { postRequest } from '../../utils/http-helper';
-
+import { BASE_URL } from '../../utils/url-helper';
 import {
   KPISETTINGFAILURE,
   KPISETTINGREQUEST,
@@ -28,7 +28,7 @@ export const kpiSettingFailure = () => {
 export const kpiSettingSetup = (kpi, kpiData) => {
   return async (dispatch) => {
     dispatch(kpiSettingRequest());
-    const URL = `${' https://a-demo.chaosgenius.io'}/api/anomaly-data/${kpi}/anomaly-params`;
+    const URL = `${BASE_URL}/api/anomaly-data/${kpi}/anomaly-params`;
     const { data, error, status } = await postRequest({
       url: URL,
       data: kpiData,

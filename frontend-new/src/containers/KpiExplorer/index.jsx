@@ -14,6 +14,12 @@ import './kpiexplorer.scss';
 
 import { getAllKpiExplorer } from '../../redux/actions';
 
+import store from '../../redux/store';
+
+const KPI_RESET = {
+  type: 'KPI_RESET'
+};
+
 const KpiExplorer = () => {
   const dispatch = useDispatch();
 
@@ -27,6 +33,7 @@ const KpiExplorer = () => {
   );
 
   useEffect(() => {
+    store.dispatch(KPI_RESET);
     dispatchGetAllKpiExplorer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);

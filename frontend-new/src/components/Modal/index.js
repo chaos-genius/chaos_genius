@@ -15,14 +15,37 @@ const SETTING_RESET = {
   type: 'SETTING_RESET'
 };
 
+const RESET_ACTION = {
+  type: 'CREATE_RESPONSE_RESET'
+};
+
+const KPI_RESET = {
+  type: 'KPI_RESET'
+};
+
 const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
-  const location = useHistory().location.pathname.split('/');
+  //const location = useHistory().location.pathname.split('/');
+  const history = useHistory();
 
   const closeModal = () => {
     setIsOpen(false);
-    if (location[1] === 'onboarding' && location[2] === '3') {
+    store.dispatch(SETTING_RESET);
+    store.dispatch(RESET_ACTION);
+    store.dispatch(KPI_RESET);
+  };
+
+  const onNavigate = () => {
+    if (text === 'kpi') {
+      store.dispatch(KPI_RESET);
+      history.push('/onboarding/3');
+    } else if (text === 'datasource') {
+      store.dispatch(RESET_ACTION);
+      history.push('/onboarding/2');
+    } else {
       store.dispatch(SETTING_RESET);
+      history.push('/');
     }
+    setIsOpen(false);
   };
 
   return (
@@ -55,7 +78,7 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
               : 'Next step is to Activate the Analytics'}
           </p>
           <div className="next-step-navigate">
-            <button className="btn black-button">
+            <button className="btn black-button" onClick={() => onNavigate()}>
               <span>
                 {text === 'kpi'
                   ? ' Add Activate Analytics'

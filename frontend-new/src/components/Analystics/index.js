@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Select from 'react-select';
 import Tooltip from 'react-tooltip-lite';
@@ -27,7 +27,7 @@ const frequencyOptions = [
   { value: 'hourly', label: 'Hourly' }
 ];
 
-const Analystics = ({ kpi }) => {
+const Analystics = ({ kpi, setAnalystics }) => {
   const dispatch = useDispatch();
   const [modelName, setModalName] = useState('');
   const [sensitivity, setSensitivity] = useState('');
@@ -38,9 +38,20 @@ const Analystics = ({ kpi }) => {
     sensitivity: '',
     frequency: ''
   });
-  const { kpiSettingLoading } = useSelector((state) => {
+  const { kpiSettingLoading, kpiSettingData } = useSelector((state) => {
     return state.setting;
   });
+  console.log('DATA:', kpiSettingData);
+
+  useEffect(() => {
+    if (
+      kpiSettingData &&
+      kpiSettingData.msg === 'Successfully updated Anomaly params'
+    ) {
+      setAnalystics(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kpiSettingData]);
 
   const onSettingSave = () => {
     var obj = { ...error };

@@ -7,8 +7,9 @@ import rightarrow from '../../assets/images/rightarrow.svg';
 import DataSourceForm from '../../components/DataSourceForm';
 import KpiExplorerForm from '../../components/KpiExplorerForm';
 //import DashboardForm from '../../components/DashboardForm';
-import FilterAnalystics from '../../components/FilterAnalystics';
-import Analystics from '../../components/Analystics';
+// import FilterAnalystics from '../../components/FilterAnalystics';
+// import Analystics from '../../components/Analystics';
+import Kpisetting from '../KpiSetting';
 
 import './onboarding.scss';
 import ModalPopUp from '../../components/Modal';
@@ -110,16 +111,17 @@ const Onboarding = () => {
           null}
         </div>
       ) : (
-        <div className="explore-wrapper">
-          {/* filter section */}
-          <div className="filter-section">
-            <FilterAnalystics />
-          </div>
-          {/* table section */}
-          <div className="table-section">
-            <Analystics />
-          </div>
-        </div>
+        // <div className="explore-wrapper">
+        //   {/* filter section */}
+        //   <div className="filter-section">
+        //     <FilterAnalystics />
+        //   </div>
+        //   {/* table section */}
+        //   <div className="table-section">
+        //     <Analystics />
+        //   </div>
+        // </div>
+        <Kpisetting onboarding={true} setModal={setModal} setText={setText} />
       )}
 
       <ModalPopUp isOpen={modal} setIsOpen={setModal} text={text} />

@@ -6,7 +6,7 @@ import Fuse from 'fuse.js';
 
 import { v4 as uuidv4 } from 'uuid';
 
-const FilterAnalystics = ({ kpi, setKpi, data }) => {
+const FilterAnalystics = ({ kpi, setKpi, data, onboarding }) => {
   const [listData, setListData] = useState(data);
   const [searchData, setSearchData] = useState(data);
 
@@ -34,6 +34,12 @@ const FilterAnalystics = ({ kpi, setKpi, data }) => {
       setListData(searchData);
     }
   };
+  const handleClick = (item) => {
+    setKpi(item.id);
+    if (!onboarding) {
+      window.history.pushState('', '', `/#/kpi/settings/${item.id}`);
+    }
+  };
   return (
     <div className="common-filter-section">
       <div className="filter-layout">
@@ -59,12 +65,7 @@ const FilterAnalystics = ({ kpi, setKpi, data }) => {
                   key={uuidv4()}
                   className={kpi === item.id ? 'active' : ''}
                   onClick={() => {
-                    setKpi(item.id);
-                    window.history.pushState(
-                      '',
-                      '',
-                      `/#/kpi/settings/${item.id}`
-                    );
+                    handleClick(item);
                   }}>
                   {item.name}
                   <img src={GreenArrow} alt="Arrow" />

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 import Modal from 'react-modal';
 
@@ -9,11 +9,22 @@ import Success from '../../assets/images/successful.svg';
 
 import './modal.scss';
 
+import store from '../../redux/store';
+
+const SETTING_RESET = {
+  type: 'SETTING_RESET'
+};
+
 const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
-  // const [isOpen, setIsOpen] = useState(false);
+  const location = useHistory().location.pathname.split('/');
+
   const closeModal = () => {
     setIsOpen(false);
+    if (location[1] === 'onboarding' && location[2] === '3') {
+      store.dispatch(SETTING_RESET);
+    }
   };
+
   return (
     <Modal isOpen={isOpen} shouldCloseOnOverlayClick={false}>
       <div className="modal-close" onClick={closeModal}>
@@ -30,23 +41,29 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
               ? 'Added a KPI'
               : text === ' datasource'
               ? 'Added a Data Source'
+              : text === 'activateanalytics'
+              ? 'Added a Activate Analytics'
               : 'created a Dashboard'}
           </h3>
           <p>
             {text === 'kpi'
-              ? 'Next step is to create dashbaords for monitoring.'
+              ? 'Next step is to create dashboards for monitoring.'
               : text === 'datasource'
               ? 'Next step is to set up KPI definitions.'
+              : text === 'activateanalytics'
+              ? 'Next step is to create dashboards for monitoring.'
               : 'Next step is to Activate the Analytics'}
           </p>
           <div className="next-step-navigate">
             <button className="btn black-button">
               <span>
                 {text === 'kpi'
-                  ? 'Create Dashboard'
+                  ? ' Add Activate Analytics'
                   : text === 'datasource'
                   ? 'Add KPI'
-                  : 'Activate Analytics'}
+                  : text === 'activateanalytics'
+                  ? 'Create Dashboard'
+                  : ''}
               </span>
             </button>
           </div>
@@ -63,6 +80,8 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
                 ? 'View added KPI’s'
                 : text === 'datasource'
                 ? 'View added data source'
+                : text === 'activateanalytics'
+                ? 'View Activate Analytics'
                 : 'View created dashboard'}
             </label>
           </Link>

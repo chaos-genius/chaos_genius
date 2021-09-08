@@ -32,6 +32,11 @@ export const setting = (state = initialState, action) => {
         kpiSettingError: true
       };
     }
+    case 'SETTING_RESET': {
+      return {
+        kpiSettingData: []
+      };
+    }
     default:
       return state;
   }

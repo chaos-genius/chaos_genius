@@ -56,6 +56,7 @@ def data_source():
         data_sources = DataSource.query.order_by(DataSource.created_at.desc()).all()
         ds_kpi_count = db.session.query(DataSource.id, func.count(Kpi.id)) \
                     .join(Kpi, Kpi.data_source == DataSource.id) \
+                    .filter(DataSource.active==True) \
                     .group_by(DataSource.id) \
                     .order_by(DataSource.created_at.desc()) \
                     .all()
@@ -232,7 +233,8 @@ def delete_data_source():
                 source_details = ds_data["sourceConfig"]
                 status = connector_client.delete_source(source_details["sourceId"])
             # delete the data source record
-            data_source_obj.delete(commit=True)
+            data_source_obj.active = False
+            data_source_obj.save(commit=True)
             msg = "deleted"
             status = True
     except Exception as err_msg:

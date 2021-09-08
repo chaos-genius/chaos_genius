@@ -40,7 +40,7 @@ class ThirdPartyClient(object):
 
         # workspace_id = config.get("workspace_id")
         # if not workspace_id:
-        self.workspace_id = self.get_workspace_list()
+        self.workspace_id = self.get_workspace_id()
 
         # Check the third party server running status
         status = self.get_server_health()

@@ -39,7 +39,8 @@
             padding-left: 21px;
           }
           &.child-show {
-            transform: rotate(90deg);
+            // transform: rotate(90deg);
+            padding-left: 30px;
           }
           &.date-column-formated {
             font-weight: $font-weight-400;
@@ -184,6 +185,14 @@
         width: 100%;
         box-shadow: none;
         background-color: transparent;
+      }
+    }
+    .table-loader {
+      td {
+        border: none;
+        .load {
+          min-height: 80vh;
+        }
       }
     }
   }

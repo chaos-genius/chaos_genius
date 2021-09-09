@@ -38,14 +38,10 @@ const Analystics = ({ kpi, setAnalystics }) => {
     sensitivity: '',
     frequency: ''
   });
-  const {
-    kpiEditData,
-    kpiEditLoading,
-    kpiSettingLoading,
-    kpiSettingData
-  } = useSelector((state) => {
-    return state.setting;
-  });
+  const { kpiEditData, kpiEditLoading, kpiSettingLoading, kpiSettingData } =
+    useSelector((state) => {
+      return state.setting;
+    });
   useEffect(() => {
     dispatch(kpiEditSetup(kpi));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -118,11 +114,8 @@ const Analystics = ({ kpi, setAnalystics }) => {
   };
   if (kpiEditLoading) {
     return (
-      <div className="loader">
-        <div className="loading-text">
-          <p>loading</p>
-          <span></span>
-        </div>
+      <div className="load">
+        <div className="preload"></div>
       </div>
     );
   } else {

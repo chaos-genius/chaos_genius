@@ -151,10 +151,18 @@
       }
     }
   }
+  .common-drilldown-graph-none {
+    visibility: hidden;
+    height: 315px;
+    width: 100%;
+    margin: 48px 0px;
+  }
 
   .common-drilldown-graph {
+    display: block;
     height: 315px;
     margin: 48px 0px;
+    width: 100%;
   }
   .common-drilldown-table {
     margin-bottom: 12px;

@@ -55,11 +55,8 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
 
   if (sidebarLoading) {
     return (
-      <div className="loader">
-        <div className="loading-text">
-          <p>loading</p>
-          <span></span>
-        </div>
+      <div className="load loader-page">
+        <div className="preload"></div>
       </div>
     );
   } else {

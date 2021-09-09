@@ -393,11 +393,8 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
           <div className="dashboard-graph-section">
             <div className="common-graph">
               {aggregationLoading ? (
-                <div className="loader">
-                  <div className="loading-text">
-                    <p>loading</p>
-                    <span></span>
-                  </div>
+                <div className="load">
+                  <div className="preload"></div>
                 </div>
               ) : (
                 <>
@@ -414,14 +411,10 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
               )}
             </div>
             {/* <div className="common-graph" id="lineChartDiv"></div> */}
-
             <div className="common-graph">
               {linechartLoading ? (
-                <div className="loader">
-                  <div className="loading-text">
-                    <p>loading</p>
-                    <span></span>
-                  </div>
+                <div className="load">
+                  <div className="preload"></div>
                 </div>
               ) : (
                 <>
@@ -471,11 +464,8 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
               }>
               <ul>
                 {dimensionLoading ? (
-                  <div className="loader">
-                    <div className="loading-text">
-                      <p>loading</p>
-                      <span></span>
-                    </div>
+                  <div className="load">
+                    <div className="preload"></div>
                   </div>
                 ) : (
                   <>
@@ -505,7 +495,8 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
                             </li>
                           );
                         })}
-                    {dimensionData.dimensions.length > 3 &&
+                    {dimensionData &&
+                    dimensionData.dimensions.length > 3 &&
                     dimensionData.dimensions.length !== 0 ? (
                       <li
                         className={
@@ -538,29 +529,20 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
             </div>
           </div>
           {/*Drill down chart*/}
-          {/* {rcaAnalysisLoading ? (
-            <div className="loader rca-graph-loader">
-              <div className="loading-text">
-                <p>loading</p>
-                <span></span>
-              </div>
-            </div>
-          ) : (
-            <>
-              {rcaAnalysisData && rcaAnalysisData.chart !== '' && ( */}
-          <div className="common-drilldown-graph" id="chartdivWaterfall"></div>
-          {/* )}
-            </>
-          )} */}
-
+          <div
+            className={
+              rcaAnalysisLoading
+                ? 'common-drilldown-graph-none'
+                : rcaAnalysisData
+                ? 'common-drilldown-graph'
+                : ''
+            }
+            id="chartdivWaterfall"></div>
           {dimension.value === 'multidimension' ? (
             <>
               {rcaAnalysisLoading ? (
-                <div className="loader rca-graph-loader">
-                  <div className="loading-text">
-                    <p>loading</p>
-                    <span></span>
-                  </div>
+                <div className="load rca-graph-loader">
+                  <div className="preload"></div>
                 </div>
               ) : (
                 <>
@@ -577,11 +559,8 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
           ) : (
             <>
               {hierarchialLoading ? (
-                <div className="loader rca-graph-loader">
-                  <div className="loading-text">
-                    <p>loading</p>
-                    <span></span>
-                  </div>
+                <div className="load rca-graph-loader">
+                  <div className="preload"></div>
                 </div>
               ) : (
                 <>

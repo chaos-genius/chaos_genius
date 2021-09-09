@@ -707,6 +707,43 @@ a:hover {
     }
   }
 }
+// Loader
+.load {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  background: $white;
+  &.loader-page {
+    height: 100vh;
+  }
+  &.rca-graph-loader {
+    height: 45vh;
+  }
+  &.home-page-loader {
+    height: 77vh;
+    width: 100%;
+  }
+}
+.preload {
+  // margin-top: 17%;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 5px solid $green_variation-2;
+  animation: 1s pre linear infinite;
+}
+@keyframes pre {
+  0% {
+    transform: rotate(0deg);
+    border-top: 5px solid $green;
+  }
+  100% {
+    transform: rotate(360deg);
+    border-top: 5px solid $green;
+  }
+}
 
 .multi-filter-selection {
   display: flex;

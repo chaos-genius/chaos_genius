@@ -114,11 +114,8 @@ const Home = () => {
                 return <></>;
               })
             ) : (
-              <div className="loader loader-page">
-                <div className="loading-text">
-                  <p>loading</p>
-                  <span></span>
-                </div>
+              <div className="load home-page-loader">
+                <div className="preload"></div>
               </div>
             )}
           </div>

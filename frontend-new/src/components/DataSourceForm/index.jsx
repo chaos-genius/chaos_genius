@@ -202,11 +202,8 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
 
   if (isLoading) {
     return (
-      <div className="loader">
-        <div className="loading-text">
-          <p>loading</p>
-          <span></span>
-        </div>
+      <div className="load ">
+        <div className="preload"></div>
       </div>
     );
   } else {

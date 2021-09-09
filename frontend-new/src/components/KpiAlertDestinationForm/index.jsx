@@ -32,7 +32,7 @@ const KpiAlertDestinationForm = ({ event, setEventSteps, setKpiSteps }) => {
     }
   };
   return (
-    <div>
+    <>
       <div className="form-group">
         <h5>Alert Destination</h5>
       </div>
@@ -63,7 +63,7 @@ const KpiAlertDestinationForm = ({ event, setEventSteps, setKpiSteps }) => {
           <span>Add Alert</span>
         </button>
       </div>
-    </div>
+    </>
   );
 };
 

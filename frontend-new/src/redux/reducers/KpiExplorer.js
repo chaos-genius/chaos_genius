@@ -129,6 +129,11 @@ export const kpiExplorer = (state = initialState, action) => {
     case KPIDISABLEFAILURE: {
       return { ...state, kpiDisableLoading: false, kpiDisableFailure: true };
     }
+    case 'KPI_RESET': {
+      return {
+        kpiSubmit: []
+      };
+    }
     default:
       return state;
   }

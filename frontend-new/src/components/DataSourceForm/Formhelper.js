@@ -62,11 +62,29 @@ export const renderTextFields = (
   handleInputChange,
   handleCheckBoxChange,
   formData,
+  formError
+) => {
+  var fields = [];
+  toTextField(
+    obj,
+    handleInputChange,
+    handleCheckBoxChange,
+    formData,
+    formError,
+    fields
+  );
+  return <>{fields}</>;
+};
+
+const toTextField = (
+  obj,
+  handleInputChange,
+  handleCheckBoxChange,
+  formData,
   formError,
   fields,
   child = ''
 ) => {
-  //const { connectionSpecification } = obj;
   const { properties } = obj;
   if (properties && Object.keys(properties).length > 0) {
     Object.entries(properties)
@@ -118,7 +136,7 @@ const renderObjectFields = (
       );
       break;
     case 'object':
-      renderTextFields(
+      toTextField(
         element[1],
         handleInputChange,
         handleCheckBoxChange,

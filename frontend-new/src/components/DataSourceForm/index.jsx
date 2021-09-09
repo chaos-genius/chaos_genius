@@ -51,7 +51,6 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const [error, setError] = useState('');
   const [formError, setFormError] = useState({});
   const [status, setStatus] = useState('');
-  var fields = [];
   const history = useHistory();
   const connectionType = JSON.parse(localStorage.getItem('connectionType'));
   const {
@@ -203,11 +202,8 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
 
   if (isLoading) {
     return (
-      <div className="loader">
-        <div className="loading-text">
-          <p>loading</p>
-          <span></span>
-        </div>
+      <div className="load ">
+        <div className="preload"></div>
       </div>
     );
   } else {
@@ -256,10 +252,8 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             handleInputChange,
             handleCheckboxChange,
             dsFormData,
-            formError,
-            fields
+            formError
           )}
-        {fields}
         {/* for Google Sheet */}
         {/*Paste here*/}
         {/* end of Google Analytics */}

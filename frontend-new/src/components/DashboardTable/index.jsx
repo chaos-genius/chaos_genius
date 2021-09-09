@@ -55,7 +55,7 @@ const DashboardTable = ({ rcaAnalysisData }) => {
                   .map((data, index) => {
                     return (
                       <tr key={index}>
-                        <td>{data.string}</td>
+                        <td className="date-column-formated">{data.string}</td>
                         <td className="date-column-formated">
                           {data.indices_in_group}
                         </td>
@@ -119,7 +119,7 @@ const DashboardTable = ({ rcaAnalysisData }) => {
                 rcaAnalysisData.data_table.slice(0, 50).map((data, index) => {
                   return (
                     <tr key={index}>
-                      <td>{data.subgroup}</td>
+                      <td className="date-column-formated">{data.subgroup}</td>
                       <td className="date-column-formated">{data.g1_agg}</td>
                       <td className="date-column-formated">{data.g1_count}</td>
                       <td className="date-column-formated">{data.g2_agg}</td>

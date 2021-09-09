@@ -65,11 +65,8 @@ const Dashboard = () => {
 
   if (sidebarLoading) {
     return (
-      <div className="loader loader-page">
-        <div className="loading-text">
-          <p>loading</p>
-          <span></span>
-        </div>
+      <div className="load loader-page">
+        <div className="preload"></div>
       </div>
     );
   } else {

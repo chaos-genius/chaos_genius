@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import Modal from 'react-modal';
 
@@ -9,10 +9,54 @@ import Success from '../../assets/images/successful.svg';
 
 import './modal.scss';
 
+import store from '../../redux/store';
+
+const SETTING_RESET = {
+  type: 'SETTING_RESET'
+};
+
+const RESET_ACTION = {
+  type: 'CREATE_RESPONSE_RESET'
+};
+
+const KPI_RESET = {
+  type: 'KPI_RESET'
+};
+
 const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
-  // const [isOpen, setIsOpen] = useState(false);
+  const history = useHistory();
+
   const closeModal = () => {
     setIsOpen(false);
+    store.dispatch(SETTING_RESET);
+    store.dispatch(RESET_ACTION);
+    store.dispatch(KPI_RESET);
+  };
+
+  const onNavigate = () => {
+    if (text === 'kpi') {
+      store.dispatch(KPI_RESET);
+      history.push('/onboarding/3');
+    } else if (text === 'datasource') {
+      store.dispatch(RESET_ACTION);
+      history.push('/onboarding/2');
+    } else {
+      store.dispatch(SETTING_RESET);
+      history.push('/dashboard/autorca');
+    }
+    setIsOpen(false);
+  };
+  const onViewHandler = () => {
+    if (text === 'kpi') {
+      store.dispatch(KPI_RESET);
+      history.push('/kpiexplorer');
+    } else if (text === 'datasource') {
+      store.dispatch(RESET_ACTION);
+      history.push('/datasource');
+    } else if (text === 'activateanalytics') {
+      store.dispatch(SETTING_RESET);
+      history.push('/dashboard/autorca');
+    }
   };
   return (
     <Modal isOpen={isOpen} shouldCloseOnOverlayClick={false}>
@@ -30,42 +74,43 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
               ? 'Added a KPI'
               : text === ' datasource'
               ? 'Added a Data Source'
+              : text === 'activateanalytics'
+              ? 'Added a Activate Analytics'
               : 'created a Dashboard'}
           </h3>
           <p>
             {text === 'kpi'
-              ? 'Next step is to create dashbaords for monitoring.'
+              ? 'Next step is to create dashboards for monitoring.'
               : text === 'datasource'
               ? 'Next step is to set up KPI definitions.'
+              : text === 'activateanalytics'
+              ? 'Next step is to create dashboards for monitoring.'
               : 'Next step is to Activate the Analytics'}
           </p>
           <div className="next-step-navigate">
-            <button className="btn black-button">
+            <button className="btn black-button" onClick={() => onNavigate()}>
               <span>
                 {text === 'kpi'
-                  ? 'Create Dashboard'
+                  ? ' Add Activate Analytics'
                   : text === 'datasource'
                   ? 'Add KPI'
-                  : 'Activate Analytics'}
+                  : text === 'activateanalytics'
+                  ? 'Go to Dashboard'
+                  : 'Go to Dashboard'}
               </span>
             </button>
           </div>
-          <Link
-            to={
-              text === 'kpi'
-                ? '/kpiexplorer'
-                : text === 'datasource'
-                ? '/datasource'
-                : ''
-            }>
+          <div onClick={() => onViewHandler()}>
             <label>
               {text === 'kpi'
                 ? 'View added KPI’s'
                 : text === 'datasource'
                 ? 'View added data source'
+                : text === 'activateanalytics'
+                ? 'View Activate Analytics'
                 : 'View created dashboard'}
             </label>
-          </Link>
+          </div>
         </div>
       </div>
     </Modal>

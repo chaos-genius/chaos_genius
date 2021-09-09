@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Up from '../../assets/images/up.svg';
 import Down from '../../assets/images/down.svg';
 import Next from '../../assets/images/next.svg';
+import Arrow from '../../assets/images/table/subvalue.svg';
 
 import '../../assets/styles/table.scss';
 
@@ -76,13 +77,28 @@ const TreeNode = ({ node, child }) => {
 
   return (
     <>
-      <tr className={child ? 'child-row' : ''}>
+      <tr
+        className={
+          !hasChild ? 'last-child' : child ? 'child-row' : 'parent-row'
+        }>
         <td
           onClick={() => setChildVisiblity((v) => !v)}
-          className={childVisible ? 'child-show' : child ? 'child-arrow' : ''}>
-          {hasChild && <img src={Next} alt="arrow"></img>}
+          className={
+            childVisible && hasChild && !child
+              ? 'child-rotate'
+              : !hasChild && child
+              ? 'last-child'
+              : ''
+          }>
+          {child && childVisible && hasChild ? (
+            <img src={Arrow} alt="Child"></img>
+          ) : hasChild ? (
+            <img src={Next} alt="arrow"></img>
+          ) : (
+            ''
+          )}
         </td>
-        <td>{node.subgroup}</td>
+        <td className="date-column-formated">{node.subgroup}</td>
         <td className="date-column-formated">{node.g1_agg}</td>
         <td className="date-column-formated">{node.g1_count}</td>
         <td className="date-column-formated">{node.g2_agg}</td>

@@ -14,6 +14,12 @@ import './kpiexplorer.scss';
 
 import { getAllKpiExplorer } from '../../redux/actions';
 
+import store from '../../redux/store';
+
+const KPI_RESET = {
+  type: 'KPI_RESET'
+};
+
 const KpiExplorer = () => {
   const dispatch = useDispatch();
 
@@ -27,6 +33,7 @@ const KpiExplorer = () => {
   );
 
   useEffect(() => {
+    store.dispatch(KPI_RESET);
     dispatchGetAllKpiExplorer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
@@ -38,7 +45,7 @@ const KpiExplorer = () => {
   useEffect(() => {
     if (kpiSearch !== '') {
       searchDataSource();
-    } else {
+    } else if (kpiExplorerList) {
       setKpiExplorerData(kpiExplorerList);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -81,11 +88,8 @@ const KpiExplorer = () => {
 
   if (isLoading) {
     return (
-      <div className="loader loader-page">
-        <div className="loading-text">
-          <p>loading</p>
-          <span></span>
-        </div>
+      <div className="load loader-page">
+        <div className="preload"></div>
       </div>
     );
   } else {
@@ -116,11 +120,14 @@ const KpiExplorer = () => {
           </div>
           {/* table section */}
           <div className="table-section">
-            <KPITable
-              kpiData={kpiExplorerData}
-              kpiSearch={kpiSearch}
-              changeData={setData}
-            />
+            {kpiExplorerList && (
+              <KPITable
+                kpiData={kpiExplorerData}
+                kpiSearch={kpiSearch}
+                changeData={setData}
+                kpiLoading={isLoading}
+              />
+            )}
           </div>
         </div>
       </div>

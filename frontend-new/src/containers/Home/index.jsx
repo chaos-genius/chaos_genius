@@ -14,6 +14,15 @@ const Home = () => {
   const dispatch = useDispatch();
 
   const { onboardingList } = useSelector((state) => state.onboarding);
+  // const onboardingList = {
+  //   completion_precentage: '0',
+  //   steps: [
+  //     { step_done: false, step_name: 'Add Data Source', step_no: 1 },
+  //     { step_done: false, step_name: 'Add KPI', step_no: 2 },
+  //     { step_done: false, step_name: 'Activate Analytics', step_no: 3 },
+  //     { step_done: false, step_name: 'Setup Smart Alert', step_no: 4 }
+  //   ]
+  // };
 
   useEffect(() => {
     dispatchOnboarding();
@@ -105,11 +114,8 @@ const Home = () => {
                 return <></>;
               })
             ) : (
-              <div className="loader loader-page">
-                <div className="loading-text">
-                  <p>loading</p>
-                  <span></span>
-                </div>
+              <div className="load home-page-loader">
+                <div className="preload"></div>
               </div>
             )}
           </div>

@@ -4,9 +4,13 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  justify-content: space-between;
+  // justify-content: space-between;
   .setup-card {
     width: 23.5%;
+    margin-right: 22px;
+    &:last-child {
+      margin-right: 0px;
+    }
   }
 }
 .progress-option {

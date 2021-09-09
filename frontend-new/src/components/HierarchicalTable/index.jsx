@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import Up from '../../assets/images/up.svg';
 import Down from '../../assets/images/down.svg';
-import Next from '../../assets/images/table/close.svg';
+import Next from '../../assets/images/next.svg';
 import Arrow from '../../assets/images/table/subvalue.svg';
 
 import '../../assets/styles/table.scss';
@@ -80,11 +80,19 @@ const TreeNode = ({ node, child }) => {
       <tr className={child ? 'child-row' : ''}>
         <td
           onClick={() => setChildVisiblity((v) => !v)}
-          className={child ? 'child-show' : ''}>
-          {hasChild && !child ? (
+          className={
+            childVisible && hasChild && !child
+              ? 'child-rotate'
+              : 'child-show'
+              ? child
+              : 'child-arrow'
+          }>
+          {child && childVisible && hasChild ? (
+            <img src={Arrow}></img>
+          ) : hasChild ? (
             <img src={Next} alt="arrow"></img>
           ) : (
-            <img src={Arrow} alt="childArrow"></img>
+            ''
           )}
         </td>
         <td>{node.subgroup}</td>

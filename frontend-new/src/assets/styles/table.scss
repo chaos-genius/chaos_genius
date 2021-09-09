@@ -36,11 +36,14 @@
           vertical-align: middle;
           padding: 16px;
           &.child-arrow {
-            padding-left: 21px;
+            padding-left: 30px;
+          }
+          &.child-rotate {
+            transform: rotate(90deg);
           }
           &.child-show {
-            // transform: rotate(90deg);
-            padding-left: 30px;
+            //transform: rotate(90deg);
+            padding-left: 32px;
           }
           &.date-column-formated {
             font-weight: $font-weight-400;

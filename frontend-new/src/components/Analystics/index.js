@@ -41,10 +41,14 @@ const Analystics = ({ kpi, setAnalystics }) => {
     sensitivity: '',
     frequency: ''
   });
-  const { kpiEditData, kpiEditLoading, kpiSettingLoading, kpiSettingData } =
-    useSelector((state) => {
-      return state.setting;
-    });
+  const {
+    kpiEditData,
+    kpiEditLoading,
+    kpiSettingLoading,
+    kpiSettingData
+  } = useSelector((state) => {
+    return state.setting;
+  });
   useEffect(() => {
     dispatch(kpiEditSetup(kpi));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -109,10 +113,7 @@ const Analystics = ({ kpi, setAnalystics }) => {
       let selected = seasonality.concat(e.target.value);
       setSeasonality(selected);
     } else if (e.target.checked === false) {
-      const index = seasonality.indexOf(e.target.value);
-      if (index > -1) {
-        seasonality.splice(index, 1);
-      }
+      setSeasonality(seasonality.filter((item) => item !== e.target.value));
     }
   };
   if (kpiEditLoading) {

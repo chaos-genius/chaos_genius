@@ -78,10 +78,12 @@ def get_all_kpis():
     results = Kpi.query.all()
 
     ret = []
+    static = None
+
     for ele in results:
         res = {}
 
-        if ele.id in [106, 81, 105, 120, 118, 116, 117, 115, 110, 113, 114, 109]: #these are kpis for which no data is available
+        if ele.id in [106, 81, 105, 120, 118, 116, 117, 115, 110, 113, 114, 109, 121]: #these are kpis for which no data is available
             continue # this is just a temporary fix so that code works
 
         for key in ['name', 'metric', 'id']:
@@ -114,7 +116,8 @@ def get_all_kpis():
 
         res['weekly_anomaly_count'] = random.randint(1, 20) #TODO
         res['monthly_anomaly_count'] = random.randint(20, 40) #TODO
-        res['graph_data'] = [] #TODO
+        res['graph_data'] = kpi_line_data(kpi_info, connection_info) if static is None else static
+        static = res['graph_data'] if static is None else static
 
         ret.append(res)
 

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import cast
 
-from celery import group
+from celery import chain, group
 from celery.app.base import Celery
 from sqlalchemy.orm.attributes import flag_modified
 
@@ -21,16 +21,55 @@ def add_together(a, b):
 
 @celery.task
 def anomaly_single_kpi(kpi_id, end_date=None):
+    """Run anomaly detection for the given KPI ID.
+
+    Must be run as a celery task.
+    """
+
     status = run_anomaly_for_kpi(kpi_id, end_date)
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
     anomaly_params = kpi.anomaly_params
 
     if status:
         print(f"Completed the anomaly for KPI ID: {kpi_id}.")
-        anomaly_params["scheduler_params"]["status"] = "completed"
+        anomaly_params["scheduler_params"]["anomaly_status"] = "completed"
     else:
         print(f"Anomaly failed for the for KPI ID: {kpi_id}.")
-        anomaly_params["scheduler_params"]["status"] = "failed"
+        anomaly_params["scheduler_params"]["anomaly_status"] = "failed"
+
+    flag_modified(kpi, "anomaly_params")
+    kpi.update(commit=True, anomaly_params=anomaly_params)
+
+    return status
+
+
+@celery.task
+def rca_single_kpi(anomaly_status: bool, kpi_id: int):
+    """Run RCA for the given KPI ID.
+
+    Must be run as a celery task.
+    """
+    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
+    anomaly_params = kpi.anomaly_params
+
+    if not anomaly_status:
+        print(f"Skipping RCA since anomaly failed for KPI ID: {kpi_id}")
+
+        anomaly_params["scheduler_params"]["rca_status"] = "failed"
+        flag_modified(kpi, "anomaly_params")
+        kpi.update(commit=True, anomaly_params=anomaly_params)
+
+        return anomaly_status
+
+    # FIXME: call appropriate RCA wrapper fn here
+    status = True
+
+    if status:
+        print(f"Completed RCA for KPI ID: {kpi_id}")
+        anomaly_params["scheduler_params"]["rca_status"] = "completed"
+    else:
+        print(f"RCA FAILED for KPI ID: {kpi_id}")
+        anomaly_params["scheduler_params"]["rca_status"] = "failed"
 
     flag_modified(kpi, "anomaly_params")
     kpi.update(commit=True, anomaly_params=anomaly_params)
@@ -90,13 +129,16 @@ def anomaly_scheduler():
 
         if not already_run and current_time > scheduled_time:
             print(f"Running anomaly for KPI: {kpi.id}")
-            task_group.append(anomaly_single_kpi.s(kpi.id))
+            task_group.append(
+                chain(anomaly_single_kpi.s(kpi.id), rca_single_kpi.s(kpi.id))
+            )
 
             new_scheduler_params = (
                 scheduler_params if scheduler_params is not None else {}
             )
             new_scheduler_params["last_scheduled_time"] = current_time.isoformat()
-            new_scheduler_params["status"] = "in-progress"
+            new_scheduler_params["anomaly_status"] = "in-progress"
+            new_scheduler_params["rca_status"] = "in-progress"
             anomaly_params = kpi.anomaly_params
             anomaly_params["scheduler_params"] = new_scheduler_params
 

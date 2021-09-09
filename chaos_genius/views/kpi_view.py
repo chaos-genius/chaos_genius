@@ -16,6 +16,7 @@ from flask import (
 )
 import numpy as np
 import pandas as pd
+import random
 
 from chaos_genius.extensions import cache, db
 from chaos_genius.databases.models.kpi_model import Kpi
@@ -68,6 +69,56 @@ def kpi():
             if data_source['active'] == True:
                 kpis.append(data_source)
         return jsonify({"count": len(kpis), "data": kpis})
+
+
+@blueprint.route("/get-all-kpis-dashboard", methods=["GET"])
+def get_all_kpis():
+    """returning all kpis"""
+
+    results = Kpi.query.all()
+
+    ret = []
+    for ele in results:
+        res = {}
+
+        if ele.id in [106, 81, 105, 120, 118, 116, 117, 115, 110, 113, 114, 109]: #these are kpis for which no data is available
+            continue # this is just a temporary fix so that code works
+
+        for key in ['name', 'metric', 'id']:
+            res[key] = ele.__dict__[key]
+            
+        kpi_info = get_kpi_data_from_id(ele.id)
+        connection_info = DataSource.get_by_id(kpi_info["data_source"]).as_dict
+        
+        aggregation_type = ele.aggregation
+
+        try:
+            aggregate_data_week = kpi_aggregation(kpi_info, connection_info, timeline = 'wow')
+            aggregate_data_month = kpi_aggregation(kpi_info, connection_info, timeline = 'mom')
+
+            res['prev_week'] = aggregate_data_week['panel_metrics']['grp1_metrics'][aggregation_type]
+            res['this_week'] = aggregate_data_week['panel_metrics']['grp2_metrics'][aggregation_type]
+            res['week_change'] = res['this_week'] - res['prev_week']
+            res['prev_month'] = aggregate_data_month['panel_metrics']['grp1_metrics'][aggregation_type]
+            res['this_month'] = aggregate_data_month['panel_metrics']['grp2_metrics'][aggregation_type]
+            res['month_change'] = res['this_month'] - res['prev_month']
+
+        except:
+
+            res['prev_week'] = -1
+            res['this_week'] = -1
+            res['week_change'] = -1
+            res['prev_month'] = -1
+            res['this_month'] = -1
+            res['month_change'] = -1
+
+        res['weekly_anomaly_count'] = random.randint(1, 20) #TODO
+        res['monthly_anomaly_count'] = random.randint(20, 40) #TODO
+        res['graph_data'] = [] #TODO
+
+        ret.append(res)
+
+    return jsonify({"data": ret})
 
 
 @blueprint.route("/<int:kpi_id>/disable", methods=["GET"])

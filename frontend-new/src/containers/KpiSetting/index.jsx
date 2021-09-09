@@ -28,7 +28,7 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
   }, []);
 
   useEffect(() => {
-    if (analystics) {
+    if (analystics && onboarding) {
       setModal(true);
       setText('activateanalytics');
     } // eslint-disable-next-line react-hooks/exhaustive-deps

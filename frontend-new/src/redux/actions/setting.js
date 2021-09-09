@@ -1,6 +1,9 @@
-import { postRequest } from '../../utils/http-helper';
+import { getRequest, postRequest } from '../../utils/http-helper';
 import { BASE_URL } from '../../utils/url-helper';
 import {
+  KPIEDITFAILURE,
+  KPIEDITREQUEST,
+  KPIEDITSUCCESS,
   KPISETTINGFAILURE,
   KPISETTINGREQUEST,
   KPISETTINGSUCCESS
@@ -41,6 +44,41 @@ export const kpiSettingSetup = (kpi, kpiData) => {
       dispatch(kpiSettingFailure());
     } else if (data && status === 200) {
       dispatch(kpiSettingSuccess(data));
+    }
+  };
+};
+
+export const kpiEditRequest = () => {
+  return {
+    type: KPIEDITREQUEST
+  };
+};
+
+export const kpiEditSuccess = (response) => {
+  return {
+    type: KPIEDITSUCCESS,
+    data: response
+  };
+};
+
+export const kpiEditFailure = (response) => {
+  return {
+    type: KPIEDITFAILURE,
+    data: response
+  };
+};
+
+export const kpiEditSetup = (kpi) => {
+  return async (dispatch) => {
+    dispatch(kpiEditRequest());
+    const URL = `${BASE_URL}/api/anomaly-data/${kpi}/anomaly-params`;
+    const { data, error, status } = await getRequest({
+      url: URL
+    });
+    if (error) {
+      dispatch(kpiEditFailure());
+    } else if (data && status === 200) {
+      dispatch(kpiEditSuccess(data));
     }
   };
 };

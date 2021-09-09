@@ -6,7 +6,7 @@ import Tooltip from 'react-tooltip-lite';
 import Help from '../../assets/images/help.svg';
 
 import './analystics.scss';
-import { kpiSettingSetup } from '../../redux/actions';
+import { kpiSettingSetup, kpiEditSetup } from '../../redux/actions';
 import { useDispatch, useSelector } from 'react-redux';
 
 const modalOptions = [
@@ -30,7 +30,7 @@ const frequencyOptions = [
 const Analystics = ({ kpi, setAnalystics }) => {
   const dispatch = useDispatch();
   const [modelName, setModalName] = useState('');
-  const [sensitivity, setSensitivity] = useState('');
+  const [Sensitivity, setSensitivity] = useState('');
   const [frequency, setFrequency] = useState('');
   const [seasonality, setSeasonality] = useState([]);
   const [error, setError] = useState({
@@ -38,10 +38,28 @@ const Analystics = ({ kpi, setAnalystics }) => {
     sensitivity: '',
     frequency: ''
   });
-  const { kpiSettingLoading, kpiSettingData } = useSelector((state) => {
+  const {
+    kpiEditData,
+    kpiEditLoading,
+    kpiSettingLoading,
+    kpiSettingData
+  } = useSelector((state) => {
     return state.setting;
   });
-  console.log('DATA:', kpiSettingData);
+  useEffect(() => {
+    dispatch(kpiEditSetup(kpi));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kpi]);
+
+  useEffect(() => {
+    if (kpiEditData && kpiEditData?.anomaly_params !== null) {
+      setSensitivity(kpiEditData?.anomaly_params?.sensitivity || '');
+      setModalName(kpiEditData?.anomaly_params?.model_name || '');
+      setFrequency(kpiEditData?.anomaly_params?.frequency || '');
+      setSeasonality(kpiEditData?.anomaly_params?.seasonality || []);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kpiEditData]);
 
   useEffect(() => {
     if (
@@ -59,7 +77,7 @@ const Analystics = ({ kpi, setAnalystics }) => {
     if (modelName === '') {
       obj['modelName'] = 'Enter Model';
     }
-    if (sensitivity === '') {
+    if (Sensitivity === '') {
       obj['sensitivity'] = 'Enter Sensitivity';
     }
     if (frequency === '') {
@@ -75,7 +93,7 @@ const Analystics = ({ kpi, setAnalystics }) => {
         anomaly_params: {
           anomaly_period: 90,
           model_name: modelName,
-          sensitivity: sensitivity,
+          sensitivity: Sensitivity,
           seasonality: seasonality,
           frequency: frequency,
           scheduler_params: {
@@ -98,178 +116,195 @@ const Analystics = ({ kpi, setAnalystics }) => {
       }
     }
   };
-
-  return (
-    <>
-      <div className="dashboard-subheader">
-        <div className="common-tab configure-tab">
-          <ul>
-            <li>Configure Anomoly Detector for Selected KPI</li>
-          </ul>
+  if (kpiEditLoading) {
+    return (
+      <div className="loader">
+        <div className="loading-text">
+          <p>loading</p>
+          <span></span>
         </div>
       </div>
-      <div className="form-container">
-        <div className="form-group">
-          <label>Time Window</label>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="90 Days"
-            disabled
-          />
-        </div>
-        <div className="form-group">
-          <label>Model Frequency</label>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Daily"
-            disabled
-          />
-        </div>
-        <div className="form-group">
-          <label>Select a Model</label>
-          <Select
-            options={modalOptions}
-            classNamePrefix="selectcategory"
-            placeholder="select"
-            isSearchable={false}
-            onChange={(e) => {
-              setModalName(e.value);
-              setError({ ...error, modelName: '' });
-            }}
-          />
-          {error.modelName && (
-            <div className="connection__fail">
-              <p>{error.modelName}</p>
-            </div>
-          )}
-        </div>
-        <div className="form-group">
-          <label className="help-label">
-            Sensitivity
-            <Tooltip
-              className="sensitivity-tooltip"
-              direction="right"
-              content={
-                <span>
-                  High sensitivity leads to high granularity detection leading
-                  and higher number of alerts
-                </span>
-              }>
-              <img src={Help} alt="Help" />
-            </Tooltip>
-          </label>
-          <Select
-            options={sensitivityOptions}
-            classNamePrefix="selectcategory"
-            placeholder="select"
-            isSearchable={false}
-            onChange={(e) => {
-              setSensitivity(e.value);
-              setError({ ...error, sensitivity: '' });
-            }}
-          />
-          {error.sensitivity && (
-            <div className="connection__fail">
-              <p>{error.sensitivity}</p>
-            </div>
-          )}
-        </div>
-        <div className="form-group">
-          <label className="help-label">
-            Time Series Frequency
-            <Tooltip
-              className="timeseriesfrequency-tooltip"
-              direction="right"
-              content={
-                <span>
-                  time series granularity to be considered for anomaly detection
-                </span>
-              }>
-              <img src={Help} alt="Help" />
-            </Tooltip>
-          </label>
-          <Select
-            options={frequencyOptions}
-            classNamePrefix="selectcategory"
-            placeholder="select"
-            isSearchable={false}
-            onChange={(e) => {
-              setFrequency(e.value);
-              setError({ ...error, frequency: '' });
-            }}
-          />
-          {error.frequency && (
-            <div className="connection__fail">
-              <p>{error.frequency}</p>
-            </div>
-          )}
-        </div>
-        <div className="form-group">
-          <label>Expected Seasonality in Data</label>
-          <div className="seasonality-setting">
-            <div className="form-check check-box">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                value="M"
-                name="Month"
-                onChange={(e) => {
-                  onSeasonalityChange(e);
-                }}
-              />
-              <label for="Monthly">Monthly</label>
-            </div>
-            <div className="form-check check-box">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                value="W"
-                name="week"
-                onChange={(e) => {
-                  onSeasonalityChange(e);
-                }}
-              />
-              <label for="Weekly">Weekly</label>
-            </div>
-            <div className="form-check check-box">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                value="D"
-                name="daily"
-                onChange={(e) => {
-                  onSeasonalityChange(e);
-                }}
-              />
-              <label for="Daily">Daily</label>
-            </div>
+    );
+  } else {
+    return (
+      <>
+        <div className="dashboard-subheader">
+          <div className="common-tab configure-tab">
+            <ul>
+              <li>Configure Anomoly Detector for Selected KPI</li>
+            </ul>
           </div>
         </div>
-        <div className="form-action analystics-button">
-          <button
-            className={
-              kpiSettingLoading
-                ? 'btn black-button btn-loading'
-                : 'btn black-button'
-            }
-            onClick={() => {
-              onSettingSave();
-            }}>
-            <div className="btn-spinner">
-              <div className="spinner-border" role="status">
-                <span className="visually-hidden">Loading...</span>
+        <div className="form-container">
+          <div className="form-group">
+            <label>Time Window</label>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="90 Days"
+              disabled
+            />
+          </div>
+          <div className="form-group">
+            <label>Model Frequency</label>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Daily"
+              disabled
+            />
+          </div>
+          <div className="form-group">
+            <label>Select a Model</label>
+            <Select
+              options={modalOptions}
+              classNamePrefix="selectcategory"
+              placeholder="select"
+              value={{ value: modelName, label: modelName }}
+              isSearchable={false}
+              onChange={(e) => {
+                setModalName(e.value);
+                setError({ ...error, modelName: '' });
+              }}
+            />
+            {error.modelName && (
+              <div className="connection__fail">
+                <p>{error.modelName}</p>
               </div>
-              <span>Loading...</span>
+            )}
+          </div>
+          <div className="form-group">
+            <label className="help-label">
+              Sensitivity
+              <Tooltip
+                className="sensitivity-tooltip"
+                direction="right"
+                content={
+                  <span>
+                    High sensitivity leads to high granularity detection leading
+                    and higher number of alerts
+                  </span>
+                }>
+                <img src={Help} alt="Help" />
+              </Tooltip>
+            </label>
+            <Select
+              options={sensitivityOptions}
+              classNamePrefix="selectcategory"
+              value={{ value: Sensitivity, label: Sensitivity }}
+              placeholder="select"
+              isSearchable={false}
+              onChange={(e) => {
+                setSensitivity(e.value);
+                setError({ ...error, sensitivity: '' });
+              }}
+            />
+            {error.sensitivity && (
+              <div className="connection__fail">
+                <p>{error.sensitivity}</p>
+              </div>
+            )}
+          </div>
+          <div className="form-group">
+            <label className="help-label">
+              Time Series Frequency
+              <Tooltip
+                className="timeseriesfrequency-tooltip"
+                direction="right"
+                content={
+                  <span>
+                    time series granularity to be considered for anomaly
+                    detection
+                  </span>
+                }>
+                <img src={Help} alt="Help" />
+              </Tooltip>
+            </label>
+            <Select
+              options={frequencyOptions}
+              classNamePrefix="selectcategory"
+              placeholder="select"
+              isSearchable={false}
+              value={{ value: frequency, label: frequency }}
+              onChange={(e) => {
+                setFrequency(e.value);
+                setError({ ...error, frequency: '' });
+              }}
+            />
+            {error.frequency && (
+              <div className="connection__fail">
+                <p>{error.frequency}</p>
+              </div>
+            )}
+          </div>
+          <div className="form-group">
+            <label>Expected Seasonality in Data</label>
+            <div className="seasonality-setting">
+              <div className="form-check check-box">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  value="M"
+                  checked={seasonality.includes('M')}
+                  name="Month"
+                  onChange={(e) => {
+                    onSeasonalityChange(e);
+                  }}
+                />
+                <label for="Monthly">Monthly</label>
+              </div>
+              <div className="form-check check-box">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  value="W"
+                  name="week"
+                  checked={seasonality.includes('W')}
+                  onChange={(e) => {
+                    onSeasonalityChange(e);
+                  }}
+                />
+                <label for="Weekly">Weekly</label>
+              </div>
+              <div className="form-check check-box">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  value="D"
+                  name="daily"
+                  checked={seasonality.includes('D')}
+                  onChange={(e) => {
+                    onSeasonalityChange(e);
+                  }}
+                />
+                <label for="Daily">Daily</label>
+              </div>
             </div>
-            <div className="btn-content">
-              <span>Set Up</span>
-            </div>
-          </button>
+          </div>
+          <div className="form-action analystics-button">
+            <button
+              className={
+                kpiSettingLoading
+                  ? 'btn black-button btn-loading'
+                  : 'btn black-button'
+              }
+              onClick={() => {
+                onSettingSave();
+              }}>
+              <div className="btn-spinner">
+                <div className="spinner-border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                <span>Loading...</span>
+              </div>
+              <div className="btn-content">
+                <span>Set Up</span>
+              </div>
+            </button>
+          </div>
         </div>
-      </div>
-    </>
-  );
+      </>
+    );
+  }
 };
 export default Analystics;

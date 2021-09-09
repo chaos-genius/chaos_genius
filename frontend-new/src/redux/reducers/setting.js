@@ -1,4 +1,7 @@
 import {
+  KPIEDITREQUEST,
+  KPIEDITFAILURE,
+  KPIEDITSUCCESS,
   KPISETTINGFAILURE,
   KPISETTINGREQUEST,
   KPISETTINGSUCCESS
@@ -7,10 +10,33 @@ import {
 const initialState = {
   kpiSettingData: [],
   kpiSettingLoading: false,
-  kpiSettingError: false
+  kpiSettingError: false,
+  kpiEditData: [],
+  kpiEditLoading: false,
+  kpiEditError: []
 };
 export const setting = (state = initialState, action) => {
   switch (action.type) {
+    case KPIEDITREQUEST: {
+      return {
+        ...state,
+        kpiEditLoading: true
+      };
+    }
+    case KPIEDITSUCCESS: {
+      return {
+        ...state,
+        kpiEditData: action.data,
+        kpiEditLoading: false
+      };
+    }
+    case KPIEDITFAILURE: {
+      return {
+        ...state,
+        kpiEditError: action.data,
+        kpiEditLoading: false
+      };
+    }
     case KPISETTINGREQUEST: {
       return {
         ...state,
@@ -34,7 +60,8 @@ export const setting = (state = initialState, action) => {
     }
     case 'SETTING_RESET': {
       return {
-        kpiSettingData: []
+        kpiSettingData: [],
+        kpiEditData: []
       };
     }
     default:

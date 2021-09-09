@@ -77,15 +77,18 @@ const TreeNode = ({ node, child }) => {
 
   return (
     <>
-      <tr className={child ? 'child-row' : ''}>
+      <tr
+        className={
+          !hasChild ? 'last-child' : child ? 'child-row' : 'parent-row'
+        }>
         <td
           onClick={() => setChildVisiblity((v) => !v)}
           className={
             childVisible && hasChild && !child
               ? 'child-rotate'
-              : 'child-show'
-              ? child
-              : 'child-arrow'
+              : !hasChild && child
+              ? 'last-child'
+              : ''
           }>
           {child && childVisible && hasChild ? (
             <img src={Arrow} alt="Child"></img>

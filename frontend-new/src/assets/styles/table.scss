@@ -30,6 +30,14 @@
             }
           }
         }
+        &.last-child {
+          background-color: $grey_variation-2;
+          td {
+            &:first-child {
+              padding-left: 40px !important;
+            }
+          }
+        }
         &:hover {
           background-color: $green_variation-2;
           .edit-information {
@@ -54,7 +62,7 @@
           vertical-align: middle;
           padding: 16px;
           &.child-arrow {
-            padding-left: 30px;
+            //padding-left: 30px;
           }
           &.child-rotate {
             img {
@@ -63,7 +71,7 @@
           }
           &.child-show {
             //transform: rotate(90deg);
-            padding-left: 32px;
+            //padding-left: 32px;
           }
           &.date-column-formated {
             font-weight: $font-weight-400;

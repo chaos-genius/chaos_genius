@@ -30,12 +30,13 @@ const frequencyOptions = [
   { value: 'hourly', label: 'Hourly' }
 ];
 
-const Analystics = ({ kpi, setAnalystics }) => {
+const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   const dispatch = useDispatch();
   const [modelName, setModalName] = useState('');
   const [Sensitivity, setSensitivity] = useState('');
   const [frequency, setFrequency] = useState('');
   const [seasonality, setSeasonality] = useState([]);
+  const [isModalOpen, setModalOpen] = useState(false);
   const [error, setError] = useState({
     modelName: '',
     sensitivity: '',
@@ -49,6 +50,7 @@ const Analystics = ({ kpi, setAnalystics }) => {
   } = useSelector((state) => {
     return state.setting;
   });
+
   useEffect(() => {
     dispatch(kpiEditSetup(kpi));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -67,9 +69,15 @@ const Analystics = ({ kpi, setAnalystics }) => {
   useEffect(() => {
     if (
       kpiSettingData &&
-      kpiSettingData.msg === 'Successfully updated Anomaly params'
+      kpiSettingData.msg === 'Successfully updated Anomaly params' &&
+      onboarding
     ) {
       setAnalystics(true);
+    } else if (
+      kpiSettingData &&
+      kpiSettingData.msg === 'Successfully updated Anomaly params'
+    ) {
+      setModalOpen(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSettingData]);
@@ -116,6 +124,11 @@ const Analystics = ({ kpi, setAnalystics }) => {
       setSeasonality(seasonality.filter((item) => item !== e.target.value));
     }
   };
+
+  const closeModal = () => {
+    setModalOpen(false);
+  };
+
   if (kpiEditLoading) {
     return (
       <div className="load">
@@ -301,13 +314,10 @@ const Analystics = ({ kpi, setAnalystics }) => {
           </div>
         </div>
         <Modal
-          isOpen={false}
+          isOpen={isModalOpen}
           shouldCloseOnOverlayClick={false}
           portalClassName="anomaly-setting-modal">
-          <div
-            className="modal-close"
-            // onClick={closeModal}
-          >
+          <div className="modal-close" onClick={() => closeModal()}>
             <img src={Close} alt="Close" />
           </div>
           <div className="modal-body">

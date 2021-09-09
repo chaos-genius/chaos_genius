@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import Modal from 'react-modal';
 
@@ -24,7 +24,6 @@ const KPI_RESET = {
 };
 
 const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
-  //const location = useHistory().location.pathname.split('/');
   const history = useHistory();
 
   const closeModal = () => {
@@ -43,11 +42,22 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
       history.push('/onboarding/2');
     } else {
       store.dispatch(SETTING_RESET);
-      history.push('/');
+      history.push('/dashboard/autorca');
     }
     setIsOpen(false);
   };
-
+  const onViewHandler = () => {
+    if (text === 'kpi') {
+      store.dispatch(KPI_RESET);
+      history.push('/kpiexplorer');
+    } else if (text === 'datasource') {
+      store.dispatch(RESET_ACTION);
+      history.push('/datasource');
+    } else if (text === 'activateanalytics') {
+      store.dispatch(SETTING_RESET);
+      history.push('/dashboard/autorca');
+    }
+  };
   return (
     <Modal isOpen={isOpen} shouldCloseOnOverlayClick={false}>
       <div className="modal-close" onClick={closeModal}>
@@ -85,19 +95,12 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
                   : text === 'datasource'
                   ? 'Add KPI'
                   : text === 'activateanalytics'
-                  ? 'Create Dashboard'
+                  ? 'Go to Dashboard'
                   : 'Go to Dashboard'}
               </span>
             </button>
           </div>
-          <Link
-            to={
-              text === 'kpi'
-                ? '/kpiexplorer'
-                : text === 'datasource'
-                ? '/datasource'
-                : ''
-            }>
+          <div onClick={() => onViewHandler()}>
             <label>
               {text === 'kpi'
                 ? 'View added KPI’s'
@@ -107,7 +110,7 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
                 ? 'View Activate Analytics'
                 : 'View created dashboard'}
             </label>
-          </Link>
+          </div>
         </div>
       </div>
     </Modal>

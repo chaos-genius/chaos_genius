@@ -101,7 +101,13 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
           </div>
           {/* table section */}
           <div className="table-section">
-            {kpi && <Analystics kpi={kpi} setAnalystics={setAnalystics} />}
+            {kpi && (
+              <Analystics
+                kpi={kpi}
+                setAnalystics={setAnalystics}
+                onboarding={onboarding}
+              />
+            )}
           </div>
         </div>
       </>

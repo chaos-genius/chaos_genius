@@ -11,6 +11,9 @@
     &:last-child {
       margin-right: 0px;
     }
+    &:nth-child(4n + 4) {
+      margin-right: 0px;
+    }
   }
 }
 .progress-option {

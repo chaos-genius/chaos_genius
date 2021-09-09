@@ -86,7 +86,7 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
                   ? 'Add KPI'
                   : text === 'activateanalytics'
                   ? 'Create Dashboard'
-                  : ''}
+                  : 'Go to Dashboard'}
               </span>
             </button>
           </div>

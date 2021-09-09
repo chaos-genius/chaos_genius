@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 
 import Select from 'react-select';
 import Tooltip from 'react-tooltip-lite';
+import Modal from 'react-modal';
 
 import Help from '../../assets/images/help.svg';
+import Close from '../../assets/images/close.svg';
+import Success from '../../assets/images/successful.svg';
 
 import './analystics.scss';
 import { kpiSettingSetup, kpiEditSetup } from '../../redux/actions';
@@ -296,6 +299,25 @@ const Analystics = ({ kpi, setAnalystics }) => {
             </button>
           </div>
         </div>
+        <Modal
+          isOpen={false}
+          shouldCloseOnOverlayClick={false}
+          portalClassName="anomaly-setting-modal">
+          <div
+            className="modal-close"
+            // onClick={closeModal}
+          >
+            <img src={Close} alt="Close" />
+          </div>
+          <div className="modal-body">
+            <div className="modal-success-image">
+              <img src={Success} alt="Success" />
+            </div>
+            <div className="modal-contents">
+              <h3>You have successfully updated</h3>
+            </div>
+          </div>
+        </Modal>
       </>
     );
   }

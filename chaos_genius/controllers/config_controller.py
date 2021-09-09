@@ -8,7 +8,7 @@ def get_modified_config_file(safe_dict, name):
 
 
 def get_config_object(name):
-    return ConfigSetting.query.filter_by(name=name).first()
+    return ConfigSetting.query.filter_by(name=name, active=True).first()
 
 
 def create_config_object(config_name, config_settings):
@@ -18,7 +18,7 @@ def create_config_object(config_name, config_settings):
 
 def get_all_configurations():
     result = []
-    configs = ConfigSetting.query.all()
+    configs = ConfigSetting.query.filter_by(active=True).all()
 
     for config in configs:
         config_state = get_modified_config_file(config.safe_dict, config.name)

@@ -56,11 +56,11 @@ def get_onboarding_status():
             "step_name": "Activate Analytics",
             "step_done": analytics
         },
-        {
-            "step_no": 4,
-            "step_name": "Setup Smart Alert",
-            "step_done": alerts
-        }
+        # {
+        #     "step_no": 4,
+        #     "step_name": "Setup Smart Alert",
+        #     "step_done": alerts
+        # }
     ]
     completion_precentage = int(len([step for step in steps if step["step_done"]])/len(steps)*100)
     return jsonify({'data': {"steps": steps, "completion_precentage": completion_precentage}})
@@ -92,12 +92,10 @@ def set_config():
             return jsonify({"status": "not_found", "message": "Config doesn't exist"})
         config_obj = get_config_object(config_name)
         if config_obj:
-            config_obj.config_setting = data.get("config_settings", {})
-            config_obj.active = True
+            config_obj.active = False
             config_obj.save(commit=True)
-        else:
-            new_config = create_config_object(config_name, data.get("config_settings", {}))
-            new_config.save(commit=True)
+        new_config = create_config_object(config_name, data.get("config_settings", {}))
+        new_config.save(commit=True)
         return jsonify({"message": f"Config {config_name} has been saved successfully.", "status": "success"})
     else:
         return jsonify({"message": "The request payload is not in JSON format", "status": "failure"})

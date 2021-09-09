@@ -53,7 +53,7 @@ def data_source():
             return jsonify({"error": "The request payload is not in JSON format"})
 
     elif request.method == 'GET':
-        data_sources = DataSource.query.order_by(DataSource.created_at.desc()).all()
+        data_sources = DataSource.query.filter(DataSource.active==True).order_by(DataSource.created_at.desc()).all()
         ds_kpi_count = db.session.query(DataSource.id, func.count(Kpi.id)) \
                     .join(Kpi, Kpi.data_source == DataSource.id) \
                     .filter(DataSource.active==True) \
@@ -153,6 +153,7 @@ def create_data_source():
                 "operations": [
                     {
                         "name": "Normalization",
+                        "workspaceId": connector_client.workspace_id,
                         "operatorConfiguration": {
                             "operatorType": "normalization",
                             "normalization": {
@@ -166,6 +167,8 @@ def create_data_source():
                 }
             }
             connectionRecord = connector_client.create_connection(conn_payload)
+            if not connectionRecord:
+                raise Exception("Connection not created")
             stream_tables = [stream["stream"]["name"] for stream in stream_schema]
             stream_tables = list(map(lambda x: f"{table_prefix}{x}", stream_tables))
             db_config = connector_client.destination_db

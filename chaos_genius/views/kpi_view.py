@@ -116,8 +116,8 @@ def get_all_kpis():
 
         res['weekly_anomaly_count'] = random.randint(1, 20) #TODO
         res['monthly_anomaly_count'] = random.randint(20, 40) #TODO
-        res['graph_data'] = kpi_line_data(kpi_info, connection_info) if static is None else static
-        static = res['graph_data'] if static is None else static
+        res['graph_data'] = kpi_line_data(kpi_info, connection_info) if static is None else static #TODO
+        static = res['graph_data'] if static is None else static #TODO
 
         ret.append(res)
 

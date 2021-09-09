@@ -88,14 +88,14 @@ const TreeNode = ({ node, child }) => {
               : 'child-arrow'
           }>
           {child && childVisible && hasChild ? (
-            <img src={Arrow}></img>
+            <img src={Arrow} alt="Child"></img>
           ) : hasChild ? (
             <img src={Next} alt="arrow"></img>
           ) : (
             ''
           )}
         </td>
-        <td>{node.subgroup}</td>
+        <td className="date-column-formated">{node.subgroup}</td>
         <td className="date-column-formated">{node.g1_agg}</td>
         <td className="date-column-formated">{node.g1_count}</td>
         <td className="date-column-formated">{node.g2_agg}</td>

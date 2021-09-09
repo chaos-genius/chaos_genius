@@ -529,7 +529,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
             </div>
           </div>
           {/*Drill down chart*/}
-          <div
+          {/* <div
             className={
               rcaAnalysisLoading
                 ? 'common-drilldown-graph-none'
@@ -537,7 +537,9 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
                 ? 'common-drilldown-graph'
                 : ''
             }
-            id="chartdivWaterfall"></div>
+            id="chartdivWaterfall"></div> */}
+          <div className="common-drilldown-graph" id="chartdivWaterfall"></div>
+
           {dimension.value === 'multidimension' ? (
             <>
               {rcaAnalysisLoading ? (

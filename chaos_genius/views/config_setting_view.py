@@ -15,12 +15,14 @@ from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.alerts.slack import trigger_overall_kpi_stats
 from chaos_genius.views.kpi_view import kpi_aggregation
+from chaos_genius.databases.models.config_setting_model import ConfigSetting
 from chaos_genius.controllers.config_controller import (
     get_modified_config_file,
     get_config_object,
     create_config_object,
     get_all_configurations
 )
+from chaos_genius.databases.db_utils import chech_editable_field
 
 blueprint = Blueprint("config_settings", __name__)
 
@@ -134,4 +136,35 @@ def test_alert():
         return jsonify({"message": f"Alert has been tested successfully.", "status": status})
     else:
         return jsonify({"error": "The request payload is not in JSON format"})
+
+@blueprint.route("/get-meta-info", methods=["GET"])
+def get_config_meta_data():
+    """Getting all the config Setting Meta."""
+    try:
+        return jsonify({"data": ConfigSetting.meta_info(), "status": "success"})
+    except Exception as err:
+        current_app.logger.info(f"Error in getting meta info for Config Setting: {err}")
+        return jsonify({"message": err, "status": "failure"})
+
+@blueprint.route("/update", methods=["POST"])
+def edit_config_setting():
+    """edit config settings."""
+    status, message = "", ""
+    try:
+        data = request.get_json()
+        config_obj = get_config_object(data.get('config_name'))
+        meta_info = ConfigSetting.meta_info()
+        if config_obj and config_obj.active == True:
+            if chech_editable_field(meta_info,'config_setting'):
+                config_obj.config_setting=data.get('config_setting')
+        
+                config_obj.save(commit=True)
+                status = "success"
+        else:
+            message = "Config setting not found or disabled"
+            status = "failure"
+    except Exception as err:
+        status = "failure"
+        current_app.logger.info(f"Error in updating the Config Setting: {err}")
+    return jsonify({"message": message, "status": status})
 

@@ -79,3 +79,78 @@ class Kpi(PkModel):
             "active": self.active,
             "created_at": self.created_at
         }
+
+    @classmethod
+    def meta_info(cls):
+        return{
+            "name": "Kpi",
+            "table_name": "kpi",
+            "fields":[
+                {
+                    "name": "name",
+                    "is_editable": True,
+                    "is_sensitive": False,
+                },
+                {
+                    "name": "is_certified",
+                    "is_editable": True,
+                    "is_sensitive": False,
+                },
+                {
+                    "name": "data_source",
+                    "is_editable": True,
+                    "is_sensitive": False,
+
+                },
+                {
+                    "name": "kpi_type",
+                    "is_editable": True,
+                    "is_sensitive": False,
+
+                },
+                {
+                    "name": "kpi_query",
+                    "is_editable": True,
+                    "is_sensitive": False,
+
+                },
+                {
+                    "name": "table_name",
+                    "is_editable": True,
+                    "is_sensitive": False,
+
+                },
+                {
+                    "name": "metric",
+                    "is_editable": True,
+                    "is_sensitive": False,
+
+                },
+                {
+                    "name": "aggregation",
+                    "is_editable": True,
+                    "is_sensitive": False,
+
+                },
+                {
+                    "name": "datetime_column",
+                    "is_editable": True,
+                    "is_sensitive": False,
+
+                },
+                {
+                    "name": "filters",
+                    "is_editable": True,
+                    "is_sensitive": False,
+
+                },
+                {
+                    "name": "dimensions",
+                    "is_editable": True,
+                    "is_sensitive": False,
+
+                }
+            ]
+
+        }
+

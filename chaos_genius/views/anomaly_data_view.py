@@ -402,6 +402,11 @@ def validate_partial_anomaly_params(anomaly_params: Dict[str, Any]) -> Tuple[str
                     anomaly_params
                 )
 
+    err, scheduler_params = validate_partial_scheduler_params(anomaly_params["scheduler_params"])
+    if err != "":
+        return err, anomaly_params
+    anomaly_params["scheduler_params"] = scheduler_params
+
     return "", anomaly_params
 
 
@@ -439,9 +444,25 @@ def update_anomaly_params(kpi: Kpi, new_anomaly_params: Dict[str, Any], run_anom
     return new_kpi
 
 
+SCHEDULER_PARAM_FIELDS = {"hour"}
+
+
 def validate_partial_scheduler_params(scheduler_params: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
     """Check if the given *partial* scheduler params have valid keys and values.
 
     see validate_partial_anomaly_params for return value meaning.
     """
+    if "hour" in scheduler_params:
+        hour = scheduler_params["hour"]
+
+        if not isinstance(hour, int):
+            return (
+                f"hour must be an integer number. Got: {repr(hour)}"
+                f" (of type: {type(hour).__name__})",
+                scheduler_params
+            )
+
+        if hour < 0 or hour > 23:
+            return (f"hour must be between 0 and 23 (inclusive). Got: {hour}", scheduler_params)
+
     return "", scheduler_params

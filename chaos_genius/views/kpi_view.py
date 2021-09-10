@@ -199,6 +199,7 @@ def edit_kpi(kpi_id):
     except Exception as err:
         status = "failure"
         current_app.logger.info(f"Error in updating the KPI: {err}")
+        message = str(err)
     return jsonify({"message": message, "status": status})
 
 @blueprint.route("/<int:kpi_id>/get-kpi-info", methods=["GET"])

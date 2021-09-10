@@ -144,9 +144,9 @@ def get_config_meta_data():
         return jsonify({"data": ConfigSetting.meta_info(), "status": "success"})
     except Exception as err:
         current_app.logger.info(f"Error in getting meta info for Config Setting: {err}")
-        return jsonify({"message": err, "status": "failure"})
+        return jsonify({"message": str(err), "status": "failure"})
 
-@blueprint.route("/update", methods=["POST"])
+@blueprint.route("/update", methods=["PUT"])
 def edit_config_setting():
     """edit config settings."""
     status, message = "", ""
@@ -159,12 +159,13 @@ def edit_config_setting():
                 config_obj.config_setting=data.get('config_setting')
         
                 config_obj.save(commit=True)
-                status = "success"
+            status = "success"
         else:
             message = "Config setting not found or disabled"
             status = "failure"
     except Exception as err:
         status = "failure"
         current_app.logger.info(f"Error in updating the Config Setting: {err}")
+        message = str(err)
     return jsonify({"message": message, "status": status})
 

@@ -236,7 +236,7 @@ def get_overall_data(kpi_id, end_date: str, n=90):
         & (AnomalyDataOutput.data_datetime <= end_date)
         & (AnomalyDataOutput.data_datetime >= start_date)
         & (AnomalyDataOutput.anomaly_type == "overall")
-    )
+    ).order_by(AnomalyDataOutput.data_datetime)
 
     results = pd.read_sql(query.statement, query.session.bind)
 
@@ -260,7 +260,7 @@ def get_dq_and_subdim_data(
         & (AnomalyDataOutput.data_datetime >= start_date)
         & (AnomalyDataOutput.anomaly_type == anomaly_type)
         & (AnomalyDataOutput.series_type == series_type)
-    )
+    ).order_by(AnomalyDataOutput.data_datetime)
 
     results = pd.read_sql(query.statement, query.session.bind)
 

@@ -88,7 +88,13 @@ def kpi_anomaly_data_quality(kpi_id):
         kpi_info = get_kpi_data_from_id(kpi_id)
         end_date = get_end_date(kpi_info)
 
-        for dq in ["max", "mean", "count", "missing"]:
+        agg = kpi_info["aggregation"]
+        if agg != "mean":
+            dq_list = ["max", "count", "mean"]
+        else:
+            dq_list = ["max", "count"]
+
+        for dq in dq_list:
             anom_data = get_dq_and_subdim_data(kpi_id, end_date, "dq", dq)
             data.append(anom_data)
 

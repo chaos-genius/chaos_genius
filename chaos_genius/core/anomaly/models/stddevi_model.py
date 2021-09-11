@@ -2,11 +2,10 @@ import pandas as pd
 
 from chaos_genius.core.anomaly.models import AnomalyModel
 
-#FIXME: add accurate threshold values
 STDSENS = {
-    'high': 0.75,
-    'medium': 1.25,
-    'low': 2
+    'high': 0.8,
+    'medium': 0.9,
+    'low': 0.95
 }
 
 class StdDeviModel(AnomalyModel):

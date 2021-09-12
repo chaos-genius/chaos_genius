@@ -39,7 +39,7 @@ class ProphetModel(AnomalyModel):
         # TODO: Add seasonality to model kwargs
         with suppress_stdout_stderr():
             self.model = pt.Prophet(
-                yearly_seasonality=True,
+                yearly_seasonality=False,
                 daily_seasonality=True,
                 interval_width = PROPHETSENS[sensitivity],
                 **self.model_kwargs).fit(df)

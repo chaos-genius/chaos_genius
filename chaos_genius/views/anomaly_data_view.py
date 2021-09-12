@@ -2,6 +2,7 @@
 """anomaly data view."""
 from datetime import datetime, timedelta
 import traceback
+from typing import cast
 
 from flask import Blueprint, current_app, jsonify, request
 import pandas as pd
@@ -9,7 +10,10 @@ import pandas as pd
 from chaos_genius.extensions import cache
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
+from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.views.kpi_view import get_kpi_data_from_id
+
+from chaos_genius.core.rca.rca_utils.string_helpers import convert_query_string_to_user_string
 
 
 blueprint = Blueprint("anomaly_data", __name__)
@@ -56,7 +60,7 @@ def kpi_anomaly_drilldown(kpi_id):
         if drilldown_date is None:
             raise ValueError("date param is required.")
 
-        drilldown_date = pd.to_datetime(drilldown_date, unit="ms").date()
+        drilldown_date = pd.to_datetime(drilldown_date, unit="ms")
 
         subdims = get_drilldowns_series_type(kpi_id, drilldown_date)
 
@@ -69,6 +73,7 @@ def kpi_anomaly_drilldown(kpi_id):
             subdim_graphs.append(results)
 
     except Exception as err:
+        print(traceback.format_exc())
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("Anomaly Drilldown Done")
     return jsonify({"data": subdim_graphs, "msg": ""})
@@ -83,7 +88,13 @@ def kpi_anomaly_data_quality(kpi_id):
         kpi_info = get_kpi_data_from_id(kpi_id)
         end_date = get_end_date(kpi_info)
 
-        for dq in ["max", "mean", "count", "missing"]:
+        agg = kpi_info["aggregation"]
+        if agg != "mean":
+            dq_list = ["max", "count", "mean"]
+        else:
+            dq_list = ["max", "count"]
+
+        for dq in dq_list:
             anom_data = get_dq_and_subdim_data(kpi_id, end_date, "dq", dq)
             data.append(anom_data)
 
@@ -92,6 +103,61 @@ def kpi_anomaly_data_quality(kpi_id):
 
     current_app.logger.info("Anomaly Drilldown Done")
     return jsonify({"data": data, "msg": ""})
+
+
+@blueprint.route("/<int:kpi_id>/anomaly-params", methods=["POST"])
+def kpi_anomaly_params(kpi_id: int):
+    current_app.logger.info(f"Updating anomaly parameters for KPI ID: {kpi_id}")
+
+    if not request.is_json:
+        return jsonify(
+            {"error": "Request body must be a JSON (and Content-Type header must be set correctly)"}
+        ), 400
+
+    req_data: dict = cast(dict, request.get_json())
+
+    if "anomaly_params" not in req_data:
+        return jsonify(
+            {"error": "The request JSON needs to have anomaly_params as a field"}
+        ), 400
+
+    fields = {
+        "anomaly_period",
+        "model_name",
+        "sensitivity",
+        "seasonality",
+        "frequency",
+        "scheduler_params"
+    }
+
+    if fields.isdisjoint(set(req_data["anomaly_params"].keys())):
+        # we don't have any of the possible fields
+        return jsonify(
+            {"error": f"The request needs to have one of {', '.join(fields)} fields in anomaly_params"}
+        ), 400
+
+    extra_fields = req_data["anomaly_params"].keys() - fields
+    if extra_fields:
+        # some unexpected fields. Return an explicit error instead of ignoring them.
+        return jsonify(
+            {"error": f"Got extra fields in anomaly_params: {', '.join(extra_fields)}"}
+        ), 400
+
+    anomaly_params = {k: v for k, v in req_data["anomaly_params"].items() if k in fields}
+
+    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
+
+    if kpi is None:
+        return jsonify(
+            {"error": f"Could not find KPI for ID: {kpi_id}"}
+        ), 400
+
+    new_kpi = cast(Kpi, kpi.update(commit=True, anomaly_params=anomaly_params))
+
+    return jsonify({
+        "msg": "Successfully updated Anomaly params",
+        "anomaly_params": new_kpi.as_dict["anomaly_params"],
+    })
 
 
 def fill_graph_data(row, graph_data, precision=2):
@@ -132,12 +198,16 @@ def convert_to_graph_json(
     series_type=None, 
     precision=2
 ):
-    # TODO: Make the graph title more human-friendly
-    title = anomaly_type
-    if series_type:
-        title += " " + series_type
+    kpi_info = get_kpi_data_from_id(kpi_id)
 
-    kpi_name = kpi_id
+    if anomaly_type == "overall":    
+        title = kpi_info["name"]
+    elif anomaly_type == "subdim":
+        title = convert_query_string_to_user_string(series_type)
+    else:
+        title = "DQ " + series_type.capitalize()
+
+    kpi_name = kpi_info["metric"]
     graph_data = {
         'title': title,
         'y_axis_label': kpi_name,
@@ -158,8 +228,8 @@ def convert_to_graph_json(
 
 def get_overall_data(kpi_id, end_date: str, n=90):
     start_date = pd.to_datetime(end_date) - timedelta(days=n)
-    start_date = start_date.strftime('%Y-%m-%d')
-    end_date = end_date.strftime('%Y-%m-%d')
+    start_date = start_date.strftime('%Y-%m-%d %H:%M:%S')
+    end_date = end_date.strftime('%Y-%m-%d %H:%M:%S')
 
     query = AnomalyDataOutput.query.filter(
         (AnomalyDataOutput.kpi_id == kpi_id)
@@ -181,8 +251,8 @@ def get_dq_and_subdim_data(
     n=90
 ):
     start_date = pd.to_datetime(end_date) - timedelta(days=n)
-    start_date = start_date.strftime('%Y-%m-%d')
-    end_date = end_date.strftime('%Y-%m-%d')
+    start_date = start_date.strftime('%Y-%m-%d %H:%M:%S')
+    end_date = end_date.strftime('%Y-%m-%d %H:%M:%S')
 
     query = AnomalyDataOutput.query.filter(
         (AnomalyDataOutput.kpi_id == kpi_id)
@@ -206,6 +276,26 @@ def get_drilldowns_series_type(kpi_id, drilldown_date, no_of_graphs=5):
     ).order_by(AnomalyDataOutput.severity.desc()).limit(no_of_graphs)
 
     results = pd.read_sql(query.statement, query.session.bind)
+    if len(results) == 0:
+        start_date = drilldown_date - timedelta(days = 1)
+        end_date = drilldown_date + timedelta(days=1)
+        query = AnomalyDataOutput.query.filter(
+            (AnomalyDataOutput.kpi_id == kpi_id)
+            & (AnomalyDataOutput.data_datetime <= end_date)
+            & (AnomalyDataOutput.data_datetime >= start_date)
+            & (AnomalyDataOutput.anomaly_type == "subdim")
+            & (AnomalyDataOutput.severity > 0)
+        )
+
+        results = pd.read_sql(query.statement, query.session.bind)
+
+        # Sorting by distance from drilldown data (ascending) and severity of 
+        # anomaly (descending), created distance for this purpose only
+        results['distance'] = abs(results['data_datetime'] - pd.to_datetime(drilldown_date))
+        results.sort_values(['distance', 'severity'], ascending = [True, False], inplace = True)
+        results.drop('distance', axis = 1, inplace = True)
+
+        results = results.iloc[:no_of_graphs]
 
     return results.series_type
 
@@ -223,9 +313,10 @@ def get_end_date(kpi_info: dict) -> datetime:
     if kpi_info['is_static']:
         end_date = kpi_info.get('static_params', {}).get('end_date', None)
         if end_date is not None:
-            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M%S')
 
+    #TODO: caused the non vieweing of data post 00:00
     if end_date is None:
-        end_date = datetime.today().date()
+        end_date = datetime.today()
 
     return end_date

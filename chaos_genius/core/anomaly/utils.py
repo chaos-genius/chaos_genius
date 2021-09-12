@@ -22,14 +22,16 @@ def get_anomaly_df(kpi_info, connection_info, last_date_in_db=None, end_date= No
     
     num_days = days_range
 
+    freq = kpi_info['anomaly_params']['ts_frequency']
+
     if last_date_in_db is None:
-        base_dt_obj = end_date - timedelta(days=num_days)
+        base_dt_obj = end_date - get_timedelta(freq, num_days)
     else:
-        base_dt_obj = last_date_in_db - timedelta(days=num_days)
+        base_dt_obj = last_date_in_db - get_timedelta(freq, num_days)
 
-    base_dt = str(base_dt_obj.date())
+    base_dt = base_dt_obj.strftime("%Y-%m-%d %H:%M:%S")
 
-    cur_dt = str(end_date.date())
+    cur_dt = end_date.strftime("%Y-%m-%d %H:%M:%S")
 
     dt_col_string = f"{indentifier}{kpi_info['datetime_column']}{indentifier}"
     gt_string = f"{dt_col_string} > '{base_dt}'"

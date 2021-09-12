@@ -1,11 +1,10 @@
 from chaos_genius.core.anomaly.models import AnomalyModel
 import pandas as pd
 
-#FIXME: add accurate threshold values
 EWSTDSENS = {
-    'high': 0.5,
-    'medium': 1.25,
-    'low': 1.75
+    'high': 0.8,
+    'medium': 0.9,
+    'low': 0.95
 }
 
 class EWSTDModel(AnomalyModel):

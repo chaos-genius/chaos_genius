@@ -14,6 +14,6 @@ def get_datasource_data_from_id(n: int) -> dict:
     """
 
     datasource_info = DataSource.get_by_id(n)
-    if datasource_info and datasource_info.as_dict:
-        return datasource_info.as_dict
+    if datasource_info and datasource_info.safe_dict:
+        return datasource_info.safe_dict
     raise ValueError(f"Data Source ID {n} not found in DATA_SOURCE_DATA")

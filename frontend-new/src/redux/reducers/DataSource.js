@@ -27,7 +27,7 @@ const initialState = {
   createDatasourceResponse: [],
   createDatasourceError: false,
   deleteDataSourceResponse: [],
-  isLoading: true,
+  isLoading: false,
   testLoading: false,
   error: false,
   metaInfoLoading: false,
@@ -161,7 +161,8 @@ export const dataSource = (state = initialState, action) => {
       return {
         ...state,
         createDatasourceResponse: [],
-        testConnectionResponse: []
+        testConnectionResponse: [],
+        deleteDataSourceResponse: []
       };
     }
     default:

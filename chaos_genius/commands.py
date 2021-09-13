@@ -118,7 +118,7 @@ def run_rca(kpi, end_date):
     click.echo(f"Starting the RCA for KPI ID: {kpi} with end date: {end_date}.")
     from chaos_genius.controllers.kpi_controller import run_rca_for_kpi
     status = run_rca_for_kpi(kpi, end_date)
-    click.echo(f"Completed the anomaly for KPI ID: {kpi}.")
+    click.echo(f"Completed the RCA for KPI ID: {kpi}.")
 
 
 @click.command()

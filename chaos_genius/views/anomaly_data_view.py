@@ -2,10 +2,11 @@
 """anomaly data view."""
 from datetime import datetime, timedelta
 import traceback
-from typing import cast
+from typing import Any, Dict, Optional, Tuple, cast
 
 from flask import Blueprint, current_app, jsonify, request
 import pandas as pd
+from sqlalchemy.orm.attributes import flag_modified
 
 from chaos_genius.extensions import cache
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
@@ -105,8 +106,22 @@ def kpi_anomaly_data_quality(kpi_id):
     return jsonify({"data": data, "msg": ""})
 
 
-@blueprint.route("/<int:kpi_id>/anomaly-params", methods=["POST"])
+@blueprint.route("/<int:kpi_id>/anomaly-params", methods=["POST", "GET"])
 def kpi_anomaly_params(kpi_id: int):
+    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
+
+    if kpi is None:
+        return jsonify(
+            {"error": f"Could not find KPI for ID: {kpi_id}"}
+        ), 400
+
+    # when method is GET we just return the anomaly params
+    if request.method == "GET":
+        return jsonify({
+            "anomaly_params": kpi.as_dict["anomaly_params"],
+        })
+
+    # when it's POST, update anomaly params
     current_app.logger.info(f"Updating anomaly parameters for KPI ID: {kpi_id}")
 
     if not request.is_json:
@@ -121,38 +136,12 @@ def kpi_anomaly_params(kpi_id: int):
             {"error": "The request JSON needs to have anomaly_params as a field"}
         ), 400
 
-    fields = {
-        "anomaly_period",
-        "model_name",
-        "sensitivity",
-        "seasonality",
-        "frequency",
-        "scheduler_params"
-    }
+    err, new_anomaly_params = validate_partial_anomaly_params(req_data["anomaly_params"])
 
-    if fields.isdisjoint(set(req_data["anomaly_params"].keys())):
-        # we don't have any of the possible fields
-        return jsonify(
-            {"error": f"The request needs to have one of {', '.join(fields)} fields in anomaly_params"}
-        ), 400
+    if err != "":
+        return jsonify({"error": err}), 400
 
-    extra_fields = req_data["anomaly_params"].keys() - fields
-    if extra_fields:
-        # some unexpected fields. Return an explicit error instead of ignoring them.
-        return jsonify(
-            {"error": f"Got extra fields in anomaly_params: {', '.join(extra_fields)}"}
-        ), 400
-
-    anomaly_params = {k: v for k, v in req_data["anomaly_params"].items() if k in fields}
-
-    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
-
-    if kpi is None:
-        return jsonify(
-            {"error": f"Could not find KPI for ID: {kpi_id}"}
-        ), 400
-
-    new_kpi = cast(Kpi, kpi.update(commit=True, anomaly_params=anomaly_params))
+    new_kpi = update_anomaly_params(kpi, new_anomaly_params)
 
     return jsonify({
         "msg": "Successfully updated Anomaly params",
@@ -320,3 +309,176 @@ def get_end_date(kpi_info: dict) -> datetime:
         end_date = datetime.today()
 
     return end_date
+
+
+ANOMALY_PARAM_FIELDS = {
+    "anomaly_period",
+    "model_name",
+    "sensitivity",
+    "seasonality",
+    "frequency",
+    "scheduler_params"
+}
+
+def validate_partial_anomaly_params(anomaly_params: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
+    """Check if given *partial* anomaly parameters have valid keys and values.
+
+    Returns an error string. Empty string "" means the params are valid.
+
+    Also returns the validated anomaly_params, with some conversions applied. This is undefined
+    when the anomaly_params is not valid. The passed anomaly_params is modified in-place.
+    """
+    fields = ANOMALY_PARAM_FIELDS
+
+    if fields.isdisjoint(set(anomaly_params.keys())):
+        # we don't have any of the possible fields
+        return f"anomaly_params needs to have one of the following fields: {', '.join(fields)}", {}
+
+    extra_fields = anomaly_params.keys() - fields
+    if extra_fields:
+        # some unexpected fields. Return an explicit error instead of ignoring them.
+        return (
+            f"Got extra fields in anomaly_params: {', '.join(extra_fields)}",
+            {k: v for k, v in anomaly_params.items() if k in fields}
+        )
+
+    # validate values of available fields
+    # maybe there's declarative way to do this?
+
+    # see the returned error messages for validations performed
+
+    if "anomaly_period" in anomaly_params:
+        anomaly_period = anomaly_params["anomaly_period"]
+
+        if not isinstance(anomaly_period, int):
+            return (
+                f"anomaly_period must be an integer number. Got: {repr(anomaly_period)}"
+                f" (of type: {type(anomaly_period).__name__})",
+                anomaly_params
+            )
+
+    frequency_types = {"daily", "hourly"}
+    if "frequency" in anomaly_params:
+        frequency = anomaly_params["frequency"]
+
+        if not isinstance(frequency, str):
+            return (
+                f"frequency must be a string, one of: {', '.join(frequency_types)}. Got: {frequency}",
+                anomaly_params)
+
+        # we compare (and store) only lower case for this field
+        frequency = frequency.lower()
+        anomaly_params["frequency"] = frequency
+
+        if frequency not in frequency_types:
+            return (
+                f"frequency must be one of: {', '.join(frequency_types)}. Got: {frequency}",
+                anomaly_params
+            )
+
+    sensitivity_types = {"high", "low", "medium"}
+    if "sensitivity" in anomaly_params:
+        sensitivity = anomaly_params["sensitivity"]
+
+        if not isinstance(sensitivity, str):
+            return (
+                f"sensitivity must be a string, one of: {', '.join(sensitivity_types)}. Got: {sensitivity}",
+                anomaly_params)
+
+        # we compare (and store) only lower case for this field
+        sensitivity = sensitivity.lower()
+        anomaly_params["sensitivity"] = sensitivity
+
+        if sensitivity not in sensitivity_types:
+            return (
+                f"sensitivity must be one of: {', '.join(sensitivity_types)}. Got: {sensitivity}",
+                anomaly_params
+            )
+
+    if "seasonality" in anomaly_params:
+        seasonality = anomaly_params["seasonality"]
+
+        if not isinstance(seasonality, list):
+            return f"seasonality must be a list. Got: {repr(seasonality)}", anomaly_params
+
+        seasonality_types = {"D", "M", "W"}
+        for s in seasonality:
+
+            if not isinstance(s, str):
+                return (
+                    f"All of the seasonalities must be a string, one of: {', '.join(seasonality_types)}. One of them was: {s}",
+                    anomaly_params)
+
+            # no lower case for this since the expecetd values are upper case
+
+            if s not in seasonality_types:
+                return (
+                    f"All of the seasonalities must one one of: {', '.join(seasonality_types)}. "
+                    f"One of them was: {s}",
+                    anomaly_params
+                )
+
+    err, scheduler_params = validate_partial_scheduler_params(anomaly_params["scheduler_params"])
+    if err != "":
+        return err, anomaly_params
+    anomaly_params["scheduler_params"] = scheduler_params
+
+    return "", anomaly_params
+
+
+def update_anomaly_params(kpi: Kpi, new_anomaly_params: Dict[str, Any], run_anomaly=True) -> Kpi:
+    """Update anomaly_params for the kpi with the given *partial* *validated* anomaly parameters.
+
+    The new_anomaly_params must be validated using validate_partial_anomaly_params.
+
+    run_anomaly is also set to True in the Kpi table, by default.
+    """
+    fields = ANOMALY_PARAM_FIELDS
+
+    anomaly_params: dict = kpi.anomaly_params
+
+    # update the non-nested fields directly
+    # currently the only nested field is scheduler_params
+    for field in (fields - {"scheduler_params"}) & new_anomaly_params.keys():
+        anomaly_params[field] = new_anomaly_params[field]
+
+    if "scheduler_params" in new_anomaly_params:
+        scheduler_params: Optional[dict] = anomaly_params["scheduler_params"]
+
+        if scheduler_params is None:
+            scheduler_params = {}
+
+        # TODO: check for fields that might be used by the celery scheduler.
+        #       we should not let those be changed from the API.
+        scheduler_params.update(new_anomaly_params["scheduler_params"])
+
+        anomaly_params["scheduler_params"] = scheduler_params
+
+    flag_modified(kpi, "anomaly_params")
+    new_kpi = cast(Kpi, kpi.update(commit=True, anomaly_params=anomaly_params, run_anomaly=run_anomaly))
+
+    return new_kpi
+
+
+SCHEDULER_PARAM_FIELDS = {"hour"}
+
+
+def validate_partial_scheduler_params(scheduler_params: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
+    """Check if the given *partial* scheduler params have valid keys and values.
+
+    see validate_partial_anomaly_params for return value meaning.
+    """
+    if "hour" in scheduler_params:
+        hour = scheduler_params["hour"]
+
+        if not isinstance(hour, int):
+            return (
+                f"hour must be an integer number. Got: {repr(hour)}"
+                f" (of type: {type(hour).__name__})",
+                scheduler_params
+            )
+
+        if hour < 0 or hour > 23:
+            return (f"hour must be between 0 and 23 (inclusive). Got: {hour}", scheduler_params)
+
+    return "", scheduler_params

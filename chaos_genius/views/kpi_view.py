@@ -168,6 +168,7 @@ def edit_kpi(kpi_id):
         data = request.get_json()
         meta_info = Kpi.meta_info()
         if kpi_obj and kpi_obj.active == True:
+            # TODO: Make it DRY
             if chech_editable_field(meta_info,'name'):
                 kpi_obj.name=data.get('name')
             if chech_editable_field(meta_info,'is_certified'):

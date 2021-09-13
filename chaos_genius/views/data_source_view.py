@@ -293,7 +293,7 @@ def log_data_source():
     return jsonify({"data": logs_details, "status": status})
 
 
-@blueprint.route("/<int:datasource_id>/get-datasource-info", methods=["GET"])
+@blueprint.route("/<int:datasource_id>", methods=["GET"])
 def get_data_source_info(datasource_id):
     """get data source details."""
     status, message = "", ""

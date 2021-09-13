@@ -81,12 +81,12 @@ class DataSource(PkModel):
                 },
                 {
                     "name": "connection_type",
-                    "is_editable": True,
+                    "is_editable": False,
                     "is_sensitive": False,
                 },
                 {
                     "name": "db_uri",
-                    "is_editable": True,
+                    "is_editable": False,
                     "is_sensitive": False,
 
                 },
@@ -111,25 +111,25 @@ class DataSource(PkModel):
                 {
                     "name": "sourceConfig",
                     "is_editable": True,
-                    "is_sensitive": False,
+                    "is_sensitive": True,
 
                 },
                 {
                     "name": "destinationConfig",
                     "is_editable": True,
-                    "is_sensitive": False,
+                    "is_sensitive": True,
 
                 },
                 {
                     "name": "connectionConfig",
                     "is_editable": True,
-                    "is_sensitive": False,
+                    "is_sensitive": True,
 
                 },
                 {
                     "name": "dbConfig",
                     "is_editable": True,
-                    "is_sensitive": False,
+                    "is_sensitive": True,
 
                 },
                 {

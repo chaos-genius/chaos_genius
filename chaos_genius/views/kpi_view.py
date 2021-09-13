@@ -168,29 +168,9 @@ def edit_kpi(kpi_id):
         data = request.get_json()
         meta_info = Kpi.meta_info()
         if kpi_obj and kpi_obj.active == True:
-            # TODO: Make it DRY
-            if chech_editable_field(meta_info,'name'):
-                kpi_obj.name=data.get('name')
-            if chech_editable_field(meta_info,'is_certified'):
-                kpi_obj.is_certified=data.get('is_certified')
-            if chech_editable_field(meta_info,'data_source'):
-                kpi_obj.data_source=data.get('data_source')
-            if chech_editable_field(meta_info,'kpi_type'):
-                kpi_obj.kpi_type=data.get('dataset_type')
-            if chech_editable_field(meta_info,'kpi_query'):
-                kpi_obj.kpi_query=data.get('kpi_query')
-            if chech_editable_field(meta_info,'table_name'):
-                kpi_obj.table_name=data.get('table_name')
-            if chech_editable_field(meta_info,'metric'):
-                kpi_obj.metric=data.get('metric')
-            if chech_editable_field(meta_info,'aggregation'):
-                kpi_obj.aggregation=data.get('aggregation')
-            if chech_editable_field(meta_info,'datetime_column'):
-                kpi_obj.datetime_column=data.get('datetime_column')
-            if chech_editable_field(meta_info,'filters'):
-                kpi_obj.filters=data.get('filters')
-            if chech_editable_field(meta_info,'dimensions'):
-                kpi_obj.dimensions=data.get('dimensions')  
+            for key, value in data.items():
+                if chech_editable_field(meta_info, key):
+                    setattr(kpi_obj, key, value)
 
             kpi_obj.save(commit=True)
             status = "success"
@@ -203,7 +183,7 @@ def edit_kpi(kpi_id):
         message = str(err)
     return jsonify({"message": message, "status": status})
 
-@blueprint.route("/<int:kpi_id>/get-kpi-info", methods=["GET"])
+@blueprint.route("/<int:kpi_id>", methods=["GET"])
 def get_kpi_info(kpi_id):
     """get Kpi details."""
     status, message = "", ""

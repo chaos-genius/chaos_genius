@@ -358,11 +358,17 @@ class AnomalyDetectionController(object):
             except Exception as e:
                 print(e)
 
-        for dq_subgroup in ["max", "count", "mean", "missing"]:
+        agg = self.kpi_info["aggregation"]
+        if agg != "mean":
+            dq_list = ["max", "count", "mean"]
+        else:
+            dq_list = ["max", "count"]
+
+        for dq in dq_list:
             if self.debug:
-                print(dq_subgroup)
+                print(dq)
 
             try:
-                self._run_anomaly_for_series(input_data, "dq", dq_subgroup)
+                self._run_anomaly_for_series(input_data, "dq", dq)
             except Exception as e:
                 print(e)

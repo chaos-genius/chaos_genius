@@ -1,11 +1,10 @@
 from chaos_genius.core.anomaly.models import AnomalyModel
 import pandas as pd
 
-#FIXME: add accurate threshold values
 EWSTDSENS = {
-    'high': 0.5,
-    'medium': 1.25,
-    'low': 1.75
+    'high': 0.8,
+    'medium': 0.9,
+    'low': 0.95
 }
 
 class EWSTDModel(AnomalyModel):
@@ -17,6 +16,7 @@ class EWSTDModel(AnomalyModel):
         self, 
         df: pd.DataFrame, 
         sensitivity,
+        frequency,
         pred_df: pd.DataFrame = None
     ) -> pd.DataFrame:
         """Takes in pd.DataFrame with 2 columns, dt and y, and returns a
@@ -35,7 +35,7 @@ class EWSTDModel(AnomalyModel):
         ew_stddevi = df["y"].ewm(span=len(df)).std().iloc[-1]
 
         #TODO: Set values for numDevi_u, numDevi_l in sensitivity
-        numDevi = EWSTDSENS[sensitivity]
+        numDevi = EWSTDSENS[sensitivity.lower()]
         numDevi_u = None
         numDevi_l = None
 

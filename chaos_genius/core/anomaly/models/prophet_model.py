@@ -12,6 +12,11 @@ PROPHETSENS = {
     "low": 0.95
 }
 
+PROPHETFREQ = {
+    'hourly': 'H',
+    'daily': 'D'
+}
+
 class ProphetModel(AnomalyModel):
     def __init__(self, *args, model_kwargs={}, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -23,6 +28,7 @@ class ProphetModel(AnomalyModel):
         self,
         df: pd.DataFrame,
         sensitivity, 
+        frequency, 
         pred_df: pd.DataFrame = None
     ) -> pd.DataFrame:
         """Takes in pd.DataFrame with 2 columns, dt and y, and returns a
@@ -39,15 +45,19 @@ class ProphetModel(AnomalyModel):
         # TODO: Add seasonality to model kwargs
         with suppress_stdout_stderr():
             self.model = pt.Prophet(
-                yearly_seasonality=True,
+                yearly_seasonality=False,
                 daily_seasonality=True,
                 interval_width = PROPHETSENS[sensitivity],
                 **self.model_kwargs).fit(df)
 
         if pred_df is None:
-            future = self.model.make_future_dataframe(periods=1)
+            future = self.model.make_future_dataframe(periods=1,
+                freq = PROPHETFREQ[frequency.lower()],
+            )
         else:
-            future = self.model.make_future_dataframe(periods=0)
+            future = self.model.make_future_dataframe(periods=0,
+                freq = PROPHETFREQ[frequency.lower()],
+            )
         
         forecast = self.model.predict(future)
         forecast = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']]

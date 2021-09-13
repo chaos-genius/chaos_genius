@@ -2,11 +2,10 @@ import pandas as pd
 
 from chaos_genius.core.anomaly.models import AnomalyModel
 
-#FIXME: add accurate threshold values
 STDSENS = {
-    'high': 0.75,
-    'medium': 1.25,
-    'low': 2
+    'high': 0.8,
+    'medium': 0.9,
+    'low': 0.95
 }
 
 class StdDeviModel(AnomalyModel):
@@ -18,6 +17,7 @@ class StdDeviModel(AnomalyModel):
         self, 
         df: pd.DataFrame, 
         sensitivity,
+        frequency,
         pred_df: pd.DataFrame = None
     ) -> pd.DataFrame:
         """Takes in pd.DataFrame with 2 columns, dt and y, and returns a
@@ -35,7 +35,7 @@ class StdDeviModel(AnomalyModel):
         stddevi = df["y"].std()
         
         #TODO: Set values for numDevi_u, numDevi_l in sensitivity
-        numDevi = STDSENS[sensitivity]
+        numDevi = STDSENS[sensitivity.lower()]
         numDevi_u = None
         numDevi_l = None
 

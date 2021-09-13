@@ -88,7 +88,13 @@ def kpi_anomaly_data_quality(kpi_id):
         kpi_info = get_kpi_data_from_id(kpi_id)
         end_date = get_end_date(kpi_info)
 
-        for dq in ["max", "mean", "count", "missing"]:
+        agg = kpi_info["aggregation"]
+        if agg != "mean":
+            dq_list = ["max", "count", "mean"]
+        else:
+            dq_list = ["max", "count"]
+
+        for dq in dq_list:
             anom_data = get_dq_and_subdim_data(kpi_id, end_date, "dq", dq)
             data.append(anom_data)
 
@@ -230,7 +236,7 @@ def get_overall_data(kpi_id, end_date: str, n=90):
         & (AnomalyDataOutput.data_datetime <= end_date)
         & (AnomalyDataOutput.data_datetime >= start_date)
         & (AnomalyDataOutput.anomaly_type == "overall")
-    )
+    ).order_by(AnomalyDataOutput.data_datetime)
 
     results = pd.read_sql(query.statement, query.session.bind)
 
@@ -254,7 +260,7 @@ def get_dq_and_subdim_data(
         & (AnomalyDataOutput.data_datetime >= start_date)
         & (AnomalyDataOutput.anomaly_type == anomaly_type)
         & (AnomalyDataOutput.series_type == series_type)
-    )
+    ).order_by(AnomalyDataOutput.data_datetime)
 
     results = pd.read_sql(query.statement, query.session.bind)
 
@@ -262,25 +268,35 @@ def get_dq_and_subdim_data(
 
 
 def get_drilldowns_series_type(kpi_id, drilldown_date, no_of_graphs=5):
-    start_date = drilldown_date - timedelta(days = 1)
-    end_date = drilldown_date + timedelta(days=1)
     query = AnomalyDataOutput.query.filter(
         (AnomalyDataOutput.kpi_id == kpi_id)
-        & (AnomalyDataOutput.data_datetime <= end_date)
-        & (AnomalyDataOutput.data_datetime >= start_date)
+        & (AnomalyDataOutput.data_datetime == drilldown_date)
         & (AnomalyDataOutput.anomaly_type == "subdim")
         & (AnomalyDataOutput.severity > 0)
-    )
+    ).order_by(AnomalyDataOutput.severity.desc()).limit(no_of_graphs)
 
     results = pd.read_sql(query.statement, query.session.bind)
+    if len(results) == 0:
+        start_date = drilldown_date - timedelta(days = 1)
+        end_date = drilldown_date + timedelta(days=1)
+        query = AnomalyDataOutput.query.filter(
+            (AnomalyDataOutput.kpi_id == kpi_id)
+            & (AnomalyDataOutput.data_datetime <= end_date)
+            & (AnomalyDataOutput.data_datetime >= start_date)
+            & (AnomalyDataOutput.anomaly_type == "subdim")
+            & (AnomalyDataOutput.severity > 0)
+        )
 
-    # Sorting by distance from drilldown data (ascending) and severity of 
-    # anomaly (descending), created distance for this purpose only
-    results['distance'] = abs(results['data_datetime'] - pd.to_datetime(drilldown_date))
-    results.sort_values(['distance', 'severity'], ascending = [True, False], inplace = True)
-    results.drop('distance', axis = 1, inplace = True)
-    print(results)
-    results = results.iloc[:no_of_graphs]
+        results = pd.read_sql(query.statement, query.session.bind)
+
+        # Sorting by distance from drilldown data (ascending) and severity of 
+        # anomaly (descending), created distance for this purpose only
+        results['distance'] = abs(results['data_datetime'] - pd.to_datetime(drilldown_date))
+        results.sort_values(['distance', 'severity'], ascending = [True, False], inplace = True)
+        results.drop('distance', axis = 1, inplace = True)
+
+        results = results.iloc[:no_of_graphs]
+
     return results.series_type
 
 

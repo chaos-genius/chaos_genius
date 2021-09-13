@@ -12,7 +12,16 @@ from chaos_genius.core.anomaly.models import AnomalyModel
 
 warnings.filterwarnings("ignore")
 
+GKSENS = {
+    "high": 0.8,
+    "medium": 0.9,
+    "low": 0.95
+}
 
+GKFREQ = {
+    'hourly': 'H',
+    'daily': 'D'
+}
 class GreyKiteModel(AnomalyModel):
 
     def __init__(self, *args, model_kwargs={}, **kwargs) -> None:
@@ -22,6 +31,8 @@ class GreyKiteModel(AnomalyModel):
     def predict(
         self,
         df: pd.DataFrame,
+        sensitivity,
+        frequency,
         pred_df: pd.DataFrame = None
     ) -> pd.DataFrame:
         """Takes in pd.DataFrame with 2 columns, dt and y, and returns a
@@ -37,7 +48,7 @@ class GreyKiteModel(AnomalyModel):
         metadata = MetadataParam(
             time_col="ds",
             value_col="y",
-            freq="D"
+            freq=GKFREQ[frequency.lower()]
         )
 
         # Creates forecasts and stores the result
@@ -50,6 +61,7 @@ class GreyKiteModel(AnomalyModel):
                 model_template=ModelTemplateEnum.SILVERKITE.name,
                 forecast_horizon=1,  # forecasts 1 step
                 **self.model_kwargs,
+                coverage= GKSENS[sensitivity.lower()],
                 metadata_param=metadata
             )
         )

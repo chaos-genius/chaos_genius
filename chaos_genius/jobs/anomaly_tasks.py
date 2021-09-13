@@ -6,6 +6,7 @@ from celery.app.base import Celery
 from sqlalchemy.orm.attributes import flag_modified
 
 from chaos_genius.controllers.kpi_controller import run_anomaly_for_kpi
+from chaos_genius.controllers.kpi_controller import run_rca_for_kpi
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.extensions import celery as celery_ext
 
@@ -61,8 +62,7 @@ def rca_single_kpi(anomaly_status: bool, kpi_id: int):
 
         return anomaly_status
 
-    # FIXME: call appropriate RCA wrapper fn here
-    status = True
+    status = run_rca_for_kpi(kpi_id)
 
     if status:
         print(f"Completed RCA for KPI ID: {kpi_id}")

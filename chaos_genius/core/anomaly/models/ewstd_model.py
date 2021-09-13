@@ -16,6 +16,7 @@ class EWSTDModel(AnomalyModel):
         self, 
         df: pd.DataFrame, 
         sensitivity,
+        frequency,
         pred_df: pd.DataFrame = None
     ) -> pd.DataFrame:
         """Takes in pd.DataFrame with 2 columns, dt and y, and returns a
@@ -34,7 +35,7 @@ class EWSTDModel(AnomalyModel):
         ew_stddevi = df["y"].ewm(span=len(df)).std().iloc[-1]
 
         #TODO: Set values for numDevi_u, numDevi_l in sensitivity
-        numDevi = EWSTDSENS[sensitivity]
+        numDevi = EWSTDSENS[sensitivity.lower()]
         numDevi_u = None
         numDevi_l = None
 

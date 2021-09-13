@@ -65,6 +65,7 @@ class ProcessAnomalyDetection:
                 prediction = model.predict(
                     input_data,
                     self.sensitivity,
+                    self.freq,
                     pred_df=input_data,
                 )
 
@@ -84,7 +85,8 @@ class ProcessAnomalyDetection:
 
                     prediction = model.predict(
                         df,
-                        self.sensitivity
+                        self.sensitivity,
+                        self.freq
                     )
                     toAppend = prediction.iloc[-1].copy()
                     toAppend.loc['y'] = df.iloc[-1]['y']

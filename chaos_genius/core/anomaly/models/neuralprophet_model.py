@@ -14,6 +14,8 @@ class NeuralProphetModel(AnomalyModel):
 
     def predict(
         self, df: pd.DataFrame, 
+        sensitivity,
+        frequency,
         pred_df: pd.DataFrame = None
     ) -> pd.DataFrame:
         """Takes in pd.DataFrame with 2 columns, dt and y, and returns a

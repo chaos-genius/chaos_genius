@@ -17,6 +17,7 @@ class StdDeviModel(AnomalyModel):
         self, 
         df: pd.DataFrame, 
         sensitivity,
+        frequency,
         pred_df: pd.DataFrame = None
     ) -> pd.DataFrame:
         """Takes in pd.DataFrame with 2 columns, dt and y, and returns a
@@ -34,7 +35,7 @@ class StdDeviModel(AnomalyModel):
         stddevi = df["y"].std()
         
         #TODO: Set values for numDevi_u, numDevi_l in sensitivity
-        numDevi = STDSENS[sensitivity]
+        numDevi = STDSENS[sensitivity.lower()]
         numDevi_u = None
         numDevi_l = None
 

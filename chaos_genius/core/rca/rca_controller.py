@@ -215,9 +215,12 @@ class RootCauseAnalysisController:
             # Get RCA Object
             rca = self._load_rca_obj(timeline)
 
-            # Aggregations
-            agg_data = self._get_aggregation(rca)
-            output.append(self._output_to_row("agg", agg_data, timeline))
+            try:
+                # Aggregations
+                agg_data = self._get_aggregation(rca)
+                output.append(self._output_to_row("agg", agg_data, timeline))
+            except:
+                print(f"Error in agg for {timeline}")
 
             dims = [None] + self.dimensions
             for dim in dims:

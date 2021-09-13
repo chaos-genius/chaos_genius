@@ -1,3 +1,4 @@
+import traceback
 from datetime import datetime
 
 from flask import current_app
@@ -20,7 +21,8 @@ def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
 
         adc.detect()
 
-    except:
+    except Exception as e:
+        traceback.print_exc()
         return False
 
     return True
@@ -34,7 +36,9 @@ def run_rca_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
         rca_controller = RootCauseAnalysisController(kpi_info, end_date)
         
         rca_controller.compute()
-    except:
+
+    except Exception as e:
+        traceback.print_exc()
         return False
 
     return True

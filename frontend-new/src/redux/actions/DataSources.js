@@ -13,7 +13,10 @@ import {
   CREATEDATASOURCEFAILURE,
   DELETEDATASOURCEREQUEST,
   DELETEDATASOURCESUCSESS,
-  DELETEDATASOURCEFAILURE
+  DELETEDATASOURCEFAILURE,
+  DATASOURCE_META_INFO_REQUEST,
+  DATASOURCE_META_INFO_SUCCESS,
+  DATASOURCE_META_INFO_FAILURE
 } from './ActionConstants';
 
 import {
@@ -190,6 +193,38 @@ export const deleteDatasource = (id) => {
       dispatch(deleteDatesourceFailure);
     } else if (data && status === 200) {
       dispatch(deleteDatasourceSuccess(data.data));
+    }
+  };
+};
+
+export const getDatasourceMetaInfoRequest = () => {
+  return {
+    type: DATASOURCE_META_INFO_REQUEST
+  };
+};
+export const getDatasourceMetaInfoSuccess = (response) => {
+  return {
+    type: DATASOURCE_META_INFO_SUCCESS,
+    data: response
+  };
+};
+
+export const getDatasourceMetaInfoFailure = () => {
+  return {
+    type: DATASOURCE_META_INFO_FAILURE
+  };
+};
+
+export const getDatasourceMetaInfo = () => {
+  return async (dispatch) => {
+    dispatch(getDatasourceMetaInfoRequest());
+    const { data, error, status } = await getRequest({
+      url: DELETE_DATASOURCE
+    });
+    if (error) {
+      dispatch(getDatasourceMetaInfoFailure());
+    } else if (data && status === 200) {
+      dispatch(getDatasourceMetaInfoSuccess(data.data));
     }
   };
 };

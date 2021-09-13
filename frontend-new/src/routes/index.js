@@ -58,7 +58,7 @@ const Routes = () => (
     />
     <PrivateRouteWithSidebar
       exact
-      path="/datasource/edit"
+      path="/datasource/edit/:id"
       component={(props) => <AddDataSource {...props} />}
     />
     <PrivateRouteWithSidebar

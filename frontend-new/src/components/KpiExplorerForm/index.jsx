@@ -134,7 +134,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     if (kpiFormData) {
       fieldData();
     }
-    if (kpiEditData) {
+    if (kpiEditData && data[2] === 'edit') {
       const obj = { ...formdata };
       obj['kpiname'] = kpiEditData?.name || '';
       obj['datasource'] = kpiEditData?.data_source;
@@ -448,10 +448,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         dimensions: formdata.adddimentsions,
         filters: formdata.addfilter
       };
-      if (data[2] === 'add') {
-        dispatchgetAllKpiExplorerSubmit(kpiInfo);
-      } else if (data[2] === 'edit') {
+      if (data[2] === 'edit') {
         dispatch(getUpdatekpi(kpiId, { name: formdata.kpiname }));
+      } else {
+        dispatchgetAllKpiExplorerSubmit(kpiInfo);
       }
     }
   };

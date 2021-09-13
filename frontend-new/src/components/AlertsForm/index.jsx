@@ -157,7 +157,6 @@ const AlertsForm = () => {
         dispatchGetAllAlertEmail(data);
       }
     } else if (data[2] === 'slack') {
-      console.log(webhookUrl);
       if (webhookUrl !== '' && webhookUrl !== null) {
         const slackData = {
           config_name: 'slack',
@@ -187,11 +186,8 @@ const AlertsForm = () => {
 
   if (editLoading) {
     return (
-      <div className="loader">
-        <div className="loading-text">
-          <p>loading</p>
-          <span></span>
-        </div>
+      <div className="load loader-page">
+        <div className="preload"></div>
       </div>
     );
   } else {

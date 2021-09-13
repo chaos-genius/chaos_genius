@@ -30,6 +30,10 @@ from chaos_genius.third_party.integration_server_config import (
 from chaos_genius.databases.db_utils import create_sqlalchemy_uri
 from chaos_genius.databases.db_metadata import DbMetadata, get_metadata
 
+from chaos_genius.controllers.data_source_controller import (
+    get_datasource_data_from_id
+)
+
 # from chaos_genius.utils import flash_errors
 
 blueprint = Blueprint("api_data_source", __name__)
@@ -288,3 +292,25 @@ def log_data_source():
         print(err_msg)
 
     return jsonify({"data": logs_details, "status": status})
+
+
+@blueprint.route("/<int:datasource_id>", methods=["GET"])
+def get_data_source_info(datasource_id):
+    """get data source details."""
+    status, message = "", ""
+    data = None
+    try:
+        ds_obj = get_datasource_data_from_id(datasource_id)
+        data = ds_obj
+        status = "success" 
+    except Exception as err:
+        status = "failure"
+        message = str(err)
+        current_app.logger.info(f"Error in fetching the Data Source: {err}")
+    return jsonify({"message": message, "status": status, "data": data})
+
+@blueprint.route("/meta-info", methods=["GET"])
+def data_source_meta_info():
+    """data source meta info view."""
+    current_app.logger.info("data source meta info")
+    return jsonify({"data": DataSource.meta_info()})

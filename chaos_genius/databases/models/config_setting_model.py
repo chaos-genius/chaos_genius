@@ -41,3 +41,26 @@ class ConfigSetting(PkModel):
             "active": self.active,
             "created_at": self.created_at,
         }
+
+    @classmethod
+    def meta_info(cls):
+        return{
+            "name": "Config Setting",
+            "table_name": "config_setting",
+            "fields":[
+                {
+                    "name": "name",
+                    "is_editable": True,
+                    "is_sensitive": False,
+                },
+                {
+                    "name": "config_setting",
+                    "is_editable": False,
+                    "is_sensitive": True,
+                }
+            ]
+
+        }
+
+
+

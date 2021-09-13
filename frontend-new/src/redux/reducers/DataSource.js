@@ -24,7 +24,7 @@ const initialState = {
   createDatasourceResponse: [],
   createDatasourceError: false,
   deleteDataSourceResponse: [],
-  isLoading: false,
+  isLoading: true,
   testLoading: false,
   error: false
 };

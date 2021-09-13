@@ -21,7 +21,7 @@ const RESET_ACTION = {
 const AlertsCard = () => {
   const dispatch = useDispatch();
 
-  const { channelStatusData } = useSelector((state) => {
+  const { channelStatusLoading, channelStatusData } = useSelector((state) => {
     return state.alert;
   });
 
@@ -42,122 +42,140 @@ const AlertsCard = () => {
     return bool;
   };
 
-  return (
-    <>
-      <div className="setup-card">
-        <img src={Slack} className="in-active" alt="Slack" />
-        <h1>
-          Slack
-          {statusChecking('slack') && (
-            <img src={Succestick} alt="success tik"></img>
-          )}
-        </h1>
-        <p>Select the data you want to monitor and analyse</p>
-        <Link
-          to={statusChecking('slack') ? '/alerts/slack/edit' : '/alerts/slack'}>
-          {/* <button className="btn black-button">
+  if (channelStatusLoading) {
+    return (
+      <div className="load loader-page">
+        <div className="preload"></div>
+      </div>
+    );
+  } else {
+    return (
+      <>
+        <div className="setup-card">
+          <img src={Slack} className="in-active" alt="Slack" />
+          <h1>
+            Slack
+            {statusChecking('slack') && (
+              <img src={Succestick} alt="success tik"></img>
+            )}
+          </h1>
+          <p>Select the data you want to monitor and analyse</p>
+          <Link
+            to={
+              statusChecking('slack') ? '/alerts/slack/edit' : '/alerts/slack'
+            }>
+            {/* <button className="btn black-button">
             <span>Edit Slack Connection</span>
           </button> */}
+            <button
+              className={
+                statusChecking('slack')
+                  ? 'btn black-button'
+                  : 'btn white-button'
+              }>
+              <span>
+                {statusChecking('slack')
+                  ? 'Edit Slack Connection'
+                  : 'Connect Slack'}
+              </span>
+            </button>
+          </Link>
+        </div>
+        <div className="setup-card">
+          <img src={Gmail} className="in-active" alt="Gmail" />
+
+          <h1>
+            Email
+            {statusChecking('email') && (
+              <img src={Succestick} alt="success tik"></img>
+            )}
+          </h1>
+
+          <p>Select the data you want to monitor and analyse</p>
+          <Link
+            to={
+              statusChecking('email') ? '/alerts/email/edit' : '/alerts/email'
+            }>
+            <button
+              className={
+                statusChecking('email')
+                  ? 'btn black-button'
+                  : 'btn white-button'
+              }>
+              <span>
+                {statusChecking('email')
+                  ? 'Edit Email Connection'
+                  : 'Connect Email'}
+              </span>
+            </button>
+          </Link>
+        </div>
+        <div className="setup-card">
+          <img src={Datadog} className="in-active" alt="Datadog" />
+          <h1>
+            Datadog{' '}
+            {statusChecking('datadog') && (
+              <img src={Succestick} alt="success tik"></img>
+            )}
+          </h1>
+          <p>Select the data you want to monitor and analyse</p>
           <button
             className={
-              statusChecking('slack') ? 'btn black-button' : 'btn white-button'
+              statusChecking('datadog')
+                ? 'btn black-button'
+                : 'btn white-button'
             }>
             <span>
-              {statusChecking('slack')
-                ? 'Edit Slack Connection'
-                : 'Connect Slack'}
+              {statusChecking('datadog')
+                ? 'Edit Datadog Connection'
+                : 'Connect Datadog'}
             </span>
           </button>
-        </Link>
-      </div>
-      <div className="setup-card">
-        <img src={Gmail} className="in-active" alt="Gmail" />
-
-        <h1>
-          Email
-          {statusChecking('email') && (
-            <img src={Succestick} alt="success tik"></img>
-          )}
-        </h1>
-
-        <p>Select the data you want to monitor and analyse</p>
-        <Link
-          to={statusChecking('email') ? '/alerts/email/edit' : '/alerts/email'}>
+        </div>
+        <div className="setup-card">
+          <img src={Asana} className="in-active" alt="Asana" />
+          <h1>
+            Asana{' '}
+            {statusChecking('asana') && (
+              <img src={Succestick} alt="success tik"></img>
+            )}
+          </h1>
+          <p>Select the data you want to monitor and analyse</p>
           <button
             className={
-              statusChecking('email') ? 'btn black-button' : 'btn white-button'
+              statusChecking('asana') ? 'btn black-button' : 'btn white-button'
             }>
             <span>
-              {statusChecking('email')
-                ? 'Edit Email Connection'
-                : 'Connect Email'}
+              {statusChecking('asana')
+                ? 'Edit Asana Connection'
+                : 'Connect Asana'}
             </span>
           </button>
-        </Link>
-      </div>
-      <div className="setup-card">
-        <img src={Datadog} className="in-active" alt="Datadog" />
-        <h1>
-          Datadog{' '}
-          {statusChecking('datadog') && (
-            <img src={Succestick} alt="success tik"></img>
-          )}
-        </h1>
-        <p>Select the data you want to monitor and analyse</p>
-        <button
-          className={
-            statusChecking('datadog') ? 'btn black-button' : 'btn white-button'
-          }>
-          <span>
-            {statusChecking('datadog')
-              ? 'Edit Datadog Connection'
-              : 'Connect Datadog'}
-          </span>
-        </button>
-      </div>
-      <div className="setup-card">
-        <img src={Asana} className="in-active" alt="Asana" />
-        <h1>
-          Asana{' '}
-          {statusChecking('asana') && (
-            <img src={Succestick} alt="success tik"></img>
-          )}
-        </h1>
-        <p>Select the data you want to monitor and analyse</p>
-        <button
-          className={
-            statusChecking('asana') ? 'btn black-button' : 'btn white-button'
-          }>
-          <span>
-            {statusChecking('asana')
-              ? 'Edit Asana Connection'
-              : 'Connect Asana'}
-          </span>
-        </button>
-      </div>
-      <div className="setup-card">
-        <img src={Teams} className="in-active" alt="Teams" />
-        <h1>
-          Teams
-          {statusChecking('teams') && (
-            <img src={Succestick} alt="success tik"></img>
-          )}
-        </h1>
-        <p>Select the data you want to monitor and analyse</p>
-        <button
-          className={
-            statusChecking('teams') ? 'btn black-button' : 'btn white-button'
-          }>
-          <span>
-            {statusChecking('teams')
-              ? 'Edit Teams Connection'
-              : 'Connect Teams'}
-          </span>
-        </button>
-        <h3>Soon</h3>
-      </div>
-    </>
-  );
+        </div>
+        <div className="setup-card">
+          <img src={Teams} className="in-active" alt="Teams" />
+          <h1>
+            Teams
+            {statusChecking('teams') && (
+              <img src={Succestick} alt="success tik"></img>
+            )}
+          </h1>
+          <p>Select the data you want to monitor and analyse</p>
+          <button
+            className={
+              statusChecking('teams') ? 'btn black-button' : 'btn white-button'
+            }>
+            <span>
+              {statusChecking('teams')
+                ? 'Edit Teams Connection'
+                : 'Connect Teams'}
+            </span>
+          </button>
+          <h3>Soon</h3>
+        </div>
+      </>
+    );
+  }
 };
 
 export default AlertsCard;

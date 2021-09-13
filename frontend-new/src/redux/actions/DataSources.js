@@ -47,12 +47,12 @@ export const getAllDataSourceFailure = () => {
 
 export const getAllDataSources = () => {
   return async (dispatch) => {
-    dispatch(getAllDataSourceRequested);
+    dispatch(getAllDataSourceRequested());
     const { data, error, status } = await getRequest({
       url: CONNECTION_URL
     });
     if (error) {
-      dispatch(getAllDataSourceFailure);
+      dispatch(getAllDataSourceFailure());
     } else if (data && status === 200) {
       dispatch(getAllDataSourceSuccess(data.data));
     }

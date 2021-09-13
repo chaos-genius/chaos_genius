@@ -50,8 +50,8 @@
 // Tooltip
 .timeseriesfrequency-tooltip {
   .react-tooltip-lite {
-    width: 228px;
-    padding: 8px 12px;
+    width: 228px !important;
+    padding: 8px 12px !important;
     background: $black_variation-2;
     border-radius: 6px;
     color: $white;
@@ -60,7 +60,6 @@
       font-size: $font-size-12;
       line-height: $line-height-18;
       letter-spacing: $letter-spacing;
-      text-transform: capitalize;
       color: $white;
     }
   }
@@ -79,8 +78,8 @@
 }
 .sensitivity-tooltip {
   .react-tooltip-lite {
-    width: 228px;
-    padding: 8px 12px;
+    width: 228px !important;
+    padding: 8px 12px !important;
     background: $black_variation-2;
     border-radius: 6px;
     color: $white;
@@ -89,7 +88,6 @@
       font-size: $font-size-12;
       line-height: $line-height-18;
       letter-spacing: $letter-spacing;
-      text-transform: capitalize;
       color: $white;
     }
   }

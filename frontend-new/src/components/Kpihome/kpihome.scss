@@ -103,10 +103,20 @@
   .kpi-graph {
     width: 234px;
     height: 56px;
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    div {
+      overflow: visible !important;
+      width: 170px !important;
+      .highcharts-container {
+        margin-bottom: 0px !important;
+      }
     }
+    // img {
+    //   width: 100%;
+    //   height: 100%;
+    //   object-fit: contain;
+    // }
   }
 }

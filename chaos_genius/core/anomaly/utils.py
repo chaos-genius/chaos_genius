@@ -50,11 +50,24 @@ def get_anomaly_df(kpi_info, connection_info, last_date_in_db=None, end_date= No
                 key_str = f"{indentifier}{key}{indentifier}"
                 kpi_filters_query += f" and {key_str} in {values_str}"
 
-    base_query = " ".join([
-        f"select * from {kpi_info['table_name']}",
-        base_filter,
-        kpi_filters_query
-    ])
+
+    kpi_type = kpi_info.get('kpi_type')
+    if kpi_type == 'table':
+        base_query = " ".join([
+            f"select * from {kpi_info['table_name']}",
+            base_filter,
+            kpi_filters_query
+        ])
+    
+    elif kpi_type == 'query':
+        base_query = " ".join([
+            f"select * from ({kpi_info['kpi_query']}) as temp_table",
+            base_filter,
+            kpi_filters_query
+        ])
+    else:
+        raise ValueError(f"kpi_type:'{kpi_type}' is not from ['table', 'query']")
+
     return get_df_from_db_uri(connection_info["db_uri"], base_query)
 
 

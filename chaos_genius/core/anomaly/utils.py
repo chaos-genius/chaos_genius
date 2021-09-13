@@ -115,7 +115,7 @@ def fill_data(input_data, dt_col, metric_col, last_date, period, end_date, freq)
                     metric_col: [0]
                 }), 
                 input_data
-            ]) 
+            ])
 
     if end_date is not None:
         end_date_diff_1 = end_date - timedelta(**FREQUENCY_DELTA[freq])

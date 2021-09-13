@@ -98,55 +98,55 @@ class Kpi(PkModel):
                 },
                 {
                     "name": "data_source",
-                    "is_editable": True,
+                    "is_editable": False,
                     "is_sensitive": False,
 
                 },
                 {
                     "name": "kpi_type",
-                    "is_editable": True,
+                    "is_editable": False,
                     "is_sensitive": False,
 
                 },
                 {
                     "name": "kpi_query",
-                    "is_editable": True,
+                    "is_editable": False,
                     "is_sensitive": False,
 
                 },
                 {
                     "name": "table_name",
-                    "is_editable": True,
+                    "is_editable": False,
                     "is_sensitive": False,
 
                 },
                 {
                     "name": "metric",
-                    "is_editable": True,
+                    "is_editable": False,
                     "is_sensitive": False,
 
                 },
                 {
                     "name": "aggregation",
-                    "is_editable": True,
+                    "is_editable": False,
                     "is_sensitive": False,
 
                 },
                 {
                     "name": "datetime_column",
-                    "is_editable": True,
+                    "is_editable": False,
                     "is_sensitive": False,
 
                 },
                 {
                     "name": "filters",
-                    "is_editable": True,
+                    "is_editable": False,
                     "is_sensitive": False,
 
                 },
                 {
                     "name": "dimensions",
-                    "is_editable": True,
+                    "is_editable": False,
                     "is_sensitive": False,
 
                 }

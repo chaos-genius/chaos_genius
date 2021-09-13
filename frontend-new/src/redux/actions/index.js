@@ -12,7 +12,10 @@ import {
   getAllKpiExplorerField,
   getAllKpiExplorerSubmit,
   getTestQuery,
-  kpiDisable
+  kpiDisable,
+  getEditMetaInfo,
+  getKpibyId,
+  getUpdatekpi
 } from './KpiEplorer';
 import {
   getDashboardAggregation,
@@ -56,5 +59,8 @@ export {
   getChannelStatus,
   getEditChannel,
   kpiSettingSetup,
-  kpiEditSetup
+  kpiEditSetup,
+  getEditMetaInfo,
+  getKpibyId,
+  getUpdatekpi
 };

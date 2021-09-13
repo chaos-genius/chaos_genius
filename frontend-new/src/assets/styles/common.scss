@@ -900,3 +900,41 @@ a:hover {
     display: none;
   }
 }
+.form-group {
+  input[type='text']:disabled {
+    background: $grey_variation-2;
+    &::placeholder {
+      font-weight: $font-weight-500;
+      color: $black_variation-2;
+    }
+  }
+  .selectcategory--is-disabled {
+    .selectcategory__control--is-disabled {
+      height: 48px;
+      background: $grey_variation-5;
+      border: 1px solid $grey_variation-1;
+      box-sizing: border-box;
+      border-radius: 6px;
+      .css-g1d714-ValueContainer {
+        padding: 2px 8px !important;
+      }
+      .input-select__single-value {
+        span {
+          font-weight: $font-weight-500;
+          font-size: $font-size-14;
+          line-height: $line-height-16;
+          letter-spacing: $letter-spacing;
+          text-transform: capitalize;
+          color: $grey_variation-3;
+        }
+      }
+      .selectcategory__indicators {
+        .css-tlfecz-indicatorContainer {
+          svg {
+            fill: $grey_variation-1;
+          }
+        }
+      }
+    }
+  }
+}

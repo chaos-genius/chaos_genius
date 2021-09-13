@@ -16,7 +16,16 @@ import {
   TESTQUERYREQUEST,
   KPIDISABLEREQUEST,
   KPIDISABLESUCCESS,
-  KPIDISABLEFAILURE
+  KPIDISABLEFAILURE,
+  KPIFORMEDITREQUEST_META_INFO,
+  KPIFORMEDITSUCCESS_META_INFO,
+  KPIFORMEDITFAILURE_META_INFO,
+  KPIEDITDATAREQUEST,
+  KPIEDITDATASUCCESS,
+  KPIEDITDATAFAILURE,
+  KPIUPDATEREQUEST,
+  KPIUPDATESUCCESS,
+  KPIUPDATEFAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -37,7 +46,16 @@ const initialState = {
   testQueryError: false,
   kpiDisableLoading: true,
   kpiDisableData: [],
-  kpiDisableError: false
+  kpiDisableError: false,
+  kpiMetaInfoLoading: false,
+  kpiMetaInfoData: [],
+  kpiMetaInfoError: false,
+  kpiEditDataLoading: false,
+  kpiEditData: [],
+  kpiEditDataError: false,
+  kpiUpdateLoading: false,
+  kpiUpdateData: [],
+  kpiUpdateError: false
 };
 
 export const kpiExplorer = (state = initialState, action) => {
@@ -129,9 +147,72 @@ export const kpiExplorer = (state = initialState, action) => {
     case KPIDISABLEFAILURE: {
       return { ...state, kpiDisableLoading: false, kpiDisableFailure: true };
     }
+    case KPIFORMEDITREQUEST_META_INFO: {
+      return {
+        ...state,
+        kpiMetaInfoLoading: true
+      };
+    }
+    case KPIFORMEDITSUCCESS_META_INFO: {
+      return {
+        ...state,
+        kpiMetaInfoLoading: false,
+        kpiMetaInfoData: action.data
+      };
+    }
+    case KPIFORMEDITFAILURE_META_INFO: {
+      return {
+        ...state,
+        kpiMetaInfoLoading: false,
+        kpiMetaInfoError: true
+      };
+    }
+    case KPIEDITDATAREQUEST: {
+      return {
+        ...state,
+        kpiEditDataLoading: true,
+        kpiEditDataError: false
+      };
+    }
+    case KPIEDITDATASUCCESS: {
+      return {
+        ...state,
+        kpiEditDataLoading: false,
+        kpiEditData: action.data
+      };
+    }
+    case KPIEDITDATAFAILURE: {
+      return {
+        ...state,
+        kpiEditDataLoading: false,
+        kpiEditDataError: true
+      };
+    }
+    case KPIUPDATEREQUEST: {
+      return {
+        ...state,
+        kpiUpdateLoading: true,
+        kpiUpdateError: false
+      };
+    }
+    case KPIUPDATESUCCESS: {
+      return {
+        ...state,
+        kpiUpdateData: action.data,
+        kpiUpdateLoading: false
+      };
+    }
+    case KPIUPDATEFAILURE: {
+      return {
+        ...state,
+        kpiUpdateLoading: false,
+        kpiUpdateError: true
+      };
+    }
     case 'KPI_RESET': {
       return {
-        kpiSubmit: []
+        kpiSubmit: [],
+        kpiUpdateData: []
       };
     }
     default:

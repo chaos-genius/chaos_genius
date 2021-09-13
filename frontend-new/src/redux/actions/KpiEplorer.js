@@ -16,7 +16,16 @@ import {
   TESTQUERYSUCCESS,
   KPIDISABLEREQUEST,
   KPIDISABLEFAILURE,
-  KPIDISABLESUCCESS
+  KPIDISABLESUCCESS,
+  KPIFORMEDITREQUEST_META_INFO,
+  KPIFORMEDITSUCCESS_META_INFO,
+  KPIFORMEDITFAILURE_META_INFO,
+  KPIEDITDATAREQUEST,
+  KPIEDITDATASUCCESS,
+  KPIEDITDATAFAILURE,
+  KPIUPDATEREQUEST,
+  KPIUPDATESUCCESS,
+  KPIUPDATEFAILURE
 } from './ActionConstants';
 
 import {
@@ -26,7 +35,7 @@ import {
   TEST_QUERY_URL
 } from '../../utils/url-helper';
 
-import { getRequest, postRequest } from '../../utils/http-helper';
+import { getRequest, postRequest, putRequest } from '../../utils/http-helper';
 
 export const getAllKpiExplorerRequested = () => {
   return {
@@ -231,6 +240,108 @@ export const kpiDisable = (id) => {
       dispatch(kpiDisableFailure());
     } else if (data && status === 200) {
       dispatch(kpiDisableSuccess(data));
+    }
+  };
+};
+
+export const getEditMetaInfoRequest = () => {
+  return {
+    type: KPIFORMEDITREQUEST_META_INFO
+  };
+};
+
+export const getEditMetaInfoSuccess = (response) => {
+  return {
+    type: KPIFORMEDITSUCCESS_META_INFO,
+    data: response
+  };
+};
+
+export const getEditMetaInfoFailure = () => {
+  return {
+    type: KPIFORMEDITFAILURE_META_INFO
+  };
+};
+
+export const getEditMetaInfo = (id) => {
+  return async (dispatch) => {
+    dispatch(getEditMetaInfoRequest());
+    const { data, error, status } = await getRequest({
+      url: `${KPI_URL}/meta-info`
+    });
+    if (error) {
+      dispatch(getEditMetaInfoFailure());
+    } else if (data && status === 200) {
+      dispatch(getEditMetaInfoSuccess(data.data));
+    }
+  };
+};
+
+export const getKpibyIdRequest = () => {
+  return {
+    type: KPIEDITDATAREQUEST
+  };
+};
+export const getKpibyIdSuccess = (response) => {
+  return {
+    type: KPIEDITDATASUCCESS,
+    data: response
+  };
+};
+export const getKpibyIdFailure = () => {
+  return {
+    type: KPIEDITDATAFAILURE
+  };
+};
+
+export const getKpibyId = (id) => {
+  return async (dispatch) => {
+    dispatch(getKpibyIdRequest());
+    const { data, error, status } = await getRequest({
+      url: `${KPI_URL}/${id}`
+    });
+    if (error) {
+      dispatch(getKpibyIdFailure());
+    } else if (data && status === 200) {
+      dispatch(getKpibyIdSuccess(data.data));
+    }
+  };
+};
+
+export const getUpdateKpiRequest = () => {
+  return {
+    type: KPIUPDATEREQUEST
+  };
+};
+export const getUpdateKpiSuccess = (response) => {
+  return {
+    type: KPIUPDATESUCCESS,
+    data: response
+  };
+};
+export const getUpdateKpiFailure = () => {
+  return {
+    type: KPIUPDATEFAILURE
+  };
+};
+
+export const getUpdatekpi = (id, updateData) => {
+  return async (dispatch) => {
+    dispatch(getUpdateKpiRequest());
+    const { data, error, status } = await putRequest({
+      url: `${KPI_URL}/${id}/update`,
+      data: JSON.stringify(updateData),
+      headers: {
+        'Content-Type': 'application/json;charset=UTF-8',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true
+      },
+      noAuth: true
+    });
+    if (error) {
+      dispatch(getUpdateKpiFailure());
+    } else if (data && status === 200) {
+      dispatch(getUpdateKpiSuccess(data));
     }
   };
 };

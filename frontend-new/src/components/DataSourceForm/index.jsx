@@ -52,15 +52,14 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const [formError, setFormError] = useState({});
   const [status, setStatus] = useState('');
   const history = useHistory();
-  const data = history.location.pathname.split('/');
+  //const data = history.location.pathname.split('/');
   const connectionType = JSON.parse(localStorage.getItem('connectionType'));
   const {
     //isLoading,
     testLoading,
     testConnectionResponse,
     createDatasourceResponse,
-    createDatasourceLoading,
-    metaInfoData
+    createDatasourceLoading
   } = useSelector((state) => state.dataSource);
 
   useEffect(() => {

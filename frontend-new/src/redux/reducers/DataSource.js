@@ -16,7 +16,10 @@ import {
   DELETEDATASOURCEFAILURE,
   DATASOURCE_META_INFO_REQUEST,
   DATASOURCE_META_INFO_SUCCESS,
-  DATASOURCE_META_INFO_FAILURE
+  DATASOURCE_META_INFO_FAILURE,
+  DATASOURCEEDITDATAREQUEST,
+  DATASOURCEEDITDATASUCCESS,
+  DATASOURCEEDITDATAFAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -27,12 +30,15 @@ const initialState = {
   createDatasourceResponse: [],
   createDatasourceError: false,
   deleteDataSourceResponse: [],
-  isLoading: false,
+  isLoading: true,
   testLoading: false,
   error: false,
   metaInfoLoading: false,
   metaInfoData: [],
-  metaInfoError: false
+  metaInfoError: false,
+  datasourceData: [],
+  datasourceLoading: false,
+  datasourceError: false
 };
 
 export const dataSource = (state = initialState, action) => {
@@ -155,6 +161,26 @@ export const dataSource = (state = initialState, action) => {
         ...state,
         metaInfoLoading: false,
         metaInfoError: true
+      };
+    }
+    case DATASOURCEEDITDATAREQUEST: {
+      return {
+        ...state,
+        datasourceLoading: true
+      };
+    }
+    case DATASOURCEEDITDATASUCCESS: {
+      return {
+        ...state,
+        datasourceData: action.data,
+        datasourceLoading: false
+      };
+    }
+    case DATASOURCEEDITDATAFAILURE: {
+      return {
+        ...state,
+        datasourceLoading: false,
+        datasourceError: true
       };
     }
     case 'CREATE_RESPONSE_RESET': {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import Select from 'react-select';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 
 import '../../assets/styles/addform.scss';
 import Play from '../../assets/images/play.svg';
@@ -11,7 +11,9 @@ import Fail from '../../assets/images/fail.svg';
 
 import {
   createDataSource,
-  testDatasourceConnection
+  testDatasourceConnection,
+  getDatasourceMetaInfo,
+  getDatasourceById
 } from '../../redux/actions';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -42,7 +44,7 @@ const datasourceIcon = (type) => {
 
 const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const dispatch = useDispatch();
-
+  const dsId = useParams().id;
   const [option, setOption] = useState([]);
   const [selectedDatasource, setSelectedDatasource] = useState();
   const [sourceDefinitionId, setSourceDefinitionId] = useState('');
@@ -52,15 +54,31 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const [formError, setFormError] = useState({});
   const [status, setStatus] = useState('');
   const history = useHistory();
-  //const data = history.location.pathname.split('/');
+  const path = history.location.pathname.split('/');
   const connectionType = JSON.parse(localStorage.getItem('connectionType'));
   const {
     //isLoading,
     testLoading,
     testConnectionResponse,
     createDatasourceResponse,
-    createDatasourceLoading
+    createDatasourceLoading,
+    metaInfoData,
+    metaInfoLoading,
+    datasourceData,
+    datasourceLoading
   } = useSelector((state) => state.dataSource);
+
+  const getEditDatasource = () => {
+    dispatch(getDatasourceMetaInfo());
+    dispatch(getDatasourceById(dsId));
+  };
+
+  useEffect(() => {
+    if (path[2] === 'edit') {
+      getEditDatasource();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const fetchData = () => {
@@ -68,6 +86,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       connectionType.map((item) => {
         return arr.push({
           value: item,
+          name: item.name,
           label: <div className="optionlabel">{datasourceIcon(item)}</div>
         });
       });
@@ -78,6 +97,30 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (datasourceData && datasourceData.length !== 0 && path[2] === 'edit') {
+      setConnectionName(datasourceData?.name);
+      setDsFormData(datasourceData?.sourceForm || {});
+      findDataType(datasourceData);
+    }
+  }, [datasourceData]);
+
+  const findDataType = (data) => {
+    if (connectionType) {
+      // setSelectedDatasource(
+      //   connectionType.find((item) => {
+      //     if (data?.connection_type === item.name) {
+      //       return {
+      //         value: item,
+      //         name: item.name,
+      //         label: <div className="optionlabel">{datasourceIcon(item)}</div>
+      //       };
+      //     }
+      //   })
+      // );
+    }
+  };
 
   useEffect(() => {
     if (
@@ -201,131 +244,151 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     }
   };
 
-  // if (isLoading) {
-  //   return (
-  //     <div className="load ">
-  //       <div className="preload"></div>
-  //     </div>
-  //   );
-  // } else {
-  return (
-    <div>
-      <div className="form-group">
-        <label>Connection Name</label>
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Enter Connection Name"
-          value={connectionName}
-          onChange={(e) => {
-            setConnectionName(e.target.value);
-            setError('');
-          }}
-        />
-        {error && (
-          <div className="connection__fail">
-            <p>{error}</p>
+  const editableStatus = (type) => {
+    var status = false;
+    metaInfoData &&
+      metaInfoData.length !== 0 &&
+      metaInfoData.fields.find((field) => {
+        if (field.name === type) {
+          status = field.is_editable ? false : true;
+        }
+        return '';
+      });
+    return status;
+  };
+
+  if (metaInfoLoading || datasourceLoading) {
+    return (
+      <div className="load ">
+        <div className="preload"></div>
+      </div>
+    );
+  } else {
+    return (
+      <div>
+        <div className="form-group">
+          <label>Connection Name</label>
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Enter Connection Name"
+            value={connectionName}
+            disabled={path[2] === 'edit' ? editableStatus('name') : false}
+            onChange={(e) => {
+              setConnectionName(e.target.value);
+              setError('');
+            }}
+          />
+          {error && (
+            <div className="connection__fail">
+              <p>{error}</p>
+            </div>
+          )}
+        </div>
+        <div className="form-group">
+          <label>Select Data Source*</label>
+          <Select
+            options={option}
+            classNamePrefix="selectcategory"
+            isDisabled={
+              path[2] === 'edit' ? editableStatus('connection_type') : false
+            }
+            value={selectedDatasource}
+            onChange={(e) => {
+              setSelectedDatasource(e);
+              setError('');
+              setFormError([]);
+              setSourceDefinitionId(e.value.sourceDefinitionId);
+              setDsFormData({});
+              setStatus('');
+            }}
+            components={{ SingleValue: customSingleValue }}
+          />
+        </div>
+
+        {selectedDatasource &&
+          selectedDatasource !== undefined &&
+          Object.keys(selectedDatasource.value).length > 0 &&
+          renderTextFields(
+            selectedDatasource.value.connectionSpecification,
+            handleInputChange,
+            handleCheckboxChange,
+            dsFormData,
+            formError
+          )}
+        {/* for Google Sheet */}
+        {/*Paste here*/}
+        {/* end of Google Analytics */}
+        {/* test connection sucess message */}
+        {status && status?.status === 'succeeded' && (
+          <div className="connection__success">
+            <p>
+              <img src={Success} alt="Success" />
+              Test Connection Success
+            </p>
           </div>
         )}
-      </div>
-      <div className="form-group">
-        <label>Select Data Source*</label>
-        <Select
-          options={option}
-          classNamePrefix="selectcategory"
-          onChange={(e) => {
-            setSelectedDatasource(e);
-            setError('');
-            setFormError([]);
-            setSourceDefinitionId(e.value.sourceDefinitionId);
-            setDsFormData({});
-            setStatus('');
-          }}
-          components={{ SingleValue: customSingleValue }}
-        />
-      </div>
-
-      {selectedDatasource &&
-        selectedDatasource !== undefined &&
-        Object.keys(selectedDatasource.value).length > 0 &&
-        renderTextFields(
-          selectedDatasource.value.connectionSpecification,
-          handleInputChange,
-          handleCheckboxChange,
-          dsFormData,
-          formError
+        {/* test connection fail message */}
+        {status && status?.status === 'failed' && (
+          <div className="connection__fail">
+            <p>
+              <img src={Fail} alt="Fail" />
+              Test Connection Failed
+            </p>
+          </div>
         )}
-      {/* for Google Sheet */}
-      {/*Paste here*/}
-      {/* end of Google Analytics */}
-      {/* test connection sucess message */}
-      {status && status?.status === 'succeeded' && (
-        <div className="connection__success">
-          <p>
-            <img src={Success} alt="Success" />
-            Test Connection Success
-          </p>
-        </div>
-      )}
-      {/* test connection fail message */}
-      {status && status?.status === 'failed' && (
-        <div className="connection__fail">
-          <p>
-            <img src={Fail} alt="Fail" />
-            Test Connection Failed
-          </p>
-        </div>
-      )}
-      <div className="form-action">
-        {status && status?.status === 'succeeded' && (
-          <button
-            // className="btn black-button"
-            className={
-              createDatasourceLoading
-                ? 'btn black-button btn-loading'
-                : 'btn black-button'
-            }
-            onClick={() => {
-              saveDataSource();
-            }}>
-            <div className="btn-spinner">
-              <div className="spinner-border">
-                <span className="visually-hidden">Loading...</span>
+        <div className="form-action">
+          {status && status?.status === 'succeeded' && (
+            <button
+              // className="btn black-button"
+              className={
+                createDatasourceLoading
+                  ? 'btn black-button btn-loading'
+                  : 'btn black-button'
+              }
+              onClick={() => {
+                saveDataSource();
+              }}>
+              <div className="btn-spinner">
+                <div className="spinner-border">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                <span>Loading...</span>
               </div>
-              <span>Loading...</span>
-            </div>
-            <div className="btn-content">
-              <span>Add Data Source</span>
-            </div>
-          </button>
-        )}
-        {(status === '' || status?.status !== 'succeeded') && (
-          <button
-            className={
-              testLoading ? 'btn black-button btn-loading' : 'btn black-button'
-            }
-            type={'submit'}
-            disabled={selectedDatasource !== undefined ? false : true}
-            onClick={() => testConnection()}>
-            <div className="btn-spinner">
-              <div className="spinner-border">
-                <span className="visually-hidden">Loading...</span>
+              <div className="btn-content">
+                <span>Add Data Source</span>
               </div>
-              <span>Loading...</span>
-            </div>
-            <div className="btn-content">
-              <img
-                src={selectedDatasource !== undefined ? Play : PlayDisable}
-                alt="Play"
-              />
-              <span>Test Connection</span>
-            </div>
-          </button>
-        )}
+            </button>
+          )}
+          {(status === '' || status?.status !== 'succeeded') && (
+            <button
+              className={
+                testLoading
+                  ? 'btn black-button btn-loading'
+                  : 'btn black-button'
+              }
+              type={'submit'}
+              disabled={selectedDatasource !== undefined ? false : true}
+              onClick={() => testConnection()}>
+              <div className="btn-spinner">
+                <div className="spinner-border">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                <span>Loading...</span>
+              </div>
+              <div className="btn-content">
+                <img
+                  src={selectedDatasource !== undefined ? Play : PlayDisable}
+                  alt="Play"
+                />
+                <span>Test Connection</span>
+              </div>
+            </button>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 };
-//};
 
 export default DataSourceForm;

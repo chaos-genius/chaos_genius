@@ -32,3 +32,4 @@ export const TEST_QUERY_URL = `${BASE_URL}/api/connection/metadata`;
 export const ALERT_EMAIL_URL = `${BASE_URL}/api/config/set-config`;
 export const CHANNEL_CONFIGURATION_URL = `${BASE_URL}/api/config/get-all-config`;
 export const EDIT_CHANNEL_URL = `${BASE_URL}/api/config/get-config`;
+export const DATASOURCE_META_INFO_URL = `${BASE_URL}/api/connection/meta-info`;

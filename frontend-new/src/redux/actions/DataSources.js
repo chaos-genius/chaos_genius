@@ -16,13 +16,17 @@ import {
   DELETEDATASOURCEFAILURE,
   DATASOURCE_META_INFO_REQUEST,
   DATASOURCE_META_INFO_SUCCESS,
-  DATASOURCE_META_INFO_FAILURE
+  DATASOURCE_META_INFO_FAILURE,
+  DATASOURCEEDITDATAFAILURE,
+  DATASOURCEEDITDATASUCCESS,
+  DATASOURCEEDITDATAREQUEST
 } from './ActionConstants';
 
 import {
   CONNECTION_TYPE,
   CONNECTION_URL,
   CREATE_DATASOURCE,
+  DATASOURCE_META_INFO_URL,
   DELETE_DATASOURCE,
   TEST_CONNECTION
 } from '../../utils/url-helper';
@@ -219,12 +223,44 @@ export const getDatasourceMetaInfo = () => {
   return async (dispatch) => {
     dispatch(getDatasourceMetaInfoRequest());
     const { data, error, status } = await getRequest({
-      url: DELETE_DATASOURCE
+      url: DATASOURCE_META_INFO_URL
     });
     if (error) {
       dispatch(getDatasourceMetaInfoFailure());
     } else if (data && status === 200) {
       dispatch(getDatasourceMetaInfoSuccess(data.data));
+    }
+  };
+};
+
+export const getDatasourceByIdRequest = () => {
+  return {
+    type: DATASOURCEEDITDATAREQUEST
+  };
+};
+export const getDatasourceByIdSuccess = (response) => {
+  return {
+    type: DATASOURCEEDITDATASUCCESS,
+    data: response
+  };
+};
+
+export const getDatasourceByIdFailure = () => {
+  return {
+    type: DATASOURCEEDITDATAFAILURE
+  };
+};
+
+export const getDatasourceById = (id) => {
+  return async (dispatch) => {
+    dispatch(getDatasourceByIdRequest());
+    const { data, error, status } = await getRequest({
+      url: `${CONNECTION_URL}/${id}`
+    });
+    if (error) {
+      dispatch(getDatasourceByIdFailure());
+    } else if (data && status === 200) {
+      dispatch(getDatasourceByIdSuccess(data.data));
     }
   };
 };

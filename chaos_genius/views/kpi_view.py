@@ -75,26 +75,24 @@ def kpi():
 def get_all_kpis():
     """returning all kpis"""
 
-    results = Kpi.query.all()
+    results = Kpi.query.filter(Kpi.active == True).all()
 
     ret = []
     static = None
+    metrics = ['name', 'metric', 'id']
 
     for ele in results:
         res = {}
 
-        if ele.id in [106, 81, 105, 120, 118, 116, 117, 115, 110, 113, 114, 109, 121]: #these are kpis for which no data is available
-            continue # this is just a temporary fix so that code works
-
-        for key in ['name', 'metric', 'id']:
+        for key in metrics:
             res[key] = ele.__dict__[key]
-            
-        kpi_info = get_kpi_data_from_id(ele.id)
-        connection_info = DataSource.get_by_id(kpi_info["data_source"]).as_dict
-        
-        aggregation_type = ele.aggregation
 
         try:
+            kpi_info = get_kpi_data_from_id(ele.id)
+            connection_info = DataSource.get_by_id(kpi_info["data_source"]).as_dict
+
+            aggregation_type = ele.aggregation
+
             aggregate_data_week = kpi_aggregation(kpi_info, connection_info, timeline = 'wow')
             aggregate_data_month = kpi_aggregation(kpi_info, connection_info, timeline = 'mom')
 
@@ -107,12 +105,12 @@ def get_all_kpis():
 
         except:
 
-            res['prev_week'] = -1
-            res['this_week'] = -1
-            res['week_change'] = -1
-            res['prev_month'] = -1
-            res['this_month'] = -1
-            res['month_change'] = -1
+            res['prev_week'] = 0
+            res['this_week'] = 0
+            res['week_change'] = 0
+            res['prev_month'] = 0
+            res['this_month'] = 0
+            res['month_change'] = 0
 
         res['weekly_anomaly_count'] = random.randint(1, 20) #TODO
         res['monthly_anomaly_count'] = random.randint(20, 40) #TODO
@@ -433,3 +431,4 @@ def get_kpi_data_from_id(n: int) -> dict:
     if kpi_info.as_dict:
         return kpi_info.as_dict
     raise ValueError(f"KPI ID {n} not found in KPI_DATA")
+

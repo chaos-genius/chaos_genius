@@ -72,7 +72,7 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
             You have successfully{' '}
             {text === 'kpi'
               ? 'Added a KPI'
-              : text === ' datasource'
+              : text === 'datasource'
               ? 'Added a Data Source'
               : text === 'activateanalytics'
               ? 'Added a Activate Analytics'

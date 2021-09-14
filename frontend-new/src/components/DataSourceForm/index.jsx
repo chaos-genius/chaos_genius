@@ -83,7 +83,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     if (
       createDatasourceResponse &&
       createDatasourceResponse.status === 'connected' &&
-      onboarding !== true
+      onboarding === false
     ) {
       history.push('/datasource');
     } else if (

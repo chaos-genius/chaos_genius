@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -17,7 +17,10 @@ import {
   getAllKpiExplorerForm,
   getAllKpiExplorerField,
   getAllKpiExplorerSubmit,
-  getTestQuery
+  getTestQuery,
+  getEditMetaInfo,
+  getKpibyId,
+  getUpdatekpi
 } from '../../redux/actions';
 
 const datasettype = [
@@ -59,8 +62,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
 
   const history = useHistory();
   const data = history.location.pathname.split('/');
+  const kpiId = useParams().id;
   const connectionType = JSON.parse(localStorage.getItem('connectionType'));
-
   const [option, setOption] = useState({
     datasource: '',
     tableoption: '',
@@ -111,11 +114,19 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     kpiField,
     testQueryData,
     kpiSubmitLoading,
-    kpiSubmit
+    kpiSubmit,
+    kpiMetaInfoData,
+    kpiEditData,
+    kpiUpdateLoading,
+    kpiUpdateData
   } = useSelector((state) => state.kpiExplorer);
 
   useEffect(() => {
     dispatchGetAllKpiExplorerForm();
+    if (data[2] === 'edit') {
+      dispatch(getEditMetaInfo());
+      dispatch(getKpibyId(kpiId));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -123,12 +134,31 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     if (kpiFormData) {
       fieldData();
     }
+    if (kpiEditData && data[2] === 'edit') {
+      const obj = { ...formdata };
+      obj['kpiname'] = kpiEditData?.name || '';
+      obj['datasource'] = kpiEditData?.data_source;
+      obj['dataset'] = kpiEditData?.kpi_type || '';
+      obj['tablename'] = kpiEditData?.table_name || '';
+      obj['query'] = kpiEditData?.kpi_query || '';
+      obj['metriccolumns'] = kpiEditData?.metric || '';
+      obj['aggregate'] = kpiEditData?.aggregation || '';
+      obj['datetimecolumns'] = kpiEditData?.datetime_column || '';
+      obj['addfilter'] = kpiEditData?.filters || [];
+      obj['adddimentsions'] = kpiEditData?.dimensions || [];
+      setDataset({
+        label: kpiEditData?.kpi_type,
+        value: kpiEditData?.kpi_type
+      });
+      setFormdata(obj);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpiFormData]);
+  }, [kpiFormData, kpiEditData]);
 
   const dispatchGetAllKpiExplorerForm = () => {
     dispatch(getAllKpiExplorerForm());
   };
+
   useEffect(() => {
     if (testQueryData) {
       queryFieldList();
@@ -174,6 +204,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       </>
     );
   };
+
   useEffect(() => {
     if (kpiSubmit && kpiSubmit.status === 'success' && onboarding !== true) {
       history.push('/kpiexplorer');
@@ -185,8 +216,15 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       setModal(true);
       setText('kpi');
     }
+    if (
+      kpiUpdateData &&
+      kpiUpdateData.status === 'success' &&
+      onboarding !== true
+    ) {
+      history.push('/kpiexplorer');
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpiSubmit]);
+  }, [kpiSubmit, kpiUpdateData]);
 
   const fieldData = () => {
     if (kpiFormData && kpiFormLoading === false) {
@@ -278,6 +316,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   //   }
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, [option.tableoption]);
+
   const tableName = (e) => {
     if (kpiField) {
       setErrorMsg({ tablename: false });
@@ -322,6 +361,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       tabledimension: false
     });
   };
+
   const handleSubmit = () => {
     if (formdata.kpiname === '') {
       setErrorMsg((prev) => {
@@ -387,7 +427,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         };
       });
     }
-
     if (
       (formdata.kpiname &&
         formdata.datasource &&
@@ -409,7 +448,11 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         dimensions: formdata.adddimentsions,
         filters: formdata.addfilter
       };
-      dispatchgetAllKpiExplorerSubmit(kpiInfo);
+      if (data[2] === 'edit') {
+        dispatch(getUpdatekpi(kpiId, { name: formdata.kpiname }));
+      } else {
+        dispatchgetAllKpiExplorerSubmit(kpiInfo);
+      }
     }
   };
 
@@ -425,6 +468,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     };
     dispatch(getTestQuery(data));
   };
+
   // const handleAddClick = () => {
   //   setInputList([...inputList, { country: '', operator: '', value: '' }]);
   // };
@@ -447,6 +491,19 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   //     setInputList(list);
   //   }
   // };
+
+  const editableStatus = (type) => {
+    var status = false;
+    kpiMetaInfoData &&
+      kpiMetaInfoData.fields.find((field) => {
+        if (field.name === type) {
+          status = field.is_editable ? false : true;
+        }
+        return '';
+      });
+    return status;
+  };
+
   if (kpiFormLoading) {
     return (
       <div className="load ">
@@ -463,6 +520,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             className="form-control"
             placeholder="Name of your KPI"
             required
+            value={formdata.kpiname}
+            disabled={data[2] === 'edit' ? editableStatus('name') : false}
             onChange={(e) => {
               setFormdata({ ...formdata, kpiname: e.target.value });
               setErrorMsg((prev) => {
@@ -485,6 +544,18 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             options={option.datasource}
             classNamePrefix="selectcategory"
             placeholder="Select Data Source"
+            value={
+              option.datasource &&
+              option.datasource.find((opt) => {
+                if (opt.id === formdata.datasource) {
+                  return opt;
+                }
+                return null;
+              })
+            }
+            isDisabled={
+              data[2] === 'edit' ? editableStatus('data_source') : false
+            }
             components={{ SingleValue: customSingleValue }}
             onChange={(e) => formOption(e)}
           />
@@ -500,10 +571,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             value={dataset}
             options={datasettype}
             // options={datasettype}
-            // value={formdata.dataset !== '' ? dataset : null}
             classNamePrefix="selectcategory"
             placeholder="Select Dataset Type"
             onChange={(e) => handleDataset(e)}
+            isDisabled={data[2] === 'edit' ? editableStatus('kpi_type') : false}
             isOptionSelected
           />
           {errorMsg.dataset === true ? (
@@ -519,6 +590,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               <label>Query *</label>
               <textarea
                 value={formdata.query !== '' ? formdata.query : ''}
+                disabled={
+                  data[2] === 'edit' ? editableStatus('kpi_query') : false
+                }
                 placeholder="Enter Query"
                 onChange={(e) => {
                   setFormdata({ ...formdata, query: e.target.value });
@@ -573,6 +647,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                   value: formdata.tablename
                 }
               }
+              isDisabled={
+                data[2] === 'edit' ? editableStatus('table_name') : false
+              }
               classNamePrefix="selectcategory"
               placeholder="Select Table"
               onChange={(e) => tableName(e)}
@@ -596,6 +673,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                   value: formdata.metriccolumns
                 }
               }
+              isDisabled={data[2] === 'edit' ? editableStatus('metric') : false}
               classNamePrefix="selectcategory"
               placeholder="Select Metric Columns"
               onChange={(e) => {
@@ -627,6 +705,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                     }
                   : null
               }
+              isDisabled={
+                data[2] === 'edit' ? editableStatus('aggregation') : false
+              }
               classNamePrefix="selectcategory"
               placeholder="Select Aggregate by"
               onChange={(e) => {
@@ -655,6 +736,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                   value: formdata.datetimecolumns
                 }
               }
+              isDisabled={
+                data[2] === 'edit' ? editableStatus('datetime_column') : false
+              }
               classNamePrefix="selectcategory"
               placeholder="Select Datetime Columns"
               onChange={(e) => {
@@ -681,8 +765,16 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                 options={option.metricOption !== '' && option.metricOption}
                 value={
                   formdata.adddimentsions.length !== 0
-                    ? option.datetime_column
-                    : ''
+                    ? formdata.adddimentsions.map((el) => {
+                        return {
+                          label: el,
+                          value: el
+                        };
+                      })
+                    : []
+                }
+                isDisabled={
+                  data[2] === 'edit' ? editableStatus('dimensions') : false
                 }
                 classNamePrefix="selectcategory"
                 closeMenuOnSelect="true"
@@ -770,7 +862,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           <div className="form-action">
             <button
               className={
-                kpiSubmitLoading
+                kpiSubmitLoading || kpiUpdateLoading
                   ? 'btn black-button btn-loading'
                   : 'btn black-button'
               }

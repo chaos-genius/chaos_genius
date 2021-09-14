@@ -175,7 +175,7 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
                           />
                           View Logs
                         </li>
-                        <Link to="/datasource/edit">
+                        <Link to={`/datasource/edit/${datasource.id}`}>
                           <li>
                             <img
                               src={Edit}

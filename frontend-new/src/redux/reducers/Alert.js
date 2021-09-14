@@ -14,7 +14,7 @@ const initialState = {
   emailLoading: false,
   emailData: [],
   emailError: false,
-  channelStatusLoading: false,
+  channelStatusLoading: true,
   channelStatusData: [],
   channelStatusError: false,
   editData: [],

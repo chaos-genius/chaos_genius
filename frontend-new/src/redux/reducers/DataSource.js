@@ -19,7 +19,10 @@ import {
   DATASOURCE_META_INFO_FAILURE,
   DATASOURCEEDITDATAREQUEST,
   DATASOURCEEDITDATASUCCESS,
-  DATASOURCEEDITDATAFAILURE
+  DATASOURCEEDITDATAFAILURE,
+  DATASOURCEUPDATEREQUEST,
+  DATASOURCEUPDATESUCCESS,
+  DATASOURCEUPDATEFAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -38,7 +41,10 @@ const initialState = {
   metaInfoError: false,
   datasourceData: [],
   datasourceLoading: false,
-  datasourceError: false
+  datasourceError: false,
+  updateDatasource: [],
+  updateDatasourceLoading: false,
+  updateDatasourceError: false
 };
 
 export const dataSource = (state = initialState, action) => {
@@ -183,12 +189,33 @@ export const dataSource = (state = initialState, action) => {
         datasourceError: true
       };
     }
+    case DATASOURCEUPDATEREQUEST: {
+      return {
+        ...state,
+        updateDatasourceLoading: true
+      };
+    }
+    case DATASOURCEUPDATESUCCESS: {
+      return {
+        ...state,
+        updateDatasource: action.data,
+        updateDatasourceLoading: false
+      };
+    }
+    case DATASOURCEUPDATEFAILURE: {
+      return {
+        ...state,
+        updateDatasourceLoading: false,
+        updateDatasourceError: true
+      };
+    }
     case 'CREATE_RESPONSE_RESET': {
       return {
         ...state,
         createDatasourceResponse: [],
         testConnectionResponse: [],
-        deleteDataSourceResponse: []
+        deleteDataSourceResponse: [],
+        updateDatasource: []
       };
     }
     default:

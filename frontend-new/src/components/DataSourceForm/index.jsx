@@ -13,7 +13,8 @@ import {
   createDataSource,
   testDatasourceConnection,
   getDatasourceMetaInfo,
-  getDatasourceById
+  getDatasourceById,
+  updateDatasourceById
 } from '../../redux/actions';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -65,7 +66,9 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     metaInfoData,
     metaInfoLoading,
     datasourceData,
-    datasourceLoading
+    datasourceLoading,
+    updateDatasourceLoading,
+    updateDatasource
   } = useSelector((state) => state.dataSource);
 
   const getEditDatasource = () => {
@@ -101,24 +104,22 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   useEffect(() => {
     if (datasourceData && datasourceData.length !== 0 && path[2] === 'edit') {
       setConnectionName(datasourceData?.name);
-      setDsFormData(datasourceData?.sourceForm || {});
+      setDsFormData(datasourceData?.sourceForm);
       findDataType(datasourceData);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datasourceData]);
 
   const findDataType = (data) => {
     if (connectionType) {
-      // setSelectedDatasource(
-      //   connectionType.find((item) => {
-      //     if (data?.connection_type === item.name) {
-      //       return {
-      //         value: item,
-      //         name: item.name,
-      //         label: <div className="optionlabel">{datasourceIcon(item)}</div>
-      //       };
-      //     }
-      //   })
-      // );
+      var obj = connectionType.find((item) => {
+        return data?.connection_type === item.name;
+      });
+      setSelectedDatasource({
+        value: obj,
+        name: obj.name,
+        label: <div className="optionlabel">{datasourceIcon(obj)}</div>
+      });
     }
   };
 
@@ -136,9 +137,15 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     ) {
       setModal(true);
       setText('datasource');
+    } else if (
+      updateDatasource &&
+      updateDatasource.status === 'success' &&
+      path[2] === 'edit'
+    ) {
+      history.push('/datasource');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [createDatasourceResponse]);
+  }, [createDatasourceResponse, updateDatasource]);
 
   const handleInputChange = (child, key, e) => {
     if (child !== '') {
@@ -257,6 +264,36 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     return status;
   };
 
+  const updateDataSource = () => {
+    const { connectionSpecification } = selectedDatasource.value;
+    const { required } = connectionSpecification;
+    var newobj = { ...formError };
+    if (Object.keys(required).length > 0) {
+      required.map((obj) => {
+        const errorText = dsFormData[obj];
+        if (!errorText) {
+          newobj[obj] = 'Please enter' + obj;
+        }
+        return newobj;
+      });
+      setFormError(newobj);
+    }
+    if (connectionName === '') {
+      setError('Please enter connection name');
+    }
+    if (Object.keys(newobj).length === 0 && connectionName !== '') {
+      const payload = {
+        connection_type: selectedDatasource.value.name,
+        name: connectionName,
+        sourceForm: {
+          connectionConfiguration: dsFormData,
+          sourceDefinitionId: sourceDefinitionId
+        }
+      };
+      dispatch(updateDatasourceById(dsId, payload));
+    }
+  };
+
   if (metaInfoLoading || datasourceLoading) {
     return (
       <div className="load ">
@@ -337,17 +374,17 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             </p>
           </div>
         )}
-        <div className="form-action">
-          {status && status?.status === 'succeeded' && (
+        {path[2] === 'edit' ? (
+          <div className="form-action">
             <button
               // className="btn black-button"
               className={
-                createDatasourceLoading
+                updateDatasourceLoading
                   ? 'btn black-button btn-loading'
                   : 'btn black-button'
               }
               onClick={() => {
-                saveDataSource();
+                updateDataSource();
               }}>
               <div className="btn-spinner">
                 <div className="spinner-border">
@@ -356,36 +393,61 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
                 <span>Loading...</span>
               </div>
               <div className="btn-content">
-                <span>Add Data Source</span>
+                <span>Save Changes</span>
               </div>
             </button>
-          )}
-          {(status === '' || status?.status !== 'succeeded') && (
-            <button
-              className={
-                testLoading
-                  ? 'btn black-button btn-loading'
-                  : 'btn black-button'
-              }
-              type={'submit'}
-              disabled={selectedDatasource !== undefined ? false : true}
-              onClick={() => testConnection()}>
-              <div className="btn-spinner">
-                <div className="spinner-border">
-                  <span className="visually-hidden">Loading...</span>
+          </div>
+        ) : (
+          <div className="form-action">
+            {status && status?.status === 'succeeded' && (
+              <button
+                // className="btn black-button"
+                className={
+                  createDatasourceLoading
+                    ? 'btn black-button btn-loading'
+                    : 'btn black-button'
+                }
+                onClick={() => {
+                  saveDataSource();
+                }}>
+                <div className="btn-spinner">
+                  <div className="spinner-border">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                  <span>Loading...</span>
                 </div>
-                <span>Loading...</span>
-              </div>
-              <div className="btn-content">
-                <img
-                  src={selectedDatasource !== undefined ? Play : PlayDisable}
-                  alt="Play"
-                />
-                <span>Test Connection</span>
-              </div>
-            </button>
-          )}
-        </div>
+                <div className="btn-content">
+                  <span>Add Data Source</span>
+                </div>
+              </button>
+            )}
+            {(status === '' || status?.status !== 'succeeded') && (
+              <button
+                className={
+                  testLoading
+                    ? 'btn black-button btn-loading'
+                    : 'btn black-button'
+                }
+                type={'submit'}
+                disabled={selectedDatasource !== undefined ? false : true}
+                onClick={() => testConnection()}>
+                <div className="btn-spinner">
+                  <div className="spinner-border">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                  <span>Loading...</span>
+                </div>
+                <div className="btn-content">
+                  <img
+                    src={selectedDatasource !== undefined ? Play : PlayDisable}
+                    alt="Play"
+                  />
+                  <span>Test Connection</span>
+                </div>
+              </button>
+            )}
+          </div>
+        )}
       </div>
     );
   }

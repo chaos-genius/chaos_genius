@@ -19,7 +19,10 @@ import {
   DATASOURCE_META_INFO_FAILURE,
   DATASOURCEEDITDATAFAILURE,
   DATASOURCEEDITDATASUCCESS,
-  DATASOURCEEDITDATAREQUEST
+  DATASOURCEEDITDATAREQUEST,
+  DATASOURCEUPDATEREQUEST,
+  DATASOURCEUPDATESUCCESS,
+  DATASOURCEUPDATEFAILURE
 } from './ActionConstants';
 
 import {
@@ -261,6 +264,43 @@ export const getDatasourceById = (id) => {
       dispatch(getDatasourceByIdFailure());
     } else if (data && status === 200) {
       dispatch(getDatasourceByIdSuccess(data.data));
+    }
+  };
+};
+
+export const updateDatasourceByIdRequest = () => {
+  return {
+    type: DATASOURCEUPDATEREQUEST
+  };
+};
+export const updateDatasourceByIdSuccess = (response) => {
+  return {
+    type: DATASOURCEUPDATESUCCESS,
+    data: response
+  };
+};
+
+export const updateDatasourceByIdFailure = () => {
+  return {
+    type: DATASOURCEUPDATEFAILURE
+  };
+};
+
+export const updateDatasourceById = (id, updateData) => {
+  return async (dispatch) => {
+    dispatch(updateDatasourceByIdRequest());
+    const { data, error, status } = await postRequest({
+      url: `${CONNECTION_URL}/${id}/test-and-update`,
+      data: JSON.stringify(updateData),
+      headers: {
+        'Content-Type': 'application/json;charset=UTF-8'
+      },
+      noAuth: true
+    });
+    if (error) {
+      dispatch(updateDatasourceByIdFailure());
+    } else if (data && status === 200) {
+      dispatch(updateDatasourceByIdSuccess(data));
     }
   };
 };

@@ -16,7 +16,7 @@ export const textBox = (
         className="form-control"
         value={
           child !== ''
-            ? formData?.child?.textID
+            ? formData?.[child]?.[textID]
             : formData?.[textID]
             ? formData[textID]
             : ''
@@ -42,7 +42,7 @@ export const checkBox = (element, type, handleInputChange, formData, child) => {
         type={type}
         checked={
           child === ''
-            ? formData?.child?.textID
+            ? formData?.[child]?.[textID]
             : formData[textID]
             ? formData[textID]
             : false

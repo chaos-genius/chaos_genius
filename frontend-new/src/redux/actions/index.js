@@ -5,7 +5,8 @@ import {
   createDataSource,
   deleteDatasource,
   getDatasourceMetaInfo,
-  getDatasourceById
+  getDatasourceById,
+  updateDatasourceById
 } from './DataSources';
 //import { getAllDataSources } from './DataSources';
 import {
@@ -66,5 +67,6 @@ export {
   getKpibyId,
   getUpdatekpi,
   getDatasourceMetaInfo,
-  getDatasourceById
+  getDatasourceById,
+  updateDatasourceById
 };

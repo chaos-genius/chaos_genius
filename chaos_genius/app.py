@@ -23,7 +23,8 @@ from chaos_genius.extensions import (
     flask_static_digest,
     login_manager,
     migrate,
-    integration_connector
+    integration_connector,
+    celery
 )
 
 
@@ -55,6 +56,7 @@ def register_extensions(app):
     migrate.init_app(app, db)
     flask_static_digest.init_app(app)
     integration_connector.init_app(app)
+    celery.init_app(app)
     return None
 
 
@@ -99,6 +101,7 @@ def register_commands(app):
     app.cli.add_command(commands.lint)
     app.cli.add_command(commands.integration_connector)
     app.cli.add_command(commands.run_anomaly)
+    app.cli.add_command(commands.run_rca)
     app.cli.add_command(commands.reinstall_db)
     app.cli.add_command(commands.insert_demo_data)
 

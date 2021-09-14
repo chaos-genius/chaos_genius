@@ -104,6 +104,25 @@ def run_anomaly(kpi, end_date):
 
 @click.command()
 @with_appcontext
+@click.option('--kpi', required=True, type=int, help="Perform Root Cause Analysis for given KPI.")
+@click.option('--end_date', type=str, help="Set end date of analysis.")
+def run_rca(kpi, end_date):
+    """Perform RCA for given KPI."""
+
+    if end_date is not None:
+        try:
+            end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
+        except:
+            raise ValueError("Invalid date.")
+
+    click.echo(f"Starting the RCA for KPI ID: {kpi} with end date: {end_date}.")
+    from chaos_genius.controllers.kpi_controller import run_rca_for_kpi
+    status = run_rca_for_kpi(kpi, end_date)
+    click.echo(f"Completed the RCA for KPI ID: {kpi}.")
+
+
+@click.command()
+@with_appcontext
 def reinstall_db():
     """Delete the db and reinstall again."""
     from chaos_genius.settings import META_DATABASE

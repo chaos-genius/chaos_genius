@@ -319,6 +319,28 @@ def get_data_source_info(datasource_id):
         current_app.logger.info(f"Error in fetching the Data Source: {err}")
     return jsonify({"message": message, "status": status, "data": data})
 
+
+@blueprint.route("/<int:datasource_id>/test-and-update", methods=["POST"])
+def update_data_source_info(datasource_id):
+    """get data source details."""
+    status, message = "", ""
+    data = None
+    try:
+        payload = request.get_json()
+        conn_name = payload.get('name')
+        conn_type = payload.get('connection_type')
+        source_form = payload.get('sourceForm')
+        ds_obj = get_datasource_data_from_id(datasource_id, as_obj=True)
+        ds_obj.name = conn_name
+        ds_obj.save(commit=True)
+        status = "success" 
+    except Exception as err:
+        status = "failure"
+        message = str(err)
+        current_app.logger.info(f"Error in udpating the Data Source: {err}")
+    return jsonify({"message": message, "status": status, "data": data})
+
+
 @blueprint.route("/meta-info", methods=["GET"])
 def data_source_meta_info():
     """data source meta info view."""

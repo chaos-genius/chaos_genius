@@ -36,6 +36,9 @@
             &:first-child {
               padding-left: 40px !important;
             }
+            &:nth-child(2) {
+              padding-left: 30px;
+            }
           }
         }
         &:hover {

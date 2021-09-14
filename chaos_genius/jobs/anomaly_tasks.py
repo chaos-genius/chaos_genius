@@ -5,8 +5,7 @@ from celery import chain, group
 from celery.app.base import Celery
 from sqlalchemy.orm.attributes import flag_modified
 
-from chaos_genius.controllers.kpi_controller import run_anomaly_for_kpi
-from chaos_genius.controllers.kpi_controller import run_rca_for_kpi
+from chaos_genius.controllers.kpi_controller import run_anomaly_for_kpi, run_rca_for_kpi
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.extensions import celery as celery_ext
 
@@ -26,6 +25,7 @@ def anomaly_single_kpi(kpi_id, end_date=None):
 
     Must be run as a celery task.
     """
+    print(f"Running anomaly for KPI ID: {kpi_id}")
 
     status = run_anomaly_for_kpi(kpi_id, end_date)
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
@@ -45,22 +45,15 @@ def anomaly_single_kpi(kpi_id, end_date=None):
 
 
 @celery.task
-def rca_single_kpi(anomaly_status: bool, kpi_id: int):
+def rca_single_kpi(kpi_id: int):
     """Run RCA for the given KPI ID.
 
     Must be run as a celery task.
     """
+    print(f"Running RCA for KPI ID: {kpi_id}")
+
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
     anomaly_params = kpi.anomaly_params
-
-    if not anomaly_status:
-        print(f"Skipping RCA since anomaly failed for KPI ID: {kpi_id}")
-
-        anomaly_params["scheduler_params"]["rca_status"] = "failed"
-        flag_modified(kpi, "anomaly_params")
-        kpi.update(commit=True, anomaly_params=anomaly_params)
-
-        return anomaly_status
 
     status = run_rca_for_kpi(kpi_id)
 
@@ -105,7 +98,11 @@ def anomaly_scheduler():
     for kpi in kpis:
         kpi: Kpi
         # get scheduler_params, will be None if it's not set
-        scheduler_params = kpi.anomaly_params.get("scheduler_params")
+        scheduler_params = (
+            kpi.anomaly_params.get("scheduler_params")
+            if kpi.anomaly_params is not None
+            else None
+        )
 
         # assume 11am if it's not set
         hour = 11
@@ -128,10 +125,9 @@ def anomaly_scheduler():
             already_run = True
 
         if not already_run and current_time > scheduled_time:
-            print(f"Running anomaly for KPI: {kpi.id}")
-            task_group.append(
-                chain(anomaly_single_kpi.s(kpi.id), rca_single_kpi.s(kpi.id))
-            )
+            print(f"Scheduling anomaly and RCA for KPI: {kpi.id}")
+            task_group.append(anomaly_single_kpi.s(kpi.id))
+            task_group.append(rca_single_kpi.s(kpi.id))
 
             new_scheduler_params = (
                 scheduler_params if scheduler_params is not None else {}

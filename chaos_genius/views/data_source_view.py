@@ -31,7 +31,7 @@ from chaos_genius.databases.db_utils import create_sqlalchemy_uri
 from chaos_genius.databases.db_metadata import DbMetadata, get_metadata
 
 from chaos_genius.controllers.data_source_controller import (
-    get_datasource_data_from_id
+    get_datasource_data_from_id, mask_sensitive_info
 )
 
 # from chaos_genius.utils import flash_errors
@@ -300,8 +300,18 @@ def get_data_source_info(datasource_id):
     status, message = "", ""
     data = None
     try:
-        ds_obj = get_datasource_data_from_id(datasource_id)
-        data = ds_obj
+        ds_obj = get_datasource_data_from_id(datasource_id, as_obj=True)
+        data_source_def = ds_obj.sourceConfig["sourceDefinitionId"]
+        if data_source_def:
+            connector_client = connector.connection
+            connector_client.init_source_def_conf()
+            connection_types = connector_client.source_conf
+            connection_def = next((source_def for source_def in connection_types if source_def["sourceDefinitionId"] == data_source_def), None)
+            masked_details = {}
+            if connection_def:
+                masked_details = mask_sensitive_info(connection_def, ds_obj.sourceConfig["connectionConfiguration"])
+        data = ds_obj.safe_dict
+        data["sourceForm"] = masked_details
         status = "success" 
     except Exception as err:
         status = "failure"

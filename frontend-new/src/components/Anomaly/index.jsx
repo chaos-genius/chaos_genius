@@ -27,16 +27,16 @@ const RESET_ACTION = {
   type: 'RESET'
 };
 
-const data = [
-  {
-    value: 'dataquality',
-    label: 'Data Quality'
-  },
-  {
-    value: 'multidimensional',
-    label: 'Multi Dimensional'
-  }
-];
+// const data = [
+//   {
+//     value: 'dataquality',
+//     label: 'Data Quality'
+//   },
+//   {
+//     value: 'multidimensional',
+//     label: 'Multi Dimensional'
+//   }
+// ];
 
 const Anomaly = ({ kpi }) => {
   const dispatch = useDispatch();
@@ -51,13 +51,10 @@ const Anomaly = ({ kpi }) => {
 
   const idRef = useRef(0);
 
-  const {
-    anomalyDetectionData,
-    anomalyDrilldownData,
-    anomalyQualityData
-  } = useSelector((state) => {
-    return state.anomaly;
-  });
+  const { anomalyDetectionData, anomalyDrilldownData, anomalyQualityData } =
+    useSelector((state) => {
+      return state.anomaly;
+    });
 
   useEffect(() => {
     store.dispatch(RESET_ACTION);
@@ -127,12 +124,25 @@ const Anomaly = ({ kpi }) => {
           shared: true,
           valueSuffix: null,
           formatter: function () {
-            const intervals = graphData.intervals.find(row => row[0] === this.x);
-            const severity_score = graphData.severity.find(row => row[0] === this.x);
-            let s = 'Confidence Interval: <b>' + intervals[1] + " - " + intervals[2] + '</b>';
+            const intervals = graphData.intervals.find(
+              (row) => row[0] === this.x
+            );
+            const severity_score = graphData.severity.find(
+              (row) => row[0] === this.x
+            );
+            let s =
+              'Confidence Interval: <b>' +
+              intervals[1] +
+              ' - ' +
+              intervals[2] +
+              '</b>';
             s = s + '<br>Value: <b>' + this.y + '</b>';
             s = s + '<br>Severity: <b>' + severity_score[1] + '</b>';
-            s = s + '<br>Datetime: <b>' + Highcharts.dateFormat('%Y %b %d %H:%M',this.x) + '</b>';
+            s =
+              s +
+              '<br>Datetime: <b>' +
+              Highcharts.dateFormat('%Y %b %d %H:%M', this.x) +
+              '</b>';
             return s;
           }
         },
@@ -159,8 +169,7 @@ const Anomaly = ({ kpi }) => {
           borderWidth: 1,
           padding: 20,
           title: {
-            text:
-              'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
+            text: 'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
             style: {
               fontStyle: 'italic'
             }
@@ -329,7 +338,7 @@ const Anomaly = ({ kpi }) => {
         <>
           <div className="dashboard-layout dashboard-layout-change">
             <div className="dashboard-container">
-              <div className="dashboard-subcategory anomaly-subcategory">
+              {/* <div className="dashboard-subcategory anomaly-subcategory">
                 <Select
                   value={category}
                   options={data}
@@ -338,7 +347,7 @@ const Anomaly = ({ kpi }) => {
                   isSearchable={false}
                   onChange={(e) => setCategory(e)}
                 />
-              </div>
+              </div> */}
 
               {chartData && chartData.length !== 0 && (
                 <HighchartsReact highcharts={Highcharts} options={chartData} />

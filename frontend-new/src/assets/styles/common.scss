@@ -910,7 +910,7 @@ a:hover {
   }
   .selectcategory--is-disabled {
     .selectcategory__control--is-disabled {
-      height: 48px;
+      min-height: 48px;
       background: $grey_variation-5;
       border: 1px solid $grey_variation-1;
       box-sizing: border-box;
@@ -920,6 +920,9 @@ a:hover {
       }
       .css-1hwfws3 {
         padding: 2px 8px !important;
+      }
+      .css-1hb7zxy-IndicatorsContainer {
+        display: none;
       }
       .input-select__single-value {
         span {

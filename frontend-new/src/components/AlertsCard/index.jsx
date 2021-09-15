@@ -62,7 +62,9 @@ const AlertsCard = () => {
           <p>Select the data you want to monitor and analyse</p>
           <Link
             to={
-              statusChecking('slack') ? '/alerts/slack/edit' : '/alerts/slack'
+              statusChecking('slack')
+                ? '/alerts/channelconfiguration/slack/edit'
+                : '/alerts/channelconfiguration/slack'
             }>
             {/* <button className="btn black-button">
             <span>Edit Slack Connection</span>
@@ -94,7 +96,9 @@ const AlertsCard = () => {
           <p>Select the data you want to monitor and analyse</p>
           <Link
             to={
-              statusChecking('email') ? '/alerts/email/edit' : '/alerts/email'
+              statusChecking('email')
+                ? '/alerts/channelconfiguration/email/edit'
+                : '/alerts/channelconfiguration/email'
             }>
             <button
               className={

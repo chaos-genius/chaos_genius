@@ -47,7 +47,7 @@
       height: 48px;
       font-weight: $font-weight-400 !important;
       font-size: $font-size-14 !important;
-      line-height: $line-height-16 !important;
+      line-height: $line-height-20 !important;
       letter-spacing: $letter-spacing !important;
       display: flex;
       align-items: center;
@@ -61,7 +61,7 @@
       height: 48px;
       font-weight: $font-weight-400 !important;
       font-size: $font-size-14 !important;
-      line-height: $line-height-16 !important;
+      line-height: $line-height-20 !important;
       letter-spacing: $letter-spacing !important;
       display: flex;
       align-items: center;
@@ -76,11 +76,11 @@
 
     .selectcategory__placeholder,
     .selectcategory__single-value {
-      font-weight: $font-weight-500;
+      font-weight: $font-weight-400;
       font-size: $font-size-14;
-      line-height: $line-height-17;
-      letter-spacing: $letter-spacing-point15;
-      color: $black_variation-2;
+      line-height: $line-height-20;
+      letter-spacing: $letter-spacing-point1;
+      color: $black_variation-2 !important;
     }
     ​ .selectcategory__dropdown-indicator,
     .css-tlfecz-indicatorContainer {

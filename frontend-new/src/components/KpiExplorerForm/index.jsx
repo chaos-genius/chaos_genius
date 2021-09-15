@@ -761,8 +761,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             <div className="form-group">
               <label>Dimensions</label>
               <Select
-                isMulti
-                options={option.metricOption !== '' && option.metricOption}
+                closeMenuOnSelect={false}
+                blurInputOnSelect={false}
                 value={
                   formdata.adddimentsions.length !== 0
                     ? formdata.adddimentsions.map((el) => {
@@ -773,13 +773,14 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                       })
                     : []
                 }
+                isMulti
+                options={option.metricOption !== '' && option.metricOption}
                 isDisabled={
                   data[2] === 'edit' ? editableStatus('dimensions') : false
                 }
                 classNamePrefix="selectcategory"
-                closeMenuOnSelect="true"
                 placeholder="Select Dimensions"
-                // menuPlacement="top"
+                menuPlacement="top"
                 onChange={(e) => {
                   setFormdata({
                     ...formdata,

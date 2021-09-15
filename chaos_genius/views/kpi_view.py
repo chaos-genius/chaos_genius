@@ -23,6 +23,7 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.extensions import cache, db
+from chaos_genius.databases.db_utils import chech_editable_field
 
 
 blueprint = Blueprint("api_kpi", __name__)
@@ -53,7 +54,8 @@ def kpi():
             dimensions=data.get('dimensions')
         )
         new_kpi.save(commit=True)
-        return jsonify({"message": f"DataSource {new_kpi.name} has been created successfully."})
+        return jsonify({"message": f"KPI {new_kpi.name} has been created successfully.", "status": "success"})
+        
     elif request.method == 'GET':
         results = db.session.query(Kpi, DataSource) \
             .join(DataSource, Kpi.data_source == DataSource.id) \
@@ -68,6 +70,24 @@ def kpi():
             if data_source['active'] == True:
                 kpis.append(data_source)
         return jsonify({"count": len(kpis), "data": kpis})
+
+
+@blueprint.route("/<int:kpi_id>/disable", methods=["GET"])
+def disable_kpi(kpi_id):
+    status, message = "", ""
+    try:
+        kpi_obj = Kpi.get_by_id(kpi_id)
+        if kpi_obj:
+            kpi_obj.active = False
+            kpi_obj.save(commit=True)
+            status = "success"
+        else:
+            message = "KPI not found"
+            status = "failure"
+    except Exception as err:
+        status = "failure"
+        current_app.logger.info(f"Error in disabling the KPI: {err}")
+    return jsonify({"message": message, "status": status})
 
 
 @blueprint.route("/<int:kpi_id>/get-dimensions", methods=["GET"])
@@ -129,6 +149,52 @@ def kpi_rca_hierarchical_data(kpi_id):
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("RCA Analysis Done")
     return jsonify({"data": data, "msg": ""})
+
+@blueprint.route("/meta-info", methods=["GET"])
+def kpi_meta_info():
+    """kpi meta info view."""
+    current_app.logger.info("kpi meta info")
+    return jsonify({"data": Kpi.meta_info()})
+
+@blueprint.route("/<int:kpi_id>/update", methods=["PUT"])
+def edit_kpi(kpi_id):
+    """edit kpi details."""
+    status, message = "", ""
+    try:
+        kpi_obj = Kpi.get_by_id(kpi_id)
+        data = request.get_json()
+        meta_info = Kpi.meta_info()
+        if kpi_obj and kpi_obj.active == True:
+            for key, value in data.items():
+                if chech_editable_field(meta_info, key):
+                    setattr(kpi_obj, key, value)
+
+            kpi_obj.save(commit=True)
+            status = "success"
+        else:
+            message = "KPI not found or disabled"
+            status = "failure"
+    except Exception as err:
+        status = "failure"
+        current_app.logger.info(f"Error in updating the KPI: {err}")
+        message = str(err)
+    return jsonify({"message": message, "status": status})
+
+@blueprint.route("/<int:kpi_id>", methods=["GET"])
+def get_kpi_info(kpi_id):
+    """get Kpi details."""
+    status, message = "", ""
+    data = None
+    try:
+        kpi_obj = get_kpi_data_from_id(kpi_id)
+        data = kpi_obj
+        status = "success" 
+    except Exception as err:
+        status = "failure"
+        message = str(err)
+        current_app.logger.info(f"Error in fetching the KPI: {err}")
+    return jsonify({"message": message, "status": status, "data":data})
+
 
 
 @cache.memoize(timeout=30000)
@@ -230,7 +296,7 @@ def get_kpi_data_from_id(n: int) -> dict:
     # TODO: Move to utils module
 
     kpi_info = Kpi.get_by_id(n)
-    if kpi_info.as_dict:
+    if kpi_info and kpi_info.as_dict:
         return kpi_info.as_dict
     raise ValueError(f"KPI ID {n} not found in KPI_DATA")
 

@@ -2,6 +2,7 @@
 """The app module, containing the app factory function."""
 import logging
 import sys
+import json
 
 from flask import Flask, render_template
 from flask_cors import CORS
@@ -19,7 +20,6 @@ from chaos_genius.extensions import (
     cache,
     # csrf_protect,
     db,
-    debug_toolbar,
     flask_static_digest,
     login_manager,
     migrate,
@@ -52,7 +52,6 @@ def register_extensions(app):
     db.init_app(app)
     # csrf_protect.init_app(app)
     # login_manager.init_app(app)
-    debug_toolbar.init_app(app)
     migrate.init_app(app, db)
     flask_static_digest.init_app(app)
     integration_connector.init_app(app)
@@ -74,11 +73,16 @@ def register_blueprints(app):
 def register_errorhandlers(app):
     """Register error handlers."""
 
-    def render_error(error):
+    def render_error(e):
         """Render error template."""
-        # If a HTTPException, pull the `code` attribute; default to 500
-        error_code = getattr(error, "code", 500)
-        return render_template(f"{error_code}.html"), error_code
+        response = e.get_response()
+        response.data = json.dumps({
+            "code": e.code,
+            "name": e.name,
+            "description": e.description,
+        })
+        response.content_type = "application/json"
+        return response
 
     for errcode in [401, 404, 500]:
         app.errorhandler(errcode)(render_error)

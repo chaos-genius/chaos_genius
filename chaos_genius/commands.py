@@ -131,6 +131,7 @@ def reinstall_db():
     if click.confirm(click.style(f"Do you want to delete and reinstall the database: {META_DATABASE}?", fg="red", bold=True)):
         click.echo('Deleting the database...')
         db.drop_all()
+        # TODO: This should be created via the flask sqlalchemy
         db.create_all()
         click.echo('Reinstalled the database')
         install_demo_data()

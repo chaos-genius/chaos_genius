@@ -64,11 +64,9 @@ def convert_query_string_to_user_string(in_str: str) -> str:
                 out = re.match(re_str, filt)
                 if out is None:
                     continue
-                else:
-                    out = out.groups()
-                    final_out.append(
-                        " ".join([val_dict.get(i, i) for i in out]))
-                    break
+                out = out.groups()
+                final_out.append(" ".join(val_dict.get(i, i) for i in out))
+                break
             else:
                 print(f"{filt} did not match any re strings.")
                 final_out.append(filt)

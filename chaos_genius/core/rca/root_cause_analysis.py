@@ -140,10 +140,10 @@ class RootCauseAnalysis():
             self._impact_table = self._initialize_impact_table()
 
         # get impact values
-        impact_table = self._impact_table.copy()
-
         if single_dim is not None:
             impact_table = self._get_single_dim_impact_table(single_dim)
+        else:
+            impact_table = self._impact_table.copy()
 
         # getting subgroups for waterfall
         best_subgroups = get_best_subgroups_using_superset_algo(
@@ -370,7 +370,6 @@ class RootCauseAnalysis():
         ]]
         col_values = [
             d1_agg, *waterfall_df["impact_non_overlap"].values.tolist()]
-            
         col_names_for_mpl.append("end")
         col_values.append(d2_agg)
 

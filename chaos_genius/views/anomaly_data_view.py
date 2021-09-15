@@ -44,6 +44,7 @@ def kpi_anomaly_detection(kpi_id):
             # remove from here once updated in frontend
             "base_anomaly_id": kpi_id
         }
+        data["chart_data"]["title"] = kpi_info["name"]
     except Exception as err:
         print(traceback.format_exc())
         current_app.logger.info(f"Error Found: {err}")

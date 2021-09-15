@@ -1,5 +1,6 @@
 source .venv/bin/activate
 source .env
+export PYTHONDONTWRITEBYTECODE=1
 
 # Flask ENV varaibles
 export FLASK_ENV=development

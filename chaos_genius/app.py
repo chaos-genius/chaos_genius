@@ -13,7 +13,8 @@ from chaos_genius.views import (
     kpi_view,
     public_view,
     anomaly_data_view,
-    config_setting_view
+    config_setting_view,
+    alert_view
 )
 from chaos_genius.extensions import (
     bcrypt,
@@ -67,6 +68,7 @@ def register_blueprints(app):
     app.register_blueprint(data_source_view.blueprint, url_prefix='/api/connection')
     app.register_blueprint(kpi_view.blueprint, url_prefix='/api/kpi')
     app.register_blueprint(anomaly_data_view.blueprint, url_prefix='/api/anomaly-data')
+    app.register_blueprint(alert_view.blueprint, url_prefix='/api/alert')
     return None
 
 
@@ -106,6 +108,7 @@ def register_commands(app):
     app.cli.add_command(commands.integration_connector)
     app.cli.add_command(commands.run_anomaly)
     app.cli.add_command(commands.run_rca)
+    app.cli.add_command(commands.run_alert)
     app.cli.add_command(commands.reinstall_db)
     app.cli.add_command(commands.insert_demo_data)
 

@@ -1,12 +1,15 @@
 # Everything needed in production
 requests==2.25.1
 
+
 # Flask
 Flask==2.0.0
 Werkzeug==2.0.0
 click>=7.0
 flask-cors==3.0.10 # TODO: Remove the CORS
 colorama==0.4.4
+celery==5.1.2
+redis==3.5.3
 
 # Database
 Flask-SQLAlchemy==2.5.1
@@ -29,6 +32,8 @@ pystan==2.19.1.1
 altair==4.1.0
 statsmodels==0.12.2
 prophet==1.0.1
+neuralprophet==0.2.7
+greykite==0.2.0
 
 # Forms
 email-validator==1.1.2
@@ -55,3 +60,4 @@ Flask-Caching>=1.7.2
 
 # Environment variable parsing
 environs==9.3.2
+

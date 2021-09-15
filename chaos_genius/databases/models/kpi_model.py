@@ -23,6 +23,9 @@ class Kpi(PkModel):
     dimensions = Column(db.JSON)
 
     run_anomaly = Column(db.Boolean(), default=True)
+    anomaly_params = Column(db.JSON)
+    anomaly_frequency = Column(db.String(80))
+
     is_static = Column(db.Boolean(), default=False)
     static_params = Column(db.JSON)
 
@@ -52,6 +55,8 @@ class Kpi(PkModel):
             "datetime_column": self.datetime_column,
             "dimensions": self.dimensions,
             "run_anomaly": self.run_anomaly,
+            "anomaly_params": self.anomaly_params,
+            "anomaly_frequency": self.anomaly_frequency,
             "is_static": self.is_static,
             "static_params": self.static_params,
             "active": self.active,
@@ -74,6 +79,8 @@ class Kpi(PkModel):
             "filters": self.filters,
             "dimensions": self.dimensions,
             "run_anomaly": self.run_anomaly,
+            "anomaly_params": self.anomaly_params,
+            "anomaly_frequency": self.anomaly_frequency,
             "is_static": self.is_static,
             "static_params": self.static_params,
             "active": self.active,

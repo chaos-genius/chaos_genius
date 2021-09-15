@@ -8,6 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_static_digest import FlaskStaticDigest
 # from flask_wtf.csrf import CSRFProtect
 from chaos_genius.third_party.flask_ext_integrations import FlaskThirdParty
+from chaos_genius.celery_extension import CeleryExtension 
 
 bcrypt = Bcrypt()
 # csrf_protect = CSRFProtect()
@@ -17,3 +18,4 @@ migrate = Migrate()
 cache = Cache()
 flask_static_digest = FlaskStaticDigest()
 integration_connector = FlaskThirdParty()
+celery = CeleryExtension()

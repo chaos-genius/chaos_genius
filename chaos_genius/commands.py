@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Click commands."""
 import os
+from datetime import datetime
 from glob import glob
 from subprocess import call
 
@@ -85,12 +86,39 @@ def integration_connector():
 @click.command()
 @with_appcontext
 @click.option('--kpi', required=True, type=int, help="Perform the anomaly detection for given KPI.")
-def run_anomaly(kpi):
+@click.option('--end_date', type=str, help="Perform the anomaly detection for given KPI.")
+def run_anomaly(kpi, end_date):
     """Perform the anomaly detection for given KPI."""
-    click.echo(f"Starting the anomaly for KPI ID: {kpi}.")
+
+    if end_date is not None:
+        try:
+            end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
+        except:
+            raise ValueError("Invalid date.")
+
+    click.echo(f"Starting the anomaly for KPI ID: {kpi} with end date: {end_date}.")
     from chaos_genius.controllers.kpi_controller import run_anomaly_for_kpi
-    status = run_anomaly_for_kpi(kpi)
+    status = run_anomaly_for_kpi(kpi, end_date)
     click.echo(f"Completed the anomaly for KPI ID: {kpi}.")
+
+
+@click.command()
+@with_appcontext
+@click.option('--kpi', required=True, type=int, help="Perform Root Cause Analysis for given KPI.")
+@click.option('--end_date', type=str, help="Set end date of analysis.")
+def run_rca(kpi, end_date):
+    """Perform RCA for given KPI."""
+
+    if end_date is not None:
+        try:
+            end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
+        except:
+            raise ValueError("Invalid date.")
+
+    click.echo(f"Starting the RCA for KPI ID: {kpi} with end date: {end_date}.")
+    from chaos_genius.controllers.kpi_controller import run_rca_for_kpi
+    status = run_rca_for_kpi(kpi, end_date)
+    click.echo(f"Completed the RCA for KPI ID: {kpi}.")
 
 
 @click.command()

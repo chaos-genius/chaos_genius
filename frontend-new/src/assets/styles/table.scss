@@ -55,26 +55,19 @@
         }
 
         td {
-          font-weight: $font-weight-500;
+          font-weight: $font-weight-400;
           font-size: $font-size-14;
-          line-height: $line-height-16;
+          line-height: $line-height-20;
           letter-spacing: $letter-spacing;
           text-transform: capitalize;
           color: $black_variation-2;
           height: 56px;
           vertical-align: middle;
           padding: 16px;
-          &.child-arrow {
-            //padding-left: 30px;
-          }
           &.child-rotate {
             img {
               transform: rotate(90deg);
             }
-          }
-          &.child-show {
-            //transform: rotate(90deg);
-            //padding-left: 32px;
           }
           &.date-column-formated {
             font-weight: $font-weight-400;
@@ -140,14 +133,10 @@
         .source-type {
           display: flex;
           align-items: center;
-
           img {
             width: 24px;
             height: 24px;
             margin-right: 8px;
-          }
-          span {
-            font-weight: $font-weight-normal;
           }
           svg {
             width: 24px;

@@ -24,7 +24,10 @@
   input[type='text']:disabled {
     background: $grey_variation-2;
     &::placeholder {
-      font-weight: $font-weight-500;
+      font-weight: $font-weight-400;
+      font-size: $font-size-14;
+      line-height: $line-height-20;
+      letter-spacing: $letter-spacing-point1;
       color: $black_variation-2;
     }
   }

@@ -149,11 +149,16 @@ a:hover {
     outline: 0 !important;
     box-shadow: none !important;
     padding: 15px;
+    font-size: $font-size-14;
+    line-height: $line-height-20;
+    letter-spacing: $letter-spacing-point1;
+    font-weight: $font-weight-400;
+    color: $black_variation-2;
   }
   label {
     font-size: $font-size-14;
     line-height: $line-height-16;
-    letter-spacing: $letter-spacing;
+    letter-spacing: $letter-spacing-point1;
     text-transform: capitalize;
     color: $black_variation-2;
     margin-bottom: 12px;
@@ -166,30 +171,39 @@ a:hover {
     box-shadow: none !important;
     min-height: 48px;
     font-size: $font-size-14;
-    font-weight: $font-weight-500;
+    font-weight: $font-weight-400;
+    line-height: $line-height-20;
+    letter-spacing: $letter-spacing-point1;
     &.h-40 {
       min-height: 40px;
+    }
+    &::placeholder {
+      font-size: $font-size-14;
+      line-height: $line-height-20;
+      letter-spacing: $letter-spacing-point1;
+      text-transform: capitalize;
+      color: $grey_variation-1;
+      font-weight: $font-weight-400;
     }
   }
   &::placeholder {
     font-size: $font-size-14;
     line-height: $line-height-16;
-    letter-spacing: $letter-spacing;
+    letter-spacing: $letter-spacing-point1;
     text-transform: capitalize;
     color: $grey_variation-1;
-    font-weight: $font-weight-300;
+    font-weight: $font-weight-400;
   }
   &.icon {
     position: relative;
     .form-control {
       padding-left: 30px;
-
       &::placeholder {
-        line-height: $line-height-14;
+        line-height: $line-height-16;
         letter-spacing: $letter-spacing;
+        font-weight: $font-weight-400;
+        font-size: $font-size-12;
         color: $grey_variation-1;
-        font-weight: $font-weight-normal;
-        font-size: $font-size-14;
       }
       &:-moz-placeholder {
         line-height: 25px;
@@ -214,6 +228,10 @@ a:hover {
     margin-bottom: 0px;
     label {
       margin-bottom: 0px;
+      font-size: $font-size-14;
+      line-height: $line-height-20;
+      letter-spacing: $letter-spacing-point1;
+      font-weight: $font-weight-400;
     }
   }
   // custom react select
@@ -257,7 +275,7 @@ a:hover {
     height: 48px;
     font-weight: $font-weight-400 !important;
     font-size: $font-size-14 !important;
-    line-height: $line-height-16 !important;
+    line-height: $line-height-20 !important;
     letter-spacing: $letter-spacing !important;
     display: flex !important;
     align-items: center !important;
@@ -346,6 +364,8 @@ a:hover {
     font-size: $font-size-14;
     line-height: $line-height-16;
     color: $grey_variation-3;
+    font-weight: $font-weight-400;
+    letter-spacing: $letter-spacing;
   }
   .form-check-input:checked {
     background-color: $green;
@@ -502,11 +522,11 @@ a:hover {
   }
   .selectcategory__placeholder,
   .selectcategory__single-value {
-    font-weight: $font-weight-500;
+    font-weight: $font-weight-400;
     font-size: $font-size-14;
-    line-height: $line-height-17;
-    letter-spacing: $letter-spacing-point15;
-    color: $black_variation-2;
+    line-height: $line-height-20;
+    letter-spacing: $letter-spacing-point1;
+    color: $black_variation-2 !important;
   }
   .selectcategory__dropdown-indicator {
     color: $black_variation-2 !important;
@@ -522,7 +542,7 @@ a:hover {
   height: 48px;
   font-weight: $font-weight-400 !important;
   font-size: $font-size-14 !important;
-  line-height: $line-height-16 !important;
+  line-height: $line-height-20 !important;
   letter-spacing: $letter-spacing !important;
   display: flex !important;
   align-items: center !important;
@@ -542,10 +562,10 @@ a:hover {
 .css-1wa3eu0-placeholder {
   margin: 0px !important;
   color: $black_variation-2 !important;
-  font-weight: $font-weight-500 !important;
+  font-weight: $font-weight-400 !important;
   font-size: $font-size-14 !important;
-  line-height: $line-height-16 !important;
-  letter-spacing: $letter-spacing !important;
+  line-height: $line-height-20 !important;
+  letter-spacing: $letter-spacing-point1 !important;
   text-transform: capitalize !important;
 }
 .css-tlfecz-indicatorContainer {
@@ -554,6 +574,11 @@ a:hover {
 .css-1uccc91-singleValue {
   margin: 0px !important;
   text-transform: capitalize;
+  font-size: 14px;
+  font-weight: $font-weight-400;
+  line-height: $line-height-20;
+  letter-spacing: $letter-spacing-point1;
+  color: $black_variation-2 !important;
 }
 .css-xb97g8:hover {
   background-color: transparent !important;
@@ -565,8 +590,10 @@ a:hover {
 }
 .css-1wa3eu0-placeholder {
   font-size: $font-size-14 !important;
-  font-weight: $font-weight-500 !important;
-  color: #7d848a !important;
+  font-weight: $font-weight-400 !important;
+  line-height: 20px !important;
+  letter-spacing: $letter-spacing-point1 !important;
+  color: $black_variation-2 !important;
 }
 .css-1hwfws3 {
   padding: 0px !important;
@@ -909,7 +936,10 @@ a:hover {
   input[type='text']:disabled {
     background: $grey_variation-2;
     &::placeholder {
-      font-weight: $font-weight-500;
+      font-weight: $font-weight-400;
+      font-size: $font-size-14;
+      line-height: $line-height-20;
+      letter-spacing: $letter-spacing-point1;
       color: $black_variation-2;
     }
   }

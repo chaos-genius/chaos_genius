@@ -152,14 +152,10 @@
     }
   }
   .common-drilldown-graph-none {
-    visibility: hidden;
-    height: 315px;
-    width: 100%;
-    margin: 48px 0px;
+    display: none;
   }
 
   .common-drilldown-graph {
-    visibility: visible;
     height: 315px;
     margin: 48px 0px;
     width: 100%;

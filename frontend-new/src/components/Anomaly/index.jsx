@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 
 import { useSelector, useDispatch } from 'react-redux';
-import Select from 'react-select';
+// import Select from 'react-select';
 
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
@@ -44,10 +44,10 @@ const Anomaly = ({ kpi }) => {
   const [chartData, setChartData] = useState([]);
   const [drilldownCollapse, setDrilldownCollapse] = useState(false);
   const [dataQualityCollapse, setDataQualityCollapse] = useState(false);
-  const [category, setCategory] = useState({
-    value: 'dataquality',
-    label: 'Data Quality'
-  });
+  // const [category, setCategory] = useState({
+  //   value: 'dataquality',
+  //   label: 'Data Quality'
+  // });
 
   const idRef = useRef(0);
 

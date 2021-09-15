@@ -11,7 +11,7 @@ import KpiAlertDestinationForm from '../../components/KpiAlertDestinationForm';
 const AddEventAlert = () => {
   const [steps, setSteps] = useState(1);
   return (
-    <div>
+    <>
       <div className="page-navigation">
         {/* Breadcrumb */}
         <nav aria-label="breadcrumb">
@@ -47,7 +47,7 @@ const AddEventAlert = () => {
           <KpiAlertDestinationForm event setEventSteps={setSteps} />
         )}
       </div>
-    </div>
+    </>
   );
 };
 export default AddEventAlert;

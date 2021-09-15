@@ -47,7 +47,7 @@ class ProphetModel(AnomalyModel):
             self.model = pt.Prophet(
                 yearly_seasonality=False,
                 daily_seasonality=True,
-                interval_width = PROPHETSENS[sensitivity],
+                interval_width = PROPHETSENS[sensitivity.lower()],
                 **self.model_kwargs).fit(df)
 
         if pred_df is None:

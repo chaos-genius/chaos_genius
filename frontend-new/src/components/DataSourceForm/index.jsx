@@ -53,6 +53,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const [dsFormData, setDsFormData] = useState({});
   const [error, setError] = useState('');
   const [formError, setFormError] = useState({});
+  const [editedForm, setEditedForm] = useState({});
   const [status, setStatus] = useState('');
   const history = useHistory();
   const path = history.location.pathname.split('/');
@@ -147,7 +148,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createDatasourceResponse, updateDatasource]);
 
-  const handleInputChange = (child, key, e) => {
+  const handleInputChange = (child, key, e, edit) => {
     if (child !== '') {
       setDsFormData((prev) => {
         return {
@@ -156,8 +157,8 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             ...prev[child],
             [key]:
               e.target.type === 'number'
-                ? parseInt(e.target.value)
-                : e.target.value
+                ? parseInt(e.target.value.trim())
+                : e.target.value.trim()
           }
         };
       });
@@ -167,12 +168,38 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
           ...prev,
           [key]:
             e.target.type === 'number'
-              ? parseInt(e.target.value)
-              : e.target.value
+              ? parseInt(e.target.value.trim())
+              : e.target.value.trim()
         };
       });
       setFormError([]);
       setStatus('');
+    }
+    if (edit === 'edit') {
+      if (child !== '') {
+        setEditedForm((prev) => {
+          return {
+            ...prev,
+            [child]: {
+              ...prev[child],
+              [key]:
+                e.target.type === 'number'
+                  ? parseInt(e.target.value)
+                  : e.target.value
+            }
+          };
+        });
+      } else {
+        setEditedForm((prev) => {
+          return {
+            ...prev,
+            [key]:
+              e.target.type === 'number'
+                ? parseInt(e.target.value)
+                : e.target.value
+          };
+        });
+      }
     }
   };
 
@@ -272,7 +299,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       required.map((obj) => {
         const errorText = dsFormData[obj];
         if (!errorText) {
-          newobj[obj] = 'Please enter' + obj;
+          newobj[obj] = 'Please enter ' + obj;
         }
         return newobj;
       });
@@ -285,7 +312,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       const payload = {
         name: connectionName,
         sourceForm: {
-          connectionConfiguration: dsFormData
+          connectionConfiguration: editedForm
         }
       };
       dispatch(updateDatasourceById(dsId, payload));
@@ -349,6 +376,8 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             handleInputChange,
             handleCheckboxChange,
             dsFormData,
+            setDsFormData,
+            setEditedForm,
             formError,
             path
           )}

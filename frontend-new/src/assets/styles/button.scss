@@ -34,6 +34,14 @@
       color: $white;
     }
   }
+  &.black-secondary-button {
+    color: $black_variation-2;
+    background-color: $white;
+    border: 1px solid $black-variation-2;
+    span {
+      color: $black_variation-2;
+    }
+  }
   &.white-button {
     color: $black_variation-2;
     background-color: $white;

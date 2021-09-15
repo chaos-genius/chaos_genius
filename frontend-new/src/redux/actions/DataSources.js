@@ -16,13 +16,20 @@ import {
   DELETEDATASOURCEFAILURE,
   DATASOURCE_META_INFO_REQUEST,
   DATASOURCE_META_INFO_SUCCESS,
-  DATASOURCE_META_INFO_FAILURE
+  DATASOURCE_META_INFO_FAILURE,
+  DATASOURCEEDITDATAFAILURE,
+  DATASOURCEEDITDATASUCCESS,
+  DATASOURCEEDITDATAREQUEST,
+  DATASOURCEUPDATEREQUEST,
+  DATASOURCEUPDATESUCCESS,
+  DATASOURCEUPDATEFAILURE
 } from './ActionConstants';
 
 import {
   CONNECTION_TYPE,
   CONNECTION_URL,
   CREATE_DATASOURCE,
+  DATASOURCE_META_INFO_URL,
   DELETE_DATASOURCE,
   TEST_CONNECTION
 } from '../../utils/url-helper';
@@ -219,12 +226,81 @@ export const getDatasourceMetaInfo = () => {
   return async (dispatch) => {
     dispatch(getDatasourceMetaInfoRequest());
     const { data, error, status } = await getRequest({
-      url: DELETE_DATASOURCE
+      url: DATASOURCE_META_INFO_URL
     });
     if (error) {
       dispatch(getDatasourceMetaInfoFailure());
     } else if (data && status === 200) {
       dispatch(getDatasourceMetaInfoSuccess(data.data));
+    }
+  };
+};
+
+export const getDatasourceByIdRequest = () => {
+  return {
+    type: DATASOURCEEDITDATAREQUEST
+  };
+};
+export const getDatasourceByIdSuccess = (response) => {
+  return {
+    type: DATASOURCEEDITDATASUCCESS,
+    data: response
+  };
+};
+
+export const getDatasourceByIdFailure = () => {
+  return {
+    type: DATASOURCEEDITDATAFAILURE
+  };
+};
+
+export const getDatasourceById = (id) => {
+  return async (dispatch) => {
+    dispatch(getDatasourceByIdRequest());
+    const { data, error, status } = await getRequest({
+      url: `${CONNECTION_URL}/${id}`
+    });
+    if (error) {
+      dispatch(getDatasourceByIdFailure());
+    } else if (data && status === 200) {
+      dispatch(getDatasourceByIdSuccess(data.data));
+    }
+  };
+};
+
+export const updateDatasourceByIdRequest = () => {
+  return {
+    type: DATASOURCEUPDATEREQUEST
+  };
+};
+export const updateDatasourceByIdSuccess = (response) => {
+  return {
+    type: DATASOURCEUPDATESUCCESS,
+    data: response
+  };
+};
+
+export const updateDatasourceByIdFailure = () => {
+  return {
+    type: DATASOURCEUPDATEFAILURE
+  };
+};
+
+export const updateDatasourceById = (id, updateData) => {
+  return async (dispatch) => {
+    dispatch(updateDatasourceByIdRequest());
+    const { data, error, status } = await postRequest({
+      url: `${CONNECTION_URL}/${id}/test-and-update`,
+      data: JSON.stringify(updateData),
+      headers: {
+        'Content-Type': 'application/json;charset=UTF-8'
+      },
+      noAuth: true
+    });
+    if (error) {
+      dispatch(updateDatasourceByIdFailure());
+    } else if (data && status === 200) {
+      dispatch(updateDatasourceByIdSuccess(data));
     }
   };
 };

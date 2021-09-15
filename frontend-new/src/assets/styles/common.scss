@@ -949,3 +949,13 @@ a:hover {
     }
   }
 }
+// editable button
+.editable-field {
+  display: flex;
+  align-items: center;
+  .btn {
+    min-height: 48px;
+    min-width: 81px;
+    margin-left: 16px;
+  }
+}

@@ -38,16 +38,15 @@ const AlertsForm = () => {
     password: '',
     emailsender: ''
   });
-
   useEffect(() => {
-    if (data[3] === 'edit') {
-      if (data[2] === 'slack') {
+    if (data[4] === 'edit') {
+      if (data[3] === 'slack') {
         dispatch(
           getEditChannel({
             config_name: 'slack'
           })
         );
-      } else if (data[2] === 'email') {
+      } else if (data[3] === 'email') {
         dispatch(
           getEditChannel({
             config_name: 'email'
@@ -59,13 +58,13 @@ const AlertsForm = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (data[2] === 'email' && editData) {
+    if (data[3] === 'email' && editData) {
       var obj = { ...email };
       obj['port'] = editData?.config_setting?.port || '';
       obj['emailsender'] = editData?.config_setting?.sender_email || '';
       obj['smtp'] = editData?.config_setting?.server || '';
       setEmail(obj);
-    } else if (data[2] === 'slack' && editData) {
+    } else if (data[3] === 'slack' && editData) {
       setWebhookUrl(editData?.config_setting?.webhookUrl || null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -85,7 +84,7 @@ const AlertsForm = () => {
   };
 
   const alertHandler = () => {
-    if (data[2] === 'email') {
+    if (data[3] === 'email') {
       var objectErr = { ...emailError };
       if (email.smtp === '') {
         // setEmailError((prev) => {
@@ -157,7 +156,7 @@ const AlertsForm = () => {
         };
         dispatchGetAllAlertEmail(data);
       }
-    } else if (data[2] === 'slack') {
+    } else if (data[3] === 'slack') {
       if (webhookUrl !== '' && webhookUrl !== null) {
         const slackData = {
           config_name: 'slack',
@@ -194,7 +193,7 @@ const AlertsForm = () => {
   } else {
     return (
       <>
-        {data[2] === 'slack' ? (
+        {data[3] === 'slack' ? (
           <>
             <div className="form-group form-title-image">
               <img src={Slack} alt="Slack" />
@@ -218,7 +217,7 @@ const AlertsForm = () => {
               )}
             </div>
           </>
-        ) : data[2] === 'email' ? (
+        ) : data[3] === 'email' ? (
           <>
             <div className="form-group form-title-image">
               <img src={Email} alt="Email" />

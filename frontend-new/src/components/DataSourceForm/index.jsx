@@ -283,11 +283,9 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     }
     if (Object.keys(newobj).length === 0 && connectionName !== '') {
       const payload = {
-        connection_type: selectedDatasource.value.name,
         name: connectionName,
         sourceForm: {
-          connectionConfiguration: dsFormData,
-          sourceDefinitionId: sourceDefinitionId
+          connectionConfiguration: dsFormData
         }
       };
       dispatch(updateDatasourceById(dsId, payload));
@@ -351,7 +349,8 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             handleInputChange,
             handleCheckboxChange,
             dsFormData,
-            formError
+            formError,
+            path
           )}
         {/* for Google Sheet */}
         {/*Paste here*/}

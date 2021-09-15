@@ -4,6 +4,7 @@ export const textBox = (
   handleInputChange,
   formData,
   formError,
+  path,
   child
 ) => {
   const textID = element[0];
@@ -13,6 +14,9 @@ export const textBox = (
       <label>{element[1]?.title ? element[1]?.title : element[0]}</label>
       <input
         type={element[1]?.['airbyte_secret'] ? 'password' : type}
+        disabled={
+          element[1]?.['airbyte_secret'] && path[2] === 'edit' ? true : false
+        }
         className="form-control"
         value={
           child !== ''
@@ -62,7 +66,8 @@ export const renderTextFields = (
   handleInputChange,
   handleCheckBoxChange,
   formData,
-  formError
+  formError,
+  path
 ) => {
   var fields = [];
   toTextField(
@@ -71,7 +76,8 @@ export const renderTextFields = (
     handleCheckBoxChange,
     formData,
     formError,
-    fields
+    fields,
+    path
   );
   return <>{fields}</>;
 };
@@ -83,6 +89,7 @@ const toTextField = (
   formData,
   formError,
   fields,
+  path,
   child = ''
 ) => {
   const { properties } = obj;
@@ -97,6 +104,7 @@ const toTextField = (
           formData,
           formError,
           fields,
+          path,
           child
         );
       });
@@ -110,12 +118,21 @@ const renderObjectFields = (
   formData,
   formError,
   fields,
+  path,
   child
 ) => {
   switch (element[1]['type']) {
     case 'string':
       fields.push(
-        textBox(element, 'text', handleInputChange, formData, formError, child)
+        textBox(
+          element,
+          'text',
+          handleInputChange,
+          formData,
+          formError,
+          path,
+          child
+        )
       );
       break;
     case 'integer':
@@ -126,13 +143,21 @@ const renderObjectFields = (
           handleInputChange,
           formData,
           formError,
+          path,
           child
         )
       );
       break;
     case 'boolean':
       fields.push(
-        checkBox(element, 'checkbox', handleCheckBoxChange, formData, child)
+        checkBox(
+          element,
+          'checkbox',
+          handleCheckBoxChange,
+          formData,
+          path,
+          child
+        )
       );
       break;
     case 'object':
@@ -143,6 +168,7 @@ const renderObjectFields = (
         formData,
         formError,
         fields,
+        path,
         element[0]
       );
       break;

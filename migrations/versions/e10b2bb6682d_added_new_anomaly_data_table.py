@@ -1,7 +1,7 @@
 """Added new anomaly data table
 
 Revision ID: e10b2bb6682d
-Revises: 7be54a3936d5
+Revises: 7e2723132df3
 Create Date: 2021-08-31 12:12:59.984125
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'e10b2bb6682d'
-down_revision = '7be54a3936d5'
+down_revision = '7e2723132df3'
 branch_labels = None
 depends_on = None
 

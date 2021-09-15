@@ -42,14 +42,10 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     sensitivity: '',
     frequency: ''
   });
-  const {
-    kpiEditData,
-    kpiEditLoading,
-    kpiSettingLoading,
-    kpiSettingData
-  } = useSelector((state) => {
-    return state.setting;
-  });
+  const { kpiEditData, kpiEditLoading, kpiSettingLoading, kpiSettingData } =
+    useSelector((state) => {
+      return state.setting;
+    });
 
   useEffect(() => {
     dispatch(kpiEditSetup(kpi));
@@ -257,11 +253,12 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                   value="M"
                   checked={seasonality.includes('M')}
                   name="Month"
+                  id="monthly"
                   onChange={(e) => {
                     onSeasonalityChange(e);
                   }}
                 />
-                <label for="Monthly">Monthly</label>
+                <label for="monthly">Monthly</label>
               </div>
               <div className="form-check check-box">
                 <input
@@ -269,12 +266,13 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                   type="checkbox"
                   value="W"
                   name="week"
+                  id="weekly"
                   checked={seasonality.includes('W')}
                   onChange={(e) => {
                     onSeasonalityChange(e);
                   }}
                 />
-                <label for="Weekly">Weekly</label>
+                <label for="weekly">Weekly</label>
               </div>
               <div className="form-check check-box">
                 <input
@@ -282,12 +280,13 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                   type="checkbox"
                   value="D"
                   name="daily"
+                  id="daily"
                   checked={seasonality.includes('D')}
                   onChange={(e) => {
                     onSeasonalityChange(e);
                   }}
                 />
-                <label for="Daily">Daily</label>
+                <label for="daily">Daily</label>
               </div>
             </div>
           </div>

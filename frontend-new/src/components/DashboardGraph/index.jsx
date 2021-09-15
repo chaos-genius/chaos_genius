@@ -373,6 +373,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
       return demoChart;
     }
   };
+
   return (
     <>
       <div className="dashboard-layout dashboard-layout-change">
@@ -529,16 +530,19 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
             </div>
           </div>
           {/*Drill down chart*/}
-          {/* <div
+
+          {rcaAnalysisLoading && (
+            <div className="load waterfallchart-loader">
+              <div className="preload"></div>
+            </div>
+          )}
+
+          <div
             className={
-              rcaAnalysisLoading
-                ? 'common-drilldown-graph-none'
-                : rcaAnalysisData
-                ? 'common-drilldown-graph'
-                : ''
+              'common-drilldown-graph' +
+              (rcaAnalysisLoading ? ' common-drilldown-graph-none ' : '')
             }
-            id="chartdivWaterfall"></div> */}
-          <div className="common-drilldown-graph" id="chartdivWaterfall"></div>
+            id="chartdivWaterfall"></div>
 
           {dimension.value === 'multidimension' ? (
             <>

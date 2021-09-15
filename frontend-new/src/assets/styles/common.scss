@@ -256,7 +256,7 @@ a:hover {
     color: $black_variation-2 !important;
     height: 48px;
     font-weight: $font-weight-400 !important;
-    font-size: $font-size-16 !important;
+    font-size: $font-size-14 !important;
     line-height: $line-height-16 !important;
     letter-spacing: $letter-spacing !important;
     display: flex !important;
@@ -725,6 +725,11 @@ a:hover {
     height: 77vh;
     width: 100%;
   }
+  &.waterfallchart-loader {
+    height: 315px;
+    margin: 48px 0px;
+    width: 100%;
+  }
 }
 .preload {
   // margin-top: 17%;
@@ -910,7 +915,7 @@ a:hover {
   }
   .selectcategory--is-disabled {
     .selectcategory__control--is-disabled {
-      height: 48px;
+      min-height: 48px;
       background: $grey_variation-5;
       border: 1px solid $grey_variation-1;
       box-sizing: border-box;
@@ -920,6 +925,9 @@ a:hover {
       }
       .css-1hwfws3 {
         padding: 2px 8px !important;
+      }
+      .css-1hb7zxy-IndicatorsContainer {
+        display: none;
       }
       .input-select__single-value {
         span {

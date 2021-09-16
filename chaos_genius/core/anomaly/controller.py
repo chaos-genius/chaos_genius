@@ -51,7 +51,11 @@ class AnomalyDetectionController(object):
                     end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
 
             if end_date is None:
-                end_date = datetime.today()
+                try: 
+                    end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
+                except:
+                    end_date = end_date + " 00:00:00"
+                    end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
         else:
             end_date = self.end_date
 

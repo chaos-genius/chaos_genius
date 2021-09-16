@@ -299,7 +299,8 @@ a:hover {
       stroke: $green;
     }
     .css-tlfecz-indicatorContainer,
-    .css-1hb7zxy-IndicatorsContainer {
+    .css-1hb7zxy-IndicatorsContainer,
+    .selectcategory__indicators {
       display: none;
     }
   }
@@ -354,6 +355,11 @@ a:hover {
     .form-check-input {
       margin-top: 0px;
       margin-right: 8px;
+      cursor: pointer;
+    }
+    .form-check-label,
+    label {
+      cursor: pointer;
     }
   }
   .form-check-input {
@@ -956,7 +962,8 @@ a:hover {
       .css-1hwfws3 {
         padding: 2px 8px !important;
       }
-      .css-1hb7zxy-IndicatorsContainer {
+      .css-1hb7zxy-IndicatorsContainer,
+      .selectcategory__indicators {
         display: none;
       }
       .input-select__single-value {

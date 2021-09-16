@@ -59,6 +59,7 @@
     .form-check-input {
       margin-top: 0px;
       margin-right: 10px;
+      cursor: pointer;
     }
     label {
       font-weight: $font-weight-400;
@@ -67,6 +68,7 @@
       letter-spacing: $letter-spacing-point1;
       text-transform: capitalize;
       color: $black_variation-2;
+      cursor: pointer;
       &.active {
         color: $green;
       }

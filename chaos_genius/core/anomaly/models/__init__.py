@@ -4,3 +4,4 @@ from chaos_genius.core.anomaly.models.stddevi_model import StdDeviModel
 from chaos_genius.core.anomaly.models.ewstd_model import EWSTDModel
 from chaos_genius.core.anomaly.models.neuralprophet_model import NeuralProphetModel
 from chaos_genius.core.anomaly.models.greykite_model import GreyKiteModel
+from chaos_genius.core.anomaly.models.ets_model import ExpTSModel

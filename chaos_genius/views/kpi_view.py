@@ -71,7 +71,7 @@ def kpi():
         return jsonify({"count": len(kpis), "data": kpis})
 
 
-@blueprint.route("/get-all-kpis-dashboard", methods=["GET"])
+@blueprint.route("/get-dashboard-list", methods=["GET"])
 def get_all_kpis():
     """returning all kpis"""
 
@@ -85,7 +85,7 @@ def get_all_kpis():
         res = {}
 
         for key in metrics:
-            res[key] = ele.__dict__[key]
+            res[key] = getattr(ele, key)
 
         try:
             kpi_info = get_kpi_data_from_id(ele.id)

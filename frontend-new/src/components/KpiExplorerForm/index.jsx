@@ -5,10 +5,13 @@ import { useHistory, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Select from 'react-select';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import Play from '../../assets/images/play-green.png';
 import Success from '../../assets/images/success.svg';
 import Fail from '../../assets/images/fail.svg';
+import Toast_error from '../../assets/images/toast-error.svg';
 //import Cancel from '../../assets/images/cancel.svg';
 
 import '../../assets/styles/addform.scss';
@@ -339,6 +342,20 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       // setFormdata({ ...formdata, tablename: e.value });
     }
   };
+  // toast.success('Successfully added', {
+  //   position: toast.POSITION.BOTTOM_RIGHT,
+  //   autoClose: false
+  // });
+  // toast(
+  //   <div className="error-msg-toast">
+  //     <img src={Toast_error} alt="Error" /> Failed to Update
+  //   </div>,
+  //   {
+  //     position: toast.POSITION.BOTTOM_RIGHT,
+  //     autoClose: false,
+  //     className: 'error-toast'
+  //   }
+  // );
 
   const handleDataset = (e) => {
     setDataset(e);
@@ -886,6 +903,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             </button>
           </div>
         </div>
+        <ToastContainer />
       </div>
     );
   }

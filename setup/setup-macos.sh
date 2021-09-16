@@ -208,7 +208,8 @@ fi
 printf "${GREEN}-->${NC} Creating the ENV file \n"
 touch .env
 echo "" > .env
-echo "FLASK_APP=run" >> .env
+echo "PORT=8080" >> .env
+echo "FLASK_APP=wsgi" >> .env
 echo "FLASK_ENV=production" >> .env
 echo "FLASK_DEBUG=0" >> .env
 echo "FLASK_RUN_PORT=5000" >> .env

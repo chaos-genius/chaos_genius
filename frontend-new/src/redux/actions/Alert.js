@@ -2,7 +2,8 @@ import {
   ALERT_EMAIL_URL,
   CHANNEL_CONFIGURATION_URL,
   EDIT_CHANNEL_URL,
-  EMAIL_META_INFO_URL
+  EMAIL_META_INFO_URL,
+  SLACK_META_INFO_URL
 } from '../../utils/url-helper';
 
 import { getRequest, postRequest } from '../../utils/http-helper';
@@ -190,7 +191,7 @@ export const getSlackMetaInfo = () => {
   return async (dispatch) => {
     dispatch(getSlackMetaInfoRequest());
     const { data, error, status } = await getRequest({
-      url: `${EMAIL_META_INFO_URL}`
+      url: `${SLACK_META_INFO_URL}`
     });
     if (error) {
       dispatch(getSlackMetaInfoFailure());

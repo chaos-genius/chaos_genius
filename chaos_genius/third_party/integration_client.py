@@ -214,6 +214,19 @@ class ThirdPartyClient(object):
         api_url = f"{self.server_uri}/api/v1/sources/update"
         return post_request(api_url, payload)
 
+    def get_source_details(self, source_id):
+        """This will be used to fetch the details of third party data source
+
+        Args:
+            source_id (str): UUID of the source id
+
+        Returns:
+            dict: details of the configuration of the source type
+        """
+        payload = {"sourceId": source_id}
+        api_url = f"{self.server_uri}/api/v1/sources/get"
+        return post_request(api_url, payload)
+
     def delete_source(self, source_id):
         """This will be used to delete the source.
 

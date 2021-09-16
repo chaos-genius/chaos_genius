@@ -30,6 +30,10 @@ from chaos_genius.third_party.integration_server_config import (
 from chaos_genius.databases.db_utils import create_sqlalchemy_uri
 from chaos_genius.databases.db_metadata import DbMetadata, get_metadata
 
+from chaos_genius.controllers.data_source_controller import (
+    get_datasource_data_from_id, mask_sensitive_info
+)
+
 # from chaos_genius.utils import flash_errors
 
 blueprint = Blueprint("api_data_source", __name__)
@@ -174,20 +178,21 @@ def create_data_source():
             db_config = connector_client.destination_db
             db_config["host"] = get_localhost_host(db_config["host"])
             db_config["db_type"] = db_type
+            db_connection_uri = create_sqlalchemy_uri(**db_config)
         else:
             sourceRecord = sourceCreationPayload
             db_mapper = DATABASE_CONFIG_MAPPER[source_form.get("sourceDefinitionId")]
             input_configuration = source_form.get("connectionConfiguration")
-            db_config = {
-                "host": input_configuration[db_mapper["host"]],
-                "port": input_configuration[db_mapper["port"]],
-                "database": input_configuration[db_mapper["database"]],
-                "username": input_configuration[db_mapper["username"]],
-                "password": input_configuration[db_mapper["password"]],
-                "db_type": db_mapper["db_type"],
-            }
-
-        db_connection_uri = create_sqlalchemy_uri(**db_config)
+            if db_mapper["db_type"] in ["mysql", "postgres"]:
+                db_config = {
+                    "host": input_configuration[db_mapper["host"]],
+                    "port": input_configuration[db_mapper["port"]],
+                    "database": input_configuration[db_mapper["database"]],
+                    "username": input_configuration[db_mapper["username"]],
+                    "password": input_configuration[db_mapper["password"]],
+                    "db_type": db_mapper["db_type"],
+                }
+                db_connection_uri = create_sqlalchemy_uri(**db_config)
         status = "connected"
 
         # Save in the database
@@ -287,3 +292,57 @@ def log_data_source():
         print(err_msg)
 
     return jsonify({"data": logs_details, "status": status})
+
+
+@blueprint.route("/<int:datasource_id>", methods=["GET"])
+def get_data_source_info(datasource_id):
+    """get data source details."""
+    status, message = "", ""
+    data = None
+    try:
+        ds_obj = get_datasource_data_from_id(datasource_id, as_obj=True)
+        data_source_def = ds_obj.sourceConfig["sourceDefinitionId"]
+        if data_source_def:
+            connector_client = connector.connection
+            connector_client.init_source_def_conf()
+            connection_types = connector_client.source_conf
+            connection_def = next((source_def for source_def in connection_types if source_def["sourceDefinitionId"] == data_source_def), None)
+            masked_details = {}
+            if connection_def:
+                masked_details = mask_sensitive_info(connection_def, ds_obj.sourceConfig["connectionConfiguration"])
+        data = ds_obj.safe_dict
+        data["sourceForm"] = masked_details
+        status = "success" 
+    except Exception as err:
+        status = "failure"
+        message = str(err)
+        current_app.logger.info(f"Error in fetching the Data Source: {err}")
+    return jsonify({"message": message, "status": status, "data": data})
+
+
+@blueprint.route("/<int:datasource_id>/test-and-update", methods=["POST"])
+def update_data_source_info(datasource_id):
+    """get data source details."""
+    status, message = "", ""
+    data = None
+    try:
+        payload = request.get_json()
+        conn_name = payload.get('name')
+        conn_type = payload.get('connection_type')
+        source_form = payload.get('sourceForm')
+        ds_obj = get_datasource_data_from_id(datasource_id, as_obj=True)
+        ds_obj.name = conn_name
+        ds_obj.save(commit=True)
+        status = "success" 
+    except Exception as err:
+        status = "failure"
+        message = str(err)
+        current_app.logger.info(f"Error in udpating the Data Source: {err}")
+    return jsonify({"message": message, "status": status, "data": data})
+
+
+@blueprint.route("/meta-info", methods=["GET"])
+def data_source_meta_info():
+    """data source meta info view."""
+    current_app.logger.info("data source meta info")
+    return jsonify({"data": DataSource.meta_info()})

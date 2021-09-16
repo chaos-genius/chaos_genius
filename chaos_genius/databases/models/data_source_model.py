@@ -67,3 +67,84 @@ class DataSource(PkModel):
             "active": self.active,
             "created_at": self.created_at
         }
+
+    @classmethod
+    def meta_info(cls):
+        return{
+            "name": "data_source",
+            "table_name": "data_source",
+            "fields":[
+                {
+                    "name": "name",
+                    "is_editable": True,
+                    "is_sensitive": False,
+                },
+                {
+                    "name": "connection_type",
+                    "is_editable": False,
+                    "is_sensitive": False,
+                },
+                {
+                    "name": "db_uri",
+                    "is_editable": False,
+                    "is_sensitive": False,
+
+                },
+                {
+                    "name": "is_third_party",
+                    "is_editable": False,
+                    "is_sensitive": False,
+
+                },
+                {
+                    "name": "connection_status",
+                    "is_editable": False,
+                    "is_sensitive": False,
+
+                },
+                {
+                    "name": "sync_status",
+                    "is_editable": False,
+                    "is_sensitive": False,
+
+                },
+                {
+                    "name": "sourceConfig",
+                    "is_editable": True,
+                    "is_sensitive": True,
+
+                },
+                {
+                    "name": "destinationConfig",
+                    "is_editable": True,
+                    "is_sensitive": True,
+
+                },
+                {
+                    "name": "connectionConfig",
+                    "is_editable": True,
+                    "is_sensitive": True,
+
+                },
+                {
+                    "name": "dbConfig",
+                    "is_editable": True,
+                    "is_sensitive": True,
+
+                },
+                {
+                    "name": "last_sync",
+                    "is_editable": False,
+                    "is_sensitive": False,
+
+                },
+                {
+                    "name": "created_at",
+                    "is_editable": False,
+                    "is_sensitive": False,
+
+                }
+            ]
+
+        }
+

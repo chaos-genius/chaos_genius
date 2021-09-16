@@ -196,7 +196,6 @@ class RootCauseAnalysis():
 
         return binned_cols
 
-
     def _generate_all_dim_combinations(self) -> List[List[str]]:
         """Creates a dictionary of all possible combinations of dims.
 
@@ -369,7 +368,8 @@ class RootCauseAnalysis():
             "\n".join(wrap(i, word_wrap_num))
             for i in waterfall_df["string"].values.tolist()
         ]]
-        col_values = [d1_agg, *waterfall_df["impact_non_overlap"].values.tolist()]
+        col_values = [
+            d1_agg, *waterfall_df["impact_non_overlap"].values.tolist()]
         col_names_for_mpl.append("end")
         col_values.append(d2_agg)
 
@@ -449,7 +449,7 @@ class RootCauseAnalysis():
         panel_metrics = []
         for data in [self._grp1_df, self._grp2_df]:
             len_data = len(data[self._metric])
-            out_dict = OrderedDict() 
+            out_dict = OrderedDict()
             try:
                 # numerical data
                 if not self._metric_is_cat:
@@ -509,7 +509,8 @@ class RootCauseAnalysis():
         self, single_dim=None
     ) -> Tuple[List[Dict[str, object]], List[Dict[str, str]]]:
         impact_table = self.get_impact_rows(single_dim)
-        cols = ['g1_agg', 'g1_count', 'g1_size', 'g2_agg', 'g2_count', 'g2_size', 'impact', 'subgroup']
+        cols = ['g1_agg', 'g1_count', 'g1_size', 'g2_agg',
+                'g2_count', 'g2_size', 'impact', 'subgroup']
         mapping = [
             ("subgroup", "Subgroup Name"),
             ("g1_count", "Prev Month Count"),
@@ -527,7 +528,6 @@ class RootCauseAnalysis():
         mapping = [{"title": v, "field": k} for k, v in mapping]
 
         return impact_table, mapping
-
 
     def get_waterfall_table_rows(
         self,
@@ -603,7 +603,7 @@ class RootCauseAnalysis():
                 for filter_string in filters:
                     children = children[
                         children["string"].str.contains(
-                            filter_string, regex= False
+                            filter_string, regex=False
                         )
                     ]
                 children = children[

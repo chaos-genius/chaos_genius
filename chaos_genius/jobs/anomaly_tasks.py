@@ -105,13 +105,14 @@ def anomaly_scheduler():
         )
 
         # assume 11am if it's not set
-        hour = 11
-        if scheduler_params is not None and "hour" in scheduler_params:
-            hour = scheduler_params["hour"]
+        hour, minute, second = 11, 0, 0
+        if scheduler_params is not None and "time" in scheduler_params:
+            # HH:MM:SS
+            hour, minute, second = map(int, scheduler_params["time"].split(":"))
 
         scheduled_time = datetime.now()
         # today's date, but at 11:00:00am
-        scheduled_time = scheduled_time.replace(hour=hour, minute=0, second=0)
+        scheduled_time = scheduled_time.replace(hour=hour, minute=minute, second=second)
         current_time = datetime.now()
 
         # check if it's already run

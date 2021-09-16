@@ -286,7 +286,7 @@ def kpi_line_data(kpi_id):
     except Exception as err:
         # print(traceback.format_exc())
         current_app.logger.error(f"Error in RCA Analysis: {err}")
-        final_data = {}
+        final_data = []
     return final_data
 
 

@@ -85,7 +85,7 @@ def kpi_anomaly_drilldown(kpi_id):
 def kpi_anomaly_data_quality(kpi_id):
     current_app.logger.info(f"Anomaly Drilldown Started for KPI ID: {kpi_id}")
 
-    data = []
+    data, status, msg = [], "success", ""
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
         end_date = get_end_date(kpi_info)
@@ -101,10 +101,12 @@ def kpi_anomaly_data_quality(kpi_id):
             data.append(anom_data)
 
     except Exception as err:
+        status = "failed"
+        msg = err
         current_app.logger.info(f"Error Found: {err}")
 
     current_app.logger.info("Anomaly Drilldown Done")
-    return jsonify({"data": data, "msg": ""})
+    return jsonify({"data": data, "msg": msg, "status": status})
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-params", methods=["POST", "GET"])

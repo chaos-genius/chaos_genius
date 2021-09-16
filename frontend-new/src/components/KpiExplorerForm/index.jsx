@@ -899,7 +899,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         </div>
         <ToastContainer
           position={toast.POSITION.BOTTOM_RIGHT}
-          autoClose={false}
+          autoClose={50000}
         />
       </div>
     );

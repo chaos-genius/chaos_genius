@@ -327,7 +327,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
         </Modal>
         <ToastContainer
           position={toast.POSITION.BOTTOM_RIGHT}
-          autoClose={false}
+          autoClose={50000}
         />
       </>
     );

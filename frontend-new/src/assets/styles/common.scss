@@ -1054,5 +1054,9 @@ a:hover {
         fill: $grey_variation-3 !important;
       }
     }
+    .Toastify__progress-bar {
+      visibility: hidden;
+      animation-play-state: running !important;
+    }
   }
 }

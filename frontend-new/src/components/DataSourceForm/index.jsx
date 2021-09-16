@@ -411,6 +411,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
                   ? 'btn black-button btn-loading'
                   : 'btn black-button'
               }
+              disabled={selectedDatasource !== undefined ? false : true}
               onClick={() => {
                 updateDataSource();
               }}>

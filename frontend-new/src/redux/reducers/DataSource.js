@@ -215,7 +215,8 @@ export const dataSource = (state = initialState, action) => {
         createDatasourceResponse: [],
         testConnectionResponse: [],
         deleteDataSourceResponse: [],
-        updateDatasource: []
+        updateDatasource: [],
+        datasourceData: []
       };
     }
     default:

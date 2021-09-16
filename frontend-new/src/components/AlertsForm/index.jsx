@@ -6,8 +6,14 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import Slack from '../../assets/images/alerts/slack.svg';
 import Email from '../../assets/images/alerts/gmail.svg';
+import Edit from '../../assets/images/disable-edit.svg';
 
-import { getAllAlertEmail, getEditChannel } from '../../redux/actions';
+import {
+  getAllAlertEmail,
+  getEditChannel,
+  getEmailMetaInfo,
+  getSlackMetaInfo
+} from '../../redux/actions';
 import { toastMessage } from '../../utils/toast-helper';
 import { ToastContainer, toast } from 'react-toastify';
 const AlertsForm = () => {
@@ -15,11 +21,18 @@ const AlertsForm = () => {
 
   const data = history.location.pathname.split('/');
 
-  const { emailLoading, editLoading, emailData, editData } = useSelector(
-    (state) => {
-      return state.alert;
-    }
-  );
+  const {
+    emailLoading,
+    editLoading,
+    emailData,
+    editData,
+    emailMetaInfoData,
+    emailMetaInfoLoading,
+    slackMetaInfoData,
+    slackMetaInfoLoading
+  } = useSelector((state) => {
+    return state.alert;
+  });
 
   const dispatch = useDispatch();
   const [webhookUrl, setWebhookUrl] = useState('');
@@ -32,6 +45,7 @@ const AlertsForm = () => {
     password: '',
     emailsender: ''
   });
+
   const [emailError, setEmailError] = useState({
     smtp: '',
     port: '',
@@ -40,8 +54,17 @@ const AlertsForm = () => {
     emailsender: ''
   });
 
+  const [enabled, setEnabled] = useState({
+    smtp: true,
+    port: true,
+    username: true,
+    password: true,
+    emailSender: true
+  });
+
   useEffect(() => {
     if (data[4] === 'edit') {
+      dispatch(getSlackMetaInfo());
       if (data[3] === 'slack') {
         dispatch(
           getEditChannel({
@@ -49,6 +72,7 @@ const AlertsForm = () => {
           })
         );
       } else if (data[3] === 'email') {
+        dispatch(getEmailMetaInfo());
         dispatch(
           getEditChannel({
             config_name: 'email'
@@ -57,7 +81,7 @@ const AlertsForm = () => {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
+  }, []);
 
   useEffect(() => {
     if (data[3] === 'email' && editData) {
@@ -188,7 +212,20 @@ const AlertsForm = () => {
     dispatch(getAllAlertEmail(data));
   };
 
-  if (editLoading) {
+  const editableStatus = (type) => {
+    var status = false;
+    emailMetaInfoData &&
+      emailMetaInfoData.length !== 0 &&
+      emailMetaInfoData.fields.find((field) => {
+        if (field.name === type) {
+          status = field.is_editable && field.is_sensitive ? true : false;
+        }
+        return '';
+      });
+    return status;
+  };
+
+  if (editLoading || emailMetaInfoLoading) {
     return (
       <div className="load loader-page">
         <div className="preload"></div>
@@ -234,6 +271,7 @@ const AlertsForm = () => {
                 placeholder="Enter SMTP server"
                 name="smtp"
                 value={email.smtp}
+                disabled={data[4] === 'edit' ? editableStatus('server') : false}
                 onChange={(e) => {
                   setEmail((prev) => {
                     return { ...prev, smtp: e.target.value };
@@ -255,6 +293,7 @@ const AlertsForm = () => {
                 className="form-control"
                 placeholder="Enter Port"
                 name="port"
+                disabled={data[4] === 'edit' ? editableStatus('port') : false}
                 value={email.port}
                 onChange={(e) => {
                   setEmail((prev) => {
@@ -271,19 +310,53 @@ const AlertsForm = () => {
             </div>
             <div className="form-group">
               <label>Username *</label>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Enter Username"
-                name="username"
-                value={email.username}
-                onChange={(e) => {
-                  setEmail((prev) => {
-                    return { ...prev, username: e.target.value };
-                  });
-                  onChangeHandler(e);
-                }}
-              />
+              <div className="editable-field">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Enter Username"
+                  name="username"
+                  disabled={
+                    data[4] === 'edit' &&
+                    editableStatus('username') &&
+                    enabled.username
+                      ? true
+                      : false
+                  }
+                  value={email.username}
+                  onChange={(e) => {
+                    setEmail((prev) => {
+                      return { ...prev, username: e.target.value };
+                    });
+                    onChangeHandler(e);
+                  }}
+                />
+                {data[4] === 'edit' &&
+                  editableStatus('username') &&
+                  (enabled.username ? (
+                    <button
+                      className="btn black-button"
+                      onClick={() =>
+                        setEnabled({ ...enabled, username: false })
+                      }>
+                      <img src={Edit} alt="Edit" />
+                      <span>Edit</span>
+                    </button>
+                  ) : (
+                    <>
+                      <button className="btn black-button">
+                        <span>Save</span>
+                      </button>
+                      <button
+                        className="btn black-secondary-button"
+                        onClick={() =>
+                          setEnabled({ ...enabled, username: true })
+                        }>
+                        <span>Cancel</span>
+                      </button>
+                    </>
+                  ))}
+              </div>
               {emailError.username !== '' ? (
                 <div className="connection__fail">
                   <p>{emailError.username}</p>
@@ -292,19 +365,53 @@ const AlertsForm = () => {
             </div>
             <div className="form-group">
               <label>Password *</label>
-              <input
-                type="password"
-                className="form-control"
-                placeholder="Enter Password"
-                name="password"
-                value={email.password}
-                onChange={(e) => {
-                  setEmail((prev) => {
-                    return { ...prev, password: e.target.value };
-                  });
-                  onChangeHandler(e);
-                }}
-              />
+              <div className="editable-field">
+                <input
+                  type="password"
+                  className="form-control"
+                  placeholder="Enter Password"
+                  name="password"
+                  value={email.password}
+                  disabled={
+                    data[4] === 'edit' &&
+                    editableStatus('password') &&
+                    enabled.password
+                      ? true
+                      : false
+                  }
+                  onChange={(e) => {
+                    setEmail((prev) => {
+                      return { ...prev, password: e.target.value };
+                    });
+                    onChangeHandler(e);
+                  }}
+                />
+                {data[4] === 'edit' &&
+                  editableStatus('password') &&
+                  (enabled.password ? (
+                    <button
+                      className="btn black-button"
+                      onClick={() =>
+                        setEnabled({ ...enabled, password: false })
+                      }>
+                      <img src={Edit} alt="Edit" />
+                      <span>Edit</span>
+                    </button>
+                  ) : (
+                    <>
+                      <button className="btn black-button">
+                        <span>Save</span>
+                      </button>
+                      <button
+                        className="btn black-secondary-button"
+                        onClick={() =>
+                          setEnabled({ ...enabled, password: true })
+                        }>
+                        <span>Cancel</span>
+                      </button>
+                    </>
+                  ))}
+              </div>
               {emailError.password !== '' ? (
                 <div className="connection__fail">
                   <p>Enter password</p>
@@ -319,6 +426,9 @@ const AlertsForm = () => {
                 placeholder="Enter Email"
                 name="emailsender"
                 value={email.emailsender}
+                disabled={
+                  data[4] === 'edit' ? editableStatus('sender_email') : false
+                }
                 onChange={(e) => {
                   setEmail((prev) => {
                     return { ...prev, emailsender: e.target.value };

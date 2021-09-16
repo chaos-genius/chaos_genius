@@ -8,7 +8,8 @@ import Slack from '../../assets/images/alerts/slack.svg';
 import Email from '../../assets/images/alerts/gmail.svg';
 
 import { getAllAlertEmail, getEditChannel } from '../../redux/actions';
-
+import { toastMessage } from '../../utils/toast-helper';
+import { ToastContainer, toast } from 'react-toastify';
 const AlertsForm = () => {
   const history = useHistory();
 
@@ -38,6 +39,7 @@ const AlertsForm = () => {
     password: '',
     emailsender: ''
   });
+
   useEffect(() => {
     if (data[4] === 'edit') {
       if (data[3] === 'slack') {
@@ -72,14 +74,15 @@ const AlertsForm = () => {
 
   useEffect(() => {
     if (emailData && emailData.status === 'success') {
-      history.push('/alerts/channelconfiguration');
+      toastMessage({ type: 'success', message: 'Successfully updated' });
+    } else if (emailData && emailData.status === 'failed') {
+      toastMessage({ type: 'error', message: 'Failed to update' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [emailData]);
 
   const validateEmail = (email) => {
-    const re =
-      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
   };
 
@@ -180,6 +183,7 @@ const AlertsForm = () => {
       };
     });
   };
+
   const dispatchGetAllAlertEmail = (data) => {
     dispatch(getAllAlertEmail(data));
   };
@@ -353,6 +357,10 @@ const AlertsForm = () => {
             </div>
           </button>
         </div>
+        <ToastContainer
+          position={toast.POSITION.BOTTOM_RIGHT}
+          autoClose={false}
+        />
       </>
     );
   }

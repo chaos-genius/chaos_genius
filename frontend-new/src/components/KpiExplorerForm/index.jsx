@@ -5,16 +5,17 @@ import { useHistory, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Select from 'react-select';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 import Play from '../../assets/images/play-green.png';
 import Success from '../../assets/images/success.svg';
 import Fail from '../../assets/images/fail.svg';
-import Toast_error from '../../assets/images/toast-error.svg';
+//import Toast_error from '../../assets/images/toast-error.svg';
 //import Cancel from '../../assets/images/cancel.svg';
 
 import '../../assets/styles/addform.scss';
+
+import { toastMessage } from '../../utils/toast-helper';
+import { ToastContainer, toast } from 'react-toastify';
 
 import {
   getAllKpiExplorerForm,
@@ -224,7 +225,14 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       kpiUpdateData.status === 'success' &&
       onboarding !== true
     ) {
-      history.push('/kpiexplorer');
+      //history.push('/kpiexplorer');
+      toastMessage({ type: 'success', message: 'Successfully updated' });
+    } else if (
+      kpiUpdateData &&
+      kpiUpdateData.status === 'failed' &&
+      onboarding !== true
+    ) {
+      toastMessage({ type: 'error', message: 'Failed to update' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSubmit, kpiUpdateData]);
@@ -342,20 +350,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       // setFormdata({ ...formdata, tablename: e.value });
     }
   };
-  // toast.success('Successfully added', {
-  //   position: toast.POSITION.BOTTOM_RIGHT,
-  //   autoClose: false
-  // });
-  // toast(
-  //   <div className="error-msg-toast">
-  //     <img src={Toast_error} alt="Error" /> Failed to Update
-  //   </div>,
-  //   {
-  //     position: toast.POSITION.BOTTOM_RIGHT,
-  //     autoClose: false,
-  //     className: 'error-toast'
-  //   }
-  // );
 
   const handleDataset = (e) => {
     setDataset(e);
@@ -903,7 +897,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             </button>
           </div>
         </div>
-        <ToastContainer />
+        <ToastContainer
+          position={toast.POSITION.BOTTOM_RIGHT}
+          autoClose={false}
+        />
       </div>
     );
   }

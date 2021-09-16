@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import Select from 'react-select';
 import { useHistory, useParams } from 'react-router-dom';
-
+import { ToastContainer, toast } from 'react-toastify';
 import '../../assets/styles/addform.scss';
 import Play from '../../assets/images/play.svg';
 import PlayDisable from '../../assets/images/play-disable.svg';
@@ -20,6 +20,8 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 
 import { renderTextFields } from './Formhelper';
+
+import { toastMessage } from '../../utils/toast-helper';
 
 const customSingleValue = ({ data }) => (
   <div className="input-select">
@@ -143,7 +145,14 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       updateDatasource.status === 'success' &&
       path[2] === 'edit'
     ) {
-      history.push('/datasource');
+      //history.push('/datasource');
+      toastMessage({ type: 'success', message: 'Successfully updated' });
+    } else if (
+      updateDatasource &&
+      updateDatasource.status === 'failed' &&
+      path[2] === 'edit'
+    ) {
+      toastMessage({ type: 'error', message: 'Failed to update' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createDatasourceResponse, updateDatasource]);
@@ -477,6 +486,10 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             )}
           </div>
         )}
+        <ToastContainer
+          position={toast.POSITION.BOTTOM_RIGHT}
+          autoClose={false}
+        />
       </div>
     );
   }

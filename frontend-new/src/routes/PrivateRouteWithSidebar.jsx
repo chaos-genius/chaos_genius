@@ -6,7 +6,7 @@ import { Route, withRouter } from 'react-router';
 
 // import { Redirect } from 'react-router-dom';
 // import { isAuthenticated } from '../utils/user-helper';
-
+import 'react-toastify/dist/ReactToastify.css';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 

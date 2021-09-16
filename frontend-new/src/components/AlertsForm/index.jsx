@@ -38,6 +38,7 @@ const AlertsForm = () => {
   const [webhookUrl, setWebhookUrl] = useState('');
   const [webhookUrlError, setWebhookUrlError] = useState(false);
   const [editedWebhookUrl, setEditedWebhookUrl] = useState('');
+  const [slackEdit, setSlackEdit] = useState(true);
 
   const [email, setEmail] = useState({
     smtp: '',
@@ -115,7 +116,8 @@ const AlertsForm = () => {
   }, [emailData]);
 
   const validateEmail = (email) => {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    const re =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
   };
 
@@ -289,8 +291,6 @@ const AlertsForm = () => {
       </>
     );
   };
-
-  const [slackEdit, setSlackEdit] = useState(true);
 
   const slackEditableStatus = (type) => {
     var status = false;

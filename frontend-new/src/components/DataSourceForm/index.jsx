@@ -488,7 +488,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
         )}
         <ToastContainer
           position={toast.POSITION.BOTTOM_RIGHT}
-          autoClose={50000}
+          autoClose={5000}
         />
       </div>
     );

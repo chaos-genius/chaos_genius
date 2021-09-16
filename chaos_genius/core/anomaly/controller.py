@@ -27,8 +27,8 @@ class AnomalyDetectionController(object):
 
         self.save_model = save_model
         self.end_date = end_date
-        self.debug = debug
-
+        self.debug = self.kpi_info['anomaly_params'].get('debug', False)
+        if self.debug == "True": self.debug = True
     def _load_anomaly_data(self) -> pd.DataFrame:
         """Loads KPI data from its datastore, preprocesses it and
         returns it for anomaly detection

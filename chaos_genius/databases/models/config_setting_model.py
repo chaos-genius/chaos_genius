@@ -44,23 +44,42 @@ class ConfigSetting(PkModel):
 
     @classmethod
     def meta_info(cls):
-        return{
-            "name": "Config Setting",
-            "table_name": "config_setting",
-            "fields":[
-                {
-                    "name": "name",
+        # TODO: Make this consistent with other models
+        return {
+            "slack": {
+                "webhook_url": {
+                    "is_editable": True,
+                    "is_sensitive": True,
+                }
+            },
+            "email": {
+                "server": {
                     "is_editable": True,
                     "is_sensitive": False,
                 },
-                {
-                    "name": "config_setting",
-                    "is_editable": False,
+                "port": {
+                    "is_editable": True,
+                    "is_sensitive": False,
+                },
+                "username": {
+                    "is_editable": True,
                     "is_sensitive": True,
+                },
+                "password": {
+                    "is_editable": True,
+                    "is_sensitive": True,
+                },
+                "sender_email": {
+                    "is_editable": True,
+                    "is_sensitive": False,
                 }
-            ]
-
+            }
         }
 
-
-
+    @classmethod
+    def get_meta_info(cls, config_name):
+        print(cls, config_name)
+        if config_name and cls.meta_info().get(config_name):
+            return cls.meta_info().get(config_name)
+        else:
+            return {}

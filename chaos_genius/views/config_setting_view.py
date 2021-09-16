@@ -137,11 +137,22 @@ def test_alert():
     else:
         return jsonify({"error": "The request payload is not in JSON format"})
 
-@blueprint.route("/get-meta-info", methods=["GET"])
-def get_config_meta_data():
+@blueprint.route("/get-meta-info/<string:config>", methods=["GET"])
+def get_config_meta_data(config):
     """Getting all the config Setting Meta."""
     try:
-        return jsonify({"data": ConfigSetting.meta_info(), "status": "success"})
+        meta_info = ConfigSetting.get_meta_info(config)
+        if not meta_info:
+            raise Exception("Config Type doesn't exist")
+        results = {
+            "name": config
+        }
+        fields = []
+        for config_key, info in meta_info.items():
+            info.update({"name": config_key})
+            fields.append(info)
+        results["fields"] = fields
+        return jsonify({"data": results, "status": "success"})
     except Exception as err:
         current_app.logger.info(f"Error in getting meta info for Config Setting: {err}")
         return jsonify({"message": str(err), "status": "failure"})

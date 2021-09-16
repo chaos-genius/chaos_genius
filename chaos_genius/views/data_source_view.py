@@ -82,15 +82,16 @@ def data_source():
 @cache.memoize(timeout=30000)
 def list_data_source_type():
     """DataSource Type view."""
-    connection_types, msg = [], ""
+    connection_types, msg, status = [], "", "success"
     try:
         connector_client = connector.connection
         connector_client.init_source_def_conf()
         connection_types = connector_client.source_conf
     except Exception as err_msg:
         print(err_msg)
-        msg = err_msg
-    return jsonify({"data": connection_types, "msg": msg})
+        msg = str(err_msg)
+        status = "failed"
+    return jsonify({"data": connection_types, "msg": msg, "status": status})
 
 
 @blueprint.route("/test", methods=["POST"])

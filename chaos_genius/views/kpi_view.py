@@ -16,6 +16,7 @@ from flask import (
 )
 import numpy as np
 import pandas as pd
+import random
 
 from chaos_genius.core.rca import RootCauseAnalysis
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
@@ -70,6 +71,57 @@ def kpi():
             if data_source['active'] == True:
                 kpis.append(data_source)
         return jsonify({"count": len(kpis), "data": kpis})
+
+
+@blueprint.route("/get-dashboard-list", methods=["GET"])
+def get_all_kpis():
+    """returning all kpis"""
+
+    results = Kpi.query.filter(Kpi.active == True).all()
+
+    ret = []
+    static = None
+    metrics = ['name', 'metric', 'id']
+
+    for ele in results:
+        res = {}
+
+        for key in metrics:
+            res[key] = getattr(ele, key)
+
+        try:
+            kpi_info = get_kpi_data_from_id(ele.id)
+            connection_info = DataSource.get_by_id(kpi_info["data_source"]).as_dict
+
+            aggregation_type = ele.aggregation
+
+            aggregate_data_week = kpi_aggregation(kpi_info, connection_info, timeline = 'wow')
+            aggregate_data_month = kpi_aggregation(kpi_info, connection_info, timeline = 'mom')
+
+            res['prev_week'] = aggregate_data_week['panel_metrics']['grp1_metrics'][aggregation_type]
+            res['this_week'] = aggregate_data_week['panel_metrics']['grp2_metrics'][aggregation_type]
+            res['week_change'] = res['this_week'] - res['prev_week']
+            res['prev_month'] = aggregate_data_month['panel_metrics']['grp1_metrics'][aggregation_type]
+            res['this_month'] = aggregate_data_month['panel_metrics']['grp2_metrics'][aggregation_type]
+            res['month_change'] = res['this_month'] - res['prev_month']
+
+        except:
+
+            res['prev_week'] = 0
+            res['this_week'] = 0
+            res['week_change'] = 0
+            res['prev_month'] = 0
+            res['this_month'] = 0
+            res['month_change'] = 0
+
+        res['weekly_anomaly_count'] = random.randint(1, 20) #TODO
+        res['monthly_anomaly_count'] = random.randint(20, 40) #TODO
+        res['graph_data'] = kpi_line_data(kpi_info, connection_info) if static is None else static #TODO
+        static = res['graph_data'] if static is None else static #TODO
+
+        ret.append(res)
+
+    return jsonify({"data": ret})
 
 
 @blueprint.route("/<int:kpi_id>/disable", methods=["GET"])

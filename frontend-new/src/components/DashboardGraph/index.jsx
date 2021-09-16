@@ -419,7 +419,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
                 </div>
               ) : (
                 <>
-                  {linechartData && (
+                  {linechartData && linechartData.length !== 0 && (
                     <HighchartsReact
                       highcharts={Highcharts}
                       options={newHighChart(linechartData)}

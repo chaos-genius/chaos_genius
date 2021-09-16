@@ -12,6 +12,9 @@ import './analystics.scss';
 import { kpiSettingSetup, kpiEditSetup } from '../../redux/actions';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { toastMessage } from '../../utils/toast-helper';
+import { ToastContainer, toast } from 'react-toastify';
+
 const modalOptions = [
   { value: 'prophet', label: 'Prophet' },
   { value: 'Standard Deviation', label: 'Standard Deviation' },
@@ -63,17 +66,11 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   }, [kpiEditData]);
 
   useEffect(() => {
-    if (
-      kpiSettingData &&
-      kpiSettingData.msg === 'Successfully updated Anomaly params' &&
-      onboarding
-    ) {
+    if (kpiSettingData && kpiSettingData.msg === 'success' && onboarding) {
       setAnalystics(true);
-    } else if (
-      kpiSettingData &&
-      kpiSettingData.msg === 'Successfully updated Anomaly params'
-    ) {
-      setModalOpen(true);
+    } else if (kpiSettingData && kpiSettingData.msg === 'success') {
+      // setModalOpen(true);
+      toastMessage({ type: 'success', message: 'Successfully updated' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSettingData]);
@@ -328,6 +325,10 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
             </div>
           </div>
         </Modal>
+        <ToastContainer
+          position={toast.POSITION.BOTTOM_RIGHT}
+          autoClose={false}
+        />
       </>
     );
   }

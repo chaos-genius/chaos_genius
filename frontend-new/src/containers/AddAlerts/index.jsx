@@ -8,6 +8,7 @@ import AlertsForm from '../../components/AlertsForm';
 const AddAlerts = () => {
   const history = useHistory();
   const data = history.location.pathname.split('/');
+
   return (
     <>
       {/* Page Navigation */}
@@ -24,15 +25,16 @@ const AddAlerts = () => {
               </Link>
             </li>
             <li className="breadcrumb-item active" aria-current="page">
-              {data[2] === 'slack' ? 'Slack Setup' : 'Email Setup'}
+              {data[3] === 'slack' ? 'Slack Setup' : 'Email Setup'}
             </li>
           </ol>
         </nav>
         {/* Back */}
+
         <div className="backnavigation">
           <Link to="/alerts/channelconfiguration">
             <img src={rightarrow} alt="Back" />
-            <span>{data[2] === 'slack' ? 'Slack Setup' : 'Email Setup'}</span>
+            <span>{data[3] === 'slack' ? 'Slack Setup' : 'Email Setup'}</span>
           </Link>
         </div>
       </div>

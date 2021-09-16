@@ -66,9 +66,9 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   }, [kpiEditData]);
 
   useEffect(() => {
-    if (kpiSettingData && kpiSettingData.msg === 'success' && onboarding) {
+    if (kpiSettingData && kpiSettingData.status === 'success' && onboarding) {
       setAnalystics(true);
-    } else if (kpiSettingData && kpiSettingData.msg === 'success') {
+    } else if (kpiSettingData && kpiSettingData.status === 'success') {
       // setModalOpen(true);
       toastMessage({ type: 'success', message: 'Successfully updated' });
     }

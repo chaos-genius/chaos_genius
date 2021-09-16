@@ -303,9 +303,13 @@ def get_end_date(kpi_info: dict) -> datetime:
     if kpi_info['is_static']:
         end_date = kpi_info.get('static_params', {}).get('end_date', None)
         if end_date is not None:
-            end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M%S')
+            try: end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
+            except:
+                end_date = end_date + " 00:00:00"
+                end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
 
-    #TODO: caused the non vieweing of data post 00:00
+
+    #TODO: caused the non viewing of data post 00:00
     if end_date is None:
         end_date = datetime.today()
 

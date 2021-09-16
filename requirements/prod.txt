@@ -7,6 +7,8 @@ Werkzeug==2.0.0
 click>=7.0
 flask-cors==3.0.10 # TODO: Remove the CORS
 colorama==0.4.4
+celery==5.1.2
+redis==3.5.3
 
 # Database
 Flask-SQLAlchemy==2.5.1
@@ -49,9 +51,10 @@ Flask-Bcrypt==0.7.1
 
 # Caching
 Flask-Caching>=1.7.2
+cachier==1.5.0 # Delete this
 
 # Debug toolbar
 Flask-DebugToolbar==0.11.0
 
 # Environment variable parsing
-environs==9.3.2
+python-dotenv==0.18.0

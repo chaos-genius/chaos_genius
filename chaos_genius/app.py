@@ -12,6 +12,7 @@ from chaos_genius.views import (
     kpi_view,
     public_view,
     anomaly_data_view,
+    alert_view,
     config_setting_view
 )
 from chaos_genius.extensions import (
@@ -23,7 +24,8 @@ from chaos_genius.extensions import (
     flask_static_digest,
     login_manager,
     migrate,
-    integration_connector
+    integration_connector,
+    celery
 )
 
 
@@ -55,6 +57,7 @@ def register_extensions(app):
     migrate.init_app(app, db)
     flask_static_digest.init_app(app)
     integration_connector.init_app(app)
+    celery.init_app(app)
     return None
 
 
@@ -66,6 +69,7 @@ def register_blueprints(app):
     app.register_blueprint(data_source_view.blueprint, url_prefix='/api/connection')
     app.register_blueprint(kpi_view.blueprint, url_prefix='/api/kpi')
     app.register_blueprint(anomaly_data_view.blueprint, url_prefix='/api/anomaly-data')
+    app.register_blueprint(anomaly_data_view.blueprint, url_prefix='/api/alert')
     return None
 
 
@@ -97,10 +101,11 @@ def register_commands(app):
     """Register Click commands."""
     app.cli.add_command(commands.test)
     app.cli.add_command(commands.lint)
-    app.cli.add_command(commands.integration_connector)
-    app.cli.add_command(commands.run_anomaly)
-    app.cli.add_command(commands.reinstall_db)
-    app.cli.add_command(commands.insert_demo_data)
+    app.cli.add_command(commands.integration)
+    app.cli.add_command(commands.anomaly)
+    app.cli.add_command(commands.alert)
+    app.cli.add_command(commands.reinstall)
+    app.cli.add_command(commands.load_demo)
 
 
 def configure_logger(app):

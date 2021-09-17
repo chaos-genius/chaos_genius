@@ -29,7 +29,9 @@ def get_alert_info(id: int):
     Args:
         id (int): alert id
     """
-    alert = Alert.query.filter_by(id=id).fetchone()
+    alert = Alert.get_by_id(id)
+    
     if not alert:
-        raise Exception("Alert ID doens't exist")
-    return alert.as_dict
+        raise Exception("Alert ID doesn't exist")
+    else:
+        return alert.as_dict

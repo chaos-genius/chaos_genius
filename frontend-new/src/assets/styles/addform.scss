@@ -1,0 +1,78 @@
+@import './variable.scss';
+
+.add-form-container {
+  background-color: $white;
+  border-radius: 10px;
+  padding: 40px;
+  width: 520px;
+  margin: 0 auto;
+  .form-action {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+  }
+  .form-check-input {
+    &:checked {
+      background-color: $green;
+      border-color: $green;
+    }
+  }
+  .query-form {
+    padding: 0px 8px;
+    .test-query-connection {
+      display: flex;
+      justify-content: space-between;
+      .test-query {
+        span {
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+          font-size: $font-size-14;
+          line-height: $line-height-16;
+          letter-spacing: $letter-spacing;
+          text-transform: capitalize;
+          color: $green;
+          img {
+            margin-right: 5px !important;
+          }
+        }
+      }
+    }
+  }
+
+  .optionlabel {
+    display: flex;
+    align-items: center;
+    font-size: $font-size-14;
+    letter-spacing: $letter-spacing-point1;
+    line-height: $line-height-20;
+    font-weight: $font-weight-400;
+    img,
+    svg {
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+    }
+  }
+  .add-options-wrapper {
+    .add-options {
+      font-weight: $font-weight-500;
+      font-size: $font-size-14;
+      line-height: $line-height-19;
+      letter-spacing: $letter-spacing-point15;
+      color: $green;
+      margin-bottom: 24px;
+      cursor: pointer;
+      label {
+        cursor: pointer;
+      }
+      &:last-child {
+        margin-bottom: 0px;
+      }
+    }
+  }
+}
+.form-title-image {
+  margin-bottom: 40px;
+  text-align: center;
+}

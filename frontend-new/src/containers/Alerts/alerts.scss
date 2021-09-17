@@ -1,0 +1,11 @@
+@import '../../assets/styles/filterlayout.scss';
+
+.alert-option-button {
+  display: flex;
+  .btn {
+    margin-left: 16px;
+  }
+  .white-button {
+    padding: 2px 16px;
+  }
+}

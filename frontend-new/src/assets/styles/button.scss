@@ -1,0 +1,125 @@
+@import '~bootstrap/scss/bootstrap';
+@import './variable.scss';
+
+.btn {
+  box-sizing: border-box;
+  border-radius: 10px;
+  padding: 2px 16px;
+  outline: 0 !important;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: 0 !important;
+  box-shadow: none !important;
+  min-width: 120px;
+  span {
+    font-weight: $font-weight-500;
+    font-size: $font-size-14;
+    line-height: $line-height-16;
+    letter-spacing: $letter-spacing;
+    text-transform: capitalize;
+  }
+  img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    margin-right: 8px;
+  }
+  &.black-button {
+    color: $black;
+    background-color: $black-variation-2;
+    border: 1px solid $black-variation-2;
+    span {
+      color: $white;
+    }
+  }
+  &.black-secondary-button {
+    color: $black_variation-2;
+    background-color: $white;
+    border: 1px solid $black-variation-2;
+    span {
+      color: $black_variation-2;
+    }
+  }
+  &.white-button {
+    color: $black_variation-2;
+    background-color: $white;
+    border: 1px solid $black-variation-2;
+    padding: 0px 26px;
+
+    span {
+      color: $black_variation-2;
+      margin-left: 0px;
+    }
+  }
+  &.grey-button {
+    background: $grey_variation-2;
+    color: $black_variation-2;
+    span {
+      color: $black_variation-2;
+    }
+  }
+  &.button-right-margin {
+    margin-right: 16px;
+  }
+  &.green-button {
+    border: none;
+    background: linear-gradient(
+      135deg,
+      #defb9d 0%,
+      #71f79e 37%,
+      #38f9d7 70%,
+      #89c4fe 100%
+    );
+    span {
+      color: $black;
+    }
+  }
+  &.green-variant-button {
+    background-color: $green;
+    color: $white;
+    span {
+      color: $white;
+    }
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    pointer-events: all !important;
+    border: 1px solid $grey_variation-1;
+    background-color: transparent;
+    span {
+      color: $grey_variation-1;
+    }
+  }
+  .spinner-border {
+    width: 15px;
+    height: 15px;
+    color: $white;
+    border-width: 2px;
+    margin-right: 5px;
+  }
+  &.btn-spacing {
+    margin-right: 16px;
+  }
+  &.btn-loading {
+    cursor: not-allowed;
+    .btn-spinner {
+      display: block !important;
+    }
+    .btn-content {
+      display: none !important;
+    }
+  }
+  .btn-spinner {
+    display: none;
+  }
+  .btn-content {
+    display: flex;
+    align-items: center;
+  }
+  &.btn-spacing {
+    margin-right: 16px;
+  }
+}

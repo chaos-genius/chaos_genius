@@ -1,0 +1,114 @@
+@import '../../assets/styles/variable.scss';
+
+.setup-card {
+  background: $white;
+  box-shadow: 4px 6px 32px -2px rgba(226, 226, 234, 0.24);
+  border-radius: 20px;
+  position: relative;
+  padding: 3%;
+  margin-bottom: 28px;
+  &.active {
+    background: url('../../assets/images/setupcard/setupcard-bg.svg') no-repeat;
+    background-size: cover;
+    background-position-y: bottom;
+    img {
+      display: none;
+      &.in-active {
+        display: none;
+      }
+      &.active {
+        display: block;
+      }
+    }
+    h1 {
+      color: $white;
+    }
+    p {
+      color: $white;
+      opacity: 0.7;
+    }
+    .btn {
+      background: linear-gradient(
+        134deg,
+        #defb9d 0%,
+        #71f79e 37%,
+        #38f9d7 70%,
+        #89c4fe 100%
+      );
+      border: none;
+      span {
+        color: $black;
+      }
+    }
+  }
+  img {
+    margin-bottom: 32px;
+    &.in-active {
+      display: block;
+    }
+    &.active {
+      display: none;
+    }
+  }
+  h1 {
+    font-weight: $font-weight-600;
+    font-size: $font-size-16;
+    line-height: $line-height-22;
+    letter-spacing: $letter-spacing;
+    color: $black_variation-2;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    img {
+      margin: 0px 0px 0px 5px;
+    }
+  }
+  p {
+    color: $black_variation-2;
+    opacity: 0.7;
+    font-size: $font-size-14;
+    line-height: $line-height-20;
+    letter-spacing: $letter-spacing;
+    margin-bottom: 24px;
+    font-weight: $font-weight-normal;
+  }
+  .btn {
+    width: 100%;
+  }
+  label {
+    font-weight: $font-weight-500;
+    font-size: $font-size-12;
+    line-height: $line-height-22;
+    text-align: center;
+    color: $blue;
+    position: absolute;
+    right: 16px;
+    top: 16px;
+    border: 1px solid $blue;
+    border-radius: 50px;
+    padding: 0px 12px;
+  }
+  h3 {
+    font-weight: $font-weight-600;
+    font-size: $font-size-18;
+    line-height: $line-height-20;
+    text-align: center;
+    color: $white;
+    letter-spacing: $letter-spacing;
+    position: absolute;
+    right: 0;
+    top: 0;
+    border-radius: 50px;
+    background: $green;
+    border-radius: 0px 20px 0px 80px;
+    box-shadow: 4px 6px 32px -2px rgba(226, 226, 226, 0.24);
+    width: 88px;
+    height: 88px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+  .btn-hidden {
+    visibility: hidden;
+  }
+}

@@ -1,0 +1,52 @@
+@import '../../assets/styles/variable.scss';
+
+.more-dropdown {
+  cursor: pointer;
+  ul {
+    width: max-content;
+    background-color: $white;
+    border: 1px solid $grey_variation-2;
+    box-sizing: border-box;
+    box-shadow: 2px 3px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    padding: 0px;
+    li {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      font-weight: normal;
+      font-size: $font-size-14;
+      line-height: $line-height-16;
+      letter-spacing: $letter-spacing;
+      text-transform: capitalize;
+      color: $grey_variation-3;
+      cursor: pointer;
+      padding: 0px 12px;
+      img {
+        margin-right: 8px;
+      }
+      &.delete-item {
+        border-top: 1px solid $grey-variation-7;
+        color: $red_variation_1;
+      }
+      .action-disable {
+        display: block;
+      }
+      .action-active {
+        display: none;
+      }
+      &:hover {
+        color: $black_variation-2;
+        .action-disable {
+          display: none;
+        }
+        .action-active {
+          display: block;
+        }
+        &.delete-item {
+          color: $red_variation_1;
+        }
+      }
+    }
+  }
+}

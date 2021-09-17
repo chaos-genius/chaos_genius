@@ -46,7 +46,7 @@ export default (props) => {
   };
 
   return (
-    <Navbar variant="dark" expanded className="ps-0 pe-2 pb-0">
+    <Navbar variant="dark" expanded className="custom-header-navbar">
       <Container fluid className="px-0">
         <div className="d-flex justify-content-between w-100">
           <div className="d-flex align-items-center">

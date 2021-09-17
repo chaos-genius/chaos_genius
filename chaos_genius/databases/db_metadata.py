@@ -166,6 +166,9 @@ class DbMetadata:
         table_columns = []
 
         # smartly add the limit 1
+        query = query.strip()
+        if query[-1] == ";":
+            query = query[:-1]
         if 'limit' not in query:
             query += ' limit 1 '
 
@@ -187,7 +190,7 @@ class DbMetadata:
 
 def get_metadata(data_source_details, from_query=False, query=''):
     metadata, err_msg = {}, ''
-    db_uri = data_source_details["dbConfig"]["db_connection_uri"]
+    db_uri = data_source_details["db_uri"]
     db_tables = data_source_details["dbConfig"]["tables"]
     if data_source_details["connection_type"].lower() == "mysql":
         db_name = db_uri.split('/')[-1]
@@ -205,6 +208,7 @@ def get_metadata(data_source_details, from_query=False, query=''):
             }
         }
     }
+    all_schema = {}
     try:
         if not from_query:
             all_schema = metadata_obj.get_schema_metadata(schema_name, tables=db_tables)
@@ -212,7 +216,8 @@ def get_metadata(data_source_details, from_query=False, query=''):
             all_schema = metadata_obj.get_schema_metadata_from_query(query)
     except Exception as err:
         print(err)
-        err_msg = err
+        err_msg = str(err)
 
-    metadata = all_schema
+    if all_schema:
+        metadata = all_schema
     return metadata, err_msg

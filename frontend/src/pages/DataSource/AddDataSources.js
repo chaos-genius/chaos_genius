@@ -4,7 +4,7 @@ import { Button } from '@themesberg/react-bootstrap';
 import {
     Card, CardContent, Grid, FormControl,
     TextField, InputLabel, Typography, Accordion, AccordionSummary, AccordionDetails,
-    CircularProgress
+    CircularProgress, Container
 } from '@material-ui/core';
 
 import './../../assets/css/custom.css'
@@ -19,6 +19,7 @@ import StepTabs from "../../components/StepTabs"
 import BreadCrumb from "../../components/BreadCrumb"
 
 import { ArrowBack } from "@material-ui/icons";
+import testConnection from './../../assets/img/test-connection.svg'
 
 
 class AddDataSources extends React.Component {
@@ -57,7 +58,6 @@ class AddDataSources extends React.Component {
     }
 
     handleInputChange = (e, key) => {
-        // console.log(e.target)
         const value = e.target.value;
         const setObj = this.state.formData;
 
@@ -95,7 +95,6 @@ class AddDataSources extends React.Component {
 
     filterProperties = () => {
         const { connectionTypes, connection } = this.state;
-        // console.log("connectionTypes",connectionTypes)
         let renderData = [];
         if (Object.keys(connectionTypes).length > 0) {
             renderData = connectionTypes.filter((obj) => {
@@ -267,68 +266,76 @@ class AddDataSources extends React.Component {
     renderAppBar = () => {
         return (
             <Grid container spacing={2}>
-                <Grid item xs={2} className="display-flex-center pl-0 pr-0">
-                    <Typography component="h4"><span className="mr-2"><ArrowBack />Add DataSource</span></Typography>
-                </Grid>
-                <Grid item xs={8} className="text-center">
+                <Grid item xs={12} alignItems="center" className="text-center">
                     <StepTabs index={0} />
                 </Grid>
             </Grid>
         )
     }
 
-    render() {    
+    render() {
         return (
             <>
-                <BreadCrumb />
+                <div className="custom-nav-appbar">
+                    <BreadCrumb />
+                    <Button component="h4" href="/#/home"  className="breadcrumb-nav"><span className="mr-2"><ArrowBack />Add DataSource</span></Button>
+                </div>
+                <Container maxWidth="md">
+                    {this.renderAppBar()}
+                    <Grid container spacing={3} justify="center">
+                        <Grid item xs={7}>
+                            <Card>
+                                <CardContent>
+                                    <Grid container spacing={3}>
+                                        <Grid item xs={12}>
+                                            <FormControl variant="outlined" style={{ width: '100%' }}>
+                                                <InputLabel htmlFor="connectionName">Connection Name</InputLabel>
+                                                <TextField
+                                                    error={(this.state.connectionNameError) ? (true) : (false)}
+                                                    value={this.state.connectionName}
+                                                    id="connectionName"
+                                                    type="text"
+                                                    variant="outlined"
+                                                    placeholder="Enter Connection Name"
+                                                    onChange={(e) => this.handleNormalInputChange(e, "connectionName")}
+                                                    helperText={this.state.connectionNameError}
+                                                />
+                                            </FormControl>
+                                        </Grid>
+                                        {((Object.keys(this.state.connectionTypes).length > 0)) ? (tab1Fields(this.state, this.handleAutoComplete, this.handleInputAutoComplete)) : ("")}
+                                        {(Object.keys(this.state.properties).length > 0) ? (renderInputFields(this.state, this.handleInputChange, this.handleBooleanChange)) : ("")}
+                                        <Grid item xs={12} className="mt-4">
+                                            {this.state.testMessage !== null && (<div><strong>Connection Status:</strong> {this.state.testMessage}</div>)}
+                                            {(this.state.testConnection === "succeeded") ? (<div><strong>Connection Status:</strong> Succeeded</div>) : ("")}
+                                        </Grid>
+                                    </Grid>
+                                    {(this.state.testConnection === "failed" && this.state.testLogs) ? (this.renderLogsUI()) : ("")}
+                                    <Grid container spacing={3}>
+                                        <Grid item xs={12} className="text-right">
+                                            {(this.state.testConnection === "succeeded") ? (
+                                                <Button variant="primary" onClick={this.saveDataSource}>
+                                                    {
+                                                        (this.state.submitLoader) ?
+                                                            (<CircularProgress size={24} className="button-progress" />) :
+                                                            (<>Submit</>)
+                                                    }</Button>
+                                            ) : (
+                                                <Button variant="primary" onClick={this.handleTestConnection}>{
+                                                    (this.state.testLoader) ?
+                                                        (<CircularProgress size={24} className="button-progress" />) :
+                                                        (<><img src={testConnection} alt="test-icon" /> Test Connection</>)
+                                                }</Button>
+                                            )}
 
-                {this.renderAppBar()}
-                <Grid container spacing={3} justify="center">
-                    <Grid item xs={6}>
-                        <Card>
-                            <CardContent>
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12}>
-                                        <FormControl variant="outlined" style={{ width: '100%' }}>
-                                            <InputLabel htmlFor="connectionName">Connection Name</InputLabel>
-                                            <TextField
-                                                error={(this.state.connectionNameError) ? (true) : (false)}
-                                                value={this.state.connectionName}
-                                                id="connectionName"
-                                                type="text"
-                                                variant="outlined"
-                                                onChange={(e) => this.handleNormalInputChange(e, "connectionName")}
-                                                helperText={this.state.connectionNameError}
-                                            />
-                                        </FormControl>
+
+
+                                        </Grid>
                                     </Grid>
-                                    {((Object.keys(this.state.connectionTypes).length > 0)) ? (tab1Fields(this.state, this.handleAutoComplete, this.handleInputAutoComplete)) : ("")}
-                                    {(Object.keys(this.state.properties).length > 0) ? (renderInputFields(this.state, this.handleInputChange, this.handleBooleanChange)) : ("")}
-                                    <Grid item xs={12} className="mt-4">
-                                        {this.state.testMessage !== null && (<div><strong>Connection Status:</strong> {this.state.testMessage}</div>)}
-                                        {(this.state.testConnection === "succeeded") ? (<div><strong>Connection Status:</strong> Succeeded</div>) : ("")}
-                                    </Grid>
-                                </Grid>
-                                {(this.state.testConnection === "failed" && this.state.testLogs) ? (this.renderLogsUI()) : ("")}
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12} className="text-right">
-                                        <Button variant="warning" onClick={this.handleTestConnection}>{
-                                            (this.state.testLoader) ?
-                                                (<CircularProgress size={24} className="button-progress" />) :
-                                                (<>Test Connection</>)
-                                        }</Button>
-                                        <Button variant="primary" onClick={this.saveDataSource}>
-                                            {
-                                                (this.state.submitLoader) ?
-                                                    (<CircularProgress size={24} className="button-progress" />) :
-                                                    (<>Submit</>)
-                                            }</Button>
-                                    </Grid>
-                                </Grid>
-                            </CardContent>
-                        </Card>
+                                </CardContent>
+                            </Card>
+                        </Grid>
                     </Grid>
-                </Grid>
+                </Container>
             </>
         )
     }

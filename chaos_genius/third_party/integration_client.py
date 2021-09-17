@@ -11,7 +11,8 @@ from chaos_genius.utils.io_helper import cg_print
 from chaos_genius.third_party.integration_server_config import (
     SOURCE_WHITELIST_AND_TYPE as SOURCE_DEF_ID,
     DESTINATION_DEF_ID,
-    DEFAULT_WORKSPACE_ID
+    DEFAULT_WORKSPACE_ID,
+    SOURCE_ICON_OVERRIDE
 )
 
 
@@ -29,7 +30,7 @@ class ThirdPartyClient(object):
         self.config = config
         self.server_uri = config.get("INTEGRATION_SERVER", server_uri)
         self.destination_db = {
-            "host": config["INTEGRATION_DB_HOST"],
+            "host": get_docker_host(config["INTEGRATION_DB_HOST"]),
             "port": int(config["INTEGRATION_DB_PORT"]),
             "username": config["INTEGRATION_DB_USERNAME"],
             "password": config["INTEGRATION_DB_PASSWORD"],
@@ -37,10 +38,9 @@ class ThirdPartyClient(object):
         }
         self.destination_def_id = DESTINATION_DEF_ID
 
-        # Hardcode the worksapce exposed in the UI for now
         # workspace_id = config.get("workspace_id")
         # if not workspace_id:
-        self.workspace_id = DEFAULT_WORKSPACE_ID
+        self.workspace_id = self.get_workspace_id()
 
         # Check the third party server running status
         status = self.get_server_health()
@@ -51,6 +51,22 @@ class ThirdPartyClient(object):
         # if server_uri == None: # as flask extension
         #     self.init_destination_def_conf()
         #     self.init_source_def_conf()
+
+    def get_workspace_id(self):
+        """This will return the ID of the first workspace
+        Either send the id of the first workspace if exist or the default one
+        """
+        workspaces = self.get_workspace_list()
+        if workspaces:
+            return workspaces[0]['workspaceId']
+        else:
+            return DEFAULT_WORKSPACE_ID
+
+    def get_workspace_list(self):
+        """This will return the list of workspaces in the given deployment"""
+        api_url = f"{self.server_uri}/api/v1/workspaces/list"
+        workspaces = post_request(api_url, {})
+        return workspaces.get("workspaces", [])
 
     def init_destination_def_conf(self):
         """Load the destination defination and configuration
@@ -71,6 +87,9 @@ class ThirdPartyClient(object):
             source_specs = self.get_source_def_specs(source["sourceDefinitionId"])
             source["connectionSpecification"] = source_specs["connectionSpecification"]
             source["isThirdParty"] = SOURCE_DEF_ID[source["sourceDefinitionId"]]
+            icon_found = SOURCE_ICON_OVERRIDE.get(source["sourceDefinitionId"])
+            if icon_found:
+                source['icon'] = icon_found
         self.source_conf = available_sources
 
     def create_workspace(self, payload):
@@ -195,6 +214,19 @@ class ThirdPartyClient(object):
         api_url = f"{self.server_uri}/api/v1/sources/update"
         return post_request(api_url, payload)
 
+    def get_source_details(self, source_id):
+        """This will be used to fetch the details of third party data source
+
+        Args:
+            source_id (str): UUID of the source id
+
+        Returns:
+            dict: details of the configuration of the source type
+        """
+        payload = {"sourceId": source_id}
+        api_url = f"{self.server_uri}/api/v1/sources/get"
+        return post_request(api_url, payload)
+
     def delete_source(self, source_id):
         """This will be used to delete the source.
 
@@ -246,7 +278,6 @@ class ThirdPartyClient(object):
             "destinationDefinitionId": self.destination_def_id,
             "workspaceId": self.workspace_id,
             "connectionConfiguration": {
-                "basic_normalization": True,
                 "ssl": False,
                 "password": self.destination_db["password"],
                 "username": self.destination_db["username"],
@@ -417,6 +448,12 @@ class ThirdPartyClient(object):
         return get_request(api_url)
 
     def test_connection(self, payload):
+        db_host = payload["connectionConfiguration"].get("host")
+        if db_host:
+            payload["connectionConfiguration"]["host"] = get_docker_host(db_host)
+        db_port = payload["connectionConfiguration"].get("port")
+        if db_port:
+            payload["connectionConfiguration"]["port"] = int(db_port)
         api_url = f"{self.server_uri}/api/v1/scheduler/sources/check_connection"
         return post_request(api_url, payload)
 
@@ -466,20 +503,11 @@ def init_integration_server():
     the Postgres db for storing the third party data will be stored.
 
     """
-
-    config = dotenv_values(".env")
-    server_url = config["INTEGRATION_SERVER"]
-    db_host = config["INTEGRATION_DB_HOST"]
-    db_user = config["INTEGRATION_DB_USERNAME"]
-    db_password = config["INTEGRATION_DB_PASSWORD"]
-    db_port = config["INTEGRATION_DB_PORT"]
-    db_name = config["INTEGRATION_DATABASE"]
-
     client = ThirdPartyClient()
     status = client.get_server_health()
     if status.get('db', False):
         payload = {
-            "workspaceId": DEFAULT_WORKSPACE_ID,
+            "workspaceId": client.workspace_id,
             "initialSetupComplete": True,
             "displaySetupWizard": False,
             "email": "user@example.com",
@@ -493,3 +521,23 @@ def init_integration_server():
 
     status = client.get_server_health()
     return status.get('db', False)
+
+
+def get_docker_host(db_host):
+    """ convert the localhost for accessing inside the docker
+        localhost ---> host.docker.internal
+    """
+    converted_host = db_host
+    if db_host == 'localhost':
+        converted_host = 'host.docker.internal'
+    return converted_host
+
+
+def get_localhost_host(db_host):
+    """ convert the docker accessible host name to parent machine one
+        host.docker.internal ---> localhost
+    """
+    converted_host = db_host
+    if db_host == 'host.docker.internal':
+        converted_host = 'localhost'
+    return converted_host

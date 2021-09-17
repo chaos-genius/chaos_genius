@@ -111,7 +111,6 @@ class RcaAnalysisTable extends React.Component {
     constructor(props) {
         super(props)
 
-        console.log("props", props)
         this.state = {
             tabCol: props.columns,
             tableDataProps: props.data,

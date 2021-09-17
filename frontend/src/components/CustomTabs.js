@@ -58,8 +58,6 @@ export default function SimpleTabs(props){
         //     setTimeout(function(){ props.plotChart(newValue) }, 1000);   
         // }
         if(props?.handleDimensionChange){            
-            // console.log(value)
-            // console.log(newValue)
             props.handleDimensionChange(event,"tab",newValue)
         }
         

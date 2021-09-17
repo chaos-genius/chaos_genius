@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 """Click commands."""
 import os
+from datetime import datetime
 from glob import glob
 from subprocess import call
 
 import click
+from flask.cli import with_appcontext
+
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.join(HERE, os.pardir)
@@ -78,3 +81,78 @@ def integration_connector():
         click.echo(f"Third Party Setup: Connector initialised successfully.")
     else:
         click.echo(f"Third Party Setup: Connector initialisation failed.")
+
+
+@click.command()
+@with_appcontext
+@click.option('--kpi', required=True, type=int, help="Perform the anomaly detection for given KPI.")
+@click.option('--end_date', type=str, help="Perform the anomaly detection for given KPI.")
+def run_anomaly(kpi, end_date):
+    """Perform the anomaly detection for given KPI."""
+
+    if end_date is not None:
+        try:
+            end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
+        except:
+            raise ValueError("Invalid date.")
+
+    click.echo(f"Starting the anomaly for KPI ID: {kpi} with end date: {end_date}.")
+    from chaos_genius.controllers.kpi_controller import run_anomaly_for_kpi
+    status = run_anomaly_for_kpi(kpi, end_date)
+    click.echo(f"Completed the anomaly for KPI ID: {kpi}.")
+
+
+@click.command()
+@with_appcontext
+@click.option('--kpi', required=True, type=int, help="Perform Root Cause Analysis for given KPI.")
+@click.option('--end_date', type=str, help="Set end date of analysis.")
+def run_rca(kpi, end_date):
+    """Perform RCA for given KPI."""
+
+    if end_date is not None:
+        try:
+            end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
+        except:
+            raise ValueError("Invalid date.")
+
+    click.echo(f"Starting the RCA for KPI ID: {kpi} with end date: {end_date}.")
+    from chaos_genius.controllers.kpi_controller import run_rca_for_kpi
+    status = run_rca_for_kpi(kpi, end_date)
+    click.echo(f"Completed the RCA for KPI ID: {kpi}.")
+
+
+@click.command()
+@with_appcontext
+def reinstall_db():
+    """Delete the db and reinstall again."""
+    from chaos_genius.settings import META_DATABASE
+    from chaos_genius.extensions import db
+    from chaos_genius.databases.demo_data import install_demo_db
+    if click.confirm(click.style(f"Do you want to delete and reinstall the database: {META_DATABASE}?", fg="red", bold=True)):
+        click.echo('Deleting the database...')
+        db.drop_all()
+        # TODO: This should be created via the flask sqlalchemy
+        db.create_all()
+        click.echo('Reinstalled the database')
+        install_demo_data()
+    else:
+        click.echo('Aborting the reinstall...')
+
+
+@click.command()
+@with_appcontext
+def insert_demo_data():
+    """Insert the demo data."""
+    install_demo_data()
+
+
+def install_demo_data():
+    from chaos_genius.databases.demo_data import install_demo_db
+    if click.confirm(click.style(f"Do you want to insert the demo data?")):
+        status = install_demo_db()
+        if status:
+            click.echo('Inserted the demo data')
+        else:
+            click.echo('Demo Data insertion failed')
+    else:
+        click.echo('Aborting the demo data insertion.')

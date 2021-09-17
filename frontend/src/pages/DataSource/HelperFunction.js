@@ -34,6 +34,15 @@ const renderTextField = (field, textType, formData, formError, handleInputChange
         </Grid>
     )
 }
+const countryToFlag = (option) => {
+    let textHtml = option.icon;
+    return(
+        <span>
+            <span dangerouslySetInnerHTML={{ __html: textHtml }} className="datasource-svgicon" />
+            {option.name}
+        </span>
+    )
+}
 const renderBooleanField = (field, textType, formData, formError, handleBooleanChange) => {
     const textID = field[0];
     const textError = (formError?.[textID]) ? (formError[textID]) : ("")
@@ -49,6 +58,7 @@ const renderBooleanField = (field, textType, formData, formError, handleBooleanC
                     />
                 }
                 label={(field[1]?.['title']) ? (field[1]['title']) : ("")}
+                className="custom-checkbox"
             />
             {/* <FormControl variant="outlined" style={{ width: '100%' }}>
                 <InputLabel htmlFor={textID} >{(field[1]?.['title']) ? (field[1]['title']) : ("")}</InputLabel>
@@ -68,11 +78,9 @@ const renderBooleanField = (field, textType, formData, formError, handleBooleanC
 }
 export const renderInputFields = (props, handleInputChange, handleBooleanChange) => {
     const { properties, formData, formError } = props;
-    // console.log("formData",formData)
     let fields = [];
     if (Object.keys(properties).length > 0) {
         Object.entries(properties).forEach((obj) => {
-            // console.log("objjj", obj)
             switch (obj[1]['type']) {
                 case "string":
                     fields.push(renderTextField(obj, "text", formData, formError, handleInputChange))
@@ -88,7 +96,6 @@ export const renderInputFields = (props, handleInputChange, handleBooleanChange)
             }
         })
     }
-    // console.log(fields)
     return (
         <>
             {fields}
@@ -119,7 +126,8 @@ export const tab1Fields = (props, handleAutoComplete, handleInputAutoComplete) =
                     getOptionSelected={(option, value) => option.name === value}
                     renderOption={(option) => (
                         <React.Fragment>
-                            {(option?.name) ? (option.name) : ("")}
+                            <span>{countryToFlag(option)}</span>
+                            {/* {(option?.name) ? (option.name) : ("")} */}
                         </React.Fragment>
                     )}
                     renderInput={(params) => (<TextField {...params} variant="outlined" inputProps={{...params.inputProps,autoComplete: 'new-password' }} />)}
@@ -131,7 +139,6 @@ export const tab1Fields = (props, handleAutoComplete, handleInputAutoComplete) =
     )
 }
 export const renderlogs = (logs) => {
-    // console.log("logs", logs.logLines)
     const logsfield = []
 
     logs.logLines.map((obj) => {

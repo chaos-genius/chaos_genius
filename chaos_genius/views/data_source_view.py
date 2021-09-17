@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """DataSource views for creating and viewing the data source."""
 import re
+from uuid import uuid4
+import random
+from datetime import datetime
 from flask import (
     Blueprint,
     current_app,
@@ -11,26 +14,29 @@ from flask import (
     url_for,
     jsonify
 )
-
+from sqlalchemy import func
+from chaos_genius.extensions import cache, db
+from chaos_genius.third_party.integration_client import get_localhost_host
+from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.extensions import integration_connector as connector
 from chaos_genius.third_party.integration_server_config import (
     SOURCE_CONFIG_MAPPING,
     SOURCE_WHITELIST_AND_TYPE,
     DATABASE_CONFIG_MAPPER,
-    DESTINATION_TYPE as db_type
+    DESTINATION_TYPE as db_type,
+    DATA_SOURCE_ABBREVIATION
 )
 from chaos_genius.databases.db_utils import create_sqlalchemy_uri
 from chaos_genius.databases.db_metadata import DbMetadata, get_metadata
 
+from chaos_genius.controllers.data_source_controller import (
+    get_datasource_data_from_id, mask_sensitive_info
+)
+
 # from chaos_genius.utils import flash_errors
 
-blueprint = Blueprint("api_data_source", __name__, static_folder="../static")
-
-CONNECTION_TYPES = [
-    {'name': 'PostgreSQL', 'value': 'postgresql'},
-    {'name': 'MySQL', 'value': 'mysql'}
-]
+blueprint = Blueprint("api_data_source", __name__)
 
 
 @blueprint.route("/", methods=["GET", "POST"])
@@ -51,30 +57,41 @@ def data_source():
             return jsonify({"error": "The request payload is not in JSON format"})
 
     elif request.method == 'GET':
-        data_sources = DataSource.query.all()
-        results = [conn.safe_dict for conn in data_sources]
-        results = sorted(results, reverse=True, key=lambda x: x["id"]) # TODO: Remove this and do in the query
+        data_sources = DataSource.query.filter(DataSource.active==True).order_by(DataSource.created_at.desc()).all()
+        ds_kpi_count = db.session.query(DataSource.id, func.count(Kpi.id)) \
+                    .join(Kpi, Kpi.data_source == DataSource.id) \
+                    .filter(DataSource.active==True) \
+                    .group_by(DataSource.id) \
+                    .order_by(DataSource.created_at.desc()) \
+                    .all()
+        data_source_kpi_map = {}
+        for row in ds_kpi_count:
+            data_source_kpi_map[row[0]] = row[1]
+        results = []
+        for conn in data_sources:
+            # TODO: Add the kpi_count, real sync details and sorting info
+            conn_detail = conn.safe_dict
+            conn_detail['last_sync'] = datetime.now()
+            conn_detail['kpi_count'] = data_source_kpi_map.get(conn_detail['id'], 0)
+            results.append(conn_detail)
+        results = sorted(results, reverse=True, key=lambda x: x["id"])
         return jsonify({"count": len(results), "data": results})
 
 
-@blueprint.route("/connection-types", methods=["GET", "POST"])
-def data_source_types():
-    """DataSource Type view."""
-    return jsonify({"data": CONNECTION_TYPES})
-
-
 @blueprint.route("/types", methods=["GET"])
+@cache.memoize(timeout=30000)
 def list_data_source_type():
     """DataSource Type view."""
-    connection_types, msg = [], ""
+    connection_types, msg, status = [], "", "success"
     try:
         connector_client = connector.connection
         connector_client.init_source_def_conf()
         connection_types = connector_client.source_conf
     except Exception as err_msg:
         print(err_msg)
-        msg = err_msg
-    return jsonify({"data": connection_types, "msg": msg})
+        msg = str(err_msg)
+        status = "failed"
+    return jsonify({"data": connection_types, "msg": msg, "status": status})
 
 
 @blueprint.route("/test", methods=["POST"])
@@ -125,10 +142,9 @@ def create_data_source():
             for stream in stream_schema:
                 stream["config"].update(mapping_config)
 
-            # TODO: Make the prefix short since long table names truncated by default
-            stripped_conn_type = "".join(re.findall("[a-zA-Z]+", conn_type))
-            stripped_conn_name = "".join(re.findall("[a-zA-Z]+", conn_name))
-            table_prefix = f"CG_{stripped_conn_type}_{stripped_conn_name}_"
+            abbv_conn_type = DATA_SOURCE_ABBREVIATION[conn_type]
+            random_conn_name = str(uuid4())[:4]
+            table_prefix = f"{abbv_conn_type}_{random_conn_name}_"
             table_prefix = table_prefix.lower()
             conn_payload = {
                 "sourceId": sourceRecord["sourceId"],
@@ -142,6 +158,7 @@ def create_data_source():
                 "operations": [
                     {
                         "name": "Normalization",
+                        "workspaceId": connector_client.workspace_id,
                         "operatorConfiguration": {
                             "operatorType": "normalization",
                             "normalization": {
@@ -155,25 +172,28 @@ def create_data_source():
                 }
             }
             connectionRecord = connector_client.create_connection(conn_payload)
+            if not connectionRecord:
+                raise Exception("Connection not created")
             stream_tables = [stream["stream"]["name"] for stream in stream_schema]
             stream_tables = list(map(lambda x: f"{table_prefix}{x}", stream_tables))
             db_config = connector_client.destination_db
+            db_config["host"] = get_localhost_host(db_config["host"])
             db_config["db_type"] = db_type
+            db_connection_uri = create_sqlalchemy_uri(**db_config)
         else:
             sourceRecord = sourceCreationPayload
             db_mapper = DATABASE_CONFIG_MAPPER[source_form.get("sourceDefinitionId")]
             input_configuration = source_form.get("connectionConfiguration")
-            db_config = {
-                "host": input_configuration[db_mapper["host"]],
-                "port": input_configuration[db_mapper["port"]],
-                "database": input_configuration[db_mapper["database"]],
-                "username": input_configuration[db_mapper["username"]],
-                "password": input_configuration[db_mapper["password"]],
-                "db_type": db_mapper["db_type"],
-            }
-
-        # TODO: Correct the database URI incase of the localhost db (replace docker.localhost)
-        db_connection_uri = create_sqlalchemy_uri(**db_config)
+            if db_mapper["db_type"] in ["mysql", "postgres"]:
+                db_config = {
+                    "host": input_configuration[db_mapper["host"]],
+                    "port": input_configuration[db_mapper["port"]],
+                    "database": input_configuration[db_mapper["database"]],
+                    "username": input_configuration[db_mapper["username"]],
+                    "password": input_configuration[db_mapper["password"]],
+                    "db_type": db_mapper["db_type"],
+                }
+                db_connection_uri = create_sqlalchemy_uri(**db_config)
         status = "connected"
 
         # Save in the database
@@ -222,7 +242,8 @@ def delete_data_source():
                 source_details = ds_data["sourceConfig"]
                 status = connector_client.delete_source(source_details["sourceId"])
             # delete the data source record
-            data_source_obj.delete(commit=True)
+            data_source_obj.active = False
+            data_source_obj.save(commit=True)
             msg = "deleted"
             status = True
     except Exception as err_msg:
@@ -243,7 +264,7 @@ def metadata_data_source():
         data_source_obj = DataSource.get_by_id(data_source_id)
         if data_source_obj:
             ds_data = data_source_obj.as_dict
-            metadata, err_msg = get_metadata(ds_data, from_query, query)
+            metadata, msg = get_metadata(ds_data, from_query, query)
     except Exception as err_msg:
         print(err_msg)
         msg = err_msg
@@ -272,3 +293,57 @@ def log_data_source():
         print(err_msg)
 
     return jsonify({"data": logs_details, "status": status})
+
+
+@blueprint.route("/<int:datasource_id>", methods=["GET"])
+def get_data_source_info(datasource_id):
+    """get data source details."""
+    status, message = "", ""
+    data = None
+    try:
+        ds_obj = get_datasource_data_from_id(datasource_id, as_obj=True)
+        data_source_def = ds_obj.sourceConfig["sourceDefinitionId"]
+        if data_source_def:
+            connector_client = connector.connection
+            connector_client.init_source_def_conf()
+            connection_types = connector_client.source_conf
+            connection_def = next((source_def for source_def in connection_types if source_def["sourceDefinitionId"] == data_source_def), None)
+            masked_details = {}
+            if connection_def:
+                masked_details = mask_sensitive_info(connection_def, ds_obj.sourceConfig["connectionConfiguration"])
+        data = ds_obj.safe_dict
+        data["sourceForm"] = masked_details
+        status = "success" 
+    except Exception as err:
+        status = "failure"
+        message = str(err)
+        current_app.logger.info(f"Error in fetching the Data Source: {err}")
+    return jsonify({"message": message, "status": status, "data": data})
+
+
+@blueprint.route("/<int:datasource_id>/test-and-update", methods=["POST"])
+def update_data_source_info(datasource_id):
+    """get data source details."""
+    status, message = "", ""
+    data = None
+    try:
+        payload = request.get_json()
+        conn_name = payload.get('name')
+        conn_type = payload.get('connection_type')
+        source_form = payload.get('sourceForm')
+        ds_obj = get_datasource_data_from_id(datasource_id, as_obj=True)
+        ds_obj.name = conn_name
+        ds_obj.save(commit=True)
+        status = "success" 
+    except Exception as err:
+        status = "failure"
+        message = str(err)
+        current_app.logger.info(f"Error in udpating the Data Source: {err}")
+    return jsonify({"message": message, "status": status, "data": data})
+
+
+@blueprint.route("/meta-info", methods=["GET"])
+def data_source_meta_info():
+    """data source meta info view."""
+    current_app.logger.info("data source meta info")
+    return jsonify({"data": DataSource.meta_info()})

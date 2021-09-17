@@ -1,11 +1,15 @@
 # Everything needed in production
 requests==2.25.1
 
+
 # Flask
 Flask==2.0.0
 Werkzeug==2.0.0
 click>=7.0
-flask-cors==3.0.10 # TODO: Remove this
+flask-cors==3.0.10 # TODO: Remove the CORS
+colorama==0.4.4
+celery==5.1.2
+redis==3.5.3
 
 # Database
 Flask-SQLAlchemy==2.5.1
@@ -16,11 +20,20 @@ PyMySQL==1.0.2
 # Migrations
 Flask-Migrate==2.7.0
 
+# Alert
+slack-sdk==3.8.0
+
 # Data Analysis
 matplotlib==3.4.2
 numpy==1.20.3
 pandas==1.2.4
 ipython==7.24.0
+pystan==2.19.1.1
+altair==4.1.0
+statsmodels==0.12.2
+prophet==1.0.1
+neuralprophet==0.2.7
+greykite==0.2.0
 
 # Forms
 email-validator==1.1.2
@@ -43,7 +56,8 @@ Flask-Bcrypt==0.7.1
 Flask-Caching>=1.7.2
 
 # Debug toolbar
-Flask-DebugToolbar==0.11.0
+# Flask-DebugToolbar==0.11.0
 
 # Environment variable parsing
 environs==9.3.2
+

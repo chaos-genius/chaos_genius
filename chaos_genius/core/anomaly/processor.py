@@ -84,7 +84,7 @@ class ProcessAnomalyDetection:
                     ]
 
                     prediction = model.predict(
-                        df,
+                        df.iloc[:-1],
                         self.sensitivity,
                         self.freq
                     )

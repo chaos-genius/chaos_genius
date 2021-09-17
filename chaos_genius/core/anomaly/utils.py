@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 import pandas as pd
 
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
-from chaos_genius.core.anomaly.constants import FREQUENCY_DELTA
 
 def bound_between(min_val, val, max_val):
     return min(max(val, min_val), max_val)
@@ -118,6 +117,7 @@ def get_timedelta(freq, diff):
     return timedelta(**offset)
 
 def fill_data(input_data, dt_col, metric_col, last_date, period, end_date, freq):
+    from chaos_genius.core.anomaly.constants import FREQUENCY_DELTA
     if last_date is not None:
         last_date_diff_period = last_date - get_timedelta(freq, period)\
             + get_timedelta(freq, 1)

@@ -7,7 +7,8 @@ from chaos_genius.core.anomaly.utils import (
     get_anomaly_df,
     get_dq_missing_data,
     get_last_date_in_db,
-    fill_data
+    fill_data,
+    get_timedelta
 )
 from chaos_genius.core.anomaly.constants import RESAMPLE_FREQUENCY, FREQUENCY_DELTA
 
@@ -53,17 +54,19 @@ class AnomalyDetectionController(object):
                     end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
 
             if end_date is None:
-                try: 
-                    end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
-                except:
-                    end_date = end_date + " 00:00:00"
-                    end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
+                end_date = datetime.now()
         else:
             end_date = self.end_date
 
         last_date_in_db = self._get_last_date_in_db("overall")
 
-        df = get_anomaly_df(self.kpi_info, conn.as_dict, last_date_in_db, end_date)
+        df = get_anomaly_df(
+            self.kpi_info,
+            conn.as_dict,
+            last_date_in_db,
+            end_date,
+            self.kpi_info['anomaly_params']['period']
+        )
 
         dt_col = self.kpi_info['datetime_column']
 
@@ -94,8 +97,8 @@ class AnomalyDetectionController(object):
         model_name: str,
         input_data: pd.DataFrame,
         last_date: datetime,
-        series,
-        subgroup,
+        series: str,
+        subgroup: str,
         freq
     ) -> pd.DataFrame:
         """Detects anomaly in the given data

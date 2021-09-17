@@ -19,6 +19,7 @@ helper_objects = {
     'slack': SLACK_CONFIGS_EXPOSE
 }
 
+# TODO: Duplicate logic in the alert_cofig model too
 def modified_config_state(config_state):
     config_obj = deepcopy(config_state)
     config_settings = config_state.get("config_setting", {})

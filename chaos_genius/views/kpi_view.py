@@ -77,51 +77,34 @@ def kpi():
 def get_all_kpis():
     """returning all kpis"""
 
+    status, message = "success", ""
+    timeline = request.args.get("timeline", "wow")
     results = Kpi.query.filter(Kpi.active == True).all()
 
     ret = []
     static = None
     metrics = ['name', 'metric', 'id']
-
-    for ele in results:
-        res = {}
-
+    for kpi in results:
+        info = {}
         for key in metrics:
-            res[key] = getattr(ele, key)
-
+            info[key] = getattr(kpi, key)
         try:
-            kpi_info = get_kpi_data_from_id(ele.id)
-            connection_info = DataSource.get_by_id(kpi_info["data_source"]).as_dict
+            aggregation_type = kpi.aggregation
+            aggregate_data = kpi_aggregation(kpi.id, timeline)
+            info['prev'] = aggregate_data['panel_metrics']['grp1_metrics'][aggregation_type]
+            info['current'] = aggregate_data['panel_metrics']['grp2_metrics'][aggregation_type]
+            info['change'] = info['this_week'] - info['prev_week']
+        except Exception as err_msg:
+            info['prev'] = 0
+            info['current'] = 0
+            info['change'] = 0
 
-            aggregation_type = ele.aggregation
+        info["timeline"] = "week" if timeline == "wow" else "month"
+        info['anomaly_count'] = random.randint(1, 20) #TODO
+        info['graph_data'] = kpi_line_data(kpi.id)
+        ret.append(info)
 
-            aggregate_data_week = kpi_aggregation(kpi_info, connection_info, timeline = 'wow')
-            aggregate_data_month = kpi_aggregation(kpi_info, connection_info, timeline = 'mom')
-
-            res['prev_week'] = aggregate_data_week['panel_metrics']['grp1_metrics'][aggregation_type]
-            res['this_week'] = aggregate_data_week['panel_metrics']['grp2_metrics'][aggregation_type]
-            res['week_change'] = res['this_week'] - res['prev_week']
-            res['prev_month'] = aggregate_data_month['panel_metrics']['grp1_metrics'][aggregation_type]
-            res['this_month'] = aggregate_data_month['panel_metrics']['grp2_metrics'][aggregation_type]
-            res['month_change'] = res['this_month'] - res['prev_month']
-
-        except:
-
-            res['prev_week'] = 0
-            res['this_week'] = 0
-            res['week_change'] = 0
-            res['prev_month'] = 0
-            res['this_month'] = 0
-            res['month_change'] = 0
-
-        res['weekly_anomaly_count'] = random.randint(1, 20) #TODO
-        res['monthly_anomaly_count'] = random.randint(20, 40) #TODO
-        res['graph_data'] = kpi_line_data(kpi_info, connection_info) if static is None else static #TODO
-        static = res['graph_data'] if static is None else static #TODO
-
-        ret.append(res)
-
-    return jsonify({"data": ret})
+    return jsonify({"data": ret, "message": message, "status": status})
 
 
 @blueprint.route("/<int:kpi_id>/disable", methods=["GET"])

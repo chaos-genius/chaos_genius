@@ -104,7 +104,7 @@ def test_data_source():
         connection_status = connector_client.test_connection(payload)
     except Exception as err_msg:
         print(err_msg)
-        msg = err_msg
+        msg = str(err_msg)
     return jsonify({"data": connection_status, "msg": msg})
 
 
@@ -215,7 +215,7 @@ def create_data_source():
     except Exception as err_msg:
         print('-'*60)
         print(err_msg)
-        msg = err_msg
+        msg = str(err_msg)
         # import traceback; print(traceback.format_exc())
     return jsonify({"data": {}, "msg": msg, "status": status})
 
@@ -267,7 +267,7 @@ def metadata_data_source():
             metadata, msg = get_metadata(ds_data, from_query, query)
     except Exception as err_msg:
         print(err_msg)
-        msg = err_msg
+        msg = str(err_msg)
 
     return jsonify({"data": metadata, "msg": msg})
 

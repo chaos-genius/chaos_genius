@@ -3,9 +3,11 @@ import io
 import json
 import pickle
 import pandas as pd
+import datetime
 from chaos_genius.utils.io_helper import is_file_exists
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.alert_model import Alert
+from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.alerts.email import send_static_alert_email
 
@@ -144,16 +146,56 @@ class StaticEventAlertController:
 
 
 class AnomalyAlertController:
-    def __init__(self, kpi_info):
-        self.kpi_info = kpi_info
+    def __init__(self, alert_info):
+        self.alert_info = alert_info
 
     def check_and_prepare_alert(self):
-        pass
+        
+        kpi_id = self.alert_info["kpi"]
+
+        curr_date_time = datetime.datetime.now()
+        lower_limit_dt = curr_date_time - datetime.timedelta(hours = 72, minutes = 0) #TODO - the delta needs to be variable
+
+        anomaly_data = AnomalyDataOutput.query.filter(
+                                            AnomalyDataOutput.kpi_id == kpi_id,
+                                            AnomalyDataOutput.anomaly_type == 'overall',
+                                            AnomalyDataOutput.is_anomaly == 1,
+                                            AnomalyDataOutput.data_datetime >= lower_limit_dt
+                                        ).all()
+
+        if len(anomaly_data) == 0:
+            return f'No anomaly exists (KPI ID - {kpi_id})'
+
+        anomaly_data.sort(key = lambda anomaly: getattr(anomaly, 'severity'), reverse = True)
+        anomaly = anomaly_data[0]
+        
+        if getattr(anomaly, 'severity') < self.alert_info['severity_cutoff_score']:
+            return f"The anomaliy's severity score is below the threshold (KPI ID - {kpi_id})"
+
+        return self.send_alert_email(anomaly)
+        
+    def send_alert_email(self, anomaly):
+
+        recipient_emails = self.alert_info["alert_channel_conf"].get("email", [])
+        
+        if recipient_emails:
+
+            subject = f"KPI Alert Notification: {self.alert_info['alert_name']} [ID - {self.alert_info['id']}] [KPI ID - {self.alert_info['kpi']}]"
+            message = self.alert_info["alert_message"]
+            message = message + '\n' + f"The highest value {round(getattr(anomaly, 'y'), 1)} Occurred at {str(getattr(anomaly, 'data_datetime'))}"
+            message = message + '\n' + f"The expected range is {round(getattr(anomaly, 'yhat_lower'), 2)} to {round(getattr(anomaly, 'yhat_upper'), 2)}"
+            message = message + '\n' + f"The severity value of this anomaly was {round(getattr(anomaly, 'severity'), 2)}"
+            test = send_static_alert_email(recipient_emails, subject, message, self.alert_info)
+
+            return f"Status for KPI ID - {getattr(anomaly, 'kpi_id')} : {test}"
+        else:
+
+            return f"No receipent email available (KPI ID - {getattr(anomaly, 'kpi_id')})"
 
 
 class StaticKpiAlertController:
-    def __init__(self, kpi_info):
-        self.kpi_info = kpi_info
+    def __init__(self, alert_info):
+        self.alert_info = alert_info
 
     def check_and_prepare_alert(self):
         pass
@@ -182,8 +224,9 @@ def check_and_trigger_alert(alert_id):
         static_alert_obj = StaticEventAlertController(alert_info.as_dict, db_uri)
         static_alert_obj.check_and_prepare_alert()
     elif alert_info.alert_type == "KPI Alert" and alert_info.kpi_alert_type == "Anomaly":
-        anomaly_obj = AnomalyAlertController(kpi_info.as_dict)
+        anomaly_obj = AnomalyAlertController(alert_info.as_dict)
+        return anomaly_obj.check_and_prepare_alert()
     elif alert_info.alert_type == "KPI Alert" and alert_info.kpi_alert_type == "Static":
-        static_kpi_alert = StaticKpiAlertController(kpi_info.as_dict)
+        static_kpi_alert = StaticKpiAlertController(alert_info.as_dict)
     
     return True

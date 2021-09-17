@@ -116,8 +116,7 @@ const AlertsForm = () => {
   }, [emailData]);
 
   const validateEmail = (email) => {
-    const re =
-      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
   };
 
@@ -252,12 +251,17 @@ const AlertsForm = () => {
   };
 
   const editableStatus = (type) => {
-    var status = false;
+    var status = '';
     emailMetaInfoData &&
       emailMetaInfoData.length !== 0 &&
       emailMetaInfoData.fields.find((field) => {
         if (field.name === type) {
-          status = field.is_editable && field.is_sensitive ? true : false;
+          status =
+            field.is_editable && field.is_sensitive
+              ? 'sensitive'
+              : field.is_editable
+              ? 'editable'
+              : '';
         }
         return '';
       });
@@ -293,12 +297,17 @@ const AlertsForm = () => {
   };
 
   const slackEditableStatus = (type) => {
-    var status = false;
+    var status = '';
     slackMetaInfoData &&
       slackMetaInfoData.length !== 0 &&
       slackMetaInfoData.fields.find((field) => {
         if (field.name === type) {
-          status = field.is_editable && field.is_sensitive ? true : false;
+          status =
+            field.is_editable && field.is_sensitive
+              ? 'sensitive'
+              : field.is_editable
+              ? 'editable'
+              : '';
         }
         return '';
       });
@@ -328,10 +337,12 @@ const AlertsForm = () => {
                   placeholder="Enter Webhook URL"
                   value={slackEdit ? webhookUrl : editedWebhookUrl}
                   disabled={
-                    data[4] === 'edit' &&
-                    slackEditableStatus('webhook_url') &&
-                    slackEdit
-                      ? true
+                    data[4] === 'edit'
+                      ? slackEditableStatus('webhook_url') === 'editable'
+                        ? false
+                        : slackEditableStatus('webhook_url') === 'sensitive'
+                        ? slackEdit
+                        : true
                       : false
                   }
                   onChange={(e) => {
@@ -344,7 +355,7 @@ const AlertsForm = () => {
                   }}
                 />
                 {data[4] === 'edit' &&
-                  slackEditableStatus('webhook_url') &&
+                  slackEditableStatus('webhook_url') === 'sensitive' &&
                   (slackEdit ? (
                     <button
                       className="btn black-button"
@@ -395,14 +406,20 @@ const AlertsForm = () => {
                   name="smtp"
                   value={enabled.smtp ? email.smtp : sensitiveData.smtp}
                   disabled={
-                    data[4] === 'edit' ? editableStatus('server') : false
+                    data[4] === 'edit'
+                      ? editableStatus('server') === 'editable'
+                        ? false
+                        : editableStatus('server') === 'sensitive'
+                        ? enabled.smtp
+                        : true
+                      : false
                   }
                   onChange={(e) => {
                     onChangeHandler(e);
                   }}
                 />
                 {data[4] === 'edit' &&
-                  editableStatus('server') &&
+                  editableStatus('server') === 'sensitive' &&
                   editAndSaveButton('server')}
               </div>
               {emailError.smtp !== '' ? (
@@ -420,14 +437,22 @@ const AlertsForm = () => {
                   className="form-control"
                   placeholder="Enter Port"
                   name="port"
-                  disabled={data[4] === 'edit' ? editableStatus('port') : false}
+                  disabled={
+                    data[4] === 'edit'
+                      ? editableStatus('port') === 'editable'
+                        ? false
+                        : editableStatus('port') === 'sensitive'
+                        ? enabled.port
+                        : true
+                      : false
+                  }
                   value={enabled.port ? email.port : sensitiveData.port}
                   onChange={(e) => {
                     onChangeHandler(e);
                   }}
                 />
                 {data[4] === 'edit' &&
-                  editableStatus('port') &&
+                  editableStatus('port') === 'sensitive' &&
                   editAndSaveButton('port')}
               </div>
               {emailError.port !== '' ? (
@@ -445,10 +470,12 @@ const AlertsForm = () => {
                   placeholder="Enter Username"
                   name="username"
                   disabled={
-                    data[4] === 'edit' &&
-                    editableStatus('username') &&
-                    enabled.username
-                      ? true
+                    data[4] === 'edit'
+                      ? editableStatus('username') === 'editable'
+                        ? false
+                        : editableStatus('username') === 'sensitive'
+                        ? enabled.username
+                        : true
                       : false
                   }
                   value={
@@ -459,7 +486,7 @@ const AlertsForm = () => {
                   }}
                 />
                 {data[4] === 'edit' &&
-                  editableStatus('username') &&
+                  editableStatus('username') === 'sensitive' &&
                   editAndSaveButton('username')}
               </div>
               {emailError.username !== '' ? (
@@ -480,10 +507,12 @@ const AlertsForm = () => {
                     enabled.password ? email.password : sensitiveData.password
                   }
                   disabled={
-                    data[4] === 'edit' &&
-                    editableStatus('password') &&
-                    enabled.password
-                      ? true
+                    data[4] === 'edit'
+                      ? editableStatus('password') === 'editable'
+                        ? false
+                        : editableStatus('password') === 'sensitive'
+                        ? enabled.password
+                        : true
                       : false
                   }
                   onChange={(e) => {
@@ -491,7 +520,7 @@ const AlertsForm = () => {
                   }}
                 />
                 {data[4] === 'edit' &&
-                  editableStatus('password') &&
+                  editableStatus('password') === 'sensitive' &&
                   editAndSaveButton('password')}
               </div>
               {emailError.password !== '' ? (
@@ -514,14 +543,20 @@ const AlertsForm = () => {
                       : sensitiveData.emailsender
                   }
                   disabled={
-                    data[4] === 'edit' ? editableStatus('sender_email') : false
+                    data[4] === 'edit'
+                      ? editableStatus('sender_email') === 'editable'
+                        ? false
+                        : editableStatus('sender_email') === 'sensitive'
+                        ? enabled.emailsender
+                        : true
+                      : false
                   }
                   onChange={(e) => {
                     onChangeHandler(e);
                   }}
                 />
                 {data[4] === 'edit' &&
-                  editableStatus('sender_email') &&
+                  editableStatus('sender_email') === 'sensitive' &&
                   editAndSaveButton('emailsender')}
               </div>
               {emailError.emailsender !== '' ? (

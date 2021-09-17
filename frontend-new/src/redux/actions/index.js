@@ -26,7 +26,7 @@ import {
   getAllDashboardDimension,
   getAllDashboardHierarchical
 } from './Dashboard';
-import { getOnboardingStatus } from './Onboarding';
+import { getOnboardingStatus, getHomeKpi } from './Onboarding';
 import { getDashboardLinechart } from './LineChart';
 import { getDashboardSidebar } from './Sidebarlist';
 import {
@@ -76,5 +76,6 @@ export {
   getDatasourceById,
   updateDatasourceById,
   getEmailMetaInfo,
-  getSlackMetaInfo
+  getSlackMetaInfo,
+  getHomeKpi
 };

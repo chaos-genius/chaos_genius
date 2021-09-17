@@ -13,9 +13,9 @@ def get_alert_list(frequency:str = None, as_obj:bool = False):
         list: List of the alerts
     """
     if frequency:
-        data = Alert.query.filter_by(alert_frequency=frequency).all()
+        data = Alert.query.filter_by(alert_frequency=frequency,active=True).all()
     else:
-        data = Alert.query.all()
+        data = Alert.query.filter_by(active=True).all()
     if as_obj:
         results = data
     else:
@@ -29,7 +29,12 @@ def get_alert_info(id: int):
     Args:
         id (int): alert id
     """
-    alert = Alert.query.filter_by(id=id).fetchone()
+    alert = Alert.get_by_id(id)
+    
     if not alert:
         raise Exception("Alert ID doens't exist")
-    return alert.as_dict
+    elif (alert.active == True):
+        return alert.as_dict
+    else:
+        raise Exception("Alert ID doens't exist")
+

@@ -1,6 +1,7 @@
 import pandas as pd
 
 from chaos_genius.core.anomaly.models import AnomalyModel
+from chaos_genius.core.anomaly.utils import get_timedelta
 
 STDSENS = {
     'high': 0.8,
@@ -48,6 +49,13 @@ class StdDeviModel(AnomalyModel):
         threshold_u = mean + (numDevi_u * stddevi)
         threshold_l = mean - (numDevi_l * stddevi)
         
+        #TODO: COMMIT AS PART OF ANOMALY MAJOR FIX
+        # MAYBE COMMIT AS PREDICTION MAKER IN StdDevi
+        if pred_df is None:
+            forecast_time = df['ds'].iloc[-1] + get_timedelta(frequency, 1)
+            forecast_value = (threshold_l + threshold_u)/2
+            df = df.append({'ds': forecast_time, 'y': forecast_value}, ignore_index=True)
+
         df['yhat_lower'] = threshold_l
         df['yhat_upper'] = threshold_u
         df['yhat'] = (threshold_l + threshold_u)/2

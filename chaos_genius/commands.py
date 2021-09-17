@@ -123,6 +123,17 @@ def run_rca(kpi, end_date):
 
 @click.command()
 @with_appcontext
+@click.option('--id', required=True, type=int, help="Perform the alert operation for provided Alert ID.")
+def run_alert(id):
+    """Check and perform the alert operation for provided Alert ID."""
+    click.echo(f"Starting the alert check for ID: {id}.")
+    from chaos_genius.alerts.base_alerts import check_and_trigger_alert
+    status = check_and_trigger_alert(id)
+    click.echo(f"Completed the alert check for ID: {id}.")
+
+
+@click.command()
+@with_appcontext
 def reinstall_db():
     """Delete the db and reinstall again."""
     from chaos_genius.settings import META_DATABASE

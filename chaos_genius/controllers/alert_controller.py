@@ -33,8 +33,5 @@ def get_alert_info(id: int):
     
     if not alert:
         raise Exception("Alert ID doesn't exist")
-    elif (alert.active == True):
-        return alert.as_dict
     else:
-        raise Exception("Alert ID doens't exist")
-
+        return alert.as_dict

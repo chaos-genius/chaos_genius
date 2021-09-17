@@ -15,7 +15,6 @@ const DashboardFilter = ({
   tabs,
   SetKpiAggregate
 }) => {
-  //const [active, setActive] = useState('');
   const [listData, setListData] = useState(data);
   const [searchData, setSearchData] = useState(data);
 

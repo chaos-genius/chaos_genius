@@ -9,9 +9,13 @@ import Select from 'react-select';
 import Play from '../../assets/images/play-green.png';
 import Success from '../../assets/images/success.svg';
 import Fail from '../../assets/images/fail.svg';
+//import Toast_error from '../../assets/images/toast-error.svg';
 //import Cancel from '../../assets/images/cancel.svg';
 
 import '../../assets/styles/addform.scss';
+
+import { toastMessage } from '../../utils/toast-helper';
+import { ToastContainer, toast } from 'react-toastify';
 
 import {
   getAllKpiExplorerForm,
@@ -221,7 +225,14 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       kpiUpdateData.status === 'success' &&
       onboarding !== true
     ) {
-      history.push('/kpiexplorer');
+      //history.push('/kpiexplorer');
+      toastMessage({ type: 'success', message: 'Successfully updated' });
+    } else if (
+      kpiUpdateData &&
+      kpiUpdateData.status === 'failed' &&
+      onboarding !== true
+    ) {
+      toastMessage({ type: 'error', message: 'Failed to update' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSubmit, kpiUpdateData]);
@@ -886,6 +897,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             </button>
           </div>
         </div>
+        <ToastContainer
+          position={toast.POSITION.BOTTOM_RIGHT}
+          autoClose={5000}
+        />
       </div>
     );
   }

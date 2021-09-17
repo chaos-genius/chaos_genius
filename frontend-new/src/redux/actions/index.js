@@ -29,7 +29,13 @@ import {
 import { getOnboardingStatus } from './Onboarding';
 import { getDashboardLinechart } from './LineChart';
 import { getDashboardSidebar } from './Sidebarlist';
-import { getAllAlertEmail, getChannelStatus, getEditChannel } from './Alert';
+import {
+  getAllAlertEmail,
+  getChannelStatus,
+  getEditChannel,
+  getEmailMetaInfo,
+  getSlackMetaInfo
+} from './Alert';
 import {
   anomalyDetection,
   getAnomalyQualityData,
@@ -68,5 +74,7 @@ export {
   getUpdatekpi,
   getDatasourceMetaInfo,
   getDatasourceById,
-  updateDatasourceById
+  updateDatasourceById,
+  getEmailMetaInfo,
+  getSlackMetaInfo
 };

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import Select from 'react-select';
 import { useHistory, useParams } from 'react-router-dom';
-
+import { ToastContainer, toast } from 'react-toastify';
 import '../../assets/styles/addform.scss';
 import Play from '../../assets/images/play.svg';
 import PlayDisable from '../../assets/images/play-disable.svg';
@@ -20,6 +20,8 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 
 import { renderTextFields } from './Formhelper';
+
+import { toastMessage } from '../../utils/toast-helper';
 
 const customSingleValue = ({ data }) => (
   <div className="input-select">
@@ -59,7 +61,6 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const path = history.location.pathname.split('/');
   const connectionType = JSON.parse(localStorage.getItem('connectionType'));
   const {
-    //isLoading,
     testLoading,
     testConnectionResponse,
     createDatasourceResponse,
@@ -143,7 +144,13 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       updateDatasource.status === 'success' &&
       path[2] === 'edit'
     ) {
-      history.push('/datasource');
+      toastMessage({ type: 'success', message: 'Successfully updated' });
+    } else if (
+      updateDatasource &&
+      updateDatasource.status === 'failed' &&
+      path[2] === 'edit'
+    ) {
+      toastMessage({ type: 'error', message: 'Failed to update' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createDatasourceResponse, updateDatasource]);
@@ -381,9 +388,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             formError,
             path
           )}
-        {/* for Google Sheet */}
-        {/*Paste here*/}
-        {/* end of Google Analytics */}
+
         {/* test connection sucess message */}
         {status && status?.status === 'succeeded' && (
           <div className="connection__success">
@@ -430,7 +435,6 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
           <div className="form-action">
             {status && status?.status === 'succeeded' && (
               <button
-                // className="btn black-button"
                 className={
                   createDatasourceLoading
                     ? 'btn black-button btn-loading'
@@ -477,6 +481,10 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             )}
           </div>
         )}
+        <ToastContainer
+          position={toast.POSITION.BOTTOM_RIGHT}
+          autoClose={5000}
+        />
       </div>
     );
   }

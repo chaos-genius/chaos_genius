@@ -9,8 +9,12 @@ import Close from '../../assets/images/close.svg';
 import Success from '../../assets/images/successful.svg';
 
 import './analystics.scss';
+
 import { kpiSettingSetup, kpiEditSetup } from '../../redux/actions';
 import { useDispatch, useSelector } from 'react-redux';
+
+import { toastMessage } from '../../utils/toast-helper';
+import { ToastContainer, toast } from 'react-toastify';
 
 const modalOptions = [
   { value: 'prophet', label: 'Prophet' },
@@ -32,6 +36,7 @@ const frequencyOptions = [
 
 const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   const dispatch = useDispatch();
+
   const [modelName, setModalName] = useState('');
   const [Sensitivity, setSensitivity] = useState('');
   const [frequency, setFrequency] = useState('');
@@ -42,6 +47,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     sensitivity: '',
     frequency: ''
   });
+
   const { kpiEditData, kpiEditLoading, kpiSettingLoading, kpiSettingData } =
     useSelector((state) => {
       return state.setting;
@@ -63,17 +69,11 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   }, [kpiEditData]);
 
   useEffect(() => {
-    if (
-      kpiSettingData &&
-      kpiSettingData.msg === 'Successfully updated Anomaly params' &&
-      onboarding
-    ) {
+    if (kpiSettingData && kpiSettingData.status === 'success' && onboarding) {
       setAnalystics(true);
-    } else if (
-      kpiSettingData &&
-      kpiSettingData.msg === 'Successfully updated Anomaly params'
-    ) {
-      setModalOpen(true);
+    } else if (kpiSettingData && kpiSettingData.status === 'success') {
+      // setModalOpen(true);
+      toastMessage({ type: 'success', message: 'Successfully updated' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSettingData]);
@@ -328,6 +328,10 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
             </div>
           </div>
         </Modal>
+        <ToastContainer
+          position={toast.POSITION.BOTTOM_RIGHT}
+          autoClose={5000}
+        />
       </>
     );
   }

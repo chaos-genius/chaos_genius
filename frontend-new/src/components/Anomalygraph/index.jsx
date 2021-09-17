@@ -114,25 +114,23 @@ const Anomalygraph = ({ key, drilldown }) => {
           shared: true,
           valueSuffix: null,
           formatter: function () {
-            const intervals = graphData.intervals.find(row => row[0] === this.x);
-            const severity_score = graphData.severity.find(row => row[0] === this.x);
-            let s = 'Confidence Interval: <b>' + intervals[1] + " - " + intervals[2] + '</b>';
+            const intervals = graphData.intervals.find(
+              (row) => row[0] === this.x
+            );
+            const severity_score = graphData.severity.find(
+              (row) => row[0] === this.x
+            );
+            let s =
+              'Confidence Interval: <b>' +
+              intervals[1] +
+              ' - ' +
+              intervals[2] +
+              '</b>';
             s = s + '<br>Value: <b>' + this.y + '</b>';
             s = s + '<br>Severity: <b>' + severity_score[1] + '</b>';
             return s;
           }
         },
-        // legend: {
-        //     enabled: true,
-        //     borderWidth: 1,
-        //     padding: 20,
-        //     title: {
-        //         text: 'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
-        //         style: {
-        //             fontStyle: "italic",
-        //         },
-        //     },
-        // },
         series: [
           {
             name: 'Confidence Interval',

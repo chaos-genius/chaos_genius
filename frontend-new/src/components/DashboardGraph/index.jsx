@@ -154,57 +154,6 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
     }
   }
 
-  const plotLineChart = () => {
-    am4core.options.autoDispose = true;
-
-    let chart = am4core.create('lineChartDiv', am4charts.XYChart);
-
-    // chart.legend = new am4charts.Legend();
-    // chart.legend.position = "bottom";
-
-    chart.data = linechartData;
-
-    chart.fontSize = 12;
-    chart.fontFamily = 'Inter ,sans-serif';
-
-    let title = chart.titles.create();
-    title.text = kpiName;
-    title.fontSize = 14;
-    title.fontfamily = 'Inter ,sans-serif';
-    title.lineheight = '18';
-    title.marginBottom = 10;
-    title.align = 'center';
-    title.fill = '#222222';
-    title.fontWeight = '500';
-
-    // Create axes
-    let dateAxis = chart.xAxes.push(new am4charts.DateAxis());
-    dateAxis.renderer.minGridDistance = 50;
-    // dateAxis.renderer.grid.template.disabled = true;
-
-    chart.yAxes.push(new am4charts.ValueAxis());
-    //valueAxis.renderer.grid.template.disabled = true;
-
-    // Create series
-    let series = chart.series.push(new am4charts.LineSeries());
-    // series.legendSettings.labelText = "Values";
-    series.dataFields.valueY = 'value';
-    series.dataFields.dateX = 'date';
-    series.stroke = am4core.color('#60CA9A');
-    series.strokeWidth = 2.5;
-    series.minBulletDistance = 10;
-    series.tooltipText = '[bold]{date.formatDate()}:[/] {value}';
-    series.tooltip.pointerOrientation = 'vertical';
-    series.tooltip.getFillFromObject = false;
-    series.tooltip.background.fill = am4core.color('#F5F5F5');
-    series.tooltip.label.fontSize = 12;
-    series.tooltip.label.fontFamily = 'Inter ,sans-serif';
-    series.tooltip.label.fill = '#222222';
-
-    // Add cursor
-    chart.cursor = new am4charts.XYCursor();
-  };
-
   const plotChart = () => {
     if (rcaAnalysisData?.chart) {
       am4core.options.autoDispose = true;
@@ -287,9 +236,6 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
     }
   };
 
-  if (linechartData) {
-    plotLineChart();
-  }
   if (rcaAnalysisData) {
     plotChart();
   }
@@ -340,7 +286,6 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
         xAxis: {
           type: 'datetime',
           categories: line.map((data) => new Date(data.date)),
-          // gridLineWidth: 1,
           labels: {
             step: 6,
             formatter: function () {
@@ -351,7 +296,6 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
         yAxis: {
           type: 'value',
           step: 1
-          // gridLineWidth: 1
         },
         plotOptions: {
           line: {
@@ -411,7 +355,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
                 </>
               )}
             </div>
-            {/* <div className="common-graph" id="lineChartDiv"></div> */}
+            {/* Line Chart */}
             <div className="common-graph">
               {linechartLoading ? (
                 <div className="load">
@@ -419,7 +363,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
                 </div>
               ) : (
                 <>
-                  {linechartData && (
+                  {linechartData && linechartData.length !== 0 && (
                     <HighchartsReact
                       highcharts={Highcharts}
                       options={newHighChart(linechartData)}
@@ -536,7 +480,6 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
               <div className="preload"></div>
             </div>
           )}
-
           <div
             className={
               'common-drilldown-graph' +
@@ -544,6 +487,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
             }
             id="chartdivWaterfall"></div>
 
+          {/* Table */}
           {dimension.value === 'multidimension' ? (
             <>
               {rcaAnalysisLoading ? (

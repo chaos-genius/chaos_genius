@@ -7,7 +7,13 @@ import {
   CHANNERSTATUSFAILURE,
   EDITCHANNELREQUEST,
   EDITCHANNELSUCCESS,
-  EDITCHANNELFAILURE
+  EDITCHANNELFAILURE,
+  EMAIL_META_INFO_REQUEST,
+  EMAIL_META_INFO_SUCCESS,
+  EMAIL_META_INFO_FAILURE,
+  SLACK_META_INFO_REQUEST,
+  SLACK_META_INFO_SUCCESS,
+  SLACK_META_INFO_FAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -19,7 +25,13 @@ const initialState = {
   channelStatusError: false,
   editData: [],
   editLoading: false,
-  editError: false
+  editError: false,
+  slackMetaInfoLoading: false,
+  slackMetaInfoData: [],
+  slackMetaInfoError: false,
+  emailMetaInfoLoading: false,
+  emailMetaInfoData: [],
+  emailMetaInfoError: false
 };
 export const alert = (state = initialState, action) => {
   switch (action.type) {
@@ -82,6 +94,46 @@ export const alert = (state = initialState, action) => {
         ...state,
         editLoading: false,
         editError: true
+      };
+    }
+    case EMAIL_META_INFO_REQUEST: {
+      return {
+        ...state,
+        emailMetaInfoLoading: true
+      };
+    }
+    case EMAIL_META_INFO_SUCCESS: {
+      return {
+        ...state,
+        emailMetaInfoLoading: false,
+        emailMetaInfoData: action.data
+      };
+    }
+    case EMAIL_META_INFO_FAILURE: {
+      return {
+        ...state,
+        emailMetaInfoLoading: false,
+        emailMetaInfoError: true
+      };
+    }
+    case SLACK_META_INFO_REQUEST: {
+      return {
+        ...state,
+        slackMetaInfoLoading: true
+      };
+    }
+    case SLACK_META_INFO_SUCCESS: {
+      return {
+        ...state,
+        slackMetaInfoLoading: false,
+        slackMetaInfoData: action.data
+      };
+    }
+    case SLACK_META_INFO_FAILURE: {
+      return {
+        ...state,
+        slackMetaInfoLoading: false,
+        slackMetaInfoError: true
       };
     }
     case 'RESET_EMAIL_DATA': {

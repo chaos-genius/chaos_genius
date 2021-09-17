@@ -2,8 +2,10 @@ import React from 'react';
 
 import Select from 'react-select';
 
-import './kpialertdestinationform.scss';
 import Slack from '../../assets/images/table/slack.svg';
+
+import './kpialertdestinationform.scss';
+
 const customSingleValue = ({ data }) => (
   <div className="input-select">
     <div className="input-select__single-value">

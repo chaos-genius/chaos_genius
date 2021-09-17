@@ -1,7 +1,9 @@
 import {
   ALERT_EMAIL_URL,
   CHANNEL_CONFIGURATION_URL,
-  EDIT_CHANNEL_URL
+  EDIT_CHANNEL_URL,
+  EMAIL_META_INFO_URL,
+  SLACK_META_INFO_URL
 } from '../../utils/url-helper';
 
 import { getRequest, postRequest } from '../../utils/http-helper';
@@ -15,7 +17,13 @@ import {
   CHANNELSTATUSREQUEST,
   EDITCHANNELSUCCESS,
   EDITCHANNELFAILURE,
-  EDITCHANNELREQUEST
+  EDITCHANNELREQUEST,
+  EMAIL_META_INFO_REQUEST,
+  EMAIL_META_INFO_SUCCESS,
+  EMAIL_META_INFO_FAILURE,
+  SLACK_META_INFO_FAILURE,
+  SLACK_META_INFO_SUCCESS,
+  SLACK_META_INFO_REQUEST
 } from './ActionConstants';
 
 export const getAlertEmailRequest = () => {
@@ -123,6 +131,72 @@ export const getEditChannel = (editData) => {
       dispatch(getEditFailure());
     } else if (data && status === 200) {
       dispatch(getEditSuccess(data.data));
+    }
+  };
+};
+
+export const getEmailMetaInfoRequest = () => {
+  return {
+    type: EMAIL_META_INFO_REQUEST
+  };
+};
+
+export const getEmailMetaInfoSuccess = (response) => {
+  return {
+    type: EMAIL_META_INFO_SUCCESS,
+    data: response
+  };
+};
+
+export const getEmailMetaInfoFailure = () => {
+  return {
+    type: EMAIL_META_INFO_FAILURE
+  };
+};
+
+export const getEmailMetaInfo = () => {
+  return async (dispatch) => {
+    dispatch(getEmailMetaInfoRequest());
+    const { data, error, status } = await getRequest({
+      url: `${EMAIL_META_INFO_URL}`
+    });
+    if (error) {
+      dispatch(getEmailMetaInfoFailure());
+    } else if (data && status === 200) {
+      dispatch(getEmailMetaInfoSuccess(data.data));
+    }
+  };
+};
+
+export const getSlackMetaInfoRequest = () => {
+  return {
+    type: SLACK_META_INFO_REQUEST
+  };
+};
+
+export const getSlackMetaInfoSuccess = (response) => {
+  return {
+    type: SLACK_META_INFO_SUCCESS,
+    data: response
+  };
+};
+
+export const getSlackMetaInfoFailure = () => {
+  return {
+    type: SLACK_META_INFO_FAILURE
+  };
+};
+
+export const getSlackMetaInfo = () => {
+  return async (dispatch) => {
+    dispatch(getSlackMetaInfoRequest());
+    const { data, error, status } = await getRequest({
+      url: `${SLACK_META_INFO_URL}`
+    });
+    if (error) {
+      dispatch(getSlackMetaInfoFailure());
+    } else if (data && status === 200) {
+      dispatch(getSlackMetaInfoSuccess(data.data));
     }
   };
 };

@@ -70,7 +70,7 @@ class Alert(PkModel):
                 },
                 {
                     "name": "alert_type",
-                    "is_editable": True,
+                    "is_editable": False,
                     "is_sensitive": False,
                 },
                 {
@@ -87,13 +87,13 @@ class Alert(PkModel):
                 },
                 {
                     "name": "alert_settings",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
 
                 },
                 {
                     "name": "kpi",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
 
                 },
@@ -105,31 +105,31 @@ class Alert(PkModel):
                 },
                 {
                     "name": "severity_cutoff_score",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
 
                 },
                 {
                     "name": "alert_message",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
 
                 },
                 {
                     "name": "alert_frequency",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
 
                 },
                 {
                     "name": "alert_channel",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
 
                 },
                 {
                     "name": "alert_channel_conf",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
 
                 }

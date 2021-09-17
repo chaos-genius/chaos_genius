@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import Search from '../../assets/images/search.svg';
 import GreenArrow from '../../assets/images/green-arrow.svg';
+
 import Fuse from 'fuse.js';
 
 import { v4 as uuidv4 } from 'uuid';

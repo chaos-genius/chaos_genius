@@ -61,7 +61,6 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const path = history.location.pathname.split('/');
   const connectionType = JSON.parse(localStorage.getItem('connectionType'));
   const {
-    //isLoading,
     testLoading,
     testConnectionResponse,
     createDatasourceResponse,
@@ -145,7 +144,6 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       updateDatasource.status === 'success' &&
       path[2] === 'edit'
     ) {
-      //history.push('/datasource');
       toastMessage({ type: 'success', message: 'Successfully updated' });
     } else if (
       updateDatasource &&
@@ -390,9 +388,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             formError,
             path
           )}
-        {/* for Google Sheet */}
-        {/*Paste here*/}
-        {/* end of Google Analytics */}
+
         {/* test connection sucess message */}
         {status && status?.status === 'succeeded' && (
           <div className="connection__success">
@@ -439,7 +435,6 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
           <div className="form-action">
             {status && status?.status === 'succeeded' && (
               <button
-                // className="btn black-button"
                 className={
                   createDatasourceLoading
                     ? 'btn black-button btn-loading'

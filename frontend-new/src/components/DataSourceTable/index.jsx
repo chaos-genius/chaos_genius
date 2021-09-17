@@ -82,7 +82,7 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
   };
 
   return (
-    <>
+    <div class="table-responsive">
       <table className="table">
         <thead>
           <tr>
@@ -240,7 +240,7 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
           </div>
         </div>
       </Modal>
-    </>
+    </div>
   );
 };
 export default DataSourceTable;

@@ -9,6 +9,7 @@ import Close from '../../assets/images/close.svg';
 import Success from '../../assets/images/successful.svg';
 
 import './analystics.scss';
+
 import { kpiSettingSetup, kpiEditSetup } from '../../redux/actions';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -35,6 +36,7 @@ const frequencyOptions = [
 
 const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   const dispatch = useDispatch();
+
   const [modelName, setModalName] = useState('');
   const [Sensitivity, setSensitivity] = useState('');
   const [frequency, setFrequency] = useState('');
@@ -45,6 +47,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     sensitivity: '',
     frequency: ''
   });
+
   const { kpiEditData, kpiEditLoading, kpiSettingLoading, kpiSettingData } =
     useSelector((state) => {
       return state.setting;

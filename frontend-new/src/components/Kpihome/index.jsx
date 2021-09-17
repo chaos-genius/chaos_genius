@@ -4,7 +4,6 @@ import Select from 'react-select';
 
 import Search from '../../assets/images/search.svg';
 import Up from '../../assets/images/up.svg';
-// import Down from '../../assets/images/down.svg';
 
 import './kpihome.scss';
 import apiData from './dummy.json';
@@ -100,7 +99,6 @@ const Kpihome = () => {
       <div className="homepage-setup-card-wrapper">
         <div className="homepage-options">
           <Select
-            // value={monthWeek}
             classNamePrefix="selectcategory"
             placeholder="Sort by"
             isSearchable={false}
@@ -117,7 +115,6 @@ const Kpihome = () => {
               </span>
             </div>
             <Select
-              // value={monthWeek}
               options={data}
               classNamePrefix="selectcategory"
               placeholder="Current week on last week"
@@ -158,7 +155,6 @@ const Kpihome = () => {
                 </span>
               </div>
               <div className="kpi-content kpi-graph">
-                {/* <img src={Graph} alt="Graph" /> */}
                 <HighchartsReact
                   className="sparkline-graph"
                   highcharts={Highcharts}

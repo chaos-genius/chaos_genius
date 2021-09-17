@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import Select from 'react-select';
 
 import './eventalertform.scss';
@@ -20,7 +21,7 @@ const EventAlertForm = ({ setSteps }) => {
     setSteps(2);
   };
   return (
-    <div>
+    <>
       <div className="form-group">
         <label>Name Of Your Alert *</label>
         <input
@@ -120,33 +121,6 @@ const EventAlertForm = ({ setSteps }) => {
             </label>
           </div>
         </div>
-
-        {/* <div className="radio-group">
-          <div className="form-check active">
-            <input
-              type="radio"
-              name="setting"
-              id="newentry"
-              className="form-check-input"></input>
-            <label hrmlFor="newentry">New Entry</label>
-          </div>
-          <div className="form-check">
-            <input
-              type="radio"
-              name="setting"
-              id="allchanges"
-              className="form-check-input"></input>
-            <label htmlFor="allchanges">All Changes</label>
-          </div>
-          <div className="form-check">
-            <input
-              type="radio"
-              name="setting"
-              id="alwayssend"
-              className="form-check-input"></input>
-            <label htmlFor="alwayssend">Always Send</label>
-          </div>
-        </div> */}
       </div>
       <div className="form-group ">
         <label>Message Body *</label>
@@ -157,7 +131,7 @@ const EventAlertForm = ({ setSteps }) => {
           <span>Next Step</span>
         </button>
       </div>
-    </div>
+    </>
   );
 };
 export default EventAlertForm;

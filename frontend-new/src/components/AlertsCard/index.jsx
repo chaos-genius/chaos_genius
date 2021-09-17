@@ -10,7 +10,9 @@ import Datadog from '../../assets/images/alerts/datadog.svg';
 import Asana from '../../assets/images/alerts/asana.svg';
 import Teams from '../../assets/images/alerts/teams.svg';
 import Succestick from '../../assets/images/setupcard/success-tick.svg';
+
 import '../SetupCard/setupcard.scss';
+
 import { getChannelStatus } from '../../redux/actions';
 import store from '../../redux/store';
 
@@ -66,9 +68,6 @@ const AlertsCard = () => {
                 ? '/alerts/channelconfiguration/slack/edit'
                 : '/alerts/channelconfiguration/slack'
             }>
-            {/* <button className="btn black-button">
-            <span>Edit Slack Connection</span>
-          </button> */}
             <button
               className={
                 statusChecking('slack')

@@ -1,6 +1,7 @@
 import React from 'react';
+
 import { Link, useHistory } from 'react-router-dom';
-import './sidebar.scss';
+
 import logo from '../../assets/images/logo.svg';
 import home from '../../assets/images/sidebar/home.svg';
 import homeactive from '../../assets/images/sidebar/home-active.svg';
@@ -14,6 +15,8 @@ import datasource from '../../assets/images/sidebar/datasource.svg';
 import datasourceactive from '../../assets/images/sidebar/datasource-active.svg';
 import alerts from '../../assets/images/sidebar/alerts.svg';
 import alertsactive from '../../assets/images/sidebar/alerts-active.svg';
+
+import './sidebar.scss';
 
 const Sidebar = () => {
   const history = useHistory();

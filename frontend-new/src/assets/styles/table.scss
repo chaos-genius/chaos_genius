@@ -187,7 +187,7 @@
   }
   .empty-table {
     &:hover {
-      background-color: transparent;
+      background-color: inherit !important;
     }
     td {
       text-align: center;

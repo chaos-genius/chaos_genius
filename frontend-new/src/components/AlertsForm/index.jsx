@@ -14,8 +14,10 @@ import {
   getEmailMetaInfo,
   getSlackMetaInfo
 } from '../../redux/actions';
+
 import { toastMessage } from '../../utils/toast-helper';
 import { ToastContainer, toast } from 'react-toastify';
+
 const AlertsForm = () => {
   const history = useHistory();
 
@@ -116,7 +118,8 @@ const AlertsForm = () => {
   }, [emailData]);
 
   const validateEmail = (email) => {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    const re =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
   };
 
@@ -124,15 +127,9 @@ const AlertsForm = () => {
     if (data[3] === 'email') {
       var objectErr = { ...emailError };
       if (email.smtp === '') {
-        // setEmailError((prev) => {
-        //   return { ...prev, smtp: 'Enter SMTP server' };
-        // });
         objectErr['smtp'] = 'Enter SMTP server';
       }
       if (email.port === '') {
-        // setEmailError((prev) => {
-        //   return { ...prev, port: 'Enter Port' };
-        // });
         objectErr['port'] = 'Enter Port';
       }
       if (
@@ -143,34 +140,19 @@ const AlertsForm = () => {
         ) &&
         email.port !== ''
       ) {
-        // setEmailError((prev) => {
-        //   return { ...prev, port: 'Enter Valid port' };
-        // });
         objectErr['port'] = 'Enter Valid Port';
       }
 
       if (email.username === '') {
-        // setEmailError((prev) => {
-        //   return { ...prev, username: 'Enter Username' };
-        // });
         objectErr['username'] = 'Enter Username';
       }
       if (email.password === '') {
-        // setEmailError((prev) => {
-        //   return { ...prev, password: 'Enter Password' };
-        // });
         objectErr['password'] = 'Enter Password';
       }
       if (email.emailsender === '') {
-        // setEmailError((prev) => {
-        //   return { ...prev, emailsender: 'Enter Email' };
-        // });
         objectErr['emailsender'] = 'Enter Email';
       }
       if (email.emailsender !== '' && !validateEmail(email.emailsender)) {
-        // setEmailError((prev) => {
-        //   return { ...prev, emailsender: 'Enter Valid Email' };
-        // });
         objectErr['emailsender'] = 'Enter Valid Email';
       }
       setEmailError(objectErr);
@@ -569,11 +551,6 @@ const AlertsForm = () => {
         ) : null}
 
         <div className="form-action">
-          {/* <Link to="/alerts/channelconfiguration">
-          <button className="btn white-button btn-spacing">
-            <span>Cancel</span>
-          </button>
-        </Link> */}
           <button
             className={
               emailLoading ? 'btn black-button btn-loading' : 'btn black-button'

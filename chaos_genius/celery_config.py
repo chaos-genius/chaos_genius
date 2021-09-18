@@ -1,16 +1,16 @@
 from datetime import timedelta
+
 from celery.schedules import crontab, schedule
 
 CELERY_IMPORTS = ("chaos_genius.jobs")
 CELERY_TASK_RESULT_EXPIRES = 30
 CELERY_TIMEZONE = "UTC"
-# 
+
 CELERY_ACCEPT_CONTENT = ["json", "msgpack", "yaml"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 
 CELERYBEAT_SCHEDULE = {
-    # TODO: Add schedule here
     # 'anomaly-task-every-minute': {
     #     'task': 'chaos_genius.jobs.anomaly_tasks.add_together',
     #     'schedule': crontab(minute="*"), # Every minutes
@@ -55,15 +55,16 @@ CELERYBEAT_SCHEDULE = {
     }
 }
 
+CELERY_ROUTES = {
+    "chaos_genius.jobs.anomaly_tasks.*": {"queue": "anomaly-rca"},
+    "chaos_genius.jobs.alert_tasks.*": {"queue": "alerts"},
+}
+
 # Scheduler runs every hour
 # looks at tasks in last n hour
 # if they are in processing in 24 hours, schedule them right away
 # job expiry window
 # add details of job into a table, then schedule it
-
-
-# baseline
-
 
 
 # TODO: Use this for config

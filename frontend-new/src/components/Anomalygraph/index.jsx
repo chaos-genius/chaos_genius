@@ -128,10 +128,31 @@ const Anomalygraph = ({ key, drilldown }) => {
               '</b>';
             s = s + '<br>Value: <b>' + this.y + '</b>';
             s = s + '<br>Severity: <b>' + severity_score[1] + '</b>';
+            s =
+              s +
+              '<br>Datetime: <b>' +
+              Highcharts.dateFormat('%Y %b %d %H:%M', this.x) +
+              '</b>';
             return s;
           }
         },
         series: [
+          {
+            name: 'Value',
+            id: 'value',
+            zoneAxis: 'x',
+            zones: zones,
+            data: graphData.values,
+            zIndex: 2,
+            color: '#25cc7b',
+            marker: {
+              fillColor: 'white',
+              lineWidth: 1,
+              lineColor: 'grey',
+              symbol: 'circle',
+              enabled: false
+            }
+          },
           {
             name: 'Confidence Interval',
             id: 'Confidence Interval',
@@ -154,22 +175,6 @@ const Anomalygraph = ({ key, drilldown }) => {
               hover: {
                 enabled: false
               }
-            }
-          },
-          {
-            name: 'Value',
-            id: 'value',
-            zoneAxis: 'x',
-            zones: zones,
-            data: graphData.values,
-            zIndex: 2,
-            color: '#25cc7b',
-            marker: {
-              fillColor: 'white',
-              lineWidth: 1,
-              lineColor: 'grey',
-              symbol: 'circle',
-              enabled: false
             }
           },
           {

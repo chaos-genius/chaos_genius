@@ -146,6 +146,16 @@ class StaticEventAlertController:
 
 
 class AnomalyAlertController:
+
+    FREQUENY_DICT = {
+        "weekly": datetime.timedelta(days = 7, hours = 0, minutes = 0),
+        "daily": datetime.timedelta(days = 1, hours = 0, minutes = 0),
+        "hourly": datetime.timedelta(days = 0, hours = 1, minutes = 0),
+        "every_15_minute": datetime.timedelta(days = 0, hours = 0, minutes = 15),
+        "every_minute": datetime.timedelta(days = 0, hours = 0, minutes = 1)
+    }
+
+
     def __init__(self, alert_info):
         self.alert_info = alert_info
 
@@ -154,16 +164,13 @@ class AnomalyAlertController:
         kpi_id = self.alert_info["kpi"]
 
         curr_date_time = datetime.datetime.now()
-
-        hours, minutes = smome_func() #some random function
-
-        lower_limit_dt = curr_date_time - datetime.timedelta(hours = hours, minutes = minutes) #TODO - the delta needs to be variable
+        lower_limit_dt = curr_date_time - self.FREQUENY_DICT[self.alert_info['alert_frequency']]
 
         anomaly_data = AnomalyDataOutput.query.filter(
                                             AnomalyDataOutput.kpi_id == kpi_id,
                                             AnomalyDataOutput.anomaly_type == 'overall',
                                             AnomalyDataOutput.is_anomaly == 1,
-                                            AnomalyDataOutput.data_datetime >= lower_limit_dt
+                                            AnomalyDataOutput.data_datetime > lower_limit_dt
                                         ).all()
 
         if len(anomaly_data) == 0:

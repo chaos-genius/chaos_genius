@@ -199,7 +199,7 @@ const Anomaly = ({ kpi }) => {
             lineWidth: 0,
             linkedTo: ':previous',
             color: '#60CA9A',
-            fillOpacity: 0.1,
+            fillOpacity: 0.2,
             zIndex: 0,
             states: {
               inactive: {

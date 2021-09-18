@@ -1,4 +1,5 @@
 from chaos_genius.core.anomaly.models import AnomalyModel
+from chaos_genius.core.anomaly.utils import get_timedelta
 import pandas as pd
 
 EWSTDSENS = {
@@ -46,7 +47,14 @@ class EWSTDModel(AnomalyModel):
         
         threshold_u = ew_mean + (numDevi_u * ew_stddevi)
         threshold_l = ew_mean - (numDevi_l * ew_stddevi)
-        
+
+        #TODO: COMMIT AS PART OF ANOMALY MAJOR FIX
+        # MAYBE COMMIT AS PREDICTION MAKER IN EWSTD
+        if pred_df is None:
+            forecast_time = df['ds'].iloc[-1] + get_timedelta(frequency, 1)
+            forecast_value = (threshold_l + threshold_u)/2
+            df = df.append({'ds': forecast_time, 'y': forecast_value}, ignore_index=True)
+
         df['yhat_lower'] = threshold_l
         df['yhat_upper'] = threshold_u
         df['yhat'] = (threshold_l + threshold_u)/2

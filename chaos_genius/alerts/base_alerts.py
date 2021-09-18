@@ -154,7 +154,10 @@ class AnomalyAlertController:
         kpi_id = self.alert_info["kpi"]
 
         curr_date_time = datetime.datetime.now()
-        lower_limit_dt = curr_date_time - datetime.timedelta(hours = 72, minutes = 0) #TODO - the delta needs to be variable
+
+        hours, minutes = smome_func() #some random function
+
+        lower_limit_dt = curr_date_time - datetime.timedelta(hours = hours, minutes = minutes) #TODO - the delta needs to be variable
 
         anomaly_data = AnomalyDataOutput.query.filter(
                                             AnomalyDataOutput.kpi_id == kpi_id,

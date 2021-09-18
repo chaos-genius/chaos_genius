@@ -22,6 +22,10 @@ const data = [
   {
     value: 'wow',
     label: 'Current Week on Last Week'
+  },
+  {
+    value: 'dod',
+    label: 'Current Day on Last Day'
   }
 ];
 

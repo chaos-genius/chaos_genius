@@ -19,6 +19,7 @@ import pandas as pd
 import random
 
 from chaos_genius.core.rca import RootCauseAnalysis
+from chaos_genius.core.utils.kpi_validation import validate_kpi
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.data_source_model import DataSource
@@ -39,7 +40,6 @@ def kpi():
         if not request.is_json:
             return jsonify({"error": "The request payload is not in JSON format"})
 
-        # TODO: Add the backend validation
         data = request.get_json()
         new_kpi = Kpi(
             name=data.get('name'),
@@ -54,9 +54,14 @@ def kpi():
             filters=data.get('filters'),
             dimensions=data.get('dimensions')
         )
+        # Perform KPI Validation
+        status, message = validate_kpi(new_kpi.as_dict)
+        if status is not True:
+            return jsonify({"error": message, "status": "failure"})
+
         new_kpi.save(commit=True)
         return jsonify({"message": f"KPI {new_kpi.name} has been created successfully.", "status": "success"})
-        
+
     elif request.method == 'GET':
         results = db.session.query(Kpi, DataSource) \
             .join(DataSource, Kpi.data_source == DataSource.id) \

@@ -217,7 +217,7 @@ def check_and_trigger_alert(alert_id):
     if not alert_info:
         raise Exception("Alert doesn't exist")
 
-    if not alert_info["active"]:
+    if not alert_info.active:
         print("Alert isn't active. Please activate the alert.")
         return True
 

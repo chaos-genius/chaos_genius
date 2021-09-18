@@ -147,7 +147,7 @@ class StaticEventAlertController:
 
 class AnomalyAlertController:
 
-    FREQUENY_DICT = {
+    FREQUENCY_DICT = {
         "weekly": datetime.timedelta(days = 7, hours = 0, minutes = 0),
         "daily": datetime.timedelta(days = 1, hours = 0, minutes = 0),
         "hourly": datetime.timedelta(days = 0, hours = 1, minutes = 0),
@@ -164,7 +164,7 @@ class AnomalyAlertController:
         kpi_id = self.alert_info["kpi"]
 
         curr_date_time = datetime.datetime.now()
-        lower_limit_dt = curr_date_time - self.FREQUENY_DICT[self.alert_info['alert_frequency']]
+        lower_limit_dt = curr_date_time - self.FREQUENCY_DICT[self.alert_info['alert_frequency']]
 
         anomaly_data = AnomalyDataOutput.query.filter(
                                             AnomalyDataOutput.kpi_id == kpi_id,

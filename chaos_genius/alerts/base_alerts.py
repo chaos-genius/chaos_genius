@@ -217,6 +217,10 @@ def check_and_trigger_alert(alert_id):
     if not alert_info:
         raise Exception("Alert doesn't exist")
 
+    if not alert_info["active"]:
+        print("Alert isn't active. Please activate the alert.")
+        return True
+
     if alert_info.alert_type == "Event Alert":
         data_source_id = alert_info.data_source
         data_source_obj = DataSource.get_by_id(data_source_id)

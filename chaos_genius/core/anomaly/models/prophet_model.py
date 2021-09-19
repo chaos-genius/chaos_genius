@@ -4,7 +4,7 @@ import prophet as pt
 from prophet.serialize import model_to_json, model_from_json
 
 from chaos_genius.core.anomaly.models import AnomalyModel
-from chaos_genius.core.utils import suppress_stdout_stderr
+from chaos_genius.core.utils.supress_output import suppress_stdout_stderr
 
 PROPHETSENS = {
     "high": 0.8,

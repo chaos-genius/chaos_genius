@@ -28,3 +28,16 @@ Backend
 - Run the dev server `bash dev_server.sh`
 
 
+
+## Docker
+
+1. Build all services with `docker-compose build`
+   This will build all the containers.
+
+2. Run all containers with `docker-compose up`
+   This will run all containers with airbyte and other dependencies.
+
+3. Shut down all containers with `docker-compose down`
+
+4. Delete all data from volumes with `docker volumes prune`. 
+   Make sure you don't have data from other containers. If yes, then we need to do this manually.

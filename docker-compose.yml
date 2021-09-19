@@ -27,7 +27,7 @@ services:
       - POSTGRES_USER=${DATABASE_USER}
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
     volumes:
-      - db:/var/lib/postgresql/data
+      - ./docker/airbyte-db:/var/lib/postgresql/data
   scheduler:
     image: airbyte/scheduler:${VERSION}
     logging: *default-logging
@@ -197,6 +197,7 @@ services:
       - POSTGRES_PASSWORD='chaosgenius'
     volumes:
       - ./docker/cg-db-setup:/docker-entrypoint-initdb.d/
+      - ./docker/cg-db:/var/lib/postgresql/data
     ports:
       - 5433:5432
 

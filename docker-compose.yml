@@ -193,8 +193,8 @@ services:
       retries: 10
     restart: always
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD='chaosgenius'
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - ./docker/cg-db-setup:/docker-entrypoint-initdb.d/
       - ./docker/cg-db:/var/lib/postgresql/data

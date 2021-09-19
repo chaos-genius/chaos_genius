@@ -19,6 +19,7 @@ import pandas as pd
 import random
 
 from chaos_genius.core.rca import RootCauseAnalysis
+from chaos_genius.core.utils.kpi_validation import validate_kpi
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.data_source_model import DataSource
@@ -39,7 +40,6 @@ def kpi():
         if not request.is_json:
             return jsonify({"error": "The request payload is not in JSON format"})
 
-        # TODO: Add the backend validation
         data = request.get_json()
         new_kpi = Kpi(
             name=data.get('name'),
@@ -54,9 +54,14 @@ def kpi():
             filters=data.get('filters'),
             dimensions=data.get('dimensions')
         )
+        # Perform KPI Validation
+        status, message = validate_kpi(new_kpi.as_dict)
+        if status is not True:
+            return jsonify({"error": message, "status": "failure"})
+
         new_kpi.save(commit=True)
         return jsonify({"message": f"KPI {new_kpi.name} has been created successfully.", "status": "success"})
-        
+
     elif request.method == 'GET':
         results = db.session.query(Kpi, DataSource) \
             .join(DataSource, Kpi.data_source == DataSource.id) \
@@ -237,12 +242,15 @@ def kpi_aggregation(kpi_id, timeline="mom"):
     try:
         end_date = get_end_date(kpi_id)
 
-        final_data = RcaData.query.filter(
+        data_point = RcaData.query.filter(
             (RcaData.kpi_id == kpi_id)
             & (RcaData.data_type == "agg")
             & (RcaData.timeline == timeline)
-            & (RcaData.end_date == end_date)
-        ).first().data
+            & (RcaData.end_date <= end_date)
+        ).order_by(RcaData.created_at.desc()).first()
+
+        final_data = data_point.data
+        final_data["analysis_date"] = data_point.end_date.strftime("%Y-%m-%d")
 
     except Exception as err:
         # print(traceback.format_exc())
@@ -250,7 +258,8 @@ def kpi_aggregation(kpi_id, timeline="mom"):
         final_data = {
             "panel_metrics": [],
             "line_chart_data": [],
-            "insights": []
+            "insights": [],
+            "analysis_date": ""
         }
     return final_data
 
@@ -260,15 +269,16 @@ def kpi_line_data(kpi_id):
     try:
         end_date = get_end_date(kpi_id)
 
-        final_data = RcaData.query.filter(
+        data_point = RcaData.query.filter(
             (RcaData.kpi_id == kpi_id)
             & (RcaData.data_type == "line")
-            & (RcaData.end_date == end_date)
-        ).first().data
+            & (RcaData.end_date <= end_date)
+        ).order_by(RcaData.created_at.desc()).first()
+
+        final_data = data_point.data
 
     except Exception as err:
-        # print(traceback.format_exc())
-        current_app.logger.error(f"Error in RCA Analysis: {err}")
+        current_app.logger.error(f'Error in RCA Analysis: {err}')
         final_data = []
     return final_data
 
@@ -278,19 +288,24 @@ def rca_analysis(kpi_id, timeline="mom", dimension=None):
     try:
         end_date = get_end_date(kpi_id)
 
-        final_data = RcaData.query.filter(
+        data_point = RcaData.query.filter(
             (RcaData.kpi_id == kpi_id)
             & (RcaData.data_type == "rca")
             & (RcaData.timeline == timeline)
-            & (RcaData.end_date == end_date)
+            & (RcaData.end_date <= end_date)
             & (RcaData.dimension == dimension)
-        ).first().data
+        ).order_by(RcaData.created_at.desc()).first()
+
+        final_data = data_point.data
+        final_data["analysis_date"] = data_point.end_date.strftime("%Y-%m-%d")
+
     except Exception as err:
         # print(traceback.format_exc())
         current_app.logger.error(f"Error in RCA Analysis: {err}")
         final_data = {
             "chart": {"chart_data": [], "y_axis_lim": [], "chart_table": []},
-            "data_table": []
+            "data_table": [],
+            "analysis_date": ""
         }
     return final_data
 
@@ -300,19 +315,24 @@ def rca_hierarchical_data(kpi_id, timeline="mom", dimension=None):
     try:
         end_date = get_end_date(kpi_id)
 
-        final_data = RcaData.query.filter(
+        data_point = RcaData.query.filter(
             (RcaData.kpi_id == kpi_id)
             & (RcaData.data_type == "htable")
             & (RcaData.timeline == timeline)
-            & (RcaData.end_date == end_date)
+            & (RcaData.end_date <= end_date)
             & (RcaData.dimension == dimension)
-        ).first().data
+        ).order_by(RcaData.created_at.desc()).first()
+
+        final_data = data_point.data
+        final_data["analysis_date"] = data_point.end_date.strftime("%Y-%m-%d")
+
     except Exception as err:
         # print(traceback.format_exc())
         current_app.logger.error(
             f"Error in RCA hierarchical table generation: {err}")
         final_data = {
-            "data_table": []
+            "data_table": [],
+            "analysis_date": ""
         }
     return final_data
 

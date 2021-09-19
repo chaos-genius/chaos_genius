@@ -31,6 +31,8 @@ Backend
 
 ## Docker
 
+### Build 
+
 1. Build all services with `docker-compose build`
    This will build all the containers.
 
@@ -40,4 +42,14 @@ Backend
 3. Shut down all containers with `docker-compose down`
 
 4. Delete all data from volumes with `docker volumes prune`. 
+   Make sure you don't have data from other containers. If yes, then we need to do this manually.
+
+### From Image
+
+1. Run all containers with `docker-compose -f docker-compose.image.yml up`
+   This will run all containers with airbyte and other dependencies.
+
+2. Shut down all containers with `docker-compose down`
+
+3. Delete all data from volumes with `docker volumes prune`. 
    Make sure you don't have data from other containers. If yes, then we need to do this manually.

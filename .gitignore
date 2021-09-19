@@ -5,7 +5,6 @@
 instance/*
 !instance/.gitignore
 .webassets-cache
-.env
 .env.dev
 .alert
 

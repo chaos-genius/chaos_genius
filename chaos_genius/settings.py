@@ -9,7 +9,7 @@ environment variables.
 import os
 from dotenv import load_dotenv
 
-load_dotenv()  # loads environment variables from .env
+load_dotenv(".env.dev")  # loads environment variables from .env
 
 CWD = os.getcwd()
 

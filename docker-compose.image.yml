@@ -140,11 +140,8 @@ services:
     volumes:
       - ./temporal/dynamicconfig:/etc/temporal/config/dynamicconfig
 
-  frontend:
+  chaosgenius-webapp:
     image: chaosgenius/front-test-rel
-    # build:
-    #   context: ./frontend-new
-    #   dockerfile: Dockerfile
     ports:
       - "3000:3000"
     environment:
@@ -155,14 +152,13 @@ services:
     stdin_open: true
     command: npm run start
 
-  backend:
+  chaosgenius-server:
     image: chaosgenius/backend-test-rel
-    # build: .
     command: sh setup/run-backend-docker.sh
     ports:
       - "5000:5000"
     depends_on:
-      - cg-db
+      - chaosgenius-db
       - server
     environment:
       - FLASK_APP=${FLASK_APP}
@@ -185,7 +181,7 @@ services:
       - INTEGRATION_DB_PORT=${INTEGRATION_DB_PORT}
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
 
-  cg-db:
+  chaosgenius-db:
     image: postgres
     restart: always
     healthcheck:

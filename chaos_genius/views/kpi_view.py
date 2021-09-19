@@ -296,7 +296,7 @@ def rca_analysis(kpi_id, timeline="mom", dimension=None):
 
 
 @cache.memoize(timeout=30000)
-def rca_hierarchical_data(kpi_id, connection_info, timeline="mom", dimension=None):
+def rca_hierarchical_data(kpi_id, timeline="mom", dimension=None):
     try:
         end_date = get_end_date(kpi_id)
 

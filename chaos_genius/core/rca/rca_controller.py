@@ -220,7 +220,8 @@ class RootCauseAnalysisController:
                 agg_data = self._get_aggregation(rca)
                 output.append(self._output_to_row("agg", agg_data, timeline))
             except:
-                print(f"Error in agg for {timeline}")
+                print(f"Error in agg for {timeline}. Skipping timeline.")
+                continue
 
             dims = [None] + self.dimensions
             for dim in dims:

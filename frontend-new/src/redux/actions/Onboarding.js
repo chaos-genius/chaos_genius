@@ -1,10 +1,17 @@
 import {
   ONBOARDINGSUCCESS,
   ONBOARDINGREQUEST,
-  ONBOARDINGFAILURE
+  ONBOARDINGFAILURE,
+  HOMEKPIVIEWREQUEST,
+  HOMEKPIVIEWSUCCESS,
+  HOMEKPIVIEWFAILURE
 } from './ActionConstants';
 
-import { ONBOARDING_URL } from '../../utils/url-helper';
+import {
+  attachParams,
+  KPI_RELATIVE_URL,
+  ONBOARDING_URL
+} from '../../utils/url-helper';
 
 import { getRequest } from '../../utils/http-helper';
 
@@ -37,6 +44,40 @@ export const getOnboardingStatus = () => {
       dispatch(getOnboardingStatusFailure);
     } else if (data && status === 200) {
       dispatch(getOnboardingStatusSuccess(data.data));
+    }
+  };
+};
+
+export const getHomeKpiRequested = () => {
+  return {
+    type: HOMEKPIVIEWREQUEST
+  };
+};
+
+export const getHomeKpiSuccess = (response) => {
+  return {
+    type: HOMEKPIVIEWSUCCESS,
+    data: response
+  };
+};
+
+export const getHomeKpiFailure = () => {
+  return {
+    type: HOMEKPIVIEWFAILURE
+  };
+};
+
+export const getHomeKpi = (params) => {
+  return async (dispatch) => {
+    const url = attachParams(`${KPI_RELATIVE_URL}/get-dashboard-list`, params);
+    dispatch(getHomeKpiRequested());
+    const { data, error, status } = await getRequest({
+      url: url
+    });
+    if (error) {
+      dispatch(getHomeKpiFailure());
+    } else if (data && status === 200) {
+      dispatch(getHomeKpiSuccess(data.data));
     }
   };
 };

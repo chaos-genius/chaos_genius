@@ -99,6 +99,7 @@
     display: flex;
     flex-direction: column;
     &.kpi-content-label {
+      width: 180px;
       label {
         margin-bottom: 0px;
       }

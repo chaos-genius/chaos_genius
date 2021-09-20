@@ -1,5 +1,6 @@
 import {
   ALERT_EMAIL_URL,
+  ALERT_LIST_URL,
   CHANNEL_CONFIGURATION_URL,
   EDIT_CHANNEL_URL,
   EMAIL_META_INFO_URL,
@@ -23,7 +24,10 @@ import {
   EMAIL_META_INFO_FAILURE,
   SLACK_META_INFO_FAILURE,
   SLACK_META_INFO_SUCCESS,
-  SLACK_META_INFO_REQUEST
+  SLACK_META_INFO_REQUEST,
+  ALERTSSUCCESS,
+  ALERTSFAILURE,
+  ALERTSREQUEST
 } from './ActionConstants';
 
 export const getAlertEmailRequest = () => {
@@ -197,6 +201,39 @@ export const getSlackMetaInfo = () => {
       dispatch(getSlackMetaInfoFailure());
     } else if (data && status === 200) {
       dispatch(getSlackMetaInfoSuccess(data.data));
+    }
+  };
+};
+
+export const getAllAlertRequest = () => {
+  return {
+    type: ALERTSREQUEST
+  };
+};
+
+export const getAllAlertFailure = () => {
+  return {
+    type: ALERTSFAILURE
+  };
+};
+
+export const getAllAlertSuccess = (response) => {
+  return {
+    type: ALERTSSUCCESS,
+    data: response
+  };
+};
+
+export const getAllAlerts = () => {
+  return async (dispatch) => {
+    dispatch(getAllAlertRequest());
+    const { data, error, status } = await getRequest({
+      url: ALERT_LIST_URL
+    });
+    if (error) {
+      dispatch(getAllAlertFailure());
+    } else if (data && status === 200) {
+      dispatch(getAllAlertSuccess(data.data));
     }
   };
 };

@@ -13,7 +13,10 @@ import {
   EMAIL_META_INFO_FAILURE,
   SLACK_META_INFO_REQUEST,
   SLACK_META_INFO_SUCCESS,
-  SLACK_META_INFO_FAILURE
+  SLACK_META_INFO_FAILURE,
+  ALERTSREQUEST,
+  ALERTSSUCCESS,
+  ALERTSFAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -31,7 +34,10 @@ const initialState = {
   slackMetaInfoError: false,
   emailMetaInfoLoading: false,
   emailMetaInfoData: [],
-  emailMetaInfoError: false
+  emailMetaInfoError: false,
+  alertList: [],
+  alertLoading: true,
+  alertError: false
 };
 export const alert = (state = initialState, action) => {
   switch (action.type) {
@@ -134,6 +140,26 @@ export const alert = (state = initialState, action) => {
         ...state,
         slackMetaInfoLoading: false,
         slackMetaInfoError: true
+      };
+    }
+    case ALERTSREQUEST: {
+      return {
+        ...state,
+        alertLoading: true
+      };
+    }
+    case ALERTSSUCCESS: {
+      return {
+        ...state,
+        alertLoading: false,
+        alertList: action.data
+      };
+    }
+    case ALERTSFAILURE: {
+      return {
+        ...state,
+        alertLoading: false,
+        alertError: true
       };
     }
     case 'RESET_EMAIL_DATA': {

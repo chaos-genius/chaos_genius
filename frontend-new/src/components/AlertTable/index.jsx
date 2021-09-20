@@ -7,8 +7,11 @@ import Slack from '../../assets/images/table/slack.svg';
 import Asana from '../../assets/images/table/asana.svg';
 import Datadog from '../../assets/images/table/datadog.svg';
 import Rectangle from '../../assets/images/table/downarrow.svg';
+import Email from '../../assets/images/table/gmail.svg';
+import Noresult from '../Noresult';
+import { formatDate } from '../../utils/date-helper';
 
-const AlertTable = () => {
+const AlertTable = ({ alertData, alertSearch }) => {
   return (
     <div class="table-responsive">
       {' '}
@@ -26,138 +29,59 @@ const AlertTable = () => {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Changes In DAU's</td>
-            <td className="date-column-formated">KPI Based</td>
-            <td className="date-column-formated">12/06/2021</td>
-            <td>
-              <div className="alert-status">
-                <label>Active</label>
-                <div className="form-check form-switch">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="removeoverlap"
-                  />
-                </div>
-              </div>
-            </td>
-            <td>22</td>
-            <td>
-              <div className="table-actions">
-                <div className="table-action-icon">
-                  <img src={Slack} alt="slack" />
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>Changes In DAU's</td>
-            <td className="date-column-formated">KPI Based</td>
-            <td className="date-column-formated">12/06/2021</td>
-            <td>
-              <div className="alert-status">
-                <label>Active</label>
-                <div className="form-check form-switch ">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="removeoverlap"
-                  />
-                </div>
-              </div>
-            </td>
-            <td>22</td>
-            <td>
-              <div className="table-actions">
-                <div className="table-action-icon">
-                  <img src={Slack} alt="slack" />
-                </div>
-                <div className="table-action-icon">
-                  <img src={Datadog} alt="data dog" />
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>Anamoly Detected</td>
-            <td className="date-column-formated">Event Based</td>
-            <td className="date-column-formated">12/06/2021</td>
-            <td>
-              <div className="alert-status">
-                <label>InActive</label>
-                <div className="form-check form-switch">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="removeoverlap"
-                  />
-                </div>
-              </div>
-            </td>
-            <td>16</td>
-            <td>
-              <div className="table-actions">
-                <div className="table-action-icon">
-                  <img src={Slack} alt="" />
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>Changes In DAU's</td>
-            <td className="date-column-formated">KPI Based</td>
-            <td className="date-column-formated">12/06/2021</td>
-            <td>
-              <div className="alert-status">
-                <label>Active</label>
-                <div className="form-check form-switch">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="removeoverlap"
-                  />
-                </div>
-              </div>
-            </td>
-            <td>22</td>
-            <td>
-              <div className="table-actions">
-                <div className="table-action-icon">
-                  <img src={Slack} alt="" />
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>Changes In DAU's</td>
-            <td className="date-column-formated">Event Based</td>
-            <td className="date-column-formated">12/06/2021</td>
-            <td>
-              <div className="alert-status">
-                <label>Active</label>
-                <div className="form-check form-switch">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="removeoverlap"
-                  />
-                </div>
-              </div>
-            </td>
-            <td>22</td>
-            <td>
-              <div className="table-actions">
-                <div className="table-action-icon">
-                  <img src={Slack} alt="" />
-                </div>
-
-                <div className="table-action-icon">
-                  <img src={Asana} alt="" />
-                </div>
-              </div>
-            </td>
-          </tr>
+          {alertData && alertData.length !== 0 ? (
+            alertData.map((alert) => {
+              return (
+                <tr>
+                  <td>{alert.alert_name || '-'}</td>
+                  <td className="date-column-formated">
+                    {alert.alert_type || '-'}
+                  </td>
+                  <td className="date-column-formated">
+                    {formatDate(alert.last_sync) || '-'}
+                  </td>
+                  <td>
+                    <div className="alert-status">
+                      <label>Active</label>
+                      <div className="form-check form-switch">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id="removeoverlap"
+                          checked={alert.active || false}
+                        />
+                      </div>
+                    </div>
+                  </td>
+                  <td>{alert.severity_cutoff_score || '-'}</td>
+                  <td>
+                    <div className="table-actions">
+                      <div className="table-action-icon">
+                        <img
+                          src={
+                            alert.alert_alert_channel === 'slack'
+                              ? Slack
+                              : alert.alert_channel === 'email'
+                              ? Email
+                              : alert.alert_channel === 'asana'
+                              ? Asana
+                              : Datadog
+                          }
+                          alt={alert.alert_channel}
+                        />
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })
+          ) : (
+            <tr className="empty-table">
+              <td colSpan={6}>
+                <Noresult text={alertSearch} title="Alerts" />
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

@@ -98,7 +98,7 @@ def get_all_kpis():
             aggregate_data = kpi_aggregation(kpi.id, timeline)
             info['prev'] = aggregate_data['panel_metrics']['grp1_metrics'][aggregation_type]
             info['current'] = aggregate_data['panel_metrics']['grp2_metrics'][aggregation_type]
-            info['change'] = info['this_week'] - info['prev_week']
+            info['change'] = info['current'] - info['prev']
         except Exception as err_msg:
             info['prev'] = 0
             info['current'] = 0

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 
+import { useHistory } from 'react-router-dom';
+
 import Select from 'react-select';
 
 import Search from '../../assets/images/search.svg';
 import Up from '../../assets/images/up.svg';
 
 import './kpihome.scss';
-//import apiData from './dummy.json';
 
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
@@ -34,6 +35,7 @@ const data = [
 
 const Kpihome = () => {
   const dispatch = useDispatch();
+  const history = useHistory();
 
   const { homeKpiData, homeKpiLoading } = useSelector(
     (state) => state.onboarding
@@ -122,7 +124,7 @@ const Kpihome = () => {
         <div className="heading-option">
           <div className="heading-title">
             <h3>My KPIs</h3>
-            <p>Lorem ipsum is a dummy text</p>
+            {/* <p>Lorem ipsum is a dummy text</p> */}
           </div>
         </div>
         <div className="homepage-setup-card-wrapper">
@@ -196,7 +198,11 @@ const Kpihome = () => {
                       />
                     )}
                   </div>
-                  <div className="kpi-content kpi-details">Details</div>
+                  <div
+                    className="kpi-content kpi-details"
+                    onClick={() => history.push('/kpiexplorer')}>
+                    Details
+                  </div>
                 </div>
               );
             })}

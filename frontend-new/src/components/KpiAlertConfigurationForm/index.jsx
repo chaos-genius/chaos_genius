@@ -5,13 +5,13 @@ import { Range, getTrackBackground } from 'react-range';
 
 import Anomoly from '../../assets/images/alerts/anomoly.svg';
 import AnomolyActive from '../../assets/images/alerts/anomoly-active.svg';
-import Static from '../../assets/images/alerts/static.svg';
-import StaticActive from '../../assets/images/alerts/static-active.svg';
+//import Static from '../../assets/images/alerts/static.svg';
+//import StaticActive from '../../assets/images/alerts/static-active.svg';
 
 import './kpialertconfigurationform.scss';
 
 const KpiAlertConfigurationForm = ({ setSteps }) => {
-  const [type, setType] = useState('static');
+  const [type, setType] = useState('anomoloy');
   const [conditionType, setConditionType] = useState('');
   const [value, setValue] = useState([90]);
 
@@ -53,7 +53,7 @@ const KpiAlertConfigurationForm = ({ setSteps }) => {
             />
             <span>Anomoly</span>
           </div>
-          <div
+          {/* <div
             className={type === 'static' ? 'alerts-type active' : 'alerts-type'}
             onClick={() => setType('static')}>
             <img src={Static} alt="Static" className="alert-image" />
@@ -63,7 +63,7 @@ const KpiAlertConfigurationForm = ({ setSteps }) => {
               className="alert-image-active"
             />
             <span>Static</span>
-          </div>
+          </div> */}
         </div>
       </div>
       <div className="form-group">

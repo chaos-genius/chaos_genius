@@ -23,6 +23,7 @@ const Alerts = () => {
   const [alertData, setAlertData] = useState(alertList);
   const [alertSearch, setAlertSearch] = useState('');
   const [alertFilter, setAlertFilter] = useState([]);
+  const [alertStatusFilter, setAlertStatusFilter] = useState([]);
 
   useEffect(() => {
     dispatch(getAllAlerts());
@@ -69,9 +70,31 @@ const Alerts = () => {
         setAlertData(arr);
       }
     };
+
+    const fetchStatusFilter = () => {
+      if (alertStatusFilter.length === 0) {
+        setAlertData(alertList);
+      } else {
+        var arr = [];
+        alertStatusFilter &&
+          alertStatusFilter.forEach((data) => {
+            alertList.forEach((list) => {
+              if (list.active && data === 'active') {
+                arr.push(list);
+              } else if (list.active === false && data === 'inactive') {
+                arr.push(list);
+              }
+            });
+          });
+
+        setAlertData(arr);
+      }
+    };
+
     fetchFilter();
+    fetchStatusFilter();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alertFilter]);
+  }, [alertFilter, alertStatusFilter]);
 
   if (alertLoading) {
     return (
@@ -110,6 +133,7 @@ const Alerts = () => {
               setAlertSearch={setAlertSearch}
               setAlertFilter={setAlertFilter}
               alertData={alertList}
+              setAlertStatusFilter={setAlertStatusFilter}
             />
           </div>
           {/* table section */}

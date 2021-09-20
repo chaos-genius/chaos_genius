@@ -36,3 +36,4 @@ export const DATASOURCE_META_INFO_URL = `${BASE_URL}/api/connection/meta-info`;
 export const EMAIL_META_INFO_URL = `${BASE_URL}/api/config/get-meta-info/email`;
 export const SLACK_META_INFO_URL = `${BASE_URL}/api/config/get-meta-info/slack`;
 export const ALERT_LIST_URL = `${BASE_URL}/api/alert`;
+export const CREATE_KPI_ALERT_URL = `${BASE_URL}/api/alert/add`;

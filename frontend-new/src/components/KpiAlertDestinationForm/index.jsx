@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import Select from 'react-select';
 
+import { useDispatch, useSelector } from 'react-redux';
+
 import Slack from '../../assets/images/table/slack.svg';
+import Email from '../../assets/images/table/gmail.svg';
 
 import './kpialertdestinationform.scss';
+import { createKpiAlert } from '../../redux/actions';
+import { toastMessage } from '../../utils/toast-helper';
 
 const customSingleValue = ({ data }) => (
   <div className="input-select">
@@ -22,10 +27,32 @@ const option = [
         Slack
       </div>
     ),
-    value: 'Slack'
+    value: 'slack'
+  },
+  {
+    label: (
+      <div className="optionlabel">
+        <img src={Email} alt="datasource" />
+        Email
+      </div>
+    ),
+    value: 'email'
   }
 ];
-const KpiAlertDestinationForm = ({ event, setEventSteps, setKpiSteps }) => {
+
+const KpiAlertDestinationForm = ({
+  event,
+  setEventSteps,
+  setKpiSteps,
+  setAlertFormData,
+  alertFormData
+}) => {
+  const dispatch = useDispatch();
+
+  const { createKpiAlertData, createKpiAlertLoading } = useSelector((state) => {
+    return state.alert;
+  });
+
   const onBack = () => {
     if (event) {
       setEventSteps(1);
@@ -33,6 +60,19 @@ const KpiAlertDestinationForm = ({ event, setEventSteps, setKpiSteps }) => {
       setKpiSteps(1);
     }
   };
+
+  const onKpiAlertSubmit = () => {
+    dispatch(createKpiAlert(alertFormData));
+  };
+
+  useEffect(() => {
+    if (createKpiAlertData && createKpiAlertData.status === 'success') {
+      toastMessage({ type: 'success', message: 'Successfully created' });
+    } else if (createKpiAlertData && createKpiAlertData.status === 'failure') {
+      toastMessage({ type: 'success', message: 'Failed to create' });
+    }
+  }, [createKpiAlertData]);
+
   return (
     <>
       <div className="form-group">
@@ -45,6 +85,9 @@ const KpiAlertDestinationForm = ({ event, setEventSteps, setKpiSteps }) => {
           classNamePrefix="selectcategory"
           placeholder="Select"
           components={{ SingleValue: customSingleValue }}
+          onChange={(e) => {
+            setAlertFormData({ ...alertFormData, alert_channel: e.value });
+          }}
         />
       </div>
 
@@ -61,8 +104,22 @@ const KpiAlertDestinationForm = ({ event, setEventSteps, setKpiSteps }) => {
         <button className="btn white-button" onClick={() => onBack()}>
           <span>Back</span>
         </button>
-        <button className="btn black-button">
-          <span>Add Alert</span>
+        <button
+          className={
+            createKpiAlertLoading
+              ? 'btn black-button btn-loading'
+              : 'btn black-button'
+          }
+          onClick={() => onKpiAlertSubmit()}>
+          <div className="btn-spinner">
+            <div className="spinner-border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            <span>Loading...</span>
+          </div>
+          <div className="btn-content">
+            <span>Add Alert</span>
+          </div>
         </button>
       </div>
     </>

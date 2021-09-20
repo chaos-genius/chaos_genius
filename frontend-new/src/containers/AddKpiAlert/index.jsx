@@ -9,6 +9,22 @@ import KpiAlertDestinationForm from '../../components/KpiAlertDestinationForm';
 
 const AddKpiAlert = () => {
   const [steps, setSteps] = useState(1);
+
+  const [alertFormData, setAlertFormData] = useState({
+    alert_name: '',
+    alert_type: 'KPI Alert',
+    data_source: 1,
+    alert_query: '',
+    alert_settings: '',
+    kpi: 1,
+    kpi_alert_type: 'Anomaly',
+    severity_cutoff_score: 1,
+    alert_message: '',
+    alert_frequency: '',
+    alert_channel: '',
+    alert_channel_conf: '{}'
+  });
+
   return (
     <>
       {/* Page Navigation */}
@@ -46,9 +62,17 @@ const AddKpiAlert = () => {
       {/* add KPI Alert form */}
       <div className="add-form-container">
         {steps === 1 ? (
-          <KpiAlertConfigurationForm setSteps={setSteps} />
+          <KpiAlertConfigurationForm
+            setSteps={setSteps}
+            setAlertFormData={setAlertFormData}
+            alertFormData={alertFormData}
+          />
         ) : (
-          <KpiAlertDestinationForm setKpiSteps={setSteps} />
+          <KpiAlertDestinationForm
+            setKpiSteps={setSteps}
+            setAlertFormData={setAlertFormData}
+            alertFormData={alertFormData}
+          />
         )}
       </div>
     </>

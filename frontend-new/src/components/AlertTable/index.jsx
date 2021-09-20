@@ -13,7 +13,7 @@ import { formatDate } from '../../utils/date-helper';
 
 const AlertTable = ({ alertData, alertSearch }) => {
   return (
-    <div class="table-responsive">
+    <div className="table-responsive">
       {' '}
       <table className="table">
         <thead>
@@ -48,7 +48,7 @@ const AlertTable = ({ alertData, alertSearch }) => {
                           className="form-check-input"
                           type="checkbox"
                           id="removeoverlap"
-                          checked={alert.active || false}
+                          checked={alert.active}
                         />
                       </div>
                     </div>

@@ -16,7 +16,10 @@ import {
   SLACK_META_INFO_FAILURE,
   ALERTSREQUEST,
   ALERTSSUCCESS,
-  ALERTSFAILURE
+  ALERTSFAILURE,
+  CREATEKPIALERTREQUEST,
+  CREATEKPIALERTSUCCESS,
+  CREATEKPIALERTFAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -37,7 +40,10 @@ const initialState = {
   emailMetaInfoError: false,
   alertList: [],
   alertLoading: true,
-  alertError: false
+  alertError: false,
+  createKpiAlertData: [],
+  createKpiAlertLoading: false,
+  createKpiAlertError: false
 };
 export const alert = (state = initialState, action) => {
   switch (action.type) {
@@ -160,6 +166,26 @@ export const alert = (state = initialState, action) => {
         ...state,
         alertLoading: false,
         alertError: true
+      };
+    }
+    case CREATEKPIALERTREQUEST: {
+      return {
+        ...state,
+        createKpiAlertLoading: true
+      };
+    }
+    case CREATEKPIALERTSUCCESS: {
+      return {
+        ...state,
+        createKpiAlertData: action.data,
+        createKpiAlertLoading: false
+      };
+    }
+    case CREATEKPIALERTFAILURE: {
+      return {
+        ...state,
+        createKpiAlertLoading: false,
+        createKpiAlertError: true
       };
     }
     case 'RESET_EMAIL_DATA': {

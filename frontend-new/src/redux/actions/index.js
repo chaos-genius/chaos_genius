@@ -35,7 +35,8 @@ import {
   getEditChannel,
   getEmailMetaInfo,
   getSlackMetaInfo,
-  getAllAlerts
+  getAllAlerts,
+  createKpiAlert
 } from './Alert';
 import {
   anomalyDetection,
@@ -79,5 +80,6 @@ export {
   getEmailMetaInfo,
   getSlackMetaInfo,
   getHomeKpi,
-  getAllAlerts
+  getAllAlerts,
+  createKpiAlert
 };

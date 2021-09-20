@@ -2,18 +2,24 @@ import React, { useEffect, useState } from 'react';
 
 import Search from '../../assets/images/search.svg';
 
-const AlertFilter = ({ setAlertSearch, setAlertFilter, alertData }) => {
+const AlertFilter = ({
+  setAlertSearch,
+  setAlertFilter,
+  alertData,
+  setAlertStatusFilter
+}) => {
   const [checked, setChecked] = useState([]);
   const [channelType, setChannelType] = useState([]);
-
+  const [statusChecked, setStatusChecked] = useState([]);
   const onSearch = (e) => {
     setAlertSearch(e.target.value);
   };
 
   useEffect(() => {
     setAlertFilter(checked);
+    setAlertStatusFilter(statusChecked);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checked]);
+  }, [checked, statusChecked]);
 
   useEffect(() => {
     if (alertData) {
@@ -29,6 +35,17 @@ const AlertFilter = ({ setAlertSearch, setAlertFilter, alertData }) => {
     } else if (e.target.checked === false) {
       let selected = checked.filter((data) => data !== e.target.name);
       setChecked(selected);
+    }
+  };
+
+  const onChangeStatusFilter = (e) => {
+    if (e.target.checked === true) {
+      let selected = statusChecked.concat(e.target.name);
+      setStatusChecked(selected);
+      setAlertStatusFilter(statusChecked);
+    } else if (e.target.checked === false) {
+      let selected = statusChecked.filter((data) => data !== e.target.name);
+      setStatusChecked(selected);
     }
   };
 
@@ -79,10 +96,11 @@ const AlertFilter = ({ setAlertSearch, setAlertFilter, alertData }) => {
           <input
             className="form-check-input"
             type="checkbox"
-            id="checkboxfilter6"
-            name="checkboxfilter6"
+            id="active"
+            name="active"
+            onChange={(e) => onChangeStatusFilter(e)}
           />
-          <label className="form-check-label" htmlFor="checkboxfilter6">
+          <label className="form-check-label" htmlFor="active">
             Active
           </label>
         </div>
@@ -90,10 +108,11 @@ const AlertFilter = ({ setAlertSearch, setAlertFilter, alertData }) => {
           <input
             className="form-check-input"
             type="checkbox"
-            id="checkboxfilter7"
-            name="checkboxfilter7"
+            id="inactive"
+            name="inactive"
+            onChange={(e) => onChangeStatusFilter(e)}
           />
-          <label className="form-check-label" htmlFor="checkboxfilter7">
+          <label className="form-check-label" htmlFor="inactive">
             In Active
           </label>
         </div>

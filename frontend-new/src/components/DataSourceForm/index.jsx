@@ -90,7 +90,8 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       var arr = [];
       connectionType.map((item) => {
         return arr.push({
-          value: item,
+          value: item.name,
+          selected: item,
           name: item.name,
           label: <div className="optionlabel">{datasourceIcon(item)}</div>
         });
@@ -226,7 +227,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   };
 
   const testConnection = () => {
-    const { connectionSpecification } = selectedDatasource.value;
+    const { connectionSpecification } = selectedDatasource.selected;
     const { required } = connectionSpecification;
     var newobj = { ...formError };
     if (Object.keys(required).length > 0) {
@@ -256,7 +257,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   };
 
   const saveDataSource = () => {
-    const { connectionSpecification } = selectedDatasource.value;
+    const { connectionSpecification } = selectedDatasource.selected;
     const { required } = connectionSpecification;
     var newobj = { ...formError };
     if (Object.keys(required).length > 0) {
@@ -274,7 +275,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     }
     if (Object.keys(newobj).length === 0 && connectionName !== '') {
       const payload = {
-        connection_type: selectedDatasource.value.name,
+        connection_type: selectedDatasource.value,
         name: connectionName,
         sourceForm: {
           connectionConfiguration: dsFormData,
@@ -299,7 +300,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   };
 
   const updateDataSource = () => {
-    const { connectionSpecification } = selectedDatasource.value;
+    const { connectionSpecification } = selectedDatasource.selected;
     const { required } = connectionSpecification;
     var newobj = { ...formError };
     if (Object.keys(required).length > 0) {
@@ -377,9 +378,9 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
 
         {selectedDatasource &&
           selectedDatasource !== undefined &&
-          Object.keys(selectedDatasource.value).length > 0 &&
+          Object.keys(selectedDatasource.selected).length > 0 &&
           renderTextFields(
-            selectedDatasource.value.connectionSpecification,
+            selectedDatasource.selected.connectionSpecification,
             handleInputChange,
             handleCheckboxChange,
             dsFormData,

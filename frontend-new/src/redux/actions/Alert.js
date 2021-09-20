@@ -2,6 +2,7 @@ import {
   ALERT_EMAIL_URL,
   ALERT_LIST_URL,
   CHANNEL_CONFIGURATION_URL,
+  CREATE_KPI_ALERT_URL,
   EDIT_CHANNEL_URL,
   EMAIL_META_INFO_URL,
   SLACK_META_INFO_URL
@@ -27,7 +28,10 @@ import {
   SLACK_META_INFO_REQUEST,
   ALERTSSUCCESS,
   ALERTSFAILURE,
-  ALERTSREQUEST
+  ALERTSREQUEST,
+  CREATEKPIALERTREQUEST,
+  CREATEKPIALERTSUCCESS,
+  CREATEKPIALERTFAILURE
 } from './ActionConstants';
 
 export const getAlertEmailRequest = () => {
@@ -234,6 +238,44 @@ export const getAllAlerts = () => {
       dispatch(getAllAlertFailure());
     } else if (data && status === 200) {
       dispatch(getAllAlertSuccess(data.data));
+    }
+  };
+};
+
+export const createKpiAlertRequest = () => {
+  return {
+    type: CREATEKPIALERTREQUEST
+  };
+};
+
+export const createKpiAlertSuccess = (response) => {
+  return {
+    type: CREATEKPIALERTSUCCESS,
+    data: response
+  };
+};
+
+export const createKpiAlertFailure = () => {
+  return {
+    type: CREATEKPIALERTFAILURE
+  };
+};
+
+export const createKpiAlert = (payload) => {
+  return async (dispatch) => {
+    dispatch(createKpiAlertRequest());
+    const { data, error, status } = await postRequest({
+      url: CREATE_KPI_ALERT_URL,
+      data: JSON.stringify(payload),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      noAuth: true
+    });
+    if (error) {
+      dispatch(createKpiAlertFailure());
+    } else if (data && status === 200) {
+      dispatch(createKpiAlertSuccess(data));
     }
   };
 };

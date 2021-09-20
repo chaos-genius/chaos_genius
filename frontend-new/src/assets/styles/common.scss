@@ -998,7 +998,7 @@ a:hover {
 }
 // Toastify
 .Toastify__toast-container {
-  width: 240px !important;
+  // width: 240px !important;
   .Toastify__toast {
     padding: 14px;
     height: 44px;
@@ -1056,7 +1056,24 @@ a:hover {
     }
     .Toastify__progress-bar {
       visibility: hidden;
-      animation-play-state: running !important;
+      // animation-play-state: running !important;
     }
   }
+  // .toast-title {
+  //   position: absolute;
+  //   top: 0;
+  //   left: 0;
+  //   border-bottom: 1px solid $green;
+  //   width: 100%;
+  //   padding: 5px 20px;
+  // }
+  // .Toastify__close-button {
+  //   position: absolute;
+  //   top: -19px;
+  //   right: 0;
+  //   padding-right: 15px;
+  // }
+  // .Toastify__toast-body {
+  //   margin-top: 15px;
+  // }
 }

@@ -117,7 +117,8 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
                         {formatDate(kpi.created_at) || '-'}
                       </td>
                       <td>
-                        <div className="dropdown more-dropdown">
+                        {/* dropdown */}
+                        <div className="more-dropdown">
                           <div
                             data-bs-toggle="dropdown"
                             aria-expanded="false"
@@ -139,7 +140,7 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
                               title="Actions"
                             />
                           </div>
-                          <ul className="dropdown-menu">
+                          <ul className="dropdown-menu ">
                             <Link to={`/kpi/settings/${kpi.id}`}>
                               <li>
                                 <img

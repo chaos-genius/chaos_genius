@@ -258,7 +258,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     onSeasonalityChange(e);
                   }}
                 />
-                <label for="monthly">Monthly</label>
+                <label htmlFor="monthly">Monthly</label>
               </div>
               <div className="form-check check-box">
                 <input
@@ -272,7 +272,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     onSeasonalityChange(e);
                   }}
                 />
-                <label for="weekly">Weekly</label>
+                <label htmlFor="weekly">Weekly</label>
               </div>
               <div className="form-check check-box">
                 <input
@@ -286,7 +286,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     onSeasonalityChange(e);
                   }}
                 />
-                <label for="daily">Daily</label>
+                <label htmlFor="daily">Daily</label>
               </div>
             </div>
           </div>

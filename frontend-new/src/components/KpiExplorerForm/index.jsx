@@ -15,7 +15,6 @@ import Fail from '../../assets/images/fail.svg';
 import '../../assets/styles/addform.scss';
 
 import { toastMessage } from '../../utils/toast-helper';
-import { ToastContainer, toast } from 'react-toastify';
 
 import {
   getAllKpiExplorerForm,
@@ -66,6 +65,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
 
   const history = useHistory();
   const data = history.location.pathname.split('/');
+
   const kpiId = useParams().id;
   const connectionType = JSON.parse(localStorage.getItem('connectionType'));
   const [option, setOption] = useState({
@@ -210,13 +210,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   };
 
   useEffect(() => {
-    if (kpiSubmit && kpiSubmit.status === 'success' && onboarding !== true) {
-      history.push('/kpiexplorer');
-    } else if (
-      kpiSubmit &&
-      kpiSubmit.status === 'success' &&
-      onboarding === true
-    ) {
+    if (kpiSubmit && kpiSubmit.status === 'success' && onboarding === true) {
       setModal(true);
       setText('kpi');
     }
@@ -233,6 +227,16 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       onboarding !== true
     ) {
       toastMessage({ type: 'error', message: 'Failed to update' });
+    }
+    if (kpiSubmit && kpiSubmit.status === 'success' && data[2] === 'add') {
+      history.push('/kpiexplorer');
+      toastMessage({ type: 'success', message: 'Successfully Added' });
+    } else if (
+      kpiSubmit &&
+      kpiSubmit.status === 'failure' &&
+      data[2] === 'add'
+    ) {
+      toastMessage({ type: 'error', message: 'Failed to Added' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSubmit, kpiUpdateData]);
@@ -333,7 +337,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       setErrorMsg({ tablename: false });
       var optionValueArr = [];
       for (const [key, value] of Object.entries(kpiField.tables)) {
-        const valueData = key;
+        const valueData = e.value;
         if (key === valueData) {
           value.table_columns.forEach((data) => {
             optionValueArr.push({
@@ -341,9 +345,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               label: data.name
             });
           });
-
-          setOption({ ...option, metricOption: optionValueArr });
         }
+        setOption({ ...option, metricOption: optionValueArr });
         setFormdata({ ...formdata, tablename: valueData });
       }
 
@@ -479,6 +482,20 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     };
     dispatch(getTestQuery(data));
   };
+  useEffect(() => {
+    if (testQueryData && testQueryData?.msg === 'success') {
+      toastMessage({
+        type: 'success',
+        message: 'Test Connection Success'
+      });
+    }
+    if (testQueryData && testQueryData?.msg === 'failed') {
+      toastMessage({
+        type: 'error',
+        message: 'Test Connection Failed'
+      });
+    }
+  }, [testQueryData]);
 
   // const handleAddClick = () => {
   //   setInputList([...inputList, { country: '', operator: '', value: '' }]);
@@ -523,7 +540,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     );
   } else {
     return (
-      <div>
+      <>
         <div className="form-group">
           <label>KPI Name *</label>
           <input
@@ -673,11 +690,15 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             ) : null}
           </div>
         )}
-        <div>
+        <>
           <div className="form-group">
             <label>Metric Columns *</label>
             <Select
-              options={option.metricOption !== '' && option.metricOption}
+              options={
+                option.metricOption &&
+                option.metricOption.length !== 0 &&
+                option.metricOption
+              }
               value={
                 formdata.metriccolumns !== '' && {
                   label: formdata.metriccolumns,
@@ -740,7 +761,11 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           <div className="form-group">
             <label>Datetime Columns *</label>
             <Select
-              options={option.metricOption !== '' && option.metricOption}
+              options={
+                option.metricOption &&
+                option.metricOption.length !== 0 &&
+                option.metricOption
+              }
               value={
                 formdata.datetimecolumns !== '' && {
                   label: formdata.datetimecolumns,
@@ -785,7 +810,11 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                     : []
                 }
                 isMulti
-                options={option.metricOption !== '' && option.metricOption}
+                options={
+                  option.metricOption &&
+                  option.metricOption.length !== 0 &&
+                  option.metricOption
+                }
                 isDisabled={
                   data[2] === 'edit' ? editableStatus('dimensions') : false
                 }
@@ -896,12 +925,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               </div>
             </button>
           </div>
-        </div>
-        <ToastContainer
-          position={toast.POSITION.BOTTOM_RIGHT}
-          autoClose={5000}
-        />
-      </div>
+        </>
+      </>
     );
   }
 };

@@ -5,6 +5,12 @@ export const toastMessage = (data) => {
   const { type, message } = data;
   switch (type) {
     case 'success':
+      // toast.success(
+      //   <>
+      //     <div className="toast-title">KPI</div>
+      //     {message}
+      //   </>
+      // );
       toast.success(message);
       break;
     case 'warn':

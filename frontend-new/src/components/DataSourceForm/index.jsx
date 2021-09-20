@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 
 import Select from 'react-select';
+
 import { useHistory, useParams } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
-import '../../assets/styles/addform.scss';
+
 import Play from '../../assets/images/play.svg';
 import PlayDisable from '../../assets/images/play-disable.svg';
-import Success from '../../assets/images/success.svg';
-import Fail from '../../assets/images/fail.svg';
+// import Success from '../../assets/images/success.svg';
+// import Fail from '../../assets/images/fail.svg';
+
+import '../../assets/styles/addform.scss';
 
 import {
   createDataSource,
@@ -151,6 +153,13 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       path[2] === 'edit'
     ) {
       toastMessage({ type: 'error', message: 'Failed to update' });
+    } else if (
+      createDatasourceResponse &&
+      createDatasourceResponse.status === 'connected' &&
+      path[2] === 'add'
+    ) {
+      history.push('/datasource');
+      toastMessage({ type: 'success', message: 'Successfully Added' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createDatasourceResponse, updateDatasource]);
@@ -213,6 +222,23 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   useEffect(() => {
     if (testConnectionResponse !== undefined) {
       setStatus(testConnectionResponse);
+    }
+    if (
+      testConnectionResponse &&
+      testConnectionResponse.status === 'succeeded'
+    ) {
+      toastMessage({
+        type: 'success',
+        message: 'Test Connection Success'
+      });
+    } else if (
+      testConnectionResponse &&
+      testConnectionResponse.status === 'failed'
+    ) {
+      toastMessage({
+        type: 'error',
+        message: 'Test Connection Failed'
+      });
     }
   }, [testConnectionResponse]);
 
@@ -390,23 +416,23 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
           )}
 
         {/* test connection sucess message */}
-        {status && status?.status === 'succeeded' && (
+        {/* {status && status?.status === 'succeeded' && (
           <div className="connection__success">
             <p>
               <img src={Success} alt="Success" />
               Test Connection Success
             </p>
           </div>
-        )}
+        )} */}
         {/* test connection fail message */}
-        {status && status?.status === 'failed' && (
+        {/* {status && status?.status === 'failed' && (
           <div className="connection__fail">
             <p>
               <img src={Fail} alt="Fail" />
               Test Connection Failed
             </p>
           </div>
-        )}
+        )} */}
         {path[2] === 'edit' ? (
           <div className="form-action">
             <button
@@ -481,10 +507,6 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             )}
           </div>
         )}
-        <ToastContainer
-          position={toast.POSITION.BOTTOM_RIGHT}
-          autoClose={5000}
-        />
       </div>
     );
   }

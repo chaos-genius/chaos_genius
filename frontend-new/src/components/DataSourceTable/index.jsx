@@ -124,7 +124,8 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
                     {formatDate(datasource.created_at)}
                   </td>
                   <td>
-                    <div className="dropdown more-dropdown">
+                    {/* dropdown */}
+                    <div className="more-dropdown">
                       <div
                         data-bs-toggle="dropdown"
                         aria-expanded="false"

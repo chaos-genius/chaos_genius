@@ -119,7 +119,8 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
         return data?.connection_type === item.name;
       });
       setSelectedDatasource({
-        value: obj,
+        value: obj.name,
+        selected: obj,
         name: obj.name,
         label: <div className="optionlabel">{datasourceIcon(obj)}</div>
       });

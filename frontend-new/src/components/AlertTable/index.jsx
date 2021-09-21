@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { Link } from 'react-router-dom';
+
 import '../../assets/styles/table.scss';
 import './alerttable.scss';
 
@@ -102,20 +104,21 @@ const AlertTable = ({ alertData, alertSearch }) => {
                         />
                       </div>
                       <ul className="dropdown-menu">
-                        <li>
-                          <img
-                            src={Edit}
-                            alt="Edit"
-                            className="action-disable"
-                          />
-                          <img
-                            src={EditActive}
-                            alt="Edit"
-                            className="action-active"
-                          />
-                          Edit
-                        </li>
-
+                        <Link to={`/alerts/edit/kpi-alert/${alert.id}`}>
+                          <li>
+                            <img
+                              src={Edit}
+                              alt="Edit"
+                              className="action-disable"
+                            />
+                            <img
+                              src={EditActive}
+                              alt="Edit"
+                              className="action-active"
+                            />
+                            Edit
+                          </li>
+                        </Link>
                         <li className="delete-item" onClick={() => {}}>
                           <img src={DeleteActive} alt="Delete" />
                           Delete

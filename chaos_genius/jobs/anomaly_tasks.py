@@ -12,11 +12,11 @@ from chaos_genius.extensions import celery as celery_ext
 celery = cast(Celery, celery_ext.celery)
 
 
-@celery.task
-def add_together(a, b):
-    print(a + b)
-    print("It works...xD")
-    # return a + b
+# @celery.task
+# def add_together(a, b):
+#     print(a + b)
+#     print("It works...xD")
+#     # return a + b
 
 
 @celery.task
@@ -92,7 +92,9 @@ def anomaly_scheduler():
     # find KPIs
     kpis: Kpi = Kpi.query.distinct("kpi_id").filter(
         (Kpi.run_anomaly == True) & (Kpi.active == True) & (Kpi.is_static == False)
+        & (Kpi.anomaly_params is not None)
     )
+    
     task_group = []
 
     for kpi in kpis:

@@ -38,7 +38,7 @@ def run_single_alert(alert_id):
     Args:
         alert_id ([type]): [description]
     """
-    print(f"Running anomaly for ALERT ID: {alert_id}")
+    print(f"Running alert for ALERT ID: {alert_id}")
     status = check_and_trigger_alert(alert_id)
     if status:
         print(f"Triggered the alert ID: {alert_id}.")

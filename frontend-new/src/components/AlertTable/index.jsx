@@ -11,7 +11,7 @@ import Slack from '../../assets/images/table/slack.svg';
 import Asana from '../../assets/images/table/asana.svg';
 import Datadog from '../../assets/images/table/datadog.svg';
 import Rectangle from '../../assets/images/table/downarrow.svg';
-import Email from '../../assets/images/table/gmail.svg';
+import Email from '../../assets/images/table/email.svg';
 import Noresult from '../Noresult';
 import More from '../../assets/images/more.svg';
 import Moreactive from '../../assets/images/more-active.svg';

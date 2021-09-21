@@ -109,6 +109,11 @@ def kpi_anomaly_data_quality(kpi_id):
     return jsonify({"data": data, "msg": msg, "status": status})
 
 
+@blueprint.route("/anomaly-params/meta-info", methods=["GET"])
+def kpi_anomaly_params_meta():
+    return jsonify(ANOMALY_PARAMS_META)
+
+
 @blueprint.route("/<int:kpi_id>/anomaly-params", methods=["POST", "GET"])
 def kpi_anomaly_params(kpi_id: int):
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
@@ -327,6 +332,47 @@ ANOMALY_PARAM_FIELDS = {
     "scheduler_params"
 }
 
+ANOMALY_PARAMS_META = {
+    "name": "anomaly_params",
+    "fields": [
+        {
+            "name": "anomaly_period",
+            "is_editable": False,
+            "is_sensitive": False,
+        },
+        {
+            "name": "model_name",
+            "is_editable": False,
+            "is_sensitive": False,
+        },
+        {
+            "name": "sensitivity",
+            "is_editable": True,
+            "is_sensitive": False,
+        },
+        {
+            "name": "seasonality",
+            "is_editable": False,
+            "is_sensitive": False,
+        },
+        {
+            "name": "frequency",
+            "is_editable": False,
+            "is_sensitive": False,
+        },
+        {
+            "name": "scheduler_params",
+            "fields": [
+                {
+                    "name": "time",
+                    "is_editable": True,
+                    "is_sensitive": False,
+                },
+            ],
+        },
+    ],
+}
+
 def validate_partial_anomaly_params(anomaly_params: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
     """Check if given *partial* anomaly parameters have valid keys and values.
 
@@ -444,6 +490,8 @@ def update_anomaly_params(kpi: Kpi, new_anomaly_params: Dict[str, Any], run_anom
 
     anomaly_params: dict = kpi.anomaly_params
 
+    # TODO: check if fields are marked as non-editable
+
     # update the non-nested fields directly
     # currently the only nested field is scheduler_params
     for field in (fields - {"scheduler_params"}) & new_anomaly_params.keys():
@@ -475,17 +523,38 @@ def validate_partial_scheduler_params(scheduler_params: Dict[str, Any]) -> Tuple
 
     see validate_partial_anomaly_params for return value meaning.
     """
-    if "hour" in scheduler_params:
-        hour = scheduler_params["hour"]
+    if "time" in scheduler_params:
+        time = scheduler_params["time"]
 
-        if not isinstance(hour, int):
+        if not isinstance(time, str):
+            return f"time must be a string. Got: {type(time).__name__}", scheduler_params
+
+        times = time.split(":")
+
+        err_msg = "time must be in the format HH:MM:SS"
+
+        if len(times) != 3:
+            return f"{err_msg}. Got: {time}", scheduler_params
+
+        hour, minute, second = times
+
+        if not hour.isdigit() or not minute.isdigit() or not second.isdigit():
             return (
-                f"hour must be an integer number. Got: {repr(hour)}"
-                f" (of type: {type(hour).__name__})",
+                f"hour, minute, second must be numbers. Got: {hour}, {minute}, {second}",
                 scheduler_params
             )
 
+        hour = int(hour)
+
         if hour < 0 or hour > 23:
             return (f"hour must be between 0 and 23 (inclusive). Got: {hour}", scheduler_params)
+
+        minute, second = int(minute), int(second)
+
+        if minute < 0 or minute > 60:
+            return (f"minute must be between 0 and 60 (inclusive). Got: {minute}", scheduler_params)
+
+        if second < 0 or second > 60:
+            return (f"second must be between 0 and 60 (inclusive). Got: {second}", scheduler_params)
 
     return "", scheduler_params

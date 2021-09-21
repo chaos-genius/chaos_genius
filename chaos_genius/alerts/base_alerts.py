@@ -12,6 +12,15 @@ from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.alerts.email import send_static_alert_email
 
 
+FREQUENCY_DICT = {
+    "weekly": datetime.timedelta(days = 7, hours = 0, minutes = 0),
+    "daily": datetime.timedelta(days = 1, hours = 0, minutes = 0),
+    "hourly": datetime.timedelta(days = 0, hours = 1, minutes = 0),
+    "every_15_minute": datetime.timedelta(days = 0, hours = 0, minutes = 15),
+    "every_minute": datetime.timedelta(days = 0, hours = 0, minutes = 1)
+}
+
+
 class StaticEventAlertController:
     """This is the controller class for the static events
 
@@ -154,6 +163,21 @@ class AnomalyAlertController:
         kpi_id = self.alert_info["kpi"]
 
         curr_date_time = datetime.datetime.now()
+        check_time = FREQUENCY_DICT[self.alert_info['alert_frequency']]
+
+        alert: Optional[Alert] = Alert.get_by_id(self.alert_info["id"])
+        if alert is None:
+            print(f"Could not find alert by ID: {self.alert_info['id']}")
+            return False
+
+        if alert.last_alerted is not None and \
+                alert.last_alerted > (curr_date_time - check_time):
+            print(f"Skipping alert with ID {self.alert_info['id']} since it was already run")
+            return True
+
+        lower_limit_dt = curr_date_time - check_time
+        alert.update(commit=True, last_alerted=curr_date_time)
+
         lower_limit_dt = curr_date_time - datetime.timedelta(hours = 72, minutes = 0) #TODO - the delta needs to be variable
 
         anomaly_data = AnomalyDataOutput.query.filter(

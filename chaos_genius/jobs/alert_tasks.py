@@ -16,7 +16,7 @@ def check_alerts(alert_frequency):
         alert_frequency (string): frequency of the alert
     """
     task_group = []
-    if alert_frequency in ['weekly', 'daily', 'hourly', 'every_15_minute']:
+    if alert_frequency in ['weekly', 'daily', 'hourly', 'every_15_minute', 'every_minute']:
         # Using every minute for testing
         alerts = get_alert_list(frequency=alert_frequency, as_obj=True)
         for alert in alerts:

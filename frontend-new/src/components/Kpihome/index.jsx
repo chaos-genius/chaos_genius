@@ -190,7 +190,7 @@ const Kpihome = () => {
                     </span>
                   </div>
                   <div className="kpi-content kpi-graph">
-                    {item.graphData && item.graphData.length !== 0 && (
+                    {item.graph_data && item.graph_data.length !== 0 && (
                       <HighchartsReact
                         className="sparkline-graph"
                         highcharts={Highcharts}

@@ -160,6 +160,12 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     ) {
       history.push('/datasource');
       toastMessage({ type: 'success', message: 'Successfully Added' });
+    } else if (
+      createDatasourceResponse &&
+      createDatasourceResponse.status === 'failed' &&
+      path[2] === 'add'
+    ) {
+      toastMessage({ type: 'error', message: 'Failed to Add' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createDatasourceResponse, updateDatasource]);

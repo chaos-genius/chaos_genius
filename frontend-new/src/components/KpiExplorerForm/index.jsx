@@ -241,6 +241,21 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSubmit, kpiUpdateData]);
 
+  useEffect(() => {
+    if (testQueryData && testQueryData?.msg === 'success') {
+      toastMessage({
+        type: 'success',
+        message: 'Test Connection Success'
+      });
+    }
+    if (testQueryData && testQueryData?.msg === 'failed') {
+      toastMessage({
+        type: 'error',
+        message: 'Test Connection Failed'
+      });
+    }
+  }, [testQueryData]);
+
   const fieldData = () => {
     if (kpiFormData && kpiFormLoading === false) {
       var optionArr = [];
@@ -482,20 +497,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     };
     dispatch(getTestQuery(data));
   };
-  useEffect(() => {
-    if (testQueryData && testQueryData?.msg === 'success') {
-      toastMessage({
-        type: 'success',
-        message: 'Test Connection Success'
-      });
-    }
-    if (testQueryData && testQueryData?.msg === 'failed') {
-      toastMessage({
-        type: 'error',
-        message: 'Test Connection Failed'
-      });
-    }
-  }, [testQueryData]);
 
   // const handleAddClick = () => {
   //   setInputList([...inputList, { country: '', operator: '', value: '' }]);

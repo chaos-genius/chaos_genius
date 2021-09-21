@@ -66,6 +66,7 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
       </>
     );
   };
+
   return (
     <div class="table-responsive">
       <table className="table">
@@ -118,7 +119,13 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
                       </td>
                       <td>
                         {/* dropdown */}
-                        <div className="more-dropdown">
+
+                        <div
+                          className={
+                            kpiData.length !== 1
+                              ? ' more-dropdown dropdown'
+                              : ' more-dropdown '
+                          }>
                           <div
                             data-bs-toggle="dropdown"
                             aria-expanded="false"

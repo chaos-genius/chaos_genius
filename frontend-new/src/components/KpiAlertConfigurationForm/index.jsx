@@ -165,7 +165,9 @@ const KpiAlertConfigurationForm = ({ setSteps }) => {
                 step={1}
                 min={0}
                 max={100}
-                onChange={(values) => setValue([values])}
+                onChange={(values) => {
+                  setValue([values]);
+                }}
                 renderTrack={({ props, children }) => (
                   <div
                     onMouseDown={props.onMouseDown}
@@ -176,6 +178,7 @@ const KpiAlertConfigurationForm = ({ setSteps }) => {
                       width: '100%'
                     }}>
                     <div
+                      className="background"
                       ref={props.ref}
                       style={{
                         height: '8px',
@@ -184,12 +187,16 @@ const KpiAlertConfigurationForm = ({ setSteps }) => {
                         background: getTrackBackground({
                           values: value,
                           colors: [
-                            ['#60CA9A 0%', '#FAC06B', '#E96560'],
+                            // ['#60CA9A 4.86%', '#FAC06B 61.61%', '#E96560'],
+                            // '#EFEFEF'
+                            ['#60CA9A 0%', '#FAC06B ', '#E96560'],
                             '#EFEFEF'
                           ],
                           min: 0,
-                          max: 100
+                          max: 100,
+                          overflow: 'hidden'
                         }),
+
                         alignSelf: 'center'
                       }}>
                       {children}

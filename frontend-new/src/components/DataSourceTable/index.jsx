@@ -125,7 +125,12 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
                   </td>
                   <td>
                     {/* dropdown */}
-                    <div className="more-dropdown">
+                    <div
+                      className={
+                        tableData.length !== 1
+                          ? ' more-dropdown dropdown '
+                          : ' more-dropdown '
+                      }>
                       <div
                         data-bs-toggle="dropdown"
                         aria-expanded="false"

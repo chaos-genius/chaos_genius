@@ -28,6 +28,7 @@ def anomaly_single_kpi(kpi_id, end_date=None):
     print(f"Running anomaly for KPI ID: {kpi_id}")
 
     status = run_anomaly_for_kpi(kpi_id, end_date)
+
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
     anomaly_params = kpi.anomaly_params
 
@@ -52,10 +53,10 @@ def rca_single_kpi(kpi_id: int):
     """
     print(f"Running RCA for KPI ID: {kpi_id}")
 
+    status = run_rca_for_kpi(kpi_id)
+
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
     anomaly_params = kpi.anomaly_params
-
-    status = run_rca_for_kpi(kpi_id)
 
     if status:
         print(f"Completed RCA for KPI ID: {kpi_id}")

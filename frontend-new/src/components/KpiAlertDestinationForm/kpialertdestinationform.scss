@@ -27,6 +27,7 @@
       text-transform: capitalize;
       color: $black_variation-2;
       padding: 2px 8px;
+      width: 100%;
       &::placeholder {
         color: $grey_variation-1;
       }
@@ -40,6 +41,7 @@
       color: $black_variation-2;
       margin-bottom: 5px;
       margin-left: 5px;
+      margin-top: 5px;
       background: $grey_variation-2;
       box-sizing: border-box;
       border: none;

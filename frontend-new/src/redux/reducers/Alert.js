@@ -28,7 +28,11 @@ import {
   KPIALERTEDITFAILURE,
   KPIALERTUPDATEREQUEST,
   KPIALERTUPDATESUCCESS,
-  KPIALERTUPDATEFAILURE
+  KPIALERTUPDATEFAILURE,
+  KPIALERTDISABLEREQUEST,
+  KPIDISABLESUCCESS,
+  KPIALERTDISABLESUCCESS,
+  KPIALERTDISABLEFAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -61,7 +65,10 @@ const initialState = {
   kpiAlertEditError: false,
   updateKpiAlertData: [],
   updateKpiAlertLoading: false,
-  updateKpiAlertError: false
+  updateKpiAlertError: false,
+  kpiAlertDisableLoading: false,
+  kpiAlertDisableData: [],
+  kpiAlertDisableError: false
 };
 export const alert = (state = initialState, action) => {
   switch (action.type) {
@@ -266,13 +273,34 @@ export const alert = (state = initialState, action) => {
         updateKpiAlertError: false
       };
     }
+    case KPIALERTDISABLEREQUEST: {
+      return {
+        ...state,
+        kpiAlertDisableLoading: true
+      };
+    }
+    case KPIALERTDISABLESUCCESS: {
+      return {
+        ...state,
+        kpiAlertDisableLoading: false,
+        kpiAlertDisableData: action.data
+      };
+    }
+    case KPIALERTDISABLEFAILURE: {
+      return {
+        ...state,
+        kpiAlertDisableLoading: false,
+        kpiAlertDisableError: true
+      };
+    }
     case 'RESET_EMAIL_DATA': {
       return {
         ...state,
         emailData: [],
         editData: [],
         kpiAlertEditData: [],
-        updateKpiAlertData: []
+        updateKpiAlertData: [],
+        kpiAlertDisableData: []
       };
     }
     default:

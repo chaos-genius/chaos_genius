@@ -39,7 +39,8 @@ import {
   createKpiAlert,
   kpiAlertMetaInfo,
   getKpiAlertById,
-  updateKpiAlert
+  updateKpiAlert,
+  kpiAlertDisable
 } from './Alert';
 import {
   anomalyDetection,
@@ -87,5 +88,6 @@ export {
   createKpiAlert,
   kpiAlertMetaInfo,
   getKpiAlertById,
-  updateKpiAlert
+  updateKpiAlert,
+  kpiAlertDisable
 };

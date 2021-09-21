@@ -29,11 +29,12 @@ const Alerts = () => {
   const [alertSearch, setAlertSearch] = useState('');
   const [alertFilter, setAlertFilter] = useState([]);
   const [alertStatusFilter, setAlertStatusFilter] = useState([]);
+  const [data, setData] = useState(false);
 
   useEffect(() => {
     store.dispatch(RESET_ACTION);
     dispatch(getAllAlerts());
-  }, [dispatch]);
+  }, [dispatch, data]);
 
   useEffect(() => {
     if (alertSearch !== '') {
@@ -77,31 +78,34 @@ const Alerts = () => {
       }
     };
 
-    const fetchStatusFilter = () => {
-      if (alertStatusFilter.length === 0) {
-        setAlertData(alertList);
-      } else {
-        var arr = [];
-        alertStatusFilter &&
-          alertStatusFilter.forEach((data) => {
-            alertList.forEach((list) => {
-              if (list.active && data === 'active') {
-                arr.push(list);
-              } else if (list.active === false && data === 'inactive') {
-                arr.push(list);
-              }
-            });
-          });
-
-        setAlertData(arr);
-      }
-    };
-
     fetchFilter();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alertFilter]);
+
+  const fetchStatusFilter = () => {
+    if (alertStatusFilter.length === 0) {
+      setAlertData(alertList);
+    } else {
+      var arr = [];
+      alertStatusFilter &&
+        alertStatusFilter.forEach((data) => {
+          alertList.forEach((list) => {
+            if (list.active && data === 'active') {
+              arr.push(list);
+            } else if (list.active === false && data === 'inactive') {
+              arr.push(list);
+            }
+          });
+        });
+
+      setAlertData(arr);
+    }
+  };
+
+  useEffect(() => {
     fetchStatusFilter();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alertFilter, alertStatusFilter]);
-
+  }, [alertStatusFilter]);
   if (alertLoading) {
     return (
       <div className="load loader-page">
@@ -144,7 +148,11 @@ const Alerts = () => {
           </div>
           {/* table section */}
           <div className="table-section">
-            <AlertTable alertData={alertData} alertSearch={alertSearch} />
+            <AlertTable
+              alertData={alertData}
+              alertSearch={alertSearch}
+              changeData={setData}
+            />
           </div>
         </div>
       </div>

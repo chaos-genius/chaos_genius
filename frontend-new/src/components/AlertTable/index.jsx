@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Link } from 'react-router-dom';
+
+import Modal from 'react-modal';
 
 import '../../assets/styles/table.scss';
 import './alerttable.scss';
@@ -16,10 +18,43 @@ import Moreactive from '../../assets/images/more-active.svg';
 import Edit from '../../assets/images/edit.svg';
 import EditActive from '../../assets/images/datasourceedit-active.svg';
 import DeleteActive from '../../assets/images/delete-active.svg';
+import Close from '../../assets/images/close.svg';
+
+import { useDispatch, useSelector } from 'react-redux';
 
 import { formatDate } from '../../utils/date-helper';
+import { kpiAlertDisable } from '../../redux/actions';
 
-const AlertTable = ({ alertData, alertSearch }) => {
+import { toastMessage } from '../../utils/toast-helper';
+import { ToastContainer, toast } from 'react-toastify';
+
+const AlertTable = ({ alertData, alertSearch, changeData }) => {
+  const dispatch = useDispatch();
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [data, setData] = useState('');
+
+  const closeModal = () => {
+    setIsOpen(false);
+  };
+  const { kpiAlertDisableData } = useSelector((state) => {
+    return state.alert;
+  });
+
+  const onDelete = (id) => {
+    dispatch(kpiAlertDisable(id));
+  };
+
+  useEffect(() => {
+    if (kpiAlertDisableData && kpiAlertDisableData.status === 'success') {
+      setIsOpen(false);
+      changeData((prev) => !prev);
+      toastMessage({ type: 'success', message: kpiAlertDisableData.message });
+    } else if (kpiAlertDisableData && kpiAlertDisableData === 'failure') {
+      toastMessage({ type: 'error', message: kpiAlertDisableData.message });
+    }
+  }, [kpiAlertDisableData]);
+
   return (
     <div className="table-responsive">
       <table className="table">
@@ -67,7 +102,7 @@ const AlertTable = ({ alertData, alertSearch }) => {
                       <div className="table-action-icon">
                         <img
                           src={
-                            alert.alert_alert_channel === 'slack'
+                            alert.alert_channel === 'slack'
                               ? Slack
                               : alert.alert_channel === 'email'
                               ? Email
@@ -119,7 +154,12 @@ const AlertTable = ({ alertData, alertSearch }) => {
                             Edit
                           </li>
                         </Link>
-                        <li className="delete-item" onClick={() => {}}>
+                        <li
+                          className="delete-item"
+                          onClick={() => {
+                            setIsOpen(true);
+                            setData(alert);
+                          }}>
                           <img src={DeleteActive} alt="Delete" />
                           Delete
                         </li>
@@ -138,6 +178,32 @@ const AlertTable = ({ alertData, alertSearch }) => {
           )}
         </tbody>
       </table>
+      <Modal
+        portalClassName="deletemodal"
+        isOpen={isOpen}
+        shouldCloseOnOverlayClick={false}
+        className="deleteModal">
+        <div className="modal-close">
+          <img src={Close} alt="Close" onClick={closeModal} />
+        </div>
+        <div className="modal-body">
+          <div className="modal-contents">
+            <h3>Delete {data.name} ?</h3>
+            <p>Are you sure you want to delete </p>
+            <div className="next-step-navigate">
+              <button className="btn white-button" onClick={closeModal}>
+                <span>Cancel</span>
+              </button>
+              <button
+                className="btn black-button"
+                onClick={() => onDelete(data.id)}>
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Modal>
+      <ToastContainer position={toast.POSITION.BOTTOM_RIGHT} autoClose={5000} />
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import {
   ALERT_EMAIL_URL,
   ALERT_LIST_URL,
+  BASE_URL,
   CHANNEL_CONFIGURATION_URL,
   CREATE_KPI_ALERT_URL,
   EDIT_CHANNEL_URL,
@@ -43,7 +44,11 @@ import {
   KPIALERTEDITFAILURE,
   KPIALERTUPDATEREQUEST,
   KPIALERTUPDATESUCCESS,
-  KPIALERTUPDATEFAILURE
+  KPIALERTUPDATEFAILURE,
+  KPIALERTDISABLEREQUEST,
+  KPIDISABLESUCCESS,
+  KPIALERTDISABLEFAILURE,
+  KPIALERTDISABLESUCCESS
 } from './ActionConstants';
 
 export const getAlertEmailRequest = () => {
@@ -392,6 +397,39 @@ export const updateKpiAlert = (id, payload) => {
       dispatch(updateKpiAlertFailure());
     } else if (data && status === 200) {
       dispatch(updateKpiAlertSuccess(data));
+    }
+  };
+};
+
+export const kpiAlertDisableRequest = () => {
+  return {
+    type: KPIALERTDISABLEREQUEST
+  };
+};
+
+export const kpiAlertDisableSuccess = (response) => {
+  return {
+    type: KPIALERTDISABLESUCCESS,
+    data: response
+  };
+};
+
+export const kpiAlertDisableFailure = () => {
+  return {
+    type: KPIALERTDISABLEFAILURE
+  };
+};
+
+export const kpiAlertDisable = (id) => {
+  return async (dispatch) => {
+    dispatch(kpiAlertDisableRequest());
+    const { data, error, status } = await getRequest({
+      url: `${BASE_URL}/api/alert/${id}/disable`
+    });
+    if (error) {
+      dispatch(kpiAlertDisableFailure());
+    } else if (data && status === 200) {
+      dispatch(kpiAlertDisableSuccess(data));
     }
   };
 };

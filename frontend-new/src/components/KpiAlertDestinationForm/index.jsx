@@ -169,7 +169,11 @@ const KpiAlertDestinationForm = ({
       <div className="form-group">
         <label>Add Recepients </label>
         {/* <Select isMulti classNamePrefix="selectcategory" placeholder="Select" /> */}
-        <TagsInput value={resp} onChange={(e) => handleChange(e)} />
+        <TagsInput
+          value={resp}
+          onChange={(e) => handleChange(e)}
+          placeholder="Add Recepients"
+        />
       </div>
       <div className="add-options-wrapper options-spacing">
         {/* <div className="add-options">

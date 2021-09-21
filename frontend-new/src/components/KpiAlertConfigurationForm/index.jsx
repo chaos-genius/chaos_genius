@@ -9,6 +9,8 @@ import { Range, getTrackBackground } from 'react-range';
 
 import Anomoly from '../../assets/images/alerts/anomoly.svg';
 import AnomolyActive from '../../assets/images/alerts/anomoly-active.svg';
+import Edit from '../../assets/images/disable-edit.svg';
+
 //import Static from '../../assets/images/alerts/static.svg';
 //import StaticActive from '../../assets/images/alerts/static-active.svg';
 
@@ -189,25 +191,43 @@ const KpiAlertConfigurationForm = ({
         </div>
         <div className="form-group">
           <label>Select KPI*</label>
-          <Select
-            classNamePrefix="selectcategory"
-            placeholder="Select"
-            options={option}
-            value={
-              path[2] === 'edit' && alertFormData.data_source
-                ? option.find((item) => alertFormData.kpi === item.id)
-                : selectedKpi
-            }
-            onChange={(e) => {
-              setSelectedKpi(e);
-              setAlertFormData({
-                ...alertFormData,
-                data_source: e.datasource_id,
-                kpi: e.id
-              });
-              setError({ ...error, data_source: '' });
-            }}
-          />
+          <div className="editable-field">
+            <Select
+              classNamePrefix="selectcategory"
+              placeholder="Select"
+              options={option}
+              value={
+                path[2] === 'edit' && alertFormData.data_source
+                  ? option.find((item) => alertFormData.kpi === item.id)
+                  : selectedKpi
+              }
+              onChange={(e) => {
+                setSelectedKpi(e);
+                setAlertFormData({
+                  ...alertFormData,
+                  data_source: e.datasource_id,
+                  kpi: e.id
+                });
+                setError({ ...error, data_source: '' });
+              }}
+            />
+            {/* <>
+   
+              <button className="btn black-button">
+                <img src={Edit} alt="Edit" />
+                <span>Edit</span>
+              </button>
+            </> */}
+            <>
+              <button className="btn black-button">
+                <span>Save</span>
+              </button>
+              <button className="btn black-secondary-button">
+                <span>Cancel</span>
+              </button>
+            </>
+          </div>
+
           {error.data_source && (
             <div className="connection__fail">
               <p>{error.data_source}</p>

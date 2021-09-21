@@ -20,6 +20,7 @@ import random
 
 from chaos_genius.core.rca import RootCauseAnalysis
 from chaos_genius.core.utils.kpi_validation import validate_kpi
+from chaos_genius.core.utils.round import round_number
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.data_source_model import DataSource
@@ -96,9 +97,9 @@ def get_all_kpis():
         try:
             aggregation_type = kpi.aggregation
             aggregate_data = kpi_aggregation(kpi.id, timeline)
-            info['prev'] = aggregate_data['panel_metrics']['grp1_metrics'][aggregation_type]
-            info['current'] = aggregate_data['panel_metrics']['grp2_metrics'][aggregation_type]
-            info['change'] = info['current'] - info['prev']
+            info['prev'] = round_number(aggregate_data['panel_metrics']['grp1_metrics'][aggregation_type])
+            info['current'] = round_number(aggregate_data['panel_metrics']['grp2_metrics'][aggregation_type])
+            info['change'] = round_number(info['current'] - info['prev'])
         except Exception as err_msg:
             info['prev'] = 0
             info['current'] = 0

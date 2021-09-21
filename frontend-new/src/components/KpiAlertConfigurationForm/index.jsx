@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
 
+import { useHistory, useParams } from 'react-router-dom';
+
 import Select from 'react-select';
 import { Range, getTrackBackground } from 'react-range';
 
@@ -13,6 +15,7 @@ import AnomolyActive from '../../assets/images/alerts/anomoly-active.svg';
 import './kpialertconfigurationform.scss';
 
 import { getAllKpiExplorer } from '../../redux/actions';
+import { getKpiAlertById } from '../../redux/actions';
 
 const alertFrequency = [
   {
@@ -27,28 +30,103 @@ const alertFrequency = [
 const KpiAlertConfigurationForm = ({
   setSteps,
   setAlertFormData,
-  alertFormData
+  alertFormData,
+  kpiAlertMetaInfo
 }) => {
+  const kpiId = useParams().id;
+  const history = useHistory();
+
+  const path = history.location.pathname.split('/');
   const dispatch = useDispatch();
   const connectionType = JSON.parse(localStorage.getItem('connectionType'));
   const [type, setType] = useState('anomoloy');
   const [conditionType, setConditionType] = useState('');
   const [value, setValue] = useState([90]);
-
+  const [selectedKpi, setSelectedKpi] = useState();
+  const [error, setError] = useState({
+    alert_name: '',
+    data_source: '',
+    alert_type: '',
+    kpi_alert_type: '',
+    severity_cutoff_score: '',
+    alert_message: '',
+    alert_frequency: ''
+  });
   const [option, setOption] = useState([]);
 
   const onSubmit = () => {
-    setSteps(2);
+    var obj = { ...error };
+    if (alertFormData.alert_name === '') {
+      obj['alert_name'] = 'Enter Name of Your Alert';
+    }
+    if (alertFormData.data_source === 0) {
+      obj['data_source'] = 'Enter Kpi';
+    }
+    if (alertFormData.kpi_alert_type === '') {
+      obj['kpi_alert_type'] = 'Enter Kpi Alert Type';
+    }
+    if (alertFormData.severity_cutoff_score === '') {
+      obj['severity_cutoff_score'] = 'Enter Significance Score';
+    }
+    if (alertFormData.alert_frequency === '') {
+      obj['alert_frequency'] = 'Enter Alert Frequency';
+    }
+    if (alertFormData.alert_message === '') {
+      obj['alert_message'] = 'Enter Alert Frequency';
+    }
+    setError(obj);
+    if (
+      obj.alert_name === '' &&
+      obj.kpi_alert_type === '' &&
+      obj.severity_cutoff_score === '' &&
+      obj.alert_frequency === '' &&
+      obj.alert_message === ''
+    ) {
+      setSteps(2);
+    }
   };
 
   const { isLoading, kpiExplorerList } = useSelector(
     (state) => state.kpiExplorer
   );
 
+  const { kpiAlertEditData, kpiAlertEditLoading } = useSelector((state) => {
+    return state.alert;
+  });
+
   useEffect(() => {
-    dispatchGetAllKpiExplorer();
+    if (path[2] === 'edit') {
+      dispatch(getKpiAlertById(kpiId));
+      dispatchGetAllKpiExplorer();
+    } else {
+      dispatchGetAllKpiExplorer();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (
+      kpiAlertEditData &&
+      kpiAlertEditData.length !== 0 &&
+      path[2] === 'edit'
+    ) {
+      setAlertFormData({
+        alert_name: kpiAlertEditData?.alert_name,
+        alert_type: kpiAlertEditData?.alert_type,
+        data_source: kpiAlertEditData?.data_source,
+        alert_query: '',
+        alert_settings: '',
+        kpi: kpiAlertEditData?.kpi,
+        kpi_alert_type: kpiAlertEditData?.kpi_alert_type,
+        severity_cutoff_score: kpiAlertEditData?.severity_cutoff_score,
+        alert_message: kpiAlertEditData?.alert_message,
+        alert_frequency: kpiAlertEditData?.alert_frequency,
+        alert_channel: kpiAlertEditData?.alert_channel,
+        alert_channel_conf: kpiAlertEditData?.alert_channel_conf
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kpiAlertEditData]);
 
   const dispatchGetAllKpiExplorer = () => {
     dispatch(getAllKpiExplorer());
@@ -97,9 +175,9 @@ const KpiAlertConfigurationForm = ({
     );
   };
 
-  if (isLoading) {
+  if (kpiAlertEditLoading) {
     return (
-      <div className="load ">
+      <div className="load">
         <div className="preload"></div>
       </div>
     );
@@ -115,15 +193,26 @@ const KpiAlertConfigurationForm = ({
             classNamePrefix="selectcategory"
             placeholder="Select"
             options={option}
+            value={
+              path[2] === 'edit' && alertFormData.data_source
+                ? option.find((item) => alertFormData.kpi === item.id)
+                : selectedKpi
+            }
             onChange={(e) => {
+              setSelectedKpi(e);
               setAlertFormData({
                 ...alertFormData,
                 data_source: e.datasource_id,
                 kpi: e.id
               });
-              //setAlertFormData({ ...alertFormData, kpi: e.id });
+              setError({ ...error, data_source: '' });
             }}
           />
+          {error.data_source && (
+            <div className="connection__fail">
+              <p>{error.data_source}</p>
+            </div>
+          )}
         </div>
         <div className="form-group">
           <label>Name of your Alert *</label>
@@ -132,13 +221,20 @@ const KpiAlertConfigurationForm = ({
             className="form-control"
             placeholder="Enter alert name"
             required
+            value={alertFormData?.alert_name}
             onChange={(e) => {
               setAlertFormData({
                 ...alertFormData,
                 alert_name: e.target.value
               });
+              setError({ ...error, alert_name: '' });
             }}
           />
+          {error.alert_name && (
+            <div className="connection__fail">
+              <p>{error.alert_name}</p>
+            </div>
+          )}
         </div>
         <div className="form-group">
           <label>Alert Type *</label>
@@ -155,6 +251,11 @@ const KpiAlertConfigurationForm = ({
                 className="alert-image-active"
               />
               <span>Anomoly</span>
+              {error.kpi_alert_type && (
+                <div className="connection__fail">
+                  <p>{error.kpi_alert_type}</p>
+                </div>
+              )}
             </div>
             {/* <div
             className={type === 'static' ? 'alerts-type active' : 'alerts-type'}
@@ -332,24 +433,45 @@ const KpiAlertConfigurationForm = ({
           <label>Alert Frequency *</label>
           <Select
             classNamePrefix="selectcategory"
-            placeholder="Daily"
+            placeholder="Alert Frequency"
             options={alertFrequency}
-            onChange={(e) =>
-              setAlertFormData({ ...alertFormData, alert_frequency: e.value })
+            value={
+              alertFormData.alert_frequency
+                ? {
+                    value: alertFormData.alert_frequency,
+                    label: alertFormData.alert_frequency
+                  }
+                : 'none'
             }
+            onChange={(e) => {
+              setAlertFormData({ ...alertFormData, alert_frequency: e.value });
+              setError({ ...error, alert_frequency: '' });
+            }}
           />
+          {error.alert_frequency && (
+            <div className="connection__fail">
+              <p>{error.alert_frequency}</p>
+            </div>
+          )}
         </div>
         <div className="form-group alert-textarea">
           <label>Message Body *</label>
           <textarea
             placeholder="Enter message here"
+            value={alertFormData.alert_message}
             onChange={(e) => {
               setAlertFormData({
                 ...alertFormData,
                 alert_message: e.target.value
               });
+              setError({ ...error, alert_message: '' });
             }}
           />
+          {error.alert_message && (
+            <div className="connection__fail">
+              <p>{error.alert_message}</p>
+            </div>
+          )}
         </div>
         <div className="form-action ">
           <button className="btn black-button" onClick={() => onSubmit()}>

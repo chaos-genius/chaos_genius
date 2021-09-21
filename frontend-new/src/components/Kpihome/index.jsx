@@ -200,7 +200,9 @@ const Kpihome = () => {
                   </div>
                   <div
                     className="kpi-content kpi-details"
-                    onClick={() => history.push('/kpiexplorer')}>
+                    onClick={() =>
+                      history.push(`/dashboard/autorca/${item.id}`)
+                    }>
                     Details
                   </div>
                 </div>

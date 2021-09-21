@@ -14,6 +14,11 @@ import AlertFilter from '../../components/AlertFilter';
 import { getAllAlerts } from '../../redux/actions';
 
 import Fuse from 'fuse.js';
+import store from '../../redux/store';
+
+const RESET_ACTION = {
+  type: 'RESET_EMAIL_DATA'
+};
 
 const Alerts = () => {
   const dispatch = useDispatch();
@@ -26,6 +31,7 @@ const Alerts = () => {
   const [alertStatusFilter, setAlertStatusFilter] = useState([]);
 
   useEffect(() => {
+    store.dispatch(RESET_ACTION);
     dispatch(getAllAlerts());
   }, [dispatch]);
 

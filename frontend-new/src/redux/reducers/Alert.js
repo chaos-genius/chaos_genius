@@ -19,7 +19,16 @@ import {
   ALERTSFAILURE,
   CREATEKPIALERTREQUEST,
   CREATEKPIALERTSUCCESS,
-  CREATEKPIALERTFAILURE
+  CREATEKPIALERTFAILURE,
+  KPI_ALERT_META_INFO_REQUEST,
+  KPI_ALERT_META_INFO_SUCCESS,
+  KPI_ALERT_META_INFO_FAILURE,
+  KPIALERTEDITREQUEST,
+  KPIALERTEDITSUCCESS,
+  KPIALERTEDITFAILURE,
+  KPIALERTUPDATEREQUEST,
+  KPIALERTUPDATESUCCESS,
+  KPIALERTUPDATEFAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -43,7 +52,16 @@ const initialState = {
   alertError: false,
   createKpiAlertData: [],
   createKpiAlertLoading: false,
-  createKpiAlertError: false
+  createKpiAlertError: false,
+  kpiAlertMetaInfoData: [],
+  kpiAlertMetaInfoLoading: false,
+  kpiAlertMetaInfoError: false,
+  kpiAlertEditData: [],
+  kpiAlertEditLoading: false,
+  kpiAlertEditError: false,
+  updateKpiAlertData: [],
+  updateKpiAlertLoading: false,
+  updateKpiAlertError: false
 };
 export const alert = (state = initialState, action) => {
   switch (action.type) {
@@ -188,11 +206,73 @@ export const alert = (state = initialState, action) => {
         createKpiAlertError: true
       };
     }
+    case KPI_ALERT_META_INFO_REQUEST: {
+      return {
+        ...state,
+        kpiAlertMetaInfoLoading: true
+      };
+    }
+    case KPI_ALERT_META_INFO_SUCCESS: {
+      return {
+        ...state,
+        kpiAlertMetaInfoLoading: false,
+        kpiAlertMetaInfoData: action.data
+      };
+    }
+    case KPI_ALERT_META_INFO_FAILURE: {
+      return {
+        ...state,
+        kpiAlertMetaInfoLoading: false,
+        kpiAlertMetaInfoError: true
+      };
+    }
+    case KPIALERTEDITREQUEST: {
+      return {
+        ...state,
+        kpiAlertEditLoading: true
+      };
+    }
+    case KPIALERTEDITSUCCESS: {
+      return {
+        ...state,
+        kpiAlertEditLoading: false,
+        kpiAlertEditData: action.data
+      };
+    }
+    case KPIALERTEDITFAILURE: {
+      return {
+        ...state,
+        kpiAlertEditLoading: false,
+        kpiAlertEditError: true
+      };
+    }
+    case KPIALERTUPDATEREQUEST: {
+      return {
+        ...state,
+        updateKpiAlertLoading: true
+      };
+    }
+    case KPIALERTUPDATESUCCESS: {
+      return {
+        ...state,
+        updateKpiAlertLoading: false,
+        updateKpiAlertData: action.data
+      };
+    }
+    case KPIALERTUPDATEFAILURE: {
+      return {
+        ...state,
+        updateKpiAlertLoading: false,
+        updateKpiAlertError: false
+      };
+    }
     case 'RESET_EMAIL_DATA': {
       return {
         ...state,
         emailData: [],
-        editData: []
+        editData: [],
+        kpiAlertEditData: [],
+        updateKpiAlertData: []
       };
     }
     default:

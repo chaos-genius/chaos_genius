@@ -5,10 +5,13 @@ import {
   CREATE_KPI_ALERT_URL,
   EDIT_CHANNEL_URL,
   EMAIL_META_INFO_URL,
-  SLACK_META_INFO_URL
+  GET_KPI_ALERT_BY_ID_URL,
+  KPI_ALERT_META_INFO_URL,
+  SLACK_META_INFO_URL,
+  UPDATE_KPI_ALERT_URL
 } from '../../utils/url-helper';
 
-import { getRequest, postRequest } from '../../utils/http-helper';
+import { getRequest, postRequest, putRequest } from '../../utils/http-helper';
 
 import {
   ALERTEMAILREQUEST,
@@ -31,7 +34,16 @@ import {
   ALERTSREQUEST,
   CREATEKPIALERTREQUEST,
   CREATEKPIALERTSUCCESS,
-  CREATEKPIALERTFAILURE
+  CREATEKPIALERTFAILURE,
+  KPI_ALERT_META_INFO_REQUEST,
+  KPI_ALERT_META_INFO_SUCCESS,
+  KPI_ALERT_META_INFO_FAILURE,
+  KPIALERTEDITREQUEST,
+  KPIALERTEDITSUCCESS,
+  KPIALERTEDITFAILURE,
+  KPIALERTUPDATEREQUEST,
+  KPIALERTUPDATESUCCESS,
+  KPIALERTUPDATEFAILURE
 } from './ActionConstants';
 
 export const getAlertEmailRequest = () => {
@@ -276,6 +288,110 @@ export const createKpiAlert = (payload) => {
       dispatch(createKpiAlertFailure());
     } else if (data && status === 200) {
       dispatch(createKpiAlertSuccess(data));
+    }
+  };
+};
+
+export const kpiAlertMetaInfoRequest = () => {
+  return {
+    type: KPI_ALERT_META_INFO_REQUEST
+  };
+};
+
+export const kpiAlertMetaInfoSuccess = (response) => {
+  return {
+    type: KPI_ALERT_META_INFO_SUCCESS,
+    data: response
+  };
+};
+
+export const kpiAlertMetaInfoFailure = () => {
+  return {
+    type: KPI_ALERT_META_INFO_FAILURE
+  };
+};
+
+export const kpiAlertMetaInfo = () => {
+  return async (dispatch) => {
+    dispatch(kpiAlertMetaInfoRequest());
+    const { data, error, status } = await getRequest({
+      url: `${KPI_ALERT_META_INFO_URL}`
+    });
+    if (error) {
+      dispatch(kpiAlertMetaInfoFailure());
+    } else if (data && status === 200) {
+      dispatch(kpiAlertMetaInfoSuccess(data.data));
+    }
+  };
+};
+
+export const getKpiAlertByIdRequest = () => {
+  return {
+    type: KPIALERTEDITREQUEST
+  };
+};
+
+export const getKpiAlertByIdSuccess = (response) => {
+  return {
+    type: KPIALERTEDITSUCCESS,
+    data: response
+  };
+};
+
+export const getKpiAlertByIdFailure = () => {
+  return {
+    type: KPIALERTEDITFAILURE
+  };
+};
+
+export const getKpiAlertById = (id) => {
+  return async (dispatch) => {
+    dispatch(getKpiAlertByIdRequest());
+    const { data, error, status } = await getRequest({
+      url: `${GET_KPI_ALERT_BY_ID_URL}/${id}/get-info`
+    });
+    if (error) {
+      dispatch(getKpiAlertByIdFailure());
+    } else if (data && status === 200) {
+      dispatch(getKpiAlertByIdSuccess(data.data));
+    }
+  };
+};
+
+export const updateKpiAlertRequest = () => {
+  return {
+    type: KPIALERTUPDATEREQUEST
+  };
+};
+
+export const updateKpiAlertSuccess = (response) => {
+  return {
+    type: KPIALERTUPDATESUCCESS,
+    data: response
+  };
+};
+
+export const updateKpiAlertFailure = () => {
+  return {
+    type: KPIALERTUPDATEFAILURE
+  };
+};
+
+export const updateKpiAlert = (id, payload) => {
+  return async (dispatch) => {
+    dispatch(updateKpiAlertRequest());
+    const { data, error, status } = await putRequest({
+      url: `${UPDATE_KPI_ALERT_URL}/${id}/update`,
+      data: JSON.stringify(payload),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      noAuth: true
+    });
+    if (error) {
+      dispatch(updateKpiAlertFailure());
+    } else if (data && status === 200) {
+      dispatch(updateKpiAlertSuccess(data));
     }
   };
 };

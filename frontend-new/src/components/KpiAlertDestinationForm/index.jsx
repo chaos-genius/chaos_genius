@@ -1,16 +1,20 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import Select from 'react-select';
 
 import { useDispatch, useSelector } from 'react-redux';
 
+import { useHistory, useParams } from 'react-router-dom';
+
 import Slack from '../../assets/images/table/slack.svg';
-import Email from '../../assets/images/table/gmail.svg';
+import Email from '../../assets/images/alerts/email.svg';
 
 import './kpialertdestinationform.scss';
-import { createKpiAlert } from '../../redux/actions';
-import { toastMessage } from '../../utils/toast-helper';
+import { createKpiAlert, updateKpiAlert } from '../../redux/actions';
+//import { toastMessage } from '../../utils/toast-helper';
+import TagsInput from 'react-tagsinput';
 
+import 'react-tagsinput/react-tagsinput.css';
 const customSingleValue = ({ data }) => (
   <div className="input-select">
     <div className="input-select__single-value">
@@ -45,13 +49,32 @@ const KpiAlertDestinationForm = ({
   setEventSteps,
   setKpiSteps,
   setAlertFormData,
-  alertFormData
+  alertFormData,
+  kpiAlertMetaInfo
 }) => {
   const dispatch = useDispatch();
+  const [resp, setresp] = useState([]);
+  const history = useHistory();
+  const kpiId = useParams().id;
+  const path = history.location.pathname.split('/');
+  //createKpiAlertData
+  const { createKpiAlertLoading, updateKpiAlertLoading } = useSelector(
+    (state) => {
+      return state.alert;
+    }
+  );
 
-  const { createKpiAlertData, createKpiAlertLoading } = useSelector((state) => {
-    return state.alert;
+  const [error, setError] = useState({
+    alert_channel: '',
+    add_recepients: ''
   });
+
+  useEffect(() => {
+    if (path[2] === 'edit') {
+      setresp(alertFormData?.alert_channel_conf?.[alertFormData.alert_channel]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onBack = () => {
     if (event) {
@@ -62,16 +85,40 @@ const KpiAlertDestinationForm = ({
   };
 
   const onKpiAlertSubmit = () => {
-    dispatch(createKpiAlert(alertFormData));
+    var obj = { ...error };
+    if (alertFormData.alert_channel === '') {
+      obj['alert_channel'] = 'Enter Channel';
+    }
+    setError(obj);
+    if (error.alert_channel === '') {
+      if (path[2] === 'edit') {
+        console.log('called');
+        dispatch(updateKpiAlert(kpiId, alertFormData));
+      } else {
+        dispatch(createKpiAlert(alertFormData));
+      }
+    }
   };
 
-  useEffect(() => {
-    if (createKpiAlertData && createKpiAlertData.status === 'success') {
-      toastMessage({ type: 'success', message: 'Successfully created' });
-    } else if (createKpiAlertData && createKpiAlertData.status === 'failure') {
-      toastMessage({ type: 'success', message: 'Failed to create' });
-    }
-  }, [createKpiAlertData]);
+  // useEffect(() => {
+  //   if (createKpiAlertData && createKpiAlertData.status === 'success') {
+  //     toastMessage({ type: 'success', message: 'Successfully created' });
+  //   } else if (createKpiAlertData && createKpiAlertData.status === 'failure') {
+  //     toastMessage({ type: 'success', message: 'Failed to create' });
+  //   }
+  // }, [createKpiAlertData]);
+
+  const handleChange = (tags) => {
+    setresp(tags);
+    setAlertFormData((prev) => {
+      return {
+        ...prev,
+        alert_channel_conf: {
+          [alertFormData['alert_channel']]: tags
+        }
+      };
+    });
+  };
 
   return (
     <>
@@ -84,21 +131,48 @@ const KpiAlertDestinationForm = ({
           options={option}
           classNamePrefix="selectcategory"
           placeholder="Select"
+          value={
+            alertFormData.alert_channel
+              ? {
+                  label: (
+                    <div className="optionlabel">
+                      <img
+                        src={
+                          alertFormData.alert_channel === 'email'
+                            ? Email
+                            : Slack
+                        }
+                        alt="datasource"
+                      />
+                      {alertFormData.alert_channel}
+                    </div>
+                  ),
+                  value: `${alertFormData.alert_channel}`
+                }
+              : 'none'
+          }
           components={{ SingleValue: customSingleValue }}
           onChange={(e) => {
             setAlertFormData({ ...alertFormData, alert_channel: e.value });
+            setError({ ...error, alert_channel: '' });
           }}
         />
+        {error.alert_channel && (
+          <div className="connection__fail">
+            <p>{error.alert_channel}</p>
+          </div>
+        )}
       </div>
 
       <div className="form-group">
         <label>Add Recepients </label>
-        <Select isMulti classNamePrefix="selectcategory" placeholder="Select" />
+        {/* <Select isMulti classNamePrefix="selectcategory" placeholder="Select" /> */}
+        <TagsInput value={resp} onChange={(e) => handleChange(e)} />
       </div>
       <div className="add-options-wrapper options-spacing">
-        <div className="add-options">
+        {/* <div className="add-options">
           <label>+ Add Another Channel</label>
-        </div>
+        </div> */}
       </div>
       <div className="form-action alerts-button">
         <button className="btn white-button" onClick={() => onBack()}>
@@ -106,7 +180,7 @@ const KpiAlertDestinationForm = ({
         </button>
         <button
           className={
-            createKpiAlertLoading
+            createKpiAlertLoading || updateKpiAlertLoading
               ? 'btn black-button btn-loading'
               : 'btn black-button'
           }
@@ -118,7 +192,7 @@ const KpiAlertDestinationForm = ({
             <span>Loading...</span>
           </div>
           <div className="btn-content">
-            <span>Add Alert</span>
+            <span>{path[2] === 'edit' ? 'Save changes' : 'Add Alert'} </span>
           </div>
         </button>
       </div>

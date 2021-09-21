@@ -71,7 +71,9 @@ const KpiAlertDestinationForm = ({
 
   useEffect(() => {
     if (path[2] === 'edit') {
-      setresp(alertFormData?.alert_channel_conf?.[alertFormData.alert_channel]);
+      setresp(
+        alertFormData?.alert_channel_conf?.[alertFormData.alert_channel] || []
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

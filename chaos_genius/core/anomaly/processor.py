@@ -17,6 +17,7 @@ class ProcessAnomalyDetection:
         table_name: str,
         freq: str,
         sensitivity: str,
+        slack: int,
         series: str,
         subgroup: str = None,
         model_kwargs={},
@@ -32,6 +33,7 @@ class ProcessAnomalyDetection:
         self.model_kwargs = model_kwargs
         self.freq = freq
         self.sensitivity = sensitivity
+        self.slack = slack
 
     def predict(self):
 
@@ -61,7 +63,8 @@ class ProcessAnomalyDetection:
 
         if self.last_date is None:
             # pass complete input data frame in here as pred_df
-            if len(input_data) >= self.period:
+            if self.period-len(input_data) <= self.slack:
+
                 prediction = model.predict(
                     input_data,
                     self.sensitivity,

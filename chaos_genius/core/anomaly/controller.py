@@ -31,6 +31,7 @@ class AnomalyDetectionController(object):
         self.debug = self.kpi_info['anomaly_params'].get('debug', False)
         if self.debug == "True": self.debug = True
         if self.debug == "False": self.debug = False
+        self.slack = self.kpi_info['anomaly_params'].get('slack', 3)
 
     def _load_anomaly_data(self) -> pd.DataFrame:
         """Loads KPI data from its datastore, preprocesses it and
@@ -129,6 +130,7 @@ class AnomalyDetectionController(object):
             self.kpi_info["table_name"],
             freq,
             sensitivity,
+            self.slack,
             series,
             subgroup,
             self.kpi_info.get("model_kwargs", {})

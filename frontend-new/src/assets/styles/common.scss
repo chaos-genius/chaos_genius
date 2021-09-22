@@ -998,6 +998,12 @@ a:hover {
   .css-2b097c-container {
     width: 100%;
   }
+  .selectcategory--is-disabled {
+    width: 100%;
+    .selectcategory__placeholder {
+      padding: 2px 8px;
+    }
+  }
 }
 // Toastify
 .Toastify__toast-container {

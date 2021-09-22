@@ -29,6 +29,10 @@ from chaos_genius.extensions import cache, db
 from chaos_genius.databases.db_utils import chech_editable_field
 
 
+from celery.app.base import Celery
+from chaos_genius.extensions import celery as celery_ext
+from chaos_genius.jobs.anomaly_tasks import rca_single_kpi
+celery = celery_ext.celery
 blueprint = Blueprint("api_kpi", __name__)
 
 
@@ -61,6 +65,9 @@ def kpi():
             return jsonify({"error": message, "status": "failure"})
 
         new_kpi.save(commit=True)
+        # run rca as soon as new KPI is added
+        #TODO: Test this manual trigger
+        rca_single_kpi.delay(new_kpi.id)
         return jsonify({"message": f"KPI {new_kpi.name} has been created successfully.", "status": "success"})
 
     elif request.method == 'GET':

@@ -86,7 +86,7 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
                   </td>
                   <td>
                     <div className="alert-status">
-                      <label>Active</label>
+                      <label>{alert.active ? 'Active' : 'InActive'}</label>
                       <div className="form-check form-switch">
                         <input
                           className="form-check-input"

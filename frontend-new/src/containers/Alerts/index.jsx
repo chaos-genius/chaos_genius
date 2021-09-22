@@ -134,7 +134,7 @@ const Alerts = () => {
             </Link>
           </div>
         </div>
-        {false ? (
+        {alertList && alertList.length !== 0 ? (
           <div className="explore-wrapper">
             {/* filter section */}
             <div className="filter-section">

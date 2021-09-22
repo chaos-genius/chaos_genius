@@ -263,9 +263,9 @@ const KpiAlertDestinationForm = ({
         </div>
       </div>
       <div className="add-options-wrapper options-spacing">
-        {/* <div className="add-options">
+        <div className="add-options">
           <label>+ Add Another Channel</label>
-        </div> */}
+        </div>
       </div>
       <div className="form-action alerts-button">
         <button className="btn white-button" onClick={() => onBack()}>

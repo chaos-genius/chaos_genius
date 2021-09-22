@@ -68,7 +68,6 @@ const KpiAlertDestinationForm = ({
   } = useSelector((state) => {
     return state.alert;
   });
-  console.log('Kpi Update:', updateKpiAlertData);
   const [error, setError] = useState({
     alert_channel: '',
     add_recepients: ''

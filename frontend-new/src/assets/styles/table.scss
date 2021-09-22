@@ -22,6 +22,10 @@
     }
     tbody {
       tr {
+        // display: none;
+        // &:last-child {
+        //   display: contents;
+        // }
         &.child-row {
           background-color: $grey_variation-2;
           td {
@@ -64,6 +68,7 @@
           height: 56px;
           vertical-align: middle;
           padding: 16px;
+
           &.child-rotate {
             img {
               transform: rotate(90deg);

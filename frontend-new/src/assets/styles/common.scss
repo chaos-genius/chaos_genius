@@ -1008,10 +1008,11 @@ a:hover {
 }
 // Toastify
 .Toastify__toast-container {
-  width: 240px !important;
+  padding: 0px;
+  width: fit-content !important;
   .Toastify__toast {
     padding: 14px;
-    height: 44px;
+    min-height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1033,6 +1034,7 @@ a:hover {
         line-height: $line-height-14;
         letter-spacing: $letter-spacing;
         color: $black_variation-2;
+        margin-right: 35px;
         img {
           margin-right: 10px;
         }
@@ -1055,11 +1057,13 @@ a:hover {
           line-height: $line-height-14;
           letter-spacing: $letter-spacing;
           color: $black_variation-2;
+          margin-right: 35px;
         }
       }
     }
     button {
       height: 100%;
+      margin-top: 4px;
       svg {
         fill: $grey_variation-3 !important;
       }
@@ -1069,4 +1073,39 @@ a:hover {
       animation-play-state: running !important;
     }
   }
+  // .toast-title {
+  //   position: absolute;
+  //   top: 0;
+  //   left: 0;
+  //   border-bottom: 1px solid $green;
+  //   width: 100%;
+  //   padding: 5px 20px;
+  // }
+  // .Toastify__close-button {
+  //   position: absolute;
+  //   top: -19px;
+  //   right: 0;
+  //   padding-right: 15px;
+  // }
+  // .Toastify__toast-body {
+  //   margin-top: 15px;
+  // }
 }
+// .range-selector {
+//   div {
+//     div {
+//       height: 8px;
+//       width: 100%;
+//       border-radius: 4px;
+//       background: linear-gradient(
+//         90deg,
+//         #60ca9a 4.86%,
+//         #fac06b 61.61%,
+//         #e96560 117.38%
+//       ) !important;
+//       div {
+//         background: $white !important;
+//       }
+//     }
+//   }
+// }

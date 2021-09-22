@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { Route, withRouter } from 'react-router';
+import { ToastContainer, toast } from 'react-toastify';
 
 // import { Redirect } from 'react-router-dom';
 // import { isAuthenticated } from '../utils/user-helper';
@@ -45,6 +46,10 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
                 <Component {...props} />
               </div>
             </main>
+            <ToastContainer
+              position={toast.POSITION.BOTTOM_RIGHT}
+              autoClose={5000}
+            />
           </div>
         </>
       )}

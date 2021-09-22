@@ -15,6 +15,7 @@ import { getAllAlerts } from '../../redux/actions';
 
 import Fuse from 'fuse.js';
 import store from '../../redux/store';
+import Noalert from '../../components/Noalert';
 
 const RESET_ACTION = {
   type: 'RESET_EMAIL_DATA'
@@ -114,7 +115,7 @@ const Alerts = () => {
     );
   } else {
     return (
-      <div>
+      <>
         {/* common heading and options */}
         <div className="heading-option">
           <div className="heading-title">
@@ -136,6 +137,7 @@ const Alerts = () => {
         </div>
         {alertList && alertList.length !== 0 ? (
           <div className="explore-wrapper">
+            {/* explore wrapper */}
             {/* filter section */}
             <div className="filter-section">
               <AlertFilter
@@ -155,10 +157,11 @@ const Alerts = () => {
             </div>
           </div>
         ) : (
-          <div>no result </div>
+          <div className="no-alert-container">
+            <Noalert />
+          </div>
         )}
-        {/* explore wrapper */}
-      </div>
+      </>
     );
   }
 };

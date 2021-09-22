@@ -80,7 +80,7 @@ const KpiAlertConfigurationForm = ({
     if (alertFormData.alert_name === '') {
       obj['alert_name'] = 'Enter Name of Your Alert';
     }
-    if (alertFormData.data_source === 0) {
+    if (alertFormData.data_source === 0 || alertFormData.data_source === null) {
       obj['data_source'] = 'Enter Kpi';
     }
     if (alertFormData.kpi_alert_type === '') {
@@ -98,6 +98,7 @@ const KpiAlertConfigurationForm = ({
     setError(obj);
     if (
       obj.alert_name === '' &&
+      obj.data_source === '' &&
       obj.kpi_alert_type === '' &&
       obj.severity_cutoff_score === '' &&
       obj.alert_frequency === '' &&

@@ -218,7 +218,6 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
           </div>
         </div>
       </Modal>
-      <ToastContainer position={toast.POSITION.BOTTOM_RIGHT} autoClose={5000} />
     </div>
   );
 };

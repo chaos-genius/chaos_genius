@@ -93,7 +93,7 @@ def anomaly_scheduler():
     # find KPIs
     kpis: Kpi = Kpi.query.distinct("kpi_id").filter(
         (Kpi.run_anomaly == True) & (Kpi.active == True) & (Kpi.is_static == False)
-        & (Kpi.anomaly_params is not None)
+        & (Kpi.anomaly_params != None)
     )
     
     task_group = []

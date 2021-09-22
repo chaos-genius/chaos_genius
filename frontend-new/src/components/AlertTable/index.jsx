@@ -28,6 +28,12 @@ import { kpiAlertDisable } from '../../redux/actions';
 import { toastMessage } from '../../utils/toast-helper';
 import { ToastContainer, toast } from 'react-toastify';
 
+import store from '../../redux/store';
+
+const RESET_ACTION = {
+  type: 'RESET_ALERT_DATA_Data'
+};
+
 const AlertTable = ({ alertData, alertSearch, changeData }) => {
   const dispatch = useDispatch();
 
@@ -44,6 +50,9 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
   const onDelete = (id) => {
     dispatch(kpiAlertDisable(id));
   };
+  useEffect(() => {
+    store.dispatch(RESET_ACTION);
+  }, [dispatch]);
 
   useEffect(() => {
     if (kpiAlertDisableData && kpiAlertDisableData.status === 'success') {
@@ -117,7 +126,12 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
                     </div>
                   </td>
                   <td>
-                    <div className="more-dropdown">
+                    <div
+                      className={
+                        alertData.length !== 1
+                          ? ' more-dropdown dropdown '
+                          : ' more-dropdown '
+                      }>
                       <div
                         data-bs-toggle="dropdown"
                         aria-expanded="false"

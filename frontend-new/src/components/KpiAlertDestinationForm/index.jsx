@@ -60,12 +60,15 @@ const KpiAlertDestinationForm = ({
   const kpiId = useParams().id;
   const path = history.location.pathname.split('/');
   //createKpiAlertData ,updateKpiAlert
-  const { createKpiAlertLoading, updateKpiAlertLoading } = useSelector(
-    (state) => {
-      return state.alert;
-    }
-  );
-
+  const {
+    createKpiAlertLoading,
+    updateKpiAlertLoading,
+    createKpiAlertData,
+    updateKpiAlertData
+  } = useSelector((state) => {
+    return state.alert;
+  });
+  console.log('Kpi Update:', updateKpiAlertData);
   const [error, setError] = useState({
     alert_channel: '',
     add_recepients: ''
@@ -168,13 +171,24 @@ const KpiAlertDestinationForm = ({
     );
   };
 
-  // useEffect(() => {
-  //   if (createKpiAlertData && createKpiAlertData.status === 'success') {
-  //     toastMessage({ type: 'success', message: 'Successfully created' });
-  //   } else if (createKpiAlertData && createKpiAlertData.status === 'failure') {
-  //     toastMessage({ type: 'success', message: 'Failed to create' });
-  //   }
-  // }, [createKpiAlertData]);
+  useEffect(() => {
+    if (createKpiAlertData && createKpiAlertData.status === 'success') {
+      history.push('/alerts');
+      toastMessage({ type: 'success', message: 'Successfully created' });
+    } else if (createKpiAlertData && createKpiAlertData.status === 'failure') {
+      toastMessage({ type: 'error', message: 'Failed to create' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createKpiAlertData]);
+
+  useEffect(() => {
+    if (updateKpiAlertData && updateKpiAlertData.status === 'success') {
+      toastMessage({ type: 'success', message: 'Successfully updated' });
+    } else if (updateKpiAlertData && updateKpiAlertData.status === 'failure') {
+      toastMessage({ type: 'error', message: 'Failed to update' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [updateKpiAlertData]);
 
   const handleChange = (tags) => {
     setresp(tags);

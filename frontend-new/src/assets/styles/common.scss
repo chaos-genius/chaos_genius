@@ -940,7 +940,7 @@ a:hover {
   }
 }
 .form-group {
-  input[type='text']:disabled {
+  input:disabled {
     background: $grey_variation-2;
     &::placeholder {
       font-weight: $font-weight-400;

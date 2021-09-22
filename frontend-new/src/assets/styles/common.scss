@@ -991,6 +991,9 @@ a:hover {
 .editable-field {
   display: flex;
   align-items: center;
+  // .css-2b097c-container {
+  //   width: 100%;
+  // }
   input:disabled {
     background: $grey_variation-2;
     &::placeholder {
@@ -1006,7 +1009,8 @@ a:hover {
     min-width: 81px;
     margin-left: 16px;
   }
-  input .css-2b097c-container {
+  input,
+  .css-2b097c-container {
     width: 100%;
   }
   .selectcategory--is-disabled {

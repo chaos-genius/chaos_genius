@@ -12,10 +12,13 @@ import Edit from '../../assets/images/disable-edit.svg';
 
 import './kpialertdestinationform.scss';
 import { createKpiAlert, updateKpiAlert } from '../../redux/actions';
-//import { toastMessage } from '../../utils/toast-helper';
-import TagsInput from 'react-tagsinput';
+import { toastMessage } from '../../utils/toast-helper';
+// import TagsInput from 'react-tagsinput';
+// import 'react-tagsinput/react-tagsinput.css';
 
-import 'react-tagsinput/react-tagsinput.css';
+import ReactTagInput from '@pathofdev/react-tag-input';
+import '@pathofdev/react-tag-input/build/index.css';
+
 const customSingleValue = ({ data }) => (
   <div className="input-select">
     <div className="input-select__single-value">
@@ -176,7 +179,9 @@ const KpiAlertDestinationForm = ({
   // }, [createKpiAlertData]);
 
   const handleChange = (tags) => {
+    console.log(tags);
     setresp(tags);
+
     setAlertFormData((prev) => {
       return {
         ...prev,
@@ -185,6 +190,11 @@ const KpiAlertDestinationForm = ({
         }
       };
     });
+  };
+
+  const validateEmail = (email) => {
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    return re.test(String(email).toLowerCase());
   };
 
   return (
@@ -251,10 +261,26 @@ const KpiAlertDestinationForm = ({
         <label>Add Recepients </label>
         {/* <Select isMulti classNamePrefix="selectcategory" placeholder="Select" /> */}
         <div className="editable-field">
-          <TagsInput
+          {/* <TagsInput
             value={resp}
             onChange={(e) => handleChange(e)}
             placeholder="Add Recepients"
+          /> */}
+          <ReactTagInput
+            tags={resp}
+            placeholder="Add Recepients"
+            onChange={(newTags) => handleChange(newTags)}
+            validator={(value) => {
+              const isEmail = validateEmail(value);
+              if (!isEmail) {
+                toastMessage({
+                  type: 'error',
+                  message: 'Please enter an valid e-mail address'
+                });
+              }
+              // Return boolean to indicate validity
+              return isEmail;
+            }}
           />
           {path[2] === 'edit' &&
             editableStatus('alert_channnel') === 'sensitive' &&

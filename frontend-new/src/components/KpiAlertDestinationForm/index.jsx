@@ -58,7 +58,7 @@ const KpiAlertDestinationForm = ({
   const history = useHistory();
   const kpiId = useParams().id;
   const path = history.location.pathname.split('/');
-  //createKpiAlertData
+  //createKpiAlertData ,updateKpiAlert
   const { createKpiAlertLoading, updateKpiAlertLoading } = useSelector(
     (state) => {
       return state.alert;
@@ -105,7 +105,6 @@ const KpiAlertDestinationForm = ({
     setError(obj);
     if (error.alert_channel === '') {
       if (path[2] === 'edit') {
-        console.log('called');
         dispatch(updateKpiAlert(kpiId, alertFormData));
       } else {
         dispatch(createKpiAlert(alertFormData));

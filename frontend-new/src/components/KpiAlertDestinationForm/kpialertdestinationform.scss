@@ -8,7 +8,7 @@
   min-height: 150px;
 }
 .form-group {
-  .react-tagsinput {
+  .react-tag-input {
     min-height: 48px;
     height: auto;
     background: $white;
@@ -17,40 +17,40 @@
     border-radius: 6px;
     display: flex;
     align-items: center;
-    padding: 0px;
+    padding: 2px 8px;
     width: 100%;
-    .react-tagsinput-input {
-      margin: 0px;
+    .react-tag-input__input {
       font-weight: $font-weight-400;
       font-size: $font-size-14;
       line-height: $line-height-20;
       letter-spacing: $letter-spacing-point1;
-      text-transform: capitalize;
       color: $black_variation-2;
-      padding: 2px 8px;
       width: 100%;
       &::placeholder {
         color: $grey_variation-1;
-        content: 'Add Recepients' !important;
       }
     }
-    .react-tagsinput-tag {
-      font-weight: $font-weight-400;
-      font-size: $font-size-14;
-      line-height: $line-height-16;
-      letter-spacing: $letter-spacing;
-      color: $black_variation-2;
-      margin-bottom: 5px;
-      margin-left: 5px;
-      margin-top: 5px;
+    .react-tag-input__tag {
       background: $grey_variation-2;
       box-sizing: border-box;
       border: none;
       border-radius: 2px;
-      a {
-        padding-left: 4px;
+      .react-tag-input__tag__content {
+        font-weight: $font-weight-400;
+        font-size: $font-size-14;
+        line-height: $line-height-16;
+        letter-spacing: $letter-spacing;
+        color: $black_variation-2;
+        background: $grey_variation-2;
+        padding: 3px 3px 3px 6px;
+      }
+      .react-tag-input__tag__remove {
+        background: $grey_variation-2;
+        &::after {
+          background-color: $green;
+        }
         &::before {
-          color: $green;
+          background-color: $green;
         }
       }
     }

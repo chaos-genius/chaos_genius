@@ -13,8 +13,6 @@ import Edit from '../../assets/images/disable-edit.svg';
 import './kpialertdestinationform.scss';
 import { createKpiAlert, updateKpiAlert } from '../../redux/actions';
 import { toastMessage } from '../../utils/toast-helper';
-// import TagsInput from 'react-tagsinput';
-// import 'react-tagsinput/react-tagsinput.css';
 
 import ReactTagInput from '@pathofdev/react-tag-input';
 import '@pathofdev/react-tag-input/build/index.css';
@@ -179,7 +177,6 @@ const KpiAlertDestinationForm = ({
   // }, [createKpiAlertData]);
 
   const handleChange = (tags) => {
-    console.log(tags);
     setresp(tags);
 
     setAlertFormData((prev) => {
@@ -193,7 +190,8 @@ const KpiAlertDestinationForm = ({
   };
 
   const validateEmail = (email) => {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    const re =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
   };
 

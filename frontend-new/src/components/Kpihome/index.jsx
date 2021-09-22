@@ -16,6 +16,7 @@ import highchartsMore from 'highcharts/highcharts-more';
 import { useDispatch, useSelector } from 'react-redux';
 import { getHomeKpi } from '../../redux/actions';
 import Fuse from 'fuse.js';
+import Noresult from '../Noresult';
 
 highchartsMore(Highcharts);
 
@@ -186,78 +187,85 @@ const Kpihome = () => {
               />
             </div>
           </div>
-          {kpiHomeData &&
-            kpiHomeData.length !== 0 &&
-            kpiHomeData.map((item) => {
-              return (
-                <div className="kpi-card" key={item.id}>
-                  <div className="kpi-content kpi-content-label">
-                    <h3>{item.name}</h3>
-                    <label>(Mins)</label>
-                  </div>
-                  <div className="kpi-content">
-                    <label>
-                      {timeline.value === 'wow'
-                        ? 'This Week'
-                        : timeline.value === 'mom'
-                        ? 'This Month'
-                        : 'This Day'}
-                    </label>
-                    <span>{item.current}</span>
-                  </div>
-                  <div className="kpi-content">
-                    <label>
-                      {timeline.value === 'wow'
-                        ? 'Previous Week'
-                        : timeline.value === 'mom'
-                        ? 'Previous Month'
-                        : 'Previous Day'}
-                    </label>
-                    <span>{item.prev}</span>
-                  </div>
-                  <div className="kpi-content">
-                    <label>Change</label>
-                    <span>
-                      {item.change}
-                      <label className="high-change">
-                        <img src={Up} alt="High" />
-                        33%
-                      </label>
-                    </span>
-                  </div>
-                  <div className="kpi-content">
-                    <label>Anomalies</label>
-                    <span>
-                      {item.anomaly_count}
-                      <label className="anomalies-period">
-                        {' '}
+
+          {kpiHomeData && kpiHomeData.length !== 0 ? (
+            <>
+              {kpiHomeData.map((item) => {
+                return (
+                  <div className="kpi-card" key={item.id}>
+                    <div className="kpi-content kpi-content-label">
+                      <h3>{item.name}</h3>
+                      <label>(Mins)</label>
+                    </div>
+                    <div className="kpi-content">
+                      <label>
                         {timeline.value === 'wow'
-                          ? '(last week)'
+                          ? 'This Week'
                           : timeline.value === 'mom'
-                          ? '(last month)'
-                          : ' (last day)'}{' '}
+                          ? 'This Month'
+                          : 'This Day'}
                       </label>
-                    </span>
+                      <span>{item.current}</span>
+                    </div>
+                    <div className="kpi-content">
+                      <label>
+                        {timeline.value === 'wow'
+                          ? 'Previous Week'
+                          : timeline.value === 'mom'
+                          ? 'Previous Month'
+                          : 'Previous Day'}
+                      </label>
+                      <span>{item.prev}</span>
+                    </div>
+                    <div className="kpi-content">
+                      <label>Change</label>
+                      <span>
+                        {item.change}
+                        <label className="high-change">
+                          <img src={Up} alt="High" />
+                          33%
+                        </label>
+                      </span>
+                    </div>
+                    <div className="kpi-content">
+                      <label>Anomalies</label>
+                      <span>
+                        {item.anomaly_count}
+                        <label className="anomalies-period">
+                          {' '}
+                          {timeline.value === 'wow'
+                            ? '(last week)'
+                            : timeline.value === 'mom'
+                            ? '(last month)'
+                            : ' (last day)'}{' '}
+                        </label>
+                      </span>
+                    </div>
+                    <div className="kpi-content kpi-graph">
+                      {item.graph_data && item.graph_data.length !== 0 && (
+                        <HighchartsReact
+                          className="sparkline-graph"
+                          highcharts={Highcharts}
+                          options={sparklineGraph(item.graph_data)}
+                        />
+                      )}
+                    </div>
+                    <div
+                      className="kpi-content kpi-details"
+                      onClick={() =>
+                        history.push(`/dashboard/autorca/${item.id}`)
+                      }>
+                      Details
+                    </div>
                   </div>
-                  <div className="kpi-content kpi-graph">
-                    {item.graph_data && item.graph_data.length !== 0 && (
-                      <HighchartsReact
-                        className="sparkline-graph"
-                        highcharts={Highcharts}
-                        options={sparklineGraph(item.graph_data)}
-                      />
-                    )}
-                  </div>
-                  <div
-                    className="kpi-content kpi-details"
-                    onClick={() =>
-                      history.push(`/dashboard/autorca/${item.id}`)
-                    }>
-                    Details
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </>
+          ) : (
+            <div className="no-data-kpihome">
+              <Noresult text={search} title={'KPI'} />
+            </div>
+          )}
         </div>
       </>
     );

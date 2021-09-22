@@ -8,6 +8,7 @@ import { useHistory, useParams } from 'react-router-dom';
 
 import Slack from '../../assets/images/table/slack.svg';
 import Email from '../../assets/images/alerts/email.svg';
+import Edit from '../../assets/images/disable-edit.svg';
 
 import './kpialertdestinationform.scss';
 import { createKpiAlert, updateKpiAlert } from '../../redux/actions';
@@ -69,6 +70,16 @@ const KpiAlertDestinationForm = ({
     add_recepients: ''
   });
 
+  const [enabled, setEnabled] = useState({
+    alert_channel: true,
+    add_recepients: true
+  });
+
+  const [sensitiveData, setSensitveData] = useState({
+    alert_channel: '',
+    add_recepients: ''
+  });
+
   useEffect(() => {
     if (path[2] === 'edit') {
       setresp(
@@ -102,6 +113,61 @@ const KpiAlertDestinationForm = ({
     }
   };
 
+  const editableStatus = (type) => {
+    var status = '';
+    kpiAlertMetaInfo &&
+      kpiAlertMetaInfo.length !== 0 &&
+      kpiAlertMetaInfo.fields.find((field) => {
+        if (field.name === type) {
+          status =
+            field.is_editable && field.is_sensitive
+              ? 'sensitive'
+              : field.is_editable
+              ? 'editable'
+              : '';
+        }
+        return '';
+      });
+    return status;
+  };
+
+  const onSaveInput = (name) => {
+    setEnabled({ ...enabled, [name]: true });
+  };
+
+  const onCancelInput = (name) => {
+    setEnabled({ ...enabled, [name]: true });
+    setSensitveData({ ...sensitiveData, [name]: '' });
+  };
+
+  const editAndSaveButton = (name) => {
+    return (
+      <>
+        {enabled[name] ? (
+          <button
+            className="btn black-button"
+            onClick={() => setEnabled({ ...enabled, [name]: false })}>
+            <img src={Edit} alt="Edit" />
+            <span>Edit</span>
+          </button>
+        ) : (
+          <>
+            <button
+              className="btn black-button"
+              onClick={() => onSaveInput(name)}>
+              <span>Save</span>
+            </button>
+            <button
+              className="btn black-secondary-button"
+              onClick={() => onCancelInput(name)}>
+              <span>Cancel</span>
+            </button>
+          </>
+        )}
+      </>
+    );
+  };
+
   // useEffect(() => {
   //   if (createKpiAlertData && createKpiAlertData.status === 'success') {
   //     toastMessage({ type: 'success', message: 'Successfully created' });
@@ -129,36 +195,52 @@ const KpiAlertDestinationForm = ({
       </div>
       <div className="form-group">
         <label>Select Channel *</label>
-        <Select
-          options={option}
-          classNamePrefix="selectcategory"
-          placeholder="Select"
-          value={
-            alertFormData.alert_channel
-              ? {
-                  label: (
-                    <div className="optionlabel">
-                      <img
-                        src={
-                          alertFormData.alert_channel === 'email'
-                            ? Email
-                            : Slack
-                        }
-                        alt="datasource"
-                      />
-                      {alertFormData.alert_channel}
-                    </div>
-                  ),
-                  value: `${alertFormData.alert_channel}`
-                }
-              : 'none'
-          }
-          components={{ SingleValue: customSingleValue }}
-          onChange={(e) => {
-            setAlertFormData({ ...alertFormData, alert_channel: e.value });
-            setError({ ...error, alert_channel: '' });
-          }}
-        />
+        <div className="editable-field">
+          <Select
+            options={option}
+            classNamePrefix="selectcategory"
+            placeholder="Select"
+            isDisabled={
+              path[2] === 'edit'
+                ? editableStatus('alert_channel') === 'editable'
+                  ? false
+                  : editableStatus('alert_channel') === 'sensitive'
+                  ? enabled.alert_channel
+                  : true
+                : false
+            }
+            value={
+              enabled.alert_channel
+                ? alertFormData.alert_channel
+                  ? {
+                      label: (
+                        <div className="optionlabel">
+                          <img
+                            src={
+                              alertFormData.alert_channel === 'email'
+                                ? Email
+                                : Slack
+                            }
+                            alt="datasource"
+                          />
+                          {alertFormData.alert_channel}
+                        </div>
+                      ),
+                      value: `${alertFormData.alert_channel}`
+                    }
+                  : 'none'
+                : sensitiveData.alert_channel
+            }
+            components={{ SingleValue: customSingleValue }}
+            onChange={(e) => {
+              setAlertFormData({ ...alertFormData, alert_channel: e.value });
+              setError({ ...error, alert_channel: '' });
+            }}
+          />
+          {path[2] === 'edit' &&
+            editableStatus('alert_channnel') === 'sensitive' &&
+            editAndSaveButton('alert_channel')}
+        </div>
         {error.alert_channel && (
           <div className="connection__fail">
             <p>{error.alert_channel}</p>
@@ -169,11 +251,16 @@ const KpiAlertDestinationForm = ({
       <div className="form-group">
         <label>Add Recepients </label>
         {/* <Select isMulti classNamePrefix="selectcategory" placeholder="Select" /> */}
-        <TagsInput
-          value={resp}
-          onChange={(e) => handleChange(e)}
-          placeholder="Add Recepients"
-        />
+        <div className="editable-field">
+          <TagsInput
+            value={resp}
+            onChange={(e) => handleChange(e)}
+            placeholder="Add Recepients"
+          />
+          {path[2] === 'edit' &&
+            editableStatus('alert_channnel') === 'sensitive' &&
+            editAndSaveButton('alert_channel')}
+        </div>
       </div>
       <div className="add-options-wrapper options-spacing">
         {/* <div className="add-options">

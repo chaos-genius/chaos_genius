@@ -54,7 +54,26 @@ const KpiAlertConfigurationForm = ({
     alert_message: '',
     alert_frequency: ''
   });
+  const [sensitiveData, setSensitveData] = useState({
+    alert_name: '',
+    data_source: '',
+    alert_type: '',
+    kpi_alert_type: '',
+    severity_cutoff_score: '',
+    alert_message: '',
+    alert_frequency: ''
+  });
   const [option, setOption] = useState([]);
+
+  const [enabled, setEnabled] = useState({
+    alert_name: true,
+    data_source: true,
+    alert_type: true,
+    kpi_alert_type: true,
+    severity_cutoff_score: true,
+    alert_message: true,
+    alert_frequency: true
+  });
 
   const onSubmit = () => {
     var obj = { ...error };
@@ -177,6 +196,61 @@ const KpiAlertConfigurationForm = ({
     );
   };
 
+  const editableStatus = (type) => {
+    var status = '';
+    kpiAlertMetaInfo &&
+      kpiAlertMetaInfo.length !== 0 &&
+      kpiAlertMetaInfo.fields.find((field) => {
+        if (field.name === type) {
+          status =
+            field.is_editable && field.is_sensitive
+              ? 'sensitive'
+              : field.is_editable
+              ? 'editable'
+              : '';
+        }
+        return '';
+      });
+    return status;
+  };
+
+  const onSaveInput = (name) => {
+    setEnabled({ ...enabled, [name]: true });
+  };
+
+  const onCancelInput = (name) => {
+    setEnabled({ ...enabled, [name]: true });
+    setSensitveData({ ...sensitiveData, [name]: '' });
+  };
+
+  const editAndSaveButton = (name) => {
+    return (
+      <>
+        {enabled[name] ? (
+          <button
+            className="btn black-button"
+            onClick={() => setEnabled({ ...enabled, [name]: false })}>
+            <img src={Edit} alt="Edit" />
+            <span>Edit</span>
+          </button>
+        ) : (
+          <>
+            <button
+              className="btn black-button"
+              onClick={() => onSaveInput(name)}>
+              <span>Save</span>
+            </button>
+            <button
+              className="btn black-secondary-button"
+              onClick={() => onCancelInput(name)}>
+              <span>Cancel</span>
+            </button>
+          </>
+        )}
+      </>
+    );
+  };
+
   if (kpiAlertEditLoading) {
     return (
       <div className="load">
@@ -196,10 +270,21 @@ const KpiAlertConfigurationForm = ({
               classNamePrefix="selectcategory"
               placeholder="Select"
               options={option}
+              isDisabled={
+                path[2] === 'edit'
+                  ? editableStatus('alert_type') === 'editable'
+                    ? false
+                    : editableStatus('alert_type') === 'sensitive'
+                    ? enabled.alert_type
+                    : true
+                  : false
+              }
               value={
-                path[2] === 'edit' && alertFormData.data_source
-                  ? option.find((item) => alertFormData.kpi === item.id)
-                  : selectedKpi
+                enabled.data_source
+                  ? alertFormData.data_source
+                    ? option.find((item) => alertFormData.kpi === item.id)
+                    : selectedKpi
+                  : sensitiveData.data_source
               }
               onChange={(e) => {
                 setSelectedKpi(e);
@@ -211,21 +296,9 @@ const KpiAlertConfigurationForm = ({
                 setError({ ...error, data_source: '' });
               }}
             />
-            {/* <>
-   
-              <button className="btn black-button">
-                <img src={Edit} alt="Edit" />
-                <span>Edit</span>
-              </button>
-            </> */}
-            <>
-              <button className="btn black-button">
-                <span>Save</span>
-              </button>
-              <button className="btn black-secondary-button">
-                <span>Cancel</span>
-              </button>
-            </>
+            {path[2] === 'edit' &&
+              editableStatus('alert_type') === 'sensitive' &&
+              editAndSaveButton('alert_type')}
           </div>
 
           {error.data_source && (
@@ -236,20 +309,38 @@ const KpiAlertConfigurationForm = ({
         </div>
         <div className="form-group">
           <label>Name of your Alert *</label>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Enter alert name"
-            required
-            value={alertFormData?.alert_name}
-            onChange={(e) => {
-              setAlertFormData({
-                ...alertFormData,
-                alert_name: e.target.value
-              });
-              setError({ ...error, alert_name: '' });
-            }}
-          />
+          <div className="editable-field">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Enter alert name"
+              required
+              value={
+                enabled.alert_name
+                  ? alertFormData?.alert_name
+                  : sensitiveData.alert_name
+              }
+              disabled={
+                path[2] === 'edit'
+                  ? editableStatus('alert_name') === 'editable'
+                    ? false
+                    : editableStatus('alert_name') === 'sensitive'
+                    ? enabled.alert_name
+                    : true
+                  : false
+              }
+              onChange={(e) => {
+                setAlertFormData({
+                  ...alertFormData,
+                  alert_name: e.target.value
+                });
+                setError({ ...error, alert_name: '' });
+              }}
+            />
+            {path[2] === 'edit' &&
+              editableStatus('alert_type') === 'sensitive' &&
+              editAndSaveButton('alert_type')}
+          </div>
           {error.alert_name && (
             <div className="connection__fail">
               <p>{error.alert_name}</p>
@@ -258,6 +349,7 @@ const KpiAlertConfigurationForm = ({
         </div>
         <div className="form-group">
           <label>Alert Type *</label>
+
           <div className="alerts-type-container">
             <div
               className={
@@ -271,6 +363,7 @@ const KpiAlertConfigurationForm = ({
                 className="alert-image-active"
               />
               <span>Anomoly</span>
+
               {error.kpi_alert_type && (
                 <div className="connection__fail">
                   <p>{error.kpi_alert_type}</p>
@@ -451,23 +544,42 @@ const KpiAlertConfigurationForm = ({
         )}
         <div className="form-group">
           <label>Alert Frequency *</label>
-          <Select
-            classNamePrefix="selectcategory"
-            placeholder="Alert Frequency"
-            options={alertFrequency}
-            value={
-              alertFormData.alert_frequency
-                ? {
-                    value: alertFormData.alert_frequency,
-                    label: alertFormData.alert_frequency
-                  }
-                : 'none'
-            }
-            onChange={(e) => {
-              setAlertFormData({ ...alertFormData, alert_frequency: e.value });
-              setError({ ...error, alert_frequency: '' });
-            }}
-          />
+          <div className="editable-field">
+            <Select
+              classNamePrefix="selectcategory"
+              placeholder="Alert Frequency"
+              options={alertFrequency}
+              isDisabled={
+                path[2] === 'edit'
+                  ? editableStatus('alert_frequency') === 'editable'
+                    ? false
+                    : editableStatus('alert_frequency') === 'sensitive'
+                    ? enabled.alert_frequency
+                    : true
+                  : false
+              }
+              value={
+                enabled.alert_frequency
+                  ? alertFormData.alert_frequency
+                    ? {
+                        value: alertFormData.alert_frequency,
+                        label: alertFormData.alert_frequency
+                      }
+                    : 'none'
+                  : sensitiveData.alert_frequency
+              }
+              onChange={(e) => {
+                setAlertFormData({
+                  ...alertFormData,
+                  alert_frequency: e.value
+                });
+                setError({ ...error, alert_frequency: '' });
+              }}
+            />
+            {path[2] === 'edit' &&
+              editableStatus('alert_frequency') === 'sensitive' &&
+              editAndSaveButton('alert_frequency')}
+          </div>
           {error.alert_frequency && (
             <div className="connection__fail">
               <p>{error.alert_frequency}</p>
@@ -478,7 +590,20 @@ const KpiAlertConfigurationForm = ({
           <label>Message Body *</label>
           <textarea
             placeholder="Enter message here"
-            value={alertFormData.alert_message}
+            value={
+              enabled.alert_message
+                ? alertFormData.alert_message
+                : sensitiveData.alert_message
+            }
+            disabled={
+              path[2] === 'edit'
+                ? editableStatus('alert_message') === 'editable'
+                  ? false
+                  : editableStatus('alert_message') === 'sensitive'
+                  ? enabled.alert_message
+                  : true
+                : false
+            }
             onChange={(e) => {
               setAlertFormData({
                 ...alertFormData,

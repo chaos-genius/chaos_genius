@@ -25,7 +25,13 @@ const AddAlerts = () => {
               </Link>
             </li>
             <li className="breadcrumb-item active" aria-current="page">
-              {data[3] === 'slack' ? 'Slack Setup' : 'Email Setup'}
+              {data[4] !== 'edit'
+                ? data[3] === 'slack'
+                  ? 'Slack Setup'
+                  : 'Email Setup'
+                : data[3] === 'slack'
+                ? 'Edit Slack Connection'
+                : 'Edit Email Connection'}
             </li>
           </ol>
         </nav>
@@ -34,7 +40,16 @@ const AddAlerts = () => {
         <div className="backnavigation">
           <Link to="/alerts/channelconfiguration">
             <img src={rightarrow} alt="Back" />
-            <span>{data[3] === 'slack' ? 'Slack Setup' : 'Email Setup'}</span>
+            <span>
+              {' '}
+              {data[4] !== 'edit'
+                ? data[3] === 'slack'
+                  ? 'Slack Setup'
+                  : 'Email Setup'
+                : data[3] === 'slack'
+                ? 'Edit Slack Connection'
+                : 'Edit Email Connection'}
+            </span>
           </Link>
         </div>
       </div>

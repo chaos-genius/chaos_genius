@@ -53,6 +53,7 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
     } else if (kpiAlertDisableData && kpiAlertDisableData === 'failure') {
       toastMessage({ type: 'error', message: kpiAlertDisableData.message });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiAlertDisableData]);
 
   return (

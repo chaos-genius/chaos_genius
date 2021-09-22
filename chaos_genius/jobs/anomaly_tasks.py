@@ -88,6 +88,7 @@ def anomaly_kpi():
 # runs every N time (set in celery_config)
 # if time > scheduled time today, run task
 # last_scheduled_time -> if it's < specified time of today's date, run task
+# TODO: Need to add logic for running RCA after KPI setup.
 @celery.task
 def anomaly_scheduler():
     # find KPIs

@@ -1,6 +1,5 @@
 import {
   attachParams,
-  DASHBOARD_SIDEBAR_URL,
   KPI_RELATIVE_URL,
   BASE_URL
 } from '../../utils/url-helper';

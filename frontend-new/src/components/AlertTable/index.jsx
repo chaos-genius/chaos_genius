@@ -26,7 +26,6 @@ import { formatDate } from '../../utils/date-helper';
 import { kpiAlertDisable } from '../../redux/actions';
 
 import { toastMessage } from '../../utils/toast-helper';
-import { ToastContainer, toast } from 'react-toastify';
 
 import store from '../../redux/store';
 

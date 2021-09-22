@@ -1092,7 +1092,10 @@ a:hover {
 //         #60ca9a 4.86%,
 //         #fac06b 61.61%,
 //         #e96560 117.38%
-//       );
+//       ) !important;
+//       div {
+//         background: $white !important;
+//       }
 //     }
 //   }
 // }

@@ -187,10 +187,10 @@ const KpiAlertConfigurationForm = ({ setSteps }) => {
                         background: getTrackBackground({
                           values: value,
                           colors: [
-                            // ['#60CA9A 4.86%', '#FAC06B 61.61%', '#E96560'],
-                            // '#EFEFEF'
-                            ['#60CA9A 0%', '#FAC06B ', '#E96560'],
+                            ['#60CA9A 0%', '#FAC06B', '#E96560'],
                             '#EFEFEF'
+                            // ['#60CA9A 0%', '#FAC06B ', '#E96560'],
+                            // '#EFEFEF'
                           ],
                           min: 0,
                           max: 100,

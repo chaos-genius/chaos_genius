@@ -31,6 +31,7 @@ class Kpi(PkModel):
 
     active = Column(db.Boolean(), default=True)
     created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
+    rca_time = Column(db.DateTime, nullable=True, default=dt.datetime.utcnow)
 
     def __init__(self, name, **kwargs):
         """Create instance."""

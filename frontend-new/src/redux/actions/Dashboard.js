@@ -5,9 +5,6 @@ import {
   BASE_URL
 } from '../../utils/url-helper';
 import {
-  DASHBOARDSIDEBARREQUEST,
-  DASHBOARDSIDEBARSUCCESS,
-  DASHBOARDSIDEBARFAILURE,
   DASHBOARDAGGREGATIONREQUEST,
   DASHBOARDAGGREGATIONSUCCESS,
   DASHBOARDAGGREGATIONFAILURE,
@@ -22,39 +19,6 @@ import {
   DASHBOARDHIERARCHICALREQUEST
 } from './ActionConstants';
 import { getRequest } from '../../utils/http-helper';
-
-export const dashboardSidebarRequested = () => {
-  return {
-    type: DASHBOARDSIDEBARREQUEST
-  };
-};
-
-export const dashboardSidebarSuccess = (response) => {
-  return {
-    type: DASHBOARDSIDEBARSUCCESS,
-    data: response
-  };
-};
-
-export const dashboardSidebarFailure = () => {
-  return {
-    type: DASHBOARDSIDEBARFAILURE
-  };
-};
-
-export const getDashboardSidebar = () => {
-  return async (dispatch) => {
-    dispatch(dashboardSidebarRequested);
-    const { data, error, status } = await getRequest({
-      url: DASHBOARD_SIDEBAR_URL
-    });
-    if (error) {
-      dispatch(dashboardSidebarFailure);
-    } else if (data && status === 200) {
-      dispatch(dashboardSidebarSuccess(data.data));
-    }
-  };
-};
 
 export const dashboardAggregationRequested = () => {
   return {
@@ -77,7 +41,10 @@ export const dashboardAggregationFailure = () => {
 
 export const getDashboardAggregation = (id, params) => {
   return async (dispatch) => {
-    const url = attachParams(`${KPI_RELATIVE_URL}/${id}/kpi-aggregations`, params);
+    const url = attachParams(
+      `${KPI_RELATIVE_URL}/${id}/kpi-aggregations`,
+      params
+    );
     dispatch(dashboardAggregationRequested());
     const { data, error, status } = await getRequest({
       url: url
@@ -179,7 +146,10 @@ export const getAllHierarchicalFailure = () => {
 
 export const getAllDashboardHierarchical = (id, params) => {
   return async (dispatch) => {
-    const url = attachParams(`${KPI_RELATIVE_URL}/${id}/rca-hierarchical-data`, params);
+    const url = attachParams(
+      `${KPI_RELATIVE_URL}/${id}/rca-hierarchical-data`,
+      params
+    );
     dispatch(getAllHierarchicalRequest());
     const { data, error, status } = await getRequest({
       url: url

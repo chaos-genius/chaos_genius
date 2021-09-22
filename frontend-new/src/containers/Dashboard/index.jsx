@@ -64,9 +64,6 @@ const Dashboard = () => {
     setTabs(tabs);
     window.history.pushState('', '', `/#/dashboard/${tabs}/${kpi}`);
   };
-  // const onSettingClick = (option) => {
-  //   history.push(`/kpi/settings/${kpi}`);
-  // };
 
   if (sidebarLoading) {
     return (

@@ -14,6 +14,7 @@ export const sidebar = (state = initialState, action) => {
   switch (action.type) {
     case DASHBOARDSIDEBARREQUEST: {
       return {
+        ...state,
         sidebarLoading: true,
         sidebarError: false
       };
@@ -21,12 +22,14 @@ export const sidebar = (state = initialState, action) => {
 
     case DASHBOARDSIDEBARSUCCESS: {
       return {
+        ...sidebar,
         sidebarLoading: false,
         sidebarList: action.data
       };
     }
     case DASHBOARDSIDEBARFAILURE: {
       return {
+        ...state,
         sidebarLoading: false,
         sidebarError: true
       };

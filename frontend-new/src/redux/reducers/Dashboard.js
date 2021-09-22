@@ -14,9 +14,6 @@ import {
 } from '../actions/ActionConstants';
 
 const initialState = {
-  sidebarLoading: true,
-  sidebarError: false,
-  sidebarList: [],
   aggregationLoading: true,
   aggregationData: [],
   aggregationError: false,
@@ -33,25 +30,6 @@ const initialState = {
 
 export const dashboard = (state = initialState, action) => {
   switch (action.type) {
-    case DASHBOARDSIDEBARREQUEST: {
-      return {
-        sidebarLoading: true,
-        sidebarError: false
-      };
-    }
-
-    case DASHBOARDSIDEBARSUCCESS: {
-      return {
-        sidebarLoading: false,
-        sidebarList: action.data
-      };
-    }
-    case DASHBOARDSIDEBARFAILURE: {
-      return {
-        sidebarLoading: false,
-        sidebarError: true
-      };
-    }
     case DASHBOARDAGGREGATIONREQUEST: {
       return {
         aggregationLoading: true,

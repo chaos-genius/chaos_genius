@@ -24,7 +24,6 @@ const Alerts = () => {
   const dispatch = useDispatch();
 
   const { alertLoading, alertList } = useSelector((state) => state.alert);
-
   const [alertData, setAlertData] = useState(alertList);
   const [alertSearch, setAlertSearch] = useState('');
   const [alertFilter, setAlertFilter] = useState([]);
@@ -106,6 +105,7 @@ const Alerts = () => {
     fetchStatusFilter();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alertStatusFilter]);
+
   if (alertLoading) {
     return (
       <div className="load loader-page">
@@ -134,27 +134,30 @@ const Alerts = () => {
             </Link>
           </div>
         </div>
-
+        {false ? (
+          <div className="explore-wrapper">
+            {/* filter section */}
+            <div className="filter-section">
+              <AlertFilter
+                setAlertSearch={setAlertSearch}
+                setAlertFilter={setAlertFilter}
+                alertData={alertList}
+                setAlertStatusFilter={setAlertStatusFilter}
+              />
+            </div>
+            {/* table section */}
+            <div className="table-section">
+              <AlertTable
+                alertData={alertData}
+                alertSearch={alertSearch}
+                changeData={setData}
+              />
+            </div>
+          </div>
+        ) : (
+          <div>no result </div>
+        )}
         {/* explore wrapper */}
-        <div className="explore-wrapper">
-          {/* filter section */}
-          <div className="filter-section">
-            <AlertFilter
-              setAlertSearch={setAlertSearch}
-              setAlertFilter={setAlertFilter}
-              alertData={alertList}
-              setAlertStatusFilter={setAlertStatusFilter}
-            />
-          </div>
-          {/* table section */}
-          <div className="table-section">
-            <AlertTable
-              alertData={alertData}
-              alertSearch={alertSearch}
-              changeData={setData}
-            />
-          </div>
-        </div>
       </div>
     );
   }

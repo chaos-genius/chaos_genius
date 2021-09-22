@@ -360,6 +360,7 @@ a:hover {
     .form-check-label,
     label {
       cursor: pointer;
+      text-transform: capitalize;
     }
   }
   .form-check-input {

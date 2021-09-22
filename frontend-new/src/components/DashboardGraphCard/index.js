@@ -28,7 +28,11 @@ const Dashboardgraphcard = ({
         {/* Last Month/Last Week */}
         <div className="graph-custom-card">
           <label>
-            {monthWeek.value === 'wow' ? 'Last Week' : 'Last Month'}
+            {monthWeek.value === 'wow'
+              ? 'Last Week'
+              : monthWeek.value === 'mom'
+              ? 'Last Month'
+              : 'Last Day'}
           </label>
           <div className="grey-card">
             {kpiAggregate === 'sum' ? (
@@ -146,7 +150,11 @@ const Dashboardgraphcard = ({
         {/* This Month/This Week */}
         <div className="graph-custom-card">
           <label>
-            {monthWeek.value === 'wow' ? 'This Week' : 'This Month'}
+            {monthWeek.value === 'wow'
+              ? 'This Week'
+              : monthWeek.value === 'mom'
+              ? 'This Month'
+              : 'This Day'}
           </label>
           <div className="white-card">
             {kpiAggregate === 'sum' ? (

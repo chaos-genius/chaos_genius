@@ -27,6 +27,7 @@ class Alert(PkModel):
 
     active = Column(db.Boolean(), default=False)
     created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
+    last_alerted = Column(db.DateTime, nullable=True)
 
     def __init__(self, **kwargs):
         """Create instance."""

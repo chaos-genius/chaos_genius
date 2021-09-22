@@ -7,3 +7,52 @@
 .options-spacing {
   min-height: 150px;
 }
+.form-group {
+  .react-tagsinput {
+    min-height: 48px;
+    height: auto;
+    background: $white;
+    border: 1px solid $grey_variation-1;
+    box-sizing: border-box;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding: 0px;
+    width: 100%;
+    .react-tagsinput-input {
+      margin: 0px;
+      font-weight: $font-weight-400;
+      font-size: $font-size-14;
+      line-height: $line-height-20;
+      letter-spacing: $letter-spacing-point1;
+      text-transform: capitalize;
+      color: $black_variation-2;
+      padding: 2px 8px;
+      width: 100%;
+      &::placeholder {
+        color: $grey_variation-1;
+        content: 'Add Recepients' !important;
+      }
+    }
+    .react-tagsinput-tag {
+      font-weight: $font-weight-400;
+      font-size: $font-size-14;
+      line-height: $line-height-16;
+      letter-spacing: $letter-spacing;
+      color: $black_variation-2;
+      margin-bottom: 5px;
+      margin-left: 5px;
+      margin-top: 5px;
+      background: $grey_variation-2;
+      box-sizing: border-box;
+      border: none;
+      border-radius: 2px;
+      a {
+        padding-left: 4px;
+        &::before {
+          color: $green;
+        }
+      }
+    }
+  }
+}

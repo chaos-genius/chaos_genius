@@ -5,7 +5,7 @@ import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Slack from '../../assets/images/alerts/slack.svg';
-import Email from '../../assets/images/alerts/gmail.svg';
+import Email from '../../assets/images/alerts/email.svg';
 import Edit from '../../assets/images/disable-edit.svg';
 
 import {

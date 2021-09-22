@@ -12,11 +12,11 @@ from chaos_genius.extensions import celery as celery_ext
 celery = cast(Celery, celery_ext.celery)
 
 
-@celery.task
-def add_together(a, b):
-    print(a + b)
-    print("It works...xD")
-    # return a + b
+# @celery.task
+# def add_together(a, b):
+#     print(a + b)
+#     print("It works...xD")
+#     # return a + b
 
 
 @celery.task
@@ -28,6 +28,7 @@ def anomaly_single_kpi(kpi_id, end_date=None):
     print(f"Running anomaly for KPI ID: {kpi_id}")
 
     status = run_anomaly_for_kpi(kpi_id, end_date)
+
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
     anomaly_params = kpi.anomaly_params
 
@@ -52,10 +53,10 @@ def rca_single_kpi(kpi_id: int):
     """
     print(f"Running RCA for KPI ID: {kpi_id}")
 
+    status = run_rca_for_kpi(kpi_id)
+
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
     anomaly_params = kpi.anomaly_params
-
-    status = run_rca_for_kpi(kpi_id)
 
     if status:
         print(f"Completed RCA for KPI ID: {kpi_id}")
@@ -92,7 +93,9 @@ def anomaly_scheduler():
     # find KPIs
     kpis: Kpi = Kpi.query.distinct("kpi_id").filter(
         (Kpi.run_anomaly == True) & (Kpi.active == True) & (Kpi.is_static == False)
+        & (Kpi.anomaly_params is not None)
     )
+    
     task_group = []
 
     for kpi in kpis:

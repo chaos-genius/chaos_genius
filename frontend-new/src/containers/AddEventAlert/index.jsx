@@ -6,7 +6,7 @@ import rightarrow from '../../assets/images/rightarrow.svg';
 
 import EventAlertForm from '../../components/EventAlertForm';
 
-import KpiAlertDestinationForm from '../../components/KpiAlertDestinationForm';
+//import KpiAlertDestinationForm from '../../components/KpiAlertDestinationForm';
 
 const AddEventAlert = () => {
   const [steps, setSteps] = useState(1);
@@ -44,7 +44,8 @@ const AddEventAlert = () => {
         {steps === 1 ? (
           <EventAlertForm setSteps={setSteps} />
         ) : (
-          <KpiAlertDestinationForm event setEventSteps={setSteps} />
+          <></>
+          // <KpiAlertDestinationForm event setEventSteps={setSteps} />
         )}
       </div>
     </>

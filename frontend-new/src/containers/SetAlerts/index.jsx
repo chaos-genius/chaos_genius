@@ -21,7 +21,8 @@ const SetAlerts = () => {
           <p>Tap ‘New Alert‘ button below to add your first alert</p>
           <div className="alert-button">
             <Link to="/alerts/new/event-alert">
-              <button className="btn black-button">
+              {/* added disable button */}
+              <button className="btn black-button" disabled>
                 <img src={Plus} alt="Plus" />
                 <span>New Alert</span>
               </button>

@@ -940,7 +940,7 @@ a:hover {
   }
 }
 .form-group {
-  input[type='text']:disabled {
+  input:disabled {
     background: $grey_variation-2;
     &::placeholder {
       font-weight: $font-weight-400;
@@ -991,11 +991,25 @@ a:hover {
 .editable-field {
   display: flex;
   align-items: center;
+  // .css-2b097c-container {
+  //   width: 100%;
+  // }
+  input:disabled {
+    background: $grey_variation-2;
+    &::placeholder {
+      font-weight: $font-weight-400;
+      font-size: $font-size-14;
+      line-height: $line-height-20;
+      letter-spacing: $letter-spacing-point1;
+      color: $black_variation-2;
+    }
+  }
   .btn {
     min-height: 48px;
     min-width: 81px;
     margin-left: 16px;
   }
+  input,
   .css-2b097c-container {
     width: 100%;
   }

@@ -302,6 +302,15 @@ export const alert = (state = initialState, action) => {
         kpiAlertDisableData: []
       };
     }
+    case 'RESET_ALERT_DATA_Data': {
+      return {
+        ...state,
+        createKpiAlertData: [],
+        kpiAlertEditData: [],
+        updateKpiAlertData: [],
+        kpiAlertDisableData: []
+      };
+    }
     default:
       return state;
   }

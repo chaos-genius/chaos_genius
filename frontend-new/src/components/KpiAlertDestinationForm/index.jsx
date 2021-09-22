@@ -12,10 +12,11 @@ import Edit from '../../assets/images/disable-edit.svg';
 
 import './kpialertdestinationform.scss';
 import { createKpiAlert, updateKpiAlert } from '../../redux/actions';
-//import { toastMessage } from '../../utils/toast-helper';
-import TagsInput from 'react-tagsinput';
+import { toastMessage } from '../../utils/toast-helper';
 
-import 'react-tagsinput/react-tagsinput.css';
+import ReactTagInput from '@pathofdev/react-tag-input';
+import '@pathofdev/react-tag-input/build/index.css';
+
 const customSingleValue = ({ data }) => (
   <div className="input-select">
     <div className="input-select__single-value">
@@ -59,12 +60,14 @@ const KpiAlertDestinationForm = ({
   const kpiId = useParams().id;
   const path = history.location.pathname.split('/');
   //createKpiAlertData ,updateKpiAlert
-  const { createKpiAlertLoading, updateKpiAlertLoading } = useSelector(
-    (state) => {
-      return state.alert;
-    }
-  );
-
+  const {
+    createKpiAlertLoading,
+    updateKpiAlertLoading,
+    createKpiAlertData,
+    updateKpiAlertData
+  } = useSelector((state) => {
+    return state.alert;
+  });
   const [error, setError] = useState({
     alert_channel: '',
     add_recepients: ''
@@ -167,16 +170,28 @@ const KpiAlertDestinationForm = ({
     );
   };
 
-  // useEffect(() => {
-  //   if (createKpiAlertData && createKpiAlertData.status === 'success') {
-  //     toastMessage({ type: 'success', message: 'Successfully created' });
-  //   } else if (createKpiAlertData && createKpiAlertData.status === 'failure') {
-  //     toastMessage({ type: 'success', message: 'Failed to create' });
-  //   }
-  // }, [createKpiAlertData]);
+  useEffect(() => {
+    if (createKpiAlertData && createKpiAlertData.status === 'success') {
+      history.push('/alerts');
+      toastMessage({ type: 'success', message: 'Successfully created' });
+    } else if (createKpiAlertData && createKpiAlertData.status === 'failure') {
+      toastMessage({ type: 'error', message: 'Failed to create' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createKpiAlertData]);
+
+  useEffect(() => {
+    if (updateKpiAlertData && updateKpiAlertData.status === 'success') {
+      toastMessage({ type: 'success', message: 'Successfully updated' });
+    } else if (updateKpiAlertData && updateKpiAlertData.status === 'failure') {
+      toastMessage({ type: 'error', message: 'Failed to update' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [updateKpiAlertData]);
 
   const handleChange = (tags) => {
     setresp(tags);
+
     setAlertFormData((prev) => {
       return {
         ...prev,
@@ -185,6 +200,12 @@ const KpiAlertDestinationForm = ({
         }
       };
     });
+  };
+
+  const validateEmail = (email) => {
+    const re =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    return re.test(String(email).toLowerCase());
   };
 
   return (
@@ -251,10 +272,26 @@ const KpiAlertDestinationForm = ({
         <label>Add Recepients </label>
         {/* <Select isMulti classNamePrefix="selectcategory" placeholder="Select" /> */}
         <div className="editable-field">
-          <TagsInput
+          {/* <TagsInput
             value={resp}
             onChange={(e) => handleChange(e)}
             placeholder="Add Recepients"
+          /> */}
+          <ReactTagInput
+            tags={resp}
+            placeholder="Add Recepients"
+            onChange={(newTags) => handleChange(newTags)}
+            validator={(value) => {
+              const isEmail = validateEmail(value);
+              if (!isEmail) {
+                toastMessage({
+                  type: 'error',
+                  message: 'Please enter an valid e-mail address'
+                });
+              }
+              // Return boolean to indicate validity
+              return isEmail;
+            }}
           />
           {path[2] === 'edit' &&
             editableStatus('alert_channnel') === 'sensitive' &&

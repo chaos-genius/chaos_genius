@@ -26,7 +26,12 @@ import { formatDate } from '../../utils/date-helper';
 import { kpiAlertDisable } from '../../redux/actions';
 
 import { toastMessage } from '../../utils/toast-helper';
-import { ToastContainer, toast } from 'react-toastify';
+
+import store from '../../redux/store';
+
+const RESET_ACTION = {
+  type: 'RESET_ALERT_DATA_Data'
+};
 
 const AlertTable = ({ alertData, alertSearch, changeData }) => {
   const dispatch = useDispatch();
@@ -44,6 +49,9 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
   const onDelete = (id) => {
     dispatch(kpiAlertDisable(id));
   };
+  useEffect(() => {
+    store.dispatch(RESET_ACTION);
+  }, [dispatch]);
 
   useEffect(() => {
     if (kpiAlertDisableData && kpiAlertDisableData.status === 'success') {
@@ -86,7 +94,7 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
                   </td>
                   <td>
                     <div className="alert-status">
-                      <label>Active</label>
+                      <label>{alert.active ? 'Active' : 'InActive'}</label>
                       <div className="form-check form-switch">
                         <input
                           className="form-check-input"
@@ -117,7 +125,12 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
                     </div>
                   </td>
                   <td>
-                    <div className="more-dropdown">
+                    <div
+                      className={
+                        alertData.length !== 1
+                          ? ' more-dropdown dropdown '
+                          : ' more-dropdown '
+                      }>
                       <div
                         data-bs-toggle="dropdown"
                         aria-expanded="false"
@@ -204,7 +217,6 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
           </div>
         </div>
       </Modal>
-      <ToastContainer position={toast.POSITION.BOTTOM_RIGHT} autoClose={5000} />
     </div>
   );
 };

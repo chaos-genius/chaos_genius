@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import { useSelector, useDispatch } from 'react-redux';
 
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 
 import './dashboard.scss';
 
@@ -18,9 +18,9 @@ import { getDashboardSidebar } from '../../redux/actions';
 const Dashboard = () => {
   const dispatch = useDispatch();
   const history = useHistory();
-
+  const kpi = useParams().kpi;
   const [active, setActive] = useState('');
-  const [kpi, setKpi] = useState();
+  //const [kpi, setKpi] = useState();
   const [kpiAggregate, SetKpiAggregate] = useState('');
   const [tab, setTabs] = useState('autorca');
 
@@ -42,14 +42,19 @@ const Dashboard = () => {
   useEffect(() => {
     if (sidebarList && sidebarList.length !== 0 && kpi === undefined) {
       setActive(sidebarList[0]?.name);
-      setKpi(sidebarList[0]?.id);
+      //setKpi(sidebarList[0]?.id);
       setTabs(location[2]);
       SetKpiAggregate(sidebarList[0]?.aggregation);
 
-      window.history.pushState(
-        '',
-        '',
-        `/#/dashboard/${location[2]}/${sidebarList[0]?.id}`
+      history.push(`/dashboard/${location[2]}/${sidebarList[0]?.id}`);
+    } else if (sidebarList && sidebarList.length !== 0) {
+      setActive(
+        sidebarList.find((item) => item.id.toString() === kpi.toString())?.name
+      );
+      setTabs(location[2]);
+      SetKpiAggregate(
+        sidebarList.find((item) => item.id.toString() === kpi.toString())
+          ?.aggregation
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -59,9 +64,6 @@ const Dashboard = () => {
     setTabs(tabs);
     window.history.pushState('', '', `/#/dashboard/${tabs}/${kpi}`);
   };
-  // const onSettingClick = (option) => {
-  //   history.push(`/kpi/settings/${kpi}`);
-  // };
 
   if (sidebarLoading) {
     return (
@@ -82,11 +84,11 @@ const Dashboard = () => {
         <div className="explore-wrapper">
           {/* filter section */}
           <div className="filter-section">
-            {sidebarList && (
+            {sidebarList && kpi && (
               <FilterWithTab
                 tabs={tab}
                 kpi={kpi}
-                setKpi={setKpi}
+                //setKpi={setKpi}
                 data={sidebarList}
                 setActive={setActive}
                 SetKpiAggregate={SetKpiAggregate}

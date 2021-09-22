@@ -15,6 +15,7 @@ import { getAllAlerts } from '../../redux/actions';
 
 import Fuse from 'fuse.js';
 import store from '../../redux/store';
+import Noalert from '../../components/Noalert';
 
 const RESET_ACTION = {
   type: 'RESET_EMAIL_DATA'
@@ -24,7 +25,6 @@ const Alerts = () => {
   const dispatch = useDispatch();
 
   const { alertLoading, alertList } = useSelector((state) => state.alert);
-
   const [alertData, setAlertData] = useState(alertList);
   const [alertSearch, setAlertSearch] = useState('');
   const [alertFilter, setAlertFilter] = useState([]);
@@ -106,6 +106,7 @@ const Alerts = () => {
     fetchStatusFilter();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alertStatusFilter]);
+
   if (alertLoading) {
     return (
       <div className="load loader-page">
@@ -114,7 +115,7 @@ const Alerts = () => {
     );
   } else {
     return (
-      <div>
+      <>
         {/* common heading and options */}
         <div className="heading-option">
           <div className="heading-title">
@@ -134,28 +135,33 @@ const Alerts = () => {
             </Link>
           </div>
         </div>
-
-        {/* explore wrapper */}
-        <div className="explore-wrapper">
-          {/* filter section */}
-          <div className="filter-section">
-            <AlertFilter
-              setAlertSearch={setAlertSearch}
-              setAlertFilter={setAlertFilter}
-              alertData={alertList}
-              setAlertStatusFilter={setAlertStatusFilter}
-            />
+        {alertList && alertList.length !== 0 ? (
+          <div className="explore-wrapper">
+            {/* explore wrapper */}
+            {/* filter section */}
+            <div className="filter-section">
+              <AlertFilter
+                setAlertSearch={setAlertSearch}
+                setAlertFilter={setAlertFilter}
+                alertData={alertList}
+                setAlertStatusFilter={setAlertStatusFilter}
+              />
+            </div>
+            {/* table section */}
+            <div className="table-section">
+              <AlertTable
+                alertData={alertData}
+                alertSearch={alertSearch}
+                changeData={setData}
+              />
+            </div>
           </div>
-          {/* table section */}
-          <div className="table-section">
-            <AlertTable
-              alertData={alertData}
-              alertSearch={alertSearch}
-              changeData={setData}
-            />
+        ) : (
+          <div className="no-alert-container">
+            <Noalert />
           </div>
-        </div>
-      </div>
+        )}
+      </>
     );
   }
 };

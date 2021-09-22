@@ -27,12 +27,12 @@ export const dashboardSidebarFailure = () => {
 
 export const getDashboardSidebar = () => {
   return async (dispatch) => {
-    dispatch(dashboardSidebarRequested);
+    dispatch(dashboardSidebarRequested());
     const { data, error, status } = await getRequest({
       url: DASHBOARD_SIDEBAR_URL
     });
     if (error) {
-      dispatch(dashboardSidebarFailure);
+      dispatch(dashboardSidebarFailure());
     } else if (data && status === 200) {
       dispatch(dashboardSidebarSuccess(data.data));
     }

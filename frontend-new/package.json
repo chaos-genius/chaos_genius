@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@amcharts/amcharts4": "^4.10.22",
+    "@pathofdev/react-tag-input": "^1.0.7",
     "@popperjs/core": "^2.9.2",
     "@ramonak/react-progress-bar": "^3.2.1",
     "@testing-library/jest-dom": "^5.11.4",

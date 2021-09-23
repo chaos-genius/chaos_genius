@@ -16,7 +16,7 @@ from .rca_utils.string_helpers import convert_query_string_to_user_string
 from .rca_utils.waterfall_utils import get_waterfall_ylims, waterfall_plot_mpl
 from .rca_utils.waterfall_utils import get_best_subgroups_using_superset_algo
 
-from chaos_genius.core.utils import round_df, round_number
+from chaos_genius.core.utils.round import round_df, round_number
 
 try:
     from IPython.display import display

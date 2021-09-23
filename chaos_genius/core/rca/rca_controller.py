@@ -51,7 +51,7 @@ class RootCauseAnalysisController:
         self.num_dim_combs_to_consider = list(
             range(1, min(4, len(kpi_info['dimensions']) + 1)))
 
-    def _load_data(self, timeline="mom"):
+    def _load_data(self, timeline="mom", tail: int = None):
         end_dt_obj = datetime.today() if self.end_date is None else self.end_date
         num_days = TIMELINE_NUM_DAYS_MAP[timeline]
 
@@ -63,17 +63,25 @@ class RootCauseAnalysisController:
         end_dt = str(end_dt_obj.date())
 
         if self.kpi_info['kpi_type'] == 'table':
-            base_df, rca_df = self._get_kpi_table_data(base_dt, mid_dt, end_dt)
+            base_df, rca_df = self._get_kpi_table_data(base_dt, mid_dt, end_dt, tail)
 
         elif self.kpi_info['kpi_type'] == 'query':
             base_df, rca_df = self._get_kpi_query_data(
-                end_dt_obj, base_dt_obj, mid_dt_obj)
+                end_dt_obj, base_dt_obj, mid_dt_obj, tail)
 
         return base_df, rca_df
 
-    def _get_kpi_query_data(self, end_dt_obj, base_dt_obj, mid_dt_obj):
+    def _get_kpi_query_data(self, end_dt_obj, base_dt_obj, mid_dt_obj, tail: int = None):
+        # TODO: Fix hack to insert tail in query
+        query = self.kpi_info['kpi_query']
+        if tail is not None:
+            limit_query = f" limit {tail} "
+            query = query.split(";")
+            query[0] += limit_query
+            query = ";".join(query)
+
         query_df = get_df_from_db_uri(
-            self.connection_info["db_uri"], self.kpi_info['kpi_query'])
+            self.connection_info["db_uri"], query)
         query_df[self.dt_col] = pd.to_datetime(query_df[self.dt_col])
         base_df = query_df[(query_df[self.dt_col] > base_dt_obj) & (
             query_df[self.dt_col] <= mid_dt_obj)]
@@ -82,7 +90,7 @@ class RootCauseAnalysisController:
 
         return base_df, rca_df
 
-    def _get_kpi_table_data(self, base_dt, mid_dt, end_dt):
+    def _get_kpi_table_data(self, base_dt, mid_dt, end_dt, tail: int = None):
         indentifier = ''
         if self.connection_info["connection_type"] == "mysql":
             indentifier = '`'
@@ -105,6 +113,12 @@ class RootCauseAnalysisController:
 
         base_query = f"select * from {self.kpi_info['table_name']} {base_filter} {kpi_filters_query} "
         rca_query = f"select * from {self.kpi_info['table_name']} {rca_filter} {kpi_filters_query} "
+
+        if tail is not None:
+            limit_query = f" limit {tail} "
+            base_query += limit_query
+            rca_query += limit_query
+
         base_df = get_df_from_db_uri(
             self.connection_info["db_uri"], base_query)
         rca_df = get_df_from_db_uri(self.connection_info["db_uri"], rca_query)
@@ -220,7 +234,8 @@ class RootCauseAnalysisController:
                 agg_data = self._get_aggregation(rca)
                 output.append(self._output_to_row("agg", agg_data, timeline))
             except:
-                print(f"Error in agg for {timeline}")
+                print(f"Error in agg for {timeline}. Skipping timeline.")
+                continue
 
             dims = [None] + self.dimensions
             for dim in dims:

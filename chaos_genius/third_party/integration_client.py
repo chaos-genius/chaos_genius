@@ -14,6 +14,14 @@ from chaos_genius.third_party.integration_server_config import (
     DEFAULT_WORKSPACE_ID,
     SOURCE_ICON_OVERRIDE
 )
+from chaos_genius.settings import (
+    INTEGRATION_SERVER,
+    INTEGRATION_DB_HOST,
+    INTEGRATION_DB_USERNAME,
+    INTEGRATION_DB_PASSWORD,
+    INTEGRATION_DB_PORT,
+    INTEGRATION_DATABASE,
+)
 
 
 class ThirdPartyClient(object):
@@ -28,13 +36,13 @@ class ThirdPartyClient(object):
         super().__init__()
         config = dotenv_values(".env")
         self.config = config
-        self.server_uri = config.get("INTEGRATION_SERVER", server_uri)
+        self.server_uri = INTEGRATION_SERVER
         self.destination_db = {
-            "host": get_docker_host(config["INTEGRATION_DB_HOST"]),
-            "port": int(config["INTEGRATION_DB_PORT"]),
-            "username": config["INTEGRATION_DB_USERNAME"],
-            "password": config["INTEGRATION_DB_PASSWORD"],
-            "database": config["INTEGRATION_DATABASE"],
+            "host": get_docker_host(INTEGRATION_DB_HOST),
+            "port": int(INTEGRATION_DB_PORT),
+            "username": INTEGRATION_DB_USERNAME,
+            "password": INTEGRATION_DB_PASSWORD,
+            "database": INTEGRATION_DATABASE,
         }
         self.destination_def_id = DESTINATION_DEF_ID
 

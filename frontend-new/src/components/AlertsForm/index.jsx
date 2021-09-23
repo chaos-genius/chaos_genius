@@ -5,7 +5,7 @@ import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Slack from '../../assets/images/alerts/slack.svg';
-import Email from '../../assets/images/alerts/gmail.svg';
+import Email from '../../assets/images/alerts/email.svg';
 import Edit from '../../assets/images/disable-edit.svg';
 
 import {
@@ -16,7 +16,6 @@ import {
 } from '../../redux/actions';
 
 import { toastMessage } from '../../utils/toast-helper';
-import { ToastContainer, toast } from 'react-toastify';
 
 const AlertsForm = () => {
   const history = useHistory();
@@ -118,8 +117,7 @@ const AlertsForm = () => {
   }, [emailData]);
 
   const validateEmail = (email) => {
-    const re =
-      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
   };
 
@@ -567,10 +565,6 @@ const AlertsForm = () => {
             </div>
           </button>
         </div>
-        <ToastContainer
-          position={toast.POSITION.BOTTOM_RIGHT}
-          autoClose={5000}
-        />
       </>
     );
   }

@@ -1,12 +1,18 @@
 import {
   ALERT_EMAIL_URL,
+  ALERT_LIST_URL,
+  BASE_URL,
   CHANNEL_CONFIGURATION_URL,
+  CREATE_KPI_ALERT_URL,
   EDIT_CHANNEL_URL,
   EMAIL_META_INFO_URL,
-  SLACK_META_INFO_URL
+  GET_KPI_ALERT_BY_ID_URL,
+  KPI_ALERT_META_INFO_URL,
+  SLACK_META_INFO_URL,
+  UPDATE_KPI_ALERT_URL
 } from '../../utils/url-helper';
 
-import { getRequest, postRequest } from '../../utils/http-helper';
+import { getRequest, postRequest, putRequest } from '../../utils/http-helper';
 
 import {
   ALERTEMAILREQUEST,
@@ -23,7 +29,25 @@ import {
   EMAIL_META_INFO_FAILURE,
   SLACK_META_INFO_FAILURE,
   SLACK_META_INFO_SUCCESS,
-  SLACK_META_INFO_REQUEST
+  SLACK_META_INFO_REQUEST,
+  ALERTSSUCCESS,
+  ALERTSFAILURE,
+  ALERTSREQUEST,
+  CREATEKPIALERTREQUEST,
+  CREATEKPIALERTSUCCESS,
+  CREATEKPIALERTFAILURE,
+  KPI_ALERT_META_INFO_REQUEST,
+  KPI_ALERT_META_INFO_SUCCESS,
+  KPI_ALERT_META_INFO_FAILURE,
+  KPIALERTEDITREQUEST,
+  KPIALERTEDITSUCCESS,
+  KPIALERTEDITFAILURE,
+  KPIALERTUPDATEREQUEST,
+  KPIALERTUPDATESUCCESS,
+  KPIALERTUPDATEFAILURE,
+  KPIALERTDISABLEREQUEST,
+  KPIALERTDISABLEFAILURE,
+  KPIALERTDISABLESUCCESS
 } from './ActionConstants';
 
 export const getAlertEmailRequest = () => {
@@ -197,6 +221,214 @@ export const getSlackMetaInfo = () => {
       dispatch(getSlackMetaInfoFailure());
     } else if (data && status === 200) {
       dispatch(getSlackMetaInfoSuccess(data.data));
+    }
+  };
+};
+
+export const getAllAlertRequest = () => {
+  return {
+    type: ALERTSREQUEST
+  };
+};
+
+export const getAllAlertFailure = () => {
+  return {
+    type: ALERTSFAILURE
+  };
+};
+
+export const getAllAlertSuccess = (response) => {
+  return {
+    type: ALERTSSUCCESS,
+    data: response
+  };
+};
+
+export const getAllAlerts = () => {
+  return async (dispatch) => {
+    dispatch(getAllAlertRequest());
+    const { data, error, status } = await getRequest({
+      url: ALERT_LIST_URL
+    });
+    if (error) {
+      dispatch(getAllAlertFailure());
+    } else if (data && status === 200) {
+      dispatch(getAllAlertSuccess(data.data));
+    }
+  };
+};
+
+export const createKpiAlertRequest = () => {
+  return {
+    type: CREATEKPIALERTREQUEST
+  };
+};
+
+export const createKpiAlertSuccess = (response) => {
+  return {
+    type: CREATEKPIALERTSUCCESS,
+    data: response
+  };
+};
+
+export const createKpiAlertFailure = () => {
+  return {
+    type: CREATEKPIALERTFAILURE
+  };
+};
+
+export const createKpiAlert = (payload) => {
+  return async (dispatch) => {
+    dispatch(createKpiAlertRequest());
+    const { data, error, status } = await postRequest({
+      url: CREATE_KPI_ALERT_URL,
+      data: JSON.stringify(payload),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      noAuth: true
+    });
+    if (error) {
+      dispatch(createKpiAlertFailure());
+    } else if (data && status === 200) {
+      dispatch(createKpiAlertSuccess(data));
+    }
+  };
+};
+
+export const kpiAlertMetaInfoRequest = () => {
+  return {
+    type: KPI_ALERT_META_INFO_REQUEST
+  };
+};
+
+export const kpiAlertMetaInfoSuccess = (response) => {
+  return {
+    type: KPI_ALERT_META_INFO_SUCCESS,
+    data: response
+  };
+};
+
+export const kpiAlertMetaInfoFailure = () => {
+  return {
+    type: KPI_ALERT_META_INFO_FAILURE
+  };
+};
+
+export const kpiAlertMetaInfo = () => {
+  return async (dispatch) => {
+    dispatch(kpiAlertMetaInfoRequest());
+    const { data, error, status } = await getRequest({
+      url: `${KPI_ALERT_META_INFO_URL}`
+    });
+    if (error) {
+      dispatch(kpiAlertMetaInfoFailure());
+    } else if (data && status === 200) {
+      dispatch(kpiAlertMetaInfoSuccess(data.data));
+    }
+  };
+};
+
+export const getKpiAlertByIdRequest = () => {
+  return {
+    type: KPIALERTEDITREQUEST
+  };
+};
+
+export const getKpiAlertByIdSuccess = (response) => {
+  return {
+    type: KPIALERTEDITSUCCESS,
+    data: response
+  };
+};
+
+export const getKpiAlertByIdFailure = () => {
+  return {
+    type: KPIALERTEDITFAILURE
+  };
+};
+
+export const getKpiAlertById = (id) => {
+  return async (dispatch) => {
+    dispatch(getKpiAlertByIdRequest());
+    const { data, error, status } = await getRequest({
+      url: `${GET_KPI_ALERT_BY_ID_URL}/${id}/get-info`
+    });
+    if (error) {
+      dispatch(getKpiAlertByIdFailure());
+    } else if (data && status === 200) {
+      dispatch(getKpiAlertByIdSuccess(data.data));
+    }
+  };
+};
+
+export const updateKpiAlertRequest = () => {
+  return {
+    type: KPIALERTUPDATEREQUEST
+  };
+};
+
+export const updateKpiAlertSuccess = (response) => {
+  return {
+    type: KPIALERTUPDATESUCCESS,
+    data: response
+  };
+};
+
+export const updateKpiAlertFailure = () => {
+  return {
+    type: KPIALERTUPDATEFAILURE
+  };
+};
+
+export const updateKpiAlert = (id, payload) => {
+  return async (dispatch) => {
+    dispatch(updateKpiAlertRequest());
+    const { data, error, status } = await putRequest({
+      url: `${UPDATE_KPI_ALERT_URL}/${id}/update`,
+      data: JSON.stringify(payload),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      noAuth: true
+    });
+    if (error) {
+      dispatch(updateKpiAlertFailure());
+    } else if (data && status === 200) {
+      dispatch(updateKpiAlertSuccess(data));
+    }
+  };
+};
+
+export const kpiAlertDisableRequest = () => {
+  return {
+    type: KPIALERTDISABLEREQUEST
+  };
+};
+
+export const kpiAlertDisableSuccess = (response) => {
+  return {
+    type: KPIALERTDISABLESUCCESS,
+    data: response
+  };
+};
+
+export const kpiAlertDisableFailure = () => {
+  return {
+    type: KPIALERTDISABLEFAILURE
+  };
+};
+
+export const kpiAlertDisable = (id) => {
+  return async (dispatch) => {
+    dispatch(kpiAlertDisableRequest());
+    const { data, error, status } = await getRequest({
+      url: `${BASE_URL}/api/alert/${id}/disable`
+    });
+    if (error) {
+      dispatch(kpiAlertDisableFailure());
+    } else if (data && status === 200) {
+      dispatch(kpiAlertDisableSuccess(data));
     }
   };
 };

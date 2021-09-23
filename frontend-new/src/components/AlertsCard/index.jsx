@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Slack from '../../assets/images/alerts/slack.svg';
-import Gmail from '../../assets/images/alerts/gmail.svg';
+import Email from '../../assets/images/alerts/email.svg';
 import Datadog from '../../assets/images/alerts/datadog.svg';
 import Asana from '../../assets/images/alerts/asana.svg';
 import Teams from '../../assets/images/alerts/teams.svg';
@@ -83,7 +83,7 @@ const AlertsCard = () => {
           </Link>
         </div>
         <div className="setup-card">
-          <img src={Gmail} className="in-active" alt="Gmail" />
+          <img src={Email} className="in-active" alt="Email" />
 
           <h1>
             Email

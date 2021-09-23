@@ -2,6 +2,7 @@ import os
 import io
 import json
 import pickle
+from typing import Optional
 import pandas as pd
 import datetime
 from chaos_genius.utils.io_helper import is_file_exists
@@ -10,6 +11,15 @@ from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.alerts.email import send_static_alert_email
+
+
+FREQUENCY_DICT = {
+    "weekly": datetime.timedelta(days = 7, hours = 0, minutes = 0),
+    "daily": datetime.timedelta(days = 1, hours = 0, minutes = 0),
+    "hourly": datetime.timedelta(days = 0, hours = 1, minutes = 0),
+    "every_15_minute": datetime.timedelta(days = 0, hours = 0, minutes = 15),
+    "every_minute": datetime.timedelta(days = 0, hours = 0, minutes = 1)
+}
 
 
 class StaticEventAlertController:
@@ -147,15 +157,6 @@ class StaticEventAlertController:
 
 class AnomalyAlertController:
 
-    FREQUENCY_DICT = {
-        "weekly": datetime.timedelta(days = 7, hours = 0, minutes = 0),
-        "daily": datetime.timedelta(days = 1, hours = 0, minutes = 0),
-        "hourly": datetime.timedelta(days = 0, hours = 1, minutes = 0),
-        "every_15_minute": datetime.timedelta(days = 0, hours = 0, minutes = 15),
-        "every_minute": datetime.timedelta(days = 0, hours = 0, minutes = 1)
-    }
-
-
     def __init__(self, alert_info):
         self.alert_info = alert_info
 
@@ -164,7 +165,21 @@ class AnomalyAlertController:
         kpi_id = self.alert_info["kpi"]
 
         curr_date_time = datetime.datetime.now()
-        lower_limit_dt = curr_date_time - self.FREQUENCY_DICT[self.alert_info['alert_frequency']]
+        check_time = FREQUENCY_DICT[self.alert_info['alert_frequency']]
+
+        alert: Optional[Alert] = Alert.get_by_id(self.alert_info["id"])
+        if alert is None:
+            print(f"Could not find alert by ID: {self.alert_info['id']}")
+            return False
+
+        if alert.last_alerted is not None and \
+                alert.last_alerted > (curr_date_time - check_time):
+            print(f"Skipping alert with ID {self.alert_info['id']} since it was already run")
+            return True
+
+        alert.update(commit=True, last_alerted=curr_date_time)
+
+        lower_limit_dt = curr_date_time - FREQUENCY_DICT[self.alert_info['alert_frequency']]
 
         anomaly_data = AnomalyDataOutput.query.filter(
                                             AnomalyDataOutput.kpi_id == kpi_id,
@@ -226,6 +241,10 @@ def check_and_trigger_alert(alert_id):
     alert_info = Alert.get_by_id(alert_id)
     if not alert_info:
         raise Exception("Alert doesn't exist")
+
+    if not alert_info.active:
+        print("Alert isn't active. Please activate the alert.")
+        return True
 
     if alert_info.alert_type == "Event Alert":
         data_source_id = alert_info.data_source

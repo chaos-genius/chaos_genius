@@ -13,7 +13,25 @@ import {
   EMAIL_META_INFO_FAILURE,
   SLACK_META_INFO_REQUEST,
   SLACK_META_INFO_SUCCESS,
-  SLACK_META_INFO_FAILURE
+  SLACK_META_INFO_FAILURE,
+  ALERTSREQUEST,
+  ALERTSSUCCESS,
+  ALERTSFAILURE,
+  CREATEKPIALERTREQUEST,
+  CREATEKPIALERTSUCCESS,
+  CREATEKPIALERTFAILURE,
+  KPI_ALERT_META_INFO_REQUEST,
+  KPI_ALERT_META_INFO_SUCCESS,
+  KPI_ALERT_META_INFO_FAILURE,
+  KPIALERTEDITREQUEST,
+  KPIALERTEDITSUCCESS,
+  KPIALERTEDITFAILURE,
+  KPIALERTUPDATEREQUEST,
+  KPIALERTUPDATESUCCESS,
+  KPIALERTUPDATEFAILURE,
+  KPIALERTDISABLEREQUEST,
+  KPIALERTDISABLESUCCESS,
+  KPIALERTDISABLEFAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -31,7 +49,25 @@ const initialState = {
   slackMetaInfoError: false,
   emailMetaInfoLoading: false,
   emailMetaInfoData: [],
-  emailMetaInfoError: false
+  emailMetaInfoError: false,
+  alertList: [],
+  alertLoading: true,
+  alertError: false,
+  createKpiAlertData: [],
+  createKpiAlertLoading: false,
+  createKpiAlertError: false,
+  kpiAlertMetaInfoData: [],
+  kpiAlertMetaInfoLoading: false,
+  kpiAlertMetaInfoError: false,
+  kpiAlertEditData: [],
+  kpiAlertEditLoading: false,
+  kpiAlertEditError: false,
+  updateKpiAlertData: [],
+  updateKpiAlertLoading: false,
+  updateKpiAlertError: false,
+  kpiAlertDisableLoading: false,
+  kpiAlertDisableData: [],
+  kpiAlertDisableError: false
 };
 export const alert = (state = initialState, action) => {
   switch (action.type) {
@@ -136,11 +172,143 @@ export const alert = (state = initialState, action) => {
         slackMetaInfoError: true
       };
     }
+    case ALERTSREQUEST: {
+      return {
+        ...state,
+        alertLoading: true
+      };
+    }
+    case ALERTSSUCCESS: {
+      return {
+        ...state,
+        alertLoading: false,
+        alertList: action.data
+      };
+    }
+    case ALERTSFAILURE: {
+      return {
+        ...state,
+        alertLoading: false,
+        alertError: true
+      };
+    }
+    case CREATEKPIALERTREQUEST: {
+      return {
+        ...state,
+        createKpiAlertLoading: true
+      };
+    }
+    case CREATEKPIALERTSUCCESS: {
+      return {
+        ...state,
+        createKpiAlertData: action.data,
+        createKpiAlertLoading: false
+      };
+    }
+    case CREATEKPIALERTFAILURE: {
+      return {
+        ...state,
+        createKpiAlertLoading: false,
+        createKpiAlertError: true
+      };
+    }
+    case KPI_ALERT_META_INFO_REQUEST: {
+      return {
+        ...state,
+        kpiAlertMetaInfoLoading: true
+      };
+    }
+    case KPI_ALERT_META_INFO_SUCCESS: {
+      return {
+        ...state,
+        kpiAlertMetaInfoLoading: false,
+        kpiAlertMetaInfoData: action.data
+      };
+    }
+    case KPI_ALERT_META_INFO_FAILURE: {
+      return {
+        ...state,
+        kpiAlertMetaInfoLoading: false,
+        kpiAlertMetaInfoError: true
+      };
+    }
+    case KPIALERTEDITREQUEST: {
+      return {
+        ...state,
+        kpiAlertEditLoading: true
+      };
+    }
+    case KPIALERTEDITSUCCESS: {
+      return {
+        ...state,
+        kpiAlertEditLoading: false,
+        kpiAlertEditData: action.data
+      };
+    }
+    case KPIALERTEDITFAILURE: {
+      return {
+        ...state,
+        kpiAlertEditLoading: false,
+        kpiAlertEditError: true
+      };
+    }
+    case KPIALERTUPDATEREQUEST: {
+      return {
+        ...state,
+        updateKpiAlertLoading: true
+      };
+    }
+    case KPIALERTUPDATESUCCESS: {
+      return {
+        ...state,
+        updateKpiAlertLoading: false,
+        updateKpiAlertData: action.data
+      };
+    }
+    case KPIALERTUPDATEFAILURE: {
+      return {
+        ...state,
+        updateKpiAlertLoading: false,
+        updateKpiAlertError: false
+      };
+    }
+    case KPIALERTDISABLEREQUEST: {
+      return {
+        ...state,
+        kpiAlertDisableLoading: true
+      };
+    }
+    case KPIALERTDISABLESUCCESS: {
+      return {
+        ...state,
+        kpiAlertDisableLoading: false,
+        kpiAlertDisableData: action.data
+      };
+    }
+    case KPIALERTDISABLEFAILURE: {
+      return {
+        ...state,
+        kpiAlertDisableLoading: false,
+        kpiAlertDisableError: true
+      };
+    }
     case 'RESET_EMAIL_DATA': {
       return {
         ...state,
         emailData: [],
-        editData: []
+        editData: [],
+        kpiAlertEditData: [],
+        updateKpiAlertData: [],
+        kpiAlertDisableData: []
+      };
+    }
+    case 'RESET_ALERT_DATA_Data': {
+      return {
+        ...state,
+        createKpiAlertData: [],
+        kpiAlertEditData: [],
+        updateKpiAlertData: [],
+        kpiAlertDisableData: []
       };
     }
     default:

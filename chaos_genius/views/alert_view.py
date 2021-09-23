@@ -25,7 +25,7 @@ def list_alert():
     results = get_alert_list()
     return jsonify({"data": results})
 
-@blueprint.route("/<int:alert_id>/get-alert-info", methods=["GET"])
+@blueprint.route("/<int:alert_id>/get-info", methods=["GET"])
 def get_alert_info_by_id(alert_id):
     """get alert details."""
     status, message = "", ""

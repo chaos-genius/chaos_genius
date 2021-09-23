@@ -145,7 +145,7 @@ def ready_rca_task(kpi_id: int):
 def anomaly_scheduler():
     # find KPIs
     kpis: Kpi = Kpi.query.distinct("kpi_id").filter(
-        (Kpi.run_anomaly == True) & (Kpi.active == True) & (Kpi.is_static == False)
+        (Kpi.active == True) & (Kpi.is_static == False)
     )
 
     task_group = []

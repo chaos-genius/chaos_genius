@@ -76,11 +76,11 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
       kpiSettingData.status === 'failure' &&
       onboarding
     ) {
-      toastMessage({ type: 'success', message: 'Failed to Add' });
+      toastMessage({ type: 'error', message: 'Failed to Add' });
     } else if (kpiSettingData && kpiSettingData.status === 'success') {
       toastMessage({ type: 'success', message: 'Successfully updated' });
     } else if (kpiSettingData && kpiSettingData.status === 'failure') {
-      toastMessage({ type: 'success', message: 'Failed to update' });
+      toastMessage({ type: 'error', message: 'Failed to update' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSettingData]);

@@ -81,12 +81,46 @@ const Alerts = () => {
     fetchFilter();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alertFilter]);
+  // useEffect(() => {
+  //   if (alertStatusFilter.length === 0 && alertFilter.length === 0) {
+  //     setAlertData(alertList);
+  //   } else {
+  //     var arr = [];
+  //     alertStatusFilter &&
+  //       alertStatusFilter.forEach((status) => {
+  //         alertFilter &&
+  //           alertFilter.forEach((channel) => {
+  //             alertList.forEach((list) => {
+  //               if (
+  //                 list.active === true &&
+  //                 list.alert_channel.toLowerCase() === channel &&
+  //                 status === 'active'
+  //               ) {
+  //                 arr.push(list);
+  //               } else if (
+  //                 list.active === false &&
+  //                 list.alert_channel === channel &&
+  //                 status === 'inactive'
+  //               ) {
+  //                 arr.push(list);
+  //               } else if (list.alert_channel.toLowerCase() === channel) {
+  //                 arr.push(list);
+  //               }
+  //             });
+  //           });
+
+  //         setAlertData(arr);
+  //       });
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [alertFilter, alertStatusFilter]);
 
   const fetchStatusFilter = () => {
     if (alertStatusFilter.length === 0) {
       setAlertData(alertList);
     } else {
       var arr = [];
+
       alertStatusFilter &&
         alertStatusFilter.forEach((data) => {
           alertList.forEach((list) => {

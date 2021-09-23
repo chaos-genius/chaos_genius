@@ -168,7 +168,7 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
                             Edit
                           </li>
                         </Link>
-                        <li
+                        {/* <li
                           className="delete-item"
                           onClick={() => {
                             setIsOpen(true);
@@ -176,7 +176,7 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
                           }}>
                           <img src={DeleteActive} alt="Delete" />
                           Delete
-                        </li>
+                        </li> */}
                       </ul>
                     </div>
                   </td>

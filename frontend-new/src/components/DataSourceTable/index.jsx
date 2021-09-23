@@ -168,7 +168,7 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
                             Set Alerts
                           </li>
                         </Link>
-                        <li>
+                        {/* <li>
                           <img
                             src={Viewlog}
                             alt="View Log"
@@ -180,7 +180,7 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
                             className="action-active"
                           />
                           View Logs
-                        </li>
+                        </li> */}
                         <Link to={`/datasource/edit/${datasource.id}`}>
                           <li>
                             <img

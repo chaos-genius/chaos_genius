@@ -1105,21 +1105,21 @@ a:hover {
   //   margin-top: 15px;
   // }
 }
-// .range-selector {
-//   div {
-//     div {
-//       height: 8px;
-//       width: 100%;
-//       border-radius: 4px;
-//       background: linear-gradient(
-//         90deg,
-//         #60ca9a 4.86%,
-//         #fac06b 61.61%,
-//         #e96560 117.38%
-//       ) !important;
-//       div {
-//         background: $white !important;
-//       }
-//     }
-//   }
-// }
+.range-selector {
+  div {
+    div {
+      height: 8px;
+      width: 100%;
+      border-radius: 4px;
+      background: linear-gradient(
+        90deg,
+        #60ca9a 4.86%,
+        #fac06b 61.61%,
+        #e96560 117.38%
+      ) !important;
+      div {
+        background: $white !important;
+      }
+    }
+  }
+}

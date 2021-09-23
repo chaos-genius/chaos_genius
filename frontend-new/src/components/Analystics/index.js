@@ -71,9 +71,16 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   useEffect(() => {
     if (kpiSettingData && kpiSettingData.status === 'success' && onboarding) {
       setAnalystics(true);
+    } else if (
+      kpiSettingData &&
+      kpiSettingData.status === 'failure' &&
+      onboarding
+    ) {
+      toastMessage({ type: 'success', message: 'Failed to Add' });
     } else if (kpiSettingData && kpiSettingData.status === 'success') {
-      // setModalOpen(true);
       toastMessage({ type: 'success', message: 'Successfully updated' });
+    } else if (kpiSettingData && kpiSettingData.status === 'failure') {
+      toastMessage({ type: 'success', message: 'Failed to update' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSettingData]);

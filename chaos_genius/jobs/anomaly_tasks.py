@@ -85,6 +85,58 @@ def anomaly_kpi():
     return res
 
 
+def ready_anomaly_task(kpi_id: int):
+    """Set anomaly in-progress and update last_scheduled_time for the KPI
+
+    Returns a Celery task that *must* be executed (using .apply_async) soon.
+    Returns None if the KPI does not exist.
+    """
+    # get scheduler_params
+    kpi = Kpi.get_by_id(kpi_id)
+    if kpi is None:
+        return None
+    anomaly_params = kpi.anomaly_params or {}
+    scheduler_params = anomaly_params.get("scheduler_params") or {}
+
+    # update scheduler params
+    scheduler_params["last_scheduled_time"] = datetime.now().isoformat()
+    scheduler_params["anomaly_status"] = "in-progress"
+
+    # write back scheduler_params
+    anomaly_params["scheduler_params"] = scheduler_params
+    kpi.anomaly_params = anomaly_params
+    flag_modified(kpi, "anomaly_params")
+    kpi.update(commit=True, anomaly_params=anomaly_params)
+
+    return anomaly_single_kpi.s(kpi_id)
+
+
+def ready_rca_task(kpi_id: int):
+    """Set RCA in-progress and update last_scheduled_time for the KPI
+
+    Returns a Celery task that *must* be executed (using .apply_async) soon.
+    Returns None if the KPI does not exist.
+    """
+    # get scheduler_params
+    kpi = Kpi.get_by_id(kpi_id)
+    if kpi is None:
+        return None
+    anomaly_params = kpi.anomaly_params or {}
+    scheduler_params = anomaly_params.get("scheduler_params") or {}
+
+    # update scheduler params
+    scheduler_params["last_scheduled_time"] = datetime.now().isoformat()
+    scheduler_params["rca_status"] = "in-progress"
+
+    # write back scheduler_params
+    anomaly_params["scheduler_params"] = scheduler_params
+    kpi.anomaly_params = anomaly_params
+    flag_modified(kpi, "anomaly_params")
+    kpi.update(commit=True, anomaly_params=anomaly_params)
+
+    return rca_single_kpi.s(kpi_id)
+
+
 # runs every N time (set in celery_config)
 # if time > scheduled time today, run task
 # last_scheduled_time -> if it's < specified time of today's date, run task
@@ -170,26 +222,11 @@ def anomaly_scheduler():
 
             if to_run_anomaly:
                 print(f"Scheduling anomaly for KPI: {kpi.id}")
-                task_group.append(anomaly_single_kpi.s(kpi.id))
+                task_group.append(ready_anomaly_task(kpi.id))
+
             if to_run_rca:
                 print(f"Scheduling RCA for KPI: {kpi.id}")
-                task_group.append(rca_single_kpi.s(kpi.id))
-
-            new_scheduler_params = (
-                scheduler_params if scheduler_params is not None else {}
-            )
-            if to_run_anomaly:
-                new_scheduler_params["last_scheduled_time"] = current_time.isoformat()
-                new_scheduler_params["anomaly_status"] = "in-progress"
-            if to_run_rca:
-                new_scheduler_params["last_scheduled_time"] = current_time.isoformat()
-                new_scheduler_params["rca_status"] = "in-progress"
-
-            anomaly_params = kpi.anomaly_params or {}
-            anomaly_params["scheduler_params"] = new_scheduler_params
-
-            flag_modified(kpi, "anomaly_params")
-            kpi.update(commit=True, anomaly_params=anomaly_params)
+                task_group.append(ready_rca_task(kpi.id))
 
     if not task_group:
         print("Found no pending KPI tasks.")

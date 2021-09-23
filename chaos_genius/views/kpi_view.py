@@ -60,12 +60,16 @@ def kpi():
             return jsonify({"error": message, "status": "failure"})
 
         new_kpi.save(commit=True)
-        
-        #TODO: Fix circular import error
-        from chaos_genius.jobs.anomaly_tasks import rca_single_kpi
+
+        # TODO: Fix circular import error
+        from chaos_genius.jobs.anomaly_tasks import ready_rca_task
         # run rca as soon as new KPI is added
-        rca_single_kpi.delay(new_kpi.id)
-        
+        rca_task = ready_rca_task(new_kpi.id)
+        if rca_task is None:
+            print(f"Could not run RCA task since newly added KPI was not found: {new_kpi.id}")
+        else:
+            rca_task.apply_async()
+
         return jsonify({"message": f"KPI {new_kpi.name} has been created successfully.", "status": "success"})
 
     elif request.method == 'GET':

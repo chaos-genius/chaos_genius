@@ -108,6 +108,7 @@ def get_all_kpis():
         info["timeline"] = "week" if timeline == "wow" else "month"
         info['anomaly_count'] = random.randint(1, 20) #TODO
         info['graph_data'] = kpi_line_data(kpi.id)
+        info['percentage_change'] = find_percentage_change(info['current'], info['prev'])
         ret.append(info)
 
     return jsonify({"data": ret, "message": message, "status": status})
@@ -368,3 +369,12 @@ def get_end_date(kpi_id):
         return datetime.today().date()
     else:
         return datetime.strptime(end_date, "%Y-%m-%d").date()
+
+def find_percentage_change(curr_val, prev_val):
+
+    if prev_val == 0:
+        return "--"
+
+    change = curr_val - prev_val
+    percentage_change = (change / prev_val) * 100
+    return str(round_number(percentage_change))

@@ -54,67 +54,67 @@ const Kpihome = () => {
     dispatch(getHomeKpi({ timeline: timeline.value }));
   }, [dispatch, timeline]);
 
-  const sparklineGraph = (graphData) => {
-    return {
-      title: { text: '' },
-      xAxis: {
-        visible: true,
-        type: 'text',
-        categories: graphData.map((chart) => chart.value),
-        startOnTick: false,
-        endOnTick: false,
-        gridLineWidth: 0
-      },
-      yAxis: {
-        visible: true,
-        type: 'text',
-        categories: graphData.map((chart) => chart.date),
-        gridLineWidth: 0,
-        title: '',
-        labels: {
-          enabled: true,
-          step: 1,
-          formatter: function () {
-            return Highcharts.dateFormat('%d %b', this.value);
-          }
-        }
-      },
-      tooltip: {
-        enabled: false
-      },
-      credits: false,
-      series: [
-        {
-          color: '#60CA9A',
-          dashStyle: 'Solid',
-          showInLegend: false,
-          data: graphData.map((chart) => chart.value),
-          marker: {
-            radius: 0,
-            // fillColor: '#E96560',
-            states: {
-              hover: {
-                enabled: false
-              }
-            }
-          }
-        }
-      ],
+  // const sparklineGraph = (graphData) => {
+  //   return {
+  //     title: { text: '' },
+  //     xAxis: {
+  //       visible: true,
+  //       type: 'text',
+  //       categories: graphData.map((chart) => chart.value),
+  //       startOnTick: false,
+  //       endOnTick: false,
+  //       gridLineWidth: 0
+  //     },
+  //     yAxis: {
+  //       visible: true,
+  //       type: 'text',
+  //       categories: graphData.map((chart) => chart.date),
+  //       gridLineWidth: 0,
+  //       title: '',
+  //       labels: {
+  //         enabled: false,
+  //         step: 1,
+  //         formatter: function () {
+  //           return Highcharts.dateFormat('%d %b', this.value);
+  //         }
+  //       }
+  //     },
+  // tooltip: {
+  //   enabled: false
+  // },
+  //     credits: false,
+  //     series: [
+  //       {
+  //         color: '#60CA9A',
+  //         dashStyle: 'Solid',
+  //         showInLegend: false,
+  //         data: graphData.map((chart) => chart.value),
+  // marker: {
+  //   radius: 0,
+  //   // fillColor: '#E96560',
+  //   states: {
+  //     hover: {
+  //       enabled: false
+  //     }
+  //   }
+  //         }
+  //       }
+  //     ],
 
-      chart: {
-        backgroundColor: null,
-        borderWidth: 0,
-        type: 'line',
-        margin: [2, 0, 2, 0],
-        width: 200,
-        height: 40,
-        style: {
-          overflow: 'visible'
-        },
-        skipClone: false
-      }
-    };
-  };
+  //   chart: {
+  // backgroundColor: null,
+  // borderWidth: 0,
+  // type: 'line',
+  // margin: [2, 0, 2, 0],
+  // width: 200,
+  // height: 40,
+  // style: {
+  //   overflow: 'visible'
+  // },
+  // skipClone: false
+  //   }
+  // };
+  // };
 
   useEffect(() => {
     if (search !== '') {
@@ -141,6 +141,75 @@ const Kpihome = () => {
       );
     } else {
       setKpiHomeData(homeKpiData);
+    }
+  };
+  const newHighChart = (line) => {
+    if (line) {
+      let demoChart = {
+        chart: {
+          backgroundColor: null,
+          borderWidth: 0,
+          type: 'line',
+          margin: [2, 0, 2, 0],
+          width: 200,
+          height: 40,
+          style: {
+            overflow: 'visible'
+          },
+          skipClone: false
+        },
+
+        xAxis: {
+          type: 'datetime',
+          gridLineWidth: 0,
+          categories: line.map((data) => new Date(data.date)),
+          labels: {
+            enabled: false,
+            step: 0,
+            formatter: function () {
+              return Highcharts.dateFormat('%d %b', this.value);
+            }
+          }
+        },
+        title: {
+          text: ''
+        },
+        yAxis: {
+          // type: 'value',
+          step: 1,
+          title: '',
+          gridLineWidth: 0
+        },
+        plotOptions: {
+          line: {
+            marker: {
+              enabled: false
+            }
+          }
+        },
+        legend: {
+          enabled: false
+        },
+        tooltip: {
+          enabled: false
+        },
+        series: [
+          {
+            color: '#60ca9a',
+            data: line.map((linedata) => linedata.value),
+            marker: {
+              radius: 0,
+              // fillColor: '#E96560',
+              states: {
+                hover: {
+                  enabled: false
+                }
+              }
+            }
+          }
+        ]
+      };
+      return demoChart;
     }
   };
 
@@ -248,16 +317,17 @@ const Kpihome = () => {
                             ? '(last week)'
                             : timeline.value === 'mom'
                             ? '(last month)'
-                            : ' (last day)'}{' '}
+                            : ' (last day)'}
                         </label>
                       </span>
                     </div>
-                    <div className="kpi-content kpi-graph">
+                    <div className=" kpi-content kpi-graph ">
                       {item.graph_data && item.graph_data.length !== 0 && (
                         <HighchartsReact
                           className="sparkline-graph"
                           highcharts={Highcharts}
-                          options={sparklineGraph(item.graph_data)}
+                          // options={sparklineGraph(item.graph_data)}
+                          options={newHighChart(item.graph_data)}
                         />
                       )}
                     </div>

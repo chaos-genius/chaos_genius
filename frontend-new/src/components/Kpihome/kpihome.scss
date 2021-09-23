@@ -105,6 +105,12 @@
         margin-bottom: 0px;
       }
     }
+    // .highcharts-title {
+    //   display: none;
+    // }
+    .highcharts-container {
+      width: 150px !important;
+    }
   }
   .kpi-graph {
     // width: 234px;
@@ -114,7 +120,7 @@
     justify-content: center;
     div {
       overflow: visible !important;
-      width: 120px !important;
+      // width: 120px !important;
       .highcharts-container {
         margin-bottom: 0px !important;
       }

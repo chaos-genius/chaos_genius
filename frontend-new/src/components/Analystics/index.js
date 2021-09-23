@@ -248,6 +248,10 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
               </div>
             )}
           </div>
+          {/* <div className="form-group">
+            <label> Schedule</label>
+            <input type="time" placeholder="Time" className="" />
+          </div> */}
           <div className="form-group">
             <label>Expected Seasonality in Data</label>
             <div className="seasonality-setting">
@@ -279,6 +283,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                 />
                 <label htmlFor="weekly">Weekly</label>
               </div>
+
               <div className="form-check check-box">
                 <input
                   className="form-check-input"

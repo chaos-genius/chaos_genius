@@ -107,3 +107,29 @@
     border-right-width: 10px;
   }
 }
+
+.form-group {
+  input[type='time'] {
+    width: 100%;
+    min-height: 48px;
+    background: $white;
+    border: 1px solid $grey_variation-1;
+    box-sizing: border-box;
+    border-radius: 6px;
+    font-weight: $font-weight-400;
+    font-size: $font-size-14;
+    line-height: $line-height-20;
+    letter-spacing: $letter-spacing-point1;
+    text-transform: capitalize;
+    color: $black_variation-2;
+    padding: 0px 14px;
+    &::placeholder {
+      color: $grey_variation-1;
+    }
+    &:focus,
+    &:active {
+      border: 1px solid $grey_variation-1;
+      box-sizing: border-box;
+    }
+  }
+}

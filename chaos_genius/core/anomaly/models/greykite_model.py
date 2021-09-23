@@ -1,12 +1,10 @@
 import warnings
 
-from greykite.framework.templates.forecaster import Forecaster
-from greykite.framework.utils.result_summary import summarize_grid_search_results
-from greykite.framework.templates.model_templates import ModelTemplateEnum
-from greykite.framework.templates.autogen.forecast_config import MetadataParam
-from greykite.framework.templates.autogen.forecast_config import ForecastConfig
-
 import pandas as pd
+from greykite.framework.templates.autogen.forecast_config import (
+    ForecastConfig, MetadataParam)
+from greykite.framework.templates.forecaster import Forecaster
+from greykite.framework.templates.model_templates import ModelTemplateEnum
 
 from chaos_genius.core.anomaly.models import AnomalyModel
 
@@ -22,6 +20,8 @@ GKFREQ = {
     'hourly': 'H',
     'daily': 'D'
 }
+
+
 class GreyKiteModel(AnomalyModel):
 
     def __init__(self, *args, model_kwargs={}, **kwargs) -> None:
@@ -35,8 +35,7 @@ class GreyKiteModel(AnomalyModel):
         frequency,
         pred_df: pd.DataFrame = None
     ) -> pd.DataFrame:
-        """Takes in pd.DataFrame with 2 columns, dt and y, and returns a
-        pd.DataFrame with 3 columns, dt, y, and yhat_lower, yhat_upper.
+        """Predict anomalies on data.
 
         :param df: Input Dataframe with dt, y columns
         :type df: pd.DataFrame
@@ -52,7 +51,7 @@ class GreyKiteModel(AnomalyModel):
         )
 
         # Creates forecasts and stores the result
-        forecaster = Forecaster()  
+        forecaster = Forecaster()
 
         # result is also stored as forecaster.forecast_result
         result = forecaster.run_forecast_config(
@@ -61,7 +60,7 @@ class GreyKiteModel(AnomalyModel):
                 model_template=ModelTemplateEnum.SILVERKITE.name,
                 forecast_horizon=1,  # forecasts 1 step
                 **self.model_kwargs,
-                coverage= GKSENS[sensitivity.lower()],
+                coverage=GKSENS[sensitivity.lower()],
                 metadata_param=metadata
             )
         )

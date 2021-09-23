@@ -1,10 +1,13 @@
+"""Provides processor class which computes anomaly detection."""
 import datetime
 
 import pandas as pd
 
-from chaos_genius.core.anomaly.constants import MODEL_MAPPER, FREQUENCY_DELTA
+from chaos_genius.core.anomaly.constants import FREQUENCY_DELTA, MODEL_MAPPER
 from chaos_genius.core.anomaly.models import AnomalyModel
 from chaos_genius.core.anomaly.utils import bound_between, get_timedelta
+
+ZSCORE_UPPER_BOUND = 2.5
 
 
 class ProcessAnomalyDetection:
@@ -26,8 +29,8 @@ class ProcessAnomalyDetection:
         self.input_data = data
         self.last_date = last_date
         self.period = period
-        self.table_name = table_name,
-        self.series = series,
+        self.table_name = (table_name,)
+        self.series = (series,)
         self.subgroup = subgroup
         self.model_path = self.gen_model_save_path()
         self.model_kwargs = model_kwargs
@@ -39,14 +42,13 @@ class ProcessAnomalyDetection:
 
         model = self._get_model()
 
-        predictionSeries = self._predict(model)
+        pred_series = self._predict(model)
 
-        anomalyDf = self._detect_severity(
-            self._detect_anomalies(predictionSeries))
+        anomaly_df = self._detect_severity(self._detect_anomalies(pred_series))
 
         self._save_model(model)
 
-        return anomalyDf
+        return anomaly_df
 
     def _predict(self, model: AnomalyModel):
 
@@ -54,16 +56,16 @@ class ProcessAnomalyDetection:
 
         input_data = self.input_data
 
-        predSeries = pd.DataFrame(columns=[
-            'dt', 'y', 'yhat_lower', 'yhat_upper'])
+        pred_series = pd.DataFrame(
+            columns=["dt", "y", "yhat_lower", "yhat_upper"])
 
-        input_last_date = input_data['dt'].iloc[-1]
-        input_first_date = input_data['dt'].iloc[0]
+        input_last_date = input_data["dt"].iloc[-1]
+        input_first_date = input_data["dt"].iloc[0]
         max_period = get_timedelta(self.freq, self.period)
 
         if self.last_date is None:
             # pass complete input data frame in here as pred_df
-            if self.period-len(input_data) <= self.slack:
+            if self.period - len(input_data) <= self.slack:
 
                 prediction = model.predict(
                     input_data,
@@ -72,65 +74,65 @@ class ProcessAnomalyDetection:
                     pred_df=input_data,
                 )
 
-                prediction['y'] = input_data['y']
-                predSeries = prediction
+                prediction["y"] = input_data["y"]
+                pred_series = prediction
 
         else:
 
             while self.last_date <= input_last_date:
-                curr_period = self.last_date-input_first_date
+                curr_period = self.last_date - input_first_date
 
                 if curr_period >= max_period:
                     df = input_data[
-                        (input_data['dt'] >= self.last_date-max_period)
-                        & (input_data['dt'] <= self.last_date)
+                        (input_data["dt"] >= self.last_date - max_period)
+                        & (input_data["dt"] <= self.last_date)
                     ]
 
                     prediction = model.predict(
-                        df.iloc[:-1],
-                        self.sensitivity,
-                        self.freq
+                        df.iloc[:-1], self.sensitivity, self.freq
                     )
-                    toAppend = prediction.iloc[-1].copy()
-                    toAppend.loc['y'] = df.iloc[-1]['y']
+                    to_append = prediction.iloc[-1].copy()
+                    to_append.loc["y"] = df.iloc[-1]["y"]
 
-                    predSeries = predSeries.append(toAppend, ignore_index=True)
+                    pred_series = pred_series.append(
+                        to_append, ignore_index=True)
 
-                self.last_date += datetime.timedelta(**FREQUENCY_DELTA[self.freq])
+                self.last_date += datetime.timedelta(
+                    **FREQUENCY_DELTA[self.freq])
 
-        return predSeries
+        return pred_series
 
-    def _detect_anomalies(self, predictionSeries):
-        predictionSeries["anomaly"] = 0
-        high_sel = predictionSeries["y"] > predictionSeries["yhat_upper"]
-        low_sel = predictionSeries["y"] < predictionSeries["yhat_lower"]
-        predictionSeries.loc[high_sel, "anomaly"] = 1
-        predictionSeries.loc[low_sel, "anomaly"] = -1
+    def _detect_anomalies(self, pred_series):
+        pred_series["anomaly"] = 0
+        high_sel = pred_series["y"] > pred_series["yhat_upper"]
+        low_sel = pred_series["y"] < pred_series["yhat_lower"]
+        pred_series.loc[high_sel, "anomaly"] = 1
+        pred_series.loc[low_sel, "anomaly"] = -1
 
-        return predictionSeries
+        return pred_series
 
     def _detect_severity(self, anomaly_prediction):
         std_dev = anomaly_prediction["y"].mean()
 
-        anomaly_prediction['severity'] = 0
+        anomaly_prediction["severity"] = 0
         anomaly_prediction["severity"] = anomaly_prediction.apply(
-            lambda x: self.compute_severity(x, std_dev), axis=1)
+            lambda x: self.compute_severity(x, std_dev), axis=1
+        )
 
         return anomaly_prediction
 
     def compute_severity(self, row, std_dev):
         # TODO: Create docstring for these comments
-        if row['anomaly'] == 0:
+        if row["anomaly"] == 0:
             # No anomaly. Severity is 0 ;)
             return 0
-        elif row['anomaly'] == 1:
+        elif row["anomaly"] == 1:
             # Check num deviations from upper bound of CI
-            zscore = (row['y'] - row['yhat_upper']) / std_dev
-        elif row['anomaly'] == -1:
+            zscore = (row["y"] - row["yhat_upper"]) / std_dev
+        elif row["anomaly"] == -1:
             # Check num deviations from lower bound of CI
-            zscore = (row['y'] - row['yhat_lower']) / std_dev
+            zscore = (row["y"] - row["yhat_lower"]) / std_dev
 
-        ZSCORE_UPPER_BOUND = 2.5
         # Scale zscore where 4 scales to 100; -4 scales to -100
         severity = zscore * 100 / ZSCORE_UPPER_BOUND
         severity = abs(severity)
@@ -157,6 +159,6 @@ class ProcessAnomalyDetection:
 
     def gen_model_save_path(self):
         if self.series == "overall":
-            return f'./{self.table_name}/{self.subgroup}.mdl'
+            return f"./{self.table_name}/{self.subgroup}.mdl"
         else:
-            return f'./{self.table_name}/{self.subgroup}_{self.series}.mdl'
+            return f"./{self.table_name}/{self.subgroup}_{self.series}.mdl"

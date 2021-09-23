@@ -48,8 +48,9 @@ const SetAlerts = () => {
               <Link to="/alerts/new/event-alert">
                 {/* added disable button */}
                 <button className="btn black-button" disabled>
-                  <img src={Plus} alt="Plus" />
-                  <span>New Alert</span>
+                  {/* <img src={Plus} alt="Plus" />
+                  <span>New Alert</span> */}
+                  <span>Coming Soon</span>
                 </button>
               </Link>
             </div>

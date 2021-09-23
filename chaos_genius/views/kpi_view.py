@@ -23,6 +23,7 @@ from chaos_genius.core.utils.kpi_validation import validate_kpi
 from chaos_genius.core.utils.round import round_number
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.databases.models.kpi_model import Kpi
+from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.extensions import cache, db
@@ -88,6 +89,22 @@ def kpi():
         return jsonify({"count": len(kpis), "data": kpis})
 
 
+TIME_DICT = {
+    "mom": {
+        "expansion": "month", 
+        "time_delta": timedelta(days = 30, hours = 0, minutes = 0)
+    },
+    "wow": {
+        "expansion": "week", 
+        "time_delta": timedelta(days = 7, hours = 0, minutes = 0)
+    },
+    "dod": {
+        "expansion": "day", 
+        "time_delta": timedelta(days = 1, hours = 0, minutes = 0)
+    }
+}
+
+
 @blueprint.route("/get-dashboard-list", methods=["GET"])
 def get_all_kpis():
     """returning all kpis"""
@@ -114,8 +131,8 @@ def get_all_kpis():
             info['current'] = 0
             info['change'] = 0
 
-        info["timeline"] = "week" if timeline == "wow" else "month"
-        info['anomaly_count'] = random.randint(1, 20) #TODO
+        info["timeline"] = TIME_DICT[timeline]["expansion"]
+        info['anomaly_count'] = get_anomaly_count(kpi.id, timeline)
         info['graph_data'] = kpi_line_data(kpi.id)
         info['percentage_change'] = find_percentage_change(info['current'], info['prev'])
         ret.append(info)
@@ -387,3 +404,17 @@ def find_percentage_change(curr_val, prev_val):
     change = curr_val - prev_val
     percentage_change = (change / prev_val) * 100
     return str(round_number(percentage_change))
+
+def get_anomaly_count(kpi_id, timeline):
+
+    curr_date = datetime.now()
+    lower_time_dt = curr_date - TIME_DICT[timeline]["time_delta"]
+
+    anomaly_data = AnomalyDataOutput.query.filter(
+                        AnomalyDataOutput.kpi_id == kpi_id,
+                        AnomalyDataOutput.anomaly_type == 'overall',
+                        AnomalyDataOutput.is_anomaly == 1,
+                        AnomalyDataOutput.data_datetime >= lower_time_dt
+                    ).all() 
+
+    return len(anomaly_data)

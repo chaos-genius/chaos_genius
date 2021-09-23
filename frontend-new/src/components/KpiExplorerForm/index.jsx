@@ -215,7 +215,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       setText('kpi');
     } else if (
       kpiSubmit &&
-      kpiSubmit.status === 'failed' &&
+      kpiSubmit.status === 'failure' &&
       onboarding === true
     ) {
       toastMessage({ type: 'error', message: 'Failed to Added' });

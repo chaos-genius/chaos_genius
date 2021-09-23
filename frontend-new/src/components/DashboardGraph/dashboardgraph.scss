@@ -95,10 +95,16 @@
     padding-bottom: 23px;
     .common-graph {
       width: 49%;
-      min-height: 300px;
+      min-height: 333px;
       border: 1px solid $grey_variation-4;
       box-sizing: border-box;
       border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      .highcharts-container {
+        margin-bottom: 0px;
+      }
     }
   }
   .dashboard-header-wrapper {

@@ -74,7 +74,7 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
           <tr>
             <th>KPI Name</th>
             <th>Dimensions</th>
-            <th>Data Source Type</th>
+            <th>Data Source</th>
             <th>Created On</th>
             <th>Last Modified</th>
 

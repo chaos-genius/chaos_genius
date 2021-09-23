@@ -74,7 +74,8 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
             <th>Last Modified</th>
             <th>Status</th>
             <th className="cursor-pointer">
-              Triggered <img src={Rectangle} alt="down arrow" />
+              Triggered
+              {/* <img src={Rectangle} alt="down arrow" /> */}
             </th>
             <th>Channel</th>
             <th></th>

@@ -490,10 +490,11 @@ def validate_partial_anomaly_params(anomaly_params: Dict[str, Any]) -> Tuple[str
                     anomaly_params
                 )
 
-    err, scheduler_params = validate_partial_scheduler_params(anomaly_params["scheduler_params"])
-    if err != "":
-        return err, anomaly_params
-    anomaly_params["scheduler_params"] = scheduler_params
+    if "scheduler_params" in anomaly_params:
+        err, scheduler_params = validate_partial_scheduler_params(anomaly_params["scheduler_params"])
+        if err != "":
+            return err, anomaly_params
+        anomaly_params["scheduler_params"] = scheduler_params
 
     return "", anomaly_params
 

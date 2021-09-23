@@ -160,11 +160,12 @@ const Kpihome = () => {
         </div>
         <div className="homepage-setup-card-wrapper">
           <div className="homepage-options">
-            <Select
+            {/* <Select
               classNamePrefix="selectcategory"
               placeholder="Sort by"
               isSearchable={false}
-            />
+            /> */}
+            <div></div>
             <div className="homepage-search-dropdown">
               <div className="form-group icon search-filter">
                 <input
@@ -195,7 +196,7 @@ const Kpihome = () => {
                   <div className="kpi-card" key={item.id}>
                     <div className="kpi-content kpi-content-label">
                       <h3>{item.name}</h3>
-                      <label>(Mins)</label>
+                      <label>{item.metric}</label>
                     </div>
                     <div className="kpi-content">
                       <label>
@@ -223,7 +224,7 @@ const Kpihome = () => {
                         {item.change}
                         <label className="high-change">
                           <img src={Up} alt="High" />
-                          33%
+                          {item.percentage_change}
                         </label>
                       </span>
                     </div>

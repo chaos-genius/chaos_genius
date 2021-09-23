@@ -33,7 +33,7 @@
   padding: 24px;
   margin-bottom: 16px;
   h3 {
-    font-weight: $font-weight-600;
+    font-weight: $font-weight-500;
     font-size: $font-size-18;
     line-height: $line-height-22;
     text-transform: capitalize;
@@ -98,22 +98,23 @@
   .kpi-content {
     display: flex;
     flex-direction: column;
+    width: 15%;
     &.kpi-content-label {
-      width: 180px;
+      // width: 180px;
       label {
         margin-bottom: 0px;
       }
     }
   }
   .kpi-graph {
-    width: 234px;
+    // width: 234px;
     height: 56px;
     display: flex;
     align-items: center;
     justify-content: center;
     div {
       overflow: visible !important;
-      width: 170px !important;
+      width: 120px !important;
       .highcharts-container {
         margin-bottom: 0px !important;
       }

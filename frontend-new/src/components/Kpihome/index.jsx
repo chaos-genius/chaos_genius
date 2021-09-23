@@ -6,6 +6,7 @@ import Select from 'react-select';
 
 import Search from '../../assets/images/search.svg';
 import Up from '../../assets/images/up.svg';
+import Down from '../../assets/images/down.svg';
 
 import './kpihome.scss';
 
@@ -89,8 +90,8 @@ const Kpihome = () => {
           showInLegend: false,
           data: graphData.map((chart) => chart.value),
           marker: {
-            radius: 2,
-            fillColor: '#E96560',
+            radius: 0,
+            // fillColor: '#E96560',
             states: {
               hover: {
                 enabled: false
@@ -222,8 +223,18 @@ const Kpihome = () => {
                       <label>Change</label>
                       <span>
                         {item.change}
-                        <label className="high-change">
-                          <img src={Up} alt="High" />
+                        <label
+                          className={
+                            item.percentage_change > 0
+                              ? 'high-change'
+                              : 'low-change'
+                          }>
+                          {item.percentage_change > 0 ? (
+                            <img src={Up} alt="High" />
+                          ) : (
+                            <img src={Down} alt="Low" />
+                          )}
+
                           {item.percentage_change}
                         </label>
                       </span>
@@ -233,7 +244,6 @@ const Kpihome = () => {
                       <span>
                         {item.anomaly_count}
                         <label className="anomalies-period">
-                          {' '}
                           {timeline.value === 'wow'
                             ? '(last week)'
                             : timeline.value === 'mom'

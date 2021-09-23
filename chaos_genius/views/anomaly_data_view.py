@@ -151,6 +151,25 @@ def kpi_anomaly_params(kpi_id: int):
 
     new_kpi = update_anomaly_params(kpi, new_anomaly_params)
 
+    # we ensure anomaly task is run as soon as analytics is configured
+    # we consider anomaly to be configured when the payload has model_name in it
+    # otherwise, it's an update of the existing anomaly_params, so we avoid running
+    #
+    # we also run RCA at the same time
+    if "model_name" in new_anomaly_params:
+        # TODO: move this import to top and fix import issue
+        from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task, ready_rca_task
+        anomaly_task = ready_anomaly_task(new_kpi.id)
+        rca_task = ready_rca_task(new_kpi.id)
+        if anomaly_task is None or rca_task is None:
+            print(
+                "Could not run anomaly task since newly configured KPI was not found: "
+                f"{new_kpi.id}"
+            )
+        else:
+            anomaly_task.apply_async()
+            rca_task.apply_async()
+
     return jsonify({
         "msg": "Successfully updated Anomaly params",
         "anomaly_params": new_kpi.as_dict["anomaly_params"],
@@ -471,10 +490,11 @@ def validate_partial_anomaly_params(anomaly_params: Dict[str, Any]) -> Tuple[str
                     anomaly_params
                 )
 
-    err, scheduler_params = validate_partial_scheduler_params(anomaly_params["scheduler_params"])
-    if err != "":
-        return err, anomaly_params
-    anomaly_params["scheduler_params"] = scheduler_params
+    if "scheduler_params" in anomaly_params:
+        err, scheduler_params = validate_partial_scheduler_params(anomaly_params["scheduler_params"])
+        if err != "":
+            return err, anomaly_params
+        anomaly_params["scheduler_params"] = scheduler_params
 
     return "", anomaly_params
 

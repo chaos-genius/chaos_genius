@@ -46,8 +46,8 @@ const Kpihome = () => {
   const [kpiHomeData, setKpiHomeData] = useState([]);
   const [search, setSearch] = useState('');
   const [timeline, setTimeLine] = useState({
-    value: 'wow',
-    label: 'Current Week on Last Week'
+    value: 'mom',
+    label: 'Current Month on Last Month'
   });
 
   useEffect(() => {
@@ -266,7 +266,7 @@ const Kpihome = () => {
                   <div className="kpi-card" key={item.id}>
                     <div className="kpi-content kpi-content-label">
                       <h3>{item.name}</h3>
-                      <label>{item.metric}</label>
+                      {/* <label>{item.metric}</label> */}
                     </div>
                     <div className="kpi-content">
                       <label>
@@ -308,7 +308,7 @@ const Kpihome = () => {
                         </label>
                       </span>
                     </div>
-                    <div className="kpi-content">
+                    {/* <div className="kpi-content">
                       <label>Anomalies</label>
                       <span>
                         {item.anomaly_count}
@@ -320,7 +320,7 @@ const Kpihome = () => {
                             : ' (last day)'}
                         </label>
                       </span>
-                    </div>
+                    </div> */}
                     <div className=" kpi-content kpi-graph ">
                       {item.graph_data && item.graph_data.length !== 0 && (
                         <HighchartsReact

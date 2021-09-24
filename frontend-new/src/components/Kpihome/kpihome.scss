@@ -38,7 +38,7 @@
     line-height: $line-height-22;
     text-transform: capitalize;
     color: $black_variation-2;
-    margin-bottom: 8px;
+    // margin-bottom: 8px;
   }
   label {
     font-weight: $font-weight-400;
@@ -98,7 +98,7 @@
   .kpi-content {
     display: flex;
     flex-direction: column;
-    width: 13%;
+    width: 15%;
     &.kpi-content-label {
       // width: 180px;
       label {
@@ -109,7 +109,7 @@
     //   display: none;
     // }
     .highcharts-container {
-      width: 120px !important;
+      width: 80px !important;
     }
   }
   .kpi-graph {

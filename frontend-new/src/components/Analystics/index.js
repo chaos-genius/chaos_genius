@@ -118,7 +118,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
           sensitivity: Sensitivity,
           seasonality: seasonality,
           frequency: frequency,
-          scheduler_params: { time: schedule.format('HH:mm:ss') }
+          scheduler_params: { time: schedule.format('HH:mm:00') }
         }
       };
       dispatch(kpiSettingSetup(kpi, data));

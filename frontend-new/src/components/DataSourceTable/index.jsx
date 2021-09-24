@@ -19,8 +19,8 @@ import DeleteActive from '../../assets/images/delete-active.svg';
 import Close from '../../assets/images/close.svg';
 import More from '../../assets/images/more.svg';
 import Moreactive from '../../assets/images/more-active.svg';
-import Viewlog from '../../assets/images/viewlog.svg';
-import ViewlogActive from '../../assets/images/viewlog-active.svg';
+// import Viewlog from '../../assets/images/viewlog.svg';
+// import ViewlogActive from '../../assets/images/viewlog-active.svg';
 
 import '../../assets/styles/table.scss';
 import '../Modal/modal.scss';

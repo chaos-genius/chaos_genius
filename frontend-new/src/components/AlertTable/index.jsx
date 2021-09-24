@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { Link } from 'react-router-dom';
 
-import Modal from 'react-modal';
+// import Modal from 'react-modal';
 
 import '../../assets/styles/table.scss';
 import './alerttable.scss';
@@ -16,13 +16,13 @@ import More from '../../assets/images/more.svg';
 import Moreactive from '../../assets/images/more-active.svg';
 import Edit from '../../assets/images/edit.svg';
 import EditActive from '../../assets/images/datasourceedit-active.svg';
-import DeleteActive from '../../assets/images/delete-active.svg';
-import Close from '../../assets/images/close.svg';
+// import DeleteActive from '../../assets/images/delete-active.svg';
+// import Close from '../../assets/images/close.svg';
 
 import { useDispatch, useSelector } from 'react-redux';
 
 import { formatDate } from '../../utils/date-helper';
-import { kpiAlertDisable } from '../../redux/actions';
+// import { kpiAlertDisable } from '../../redux/actions';
 
 import { toastMessage } from '../../utils/toast-helper';
 
@@ -35,26 +35,26 @@ const RESET_ACTION = {
 const AlertTable = ({ alertData, alertSearch, changeData }) => {
   const dispatch = useDispatch();
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [data, setData] = useState('');
+  // const [isOpen, setIsOpen] = useState(false);
+  // const [data, setData] = useState('');
 
-  const closeModal = () => {
-    setIsOpen(false);
-  };
+  // const closeModal = () => {
+  //   setIsOpen(false);
+  // };
   const { kpiAlertDisableData } = useSelector((state) => {
     return state.alert;
   });
 
-  const onDelete = (id) => {
-    dispatch(kpiAlertDisable(id));
-  };
+  // const onDelete = (id) => {
+  //   dispatch(kpiAlertDisable(id));
+  // };
   useEffect(() => {
     store.dispatch(RESET_ACTION);
   }, [dispatch]);
 
   useEffect(() => {
     if (kpiAlertDisableData && kpiAlertDisableData.status === 'success') {
-      setIsOpen(false);
+      // setIsOpen(false);
       changeData((prev) => !prev);
       toastMessage({ type: 'success', message: kpiAlertDisableData.message });
     } else if (kpiAlertDisableData && kpiAlertDisableData === 'failure') {
@@ -192,7 +192,7 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
           )}
         </tbody>
       </table>
-      <Modal
+      {/* <Modal
         portalClassName="deletemodal"
         isOpen={isOpen}
         shouldCloseOnOverlayClick={false}
@@ -216,7 +216,7 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
             </div>
           </div>
         </div>
-      </Modal>
+      </Modal> */}
     </div>
   );
 };

@@ -303,8 +303,8 @@ const Kpihome = () => {
                           ) : (
                             <img src={Down} alt="Low" />
                           )}
-
                           {item.percentage_change}
+                          {item.percentage_change !== '--' ? '%' : ''}
                         </label>
                       </span>
                     </div>

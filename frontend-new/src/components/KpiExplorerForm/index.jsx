@@ -254,7 +254,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         message: 'Test Connection Success'
       });
     }
-    if (testQueryData && testQueryData?.msg === 'failed') {
+    if (testQueryData && testQueryData?.msg === 'failure') {
       toastMessage({
         type: 'error',
         message: 'Test Connection Failed'

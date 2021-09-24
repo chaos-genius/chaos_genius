@@ -152,7 +152,7 @@ const Kpihome = () => {
           type: 'line',
           margin: [2, 0, 2, 0],
           width: 200,
-          height: 40,
+          height: 50,
           style: {
             overflow: 'visible'
           },
@@ -162,6 +162,7 @@ const Kpihome = () => {
         xAxis: {
           type: 'datetime',
           gridLineWidth: 0,
+
           categories: line.map((data) => new Date(data.date)),
           labels: {
             enabled: false,
@@ -179,6 +180,7 @@ const Kpihome = () => {
           step: 1,
           title: '',
           gridLineWidth: 0
+          // lineWidth: 1
         },
         plotOptions: {
           line: {

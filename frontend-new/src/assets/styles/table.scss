@@ -169,7 +169,7 @@
   }
   .table-actions {
     display: flex;
-    // justify-content: center;
+    justify-content: center;
     align-items: center;
     .table-action-icon {
       margin-right: 12px;
@@ -214,5 +214,8 @@
         min-height: 80vh;
       }
     }
+  }
+  .data-centered {
+    text-align: center;
   }
 }

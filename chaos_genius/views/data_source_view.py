@@ -255,7 +255,8 @@ def delete_data_source():
 @blueprint.route("/metadata", methods=["POST"])
 def metadata_data_source():
     """Metadata Data Source."""
-    metadata, msg = {}, ""
+    metadata, msg, status = {}, "", "success"
+
     try:
         payload = request.get_json()
         data_source_id = payload["data_source_id"]
@@ -265,11 +266,16 @@ def metadata_data_source():
         if data_source_obj:
             ds_data = data_source_obj.as_dict
             metadata, msg = get_metadata(ds_data, from_query, query)
+            if msg != "":
+                status = "failure"
+        else:
+            status = "failure"
     except Exception as err_msg:
         print(err_msg)
         msg = str(err_msg)
+        status = "failure"
 
-    return jsonify({"data": metadata, "msg": msg})
+    return jsonify({"data": metadata, "msg": msg, "status": status})
 
 
 @blueprint.route("/logs", methods=["POST"])

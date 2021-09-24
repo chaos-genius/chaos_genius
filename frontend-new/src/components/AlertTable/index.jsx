@@ -72,10 +72,10 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
             <th>Alert Type</th>
             <th>Last Modified</th>
             <th>Status</th>
-            <th className="cursor-pointer">
-              Triggered
-              {/* <img src={Rectangle} alt="down arrow" /> */}
-            </th>
+            {/* <th className="cursor-pointer">
+              Triggered */}
+            {/* <img src={Rectangle} alt="down arrow" /> */}
+            {/* </th> */}
             <th>Channel</th>
             <th></th>
           </tr>
@@ -100,12 +100,12 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
                           className="form-check-input"
                           type="checkbox"
                           id="removeoverlap"
-                          checked={alert.active}
+                          defaultChecked={alert.active}
                         />
                       </div>
                     </div>
                   </td>
-                  <td>{alert.severity_cutoff_score || '-'}</td>
+                  {/* <td>{alert.severity_cutoff_score || '-'}</td> */}
                   <td>
                     <div className="table-actions">
                       <div className="table-action-icon">

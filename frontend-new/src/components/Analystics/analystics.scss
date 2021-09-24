@@ -109,27 +109,45 @@
 }
 
 .form-group {
-  input[type='time'] {
+  .time-picker {
     width: 100%;
     min-height: 48px;
-    background: $white;
-    border: 1px solid $grey_variation-1;
-    box-sizing: border-box;
-    border-radius: 6px;
-    font-weight: $font-weight-400;
-    font-size: $font-size-14;
-    line-height: $line-height-20;
-    letter-spacing: $letter-spacing-point1;
-    text-transform: capitalize;
-    color: $black_variation-2;
-    padding: 0px 14px;
-    &::placeholder {
-      color: $grey_variation-1;
-    }
-    &:focus,
-    &:active {
+
+    input {
+      min-height: 48px;
+      background: $white;
       border: 1px solid $grey_variation-1;
       box-sizing: border-box;
+      border-radius: 6px;
+      font-weight: $font-weight-400;
+      font-size: $font-size-14;
+      line-height: $line-height-20;
+      letter-spacing: $letter-spacing-point1;
+      text-transform: capitalize;
+      color: $black_variation-2;
+      padding: 6px 12px;
+      &:focus {
+        border: 1px solid $grey_variation-1 !important;
+        box-sizing: border-box;
+      }
+      &:active {
+        border: 1px solid $grey_variation-1 !important;
+      }
+    }
+    .rc-time-picker-clear {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      right: 18px;
+      top: 0px;
+      .rc-time-picker-clear-icon {
+        &::after {
+          color: $black_variation-2;
+          font-weight: $font-weight-400;
+          font-size: $font-size-18;
+        }
+      }
     }
   }
 }

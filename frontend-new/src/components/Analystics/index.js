@@ -4,6 +4,11 @@ import Select from 'react-select';
 import Tooltip from 'react-tooltip-lite';
 import Modal from 'react-modal';
 
+import moment from 'moment';
+
+import TimePicker from 'rc-time-picker';
+import 'rc-time-picker/assets/index.css';
+
 import Help from '../../assets/images/help.svg';
 import Close from '../../assets/images/close.svg';
 import Success from '../../assets/images/successful.svg';
@@ -42,6 +47,9 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   const [frequency, setFrequency] = useState('');
   const [seasonality, setSeasonality] = useState([]);
   const [isModalOpen, setModalOpen] = useState(false);
+
+  const [schedule, setSchedule] = useState(moment());
+
   const [error, setError] = useState({
     modelName: '',
     sensitivity: '',
@@ -110,7 +118,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
           sensitivity: Sensitivity,
           seasonality: seasonality,
           frequency: frequency,
-          scheduler_params: { time: '00:01:00' }
+          scheduler_params: { time: schedule.format('HH:mm:ss') }
         }
       };
       dispatch(kpiSettingSetup(kpi, data));
@@ -128,6 +136,9 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
 
   const closeModal = () => {
     setModalOpen(false);
+  };
+  const handleValueChange = (data) => {
+    setSchedule(data);
   };
 
   if (kpiEditLoading) {
@@ -248,10 +259,17 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
               </div>
             )}
           </div>
-          {/* <div className="form-group">
-            <label> Schedule</label>
-            <input type="time" placeholder="Time" className="" />
-          </div> */}
+
+          <div className="form-group">
+            <label>Schedule</label>
+
+            <TimePicker
+              onChange={handleValueChange}
+              defaultValue={schedule}
+              className="time-picker"
+              focusOnOpen={true}
+            />
+          </div>
           <div className="form-group">
             <label>Expected Seasonality in Data</label>
             <div className="seasonality-setting">

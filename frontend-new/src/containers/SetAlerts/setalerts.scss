@@ -28,6 +28,7 @@
     background: $white;
     box-shadow: 4px 6px 32px -2px rgba(226, 226, 226, 0.24);
     border-radius: 20px;
+    position: relative;
     img {
       margin-bottom: 24px;
     }
@@ -39,6 +40,26 @@
       letter-spacing: $letter-spacing;
       color: $black_variation-2;
       margin-bottom: 12px;
+    }
+    h5 {
+      font-weight: $font-weight-600;
+      font-size: $font-size-18;
+      line-height: $line-height-20;
+      text-align: center;
+      color: $white;
+      letter-spacing: $letter-spacing;
+      position: absolute;
+      right: 0;
+      top: 0;
+      border-radius: 50px;
+      background: $green;
+      border-radius: 0px 20px 0px 80px;
+      box-shadow: 4px 6px 32px -2px rgba(226, 226, 226, 0.24);
+      width: 88px;
+      height: 88px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
     }
     p {
       font-weight: $font-weight-normal;

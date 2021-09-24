@@ -128,9 +128,11 @@
     }
     .header-collapse {
       cursor: pointer;
-      img {
-        padding: 24px 24px 18px 24px;
-      }
+      padding: 24px;
+      // img {
+      //   // padding: 24px 24px 18px 24px;
+
+      // }
     }
     .header-disable {
       img {

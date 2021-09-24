@@ -43,17 +43,17 @@ const SetAlerts = () => {
           <div className="alerts-card">
             <img src={EventAlert} alt="Event Alert" />
             <h3>Event Alert</h3>
-            <p>Tap ‘New Alert‘ button below to add your first alert</p>
+            <p>Tap ‘New Alert‘ button below to add your first alert</p>{' '}
             <div className="alert-button">
               <Link to="/alerts/new/event-alert">
                 {/* added disable button */}
                 <button className="btn black-button" disabled>
-                  {/* <img src={Plus} alt="Plus" />
-                  <span>New Alert</span> */}
-                  <span>Coming Soon</span>
+                  <img src={Plus} alt="Plus" />
+                  <span>New Alert</span>
                 </button>
               </Link>
             </div>
+            <h5>Soon</h5>
           </div>
           <div className="alerts-card">
             <img src={KpiAlert} alt="Kpi Alert" />

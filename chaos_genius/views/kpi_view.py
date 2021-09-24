@@ -111,7 +111,7 @@ def get_all_kpis():
 
     status, message = "success", ""
     timeline = request.args.get("timeline", "wow")
-    results = Kpi.query.filter(Kpi.active == True).all()
+    results = Kpi.query.filter(Kpi.active == True).order_by(Kpi.created_at.desc()).all()
 
     ret = []
     static = None

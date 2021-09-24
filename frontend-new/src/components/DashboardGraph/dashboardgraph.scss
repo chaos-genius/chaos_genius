@@ -120,7 +120,8 @@
         line-height: $line-height-22;
         letter-spacing: $letter-spacing-point4;
         color: $black_variation-2;
-        padding: 24px 24px 18px 24px;
+        // padding: 24px 24px 18px 24px;
+        padding: 24px;
       }
     }
     &.header-wrapper-disable {
@@ -128,11 +129,10 @@
     }
     .header-collapse {
       cursor: pointer;
-      padding: 24px;
-      // img {
-      //   // padding: 24px 24px 18px 24px;
-
-      // }
+      img {
+        // padding: 24px 24px 18px 24px;
+        padding: 24px;
+      }
     }
     .header-disable {
       img {

@@ -26,7 +26,7 @@ import {
 } from '../actions/ActionConstants';
 
 const initialState = {
-  dataSourcesList: [],
+  dataSourcesList: '',
   connectionType: [],
   testConnectionResponse: [],
   createDatasourceLoading: false,

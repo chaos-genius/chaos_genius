@@ -47,10 +47,10 @@ const Sidebar = () => {
               <span>Home</span>
             </Link>
           </li>
-          <li className={location[2] === 'autorca' ? 'active' : ''}>
+          <li className={location[1] === 'dashboard' ? 'active' : ''}>
             <Link to="/dashboard/autorca/">
               <img
-                src={location[2] === 'autorca' ? dashboardactive : dashboard}
+                src={location[1] === 'dashboard' ? dashboardactive : dashboard}
                 alt="Dashboard"
               />
               <span>Dashboard</span>

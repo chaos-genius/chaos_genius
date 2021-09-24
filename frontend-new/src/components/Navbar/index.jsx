@@ -13,13 +13,14 @@ const Navbar = () => {
           // data-bs-toggle="dropdown"
           // aria-expanded="false"
         >
-          <div className="user-avatar">m</div>
+          <div className="user-avatar">A</div>
           <div className="user-profile">
             <div className="profile-dropdown">
-              <p>mathew.thomas@gmail.com</p>
+              {/* <p>mathew.thomas@gmail.com</p> */}
+              <p>Admin</p>
               {/* <img src={Profiledown} alt="profile" /> */}
             </div>
-            <label>Admin</label>
+            {/* <label>Admin</label> */}
           </div>
         </div>
         {/* <ul className="dropdown-menu" aria-labelledby="userdetails">

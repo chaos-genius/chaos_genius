@@ -50,7 +50,7 @@ const initialState = {
   emailMetaInfoLoading: false,
   emailMetaInfoData: [],
   emailMetaInfoError: false,
-  alertList: [],
+  alertList: '',
   alertLoading: true,
   alertError: false,
   createKpiAlertData: [],
@@ -189,6 +189,7 @@ export const alert = (state = initialState, action) => {
       return {
         ...state,
         alertLoading: false,
+        alertList: [],
         alertError: true
       };
     }

@@ -169,7 +169,7 @@
   }
   .table-actions {
     display: flex;
-    // justify-content: center;
+    justify-content: center;
     align-items: center;
     .table-action-icon {
       margin-right: 12px;
@@ -205,11 +205,17 @@
     }
   }
   .table-loader {
+    &:hover {
+      background-color: inherit !important;
+    }
     td {
       border: none;
       .load {
         min-height: 80vh;
       }
     }
+  }
+  .data-centered {
+    text-align: center;
   }
 }

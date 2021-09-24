@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 import { Link } from 'react-router-dom';
 
-import Modal from 'react-modal';
+// import Modal from 'react-modal';
 
 import '../../assets/styles/table.scss';
 import './alerttable.scss';
@@ -10,20 +10,19 @@ import './alerttable.scss';
 import Slack from '../../assets/images/table/slack.svg';
 import Asana from '../../assets/images/table/asana.svg';
 import Datadog from '../../assets/images/table/datadog.svg';
-import Rectangle from '../../assets/images/table/downarrow.svg';
 import Email from '../../assets/images/table/email.svg';
 import Noresult from '../Noresult';
 import More from '../../assets/images/more.svg';
 import Moreactive from '../../assets/images/more-active.svg';
 import Edit from '../../assets/images/edit.svg';
 import EditActive from '../../assets/images/datasourceedit-active.svg';
-import DeleteActive from '../../assets/images/delete-active.svg';
-import Close from '../../assets/images/close.svg';
+// import DeleteActive from '../../assets/images/delete-active.svg';
+// import Close from '../../assets/images/close.svg';
 
 import { useDispatch, useSelector } from 'react-redux';
 
 import { formatDate } from '../../utils/date-helper';
-import { kpiAlertDisable } from '../../redux/actions';
+// import { kpiAlertDisable } from '../../redux/actions';
 
 import { toastMessage } from '../../utils/toast-helper';
 
@@ -36,26 +35,26 @@ const RESET_ACTION = {
 const AlertTable = ({ alertData, alertSearch, changeData }) => {
   const dispatch = useDispatch();
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [data, setData] = useState('');
+  // const [isOpen, setIsOpen] = useState(false);
+  // const [data, setData] = useState('');
 
-  const closeModal = () => {
-    setIsOpen(false);
-  };
+  // const closeModal = () => {
+  //   setIsOpen(false);
+  // };
   const { kpiAlertDisableData } = useSelector((state) => {
     return state.alert;
   });
 
-  const onDelete = (id) => {
-    dispatch(kpiAlertDisable(id));
-  };
+  // const onDelete = (id) => {
+  //   dispatch(kpiAlertDisable(id));
+  // };
   useEffect(() => {
     store.dispatch(RESET_ACTION);
   }, [dispatch]);
 
   useEffect(() => {
     if (kpiAlertDisableData && kpiAlertDisableData.status === 'success') {
-      setIsOpen(false);
+      // setIsOpen(false);
       changeData((prev) => !prev);
       toastMessage({ type: 'success', message: kpiAlertDisableData.message });
     } else if (kpiAlertDisableData && kpiAlertDisableData === 'failure') {
@@ -73,102 +72,103 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
             <th>Alert Type</th>
             <th>Last Modified</th>
             <th>Status</th>
-            <th className="cursor-pointer">
-              Triggered <img src={Rectangle} alt="down arrow" />
-            </th>
+            {/* <th className="cursor-pointer">
+              Triggered */}
+            {/* <img src={Rectangle} alt="down arrow" /> */}
+            {/* </th> */}
             <th>Channel</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
-          {alertData && alertData.length !== 0 ? (
-            alertData.map((alert) => {
-              return (
-                <tr>
-                  <td>{alert.alert_name || '-'}</td>
-                  <td className="date-column-formated">
-                    {alert.alert_type || '-'}
-                  </td>
-                  <td className="date-column-formated">
-                    {formatDate(alert.last_sync) || '-'}
-                  </td>
-                  <td>
-                    <div className="alert-status">
-                      <label>{alert.active ? 'Active' : 'InActive'}</label>
-                      <div className="form-check form-switch">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          id="removeoverlap"
-                          checked={alert.active}
-                        />
+          {alertData && alertData.length !== 0
+            ? alertData.map((alert) => {
+                return (
+                  <tr>
+                    <td>{alert.alert_name || '-'}</td>
+                    <td className="date-column-formated">
+                      {alert.alert_type || '-'}
+                    </td>
+                    <td className="date-column-formated data-centered">
+                      {formatDate(alert.last_sync) || '-'}
+                    </td>
+                    <td>
+                      <div className="alert-status">
+                        <label>{alert.active ? 'Active' : 'InActive'}</label>
+                        <div className="form-check form-switch">
+                          <input
+                            className="form-check-input"
+                            type="checkbox"
+                            id="removeoverlap"
+                            checked={alert.active}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td>{alert.severity_cutoff_score || '-'}</td>
-                  <td>
-                    <div className="table-actions">
-                      <div className="table-action-icon">
-                        <img
-                          src={
-                            alert.alert_channel === 'slack'
-                              ? Slack
-                              : alert.alert_channel === 'email'
-                              ? Email
-                              : alert.alert_channel === 'asana'
-                              ? Asana
-                              : Datadog
-                          }
-                          alt={alert.alert_channel}
-                        />
+                    </td>
+                    {/* <td>{alert.severity_cutoff_score || '-'}</td> */}
+                    <td>
+                      <div className="table-actions">
+                        <div className="table-action-icon">
+                          <img
+                            src={
+                              alert.alert_channel === 'slack'
+                                ? Slack
+                                : alert.alert_channel === 'email'
+                                ? Email
+                                : alert.alert_channel === 'asana'
+                                ? Asana
+                                : Datadog
+                            }
+                            alt={alert.alert_channel}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div
-                      className={
-                        alertData.length !== 1
-                          ? ' more-dropdown dropdown '
-                          : ' more-dropdown '
-                      }>
+                    </td>
+                    <td>
                       <div
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                        aria-haspopup="true">
-                        <img
-                          src={More}
-                          alt="More"
-                          className="moreoption"
-                          data-bs-toggle="tooltip"
-                          data-bs-placement="bottom"
-                          title="Actions"
-                        />
-                        <img
-                          src={Moreactive}
-                          alt="More"
-                          className="moreoption-active"
-                          data-bs-toggle="tooltip"
-                          data-bs-placement="bottom"
-                          title="Actions"
-                        />
-                      </div>
-                      <ul className="dropdown-menu">
-                        <Link to={`/alerts/edit/kpi-alert/${alert.id}`}>
-                          <li>
-                            <img
-                              src={Edit}
-                              alt="Edit"
-                              className="action-disable"
-                            />
-                            <img
-                              src={EditActive}
-                              alt="Edit"
-                              className="action-active"
-                            />
-                            Edit
-                          </li>
-                        </Link>
-                        <li
+                        className={
+                          alertData.length !== 1
+                            ? ' more-dropdown dropdown '
+                            : ' more-dropdown '
+                        }>
+                        <div
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                          aria-haspopup="true">
+                          <img
+                            src={More}
+                            alt="More"
+                            className="moreoption"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom"
+                            title="Actions"
+                          />
+                          <img
+                            src={Moreactive}
+                            alt="More"
+                            className="moreoption-active"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom"
+                            title="Actions"
+                          />
+                        </div>
+                        <ul className="dropdown-menu">
+                          <Link to={`/alerts/edit/kpi-alert/${alert.id}`}>
+                            <li>
+                              <img
+                                src={Edit}
+                                alt="Edit"
+                                className="action-disable"
+                              />
+                              <img
+                                src={EditActive}
+                                alt="Edit"
+                                className="action-active"
+                              />
+                              Edit
+                            </li>
+                          </Link>
+                          {/* <li
                           className="delete-item"
                           onClick={() => {
                             setIsOpen(true);
@@ -176,23 +176,23 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
                           }}>
                           <img src={DeleteActive} alt="Delete" />
                           Delete
-                        </li>
-                      </ul>
-                    </div>
+                        </li> */}
+                        </ul>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            : alertData !== '' && (
+                <tr className="empty-table">
+                  <td colSpan={6}>
+                    <Noresult text={alertSearch} title="Alerts" />
                   </td>
                 </tr>
-              );
-            })
-          ) : (
-            <tr className="empty-table">
-              <td colSpan={6}>
-                <Noresult text={alertSearch} title="Alerts" />
-              </td>
-            </tr>
-          )}
+              )}
         </tbody>
       </table>
-      <Modal
+      {/* <Modal
         portalClassName="deletemodal"
         isOpen={isOpen}
         shouldCloseOnOverlayClick={false}
@@ -216,7 +216,7 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
             </div>
           </div>
         </div>
-      </Modal>
+      </Modal> */}
     </div>
   );
 };

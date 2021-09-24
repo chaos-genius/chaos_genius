@@ -25,6 +25,7 @@ const Alerts = () => {
   const dispatch = useDispatch();
 
   const { alertLoading, alertList } = useSelector((state) => state.alert);
+
   const [alertData, setAlertData] = useState(alertList);
   const [alertSearch, setAlertSearch] = useState('');
   const [alertFilter, setAlertFilter] = useState([]);
@@ -62,32 +63,10 @@ const Alerts = () => {
 
   useEffect(() => {
     const fetchFilter = () => {
-      if (alertFilter.length === 0) {
-        setAlertData(alertList);
-      } else {
-        var arr = [];
-        alertFilter &&
-          alertFilter.forEach((data) => {
-            alertList.forEach((list) => {
-              if (list.alert_channel.toLowerCase() === data.toLowerCase()) {
-                arr.push(list);
-              }
-            });
-          });
-        setAlertData(arr);
-      }
-    };
-
-    fetchFilter();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alertFilter]);
-
-  const fetchStatusFilter = () => {
-    if (alertStatusFilter.length === 0) {
-      setAlertData(alertList);
-    } else {
       var arr = [];
-      alertStatusFilter &&
+      if (alertFilter.length === 0 && alertStatusFilter.length === 0) {
+        setAlertData(alertList);
+      } else if (alertFilter.length === 0 && alertStatusFilter.length !== 0) {
         alertStatusFilter.forEach((data) => {
           alertList.forEach((list) => {
             if (list.active && data === 'active') {
@@ -97,15 +76,43 @@ const Alerts = () => {
             }
           });
         });
-
-      setAlertData(arr);
-    }
-  };
-
-  useEffect(() => {
-    fetchStatusFilter();
+        setAlertData(arr);
+      } else if (alertStatusFilter.length === 0 && alertFilter.length !== 0) {
+        alertFilter &&
+          alertFilter.forEach((data) => {
+            alertList.forEach((list) => {
+              if (list.alert_channel.toLowerCase() === data.toLowerCase()) {
+                arr.push(list);
+              }
+            });
+          });
+        setAlertData(arr);
+      } else if (alertStatusFilter.length !== 0 && alertFilter.length !== 0) {
+        alertStatusFilter.forEach((status) => {
+          alertFilter.forEach((channel) => {
+            alertList.forEach((list) => {
+              if (
+                list.active === true &&
+                status === 'active' &&
+                list.alert_channel.toLowerCase() === channel
+              ) {
+                arr.push(list);
+              } else if (
+                list.active === false &&
+                list.alert_channel === channel &&
+                status === 'inactive'
+              ) {
+                arr.push(list);
+              }
+            });
+          });
+        });
+        setAlertData(arr);
+      }
+    };
+    fetchFilter();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alertStatusFilter]);
+  }, [alertFilter, alertStatusFilter]);
 
   if (alertLoading) {
     return (

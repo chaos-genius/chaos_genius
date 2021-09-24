@@ -146,6 +146,9 @@ const KpiAlertConfigurationForm = ({
         alert_channel: kpiAlertEditData?.alert_channel,
         alert_channel_conf: kpiAlertEditData?.alert_channel_conf
       });
+      setValue(
+        kpiAlertEditData ? [kpiAlertEditData?.severity_cutoff_score] : [1]
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiAlertEditData]);

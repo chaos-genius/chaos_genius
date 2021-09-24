@@ -120,7 +120,7 @@ def kpi_anomaly_params(kpi_id: int):
 
     if kpi is None:
         return jsonify(
-            {"error": f"Could not find KPI for ID: {kpi_id}"}
+            {"error": f"Could not find KPI for ID: {kpi_id}", "status": "failure"}
         ), 400
 
     # when method is GET we just return the anomaly params
@@ -134,20 +134,20 @@ def kpi_anomaly_params(kpi_id: int):
 
     if not request.is_json:
         return jsonify(
-            {"error": "Request body must be a JSON (and Content-Type header must be set correctly)"}
+            {"error": "Request body must be a JSON (and Content-Type header must be set correctly)", "status": "failure"}
         ), 400
 
     req_data: dict = cast(dict, request.get_json())
 
     if "anomaly_params" not in req_data:
         return jsonify(
-            {"error": "The request JSON needs to have anomaly_params as a field"}
+            {"error": "The request JSON needs to have anomaly_params as a field", "status": "failure"}
         ), 400
 
     err, new_anomaly_params = validate_partial_anomaly_params(req_data["anomaly_params"])
 
     if err != "":
-        return jsonify({"error": err}), 400
+        return jsonify({"error": err, "status": "failure"}), 400
 
     new_kpi = update_anomaly_params(kpi, new_anomaly_params)
 
@@ -173,6 +173,7 @@ def kpi_anomaly_params(kpi_id: int):
     return jsonify({
         "msg": "Successfully updated Anomaly params",
         "anomaly_params": new_kpi.as_dict["anomaly_params"],
+        "status": "success"
     })
 
 

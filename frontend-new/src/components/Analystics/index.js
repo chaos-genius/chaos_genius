@@ -268,6 +268,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
               defaultValue={schedule}
               className="time-picker"
               focusOnOpen={true}
+              showSecond={false}
             />
           </div>
           <div className="form-group">

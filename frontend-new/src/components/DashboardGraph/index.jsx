@@ -70,8 +70,8 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
     label: 'Current Month on Last Month'
   });
   const [dimension, setDimension] = useState({
-    value: 'multidimension',
-    label: 'Multidimension'
+    value: 'singledimension',
+    label: 'Singledimension'
   });
 
   const { aggregationData, aggregationLoading } = useSelector(

@@ -97,7 +97,7 @@ def list_data_source_type():
 @blueprint.route("/test", methods=["POST"])
 def test_data_source():
     """Test DataSource."""
-    connection_status, msg = [], ""
+    connection_status, msg, status= [], "", "success"
     try:
         payload = request.get_json()
         connector_client = connector.connection
@@ -105,7 +105,8 @@ def test_data_source():
     except Exception as err_msg:
         print(err_msg)
         msg = str(err_msg)
-    return jsonify({"data": connection_status, "msg": msg})
+        status = "failed"
+    return jsonify({"data": connection_status, "msg": msg, "status": status})
 
 
 @blueprint.route("/create", methods=["POST"])

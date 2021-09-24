@@ -248,13 +248,13 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   }, [kpiSubmit, kpiUpdateData]);
 
   useEffect(() => {
-    if (testQueryData && testQueryData?.msg === 'success') {
+    if (testQueryData && testQueryData?.status === 'success') {
       toastMessage({
         type: 'success',
         message: 'Test Connection Success'
       });
     }
-    if (testQueryData && testQueryData?.msg === 'failure') {
+    if (testQueryData && testQueryData?.status === 'failure') {
       toastMessage({
         type: 'error',
         message: 'Test Connection Failed'

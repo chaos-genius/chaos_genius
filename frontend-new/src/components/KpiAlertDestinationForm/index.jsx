@@ -59,6 +59,8 @@ const KpiAlertDestinationForm = ({
   const history = useHistory();
   const kpiId = useParams().id;
   const path = history.location.pathname.split('/');
+  const [anotherChannel, setAnotherChannel] = useState(false);
+  const [anotherChannelTag, setAnotherChannelTag] = useState([]);
   //createKpiAlertData ,updateKpiAlert
   const {
     createKpiAlertLoading,
@@ -203,9 +205,48 @@ const KpiAlertDestinationForm = ({
   };
 
   const validateEmail = (email) => {
-    const re =
-      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
+  };
+
+  const addChannel = () => {
+    return (
+      <>
+        <div className="form-group">
+          <label>Select Channel *</label>
+          <div className="editable-field">
+            <Select
+              options={option}
+              classNamePrefix="selectcategory"
+              placeholder="Select"
+              components={{ SingleValue: customSingleValue }}
+            />
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label>Add Recepients </label>
+          <div className="editable-field">
+            <ReactTagInput
+              tags={anotherChannelTag}
+              placeholder="Add Recepients"
+              onChange={(e) => setAnotherChannelTag(e)}
+              validator={(value) => {
+                const isEmail = validateEmail(value);
+                if (!isEmail) {
+                  toastMessage({
+                    type: 'error',
+                    message: 'Please enter an valid email address'
+                  });
+                }
+                // Return boolean to indicate validity
+                return isEmail;
+              }}
+            />
+          </div>
+        </div>
+      </>
+    );
   };
 
   return (
@@ -286,7 +327,7 @@ const KpiAlertDestinationForm = ({
               if (!isEmail) {
                 toastMessage({
                   type: 'error',
-                  message: 'Please enter an valid e-mail address'
+                  message: 'Please enter an valid email address'
                 });
               }
               // Return boolean to indicate validity
@@ -298,11 +339,14 @@ const KpiAlertDestinationForm = ({
             editAndSaveButton('alert_channel')}
         </div>
       </div>
-      <div className="add-options-wrapper options-spacing">
-        <div className="add-options">
-          <label>+ Add Another Channel</label>
+      {anotherChannel && addChannel()}
+      {anotherChannel === false && (
+        <div className="add-options-wrapper options-spacing">
+          <div className="add-options" onClick={() => setAnotherChannel(true)}>
+            <label>+ Add Another Channel</label>
+          </div>
         </div>
-      </div>
+      )}
       <div className="form-action alerts-button">
         <button className="btn white-button" onClick={() => onBack()}>
           <span>Back</span>

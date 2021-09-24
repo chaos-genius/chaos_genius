@@ -100,7 +100,7 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
                             className="form-check-input"
                             type="checkbox"
                             id="removeoverlap"
-                            defaultChecked={alert.active}
+                            checked={alert.active}
                           />
                         </div>
                       </div>

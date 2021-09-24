@@ -800,45 +800,46 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               </div>
             ) : null}
           </div>
-          {tableAdditional.tabledimension === true ? (
-            <div className="form-group">
-              <label>Dimensions</label>
-              <Select
-                closeMenuOnSelect={false}
-                blurInputOnSelect={false}
-                value={
-                  formdata.adddimentsions.length !== 0
-                    ? formdata.adddimentsions.map((el) => {
-                        return {
-                          label: el,
-                          value: el
-                        };
-                      })
-                    : []
-                }
-                isMulti
-                options={
-                  option.metricOption &&
-                  option.metricOption.length !== 0 &&
-                  option.metricOption
-                }
-                isDisabled={
-                  data[2] === 'edit' ? editableStatus('dimensions') : false
-                }
-                classNamePrefix="selectcategory"
-                placeholder="Select Dimensions"
-                menuPlacement="top"
-                onChange={(e) => {
-                  setFormdata({
-                    ...formdata,
-                    adddimentsions: e.map((el) => el.value)
-                  });
-                  setOption({ ...option, datetime_column: e.value });
-                }}
-              />
-            </div>
-          ) : null}
+          {/* {tableAdditional.tabledimension === true ? (
+            
+          ) : null} */}
 
+          <div className="form-group">
+            <label>Dimensions</label>
+            <Select
+              closeMenuOnSelect={false}
+              blurInputOnSelect={false}
+              value={
+                formdata.adddimentsions.length !== 0
+                  ? formdata.adddimentsions.map((el) => {
+                      return {
+                        label: el,
+                        value: el
+                      };
+                    })
+                  : []
+              }
+              isMulti
+              options={
+                option.metricOption &&
+                option.metricOption.length !== 0 &&
+                option.metricOption
+              }
+              isDisabled={
+                data[2] === 'edit' ? editableStatus('dimensions') : false
+              }
+              classNamePrefix="selectcategory"
+              placeholder="Select Dimensions"
+              menuPlacement="top"
+              onChange={(e) => {
+                setFormdata({
+                  ...formdata,
+                  adddimentsions: e.map((el) => el.value)
+                });
+                setOption({ ...option, datetime_column: e.value });
+              }}
+            />
+          </div>
           {/* {inputList && inputList.length !== 0 && (
             <div className="form-group">
               <label>Filters</label>
@@ -893,7 +894,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               <label>+ Add Filters</label>
             </div> */}
 
-            {tableAdditional.tabledimension === false ? (
+            {/* {tableAdditional.tabledimension === false ? (
               <div
                 className="add-options"
                 onClick={() =>
@@ -904,7 +905,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                 }>
                 <label> + Add Dimensions</label>
               </div>
-            ) : null}
+            ) : null} */}
           </div>
 
           <div className="form-action">

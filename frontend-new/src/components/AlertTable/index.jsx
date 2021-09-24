@@ -81,94 +81,94 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
           </tr>
         </thead>
         <tbody>
-          {alertData && alertData.length !== 0 ? (
-            alertData.map((alert) => {
-              return (
-                <tr>
-                  <td>{alert.alert_name || '-'}</td>
-                  <td className="date-column-formated">
-                    {alert.alert_type || '-'}
-                  </td>
-                  <td className="date-column-formated">
-                    {formatDate(alert.last_sync) || '-'}
-                  </td>
-                  <td>
-                    <div className="alert-status">
-                      <label>{alert.active ? 'Active' : 'InActive'}</label>
-                      <div className="form-check form-switch">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          id="removeoverlap"
-                          defaultChecked={alert.active}
-                        />
+          {alertData && alertData.length !== 0
+            ? alertData.map((alert) => {
+                return (
+                  <tr>
+                    <td>{alert.alert_name || '-'}</td>
+                    <td className="date-column-formated">
+                      {alert.alert_type || '-'}
+                    </td>
+                    <td className="date-column-formated">
+                      {formatDate(alert.last_sync) || '-'}
+                    </td>
+                    <td>
+                      <div className="alert-status">
+                        <label>{alert.active ? 'Active' : 'InActive'}</label>
+                        <div className="form-check form-switch">
+                          <input
+                            className="form-check-input"
+                            type="checkbox"
+                            id="removeoverlap"
+                            defaultChecked={alert.active}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  {/* <td>{alert.severity_cutoff_score || '-'}</td> */}
-                  <td>
-                    <div className="table-actions">
-                      <div className="table-action-icon">
-                        <img
-                          src={
-                            alert.alert_channel === 'slack'
-                              ? Slack
-                              : alert.alert_channel === 'email'
-                              ? Email
-                              : alert.alert_channel === 'asana'
-                              ? Asana
-                              : Datadog
-                          }
-                          alt={alert.alert_channel}
-                        />
+                    </td>
+                    {/* <td>{alert.severity_cutoff_score || '-'}</td> */}
+                    <td>
+                      <div className="table-actions">
+                        <div className="table-action-icon">
+                          <img
+                            src={
+                              alert.alert_channel === 'slack'
+                                ? Slack
+                                : alert.alert_channel === 'email'
+                                ? Email
+                                : alert.alert_channel === 'asana'
+                                ? Asana
+                                : Datadog
+                            }
+                            alt={alert.alert_channel}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div
-                      className={
-                        alertData.length !== 1
-                          ? ' more-dropdown dropdown '
-                          : ' more-dropdown '
-                      }>
+                    </td>
+                    <td>
                       <div
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                        aria-haspopup="true">
-                        <img
-                          src={More}
-                          alt="More"
-                          className="moreoption"
-                          data-bs-toggle="tooltip"
-                          data-bs-placement="bottom"
-                          title="Actions"
-                        />
-                        <img
-                          src={Moreactive}
-                          alt="More"
-                          className="moreoption-active"
-                          data-bs-toggle="tooltip"
-                          data-bs-placement="bottom"
-                          title="Actions"
-                        />
-                      </div>
-                      <ul className="dropdown-menu">
-                        <Link to={`/alerts/edit/kpi-alert/${alert.id}`}>
-                          <li>
-                            <img
-                              src={Edit}
-                              alt="Edit"
-                              className="action-disable"
-                            />
-                            <img
-                              src={EditActive}
-                              alt="Edit"
-                              className="action-active"
-                            />
-                            Edit
-                          </li>
-                        </Link>
-                        {/* <li
+                        className={
+                          alertData.length !== 1
+                            ? ' more-dropdown dropdown '
+                            : ' more-dropdown '
+                        }>
+                        <div
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                          aria-haspopup="true">
+                          <img
+                            src={More}
+                            alt="More"
+                            className="moreoption"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom"
+                            title="Actions"
+                          />
+                          <img
+                            src={Moreactive}
+                            alt="More"
+                            className="moreoption-active"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom"
+                            title="Actions"
+                          />
+                        </div>
+                        <ul className="dropdown-menu">
+                          <Link to={`/alerts/edit/kpi-alert/${alert.id}`}>
+                            <li>
+                              <img
+                                src={Edit}
+                                alt="Edit"
+                                className="action-disable"
+                              />
+                              <img
+                                src={EditActive}
+                                alt="Edit"
+                                className="action-active"
+                              />
+                              Edit
+                            </li>
+                          </Link>
+                          {/* <li
                           className="delete-item"
                           onClick={() => {
                             setIsOpen(true);
@@ -177,19 +177,19 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
                           <img src={DeleteActive} alt="Delete" />
                           Delete
                         </li> */}
-                      </ul>
-                    </div>
+                        </ul>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            : alertData !== '' && (
+                <tr className="empty-table">
+                  <td colSpan={6}>
+                    <Noresult text={alertSearch} title="Alerts" />
                   </td>
                 </tr>
-              );
-            })
-          ) : (
-            <tr className="empty-table">
-              <td colSpan={6}>
-                <Noresult text={alertSearch} title="Alerts" />
-              </td>
-            </tr>
-          )}
+              )}
         </tbody>
       </table>
       {/* <Modal

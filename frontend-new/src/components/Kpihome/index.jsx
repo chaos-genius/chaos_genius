@@ -43,7 +43,7 @@ const Kpihome = () => {
   const { homeKpiData, homeKpiLoading } = useSelector(
     (state) => state.onboarding
   );
-  const [kpiHomeData, setKpiHomeData] = useState([]);
+  const [kpiHomeData, setKpiHomeData] = useState(homeKpiData);
   const [search, setSearch] = useState('');
   const [timeline, setTimeLine] = useState({
     value: 'mom',
@@ -343,9 +343,11 @@ const Kpihome = () => {
               })}
             </>
           ) : (
-            <div className="no-data-kpihome">
-              <Noresult text={search} title={'KPI'} />
-            </div>
+            kpiHomeData !== '' && (
+              <div className="no-data-kpihome">
+                <Noresult text={search} title={'KPI'} />
+              </div>
+            )
           )}
         </div>
       </>

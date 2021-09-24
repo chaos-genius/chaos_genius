@@ -24,13 +24,13 @@ const KpiExplorer = () => {
   const dispatch = useDispatch();
 
   const [kpiSearch, setKpiSearch] = useState('');
-  const [kpiExplorerData, setKpiExplorerData] = useState([]);
   const [data, setData] = useState(false);
   const [kpiFilter, setKpiFilter] = useState([]);
 
   const { isLoading, kpiExplorerList } = useSelector(
     (state) => state.kpiExplorer
   );
+  const [kpiExplorerData, setKpiExplorerData] = useState(kpiExplorerList);
 
   useEffect(() => {
     store.dispatch(KPI_RESET);
@@ -94,7 +94,7 @@ const KpiExplorer = () => {
     );
   } else {
     return (
-      <div>
+      <>
         {/* common heading and options */}
         <div className="heading-option">
           <div className="heading-title">
@@ -130,7 +130,7 @@ const KpiExplorer = () => {
             )}
           </div>
         </div>
-      </div>
+      </>
     );
   }
 };

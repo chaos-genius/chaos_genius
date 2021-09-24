@@ -205,6 +205,9 @@
     }
   }
   .table-loader {
+    &:hover {
+      background-color: inherit !important;
+    }
     td {
       border: none;
       .load {

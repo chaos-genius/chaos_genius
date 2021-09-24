@@ -25,6 +25,7 @@ const Alerts = () => {
   const dispatch = useDispatch();
 
   const { alertLoading, alertList } = useSelector((state) => state.alert);
+
   const [alertData, setAlertData] = useState(alertList);
   const [alertSearch, setAlertSearch] = useState('');
   const [alertFilter, setAlertFilter] = useState([]);

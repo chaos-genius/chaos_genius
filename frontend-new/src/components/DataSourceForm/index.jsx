@@ -231,14 +231,17 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     if (testConnectionResponse !== undefined) {
       setStatus(testConnectionResponse);
     }
-    if (testConnectionResponse && testConnectionResponse.status === 'success') {
+    if (
+      testConnectionResponse &&
+      testConnectionResponse.status === 'succeeded'
+    ) {
       toastMessage({
         type: 'success',
         message: 'Test Connection Success'
       });
     } else if (
       testConnectionResponse &&
-      testConnectionResponse.status === 'failure'
+      testConnectionResponse.status === 'failed'
     ) {
       toastMessage({
         type: 'error',
@@ -312,6 +315,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
           sourceDefinitionId: sourceDefinitionId
         }
       };
+      console.log('Source Definition id:', payload);
       dispatch(createDataSource(payload));
     }
   };
@@ -398,7 +402,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
               setSelectedDatasource(e);
               setError('');
               setFormError([]);
-              setSourceDefinitionId(e.value.sourceDefinitionId);
+              setSourceDefinitionId(e.selected.sourceDefinitionId);
               setDsFormData({});
               setStatus('');
             }}
@@ -430,7 +434,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
           </div>
         )} */}
         {/* test connection fail message */}
-        {/* {status && status?.status === 'failed' && (
+        {/* {status && status?.status === 'failure' && (
           <div className="connection__fail">
             <p>
               <img src={Fail} alt="Fail" />

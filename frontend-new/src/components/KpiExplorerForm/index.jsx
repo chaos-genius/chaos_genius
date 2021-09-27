@@ -150,7 +150,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       obj['aggregate'] = kpiEditData?.aggregation || '';
       obj['datetimecolumns'] = kpiEditData?.datetime_column || '';
       obj['addfilter'] = kpiEditData?.filters || [];
-      obj['adddimentsions'] = kpiEditData?.dimensions || [];
+      obj['dimensions'] = kpiEditData?.dimensions || [];
       setDataset({
         label: kpiEditData?.kpi_type,
         value: kpiEditData?.kpi_type
@@ -489,7 +489,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         metric: formdata.metriccolumns,
         aggregation: formdata.aggregate,
         datetime_column: formdata.datetimecolumns,
-        dimensions: formdata.adddimentsions,
+        dimensions: formdata.dimensions,
         filters: formdata.addfilter
       };
       if (data[2] === 'edit') {

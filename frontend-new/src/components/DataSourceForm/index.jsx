@@ -228,20 +228,18 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   };
 
   useEffect(() => {
+    console.log('TEst:', testConnectionResponse);
     if (testConnectionResponse !== undefined) {
       setStatus(testConnectionResponse);
     }
-    if (
-      testConnectionResponse &&
-      testConnectionResponse.status === 'succeeded'
-    ) {
+    if (testConnectionResponse && testConnectionResponse.status === 'success') {
       toastMessage({
         type: 'success',
         message: 'Test Connection Success'
       });
     } else if (
       testConnectionResponse &&
-      testConnectionResponse.status === 'failed'
+      testConnectionResponse.status === 'failure'
     ) {
       toastMessage({
         type: 'error',

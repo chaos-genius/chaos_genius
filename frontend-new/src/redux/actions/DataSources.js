@@ -131,7 +131,7 @@ export const testDatasourceConnection = (formData) => {
     if (error) {
       dispatch(testConnectionFailure());
     } else if (data && status === 200) {
-      dispatch(testConnectionSuccess(data.data));
+      dispatch(testConnectionSuccess(data));
     }
   };
 };

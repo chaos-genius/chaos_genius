@@ -193,7 +193,8 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
                       </tr>
                     );
                   })
-                : kpiData !== '' && (
+                : kpiData &&
+                  kpiData !== '' && (
                     <tr className="empty-table">
                       <td colSpan={6}>
                         <Noresult text={kpiSearch} title="KPI" />

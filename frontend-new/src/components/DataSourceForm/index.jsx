@@ -228,7 +228,6 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   };
 
   useEffect(() => {
-    console.log('TEst:', testConnectionResponse);
     if (testConnectionResponse !== undefined) {
       setStatus(testConnectionResponse);
     }

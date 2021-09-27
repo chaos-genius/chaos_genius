@@ -39,7 +39,7 @@ const HierarchicalTable = ({ hierarchicalData }) => {
             <th>Subgroup Name</th>
             <th>Prev month Avg</th>
             <th>Prev month Size</th>
-            <th>prev month Count</th>
+            <th>Prev month Count</th>
             <th>Curr month Avg</th>
             <th>Curr month Size</th>
             <th>Curr month Count</th>

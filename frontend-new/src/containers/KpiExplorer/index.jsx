@@ -120,14 +120,12 @@ const KpiExplorer = () => {
           </div>
           {/* table section */}
           <div className="table-section">
-            {kpiExplorerList && (
-              <KPITable
-                kpiData={kpiExplorerData}
-                kpiSearch={kpiSearch}
-                changeData={setData}
-                kpiLoading={isLoading}
-              />
-            )}
+            <KPITable
+              kpiData={kpiExplorerData}
+              kpiSearch={kpiSearch}
+              changeData={setData}
+              kpiLoading={isLoading}
+            />
           </div>
         </div>
       </>

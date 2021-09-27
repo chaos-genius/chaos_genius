@@ -87,7 +87,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     aggregate: '',
     datetimecolumns: '',
     addfilter: [],
-    adddimentsions: []
+    dimensions: []
   });
 
   const [errorMsg, setErrorMsg] = useState({
@@ -99,7 +99,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     query: false,
     metriccolumns: false,
     aggregate: false,
-    datetimecolumns: false
+    datetimecolumns: false,
+    dimension: false
   });
 
   const [dataset, setDataset] = useState({ value: 'Table', label: 'Table' });
@@ -149,7 +150,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       obj['aggregate'] = kpiEditData?.aggregation || '';
       obj['datetimecolumns'] = kpiEditData?.datetime_column || '';
       obj['addfilter'] = kpiEditData?.filters || [];
-      obj['adddimentsions'] = kpiEditData?.dimensions || [];
+      obj['dimensions'] = kpiEditData?.dimensions || [];
       setDataset({
         label: kpiEditData?.kpi_type,
         value: kpiEditData?.kpi_type
@@ -287,7 +288,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       metriccolumns: '',
       aggregate: '',
       datetimecolumns: '',
-      adddimentsions: ''
+      dimensions: []
     });
     setTableAdditional({
       ...tableAdditional,
@@ -388,7 +389,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       metriccolumns: '',
       aggregate: '',
       datetimecolumns: '',
-      adddimentsions: [],
+      dimensions: [],
       tablename: ''
     });
     setTableAdditional({
@@ -454,6 +455,14 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         };
       });
     }
+    if (formdata.dimensions.length === 0) {
+      setErrorMsg((prev) => {
+        return {
+          ...prev,
+          dimension: true
+        };
+      });
+    }
     if (formdata.query === '') {
       setErrorMsg((prev) => {
         return {
@@ -480,7 +489,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         metric: formdata.metriccolumns,
         aggregation: formdata.aggregate,
         datetime_column: formdata.datetimecolumns,
-        dimensions: formdata.adddimentsions,
+        dimensions: formdata.dimensions,
         filters: formdata.addfilter
       };
       if (data[2] === 'edit') {
@@ -605,7 +614,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           <Select
             value={dataset}
             options={datasettype}
-            // options={datasettype}
             classNamePrefix="selectcategory"
             placeholder="Select Dataset Type"
             onChange={(e) => handleDataset(e)}
@@ -702,9 +710,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             <label>Metric Columns *</label>
             <Select
               options={
-                option.metricOption &&
-                option.metricOption.length !== 0 &&
-                option.metricOption
+                option.metricOption && option.metricOption.length !== 0
+                  ? option.metricOption
+                  : []
               }
               value={
                 formdata.metriccolumns !== '' && {
@@ -767,11 +775,12 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           </div>
           <div className="form-group">
             <label>Datetime Columns *</label>
+
             <Select
               options={
-                option.metricOption &&
-                option.metricOption.length !== 0 &&
-                option.metricOption
+                option.metricOption && option.metricOption.length !== 0
+                  ? option.metricOption
+                  : []
               }
               value={
                 formdata.datetimecolumns !== '' && {
@@ -805,13 +814,13 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           ) : null} */}
 
           <div className="form-group">
-            <label>Dimensions</label>
+            <label>Dimensions *</label>
             <Select
               closeMenuOnSelect={false}
               blurInputOnSelect={false}
               value={
-                formdata.adddimentsions.length !== 0
-                  ? formdata.adddimentsions.map((el) => {
+                formdata.dimensions.length !== 0
+                  ? formdata.dimensions.map((el) => {
                       return {
                         label: el,
                         value: el
@@ -821,9 +830,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               }
               isMulti
               options={
-                option.metricOption &&
-                option.metricOption.length !== 0 &&
-                option.metricOption
+                option.metricOption && option.metricOption.length !== 0
+                  ? option.metricOption
+                  : []
               }
               isDisabled={
                 data[2] === 'edit' ? editableStatus('dimensions') : false
@@ -834,11 +843,16 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               onChange={(e) => {
                 setFormdata({
                   ...formdata,
-                  adddimentsions: e.map((el) => el.value)
+                  dimensions: e.map((el) => el.value)
                 });
                 setOption({ ...option, datetime_column: e.value });
               }}
             />
+            {errorMsg.dimension === true ? (
+              <div className="connection__fail">
+                <p>Select Dimension</p>
+              </div>
+            ) : null}
           </div>
           {/* {inputList && inputList.length !== 0 && (
             <div className="form-group">

@@ -47,7 +47,10 @@ import {
   KPIALERTUPDATEFAILURE,
   KPIALERTDISABLEREQUEST,
   KPIALERTDISABLEFAILURE,
-  KPIALERTDISABLESUCCESS
+  KPIALERTDISABLESUCCESS,
+  KPIALERTENABLERESPONSE,
+  KPIALERTENABLEFAILURE,
+  KPIALERTENABLEREQUEST
 } from './ActionConstants';
 
 export const getAlertEmailRequest = () => {
@@ -429,6 +432,38 @@ export const kpiAlertDisable = (id) => {
       dispatch(kpiAlertDisableFailure());
     } else if (data && status === 200) {
       dispatch(kpiAlertDisableSuccess(data));
+    }
+  };
+};
+export const kpiAlertEnableRequest = () => {
+  return {
+    type: KPIALERTENABLEREQUEST
+  };
+};
+
+export const kpiAlertEnableFailure = () => {
+  return {
+    type: KPIALERTENABLEFAILURE
+  };
+};
+
+export const kpiAlertEnableSuccess = (response) => {
+  return {
+    type: KPIALERTENABLERESPONSE,
+    data: response
+  };
+};
+
+export const kpiAlertEnable = (id) => {
+  return async (dispatch) => {
+    dispatch(kpiAlertEnableRequest());
+    const { data, error, status } = await getRequest({
+      url: `${BASE_URL}/api/alert/${id}/enable`
+    });
+    if (error) {
+      dispatch(kpiAlertEnableFailure());
+    } else if (data && status === 200) {
+      dispatch(kpiAlertEnableSuccess(data));
     }
   };
 };

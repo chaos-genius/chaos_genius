@@ -14,15 +14,15 @@ const HierarchicalTable = ({ hierarchicalData }) => {
       roots = [],
       i;
 
-    for (i = 0; i < hierarchicalData.length; i += 1) {
-      map[hierarchicalData[i].id] = i;
-      hierarchicalData[i].children = [];
+    for (i = 0; i < hierarchicalData.data_table.length; i += 1) {
+      map[hierarchicalData.data_table[i].id] = i;
+      hierarchicalData.data_table[i].children = [];
     }
 
-    for (i = 0; i < hierarchicalData.length; i += 1) {
-      node = hierarchicalData[i];
+    for (i = 0; i < hierarchicalData.data_table.length; i += 1) {
+      node = hierarchicalData.data_table[i];
       if (node.parentId !== '0' && node.parentId !== null) {
-        hierarchicalData[map[node.parentId]].children.push(node);
+        hierarchicalData.data_table[map[node.parentId]].children.push(node);
       } else {
         roots.push(node);
       }
@@ -34,7 +34,7 @@ const HierarchicalTable = ({ hierarchicalData }) => {
     <div className="common-drilldown-table table-section">
       <table className="table">
         <thead>
-          <tr>
+          {/* <tr>
             <th></th>
             <th>Subgroup Name</th>
             <th>Prev month Avg</th>
@@ -44,12 +44,28 @@ const HierarchicalTable = ({ hierarchicalData }) => {
             <th>Curr month Size</th>
             <th>Curr month Count</th>
             <th>Impact</th>
-          </tr>
+          </tr> */}
+          {hierarchicalData &&
+          hierarchicalData.data_columns &&
+          hierarchicalData.data_columns.length !== 0 ? (
+            <>
+              <tr>
+                <th></th>
+                {hierarchicalData.data_columns.map((data) => {
+                  return <th>{data.title}</th>;
+                })}
+              </tr>
+            </>
+          ) : (
+            <h3>Not working</h3>
+          )}
         </thead>
         <tbody>
-          {hierarchicalData && hierarchicalData.length !== 0 && (
-            <Tree data={parentChildData()} />
-          )}
+          {hierarchicalData &&
+            hierarchicalData.data_table &&
+            hierarchicalData.data_table.length !== 0 && (
+              <Tree data={parentChildData()} />
+            )}
         </tbody>
       </table>
     </div>

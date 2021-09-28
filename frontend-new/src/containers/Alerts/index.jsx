@@ -11,6 +11,8 @@ import AlertTable from '../../components/AlertTable';
 import './alerts.scss';
 import AlertFilter from '../../components/AlertFilter';
 
+import { toastMessage } from '../../utils/toast-helper';
+
 import { getAllAlerts } from '../../redux/actions';
 
 import Fuse from 'fuse.js';
@@ -20,11 +22,14 @@ import Noalert from '../../components/Noalert';
 const RESET_ACTION = {
   type: 'RESET_EMAIL_DATA'
 };
-
+const RESET_ENABLE_DISABLE_DATA = {
+  type: 'RESET_ENABLE_DISABLE_DATA'
+};
 const Alerts = () => {
   const dispatch = useDispatch();
 
-  const { alertLoading, alertList } = useSelector((state) => state.alert);
+  const { alertLoading, alertList, kpiAlertEnableData, kpiAlertDisableData } =
+    useSelector((state) => state.alert);
 
   const [alertData, setAlertData] = useState(alertList);
   const [alertSearch, setAlertSearch] = useState('');
@@ -34,6 +39,7 @@ const Alerts = () => {
 
   useEffect(() => {
     store.dispatch(RESET_ACTION);
+    store.dispatch(RESET_ENABLE_DISABLE_DATA);
     dispatch(getAllAlerts());
   }, [dispatch, data]);
 
@@ -45,6 +51,22 @@ const Alerts = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alertSearch, alertList]);
+
+  useEffect(() => {
+    if (kpiAlertDisableData && kpiAlertDisableData.status === 'success') {
+      // setIsOpen(false);
+      setData((prev) => !prev);
+      toastMessage({ type: 'success', message: kpiAlertDisableData.message });
+    } else if (kpiAlertDisableData && kpiAlertDisableData === 'failure') {
+      toastMessage({ type: 'error', message: kpiAlertDisableData.message });
+    } else if (kpiAlertEnableData && kpiAlertEnableData.status === 'success') {
+      setData((prev) => !prev);
+      toastMessage({ type: 'success', message: kpiAlertEnableData.message });
+    } else if (kpiAlertEnableData && kpiAlertEnableData.status === 'failure') {
+      toastMessage({ type: 'error', message: kpiAlertEnableData.message });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kpiAlertDisableData, kpiAlertEnableData]);
 
   const searchAlert = () => {
     const options = {
@@ -156,11 +178,7 @@ const Alerts = () => {
             </div>
             {/* table section */}
             <div className="table-section">
-              <AlertTable
-                alertData={alertData}
-                alertSearch={alertSearch}
-                changeData={setData}
-              />
+              <AlertTable alertData={alertData} alertSearch={alertSearch} />
             </div>
           </div>
         ) : (

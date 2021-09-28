@@ -52,6 +52,7 @@ const Dashboard = () => {
         sidebarList.find((item) => item.id.toString() === kpi.toString())?.name
       );
       setTabs(location[2]);
+
       SetKpiAggregate(
         sidebarList.find((item) => item.id.toString() === kpi.toString())
           ?.aggregation

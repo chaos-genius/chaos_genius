@@ -1131,3 +1131,38 @@ a:hover {
     }
   }
 }
+.setup-layout-empty {
+  min-height: 630px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.setup-empty-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  h3 {
+    margin-top: 40px;
+    font-weight: $font-weight-600;
+    font-size: $font-size-24;
+    line-height: $line-height-32;
+    text-align: center;
+    letter-spacing: $letter-spacing;
+    color: $black_variation-2;
+  }
+  p {
+    font-weight: $font-weight-500;
+    font-size: $font-size-16;
+    line-height: $line-height-23;
+    text-align: center;
+    letter-spacing: $letter-spacing;
+    color: $grey_variation-3;
+    margin-top: 11px;
+  }
+}

@@ -86,10 +86,10 @@ def kpi():
         for row in results:
             kpi_info = row[0].safe_dict
             data_source_info = row[1].safe_dict
-            kpi = {"kpi": kpi_info, "data_source": data_source_info}
+            kpi_info["data_source"] = data_source_info
             # TODO: Provision to active and deactivate the KPI
             if data_source_info["active"] == True:
-                kpis.append(kpi)
+                kpis.append(kpi_info)
         return jsonify({"count": len(kpis), "data": kpis})
 
 

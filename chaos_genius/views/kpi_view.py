@@ -58,7 +58,11 @@ def kpi():
         # Perform KPI Validation
         status, message = validate_kpi(new_kpi.as_dict)
         if status is not True:
-            return jsonify({"error": message, "status": "failure"})
+            return jsonify({
+                "error": message,
+                "status": "failure",
+                "is_critical": "true"
+                })
 
         new_kpi.save(commit=True)
 
@@ -80,12 +84,12 @@ def kpi():
             .all()
         kpis = []
         for row in results:
-            kpi = row[0].safe_dict
-            data_source = row[1].safe_dict
-            data_source.update(kpi)
+            kpi_info = row[0].safe_dict
+            data_source_info = row[1].safe_dict
+            kpi = {"kpi": kpi_info, "data_source": data_source_info}
             # TODO: Provision to active and deactivate the KPI
-            if data_source['active'] == True:
-                kpis.append(data_source)
+            if data_source_info["active"] == True:
+                kpis.append(kpi)
         return jsonify({"count": len(kpis), "data": kpis})
 
 

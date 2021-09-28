@@ -251,7 +251,7 @@ class RootCauseAnalysisController:
                 # Hierarchical Table
                 if dim is not None:
                     try:
-                        htable_data = self._get_htable(rca, dim)
+                        htable_data = self._get_htable(rca, dim, timeline)
                         output.append(
                             self._output_to_row("htable", htable_data, timeline, dim))
                     except:

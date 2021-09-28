@@ -505,11 +505,10 @@ class RootCauseAnalysis():
 
         return round_df(impact_table).to_dict("records")
 
-    def get_impact_rows_with_columns(
-        self, single_dim=None, timeline: str = "mom"
-    ) -> Tuple[List[Dict[str, object]], List[Dict[str, str]]]:
-        impact_table = self.get_impact_rows(single_dim)
-        
+    def get_impact_column_map(
+        self, timeline: str = "mom"
+    ) -> List[Dict[str, str]]:
+
         timestr = ""
         if timeline == "mom":
             timestr = "Month"
@@ -531,7 +530,7 @@ class RootCauseAnalysis():
 
         mapping = [{"title": v, "field": k} for k, v in mapping]
 
-        return impact_table, mapping
+        return mapping
 
     def get_waterfall_table_rows(
         self,

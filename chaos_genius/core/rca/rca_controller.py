@@ -195,8 +195,8 @@ class RootCauseAnalysisController:
         return df.to_dict(orient="records")
 
     def _get_rca(self, rca, dimension=None, timeline="mom"):
-        impact_table, impact_table_col_map = rca.get_impact_rows_with_columns(
-            dimension, timeline)
+        impact_table = rca.get_impact_rows(dimension)
+        impact_table_col_map = rca.get_impact_column_map(timeline)
         impact_table = self._process_rca_output(impact_table)
 
         waterfall_table = rca.get_waterfall_table_rows(dimension)
@@ -212,10 +212,12 @@ class RootCauseAnalysisController:
             }
         }
 
-    def _get_htable(self, rca, dimension=None):
+    def _get_htable(self, rca, dimension=None, timeline="mom"):
         htable = rca.get_hierarchical_table(dimension)
+        impact_table_col_map = rca.get_impact_column_map(timeline)
         return {
-            'data_table': self._process_rca_output(htable)
+            'data_table': self._process_rca_output(htable),
+            "data_columns": impact_table_col_map
         }
 
     def compute(self):  # sourcery skip: merge-list-append

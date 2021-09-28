@@ -22,7 +22,7 @@ import EditActive from '../../assets/images/datasourceedit-active.svg';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { formatDate } from '../../utils/date-helper';
-// import { kpiAlertDisable } from '../../redux/actions';
+import { kpiAlertDisable, kpiAlertEnable } from '../../redux/actions';
 
 import { toastMessage } from '../../utils/toast-helper';
 
@@ -41,7 +41,7 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
   // const closeModal = () => {
   //   setIsOpen(false);
   // };
-  const { kpiAlertDisableData } = useSelector((state) => {
+  const { kpiAlertDisableData, kpiAlertEnableData } = useSelector((state) => {
     return state.alert;
   });
 
@@ -62,6 +62,29 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiAlertDisableData]);
+
+  // useEffect(() => {
+  //   if (kpiAlertEnableData && kpiAlertEnableData.status === 'success') {
+  //     toastMessage({ type: 'success', message: kpiAlertEnableData.message });
+  //   } else if (kpiAlertEnableData && kpiAlertEnableData.status === 'failure') {
+  //     toastMessage({ type: 'error', message: kpiAlertEnableData.message });
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [kpiAlertEnableData]);
+
+  const onChecking = (alert) => {
+    if (alert.active === true) {
+      onDisable(alert.id);
+    } else {
+      onEnable(alert.id);
+    }
+  };
+  const onDisable = (id) => {
+    dispatch(kpiAlertDisable(id));
+  };
+  const onEnable = (id) => {
+    dispatch(kpiAlertEnable(id));
+  };
 
   return (
     <div className="table-responsive">
@@ -101,6 +124,7 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
                             type="checkbox"
                             id="removeoverlap"
                             checked={alert.active}
+                            onChange={() => onChecking(alert)}
                           />
                         </div>
                       </div>
@@ -169,14 +193,14 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
                             </li>
                           </Link>
                           {/* <li
-                          className="delete-item"
-                          onClick={() => {
-                            setIsOpen(true);
-                            setData(alert);
-                          }}>
-                          <img src={DeleteActive} alt="Delete" />
-                          Delete
-                        </li> */}
+                            className="delete-item"
+                            onClick={() => {
+                              setIsOpen(true);
+                              setData(alert);
+                            }}>
+                            <img src={DeleteActive} alt="Delete" />
+                            Delete
+                          </li> */}
                         </ul>
                       </div>
                     </td>

@@ -24,7 +24,8 @@ const RESET_ACTION = {
 const Alerts = () => {
   const dispatch = useDispatch();
 
-  const { alertLoading, alertList } = useSelector((state) => state.alert);
+  const { alertLoading, alertList, kpiAlertEnableData, kpiAlertDisableData } =
+    useSelector((state) => state.alert);
 
   const [alertData, setAlertData] = useState(alertList);
   const [alertSearch, setAlertSearch] = useState('');
@@ -45,6 +46,18 @@ const Alerts = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alertSearch, alertList]);
+
+  useEffect(() => {
+    if (kpiAlertEnableData && kpiAlertEnableData.length !== 0) {
+      dispatch(getAllAlerts());
+    } // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kpiAlertEnableData]);
+
+  useEffect(() => {
+    if (kpiAlertDisableData && kpiAlertDisableData.length !== 0) {
+      dispatch(getAllAlerts());
+    } // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kpiAlertDisableData]);
 
   const searchAlert = () => {
     const options = {

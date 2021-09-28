@@ -129,6 +129,26 @@ def disable_alert(alert_id):
     return jsonify({"message": message, "status": status})
 
 
+@blueprint.route("/<int:alert_id>/enable", methods=["GET"])
+def enable_alert(alert_id):
+    """enable alert details."""
+    status, message = "", ""
+    try:
+        alert_obj = Alert.get_by_id(alert_id)
+        if alert_obj:
+            alert_obj.active = True
+            alert_obj.save(commit=True)
+            message = "Alert enabled Successfully"
+            status = "success"
+        else:
+            message = "Alert not found"
+            status = "failure"
+    except Exception as err:
+        status = "failure"
+        current_app.logger.info(f"Error in enabling the Alert: {err}")
+    return jsonify({"message": message, "status": status})
+
+
 @blueprint.route("/meta-info", methods=["GET"])
 def alert_meta_info():
     """alert meta info view."""

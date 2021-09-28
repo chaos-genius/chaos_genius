@@ -165,10 +165,9 @@ def edit_config_setting():
         data = request.get_json()
         config_obj = get_config_object(data.get('config_name'))
         meta_info = ConfigSetting.meta_info()
-        if config_obj and config_obj.active == True:
-            if chech_editable_field(meta_info,'config_setting'):
-                config_obj.config_setting=data.get('config_setting')
-        
+        if config_obj and config_obj.active is True:
+            if chech_editable_field(meta_info, 'config_setting'):
+                config_obj.config_setting = data.get('config_setting')
                 config_obj.save(commit=True)
             status = "success"
         else:
@@ -179,4 +178,3 @@ def edit_config_setting():
         current_app.logger.info(f"Error in updating the Config Setting: {err}")
         message = str(err)
     return jsonify({"message": message, "status": status})
-

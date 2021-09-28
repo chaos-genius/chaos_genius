@@ -514,7 +514,7 @@ class RootCauseAnalysis():
         if timeline == "mom":
             timestr = "Month"
         elif timeline == "wow":
-            timestr = "Week",
+            timestr = "Week"
         elif timeline == "dod":
             timestr = "Day"
 

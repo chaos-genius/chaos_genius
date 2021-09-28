@@ -17,6 +17,7 @@ import * as am4core from '@amcharts/amcharts4/core';
 import * as am4charts from '@amcharts/amcharts4/charts';
 
 import HierarchicalTable from '../HierarchicalTable';
+// import DeepdrillsEmptyState from '../DeepdrillsEmptyState';
 
 import {
   getDashboardAggregation,
@@ -531,6 +532,9 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
         </div>
       </div>
     </>
+    // <div className="dashboard-layout setup-timing">
+    //   <DeepdrillsEmptyState />
+    // </div>
   );
 };
 export default Dashboardgraph;

@@ -51,7 +51,7 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
   const datasourceIcon = (type) => {
     let textHtml;
     connectionType.find((item) => {
-      if (item.name === type) {
+      if (item.name === type.data_source.connection_type) {
         textHtml = item.icon;
       }
       return '';
@@ -62,7 +62,7 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
           dangerouslySetInnerHTML={{ __html: textHtml }}
           className="datasource-svgicon"
         />
-        <span>{type || '-'}</span>
+        <span>{type?.data_source?.name || '-'}</span>
       </>
     );
   };
@@ -106,9 +106,7 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
                         </td>
                         <td>
                           <div className="source-type">
-                            {connectionType
-                              ? datasourceIcon(kpi.data_source.connection_type)
-                              : '-'}
+                            {connectionType ? datasourceIcon(kpi) : '-'}
                           </div>
                         </td>
                         <td className="date-column-formated">

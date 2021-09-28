@@ -2,6 +2,8 @@
 """kpi model."""
 import datetime as dt
 
+from sqlalchemy.dialects.postgresql import JSONB
+
 from chaos_genius.databases.base_model import Column, PkModel, db
 
 
@@ -24,6 +26,7 @@ class Kpi(PkModel):
 
     run_anomaly = Column(db.Boolean(), default=True)
     anomaly_params = Column(db.JSON)
+    scheduler_params = Column(JSONB, default=lambda: {})
     anomaly_frequency = Column(db.String(80))
 
     is_static = Column(db.Boolean(), default=False)
@@ -56,6 +59,7 @@ class Kpi(PkModel):
             "dimensions": self.dimensions,
             "run_anomaly": self.run_anomaly,
             "anomaly_params": self.anomaly_params,
+            "scheduler_params": self.scheduler_params,
             "anomaly_frequency": self.anomaly_frequency,
             "is_static": self.is_static,
             "static_params": self.static_params,
@@ -80,6 +84,7 @@ class Kpi(PkModel):
             "dimensions": self.dimensions,
             "run_anomaly": self.run_anomaly,
             "anomaly_params": self.anomaly_params,
+            "scheduler_params": self.scheduler_params,
             "anomaly_frequency": self.anomaly_frequency,
             "is_static": self.is_static,
             "static_params": self.static_params,

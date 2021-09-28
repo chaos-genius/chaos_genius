@@ -4,6 +4,8 @@ from typing import cast
 from celery import chain, group
 from celery.app.base import Celery
 from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy.sql.functions import coalesce
+from sqlalchemy import func
 
 from chaos_genius.controllers.kpi_controller import run_anomaly_for_kpi, run_rca_for_kpi
 from chaos_genius.databases.models.kpi_model import Kpi
@@ -19,6 +21,23 @@ celery = cast(Celery, celery_ext.celery)
 #     # return a + b
 
 
+def update_scheduler_params(key: str, value: str):
+    """Update a single key in scheduler_params.
+
+    The return value *must* be assigned back to kpi.scheduler_params
+    and scheduler_params must be flagged as modified
+    and then the Kpi must be updated and saved in DB.
+
+    Warning: do not call this twice before saving to DB. The previous
+    change will be lost.
+    """
+    return func.jsonb_set(
+        coalesce(Kpi.scheduler_params, "{}"),
+        "{" + key + "}",
+        f'"{value}"'
+    )
+
+
 @celery.task
 def anomaly_single_kpi(kpi_id, end_date=None):
     """Run anomaly detection for the given KPI ID.
@@ -30,17 +49,16 @@ def anomaly_single_kpi(kpi_id, end_date=None):
     status = run_anomaly_for_kpi(kpi_id, end_date)
 
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
-    anomaly_params = kpi.anomaly_params
 
     if status:
         print(f"Completed the anomaly for KPI ID: {kpi_id}.")
-        anomaly_params["scheduler_params"]["anomaly_status"] = "completed"
+        kpi.scheduler_params = update_scheduler_params("anomaly_status", "completed")
     else:
         print(f"Anomaly failed for the for KPI ID: {kpi_id}.")
-        anomaly_params["scheduler_params"]["anomaly_status"] = "failed"
+        kpi.scheduler_params = update_scheduler_params("anomaly_status", "failed")
 
-    flag_modified(kpi, "anomaly_params")
-    kpi.update(commit=True, anomaly_params=anomaly_params)
+    flag_modified(kpi, "scheduler_params")
+    kpi.update(commit=True)
 
     return status
 
@@ -56,17 +74,16 @@ def rca_single_kpi(kpi_id: int):
     status = run_rca_for_kpi(kpi_id)
 
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
-    anomaly_params = kpi.anomaly_params
 
     if status:
         print(f"Completed RCA for KPI ID: {kpi_id}")
-        anomaly_params["scheduler_params"]["rca_status"] = "completed"
+        kpi.scheduler_params = update_scheduler_params("rca_status", "completed")
     else:
         print(f"RCA FAILED for KPI ID: {kpi_id}")
-        anomaly_params["scheduler_params"]["rca_status"] = "failed"
+        kpi.scheduler_params = update_scheduler_params("rca_status", "failed")
 
-    flag_modified(kpi, "anomaly_params")
-    kpi.update(commit=True, anomaly_params=anomaly_params)
+    flag_modified(kpi, "scheduler_params")
+    kpi.update(commit=True)
 
     return status
 
@@ -86,7 +103,7 @@ def anomaly_kpi():
 
 
 def ready_anomaly_task(kpi_id: int):
-    """Set anomaly in-progress and update last_scheduled_time for the KPI
+    """Set anomaly in-progress and update last_scheduled_time for the KPI.
 
     Returns a Celery task that *must* be executed (using .apply_async) soon.
     Returns None if the KPI does not exist.
@@ -95,24 +112,23 @@ def ready_anomaly_task(kpi_id: int):
     kpi = Kpi.get_by_id(kpi_id)
     if kpi is None:
         return None
-    anomaly_params = kpi.anomaly_params or {}
-    scheduler_params = anomaly_params.get("scheduler_params") or {}
 
     # update scheduler params
-    scheduler_params["last_scheduled_time"] = datetime.now().isoformat()
-    scheduler_params["anomaly_status"] = "in-progress"
-
+    kpi.scheduler_params = update_scheduler_params("last_scheduled_time", datetime.now().isoformat())
     # write back scheduler_params
-    anomaly_params["scheduler_params"] = scheduler_params
-    kpi.anomaly_params = anomaly_params
-    flag_modified(kpi, "anomaly_params")
-    kpi.update(commit=True, anomaly_params=anomaly_params)
+    flag_modified(kpi, "scheduler_params")
+    kpi = kpi.update(commit=True)
+
+    kpi.scheduler_params = update_scheduler_params("anomaly_status", "in-progress")
+    # write back scheduler_params
+    flag_modified(kpi, "scheduler_params")
+    kpi = kpi.update(commit=True)
 
     return anomaly_single_kpi.s(kpi_id)
 
 
 def ready_rca_task(kpi_id: int):
-    """Set RCA in-progress and update last_scheduled_time for the KPI
+    """Set RCA in-progress and update last_scheduled_time for the KPI.
 
     Returns a Celery task that *must* be executed (using .apply_async) soon.
     Returns None if the KPI does not exist.
@@ -121,18 +137,14 @@ def ready_rca_task(kpi_id: int):
     kpi = Kpi.get_by_id(kpi_id)
     if kpi is None:
         return None
-    anomaly_params = kpi.anomaly_params or {}
-    scheduler_params = anomaly_params.get("scheduler_params") or {}
 
     # update scheduler params
-    scheduler_params["last_scheduled_time"] = datetime.now().isoformat()
-    scheduler_params["rca_status"] = "in-progress"
+    kpi.scheduler_params = update_scheduler_params("last_scheduled_time", datetime.now().isoformat())
+    kpi.scheduler_params = update_scheduler_params("rca_status", "in-progress")
 
     # write back scheduler_params
-    anomaly_params["scheduler_params"] = scheduler_params
-    kpi.anomaly_params = anomaly_params
-    flag_modified(kpi, "anomaly_params")
-    kpi.update(commit=True, anomaly_params=anomaly_params)
+    flag_modified(kpi, "scheduler_params")
+    kpi.update(commit=True)
 
     return rca_single_kpi.s(kpi_id)
 
@@ -157,11 +169,7 @@ def anomaly_scheduler():
         # if anomaly is setup, we run both anomaly and RCA at tA + 24 hours
 
         # get scheduler_params, will be None if it's not set
-        scheduler_params = (
-            kpi.anomaly_params.get("scheduler_params")
-            if kpi.anomaly_params is not None
-            else None
-        )
+        scheduler_params = kpi.scheduler_params
 
         scheduled_time = datetime.now()
         scheduled_time = scheduled_time.replace(hour=11, minute=0, second=0)

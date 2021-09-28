@@ -532,7 +532,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
         </div>
       </div>
     </>
-    // <div className="dashboard-layout setup-timing">
+    // <div className="dashboard-layout setup-layout-empty">
     //   <DeepdrillsEmptyState />
     // </div>
   );

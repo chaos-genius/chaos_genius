@@ -58,7 +58,11 @@ def kpi():
         # Perform KPI Validation
         status, message = validate_kpi(new_kpi.as_dict)
         if status is not True:
-            return jsonify({"error": message, "status": "failure"})
+            return jsonify({
+                "error": message,
+                "status": "failure",
+                "is_critical": "true"
+                })
 
         new_kpi.save(commit=True)
 

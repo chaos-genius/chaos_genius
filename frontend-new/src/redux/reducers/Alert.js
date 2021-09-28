@@ -339,6 +339,13 @@ export const alert = (state = initialState, action) => {
         kpiAlertDisableData: []
       };
     }
+    case 'RESET_ENABLE_DISABLE_DATA': {
+      return {
+        ...state,
+        kpiAlertEnableData: [],
+        kpiAlertDisableData: []
+      };
+    }
 
     default:
       return state;

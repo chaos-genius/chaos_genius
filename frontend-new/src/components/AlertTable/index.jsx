@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { Link } from 'react-router-dom';
 
@@ -19,20 +19,18 @@ import EditActive from '../../assets/images/datasourceedit-active.svg';
 // import DeleteActive from '../../assets/images/delete-active.svg';
 // import Close from '../../assets/images/close.svg';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { formatDate } from '../../utils/date-helper';
 import { kpiAlertDisable, kpiAlertEnable } from '../../redux/actions';
 
-import { toastMessage } from '../../utils/toast-helper';
-
 import store from '../../redux/store';
 
-const RESET_ACTION = {
-  type: 'RESET_ALERT_DATA_Data'
+const RESET_ENABLE_DISABLE_DATA = {
+  type: 'RESET_ENABLE_DISABLE_DATA'
 };
 
-const AlertTable = ({ alertData, alertSearch, changeData }) => {
+const AlertTable = ({ alertData, alertSearch }) => {
   const dispatch = useDispatch();
 
   // const [isOpen, setIsOpen] = useState(false);
@@ -41,41 +39,16 @@ const AlertTable = ({ alertData, alertSearch, changeData }) => {
   // const closeModal = () => {
   //   setIsOpen(false);
   // };
-  const { kpiAlertDisableData, kpiAlertEnableData } = useSelector((state) => {
-    return state.alert;
-  });
 
   // const onDelete = (id) => {
   //   dispatch(kpiAlertDisable(id));
   // };
-  useEffect(() => {
-    store.dispatch(RESET_ACTION);
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (kpiAlertDisableData && kpiAlertDisableData.status === 'success') {
-      // setIsOpen(false);
-      changeData((prev) => !prev);
-      toastMessage({ type: 'success', message: kpiAlertDisableData.message });
-    } else if (kpiAlertDisableData && kpiAlertDisableData === 'failure') {
-      toastMessage({ type: 'error', message: kpiAlertDisableData.message });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpiAlertDisableData]);
-
-  // useEffect(() => {
-  //   if (kpiAlertEnableData && kpiAlertEnableData.status === 'success') {
-  //     toastMessage({ type: 'success', message: kpiAlertEnableData.message });
-  //   } else if (kpiAlertEnableData && kpiAlertEnableData.status === 'failure') {
-  //     toastMessage({ type: 'error', message: kpiAlertEnableData.message });
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [kpiAlertEnableData]);
 
   const onChecking = (alert) => {
+    store.dispatch(RESET_ENABLE_DISABLE_DATA);
     if (alert.active === true) {
       onDisable(alert.id);
-    } else {
+    } else if (alert.active === false) {
       onEnable(alert.id);
     }
   };

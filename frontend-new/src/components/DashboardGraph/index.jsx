@@ -521,9 +521,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
                 <>
                   {hierarchicalData &&
                     hierarchicalData?.data_table.length !== 0 && (
-                      <HierarchicalTable
-                        hierarchicalData={hierarchicalData.data_table}
-                      />
+                      <HierarchicalTable hierarchicalData={hierarchicalData} />
                     )}
                 </>
               )}

@@ -107,7 +107,7 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
                         <td>
                           <div className="source-type">
                             {connectionType
-                              ? datasourceIcon(kpi.connection_type)
+                              ? datasourceIcon(kpi.data_source.connection_type)
                               : '-'}
                           </div>
                         </td>

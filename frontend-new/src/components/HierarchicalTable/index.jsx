@@ -34,31 +34,18 @@ const HierarchicalTable = ({ hierarchicalData }) => {
     <div className="common-drilldown-table table-section">
       <table className="table">
         <thead>
-          {/* <tr>
-            <th></th>
-            <th>Subgroup Name</th>
-            <th>Prev month Avg</th>
-            <th>Prev month Size</th>
-            <th>Prev month Count</th>
-            <th>Curr month Avg</th>
-            <th>Curr month Size</th>
-            <th>Curr month Count</th>
-            <th>Impact</th>
-          </tr> */}
           {hierarchicalData &&
-          hierarchicalData.data_columns &&
-          hierarchicalData.data_columns.length !== 0 ? (
-            <>
-              <tr>
-                <th></th>
-                {hierarchicalData.data_columns.map((data) => {
-                  return <th>{data.title}</th>;
-                })}
-              </tr>
-            </>
-          ) : (
-            <h3>Not working</h3>
-          )}
+            hierarchicalData.data_columns &&
+            hierarchicalData.data_columns.length !== 0 && (
+              <>
+                <tr>
+                  <th></th>
+                  {hierarchicalData.data_columns.map((data) => {
+                    return <th>{data.title}</th>;
+                  })}
+                </tr>
+              </>
+            )}
         </thead>
         <tbody>
           {hierarchicalData &&

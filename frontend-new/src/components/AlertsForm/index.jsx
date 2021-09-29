@@ -130,7 +130,8 @@ const AlertsForm = () => {
   }, [emailData]);
 
   const validateEmail = (email) => {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    const re =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
   };
 
@@ -386,6 +387,7 @@ const AlertsForm = () => {
                     }
                   }}
                 />
+
                 {data[4] === 'edit' &&
                   slackEditableStatus('webhook_url') === 'sensitive' &&
                   (slackEdit ? (
@@ -421,6 +423,14 @@ const AlertsForm = () => {
                   <p>Enter Webhook URL</p>
                 </div>
               )}
+            </div>
+            <div className="form-group">
+              <label>Channel name</label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Channel Name"
+              />
             </div>
           </>
         ) : data[3] === 'email' ? (

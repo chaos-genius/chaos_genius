@@ -88,6 +88,8 @@ const KpiAlertDestinationForm = ({
     add_recepients: ''
   });
 
+  const [field, setField] = useState('');
+
   useEffect(() => {
     if (path[2] === 'edit') {
       setresp(
@@ -208,7 +210,8 @@ const KpiAlertDestinationForm = ({
   };
 
   const validateEmail = (email) => {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    const re =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
   };
 
@@ -300,9 +303,11 @@ const KpiAlertDestinationForm = ({
             components={{ SingleValue: customSingleValue }}
             onChange={(e) => {
               setAlertFormData({ ...alertFormData, alert_channel: e.value });
+              setField(e.value);
               setError({ ...error, alert_channel: '' });
             }}
           />
+
           {path[2] === 'edit' &&
             editableStatus('alert_channnel') === 'sensitive' &&
             editAndSaveButton('alert_channel')}
@@ -313,37 +318,40 @@ const KpiAlertDestinationForm = ({
           </div>
         )}
       </div>
-
-      <div className="form-group">
-        <label>Add Recepients </label>
-        {/* <Select isMulti classNamePrefix="selectcategory" placeholder="Select" /> */}
-        <div className="editable-field">
-          {/* <TagsInput
+      {field === 'email' && (
+        <div className="form-group">
+          <label>Add Recepients </label>
+          {/* <Select isMulti classNamePrefix="selectcategory" placeholder="Select" /> */}
+          <div className="editable-field">
+            {/* <TagsInput
             value={resp}
             onChange={(e) => handleChange(e)}
             placeholder="Add Recepients"
           /> */}
-          <ReactTagInput
-            tags={resp}
-            placeholder="Add Recepients"
-            onChange={(newTags) => handleChange(newTags)}
-            validator={(value) => {
-              const isEmail = validateEmail(value);
-              if (!isEmail) {
-                toastMessage({
-                  type: 'error',
-                  message: 'Please enter an valid email address'
-                });
-              }
-              // Return boolean to indicate validity
-              return isEmail;
-            }}
-          />
-          {path[2] === 'edit' &&
-            editableStatus('alert_channnel') === 'sensitive' &&
-            editAndSaveButton('alert_channel')}
+            <ReactTagInput
+              tags={resp}
+              // disabled={true}
+              // readOnly={true}
+              placeholder="Add Recepients"
+              onChange={(newTags) => handleChange(newTags)}
+              validator={(value) => {
+                const isEmail = validateEmail(value);
+                if (!isEmail) {
+                  toastMessage({
+                    type: 'error',
+                    message: 'Please enter an valid email address'
+                  });
+                }
+                // Return boolean to indicate validity
+                return isEmail;
+              }}
+            />
+            {path[2] === 'edit' &&
+              editableStatus('alert_channnel') === 'sensitive' &&
+              editAndSaveButton('alert_channel')}
+          </div>
         </div>
-      </div>
+      )}
       {/* commented add another channel*/}
       {/* {anotherChannel && addChannel()}
       {anotherChannel === false && (
@@ -355,7 +363,6 @@ const KpiAlertDestinationForm = ({
       )} */}
       {/*Add empty space div*/}
       <div className="add-options-wrapper options-spacing"></div>
-
       <div className="form-action alerts-button">
         <button className="btn white-button" onClick={() => onBack()}>
           <span>Back</span>

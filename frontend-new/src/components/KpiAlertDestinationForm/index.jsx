@@ -95,6 +95,7 @@ const KpiAlertDestinationForm = ({
       setresp(
         alertFormData?.alert_channel_conf?.[alertFormData.alert_channel] || []
       );
+      setField(alertFormData?.alert_channel);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

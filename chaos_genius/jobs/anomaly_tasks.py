@@ -3,9 +3,9 @@ from typing import cast
 
 from celery import chain, group
 from celery.app.base import Celery
+from sqlalchemy import func
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.sql.functions import coalesce
-from sqlalchemy import func
 
 from chaos_genius.controllers.kpi_controller import run_anomaly_for_kpi, run_rca_for_kpi
 from chaos_genius.databases.models.kpi_model import Kpi
@@ -32,9 +32,7 @@ def update_scheduler_params(key: str, value: str):
     change will be lost.
     """
     return func.jsonb_set(
-        coalesce(Kpi.scheduler_params, "{}"),
-        "{" + key + "}",
-        f'"{value}"'
+        coalesce(Kpi.scheduler_params, "{}"), "{" + key + "}", f'"{value}"'
     )
 
 
@@ -114,7 +112,9 @@ def ready_anomaly_task(kpi_id: int):
         return None
 
     # update scheduler params
-    kpi.scheduler_params = update_scheduler_params("last_scheduled_time_anomaly", datetime.now().isoformat())
+    kpi.scheduler_params = update_scheduler_params(
+        "last_scheduled_time_anomaly", datetime.now().isoformat()
+    )
     # write back scheduler_params
     flag_modified(kpi, "scheduler_params")
     kpi = kpi.update(commit=True)
@@ -139,7 +139,9 @@ def ready_rca_task(kpi_id: int):
         return None
 
     # update scheduler params
-    kpi.scheduler_params = update_scheduler_params("last_scheduled_time_rca", datetime.now().isoformat())
+    kpi.scheduler_params = update_scheduler_params(
+        "last_scheduled_time_rca", datetime.now().isoformat()
+    )
     # write back scheduler_params
     flag_modified(kpi, "scheduler_params")
     kpi = kpi.update(commit=True)
@@ -200,7 +202,9 @@ def anomaly_scheduler():
                 # this is kpi creation time
                 canon_time = kpi.created_at
                 scheduled_time = scheduled_time.replace(
-                    hour=canon_time.hour, minute=canon_time.minute, second=canon_time.second
+                    hour=canon_time.hour,
+                    minute=canon_time.minute,
+                    second=canon_time.second,
                 )
 
         current_time = datetime.now()
@@ -210,7 +214,9 @@ def anomaly_scheduler():
         # 2. anomaly is set up
         #
         # anomaly is setup if model_name is set in anomaly_params
-        anomaly_is_setup = kpi.anomaly_params is not None and "model_name" in kpi.anomaly_params
+        anomaly_is_setup = (
+            kpi.anomaly_params is not None and "model_name" in kpi.anomaly_params
+        )
         anomaly_already_run = (
             scheduler_params is not None
             and "last_scheduled_time_anomaly" in scheduler_params

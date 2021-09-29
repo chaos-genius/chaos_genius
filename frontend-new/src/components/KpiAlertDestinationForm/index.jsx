@@ -353,6 +353,9 @@ const KpiAlertDestinationForm = ({
           </div>
         </div>
       )} */}
+      {/*Add empty space div*/}
+      <div className="add-options-wrapper options-spacing"></div>
+
       <div className="form-action alerts-button">
         <button className="btn white-button" onClick={() => onBack()}>
           <span>Back</span>

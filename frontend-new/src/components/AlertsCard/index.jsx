@@ -9,6 +9,7 @@ import Email from '../../assets/images/alerts/email.svg';
 import Datadog from '../../assets/images/alerts/datadog.svg';
 import Asana from '../../assets/images/alerts/asana.svg';
 import Teams from '../../assets/images/alerts/teams.svg';
+import PagerDuty from '../../assets/images/alerts/pagerduty.svg';
 import Succestick from '../../assets/images/setupcard/success-tick.svg';
 
 import '../SetupCard/setupcard.scss';
@@ -177,6 +178,30 @@ const AlertsCard = () => {
               {statusChecking('teams')
                 ? 'Edit Teams Connection'
                 : 'Connect Teams'}
+            </span>
+          </button>
+          <h3>Soon</h3>
+        </div>
+        <div className="setup-card">
+          <img src={PagerDuty} className="in-active" alt="Pager Duty" />
+          <h1>
+            PagerDuty
+            {statusChecking('pagerduty') && (
+              <img src={Succestick} alt="success tik"></img>
+            )}
+          </h1>
+          <p>Select the data you want to monitor and analyse</p>
+          <button
+            disabled
+            className={
+              statusChecking('pagerduty')
+                ? 'btn black-button'
+                : 'btn white-button'
+            }>
+            <span>
+              {statusChecking('datadog')
+                ? 'Edit PagerDuty Connection'
+                : 'Connect PagerDuty'}
             </span>
           </button>
           <h3>Soon</h3>

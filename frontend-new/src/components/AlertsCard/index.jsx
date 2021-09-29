@@ -123,6 +123,7 @@ const AlertsCard = () => {
           </h1>
           <p>Select the data you want to monitor and analyse</p>
           <button
+            disabled
             className={
               statusChecking('datadog')
                 ? 'btn black-button'
@@ -134,17 +135,19 @@ const AlertsCard = () => {
                 : 'Connect Datadog'}
             </span>
           </button>
+          <h3>Soon</h3>
         </div>
         <div className="setup-card">
           <img src={Asana} className="in-active" alt="Asana" />
           <h1>
-            Asana{' '}
+            Asana
             {statusChecking('asana') && (
               <img src={Succestick} alt="success tik"></img>
             )}
           </h1>
           <p>Select the data you want to monitor and analyse</p>
           <button
+            disabled
             className={
               statusChecking('asana') ? 'btn black-button' : 'btn white-button'
             }>
@@ -154,6 +157,7 @@ const AlertsCard = () => {
                 : 'Connect Asana'}
             </span>
           </button>
+          <h3>Soon</h3>
         </div>
         <div className="setup-card">
           <img src={Teams} className="in-active" alt="Teams" />
@@ -165,6 +169,7 @@ const AlertsCard = () => {
           </h1>
           <p>Select the data you want to monitor and analyse</p>
           <button
+            disabled
             className={
               statusChecking('teams') ? 'btn black-button' : 'btn white-button'
             }>

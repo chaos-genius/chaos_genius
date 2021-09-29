@@ -60,7 +60,7 @@ def data_source():
         data_sources = DataSource.query.filter(DataSource.active==True).order_by(DataSource.created_at.desc()).all()
         ds_kpi_count = db.session.query(DataSource.id, func.count(Kpi.id)) \
                     .join(Kpi, Kpi.data_source == DataSource.id) \
-                    .filter(DataSource.active==True) \
+                    .filter(DataSource.active==True, Kpi.active==True) \
                     .group_by(DataSource.id) \
                     .order_by(DataSource.created_at.desc()) \
                     .all()

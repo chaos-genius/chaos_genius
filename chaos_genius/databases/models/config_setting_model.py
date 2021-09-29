@@ -50,6 +50,10 @@ class ConfigSetting(PkModel):
                 "webhook_url": {
                     "is_editable": True,
                     "is_sensitive": True,
+                },
+                "channel_name": {
+                    "is_editable": True,
+                    "is_sensitive": True,
                 }
             },
             "email": {

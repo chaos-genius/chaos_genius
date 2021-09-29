@@ -114,7 +114,7 @@ def ready_anomaly_task(kpi_id: int):
         return None
 
     # update scheduler params
-    kpi.scheduler_params = update_scheduler_params("last_scheduled_time", datetime.now().isoformat())
+    kpi.scheduler_params = update_scheduler_params("last_scheduled_time_anomaly", datetime.now().isoformat())
     # write back scheduler_params
     flag_modified(kpi, "scheduler_params")
     kpi = kpi.update(commit=True)
@@ -139,7 +139,11 @@ def ready_rca_task(kpi_id: int):
         return None
 
     # update scheduler params
-    kpi.scheduler_params = update_scheduler_params("last_scheduled_time", datetime.now().isoformat())
+    kpi.scheduler_params = update_scheduler_params("last_scheduled_time_rca", datetime.now().isoformat())
+    # write back scheduler_params
+    flag_modified(kpi, "scheduler_params")
+    kpi = kpi.update(commit=True)
+
     kpi.scheduler_params = update_scheduler_params("rca_status", "in-progress")
 
     # write back scheduler_params
@@ -209,8 +213,8 @@ def anomaly_scheduler():
         anomaly_is_setup = kpi.anomaly_params is not None and "model_name" in kpi.anomaly_params
         anomaly_already_run = (
             scheduler_params is not None
-            and "last_scheduled_time" in scheduler_params
-            and datetime.fromisoformat(scheduler_params["last_scheduled_time"])
+            and "last_scheduled_time_anomaly" in scheduler_params
+            and datetime.fromisoformat(scheduler_params["last_scheduled_time_anomaly"])
             > scheduled_time
         )
         to_run_anomaly = (not anomaly_already_run) and anomaly_is_setup
@@ -220,8 +224,8 @@ def anomaly_scheduler():
         # 2. if anomaly is scheduled, run RCA too
         rca_already_run = (
             scheduler_params is not None
-            and "last_scheduled_time" in scheduler_params
-            and datetime.fromisoformat(scheduler_params["last_scheduled_time"])
+            and "last_scheduled_time_rca" in scheduler_params
+            and datetime.fromisoformat(scheduler_params["last_scheduled_time_rca"])
             > scheduled_time
         )
         to_run_rca = to_run_anomaly or (not rca_already_run)

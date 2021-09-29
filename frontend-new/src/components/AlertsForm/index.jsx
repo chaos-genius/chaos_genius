@@ -40,13 +40,18 @@ const AlertsForm = () => {
   const [webhookUrlError, setWebhookUrlError] = useState(false);
   const [editedWebhookUrl, setEditedWebhookUrl] = useState('');
   const [slackEdit, setSlackEdit] = useState(true);
-
+  const [placeholderSlack, setPlaceHolderSlack] = useState('');
   const [email, setEmail] = useState({
     smtp: '',
     port: '',
     username: '',
     password: '',
     emailsender: ''
+  });
+
+  const [placeHolderEmail, setPlaceHolderEmail] = useState({
+    username: '',
+    password: ''
   });
 
   const [emailError, setEmailError] = useState({
@@ -72,6 +77,8 @@ const AlertsForm = () => {
     password: '',
     emailsender: ''
   });
+
+  const [editedData, setEditedData] = useState({});
 
   useEffect(() => {
     if (data[4] === 'edit') {
@@ -101,8 +108,14 @@ const AlertsForm = () => {
       obj['emailsender'] = editData?.config_setting?.sender_email || '';
       obj['smtp'] = editData?.config_setting?.server || '';
       setEmail(obj);
+      setPlaceHolderEmail({
+        ...placeHolderEmail,
+        username: editData?.config_setting?.username || '',
+        password: editData?.config_setting?.password || ''
+      });
     } else if (data[3] === 'slack' && editData) {
-      setWebhookUrl(editData?.config_setting?.webhookUrl || null);
+      //setWebhookUrl(editData?.config_setting?.webhook_url || null);
+      setPlaceHolderSlack(editData?.config_setting?.webhook_url || null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editData]);
@@ -123,67 +136,93 @@ const AlertsForm = () => {
 
   const alertHandler = () => {
     if (data[3] === 'email') {
-      var objectErr = { ...emailError };
-      if (email.smtp === '') {
-        objectErr['smtp'] = 'Enter SMTP server';
-      }
-      if (email.port === '') {
-        objectErr['port'] = 'Enter Port';
-      }
-      if (
-        !(
-          /^[1-9]\d*$/.test(email.port) &&
-          1 <= 1 * email.port &&
-          1 * email.port <= 65535
-        ) &&
-        email.port !== ''
-      ) {
-        objectErr['port'] = 'Enter Valid Port';
-      }
+      if (data[4] !== 'edit') {
+        var objectErr = { ...emailError };
+        if (email.smtp === '') {
+          objectErr['smtp'] = 'Enter SMTP server';
+        }
+        if (email.port === '') {
+          objectErr['port'] = 'Enter Port';
+        }
+        if (
+          !(
+            /^[1-9]\d*$/.test(email.port) &&
+            1 <= 1 * email.port &&
+            1 * email.port <= 65535
+          ) &&
+          email.port !== ''
+        ) {
+          objectErr['port'] = 'Enter Valid Port';
+        }
 
-      if (email.username === '') {
-        objectErr['username'] = 'Enter Username';
-      }
-      if (email.password === '') {
-        objectErr['password'] = 'Enter Password';
-      }
-      if (email.emailsender === '') {
-        objectErr['emailsender'] = 'Enter Email';
-      }
-      if (email.emailsender !== '' && !validateEmail(email.emailsender)) {
-        objectErr['emailsender'] = 'Enter Valid Email';
-      }
-      setEmailError(objectErr);
-      if (
-        objectErr.smtp === '' &&
-        objectErr.port === '' &&
-        objectErr.username === '' &&
-        objectErr.password === '' &&
-        objectErr.emailsender === ''
-      ) {
+        if (email.username === '') {
+          objectErr['username'] = 'Enter Username';
+        }
+        if (email.password === '') {
+          objectErr['password'] = 'Enter Password';
+        }
+        if (email.emailsender === '') {
+          objectErr['emailsender'] = 'Enter Email';
+        }
+        if (email.emailsender !== '' && !validateEmail(email.emailsender)) {
+          objectErr['emailsender'] = 'Enter Valid Email';
+        }
+        setEmailError(objectErr);
+        if (
+          objectErr.smtp === '' &&
+          objectErr.port === '' &&
+          objectErr.username === '' &&
+          objectErr.password === '' &&
+          objectErr.emailsender === ''
+        ) {
+          const data = {
+            config_name: 'email',
+            config_settings: {
+              server: email.smtp,
+              port: email.port,
+              username: email.username,
+              password: email.password,
+              sender_email: email.emailsender
+            }
+          };
+          dispatchGetAllAlertEmail(data);
+        }
+      } else {
         const data = {
           config_name: 'email',
-          config_settings: {
-            server: email.smtp,
-            port: email.port,
-            username: email.username,
-            password: email.password,
-            sender_email: email.emailsender
-          }
+          config_setting: editedData
         };
         dispatchGetAllAlertEmail(data);
       }
     } else if (data[3] === 'slack') {
-      if (webhookUrl !== '' && webhookUrl !== null) {
-        const slackData = {
-          config_name: 'slack',
-          config_settings: {
-            webhook_url: webhookUrl
-          }
-        };
-        dispatchGetAllAlertEmail(slackData);
+      if (data[4] !== 'edit') {
+        if (webhookUrl !== '' && webhookUrl !== null) {
+          const slackData = {
+            config_name: 'slack',
+            config_settings: {
+              webhook_url: webhookUrl
+            }
+          };
+          dispatchGetAllAlertEmail(slackData);
+        } else {
+          setWebhookUrlError(true);
+        }
       } else {
-        setWebhookUrlError(true);
+        var slackData;
+        if (webhookUrl !== '' && webhookUrl !== null) {
+          slackData = {
+            config_name: 'slack',
+            config_settings: {
+              webhook_url: webhookUrl
+            }
+          };
+        } else {
+          slackData = {
+            config_name: 'slack',
+            config_settings: {}
+          };
+        }
+        dispatchGetAllAlertEmail(slackData);
       }
     }
   };
@@ -203,6 +242,9 @@ const AlertsForm = () => {
           [name]: ''
         };
       });
+      setEditedData((prev) => {
+        return { ...prev, [name]: e.target.value };
+      });
     } else {
       setEmailError((prev) => {
         return {
@@ -213,17 +255,27 @@ const AlertsForm = () => {
       setSensitveData((prev) => {
         return { ...prev, [name]: e.target.value };
       });
+      console.log(name);
+      setEditedData((prev) => {
+        return { ...prev, [name]: e.target.value };
+      });
     }
   };
 
   const onSaveInput = (name) => {
     setEmail({ ...email, [name]: sensitiveData[name] });
+    setEditedData((prev) => {
+      return { ...prev, [name]: sensitiveData[name] };
+    });
     setEnabled({ ...enabled, [name]: true });
   };
 
   const onCancelInput = (name) => {
     setEnabled({ ...enabled, [name]: true });
     setSensitveData({ ...sensitiveData, [name]: '' });
+    setEditedData((prev) => {
+      return { ...prev, [name]: '' };
+    });
   };
 
   const dispatchGetAllAlertEmail = (data) => {
@@ -314,7 +366,7 @@ const AlertsForm = () => {
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Enter Webhook URL"
+                  placeholder={placeholderSlack || 'Enter Webhook URL'}
                   value={slackEdit ? webhookUrl : editedWebhookUrl}
                   disabled={
                     data[4] === 'edit'
@@ -447,7 +499,7 @@ const AlertsForm = () => {
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Enter Username"
+                  placeholder={placeHolderEmail.username || 'Enter Username'}
                   name="username"
                   disabled={
                     data[4] === 'edit'
@@ -481,7 +533,7 @@ const AlertsForm = () => {
                 <input
                   type="password"
                   className="form-control"
-                  placeholder="Enter Password"
+                  placeholder={placeHolderEmail.password || 'Enter Password'}
                   name="password"
                   value={
                     enabled.password ? email.password : sensitiveData.password

@@ -1,3 +1,5 @@
+"""Provides the Prophet model for anomaly detection."""
+
 import pandas as pd
 import prophet as pt
 
@@ -10,7 +12,14 @@ PROPHETFREQ = {"hourly": "H", "daily": "D"}
 
 
 class ProphetModel(AnomalyModel):
+    """Prophet model for anomaly detection."""
+
     def __init__(self, *args, model_kwargs={}, **kwargs) -> None:
+        """Initialize the ProphetModel.
+
+        :param model_kwargs: model specific configuration, defaults to {}
+        :type model_kwargs: dict, optional
+        """
         super().__init__(*args, **kwargs)
         self.model = None
         self.prevModel = None
@@ -19,14 +28,22 @@ class ProphetModel(AnomalyModel):
     def predict(
         self,
         df: pd.DataFrame,
-        sensitivity,
-        frequency,
+        sensitivity: str,
+        frequency: str,
         pred_df: pd.DataFrame = None
     ) -> pd.DataFrame:
         """Predict anomalies on data.
 
+        If pred_df is None, will predict on the last data point.
+
         :param df: Input Dataframe with dt, y columns
         :type df: pd.DataFrame
+        :param sensitivity: sensitivity to use for anomaly detection
+        :type sensitivity: str
+        :param frequency: frequency to use in the model
+        :type frequency: str
+        :param pred_df: dataframe to predict on, defaults to None
+        :type pred_df: pd.DataFrame, optional
         :return: Output Dataframe with dt, y, yhat_lower, yhat_upper
         columns
         :rtype: pd.DataFrame
@@ -72,14 +89,6 @@ class ProphetModel(AnomalyModel):
         :type model: Prophet model
         :return: dictionary containing the retrieved parameters of model
         :rtype: dict
-        Parameters
-        ----------
-        m: A trained model of the Prophet class.
-
-        Returns
-        -------
-        A Dictionary containing retrieved parameters of m.
-
         """
         res1_cols = ["k", "m", "sigma_obs"]
         res1 = {pname: model.params[pname][0][0] for pname in res1_cols}

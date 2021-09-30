@@ -19,7 +19,27 @@ DEBUG_MAX_SUBGROUPS = 10
 
 
 class AnomalyDetectionController(object):
-    def __init__(self, kpi_info, end_date=None, save_model=False, debug=False):
+    """Controller class for performing Anomaly Detection."""
+
+    def __init__(
+        self,
+        kpi_info: dict,
+        end_date: datetime = None,
+        save_model: bool = False,
+        debug: bool = False
+    ):
+        """Initialize the controller.
+
+        :param kpi_info: dictionary with information on the kpi
+        :type kpi_info: dict
+        :param end_date: end date to perform anomaly detection for, defaults to
+        None
+        :type end_date: datetime, optional
+        :param save_model: whether to save the model or not, defaults to False
+        :type save_model: bool, optional
+        :param debug: enable debugging outputs, defaults to False
+        :type debug: bool, optional
+        """
         self.kpi_info = kpi_info
 
         # TODO: Add these in kpi_info
@@ -340,6 +360,7 @@ class AnomalyDetectionController(object):
         self._save_anomaly_output(overall_anomaly_output, series, subgroup)
 
     def detect(self) -> None:
+        """Perform the anomaly detection for given KPI."""
         # TODO: Docstring
         if self.debug:
             print(self.kpi_info["anomaly_params"]["model_name"])

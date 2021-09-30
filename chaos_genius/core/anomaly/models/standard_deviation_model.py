@@ -1,3 +1,5 @@
+"""Provides the Standard Deviation model for anomaly detection."""
+
 import pandas as pd
 
 from chaos_genius.core.anomaly.models import AnomalyModel
@@ -7,7 +9,14 @@ STDSENS = {"high": 0.8, "medium": 0.9, "low": 0.95}
 
 
 class StandardDeviationModel(AnomalyModel):
-    def __init__(self, *args, model_kwargs={}, **kwargs):
+    """Standard Deviation model for anomaly detection."""
+
+    def __init__(self, *args, model_kwargs={}, **kwargs) -> None:
+        """Initialize the StandardDeviationModel.
+
+        :param model_kwargs: model specific configuration, defaults to {}
+        :type model_kwargs: dict, optional
+        """
         super().__init__(*args, **kwargs)
         self.model_kwargs = model_kwargs
 
@@ -20,8 +29,16 @@ class StandardDeviationModel(AnomalyModel):
     ) -> pd.DataFrame:
         """Predict anomalies on data.
 
+        If pred_df is None, will predict on the last data point.
+
         :param df: Input Dataframe with dt, y columns
         :type df: pd.DataFrame
+        :param sensitivity: sensitivity to use for anomaly detection
+        :type sensitivity: str
+        :param frequency: frequency to use in the model
+        :type frequency: str
+        :param pred_df: dataframe to predict on, defaults to None
+        :type pred_df: pd.DataFrame, optional
         :return: Output Dataframe with dt, y, yhat_lower, yhat_upper
         columns
         :rtype: pd.DataFrame

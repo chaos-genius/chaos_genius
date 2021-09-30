@@ -11,6 +11,8 @@ ZSCORE_UPPER_BOUND = 2.5
 
 
 class ProcessAnomalyDetection:
+    """Processor class for computing anomaly detection."""
+
     def __init__(
         self,
         model_name: str,
@@ -25,6 +27,32 @@ class ProcessAnomalyDetection:
         subgroup: str = None,
         model_kwargs={},
     ):
+        """Initialize the processor.
+
+        :param model_name: model to use
+        :type model_name: str
+        :param data: dataframe to run anomaly detection on
+        :type data: pd.DataFrame
+        :param last_date: last date for which anomaly was run
+        :type last_date: datetime.datetime
+        :param period: period of data points to train model on
+        :type period: int
+        :param table_name: table name of data
+        :type table_name: str
+        :param freq: frequency of data
+        :type freq: str
+        :param sensitivity: sensitivity to use for anomaly bounds
+        :type sensitivity: str
+        :param slack: slack in days for computing anomaly
+        :type slack: int
+        :param series: series name
+        :type series: str
+        :param subgroup: subgroup identifier, defaults to None
+        :type subgroup: str, optional
+        :param model_kwargs: parameters to initialize the model with, defaults
+        to {}
+        :type model_kwargs: dict, optional
+        """
         self.model_name = model_name
         self.input_data = data
         self.last_date = last_date
@@ -32,14 +60,18 @@ class ProcessAnomalyDetection:
         self.table_name = (table_name,)
         self.series = (series,)
         self.subgroup = subgroup
-        self.model_path = self.gen_model_save_path()
+        self.model_path = self._gen_model_save_path()
         self.model_kwargs = model_kwargs
         self.freq = freq
         self.sensitivity = sensitivity
         self.slack = slack
 
-    def predict(self):
+    def predict(self) -> pd.DataFrame:
+        """Run the prediction for anomalies.
 
+        :return: dataframe with detected anomaly_timestamp
+        :rtype: pd.DataFrame
+        """
         model = self._get_model()
 
         pred_series = self._predict(model)
@@ -116,12 +148,12 @@ class ProcessAnomalyDetection:
 
         anomaly_prediction["severity"] = 0
         anomaly_prediction["severity"] = anomaly_prediction.apply(
-            lambda x: self.compute_severity(x, std_dev), axis=1
+            lambda x: self._compute_severity(x, std_dev), axis=1
         )
 
         return anomaly_prediction
 
-    def compute_severity(self, row, std_dev):
+    def _compute_severity(self, row, std_dev):
         # TODO: Create docstring for these comments
         if row["anomaly"] == 0:
             # No anomaly. Severity is 0 ;)
@@ -157,7 +189,7 @@ class ProcessAnomalyDetection:
         except NotImplementedError:
             pass
 
-    def gen_model_save_path(self):
+    def _gen_model_save_path(self):
         if self.series == "overall":
             return f"./{self.table_name}/{self.subgroup}.mdl"
         else:

@@ -1,6 +1,7 @@
 """Provides utility functions for anomaly detection."""
 
 from datetime import datetime, timedelta
+from typing import Any
 
 import pandas as pd
 
@@ -10,16 +11,34 @@ from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 
 
 def bound_between(min_val, val, max_val):
+    """Bound value between min and max."""
     return min(max(val, min_val), max_val)
 
 
 def get_anomaly_df(
-    kpi_info,
-    connection_info,
-    last_date_in_db=None,
-    end_date=None,
-    days_range=90
-):
+    kpi_info: dict,
+    connection_info: dict,
+    last_date_in_db: datetime = None,
+    end_date: datetime = None,
+    days_range: int = 90
+) -> pd.DataFrame:
+    """Retrieve dataframe for anomaly detection.
+
+    :param kpi_info: KPI information
+    :type kpi_info: dict
+    :param connection_info: connection information for KPI
+    :type connection_info: dict
+    :param last_date_in_db: last date for which anomaly was computed, defaults
+    to None
+    :type last_date_in_db: datetime, optional
+    :param end_date: end date for which to run anomaly, defaults to None
+    :type end_date: datetime, optional
+    :param days_range: days for which to fetch data for, defaults to 90
+    :type days_range: int, optional
+    :raises ValueError: Raise error is KPI type is not supported.
+    :return: dataframe for anomaly detection
+    :rtype: pd.DataFrame
+    """
     indentifier = ""
     if connection_info["connection_type"] == "mysql":
         indentifier = "`"
@@ -82,7 +101,22 @@ def get_anomaly_df(
     return get_df_from_db_uri(connection_info["db_uri"], base_query)
 
 
-def get_last_date_in_db(kpi_id, series, subgroup=None):
+def get_last_date_in_db(
+    kpi_id: int,
+    series: str,
+    subgroup: str = None
+) -> Any | None:
+    """Get last date for which anomaly was computed.
+
+    :param kpi_id: kpi id to check for
+    :type kpi_id: int
+    :param series: series type
+    :type series: str
+    :param subgroup: subgroup id, defaults to None
+    :type subgroup: str, optional
+    :return: last date for which anomaly was computed
+    :rtype: Any | None
+    """
     results = (
         AnomalyDataOutput.query.filter(
             (AnomalyDataOutput.kpi_id == kpi_id)
@@ -99,7 +133,25 @@ def get_last_date_in_db(kpi_id, series, subgroup=None):
         return None
 
 
-def get_dq_missing_data(input_data, dt_col, metric_col, freq):
+def get_dq_missing_data(
+    input_data: pd.DataFrame,
+    dt_col: str,
+    metric_col: str,
+    freq: str
+) -> pd.DataFrame:
+    """Generate dataframe with information on missing data.
+
+    :param input_data: input dataframe
+    :type input_data: pd.DataFrame
+    :param dt_col: datetime column name
+    :type dt_col: str
+    :param metric_col: metric column name
+    :type metric_col: str
+    :param freq: frequency of data
+    :type freq: str
+    :return: dataframe with information on missing data
+    :rtype: pd.DataFrame
+    """
     data = input_data
 
     data[dt_col] = pd.to_datetime(data[dt_col])
@@ -137,14 +189,33 @@ def get_timedelta(freq, diff):
 
 
 def fill_data(
-    input_data,
-    dt_col,
-    metric_col,
-    last_date,
-    period,
-    end_date,
-    freq
-):
+    input_data: pd.DataFrame,
+    dt_col: str,
+    metric_col: str,
+    last_date: datetime,
+    period: int,
+    end_date: datetime,
+    freq: str
+) -> pd.DataFrame:
+    """Fill data from input_data.
+
+    :param input_data: input data to fill
+    :type input_data: pd.DataFrame
+    :param dt_col: datetime column name
+    :type dt_col: str
+    :param metric_col: metric column name
+    :type metric_col: str
+    :param last_date: last date for which anomaly was computed
+    :type last_date: datetime
+    :param period: period of data points to use for training
+    :type period: int
+    :param end_date: end date for anomaly computation
+    :type end_date: datetime
+    :param freq: frequency of data
+    :type freq: str
+    :return: filled dataframe
+    :rtype: pd.DataFrame
+    """
     if last_date is not None:
         last_date_diff_period = (
             last_date - get_timedelta(freq, period) + get_timedelta(freq, 1)

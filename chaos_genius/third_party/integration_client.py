@@ -88,7 +88,7 @@ class ThirdPartyClient(object):
         for source in sources_list:
                 source_specs = self.get_source_def_specs(source["sourceDefinitionId"])
                 try:
-                    if "connectionSpecification" not in list(source_specs.keys())
+                    if "connectionSpecification" not in list(source_specs.keys()):
                         return False
                 except:
                     return False

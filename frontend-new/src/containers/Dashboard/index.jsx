@@ -107,7 +107,7 @@ const Dashboard = () => {
                       <li
                         className={tab === 'autorca' ? 'active' : ''}
                         onClick={() => onTabClick('autorca')}>
-                        AutoRCA
+                        DeepDrills
                       </li>
 
                       <li

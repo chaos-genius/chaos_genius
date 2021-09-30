@@ -34,23 +34,20 @@ class EWSTDModel(AnomalyModel):
 
         # span = window size
         ew_mean = df["y"].ewm(span=len(df)).mean().iloc[-1]
-        ew_stddevi = df["y"].ewm(span=len(df)).std().iloc[-1]
+        ew_std_dev = df["y"].ewm(span=len(df)).std().iloc[-1]
 
-        # TODO: Set values for numDevi_u, numDevi_l in sensitivity
-        num_devi = EWSTDSENS[sensitivity.lower()]
-        num_devi_u = None
-        num_devi_l = None
+        num_dev = EWSTDSENS[sensitivity.lower()]
+        num_dev_u = None
+        num_dev_l = None
 
-        if num_devi_u is None:
-            num_devi_u = num_devi
-        if num_devi_l is None:
-            num_devi_l = num_devi
+        if num_dev_u is None:
+            num_dev_u = num_dev
+        if num_dev_l is None:
+            num_dev_l = num_dev
 
-        threshold_u = ew_mean + (num_devi_u * ew_stddevi)
-        threshold_l = ew_mean - (num_devi_l * ew_stddevi)
+        threshold_u = ew_mean + (num_dev_u * ew_std_dev)
+        threshold_l = ew_mean - (num_dev_l * ew_std_dev)
 
-        # TODO: COMMIT AS PART OF ANOMALY MAJOR FIX
-        # MAYBE COMMIT AS PREDICTION MAKER IN EWSTD
         if pred_df is None:
             forecast_time = df['ds'].iloc[-1] + get_timedelta(frequency, 1)
             forecast_value = (threshold_l + threshold_u)/2

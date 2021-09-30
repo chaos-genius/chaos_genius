@@ -45,17 +45,13 @@ class NeuralProphetModel(AnomalyModel):
 
         # adding confidence intervals
         mean = forecast["yhat"].mean()
-        stddevi = forecast["yhat"].std()
-        num_devi = self.model_kwargs.get('numDevi', 2)
-        num_devi_u = self.model_kwargs.get('numDevi_u')
-        num_devi_l = self.model_kwargs.get('numDevi_l')
+        std_dev = forecast["yhat"].std()
+        num_dev = self.model_kwargs.get('numDev', 2)
+        num_dev_u = self.model_kwargs.get('numDev_u', num_dev)
+        num_dev_l = self.model_kwargs.get('numDev_l', num_dev)
 
-        if num_devi_u is None:
-            num_devi_u = num_devi
-        if num_devi_l is None:
-            num_devi_l = num_devi
-        threshold_u = mean + (num_devi_u * stddevi)
-        threshold_l = mean - (num_devi_l * stddevi)
+        threshold_u = mean + (num_dev_u * std_dev)
+        threshold_l = mean - (num_dev_l * std_dev)
         forecast['yhat_lower'] = threshold_l
         forecast['yhat_upper'] = threshold_u
         forecast = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']]

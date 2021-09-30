@@ -3,10 +3,10 @@
 from chaos_genius.core.anomaly.models import (EWSTDModel, ExpTSModel,
                                               GreyKiteModel,
                                               NeuralProphetModel, ProphetModel,
-                                              StdDeviModel)
+                                              StandardDeviationModel)
 
 MODEL_MAPPER = {
-    "StdDeviModel": StdDeviModel,
+    "StandardDeviationModel": StandardDeviationModel,
     "ProphetModel": ProphetModel,
     "EWSTDModel": EWSTDModel,
     "NeuralProphetModel": NeuralProphetModel,

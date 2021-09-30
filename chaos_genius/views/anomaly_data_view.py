@@ -11,6 +11,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from chaos_genius.extensions import cache
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
+from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.views.kpi_view import get_kpi_data_from_id
 
@@ -611,7 +612,16 @@ def anomaly_settings_status(kpi_id):
         response.update(data)
         response['scheduler_params'] = DEFAULT_SCHEDULER_PARAMS.copy()
         response['scheduler_params'].update(data['scheduler_params'])
-        response['is_setup'] = True
+        response['is_anomaly_setup'] = True
+
+    rca_data = RcaData.query.filter(
+        RcaData.kpi_id == kpi_id
+    ).all()
+    if len(rca_data) == 0:
+        is_precomputed = False
+    else:
+        is_precomputed = True
+    response["is_rca_precomputed"] = is_precomputed
 
     current_app.logger.info(f"Anomaly settings retrieved for kpi: {kpi_id}")
     return jsonify(response)
@@ -631,5 +641,5 @@ DEFAULT_ANOMALY_PARAMS = {
   "scheduler_params": DEFAULT_SCHEDULER_PARAMS,
   "seasonality": [],
   "sensitivity": None,
-  "is_setup": False
+  "is_anomaly_setup": False
 }

@@ -63,11 +63,11 @@ const AlertsForm = () => {
   const [editedData, setEditedData] = useState({});
 
   const [email, setEmail] = useState({
-    smtp: '',
+    server: '',
     port: '',
     username: '',
     password: '',
-    emailsender: ''
+    sender_email: ''
   });
 
   const [placeHolderEmail, setPlaceHolderEmail] = useState({
@@ -138,11 +138,6 @@ const AlertsForm = () => {
         webhook_url: editData?.config_setting?.webhook_url,
         channel_name: editData?.config_setting?.channel_name
       });
-      // setSlackData({
-      //   ...slackData,
-      //   webhook_url: editData?.config_setting?.webhook_url,
-      //   channel_name: editData?.config_setting?.channel_name
-      // });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editData]);
@@ -165,7 +160,7 @@ const AlertsForm = () => {
     if (data[3] === 'email') {
       if (data[4] !== 'edit') {
         var objectErr = { ...emailError };
-        if (email.smtp === '') {
+        if (email.server === '') {
           objectErr['server'] = 'Enter SMTP server';
         }
         if (email.port === '') {
@@ -188,10 +183,10 @@ const AlertsForm = () => {
         if (email.password === '') {
           objectErr['password'] = 'Enter Password';
         }
-        if (email.emailsender === '') {
+        if (email.sender_email === '') {
           objectErr['sender_email'] = 'Enter Email';
         }
-        if (email.emailsender !== '' && !validateEmail(email.emailsender)) {
+        if (email.sender_email !== '' && !validateEmail(email.sender_email)) {
           objectErr['sender_email'] = 'Enter Valid Email';
         }
         setEmailError(objectErr);
@@ -409,14 +404,12 @@ const AlertsForm = () => {
                   }
                   onChange={(e) => {
                     if (slackEdit.webhook_url) {
-                      // setWebhookUrl(e.target.value);
                       setWebhookUrlError(false);
                       setSlackData({
                         ...slackData,
                         webhook_url: e.target.value
                       });
                     } else {
-                      //setEditedWebhookUrl(e.target.value);
                       setSensitveSlack({
                         ...sensitveSlack,
                         webhook_url: e.target.value
@@ -441,7 +434,6 @@ const AlertsForm = () => {
                       <button
                         className="btn black-button"
                         onClick={() => {
-                          //setWebhookUrl(editedWebhookUrl);
                           setSlackData({
                             ...slackData,
                             webhook_url: sensitveSlack.webhook_url

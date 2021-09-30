@@ -211,8 +211,7 @@ const KpiAlertDestinationForm = ({
   };
 
   const validateEmail = (email) => {
-    const re =
-      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
   };
 
@@ -319,7 +318,7 @@ const KpiAlertDestinationForm = ({
           </div>
         )}
       </div>
-      {field === 'email' && (
+      {field === 'email' ? (
         <div className="form-group">
           <label>Add Recepients </label>
           {/* <Select isMulti classNamePrefix="selectcategory" placeholder="Select" /> */}
@@ -350,6 +349,18 @@ const KpiAlertDestinationForm = ({
             {path[2] === 'edit' &&
               editableStatus('alert_channnel') === 'sensitive' &&
               editAndSaveButton('alert_channel')}
+          </div>
+        </div>
+      ) : (
+        <div className="form-group">
+          <label>Channel name</label>
+          <div className="editable-field">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Channel Name"
+              disabled={true}
+            />
           </div>
         </div>
       )}

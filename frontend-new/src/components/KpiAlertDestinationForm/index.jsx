@@ -351,7 +351,7 @@ const KpiAlertDestinationForm = ({
               editAndSaveButton('alert_channel')}
           </div>
         </div>
-      ) : (
+      ) : field === 'slack' ? (
         <div className="form-group">
           <label>Channel name</label>
           <div className="editable-field">
@@ -363,6 +363,8 @@ const KpiAlertDestinationForm = ({
             />
           </div>
         </div>
+      ) : (
+        ''
       )}
       {/* commented add another channel*/}
       {/* {anotherChannel && addChannel()}

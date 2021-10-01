@@ -179,8 +179,8 @@ const Kpihome = () => {
           // type: 'value',
           step: 1,
           title: '',
-          gridLineWidth: 0
-          // lineWidth: 1
+          gridLineWidth: 0,
+          lineWidth: 1
         },
         plotOptions: {
           line: {

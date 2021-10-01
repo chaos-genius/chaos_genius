@@ -87,7 +87,7 @@ const KpiAlertConfigurationForm = ({
       obj['kpi_alert_type'] = 'Enter Kpi Alert Type';
     }
     if (alertFormData.severity_cutoff_score === '') {
-      obj['severity_cutoff_score'] = 'Enter Significance Score';
+      obj['severity_cutoff_score'] = 'Enter Severity Score';
     }
     if (alertFormData.alert_frequency === '') {
       obj['alert_frequency'] = 'Enter Alert Frequency';
@@ -360,13 +360,13 @@ const KpiAlertConfigurationForm = ({
                 type === 'anomoloy' ? 'alerts-type active' : 'alerts-type'
               }
               onClick={() => setType('anomoloy')}>
-              <img src={Anomoly} alt="Anomoly" className="alert-image" />
+              <img src={Anomoly} alt="Anomaly" className="alert-image" />
               <img
                 src={AnomolyActive}
-                alt="Anomoly"
+                alt="Anomaly"
                 className="alert-image-active"
               />
-              <span>Anomoly</span>
+              <span>Anomaly</span>
 
               {error.kpi_alert_type && (
                 <div className="connection__fail">
@@ -477,7 +477,7 @@ const KpiAlertConfigurationForm = ({
           </>
         ) : (
           <div className="form-group">
-            <label>Significance Score *</label>
+            <label>Severity Score *</label>
             <div className="score-range">
               <div className="score-card">{value}</div>
               <div className="range-selector">

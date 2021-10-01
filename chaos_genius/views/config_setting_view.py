@@ -96,7 +96,9 @@ def set_config():
         if config_obj:
             config_obj.active = False
             config_obj.save(commit=True)
-        new_config = create_config_object(config_name, data.get("config_settings", {}))
+        config_settings = config_obj.config_setting
+        config_settings.update(data.get("config_settings", {}))
+        new_config = create_config_object(config_name, config_settings)
         new_config.save(commit=True)
         return jsonify({"message": f"Config {config_name} has been saved successfully.", "status": "success"})
     else:

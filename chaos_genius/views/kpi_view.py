@@ -80,6 +80,7 @@ def kpi():
     elif request.method == 'GET':
         results = db.session.query(Kpi, DataSource) \
             .join(DataSource, Kpi.data_source == DataSource.id) \
+            .filter(Kpi.active==True) \
             .order_by(Kpi.created_at.desc()) \
             .all()
         kpis = []
@@ -87,9 +88,7 @@ def kpi():
             kpi_info = row[0].safe_dict
             data_source_info = row[1].safe_dict
             kpi_info["data_source"] = data_source_info
-            # TODO: Provision to active and deactivate the KPI
-            if data_source_info["active"] == True:
-                kpis.append(kpi_info)
+            kpis.append(kpi_info)
         return jsonify({"count": len(kpis), "data": kpis})
 
 

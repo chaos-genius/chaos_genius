@@ -50,7 +50,11 @@ def kpi_anomaly_detection(kpi_id):
         print(traceback.format_exc())
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("Anomaly Detection Done")
-    return jsonify({"data": data, "msg": ""})
+    return jsonify({
+        "data": data,
+        "msg": "",
+        "anomaly_end_date": get_anomaly_end_date(kpi_id)
+        })
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-drilldown", methods=["GET"])
@@ -79,7 +83,11 @@ def kpi_anomaly_drilldown(kpi_id):
         print(traceback.format_exc())
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("Anomaly Drilldown Done")
-    return jsonify({"data": subdim_graphs, "msg": ""})
+    return jsonify({
+        "data": subdim_graphs,
+        "msg": "",
+        "anomaly_end_date": get_anomaly_end_date(kpi_id)
+        })
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-data-quality", methods=["GET"])
@@ -107,7 +115,12 @@ def kpi_anomaly_data_quality(kpi_id):
         current_app.logger.info(f"Error Found: {err}")
 
     current_app.logger.info("Anomaly Drilldown Done")
-    return jsonify({"data": data, "msg": msg, "status": status})
+    return jsonify({
+        "data": data,
+        "msg": msg,
+        "status": status,
+        "anomaly_end_date": get_anomaly_end_date(kpi_id)
+        })
 
 
 @blueprint.route("/anomaly-params/meta-info", methods=["GET"])
@@ -582,6 +595,7 @@ def validate_partial_scheduler_params(scheduler_params: Dict[str, Any]) -> Tuple
     return "", scheduler_params
 
 
+<<<<<<< HEAD
 @blueprint.route("/<int:kpi_id>/settings", methods=["GET"])
 # @cache.memoize(timeout=30000)
 def anomaly_settings_status(kpi_id):
@@ -643,3 +657,11 @@ DEFAULT_ANOMALY_PARAMS = {
   "sensitivity": None,
   "is_anomaly_setup": False
 }
+
+
+def get_anomaly_end_date(kpi_id: int):
+    anomaly_end_date = AnomalyDataOutput.query.filter(
+            AnomalyDataOutput.kpi_id == kpi_id
+        ).order_by(AnomalyDataOutput.data_datetime.desc()).first()
+    print(anomaly_end_date.as_dict['data_datetime'])
+    return anomaly_end_date.as_dict['data_datetime']

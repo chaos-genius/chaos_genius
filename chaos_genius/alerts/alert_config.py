@@ -10,7 +10,8 @@ EMAIL_CONFIGS_EXPOSE = {
 }
 
 SLACK_CONFIGS_EXPOSE = {
-    "webhook_url": False
+    "webhook_url": False,
+    "channel_name": True
 }
 
 

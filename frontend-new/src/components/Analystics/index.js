@@ -153,7 +153,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
         <div className="dashboard-subheader">
           <div className="common-tab configure-tab">
             <ul>
-              <li>Configure Anomoly Detector for Selected KPI</li>
+              <li>Configure Anomaly Detector for Selected KPI</li>
             </ul>
           </div>
         </div>

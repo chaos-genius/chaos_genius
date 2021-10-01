@@ -53,7 +53,7 @@ class ConfigSetting(PkModel):
                 },
                 "channel_name": {
                     "is_editable": True,
-                    "is_sensitive": True,
+                    "is_sensitive": False,
                 }
             },
             "email": {

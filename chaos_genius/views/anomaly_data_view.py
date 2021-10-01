@@ -125,6 +125,7 @@ def kpi_anomaly_data_quality(kpi_id):
 
 @blueprint.route("/anomaly-params/meta-info", methods=["GET"])
 def kpi_anomaly_params_meta():
+    # TODO: Move this dict into the corresponding data model
     return jsonify(ANOMALY_PARAMS_META)
 
 

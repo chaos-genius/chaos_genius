@@ -14,10 +14,6 @@ done
 
 
 echo "############################################"
-echo "RUNNING DOCKER-COMPOSE BUILD"
+echo "BUILDING AND STARTING SERVICES"
 echo "############################################"
-docker-compose build
-echo "############################################"
-echo "STARTING SERVICES"
-echo "############################################"
-docker-compose up
+docker-compose -f docker-compose-img.yml up

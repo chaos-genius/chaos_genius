@@ -44,26 +44,24 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
   };
 
   useEffect(() => {
-    if (deleteDataSourceResponse && deleteDataSourceResponse.length !== 0) {
-      if (deleteDataSourceResponse && deleteDataSourceResponse.status) {
-        customToast({
-          type: 'success',
-          header: 'Successfully Datasource Deleted',
-          description: deleteDataSourceResponse.msg
-        });
-        changeData((prev) => !prev);
-      } else if (
-        deleteDataSourceResponse &&
-        deleteDataSourceResponse.status === false
-      ) {
-        customToast({
-          type: 'error',
-          header: 'Failed to Delete',
-          description: deleteDataSourceResponse.msg
-        });
-      }
-      setIsOpen(false);
+    if (deleteDataSourceResponse && deleteDataSourceResponse.status) {
+      customToast({
+        type: 'success',
+        header: 'Successfully Datasource Deleted',
+        description: deleteDataSourceResponse.msg
+      });
+      changeData((prev) => !prev);
+    } else if (
+      deleteDataSourceResponse &&
+      deleteDataSourceResponse.status === false
+    ) {
+      customToast({
+        type: 'error',
+        header: 'Failed to Delete',
+        description: deleteDataSourceResponse.msg
+      });
     }
+    setIsOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [changeData, deleteDataSourceResponse]);
 

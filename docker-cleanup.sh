@@ -1,6 +1,6 @@
 echo "###### REMOVING CONTAINERS AND VOLUMES ###########"
-docker-compose -f rm
-docker volume -f prune
+docker-compose rm -f
+docker volume prune -f
 
 echo "#### CLEANING UP LOCAL DIRECTORIES ###############"
 rm -rf docker/airbyte-db

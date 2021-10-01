@@ -41,15 +41,26 @@ Backend
 
 3. Shut down all containers with `docker-compose down`
 
-4. Delete all data from volumes with `docker volumes prune`. 
+4.  Remove all created containers with `docker-compose rm`.
+
+5. Delete all data from volumes with `docker volumes prune`. 
    Make sure you don't have data from other containers. If yes, then we need to do this manually.
 
-### From Image
+### From Image (Recommended)
 
-1. Run all containers with `docker-compose -f docker-compose.image.yml up`
-   This will run all containers with airbyte and other dependencies.
+#### Linux
+1. Run the first time setup script with`./setup-docker.sh`
+   This will fetch the dependencies and run all containers with airbyte and other dependencies.
 
-2. Shut down all containers with `docker-compose down`
+2. Shut down all containers with `Ctrl + v` in the same terminal window or run `docker-compose -f docker-compose-img.yml down` in a different terminal window.
 
-3. Delete all data from volumes with `docker volumes prune`. 
+3. Subsequently (After the first-time setup) use `./start_cg` or `docker-compose -f docker-compose-img.yml up` to start up the services.
+
+4. Remove all created containers with `docker-compose -f docker-compose-img.yml rm`.
+
+5. Delete all data from volumes with `docker volume prune`.
    Make sure you don't have data from other containers. If yes, then we need to do this manually.
+
+6. Clear residual data and remove related docker images with `./docker-cleanup.sh`. 
+
+NOTE: In the case of 'permission denied' errors while running the scripts, use `sudo chmod +x <script-name>` to give the script executable permissions and try again. If the error persists, use `sudo ./<script name>` to run the scripts.

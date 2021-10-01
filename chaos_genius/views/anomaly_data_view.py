@@ -49,7 +49,11 @@ def kpi_anomaly_detection(kpi_id):
         print(traceback.format_exc())
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("Anomaly Detection Done")
-    return jsonify({"data": data, "msg": ""})
+    return jsonify({
+        "data": data,
+        "msg": "",
+        "anomaly_end_date": get_anomaly_end_date(kpi_id)
+        })
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-drilldown", methods=["GET"])
@@ -78,7 +82,11 @@ def kpi_anomaly_drilldown(kpi_id):
         print(traceback.format_exc())
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("Anomaly Drilldown Done")
-    return jsonify({"data": subdim_graphs, "msg": ""})
+    return jsonify({
+        "data": subdim_graphs,
+        "msg": "",
+        "anomaly_end_date": get_anomaly_end_date(kpi_id)
+        })
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-data-quality", methods=["GET"])
@@ -106,7 +114,12 @@ def kpi_anomaly_data_quality(kpi_id):
         current_app.logger.info(f"Error Found: {err}")
 
     current_app.logger.info("Anomaly Drilldown Done")
-    return jsonify({"data": data, "msg": msg, "status": status})
+    return jsonify({
+        "data": data,
+        "msg": msg,
+        "status": status,
+        "anomaly_end_date": get_anomaly_end_date(kpi_id)
+        })
 
 
 @blueprint.route("/anomaly-params/meta-info", methods=["GET"])
@@ -120,7 +133,7 @@ def kpi_anomaly_params(kpi_id: int):
 
     if kpi is None:
         return jsonify(
-            {"error": f"Could not find KPI for ID: {kpi_id}"}
+            {"error": f"Could not find KPI for ID: {kpi_id}", "status": "failure"}
         ), 400
 
     # when method is GET we just return the anomaly params
@@ -134,26 +147,46 @@ def kpi_anomaly_params(kpi_id: int):
 
     if not request.is_json:
         return jsonify(
-            {"error": "Request body must be a JSON (and Content-Type header must be set correctly)"}
+            {"error": "Request body must be a JSON (and Content-Type header must be set correctly)", "status": "failure"}
         ), 400
 
     req_data: dict = cast(dict, request.get_json())
 
     if "anomaly_params" not in req_data:
         return jsonify(
-            {"error": "The request JSON needs to have anomaly_params as a field"}
+            {"error": "The request JSON needs to have anomaly_params as a field", "status": "failure"}
         ), 400
 
     err, new_anomaly_params = validate_partial_anomaly_params(req_data["anomaly_params"])
 
     if err != "":
-        return jsonify({"error": err}), 400
+        return jsonify({"error": err, "status": "failure"}), 400
 
     new_kpi = update_anomaly_params(kpi, new_anomaly_params)
+
+    # we ensure anomaly task is run as soon as analytics is configured
+    # we consider anomaly to be configured when the payload has model_name in it
+    # otherwise, it's an update of the existing anomaly_params, so we avoid running
+    #
+    # we also run RCA at the same time
+    if "model_name" in new_anomaly_params:
+        # TODO: move this import to top and fix import issue
+        from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task, ready_rca_task
+        anomaly_task = ready_anomaly_task(new_kpi.id)
+        rca_task = ready_rca_task(new_kpi.id)
+        if anomaly_task is None or rca_task is None:
+            print(
+                "Could not run anomaly task since newly configured KPI was not found: "
+                f"{new_kpi.id}"
+            )
+        else:
+            anomaly_task.apply_async()
+            rca_task.apply_async()
 
     return jsonify({
         "msg": "Successfully updated Anomaly params",
         "anomaly_params": new_kpi.as_dict["anomaly_params"],
+        "status": "success"
     })
 
 
@@ -471,10 +504,11 @@ def validate_partial_anomaly_params(anomaly_params: Dict[str, Any]) -> Tuple[str
                     anomaly_params
                 )
 
-    err, scheduler_params = validate_partial_scheduler_params(anomaly_params["scheduler_params"])
-    if err != "":
-        return err, anomaly_params
-    anomaly_params["scheduler_params"] = scheduler_params
+    if "scheduler_params" in anomaly_params:
+        err, scheduler_params = validate_partial_scheduler_params(anomaly_params["scheduler_params"])
+        if err != "":
+            return err, anomaly_params
+        anomaly_params["scheduler_params"] = scheduler_params
 
     return "", anomaly_params
 
@@ -558,3 +592,11 @@ def validate_partial_scheduler_params(scheduler_params: Dict[str, Any]) -> Tuple
             return (f"second must be between 0 and 60 (inclusive). Got: {second}", scheduler_params)
 
     return "", scheduler_params
+
+
+def get_anomaly_end_date(kpi_id: int):
+    anomaly_end_date = AnomalyDataOutput.query.filter(
+            AnomalyDataOutput.kpi_id == kpi_id
+        ).order_by(AnomalyDataOutput.data_datetime.desc()).first()
+    print(anomaly_end_date.as_dict['data_datetime'])
+    return anomaly_end_date.as_dict['data_datetime']

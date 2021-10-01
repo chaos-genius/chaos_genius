@@ -85,21 +85,77 @@ def anomaly_kpi():
     return res
 
 
-# runs every hour
-# if hour > scheduled hour, run task
-# last_scheduled_time -> if it's < specified hour of today's date, run task
+def ready_anomaly_task(kpi_id: int):
+    """Set anomaly in-progress and update last_scheduled_time for the KPI
+
+    Returns a Celery task that *must* be executed (using .apply_async) soon.
+    Returns None if the KPI does not exist.
+    """
+    # get scheduler_params
+    kpi = Kpi.get_by_id(kpi_id)
+    if kpi is None:
+        return None
+    anomaly_params = kpi.anomaly_params or {}
+    scheduler_params = anomaly_params.get("scheduler_params") or {}
+
+    # update scheduler params
+    scheduler_params["last_scheduled_time"] = datetime.now().isoformat()
+    scheduler_params["anomaly_status"] = "in-progress"
+
+    # write back scheduler_params
+    anomaly_params["scheduler_params"] = scheduler_params
+    kpi.anomaly_params = anomaly_params
+    flag_modified(kpi, "anomaly_params")
+    kpi.update(commit=True, anomaly_params=anomaly_params)
+
+    return anomaly_single_kpi.s(kpi_id)
+
+
+def ready_rca_task(kpi_id: int):
+    """Set RCA in-progress and update last_scheduled_time for the KPI
+
+    Returns a Celery task that *must* be executed (using .apply_async) soon.
+    Returns None if the KPI does not exist.
+    """
+    # get scheduler_params
+    kpi = Kpi.get_by_id(kpi_id)
+    if kpi is None:
+        return None
+    anomaly_params = kpi.anomaly_params or {}
+    scheduler_params = anomaly_params.get("scheduler_params") or {}
+
+    # update scheduler params
+    scheduler_params["last_scheduled_time"] = datetime.now().isoformat()
+    scheduler_params["rca_status"] = "in-progress"
+
+    # write back scheduler_params
+    anomaly_params["scheduler_params"] = scheduler_params
+    kpi.anomaly_params = anomaly_params
+    flag_modified(kpi, "anomaly_params")
+    kpi.update(commit=True, anomaly_params=anomaly_params)
+
+    return rca_single_kpi.s(kpi_id)
+
+
+# runs every N time (set in celery_config)
+# if time > scheduled time today, run task
+# last_scheduled_time -> if it's < specified time of today's date, run task
+# TODO: Need to add logic for running RCA after KPI setup.
 @celery.task
 def anomaly_scheduler():
     # find KPIs
     kpis: Kpi = Kpi.query.distinct("kpi_id").filter(
-        (Kpi.run_anomaly == True) & (Kpi.active == True) & (Kpi.is_static == False)
-        & (Kpi.anomaly_params is not None)
+        (Kpi.active == True) & (Kpi.is_static == False)
     )
-    
+
     task_group = []
 
     for kpi in kpis:
         kpi: Kpi
+
+        # if anomaly isn't setup yet, we still run RCA at     tR + 24 hours
+        # if anomaly is setup, we run both anomaly and RCA at tA + 24 hours
+
         # get scheduler_params, will be None if it's not set
         scheduler_params = (
             kpi.anomaly_params.get("scheduler_params")
@@ -107,43 +163,70 @@ def anomaly_scheduler():
             else None
         )
 
-        # assume 11am if it's not set
-        hour, minute, second = 11, 0, 0
+        scheduled_time = datetime.now()
+        scheduled_time = scheduled_time.replace(hour=11, minute=0, second=0)
         if scheduler_params is not None and "time" in scheduler_params:
             # HH:MM:SS
+            # this is tA
             hour, minute, second = map(int, scheduler_params["time"].split(":"))
 
-        scheduled_time = datetime.now()
-        # today's date, but at 11:00:00am
-        scheduled_time = scheduled_time.replace(hour=hour, minute=minute, second=second)
+            scheduled_time = datetime.now()
+            # today's date, but at HH:MM:SS
+            scheduled_time = scheduled_time.replace(
+                hour=hour, minute=minute, second=second
+            )
+        elif scheduler_params is not None:
+            # today's date, but at rca time (tR) or at kpi creation time
+            scheduled_time = datetime.now()
+            # this is tR
+            if "rca_time" in scheduler_params:
+                hour, minute, second = map(int, scheduler_params["rca_time"].split(":"))
+                scheduled_time = scheduled_time.replace(
+                    hour=hour, minute=minute, second=second
+                )
+            else:
+                # this is kpi creation time
+                canon_time = kpi.created_at
+                scheduled_time = scheduled_time.replace(
+                    hour=canon_time.hour, minute=canon_time.minute, second=canon_time.second
+                )
+
         current_time = datetime.now()
 
-        # check if it's already run
-        already_run = False
-        if (
+        # check if we have to run anomaly:
+        # 1. not already scheduled today
+        # 2. anomaly is set up
+        #
+        # anomaly is setup if model_name is set in anomaly_params
+        anomaly_is_setup = kpi.anomaly_params is not None and "model_name" in kpi.anomaly_params
+        anomaly_already_run = (
             scheduler_params is not None
             and "last_scheduled_time" in scheduler_params
             and datetime.fromisoformat(scheduler_params["last_scheduled_time"])
             > scheduled_time
-        ):
-            already_run = True
+        )
+        to_run_anomaly = (not anomaly_already_run) and anomaly_is_setup
 
-        if not already_run and current_time > scheduled_time:
-            print(f"Scheduling anomaly and RCA for KPI: {kpi.id}")
-            task_group.append(anomaly_single_kpi.s(kpi.id))
-            task_group.append(rca_single_kpi.s(kpi.id))
+        # check if we have to run RCA
+        # 1. if not already scheduled today
+        # 2. if anomaly is scheduled, run RCA too
+        rca_already_run = (
+            scheduler_params is not None
+            and "last_scheduled_time" in scheduler_params
+            and datetime.fromisoformat(scheduler_params["last_scheduled_time"])
+            > scheduled_time
+        )
+        to_run_rca = to_run_anomaly or (not rca_already_run)
 
-            new_scheduler_params = (
-                scheduler_params if scheduler_params is not None else {}
-            )
-            new_scheduler_params["last_scheduled_time"] = current_time.isoformat()
-            new_scheduler_params["anomaly_status"] = "in-progress"
-            new_scheduler_params["rca_status"] = "in-progress"
-            anomaly_params = kpi.anomaly_params
-            anomaly_params["scheduler_params"] = new_scheduler_params
+        if current_time > scheduled_time and (to_run_rca or to_run_anomaly):
 
-            flag_modified(kpi, "anomaly_params")
-            kpi.update(commit=True, anomaly_params=anomaly_params)
+            if to_run_anomaly:
+                print(f"Scheduling anomaly for KPI: {kpi.id}")
+                task_group.append(ready_anomaly_task(kpi.id))
+
+            if to_run_rca:
+                print(f"Scheduling RCA for KPI: {kpi.id}")
+                task_group.append(ready_rca_task(kpi.id))
 
     if not task_group:
         print("Found no pending KPI tasks.")

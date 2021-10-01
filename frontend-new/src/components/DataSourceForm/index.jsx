@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 
 import Select from 'react-select';
+
 import { useHistory, useParams } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
-import '../../assets/styles/addform.scss';
+
 import Play from '../../assets/images/play.svg';
 import PlayDisable from '../../assets/images/play-disable.svg';
-import Success from '../../assets/images/success.svg';
-import Fail from '../../assets/images/fail.svg';
+// import Success from '../../assets/images/success.svg';
+// import Fail from '../../assets/images/fail.svg';
+
+import '../../assets/styles/addform.scss';
 
 import {
   createDataSource,
@@ -90,7 +92,8 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       var arr = [];
       connectionType.map((item) => {
         return arr.push({
-          value: item,
+          value: item.name,
+          selected: item,
           name: item.name,
           label: <div className="optionlabel">{datasourceIcon(item)}</div>
         });
@@ -118,7 +121,8 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
         return data?.connection_type === item.name;
       });
       setSelectedDatasource({
-        value: obj,
+        value: obj.name,
+        selected: obj,
         name: obj.name,
         label: <div className="optionlabel">{datasourceIcon(obj)}</div>
       });
@@ -151,6 +155,19 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       path[2] === 'edit'
     ) {
       toastMessage({ type: 'error', message: 'Failed to update' });
+    } else if (
+      createDatasourceResponse &&
+      createDatasourceResponse.status === 'connected' &&
+      path[2] === 'add'
+    ) {
+      history.push('/datasource');
+      toastMessage({ type: 'success', message: 'Successfully Added' });
+    } else if (
+      createDatasourceResponse &&
+      createDatasourceResponse.status === 'failed' &&
+      path[2] === 'add'
+    ) {
+      toastMessage({ type: 'error', message: 'Failed to Add' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createDatasourceResponse, updateDatasource]);
@@ -214,6 +231,23 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     if (testConnectionResponse !== undefined) {
       setStatus(testConnectionResponse);
     }
+    if (
+      testConnectionResponse &&
+      testConnectionResponse.status === 'succeeded'
+    ) {
+      toastMessage({
+        type: 'success',
+        message: 'Test Connection Success'
+      });
+    } else if (
+      testConnectionResponse &&
+      testConnectionResponse.status === 'failed'
+    ) {
+      toastMessage({
+        type: 'error',
+        message: 'Test Connection Failed'
+      });
+    }
   }, [testConnectionResponse]);
 
   const handleCheckboxChange = (key, e) => {
@@ -226,7 +260,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   };
 
   const testConnection = () => {
-    const { connectionSpecification } = selectedDatasource.value;
+    const { connectionSpecification } = selectedDatasource.selected;
     const { required } = connectionSpecification;
     var newobj = { ...formError };
     if (Object.keys(required).length > 0) {
@@ -256,7 +290,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   };
 
   const saveDataSource = () => {
-    const { connectionSpecification } = selectedDatasource.value;
+    const { connectionSpecification } = selectedDatasource.selected;
     const { required } = connectionSpecification;
     var newobj = { ...formError };
     if (Object.keys(required).length > 0) {
@@ -274,13 +308,14 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     }
     if (Object.keys(newobj).length === 0 && connectionName !== '') {
       const payload = {
-        connection_type: selectedDatasource.value.name,
+        connection_type: selectedDatasource.value,
         name: connectionName,
         sourceForm: {
           connectionConfiguration: dsFormData,
           sourceDefinitionId: sourceDefinitionId
         }
       };
+      console.log('Source Definition id:', payload);
       dispatch(createDataSource(payload));
     }
   };
@@ -299,7 +334,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   };
 
   const updateDataSource = () => {
-    const { connectionSpecification } = selectedDatasource.value;
+    const { connectionSpecification } = selectedDatasource.selected;
     const { required } = connectionSpecification;
     var newobj = { ...formError };
     if (Object.keys(required).length > 0) {
@@ -367,7 +402,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
               setSelectedDatasource(e);
               setError('');
               setFormError([]);
-              setSourceDefinitionId(e.value.sourceDefinitionId);
+              setSourceDefinitionId(e.selected.sourceDefinitionId);
               setDsFormData({});
               setStatus('');
             }}
@@ -377,9 +412,9 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
 
         {selectedDatasource &&
           selectedDatasource !== undefined &&
-          Object.keys(selectedDatasource.value).length > 0 &&
+          Object.keys(selectedDatasource.selected).length > 0 &&
           renderTextFields(
-            selectedDatasource.value.connectionSpecification,
+            selectedDatasource.selected.connectionSpecification,
             handleInputChange,
             handleCheckboxChange,
             dsFormData,
@@ -390,23 +425,23 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
           )}
 
         {/* test connection sucess message */}
-        {status && status?.status === 'succeeded' && (
+        {/* {status && status?.status === 'succeeded' && (
           <div className="connection__success">
             <p>
               <img src={Success} alt="Success" />
               Test Connection Success
             </p>
           </div>
-        )}
+        )} */}
         {/* test connection fail message */}
-        {status && status?.status === 'failed' && (
+        {/* {status && status?.status === 'failure' && (
           <div className="connection__fail">
             <p>
               <img src={Fail} alt="Fail" />
               Test Connection Failed
             </p>
           </div>
-        )}
+        )} */}
         {path[2] === 'edit' ? (
           <div className="form-action">
             <button
@@ -481,10 +516,6 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             )}
           </div>
         )}
-        <ToastContainer
-          position={toast.POSITION.BOTTOM_RIGHT}
-          autoClose={5000}
-        />
       </div>
     );
   }

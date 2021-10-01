@@ -528,6 +528,7 @@ def init_integration_server():
         raise Exception("Integration Server isn't running. Run the server and then try again.")
 
     status = client.get_server_health()
+    client.init_source_def_conf()
     return status.get('db', False)
 
 

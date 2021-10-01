@@ -29,7 +29,7 @@ import {
 } from '../actions/ActionConstants';
 
 const initialState = {
-  kpiExplorerList: [],
+  kpiExplorerList: '',
   isLoading: true,
   error: false,
   kpiFormData: [],

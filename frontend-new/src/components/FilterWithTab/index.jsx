@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import { useHistory } from 'react-router-dom';
+
 import Search from '../../assets/images/search.svg';
 import GreenArrow from '../../assets/images/green-arrow.svg';
 
@@ -15,6 +17,7 @@ const DashboardFilter = ({
   tabs,
   SetKpiAggregate
 }) => {
+  const history = useHistory();
   const [listData, setListData] = useState(data);
   const [searchData, setSearchData] = useState(data);
 
@@ -65,16 +68,14 @@ const DashboardFilter = ({
               return (
                 <li
                   key={uuidv4()}
-                  className={kpi === item.id ? 'active' : ''}
+                  className={
+                    kpi.toString() === item.id.toString() ? 'active' : ''
+                  }
                   onClick={() => {
                     setActive(item.name);
-                    setKpi(item.id);
+                    //setKpi(item.id);
                     SetKpiAggregate(item.aggregation);
-                    window.history.pushState(
-                      '',
-                      '',
-                      `/#/dashboard/${tabs}/${item.id}`
-                    );
+                    history.push(`/dashboard/${tabs}/${item.id}`);
                   }}>
                   {item.name}
                   <img src={GreenArrow} alt="Arrow" />

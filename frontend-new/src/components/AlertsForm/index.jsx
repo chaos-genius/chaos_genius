@@ -5,7 +5,7 @@ import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Slack from '../../assets/images/alerts/slack.svg';
-import Email from '../../assets/images/alerts/gmail.svg';
+import Email from '../../assets/images/alerts/email.svg';
 import Edit from '../../assets/images/disable-edit.svg';
 
 import {
@@ -16,7 +16,6 @@ import {
 } from '../../redux/actions';
 
 import { toastMessage } from '../../utils/toast-helper';
-import { ToastContainer, toast } from 'react-toastify';
 
 const AlertsForm = () => {
   const history = useHistory();
@@ -37,41 +36,67 @@ const AlertsForm = () => {
   });
 
   const dispatch = useDispatch();
-  const [webhookUrl, setWebhookUrl] = useState('');
+  const [slackEdit, setSlackEdit] = useState({
+    webhook_url: true,
+    channel_name: true
+  });
+
+  const [slackData, setSlackData] = useState({
+    webhook_url: '',
+    channel_name: ''
+  });
+
+  const [editedSlack, setEditedSlack] = useState({});
+  const [sensitveSlack, setSensitveSlack] = useState({
+    webhook_url: '',
+    channel_name: ''
+  });
+
+  const [placeholderSlack, setPlaceHolderSlack] = useState({
+    webhook_url: '',
+    channel_name: ''
+  });
+
   const [webhookUrlError, setWebhookUrlError] = useState(false);
-  const [editedWebhookUrl, setEditedWebhookUrl] = useState('');
-  const [slackEdit, setSlackEdit] = useState(true);
+  const [channelNameError, setChannelNameError] = useState(false);
+
+  const [editedData, setEditedData] = useState({});
 
   const [email, setEmail] = useState({
-    smtp: '',
+    server: '',
     port: '',
     username: '',
     password: '',
-    emailsender: ''
+    sender_email: ''
+  });
+
+  const [placeHolderEmail, setPlaceHolderEmail] = useState({
+    username: '',
+    password: ''
   });
 
   const [emailError, setEmailError] = useState({
-    smtp: '',
+    server: '',
     port: '',
     username: '',
     password: '',
-    emailsender: ''
+    sender_email: ''
   });
 
   const [enabled, setEnabled] = useState({
-    smtp: true,
+    server: true,
     port: true,
     username: true,
     password: true,
-    emailsender: true
+    sender_email: true
   });
 
   const [sensitiveData, setSensitveData] = useState({
-    smtp: '',
+    server: '',
     port: '',
     username: '',
     password: '',
-    emailsender: ''
+    sender_email: ''
   });
 
   useEffect(() => {
@@ -99,11 +124,20 @@ const AlertsForm = () => {
     if (data[3] === 'email' && editData) {
       var obj = { ...email };
       obj['port'] = editData?.config_setting?.port || '';
-      obj['emailsender'] = editData?.config_setting?.sender_email || '';
-      obj['smtp'] = editData?.config_setting?.server || '';
+      obj['sender_email'] = editData?.config_setting?.sender_email || '';
+      obj['server'] = editData?.config_setting?.server || '';
       setEmail(obj);
+      setPlaceHolderEmail({
+        ...placeHolderEmail,
+        username: editData?.config_setting?.username || '',
+        password: editData?.config_setting?.password || ''
+      });
     } else if (data[3] === 'slack' && editData) {
-      setWebhookUrl(editData?.config_setting?.webhookUrl || null);
+      setPlaceHolderSlack({
+        ...placeholderSlack,
+        webhook_url: editData?.config_setting?.webhook_url,
+        channel_name: editData?.config_setting?.channel_name
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editData]);
@@ -118,74 +152,96 @@ const AlertsForm = () => {
   }, [emailData]);
 
   const validateEmail = (email) => {
-    const re =
-      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
   };
 
   const alertHandler = () => {
     if (data[3] === 'email') {
-      var objectErr = { ...emailError };
-      if (email.smtp === '') {
-        objectErr['smtp'] = 'Enter SMTP server';
-      }
-      if (email.port === '') {
-        objectErr['port'] = 'Enter Port';
-      }
-      if (
-        !(
-          /^[1-9]\d*$/.test(email.port) &&
-          1 <= 1 * email.port &&
-          1 * email.port <= 65535
-        ) &&
-        email.port !== ''
-      ) {
-        objectErr['port'] = 'Enter Valid Port';
-      }
+      if (data[4] !== 'edit') {
+        var objectErr = { ...emailError };
+        if (email.server === '') {
+          objectErr['server'] = 'Enter SMTP server';
+        }
+        if (email.port === '') {
+          objectErr['port'] = 'Enter Port';
+        }
+        if (
+          !(
+            /^[1-9]\d*$/.test(email.port) &&
+            1 <= 1 * email.port &&
+            1 * email.port <= 65535
+          ) &&
+          email.port !== ''
+        ) {
+          objectErr['port'] = 'Enter Valid Port';
+        }
 
-      if (email.username === '') {
-        objectErr['username'] = 'Enter Username';
-      }
-      if (email.password === '') {
-        objectErr['password'] = 'Enter Password';
-      }
-      if (email.emailsender === '') {
-        objectErr['emailsender'] = 'Enter Email';
-      }
-      if (email.emailsender !== '' && !validateEmail(email.emailsender)) {
-        objectErr['emailsender'] = 'Enter Valid Email';
-      }
-      setEmailError(objectErr);
-      if (
-        objectErr.smtp === '' &&
-        objectErr.port === '' &&
-        objectErr.username === '' &&
-        objectErr.password === '' &&
-        objectErr.emailsender === ''
-      ) {
+        if (email.username === '') {
+          objectErr['username'] = 'Enter Username';
+        }
+        if (email.password === '') {
+          objectErr['password'] = 'Enter Password';
+        }
+        if (email.sender_email === '') {
+          objectErr['sender_email'] = 'Enter Email';
+        }
+        if (email.sender_email !== '' && !validateEmail(email.sender_email)) {
+          objectErr['sender_email'] = 'Enter Valid Email';
+        }
+        setEmailError(objectErr);
+        if (
+          objectErr.server === '' &&
+          objectErr.port === '' &&
+          objectErr.username === '' &&
+          objectErr.password === '' &&
+          objectErr.sender_email === ''
+        ) {
+          const data = {
+            config_name: 'email',
+            config_settings: {
+              server: email.server,
+              port: email.port,
+              username: email.username,
+              password: email.password,
+              sender_email: email.sender_email
+            }
+          };
+          dispatchGetAllAlertEmail(data);
+        }
+      } else {
         const data = {
           config_name: 'email',
-          config_settings: {
-            server: email.smtp,
-            port: email.port,
-            username: email.username,
-            password: email.password,
-            sender_email: email.emailsender
-          }
+          config_settings: editedData
         };
         dispatchGetAllAlertEmail(data);
       }
     } else if (data[3] === 'slack') {
-      if (webhookUrl !== '' && webhookUrl !== null) {
-        const slackData = {
-          config_name: 'slack',
-          config_settings: {
-            webhook_url: webhookUrl
-          }
-        };
-        dispatchGetAllAlertEmail(slackData);
+      if (data[4] !== 'edit') {
+        if (slackData.channel_name === '') {
+          setChannelNameError(true);
+        }
+        if (slackData.webhook_url === '') {
+          setWebhookUrlError(true);
+        }
+        if (
+          slackData.webhook_url !== '' &&
+          slackData.webhook_url !== null &&
+          slackData.channel_name !== '' &&
+          slackData.channel_name !== null
+        ) {
+          const payload = {
+            config_name: 'slack',
+            config_settings: slackData
+          };
+          dispatchGetAllAlertEmail(payload);
+        }
       } else {
-        setWebhookUrlError(true);
+        const payload = {
+          config_name: 'slack',
+          config_settings: editedSlack
+        };
+        dispatchGetAllAlertEmail(payload);
       }
     }
   };
@@ -205,6 +261,9 @@ const AlertsForm = () => {
           [name]: ''
         };
       });
+      setEditedData((prev) => {
+        return { ...prev, [name]: e.target.value };
+      });
     } else {
       setEmailError((prev) => {
         return {
@@ -215,17 +274,27 @@ const AlertsForm = () => {
       setSensitveData((prev) => {
         return { ...prev, [name]: e.target.value };
       });
+
+      setEditedData((prev) => {
+        return { ...prev, [name]: e.target.value };
+      });
     }
   };
 
   const onSaveInput = (name) => {
     setEmail({ ...email, [name]: sensitiveData[name] });
+    setEditedData((prev) => {
+      return { ...prev, [name]: sensitiveData[name] };
+    });
     setEnabled({ ...enabled, [name]: true });
   };
 
   const onCancelInput = (name) => {
     setEnabled({ ...enabled, [name]: true });
     setSensitveData({ ...sensitiveData, [name]: '' });
+    setEditedData((prev) => {
+      return { ...prev };
+    });
   };
 
   const dispatchGetAllAlertEmail = (data) => {
@@ -316,32 +385,47 @@ const AlertsForm = () => {
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Enter Webhook URL"
-                  value={slackEdit ? webhookUrl : editedWebhookUrl}
+                  placeholder={
+                    placeholderSlack.webhook_url || 'Enter Webhook URL'
+                  }
+                  value={
+                    slackEdit.webhook_url
+                      ? slackData.webhook_url
+                      : sensitveSlack.webhook_url
+                  }
                   disabled={
                     data[4] === 'edit'
                       ? slackEditableStatus('webhook_url') === 'editable'
                         ? false
                         : slackEditableStatus('webhook_url') === 'sensitive'
-                        ? slackEdit
+                        ? slackEdit.webhook_url
                         : true
                       : false
                   }
                   onChange={(e) => {
-                    if (slackEdit) {
-                      setWebhookUrl(e.target.value);
+                    if (slackEdit.webhook_url) {
                       setWebhookUrlError(false);
+                      setSlackData({
+                        ...slackData,
+                        webhook_url: e.target.value
+                      });
                     } else {
-                      setEditedWebhookUrl(e.target.value);
+                      setSensitveSlack({
+                        ...sensitveSlack,
+                        webhook_url: e.target.value
+                      });
                     }
                   }}
                 />
+
                 {data[4] === 'edit' &&
                   slackEditableStatus('webhook_url') === 'sensitive' &&
-                  (slackEdit ? (
+                  (slackEdit.webhook_url ? (
                     <button
                       className="btn black-button"
-                      onClick={() => setSlackEdit(false)}>
+                      onClick={() =>
+                        setSlackEdit({ ...slackEdit, webhook_url: false })
+                      }>
                       <img src={Edit} alt="Edit" />
                       <span>Edit</span>
                     </button>
@@ -350,16 +434,29 @@ const AlertsForm = () => {
                       <button
                         className="btn black-button"
                         onClick={() => {
-                          setWebhookUrl(editedWebhookUrl);
-                          setSlackEdit(true);
+                          setSlackData({
+                            ...slackData,
+                            webhook_url: sensitveSlack.webhook_url
+                          });
+                          setEditedSlack({
+                            ...editedSlack,
+                            webhook_url: sensitveSlack.webhook_url
+                          });
+                          setSlackEdit({ ...slackEdit, webhook_url: true });
                         }}>
                         <span>Save</span>
                       </button>
                       <button
                         className="btn black-secondary-button"
                         onClick={() => {
-                          setSlackEdit(true);
-                          setEditedWebhookUrl('');
+                          setSlackEdit({ ...slackEdit, webhook_url: true });
+                          setSensitveSlack({
+                            ...sensitveSlack,
+                            webhook_url: ''
+                          });
+                          setEditedSlack({
+                            ...editedSlack
+                          });
                         }}>
                         <span>Cancel</span>
                       </button>
@@ -369,6 +466,89 @@ const AlertsForm = () => {
               {webhookUrlError && (
                 <div className="connection__fail">
                   <p>Enter Webhook URL</p>
+                </div>
+              )}
+            </div>
+            <div className="form-group">
+              <label>Channel name</label>
+              <div className="editable-field">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder={placeholderSlack.channel_name || 'Channel Name'}
+                  disabled={
+                    data[4] === 'edit'
+                      ? slackEditableStatus('channel_name') === 'editable'
+                        ? false
+                        : slackEditableStatus('channel_name') === 'sensitive'
+                        ? slackEdit.channel_name
+                        : true
+                      : false
+                  }
+                  value={
+                    slackEdit.channel_name
+                      ? slackData.channel_name
+                      : sensitveSlack.channel_name
+                  }
+                  onChange={(e) => {
+                    if (slackEdit.channel_name) {
+                      setChannelNameError(false);
+                      setSlackData({
+                        ...slackData,
+                        channel_name: e.target.value
+                      });
+                    } else {
+                      setSensitveSlack({
+                        ...sensitveSlack,
+                        channel_name: e.target.value
+                      });
+                    }
+                  }}
+                />
+                {data[4] === 'edit' &&
+                  slackEditableStatus('channel_name') === 'sensitive' &&
+                  (slackEdit.channel_name ? (
+                    <button
+                      className="btn black-button"
+                      onClick={() =>
+                        setSlackEdit({ ...slackEdit, channel_name: false })
+                      }>
+                      <img src={Edit} alt="Edit" />
+                      <span>Edit</span>
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        className="btn black-button"
+                        onClick={() => {
+                          setSlackEdit({ ...slackEdit, channel_name: true });
+                          setEditedSlack({
+                            ...editedSlack,
+                            channel_name: sensitveSlack.channel_name
+                          });
+                        }}>
+                        <span>Save</span>
+                      </button>
+                      <button
+                        className="btn black-secondary-button"
+                        onClick={() => {
+                          setSlackEdit({ ...slackEdit, channel_name: true });
+                          setSensitveSlack({
+                            ...sensitveSlack,
+                            channel_name: ''
+                          });
+                          setEditedSlack({
+                            ...editedSlack
+                          });
+                        }}>
+                        <span>Cancel</span>
+                      </button>
+                    </>
+                  ))}
+              </div>
+              {channelNameError && (
+                <div className="connection__fail">
+                  <p>Enter Channel Name</p>
                 </div>
               )}
             </div>
@@ -385,14 +565,14 @@ const AlertsForm = () => {
                   type="text"
                   className="form-control"
                   placeholder="Enter SMTP server"
-                  name="smtp"
-                  value={enabled.smtp ? email.smtp : sensitiveData.smtp}
+                  name="server"
+                  value={enabled.server ? email.server : sensitiveData.server}
                   disabled={
                     data[4] === 'edit'
                       ? editableStatus('server') === 'editable'
                         ? false
                         : editableStatus('server') === 'sensitive'
-                        ? enabled.smtp
+                        ? enabled.server
                         : true
                       : false
                   }
@@ -404,9 +584,9 @@ const AlertsForm = () => {
                   editableStatus('server') === 'sensitive' &&
                   editAndSaveButton('server')}
               </div>
-              {emailError.smtp !== '' ? (
+              {emailError.server !== '' ? (
                 <div className="connection__fail">
-                  <p>{emailError.smtp}</p>
+                  <p>{emailError.server}</p>
                 </div>
               ) : null}
             </div>
@@ -449,7 +629,7 @@ const AlertsForm = () => {
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Enter Username"
+                  placeholder={placeHolderEmail.username || 'Enter Username'}
                   name="username"
                   disabled={
                     data[4] === 'edit'
@@ -483,7 +663,7 @@ const AlertsForm = () => {
                 <input
                   type="password"
                   className="form-control"
-                  placeholder="Enter Password"
+                  placeholder={placeHolderEmail.password || 'Enter Password'}
                   name="password"
                   value={
                     enabled.password ? email.password : sensitiveData.password
@@ -518,18 +698,18 @@ const AlertsForm = () => {
                   type="text"
                   className="form-control"
                   placeholder="Enter Email"
-                  name="emailsender"
+                  name="sender_email"
                   value={
-                    enabled.emailsender
-                      ? email.emailsender
-                      : sensitiveData.emailsender
+                    enabled.sender_email
+                      ? email.sender_email
+                      : sensitiveData.sender_email
                   }
                   disabled={
                     data[4] === 'edit'
                       ? editableStatus('sender_email') === 'editable'
                         ? false
                         : editableStatus('sender_email') === 'sensitive'
-                        ? enabled.emailsender
+                        ? enabled.sender_email
                         : true
                       : false
                   }
@@ -539,11 +719,11 @@ const AlertsForm = () => {
                 />
                 {data[4] === 'edit' &&
                   editableStatus('sender_email') === 'sensitive' &&
-                  editAndSaveButton('emailsender')}
+                  editAndSaveButton('sender_email')}
               </div>
-              {emailError.emailsender !== '' ? (
+              {emailError.sender_email !== '' ? (
                 <div className="connection__fail">
-                  <p>{emailError.emailsender}</p>
+                  <p>{emailError.sender_email}</p>
                 </div>
               ) : null}
             </div>
@@ -567,10 +747,6 @@ const AlertsForm = () => {
             </div>
           </button>
         </div>
-        <ToastContainer
-          position={toast.POSITION.BOTTOM_RIGHT}
-          autoClose={5000}
-        />
       </>
     );
   }

@@ -60,7 +60,7 @@ def data_source():
         data_sources = DataSource.query.filter(DataSource.active==True).order_by(DataSource.created_at.desc()).all()
         ds_kpi_count = db.session.query(DataSource.id, func.count(Kpi.id)) \
                     .join(Kpi, Kpi.data_source == DataSource.id) \
-                    .filter(DataSource.active==True) \
+                    .filter(DataSource.active==True, Kpi.active==True) \
                     .group_by(DataSource.id) \
                     .order_by(DataSource.created_at.desc()) \
                     .all()
@@ -97,7 +97,7 @@ def list_data_source_type():
 @blueprint.route("/test", methods=["POST"])
 def test_data_source():
     """Test DataSource."""
-    connection_status, msg = [], ""
+    connection_status, msg, status= [], "", "success"
     try:
         payload = request.get_json()
         connector_client = connector.connection
@@ -105,7 +105,8 @@ def test_data_source():
     except Exception as err_msg:
         print(err_msg)
         msg = str(err_msg)
-    return jsonify({"data": connection_status, "msg": msg})
+        status = "failed"
+    return jsonify({"data": connection_status, "msg": msg, "status": status})
 
 
 @blueprint.route("/create", methods=["POST"])
@@ -255,7 +256,8 @@ def delete_data_source():
 @blueprint.route("/metadata", methods=["POST"])
 def metadata_data_source():
     """Metadata Data Source."""
-    metadata, msg = {}, ""
+    metadata, msg, status = {}, "", "success"
+
     try:
         payload = request.get_json()
         data_source_id = payload["data_source_id"]
@@ -265,11 +267,16 @@ def metadata_data_source():
         if data_source_obj:
             ds_data = data_source_obj.as_dict
             metadata, msg = get_metadata(ds_data, from_query, query)
+            if msg != "":
+                status = "failure"
+        else:
+            status = "failure"
     except Exception as err_msg:
         print(err_msg)
         msg = str(err_msg)
+        status = "failure"
 
-    return jsonify({"data": metadata, "msg": msg})
+    return jsonify({"data": metadata, "msg": msg, "status": status})
 
 
 @blueprint.route("/logs", methods=["POST"])

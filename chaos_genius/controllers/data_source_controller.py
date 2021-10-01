@@ -39,16 +39,16 @@ def mask_sensitive_info(data_source_type_def: dict, data_source_details: dict) -
         if not isinstance(value, dict):
             prop_def_details = source_def_prop.get(prop, {})
             if prop_def_details.get('airbyte_secret', False):
-                masked_value = '*'*len(value)
-                masked_dict[prop] = masked_value[:16]
+                value = str(value)
+                masked_dict[prop] = f"{value[:2]}********{value[-2:]}"
             else:
                 masked_dict[prop] = value
         else:
             for inner_prop, inner_value in value.items():
                 prop_def_details = source_def_prop.get(prop, {}).get('properties', {}).get(inner_prop, {})
                 if prop_def_details.get('airbyte_secret', False):
-                    masked_value = '*'*len(inner_value)
-                    masked_dict[prop][inner_prop] = masked_value[:16]
+                    inner_value = str(inner_value)
+                    masked_dict[prop][inner_prop] = f"{inner_value[:2]}********{inner_value[-2:]}"
                 else:
                     masked_dict[prop][inner_prop] = inner_value
     return masked_dict

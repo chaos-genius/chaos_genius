@@ -4,6 +4,11 @@ import Select from 'react-select';
 import Tooltip from 'react-tooltip-lite';
 import Modal from 'react-modal';
 
+import moment from 'moment';
+
+import TimePicker from 'rc-time-picker';
+import 'rc-time-picker/assets/index.css';
+
 import Help from '../../assets/images/help.svg';
 import Close from '../../assets/images/close.svg';
 import Success from '../../assets/images/successful.svg';
@@ -42,6 +47,9 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   const [frequency, setFrequency] = useState('');
   const [seasonality, setSeasonality] = useState([]);
   const [isModalOpen, setModalOpen] = useState(false);
+
+  const [schedule, setSchedule] = useState(moment());
+
   const [error, setError] = useState({
     modelName: '',
     sensitivity: '',
@@ -71,9 +79,16 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   useEffect(() => {
     if (kpiSettingData && kpiSettingData.status === 'success' && onboarding) {
       setAnalystics(true);
+    } else if (
+      kpiSettingData &&
+      kpiSettingData.status === 'failure' &&
+      onboarding
+    ) {
+      toastMessage({ type: 'error', message: 'Failed to Add' });
     } else if (kpiSettingData && kpiSettingData.status === 'success') {
-      // setModalOpen(true);
       toastMessage({ type: 'success', message: 'Successfully updated' });
+    } else if (kpiSettingData && kpiSettingData.status === 'failure') {
+      toastMessage({ type: 'error', message: 'Failed to update' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSettingData]);
@@ -103,9 +118,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
           sensitivity: Sensitivity,
           seasonality: seasonality,
           frequency: frequency,
-          scheduler_params: {
-            time: '1 minute'
-          }
+          scheduler_params: { time: schedule.format('HH:mm:00') }
         }
       };
       dispatch(kpiSettingSetup(kpi, data));
@@ -124,6 +137,9 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   const closeModal = () => {
     setModalOpen(false);
   };
+  const handleValueChange = (data) => {
+    setSchedule(data);
+  };
 
   if (kpiEditLoading) {
     return (
@@ -137,7 +153,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
         <div className="dashboard-subheader">
           <div className="common-tab configure-tab">
             <ul>
-              <li>Configure Anomoly Detector for Selected KPI</li>
+              <li>Configure Anomaly Detector for Selected KPI</li>
             </ul>
           </div>
         </div>
@@ -243,6 +259,18 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
               </div>
             )}
           </div>
+
+          <div className="form-group">
+            <label>Schedule</label>
+
+            <TimePicker
+              onChange={handleValueChange}
+              defaultValue={schedule}
+              className="time-picker"
+              focusOnOpen={true}
+              showSecond={false}
+            />
+          </div>
           <div className="form-group">
             <label>Expected Seasonality in Data</label>
             <div className="seasonality-setting">
@@ -258,7 +286,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     onSeasonalityChange(e);
                   }}
                 />
-                <label for="monthly">Monthly</label>
+                <label htmlFor="monthly">Monthly</label>
               </div>
               <div className="form-check check-box">
                 <input
@@ -272,8 +300,9 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     onSeasonalityChange(e);
                   }}
                 />
-                <label for="weekly">Weekly</label>
+                <label htmlFor="weekly">Weekly</label>
               </div>
+
               <div className="form-check check-box">
                 <input
                   className="form-check-input"
@@ -286,7 +315,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     onSeasonalityChange(e);
                   }}
                 />
-                <label for="daily">Daily</label>
+                <label htmlFor="daily">Daily</label>
               </div>
             </div>
           </div>

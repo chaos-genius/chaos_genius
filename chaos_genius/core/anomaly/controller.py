@@ -54,6 +54,18 @@ class AnomalyDetectionController(object):
             self.debug = False
         self.slack = self.kpi_info["anomaly_params"].get("slack", 3)
 
+        #FIXME: temporary fix
+        # if both period and anomaly period are present, precedence is
+        # given to anomaly period
+        if 'anomaly_period' in self.kpi_info['anomaly_params']:
+            self.kpi_info['anomaly_params']['period'] = self.\
+                kpi_info['anomaly_params']['anomaly_period']
+        # if both frequency and ts_frequency are present precedence is
+        # given to frequency
+        if 'frequency' in self.kpi_info['anomaly_params']:
+            self.kpi_info['anomaly_params']['ts_frequency'] = self.\
+                kpi_info['anomaly_params']['frequency']
+
     def _load_anomaly_data(self) -> pd.DataFrame:
         """Load KPI data, preprocess it and return it for anomaly detection.
 

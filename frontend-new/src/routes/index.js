@@ -98,7 +98,7 @@ const Routes = () => (
     />
     <PrivateRouteWithSidebar
       exact
-      path="/alerts/new/kpi-alert"
+      path={['/alerts/new/kpi-alert', '/alerts/edit/kpi-alert/:id']}
       component={(props) => <AddKpiAlert {...props} />}
     />
     <PrivateRouteWithSidebar

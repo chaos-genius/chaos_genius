@@ -179,13 +179,13 @@ class RootCauseAnalysisController:
     def _process_rca_output(self, impact_table):
         rename_dict = {
             'string': "subgroup",
-            f"size_g1": "g1_size",
-            f"val_g1": "g1_agg",
-            f"count_g1": "g1_count",
-            f"size_g2": "g2_size",
-            f"val_g2": "g2_agg",
-            f"count_g2": "g2_count",
-            f"impact": "impact",
+            "size_g1": "g1_size",
+            "val_g1": "g1_agg",
+            "count_g1": "g1_count",
+            "size_g2": "g2_size",
+            "val_g2": "g2_agg",
+            "count_g2": "g2_count",
+            "impact": "impact",
             "id": "id",
             "parentId": "parentId",
         }
@@ -194,9 +194,9 @@ class RootCauseAnalysisController:
         df = df.fillna(np.nan).replace([np.nan], [None])
         return df.to_dict(orient="records")
 
-    def _get_rca(self, rca, dimension=None):
-        impact_table, impact_table_col_map = rca.get_impact_rows_with_columns(
-            dimension)
+    def _get_rca(self, rca, dimension=None, timeline="mom"):
+        impact_table = rca.get_impact_rows(dimension)
+        impact_table_col_map = rca.get_impact_column_map(timeline)
         impact_table = self._process_rca_output(impact_table)
 
         waterfall_table = rca.get_waterfall_table_rows(dimension)
@@ -212,10 +212,12 @@ class RootCauseAnalysisController:
             }
         }
 
-    def _get_htable(self, rca, dimension=None):
+    def _get_htable(self, rca, dimension=None, timeline="mom"):
         htable = rca.get_hierarchical_table(dimension)
+        impact_table_col_map = rca.get_impact_column_map(timeline)
         return {
-            'data_table': self._process_rca_output(htable)
+            'data_table': self._process_rca_output(htable),
+            "data_columns": impact_table_col_map
         }
 
     def compute(self):  # sourcery skip: merge-list-append
@@ -241,7 +243,7 @@ class RootCauseAnalysisController:
             for dim in dims:
                 # RCA
                 try:
-                    rca_data = self._get_rca(rca, dim)
+                    rca_data = self._get_rca(rca, dim, timeline)
                     output.append(
                         self._output_to_row("rca", rca_data, timeline, dim))
                 except:
@@ -249,7 +251,7 @@ class RootCauseAnalysisController:
                 # Hierarchical Table
                 if dim is not None:
                     try:
-                        htable_data = self._get_htable(rca, dim)
+                        htable_data = self._get_htable(rca, dim, timeline)
                         output.append(
                             self._output_to_row("htable", htable_data, timeline, dim))
                     except:

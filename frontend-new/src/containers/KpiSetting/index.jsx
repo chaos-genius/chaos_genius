@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 
 import rightarrow from '../../assets/images/rightarrow.svg';
 
@@ -21,7 +21,7 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
   });
   const [kpi, setKpi] = useState('');
   const [analystics, setAnalystics] = useState(false);
-
+  const kpiId = useParams().id;
   useEffect(() => {
     getAllDashboardSidebar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -39,15 +39,17 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
   };
 
   useEffect(() => {
-    if (sidebarList && sidebarList.length !== 0) {
+    if (sidebarList && sidebarList.length !== 0 && onboarding) {
       setKpi(sidebarList[0]?.id);
-      if (!onboarding) {
-        window.history.pushState(
-          '',
-          '',
-          `/#/kpi/settings/${sidebarList[0]?.id}`
-        );
-      }
+      // if (!onboarding) {
+      //   window.history.pushState(
+      //     '',
+      //     '',
+      //     `/#/kpi/settings/${sidebarList[0]?.id}`
+      //   );
+      // }
+    } else if (sidebarList && sidebarList.length !== 0) {
+      setKpi(kpiId);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

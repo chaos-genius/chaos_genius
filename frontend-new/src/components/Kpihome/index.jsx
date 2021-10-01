@@ -117,7 +117,6 @@ const Kpihome = () => {
           text: ''
         },
         yAxis: {
-          // type: 'value',
           step: 1,
           title: '',
           gridLineWidth: 0,
@@ -142,7 +141,6 @@ const Kpihome = () => {
             data: line.map((linedata) => linedata.value),
             marker: {
               radius: 0,
-              // fillColor: '#E96560',
               states: {
                 hover: {
                   enabled: false

@@ -18,17 +18,17 @@ import { getDashboardSidebar } from '../../redux/actions';
 const Dashboard = () => {
   const dispatch = useDispatch();
   const history = useHistory();
-  const kpi = useParams().kpi;
-  const [active, setActive] = useState('');
-  //const [kpi, setKpi] = useState();
-  const [kpiAggregate, SetKpiAggregate] = useState('');
-  const [tab, setTabs] = useState('autorca');
 
   const location = history.location.pathname.split('/');
+  const kpi = useParams().kpi;
 
   const { sidebarLoading, sidebarList } = useSelector((state) => {
     return state.sidebar;
   });
+
+  const [active, setActive] = useState('');
+  const [kpiAggregate, SetKpiAggregate] = useState('');
+  const [tab, setTabs] = useState('autorca');
 
   useEffect(() => {
     getAllDashboardSidebar();
@@ -89,7 +89,6 @@ const Dashboard = () => {
               <FilterWithTab
                 tabs={tab}
                 kpi={kpi}
-                //setKpi={setKpi}
                 data={sidebarList}
                 setActive={setActive}
                 SetKpiAggregate={SetKpiAggregate}
@@ -118,10 +117,7 @@ const Dashboard = () => {
                     </ul>
                   </div>
                   <Link to={`/kpi/settings/${kpi}`}>
-                    <div
-                      className="common-option"
-                      // onClick={() => onSettingClick('settings')}
-                    >
+                    <div className="common-option">
                       <button className="btn grey-button">
                         <img src={Setting} alt="Setting" />
                         <span>Settings</span>

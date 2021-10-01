@@ -23,7 +23,7 @@ export const CustomContent = ({ header, description, failed }) => (
         )}
       </div>
     )}
-    {description && <div>{description}</div>}
+    {description && <div className="toaster-description">{description}</div>}
   </div>
 );
 

@@ -17,7 +17,6 @@ import Moreactive from '../../assets/images/more-active.svg';
 import Edit from '../../assets/images/edit.svg';
 import EditActive from '../../assets/images/datasourceedit-active.svg';
 // import DeleteActive from '../../assets/images/delete-active.svg';
-// import Close from '../../assets/images/close.svg';
 
 import { useDispatch } from 'react-redux';
 

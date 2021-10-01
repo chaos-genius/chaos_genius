@@ -3,15 +3,16 @@ import { Link } from 'react-router-dom';
 
 import { useDispatch, useSelector } from 'react-redux';
 
+import { useToast } from 'react-toast-wnm';
+
 import Plus from '../../assets/images/plus.svg';
 import Frame from '../../assets/images/table/channelconfig.svg';
+import { CustomContent, CustomActions } from '../../utils/toast-helper';
 
 import AlertTable from '../../components/AlertTable';
 
 import './alerts.scss';
 import AlertFilter from '../../components/AlertFilter';
-
-import { toastMessage } from '../../utils/toast-helper';
 
 import { getAllAlerts } from '../../redux/actions';
 
@@ -25,8 +26,11 @@ const RESET_ACTION = {
 const RESET_ENABLE_DISABLE_DATA = {
   type: 'RESET_ENABLE_DISABLE_DATA'
 };
+
 const Alerts = () => {
   const dispatch = useDispatch();
+
+  const toast = useToast();
 
   const { alertLoading, alertList, kpiAlertEnableData, kpiAlertDisableData } =
     useSelector((state) => state.alert);
@@ -56,17 +60,63 @@ const Alerts = () => {
     if (kpiAlertDisableData && kpiAlertDisableData.status === 'success') {
       // setIsOpen(false);
       setData((prev) => !prev);
-      toastMessage({ type: 'success', message: kpiAlertDisableData.message });
+
+      customToast({
+        type: 'success',
+        header: 'Successfully Disabled',
+        description: kpiAlertDisableData.message
+      });
     } else if (kpiAlertDisableData && kpiAlertDisableData === 'failure') {
-      toastMessage({ type: 'error', message: kpiAlertDisableData.message });
+      customToast({
+        type: 'error',
+        header: 'Failed to disable',
+        description: kpiAlertDisableData.message
+      });
     } else if (kpiAlertEnableData && kpiAlertEnableData.status === 'success') {
       setData((prev) => !prev);
-      toastMessage({ type: 'success', message: kpiAlertEnableData.message });
+
+      customToast({
+        type: 'success',
+        header: 'Successfully Enabled',
+        description: kpiAlertEnableData.message
+      });
     } else if (kpiAlertEnableData && kpiAlertEnableData.status === 'failure') {
-      toastMessage({ type: 'error', message: kpiAlertEnableData.message });
+      customToast({
+        type: 'error',
+        header: 'Failed to Enable',
+        description: kpiAlertEnableData.message
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiAlertDisableData, kpiAlertEnableData]);
+
+  const customToast = (data) => {
+    const { type, header, description } = data;
+    toast({
+      autoDismiss: true,
+      enableAnimation: true,
+      delay: 5000,
+      backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
+      borderRadius: '6px',
+      color: '#222222',
+      position: 'bottom-right',
+      minWidth: '240px',
+      width: 'auto',
+      boxShadow: '4px 6px 32px -2px rgba(226, 226, 234, 0.24)',
+      padding: '17px 14px',
+      height: 'auto',
+      border: type === 'success' ? '1px solid #60ca9a' : '1px solid #FEF6F5',
+      type: type,
+      actions: <CustomActions />,
+      content: (
+        <CustomContent
+          header={header}
+          description={description}
+          failed={type === 'success' ? false : true}
+        />
+      )
+    });
+  };
 
   const searchAlert = () => {
     const options = {

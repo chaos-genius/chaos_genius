@@ -14,7 +14,9 @@ import Fail from '../../assets/images/fail.svg';
 
 import '../../assets/styles/addform.scss';
 
-import { toastMessage } from '../../utils/toast-helper';
+import { useToast } from 'react-toast-wnm';
+
+import { CustomContent, CustomActions } from '../../utils/toast-helper';
 
 import {
   getAllKpiExplorerForm,
@@ -62,6 +64,8 @@ const customSingleValue = ({ data }) => (
 
 const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   const dispatch = useDispatch();
+
+  const toast = useToast();
 
   const history = useHistory();
   const data = history.location.pathname.split('/');
@@ -209,6 +213,33 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       </>
     );
   };
+  const customToast = (data) => {
+    const { type, header, description } = data;
+    toast({
+      autoDismiss: true,
+      enableAnimation: true,
+      delay: 5000,
+      backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
+      borderRadius: '6px',
+      color: '#222222',
+      position: 'bottom-right',
+      minWidth: '240px',
+      width: 'auto',
+      boxShadow: '4px 6px 32px -2px rgba(226, 226, 234, 0.24)',
+      padding: '17px 14px',
+      height: 'auto',
+      border: type === 'success' ? '1px solid #60ca9a' : '1px solid #FEF6F5',
+      type: type,
+      actions: <CustomActions />,
+      content: (
+        <CustomContent
+          header={header}
+          description={description}
+          failed={type === 'success' ? false : true}
+        />
+      )
+    });
+  };
 
   useEffect(() => {
     if (kpiSubmit && kpiSubmit.status === 'success' && onboarding === true) {
@@ -219,48 +250,70 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       kpiSubmit.status === 'failure' &&
       onboarding === true
     ) {
-      toastMessage({ type: 'error', message: 'Failed to Added' });
+      customToast({
+        type: 'error',
+        header: 'Failed to Add',
+        description: kpiSubmit.error
+      });
     }
     if (
       kpiUpdateData &&
       kpiUpdateData.status === 'success' &&
       onboarding !== true
     ) {
-      //history.push('/kpiexplorer');
-      toastMessage({ type: 'success', message: 'Successfully updated' });
+      customToast({
+        type: 'success',
+        header: 'Successfully updated',
+        description: kpiUpdateData.message
+      });
     } else if (
       kpiUpdateData &&
       kpiUpdateData.status === 'failed' &&
       onboarding !== true
     ) {
-      toastMessage({ type: 'error', message: 'Failed to update' });
+      customToast({
+        type: 'error',
+        header: 'Failed to update',
+        description: kpiUpdateData.message
+      });
     }
     if (kpiSubmit && kpiSubmit.status === 'success' && data[2] === 'add') {
       history.push('/kpiexplorer');
-      toastMessage({ type: 'success', message: 'Successfully Added' });
+      customToast({
+        type: 'success',
+        header: 'Successfully Added',
+        description: kpiSubmit.message
+      });
     } else if (
       kpiSubmit &&
       kpiSubmit.status === 'failure' &&
       data[2] === 'add'
     ) {
-      toastMessage({ type: 'error', message: 'Failed to Added' });
+      customToast({
+        type: 'error',
+        header: 'Failed to Added',
+        description: kpiSubmit.error
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSubmit, kpiUpdateData]);
 
   useEffect(() => {
     if (testQueryData && testQueryData?.status === 'success') {
-      toastMessage({
+      customToast({
         type: 'success',
-        message: 'Test Connection Success'
+        header: 'Test Connection Success',
+        description: testQueryData.msg
       });
     }
     if (testQueryData && testQueryData?.status === 'failure') {
-      toastMessage({
+      customToast({
         type: 'error',
-        message: 'Test Connection Failed'
+        header: 'Test Connection Failed',
+        description: testQueryData.msg
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [testQueryData]);
 
   const fieldData = () => {

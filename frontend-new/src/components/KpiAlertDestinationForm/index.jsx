@@ -12,7 +12,9 @@ import Edit from '../../assets/images/disable-edit.svg';
 
 import './kpialertdestinationform.scss';
 import { createKpiAlert, updateKpiAlert } from '../../redux/actions';
-import { toastMessage } from '../../utils/toast-helper';
+import { useToast } from 'react-toast-wnm';
+
+import { CustomContent, CustomActions } from '../../utils/toast-helper';
 
 import ReactTagInput from '@pathofdev/react-tag-input';
 import '@pathofdev/react-tag-input/build/index.css';
@@ -55,6 +57,9 @@ const KpiAlertDestinationForm = ({
   kpiAlertMetaInfo
 }) => {
   const dispatch = useDispatch();
+
+  const toast = useToast();
+
   const [resp, setresp] = useState([]);
   const history = useHistory();
   const kpiId = useParams().id;
@@ -177,22 +182,66 @@ const KpiAlertDestinationForm = ({
       </>
     );
   };
+  const customToast = (data) => {
+    const { type, header, description } = data;
+    toast({
+      autoDismiss: true,
+      enableAnimation: true,
+      delay: 5000,
+      backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
+      borderRadius: '6px',
+      color: '#222222',
+      position: 'bottom-right',
+      minWidth: '240px',
+      width: 'auto',
+      boxShadow: '4px 6px 32px -2px rgba(226, 226, 234, 0.24)',
+      padding: '17px 14px',
+      height: 'auto',
+      border: type === 'success' ? '1px solid #60ca9a' : '1px solid #FEF6F5',
+      type: type,
+      actions: <CustomActions />,
+      content: (
+        <CustomContent
+          header={header}
+          description={description}
+          failed={type === 'success' ? false : true}
+        />
+      )
+    });
+  };
 
   useEffect(() => {
     if (createKpiAlertData && createKpiAlertData.status === 'success') {
       history.push('/alerts');
-      toastMessage({ type: 'success', message: 'Successfully created' });
+
+      customToast({
+        type: 'success',
+        header: 'Successfully created',
+        description: createKpiAlertData.message
+      });
     } else if (createKpiAlertData && createKpiAlertData.status === 'failure') {
-      toastMessage({ type: 'error', message: 'Failed to create' });
+      customToast({
+        type: 'error',
+        header: 'Failed to create',
+        description: createKpiAlertData.message
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createKpiAlertData]);
 
   useEffect(() => {
     if (updateKpiAlertData && updateKpiAlertData.status === 'success') {
-      toastMessage({ type: 'success', message: 'Successfully updated' });
+      customToast({
+        type: 'success',
+        header: 'Successfully updated',
+        description: updateKpiAlertData.message
+      });
     } else if (updateKpiAlertData && updateKpiAlertData.status === 'failure') {
-      toastMessage({ type: 'error', message: 'Failed to update' });
+      customToast({
+        type: 'error',
+        header: 'Failed to update',
+        description: updateKpiAlertData.message
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updateKpiAlertData]);
@@ -211,7 +260,8 @@ const KpiAlertDestinationForm = ({
   };
 
   const validateEmail = (email) => {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    const re =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
   };
 
@@ -330,16 +380,15 @@ const KpiAlertDestinationForm = ({
           /> */}
             <ReactTagInput
               tags={resp}
-              // disabled={true}
-              // readOnly={true}
               placeholder="Add Recepients"
               onChange={(newTags) => handleChange(newTags)}
               validator={(value) => {
                 const isEmail = validateEmail(value);
                 if (!isEmail) {
-                  toastMessage({
+                  customToast({
                     type: 'error',
-                    message: 'Please enter an valid email address'
+                    header: 'Failed to enter',
+                    description: 'Please enter an valid email address'
                   });
                 }
                 // Return boolean to indicate validity

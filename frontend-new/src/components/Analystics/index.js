@@ -18,8 +18,9 @@ import './analystics.scss';
 import { kpiSettingSetup, kpiEditSetup } from '../../redux/actions';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { toastMessage } from '../../utils/toast-helper';
-import { ToastContainer, toast } from 'react-toastify';
+import { useToast } from 'react-toast-wnm';
+
+import { CustomContent, CustomActions } from '../../utils/toast-helper';
 
 const modalOptions = [
   { value: 'prophet', label: 'Prophet' },
@@ -41,6 +42,8 @@ const frequencyOptions = [
 
 const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   const dispatch = useDispatch();
+
+  const toast = useToast();
 
   const [modelName, setModalName] = useState('');
   const [Sensitivity, setSensitivity] = useState('');
@@ -84,14 +87,54 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
       kpiSettingData.status === 'failure' &&
       onboarding
     ) {
-      toastMessage({ type: 'error', message: 'Failed to Add' });
+      customToast({
+        type: 'error',
+        header: 'Failed to Add',
+        description: kpiSettingData.msg
+      });
     } else if (kpiSettingData && kpiSettingData.status === 'success') {
-      toastMessage({ type: 'success', message: 'Successfully updated' });
+      customToast({
+        type: 'success',
+        header: 'Successfully updated',
+        description: kpiSettingData.msg
+      });
     } else if (kpiSettingData && kpiSettingData.status === 'failure') {
-      toastMessage({ type: 'error', message: 'Failed to update' });
+      customToast({
+        type: 'error',
+        header: 'Failed to update',
+        description: kpiSettingData.msg
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSettingData]);
+
+  const customToast = (data) => {
+    const { type, header, description } = data;
+    toast({
+      autoDismiss: true,
+      enableAnimation: true,
+      delay: 5000,
+      backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
+      borderRadius: '6px',
+      color: '#222222',
+      position: 'bottom-right',
+      minWidth: '240px',
+      width: 'auto',
+      boxShadow: '4px 6px 32px -2px rgba(226, 226, 234, 0.24)',
+      padding: '17px 14px',
+      height: 'auto',
+      border: type === 'success' ? '1px solid #60ca9a' : '1px solid #FEF6F5',
+      type: type,
+      actions: <CustomActions />,
+      content: (
+        <CustomContent
+          header={header}
+          description={description}
+          failed={type === 'success' ? false : true}
+        />
+      )
+    });
+  };
 
   const onSettingSave = () => {
     var obj = { ...error };
@@ -357,10 +400,6 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
             </div>
           </div>
         </Modal>
-        <ToastContainer
-          position={toast.POSITION.BOTTOM_RIGHT}
-          autoClose={5000}
-        />
       </>
     );
   }

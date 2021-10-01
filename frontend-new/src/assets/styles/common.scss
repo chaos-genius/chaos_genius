@@ -1080,6 +1080,7 @@ a:hover {
           letter-spacing: $letter-spacing;
           color: $black_variation-2;
           margin-right: 35px;
+          // margin-top: 25px;
         }
       }
     }
@@ -1101,16 +1102,22 @@ a:hover {
   //   left: 0;
   //   border-bottom: 1px solid $green;
   //   width: 100%;
-  //   padding: 5px 20px;
+  //   padding: 8px 5px;
+  //   img {
+  //     margin-right: 8px;
+  //   }
   // }
   // .Toastify__close-button {
   //   position: absolute;
-  //   top: -19px;
+  //   top: -27px;
   //   right: 0;
-  //   padding-right: 15px;
+  //   padding-right: 10px;
   // }
   // .Toastify__toast-body {
   //   margin-top: 15px;
+  // }
+  // .Toastify__toast-icon {
+  //   display: none;
   // }
 }
 .range-selector {
@@ -1165,4 +1172,32 @@ a:hover {
     color: $grey_variation-3;
     margin-top: 11px;
   }
+}
+
+.toaster-popup {
+  font-weight: $font-weight-400;
+  font-size: $font-size-14;
+  line-height: $line-height-16;
+  letter-spacing: $letter-spacing;
+  color: $black_variation-2;
+  min-width: 250px;
+  img {
+    margin-right: 8px;
+  }
+  .toaster-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  h3 {
+    font-weight: $font-weight-400;
+    font-size: $font-size-14;
+    line-height: $line-height-16;
+    letter-spacing: $letter-spacing;
+    color: $black_variation-2;
+  }
+}
+.toaster-popup-close {
+  width: 10px;
+  height: 10px;
 }

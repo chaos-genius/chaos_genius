@@ -367,7 +367,6 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
           sourceDefinitionId: sourceDefinitionId
         }
       };
-      console.log('Source Definition id:', payload);
       dispatch(createDataSource(payload));
     }
   };
@@ -497,7 +496,6 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
         {path[2] === 'edit' ? (
           <div className="form-action">
             <button
-              // className="btn black-button"
               className={
                 updateDatasourceLoading
                   ? 'btn black-button btn-loading'

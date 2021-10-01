@@ -54,7 +54,7 @@ Backend
 
 2. Shut down all containers with `Ctrl + v` in the same terminal window or run `docker-compose -f docker-compose-img.yml down` in a different terminal window.
 
-3. Subsequently (After the first-time setup) use `./start_cg` or `docker-compose -f docker-compose-img.yml up` to start up the services.
+3. Subsequently (After the first-time setup) use `./start_cg.sh` or `docker-compose -f docker-compose-img.yml up` to start up the services.
 
 4. Remove all created containers with `docker-compose -f docker-compose-img.yml rm`.
 

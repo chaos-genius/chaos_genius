@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional, Tuple, cast
 from flask import Blueprint, current_app, jsonify, request
 import pandas as pd
 from sqlalchemy.orm.attributes import flag_modified
+from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
 
 from chaos_genius.extensions import cache
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
@@ -374,26 +375,75 @@ ANOMALY_PARAMS_META = {
             "name": "anomaly_period",
             "is_editable": False,
             "is_sensitive": False,
+            "type": "integer",
         },
         {
             "name": "model_name",
             "is_editable": False,
             "is_sensitive": False,
+            "type": "select",
+            "options": [
+                {
+                    "value": key,
+                    "name": value,
+                } for key, value in MODEL_NAME_MAPPING
+            ]
         },
         {
             "name": "sensitivity",
             "is_editable": True,
             "is_sensitive": False,
+            "type": "select",
+            "options": [
+                {
+                    "value": "high",
+                    "name": "High",
+                },
+                {
+                    "value": "medium",
+                    "name": "Medium",
+                },
+                {
+                    "value": "low",
+                    "name": "Low",
+                }
+            ]
         },
         {
             "name": "seasonality",
             "is_editable": False,
             "is_sensitive": False,
+            "type": "multiselect",
+            "options": [
+                {
+                    "value": "M",
+                    "name": "Monthly",
+                },
+                {
+                    "value": "W",
+                    "name": "Weekly",
+                },
+                {
+                    "value": "D",
+                    "name": "Daily",
+                }
+            ]
         },
         {
             "name": "frequency",
             "is_editable": False,
             "is_sensitive": False,
+            "type": "select",
+            "options": [
+                {
+                    "value": "D",
+                    "name": "Daily",
+                },
+                {
+                    "value": "H",
+                    "name": "Hourly",
+                }
+            ]
         },
         {
             "name": "scheduler_params",
@@ -402,11 +452,13 @@ ANOMALY_PARAMS_META = {
                     "name": "time",
                     "is_editable": True,
                     "is_sensitive": False,
+                    "type": "time",
                 },
             ],
         },
     ],
 }
+
 
 def validate_partial_anomaly_params(anomaly_params: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
     """Check if given *partial* anomaly parameters have valid keys and values.

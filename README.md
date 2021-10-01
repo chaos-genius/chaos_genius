@@ -49,18 +49,24 @@ Backend
 ### From Image (Recommended)
 
 #### Linux
+
+##### Removing revious build's residual data
+
+
+##### Setup And Starting Services
 1. Run the first time setup script with`./setup-docker.sh`
    This will fetch the dependencies and run all containers with airbyte and other dependencies.
 
-2. Shut down all containers with `Ctrl + v` in the same terminal window or run `docker-compose -f docker-compose-img.yml down` in a different terminal window.
+2. Shut down all containers with `Ctrl + C` in the same terminal window or run `docker-compose -f docker-compose-img.yml down` in a different terminal window.
 
 3. Subsequently (After the first-time setup) use `./start_cg.sh` or `docker-compose -f docker-compose-img.yml up` to start up the services.
 
-4. Remove all created containers with `docker-compose -f docker-compose-img.yml rm`.
+##### Cleaning Up
+1. Remove all created containers with `docker-compose -f docker-compose-img.yml rm`.
 
-5. Delete all data from volumes with `docker volume prune`.
+2. Delete all data from volumes with `docker volume prune`.
    Make sure you don't have data from other containers. If yes, then we need to do this manually.
 
-6. Clear residual data and remove related docker images with `./docker-cleanup.sh`. 
+3. Clear residual data and remove related docker images with `./docker-cleanup.sh`. 
 
 NOTE: In the case of 'permission denied' errors while running the scripts, use `sudo chmod +x <script-name>` to give the script executable permissions and try again. If the error persists, use `sudo ./<script name>` to run the scripts.

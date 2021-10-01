@@ -386,7 +386,7 @@ ANOMALY_PARAMS_META = {
                 {
                     "value": key,
                     "name": value,
-                } for key, value in MODEL_NAME_MAPPING
+                } for key, value in MODEL_NAME_MAPPING.values()
             ]
         },
         {

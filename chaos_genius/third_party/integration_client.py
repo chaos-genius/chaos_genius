@@ -85,13 +85,20 @@ class ThirdPartyClient(object):
         self.destination_conf = conf
 
     def check_sources_availability(self, sources_list):
+        """check and return True if all the available sources have been setup properly
+        False Otherwise
+        """
+        cg_print("CHECKING FOR SOURCES AVAILABILITY")
         for source in sources_list:
                 source_specs = self.get_source_def_specs(source["sourceDefinitionId"])
                 try:
                     if "connectionSpecification" not in list(source_specs.keys()):
+                        cg_print("SOURCES NOT AVAILABLE , RETRYING IN 60 SECONDS")
                         return False
                 except:
+                    cg_print("SOURCES NOT AVAILABLE , RETRYING IN 60 SECONDS")
                     return False
+        cg_print("ALL SOURCES ARE READY")
         return True
 
 

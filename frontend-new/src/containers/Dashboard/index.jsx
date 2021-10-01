@@ -28,7 +28,7 @@ const Dashboard = () => {
 
   const [active, setActive] = useState('');
   const [kpiAggregate, SetKpiAggregate] = useState('');
-  const [tab, setTabs] = useState('autorca');
+  const [tab, setTabs] = useState('deepdrills');
 
   useEffect(() => {
     getAllDashboardSidebar();
@@ -104,8 +104,8 @@ const Dashboard = () => {
                   <div className="common-tab">
                     <ul>
                       <li
-                        className={tab === 'autorca' ? 'active' : ''}
-                        onClick={() => onTabClick('autorca')}>
+                        className={tab === 'deepdrills' ? 'active' : ''}
+                        onClick={() => onTabClick('deepdrills')}>
                         DeepDrills
                       </li>
 
@@ -129,7 +129,7 @@ const Dashboard = () => {
             ) : (
               ''
             )}
-            {tab === 'autorca' && kpi && active && (
+            {tab === 'deepdrills' && kpi && active && (
               <Dashboardgraph
                 kpi={kpi}
                 kpiName={active}

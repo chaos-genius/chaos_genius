@@ -595,7 +595,6 @@ def validate_partial_scheduler_params(scheduler_params: Dict[str, Any]) -> Tuple
     return "", scheduler_params
 
 
-<<<<<<< HEAD
 @blueprint.route("/<int:kpi_id>/settings", methods=["GET"])
 # @cache.memoize(timeout=30000)
 def anomaly_settings_status(kpi_id):

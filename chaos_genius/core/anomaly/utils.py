@@ -105,7 +105,7 @@ def get_last_date_in_db(
     kpi_id: int,
     series: str,
     subgroup: str = None
-) -> Any | None:
+) -> Any or None:
     """Get last date for which anomaly was computed.
 
     :param kpi_id: kpi id to check for

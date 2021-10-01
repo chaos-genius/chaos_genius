@@ -112,9 +112,6 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
                         <td className="date-column-formated">
                           {formatDate(kpi.created_at) || '-'}
                         </td>
-                        {/* <td className="date-column-formated">
-                          {formatDate(kpi.last_sync) || '-'}
-                        </td> */}
                         <td>
                           {/* dropdown */}
 

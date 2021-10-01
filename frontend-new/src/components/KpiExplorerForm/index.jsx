@@ -213,6 +213,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       </>
     );
   };
+
   const customToast = (data) => {
     const { type, header, description } = data;
     toast({
@@ -397,16 +398,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     }
   };
 
-  // useEffect(() => {
-  //   if (kpiField) {
-  //     tableName();
-  //   }
-  //   if (option.tableoption) {
-  //     console.log('Option :', option.tableoption.value);
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [option.tableoption]);
-
   const tableName = (e) => {
     if (kpiField) {
       setErrorMsg({ tablename: false });
@@ -565,6 +556,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     };
     dispatch(getTestQuery(data));
   };
+
+  /* This is add filter function code */
 
   // const handleAddClick = () => {
   //   setInputList([...inputList, { country: '', operator: '', value: '' }]);
@@ -862,9 +855,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               </div>
             ) : null}
           </div>
-          {/* {tableAdditional.tabledimension === true ? (
-            
-          ) : null} */}
 
           <div className="form-group">
             <label>Dimensions *</label>
@@ -949,6 +939,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
 
           {/* add option form */}
           <div className="add-options-wrapper">
+            {/*Add filter code*/}
             {/* <div
               className="add-options"
               onClick={() =>
@@ -960,19 +951,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               }>
               <label>+ Add Filters</label>
             </div> */}
-
-            {/* {tableAdditional.tabledimension === false ? (
-              <div
-                className="add-options"
-                onClick={() =>
-                  setTableAdditional({
-                    ...tableAdditional,
-                    tabledimension: true
-                  })
-                }>
-                <label> + Add Dimensions</label>
-              </div>
-            ) : null} */}
           </div>
 
           <div className="form-action">

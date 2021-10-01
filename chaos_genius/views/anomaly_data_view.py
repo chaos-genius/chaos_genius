@@ -598,5 +598,12 @@ def get_anomaly_end_date(kpi_id: int):
     anomaly_end_date = AnomalyDataOutput.query.filter(
             AnomalyDataOutput.kpi_id == kpi_id
         ).order_by(AnomalyDataOutput.data_datetime.desc()).first()
-    print(anomaly_end_date.as_dict['data_datetime'])
-    return anomaly_end_date.as_dict['data_datetime']
+    
+    try:
+        anomaly_end_date = anomaly_end_date.as_dict['data_datetime']
+    except AttributeError:
+        anomaly_end_date = None
+    except Exception as err:
+        current_app.logger.info(f"Error Found: {err}")
+
+    return anomaly_end_date

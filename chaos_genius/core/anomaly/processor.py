@@ -3,8 +3,8 @@ import datetime
 
 import pandas as pd
 
-from chaos_genius.core.anomaly.constants import FREQUENCY_DELTA, MODEL_MAPPER
-from chaos_genius.core.anomaly.models import AnomalyModel
+from chaos_genius.core.anomaly.constants import FREQUENCY_DELTA
+from chaos_genius.core.anomaly.models import MODEL_MAPPER, AnomalyModel
 from chaos_genius.core.anomaly.utils import bound_between, get_timedelta
 
 ZSCORE_UPPER_BOUND = 2.5

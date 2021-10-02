@@ -196,7 +196,11 @@ class AnomalyAlertController:
         if getattr(anomaly, 'severity') < self.alert_info['severity_cutoff_score']:
             return f"The anomaliy's severity score is below the threshold (KPI ID - {kpi_id})"
 
-        return self.send_alert_email(anomaly)
+        if self.alert_info["alert_channel"] == "email":
+            return self.send_alert_email(anomaly)
+        elif self.alert_info["alert_channel"] == "slack":
+            return self.send_slack_alert(anomaly)
+ 
         
     def send_alert_email(self, anomaly):
 
@@ -216,6 +220,8 @@ class AnomalyAlertController:
 
             return f"No receipent email available (KPI ID - {getattr(anomaly, 'kpi_id')})"
 
+    def send_slack_alert(self, anomaly):
+        pass
 
 class StaticKpiAlertController:
     def __init__(self, alert_info):

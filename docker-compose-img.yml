@@ -184,7 +184,7 @@ services:
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
 
   chaosgenius-db:
-    image: postgres
+    image: postgres:13
     restart: always
     healthcheck:
       test: [ "CMD", "pg_isready", "-q", "-d", "chaosgenius_data", "-U", "postgres" ]

@@ -9,9 +9,10 @@ from chaos_genius.utils.io_helper import is_file_exists
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
+from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.alerts.email import send_static_alert_email
-
+from chaos_genius.alerts.slack import anomaly_alert_slack
 
 FREQUENCY_DICT = {
     "weekly": datetime.timedelta(days = 7, hours = 0, minutes = 0),
@@ -221,7 +222,22 @@ class AnomalyAlertController:
             return f"No receipent email available (KPI ID - {getattr(anomaly, 'kpi_id')})"
 
     def send_slack_alert(self, anomaly):
-        pass
+        alert_name = self.alert_info["alert_name"]
+        kpi_name = Kpi.get_by_id(self.alert_info["kpi"]).safe_dict['name']
+        data_source_name = DataSource.\
+            get_by_id(self.alert_info["data_source"]).safe_dict["name"]
+        alert_body = self.alert_info["alert_message"]
+        alert_body = alert_body + "\n" + f"The highest value *{round(getattr(anomaly, 'y'), 1)}* Occurred at *{str(getattr(anomaly, 'data_datetime'))}*"
+        alert_body = alert_body + "\n" + f"The expected range is *{round(getattr(anomaly, 'yhat_lower'), 2)}* to *{round(getattr(anomaly, 'yhat_upper'), 2)}*"
+        alert_body = alert_body + "\n" + f"The severity value of this anomaly was *{round(getattr(anomaly, 'severity'), 2)}*"
+        test = anomaly_alert_slack(
+            alert_name,
+            kpi_name,
+            data_source_name,
+            alert_body
+            )
+        message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
+        return message
 
 class StaticKpiAlertController:
     def __init__(self, alert_info):

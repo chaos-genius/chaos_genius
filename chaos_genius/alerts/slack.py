@@ -5,6 +5,38 @@ config = dotenv_values(".env")
 url = config.get("SLACK_WEBHOOK_URL")
 webhook = WebhookClient(url)
 
+def anomaly_alert_slack(alert_name, kpi_name, data_source_name, alert_body):
+	response = webhook.send(
+		text = f"Anomaly Alert: {kpi_name}",
+		blocks = [
+			{
+				"type": "header",
+				"text": {
+					"type": "plain_text",
+					"text": f"Alert: {alert_name}",
+					"emoji": True
+				}
+			},
+			{
+				"type": "section",
+				"text": {
+					"type": "mrkdwn",
+					"text": f"This is the alert generated from KPI *{kpi_name}* and Data Source *{data_source_name}*."
+				}
+			},
+			{
+				"type": "divider"
+			},
+			{
+				"type": "section",
+				"text": {
+						"type": "mrkdwn",
+						"text": f"{alert_body}"
+					}
+			},
+		]
+	)
+	return response.body
 
 def trigger_overall_kpi_stats(alert_name, kpi_name, data_source_name, alert_body, stats):
 	response = webhook.send(

@@ -13,6 +13,7 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import anomaly_alert_slack
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 FREQUENCY_DICT = {
     "weekly": datetime.timedelta(days = 7, hours = 0, minutes = 0),
@@ -179,7 +180,7 @@ class AnomalyAlertController:
 
         alert.update(commit=True, last_alerted=curr_date_time)
 
-        lower_limit_dt = curr_date_time - datetime.timedelta(hours = 72, minutes = 0) #TODO - the delta needs to be variable
+        lower_limit_dt = curr_date_time - check_time
 
         anomaly_data = AnomalyDataOutput.query.filter(
                                             AnomalyDataOutput.kpi_id == kpi_id,
@@ -208,18 +209,40 @@ class AnomalyAlertController:
         recipient_emails = self.alert_info["alert_channel_conf"].get("email", [])
         
         if recipient_emails:
-
-            subject = f"KPI Alert Notification: {self.alert_info['alert_name']} [ID - {self.alert_info['id']}] [KPI ID - {self.alert_info['kpi']}]"
-            message = self.alert_info["alert_message"]
-            message = message + '\n' + f"The highest value {round(getattr(anomaly, 'y'), 1)} Occurred at {str(getattr(anomaly, 'data_datetime'))}"
-            message = message + '\n' + f"The expected range is {round(getattr(anomaly, 'yhat_lower'), 2)} to {round(getattr(anomaly, 'yhat_upper'), 2)}"
-            message = message + '\n' + f"The severity value of this anomaly was {round(getattr(anomaly, 'severity'), 2)}"
-            test = send_static_alert_email(recipient_emails, subject, message, self.alert_info)
-
+            subject = f"KPI Alert Notification: {self.alert_info['alert_name']} [Alert ID - {self.alert_info['id']}]"
+            alert_message = self.alert_info["alert_message"]
+            time_of_anomaly = str(getattr(anomaly, 'data_datetime'))
+            highest_value = round(getattr(anomaly, 'y'), 1)
+            lower_bound = round(getattr(anomaly, 'yhat_lower'), 2)
+            upper_bound = round(getattr(anomaly, 'yhat_upper'), 2)
+            severity_value = round(getattr(anomaly, 'severity'), 2)
+            test = self.send_template_email('email_alert.html', 
+                                            recipient_emails, 
+                                            subject, 
+                                            alert_message = alert_message,
+                                            time_of_anomaly = time_of_anomaly,
+                                            highest_value = highest_value,
+                                            lower_bound = lower_bound, 
+                                            upper_bound = upper_bound,
+                                            severity_value = severity_value
+                                        )
             return f"Status for KPI ID - {getattr(anomaly, 'kpi_id')} : {test}"
         else:
 
             return f"No receipent email available (KPI ID - {getattr(anomaly, 'kpi_id')})"
+
+    def send_template_email(self, template, recipient_emails, subject, **kwargs):
+        """Sends an email using a template."""
+
+        path = os.path.join(os.path.dirname(__file__), 'email_templates')
+        env = Environment(
+            loader = FileSystemLoader(path),
+            autoescape = select_autoescape(['html', 'xml'])
+        )
+
+        template = env.get_template(template)
+        test = send_static_alert_email(recipient_emails, subject, template.render(**kwargs), self.alert_info)
+        return test
 
     def send_slack_alert(self, anomaly):
         alert_name = self.alert_info["alert_name"]

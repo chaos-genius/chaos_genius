@@ -49,9 +49,13 @@ Backend
 ### From Image (Recommended)
 
 #### Linux
+##### Prerequisites
+1. Make sure you have latest version of docker-compose (at least verison 1.28).
+2. Add `172.17.0.1   host.docker.internal` to your `/etc/hosts` file if not already present. This is crucial for Airbyte containers to work properly as they use 'host.docker.internal' as a host home.
 
-##### Removing revious build's residual data
-
+##### Removing previous build's residual data
+1. Run `./previous_data_cleanup` to clear previous build's data if not cleaned.
+2. Run `docker volume prune` to clear any volumes that might have been created in the previous build. Make sure you don't have data from other containers. If yes, then we need to do this manually.
 
 ##### Setup And Starting Services
 1. Run the first time setup script with`./setup-docker.sh`

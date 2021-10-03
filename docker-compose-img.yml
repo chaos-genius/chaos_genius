@@ -261,6 +261,7 @@ services:
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
     depends_on:
       - redis
+      - chaosgenius-db
 
 volumes:
   workspace:

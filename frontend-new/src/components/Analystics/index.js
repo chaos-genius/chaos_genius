@@ -52,9 +52,25 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
 
   const toast = useToast();
 
-  const [modelName, setModalName] = useState('');
-  const [Sensitivity, setSensitivity] = useState('');
-  const [frequency, setFrequency] = useState('');
+  const {
+    kpiEditData,
+    kpiEditLoading,
+    kpiSettingLoading,
+    kpiSettingData,
+    metaInfoData,
+    metaInfoLoading
+  } = useSelector((state) => {
+    return state.setting;
+  });
+
+  const { anomalySettingData } = useSelector((state) => {
+    return state.anomaly;
+  });
+
+  const [anomalyPeriod, setAnomalyPeriod] = useState(90);
+  const [modelName, setModalName] = useState({});
+  const [Sensitivity, setSensitivity] = useState({});
+  const [frequency, setFrequency] = useState({});
   const [seasonality, setSeasonality] = useState([]);
   const [isModalOpen, setModalOpen] = useState(false);
   const [edit, setEdit] = useState('');
@@ -74,26 +90,19 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     frequency: true,
     schedule: true
   });
+
+  const [sensitiveData, setSensitiveData] = useState({
+    anomaly_period: 0,
+    model_name: {},
+    sensitivity: {},
+    frequency: {}
+  });
+
   const [option, setOption] = useState({
     model_name: [],
     sensitivity: [],
     seasonality: [],
     frequency: []
-  });
-
-  const {
-    kpiEditData,
-    kpiEditLoading,
-    kpiSettingLoading,
-    kpiSettingData,
-    metaInfoData,
-    metaInfoLoading
-  } = useSelector((state) => {
-    return state.setting;
-  });
-
-  const { anomalySettingData } = useSelector((state) => {
-    return state.anomaly;
   });
 
   useEffect(() => {
@@ -236,7 +245,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     ) {
       const data = {
         anomaly_params: {
-          anomaly_period: 90,
+          anomaly_period: anomalyPeriod,
           model_name: modelName.value,
           sensitivity: Sensitivity.value,
           seasonality: seasonality,
@@ -265,9 +274,23 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     setSchedule(data);
   };
 
-  const onSaveInput = (name) => {};
+  const onSaveInput = (name) => {
+    setEnabled({ ...enabled, [name]: true });
+    if (name === 'model_name') {
+      setModalName(sensitiveData.model_name);
+    } else if (name === 'frequency') {
+      setFrequency(sensitiveData.frequency);
+    } else if (name === 'sensitivity') {
+      setSensitivity(sensitiveData.sensitivity);
+    } else if (name === 'anomaly_period') {
+      setAnomalyPeriod(sensitiveData.anomaly_period);
+    }
+  };
 
-  const onCancelInput = (name) => {};
+  const onCancelInput = (name) => {
+    setEnabled({ ...enabled, [name]: true });
+    setSensitiveData({ ...sensitiveData, [name]: {} });
+  };
 
   const editableStatus = (type) => {
     var status = '';
@@ -336,12 +359,40 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
             <label>Time Window</label>
             <div className="editable-field">
               <input
-                type="text"
+                type="number"
                 className="form-control"
                 name="anomaly_period"
                 placeholder="90 Days"
-                disabled
+                min="0"
+                value={
+                  enabled.anomaly_period
+                    ? anomalyPeriod
+                    : sensitiveData.anomaly_period
+                }
+                disabled={
+                  edit === 'completed'
+                    ? editableStatus('anomaly_period') === 'editable'
+                      ? false
+                      : editableStatus('anomaly_period') === 'sensitive'
+                      ? enabled.anomaly_period
+                      : true
+                    : false
+                }
+                onChange={(e) => {
+                  if (enabled.anomaly_period) {
+                    setAnomalyPeriod(e.target.value);
+                  } else {
+                    setSensitiveData({
+                      ...sensitiveData,
+                      anomaly_period: e.target.value
+                    });
+                  }
+                  setError({ ...error, anomaly_period: '' });
+                }}
               />
+              {edit === 'completed' &&
+                editableStatus('anomaly_period') === 'sensitive' &&
+                editAndSaveButton('anomaly_period')}
             </div>
           </div>
           <div className="form-group">
@@ -362,7 +413,9 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                 options={option.model_name}
                 classNamePrefix="selectcategory"
                 placeholder="select"
-                value={modelName}
+                value={
+                  enabled.model_name ? modelName : sensitiveData.model_name
+                }
                 isSearchable={false}
                 isDisabled={
                   edit === 'completed'
@@ -374,7 +427,14 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     : false
                 }
                 onChange={(e) => {
-                  setModalName(e);
+                  if (enabled.model_name) {
+                    setModalName(e);
+                  } else {
+                    setSensitiveData({
+                      ...sensitiveData,
+                      model_name: e
+                    });
+                  }
                   setError({ ...error, modelName: '' });
                 }}
               />
@@ -407,7 +467,9 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
               <Select
                 options={option.sensitivity}
                 classNamePrefix="selectcategory"
-                value={Sensitivity}
+                value={
+                  enabled.sensitivity ? Sensitivity : sensitiveData.sensitivity
+                }
                 isDisabled={
                   edit === 'completed'
                     ? editableStatus('sensitivity') === 'editable'
@@ -420,7 +482,11 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                 placeholder="select"
                 isSearchable={false}
                 onChange={(e) => {
-                  setSensitivity(e);
+                  if (enabled.sensitivity) {
+                    setSensitivity(e);
+                  } else {
+                    setSensitiveData({ ...sensitiveData, sensitivity: e });
+                  }
                   setError({ ...error, sensitivity: '' });
                 }}
               />
@@ -455,7 +521,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                 classNamePrefix="selectcategory"
                 placeholder="select"
                 isSearchable={false}
-                value={frequency}
+                value={enabled.frequency ? frequency : sensitiveData.frequency}
                 isDisabled={
                   edit === 'completed'
                     ? editableStatus('frequency') === 'editable'
@@ -466,13 +532,17 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     : false
                 }
                 onChange={(e) => {
-                  setFrequency(e);
+                  if (enabled.frequency) {
+                    setFrequency(e);
+                  } else {
+                    setSensitiveData({ ...sensitiveData, frequency: e });
+                  }
                   setError({ ...error, frequency: '' });
                 }}
               />
               {edit === 'completed' &&
-                editableStatus('model_name') === 'sensitive' &&
-                editAndSaveButton('model_name')}
+                editableStatus('frequency') === 'sensitive' &&
+                editAndSaveButton('frequency')}
             </div>
             {error.frequency && (
               <div className="connection__fail">

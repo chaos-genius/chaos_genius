@@ -1,3 +1,16 @@
+from chaos_genius.settings import {
+SOURCE_GOOGLE_ANALYTICS
+SOURCE_GOOGLE_SHEETS
+SOURCE_MYSQL
+SOURCE_POSTGRES
+SOURCE_SHOPIFY
+SOURCE_STRIPE
+SOURCE_GOOGLE_ADS
+SOURCE_FACEBOOK_ADS
+SOURCE_BING_ADS
+SOURCE_GOOGLE_BIG_QUERY
+SOURCE_SNOWFLAKE
+}
 
 # This is the default worksapce
 # Check this link for more information on the same
@@ -51,17 +64,17 @@ SOURCE_CONFIG_MAPPING = {
 
 # KEY: UUID of the source, VALUE: is third party data source
 SOURCE_WHITELIST_AND_TYPE = {
-    "39f092a6-8c87-4f6f-a8d9-5cef45b7dbe1": True, # Google Analytics
-    "71607ba1-c0ac-4799-8049-7f4b90dd50f7": True, # Google Sheets
-    "435bb9a5-7887-4809-aa58-28c27df0d7ad": False, # MySQL
-    "decd338e-5647-4c0b-adf4-da0e75f5a750": False, # Postgres
-    "9da77001-af33-4bcd-be46-6252bf9342b9": True, # Shopify
-    "e094cb9a-26de-4645-8761-65c0c425d1de": True, # Stripe
-    "253487c0-2246-43ba-a21f-5116b20a2c50": True, # Google Ads
-    "e7778cfc-e97c-4458-9ecb-b4f2bba8946c": True, # Facebook Ads
-    "47f25999-dd5e-4636-8c39-e7cea2453331": True, # Bing Ads
-    "bfd1ddf8-ae8a-4620-b1d7-55597d2ba08c": False, # Google BigQuery
-    "e2d65910-8c8b-40a1-ae7d-ee2416b2bfa2": False, # Snowflake
+    "39f092a6-8c87-4f6f-a8d9-5cef45b7dbe1": SOURCE_GOOGLE_ANALYTICS, # Google Analytics
+    "71607ba1-c0ac-4799-8049-7f4b90dd50f7": SOURCE_GOOGLE_SHEETS, # Google Sheets
+    "435bb9a5-7887-4809-aa58-28c27df0d7ad": SOURCE_MYSQL, # MySQL
+    "decd338e-5647-4c0b-adf4-da0e75f5a750": SOURCE_POSTGRES, # Postgres
+    "9da77001-af33-4bcd-be46-6252bf9342b9": SOURCE_SHOPIFY # Shopify
+    "e094cb9a-26de-4645-8761-65c0c425d1de": SOURCE_STRIPE, # Stripe
+    "253487c0-2246-43ba-a21f-5116b20a2c50": SOURCE_GOOGLE_ADS, # Google Ads
+    "e7778cfc-e97c-4458-9ecb-b4f2bba8946c": SOURCE_FACEBOOK_ADS, # Facebook Ads
+    "47f25999-dd5e-4636-8c39-e7cea2453331": SOURCE_BING_ADS, # Bing Ads
+    "bfd1ddf8-ae8a-4620-b1d7-55597d2ba08c": SOURCE_GOOGLE_BIG_QUERY, # Google BigQuery
+    "e2d65910-8c8b-40a1-ae7d-ee2416b2bfa2": SOURCE_SNOWFLAKE, # Snowflake
     # "29b409d9-30a5-4cc8-ad50-886eb846fea3", # Quickbooks
 }
 

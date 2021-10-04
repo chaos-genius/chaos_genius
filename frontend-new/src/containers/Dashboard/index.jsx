@@ -145,7 +145,7 @@ const Dashboard = () => {
             ) : (
               ''
             )}
-            {tab === 'deepdrills' && kpi && active && (
+            {tab === 'deepdrills' && kpi && active && anomalySettingData && (
               <Dashboardgraph
                 kpi={kpi}
                 kpiName={active}

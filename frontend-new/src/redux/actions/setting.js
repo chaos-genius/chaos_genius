@@ -1,12 +1,15 @@
 import { getRequest, postRequest } from '../../utils/http-helper';
-import { BASE_URL } from '../../utils/url-helper';
+import { BASE_URL, SETTING_META_INFO_URL } from '../../utils/url-helper';
 import {
   KPIEDITFAILURE,
   KPIEDITREQUEST,
   KPIEDITSUCCESS,
   KPISETTINGFAILURE,
   KPISETTINGREQUEST,
-  KPISETTINGSUCCESS
+  KPISETTINGSUCCESS,
+  SETTING_META_INFO_REQUEST,
+  SETTING_META_INFO_SUCCESS,
+  SETTING_META_INFO_FAILURE
 } from './ActionConstants';
 
 export const kpiSettingRequest = () => {
@@ -79,6 +82,40 @@ export const kpiEditSetup = (kpi) => {
       dispatch(kpiEditFailure());
     } else if (data && status === 200) {
       dispatch(kpiEditSuccess(data));
+    }
+  };
+};
+
+export const settingMetaInfoRequest = () => {
+  return {
+    type: SETTING_META_INFO_REQUEST
+  };
+};
+
+export const settingMetaInfoSuccess = (response) => {
+  return {
+    type: SETTING_META_INFO_SUCCESS,
+    data: response
+  };
+};
+
+export const settingMetaInfoFailure = () => {
+  return {
+    type: SETTING_META_INFO_FAILURE
+  };
+};
+
+export const settingMetaInfo = () => {
+  return async (dispatch) => {
+    dispatch(settingMetaInfoRequest());
+
+    const { data, error, status } = await getRequest({
+      url: SETTING_META_INFO_URL
+    });
+    if (error) {
+      dispatch(settingMetaInfoFailure());
+    } else if (data && status === 200) {
+      dispatch(settingMetaInfoSuccess(data));
     }
   };
 };

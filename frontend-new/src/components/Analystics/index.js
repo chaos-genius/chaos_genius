@@ -15,12 +15,19 @@ import Success from '../../assets/images/successful.svg';
 
 import './analystics.scss';
 
-import { kpiSettingSetup, kpiEditSetup } from '../../redux/actions';
+import {
+  kpiSettingSetup,
+  kpiEditSetup,
+  settingMetaInfo,
+  anomalySetting
+} from '../../redux/actions';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useToast } from 'react-toast-wnm';
 
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
+
+import Edit from '../../assets/images/disable-edit.svg';
 
 const modalOptions = [
   { value: 'prophet', label: 'Prophet' },
@@ -50,7 +57,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   const [frequency, setFrequency] = useState('');
   const [seasonality, setSeasonality] = useState([]);
   const [isModalOpen, setModalOpen] = useState(false);
-
+  const [edit, setEdit] = useState('');
   const [schedule, setSchedule] = useState(moment());
 
   const [error, setError] = useState({
@@ -59,21 +66,94 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     frequency: ''
   });
 
-  const { kpiEditData, kpiEditLoading, kpiSettingLoading, kpiSettingData } =
-    useSelector((state) => {
-      return state.setting;
-    });
+  const [enabled, setEnabled] = useState({
+    anomaly_period: true,
+    model_frequency: true,
+    model_name: true,
+    sensitivity: true,
+    frequency: true,
+    schedule: true
+  });
+  const [option, setOption] = useState({
+    model_name: [],
+    sensitivity: [],
+    seasonality: [],
+    frequency: []
+  });
+
+  const {
+    kpiEditData,
+    kpiEditLoading,
+    kpiSettingLoading,
+    kpiSettingData,
+    metaInfoData,
+    metaInfoLoading
+  } = useSelector((state) => {
+    return state.setting;
+  });
+
+  const { anomalySettingData } = useSelector((state) => {
+    return state.anomaly;
+  });
 
   useEffect(() => {
+    dispatch(anomalySetting(kpi));
+    dispatch(settingMetaInfo());
     dispatch(kpiEditSetup(kpi));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpi]);
 
   useEffect(() => {
+    if (metaInfoData && metaInfoData.length !== 0) {
+      setOption({
+        ...option,
+        model_name: metaInfoData.fields
+          .find((item) => item.name === 'model_name')
+          .options.map((item) => {
+            return { value: item.value, label: item.name };
+          }),
+        seasonality: metaInfoData.fields
+          .find((item) => item.name === 'seasonality')
+          .options.map((item) => {
+            return { value: item.value, label: item.name };
+          }),
+        frequency: metaInfoData.fields
+          .find((item) => item.name === 'frequency')
+          .options.map((item) => {
+            return { value: item.value, label: item.name };
+          }),
+        sensitivity: metaInfoData.fields
+          .find((item) => item.name === 'sensitivity')
+          .options.map((item) => {
+            return { value: item.value, label: item.name };
+          })
+      });
+    }
+    if (anomalySettingData) {
+      setEdit(anomalySettingData?.scheduler_params?.anomaly_status);
+    }
+  }, [metaInfoData, anomalySettingData]);
+
+  useEffect(() => {
     if (kpiEditData && kpiEditData?.anomaly_params !== null) {
-      setSensitivity(kpiEditData?.anomaly_params?.sensitivity || '');
-      setModalName(kpiEditData?.anomaly_params?.model_name || '');
-      setFrequency(kpiEditData?.anomaly_params?.frequency || '');
+      setSensitivity(
+        {
+          label: kpiEditData?.anomaly_params?.sensitivity,
+          value: kpiEditData?.anomaly_params?.sensitivity
+        } || ''
+      );
+      setModalName(
+        {
+          label: kpiEditData?.anomaly_params?.model_name,
+          value: kpiEditData?.anomaly_params?.model_name
+        } || ''
+      );
+      setFrequency(
+        {
+          label: kpiEditData?.anomaly_params?.frequency,
+          value: kpiEditData?.anomaly_params?.frequency
+        } || ''
+      );
       setSeasonality(kpiEditData?.anomaly_params?.seasonality || []);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -139,13 +219,13 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   const onSettingSave = () => {
     var obj = { ...error };
 
-    if (modelName === '') {
+    if (modelName.value === '') {
       obj['modelName'] = 'Enter Model';
     }
-    if (Sensitivity === '') {
+    if (Sensitivity.value === '') {
       obj['sensitivity'] = 'Enter Sensitivity';
     }
-    if (frequency === '') {
+    if (frequency.value === '') {
       obj['frequency'] = 'Enter Frequency';
     }
     setError(obj);
@@ -157,10 +237,10 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
       const data = {
         anomaly_params: {
           anomaly_period: 90,
-          model_name: modelName,
-          sensitivity: Sensitivity,
+          model_name: modelName.value,
+          sensitivity: Sensitivity.value,
           seasonality: seasonality,
-          frequency: frequency,
+          frequency: frequency.value,
           scheduler_params: { time: schedule.format('HH:mm:00') }
         }
       };
@@ -180,11 +260,62 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   const closeModal = () => {
     setModalOpen(false);
   };
+
   const handleValueChange = (data) => {
     setSchedule(data);
   };
 
-  if (kpiEditLoading) {
+  const onSaveInput = (name) => {};
+
+  const onCancelInput = (name) => {};
+
+  const editableStatus = (type) => {
+    var status = '';
+    metaInfoData &&
+      metaInfoData.length !== 0 &&
+      metaInfoData.fields.find((field) => {
+        if (field.name === type) {
+          status =
+            field.is_editable && field.is_sensitive
+              ? 'sensitive'
+              : field.is_editable
+              ? 'editable'
+              : '';
+        }
+        return '';
+      });
+    return status;
+  };
+
+  const editAndSaveButton = (name) => {
+    return (
+      <>
+        {enabled[name] ? (
+          <button
+            className="btn black-button"
+            onClick={() => setEnabled({ ...enabled, [name]: false })}>
+            <img src={Edit} alt="Edit" />
+            <span>Edit</span>
+          </button>
+        ) : (
+          <>
+            <button
+              className="btn black-button"
+              onClick={() => onSaveInput(name)}>
+              <span>Save</span>
+            </button>
+            <button
+              className="btn black-secondary-button"
+              onClick={() => onCancelInput(name)}>
+              <span>Cancel</span>
+            </button>
+          </>
+        )}
+      </>
+    );
+  };
+
+  if (metaInfoLoading || kpiEditLoading) {
     return (
       <div className="load">
         <div className="preload"></div>
@@ -203,35 +334,54 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
         <div className="form-container">
           <div className="form-group">
             <label>Time Window</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="90 Days"
-              disabled
-            />
+            <div className="editable-field">
+              <input
+                type="text"
+                className="form-control"
+                name="anomaly_period"
+                placeholder="90 Days"
+                disabled
+              />
+            </div>
           </div>
           <div className="form-group">
             <label>Model Frequency</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Daily"
-              disabled
-            />
+            <div className="editable-field">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Daily"
+                disabled
+              />
+            </div>
           </div>
           <div className="form-group">
             <label>Select a Model</label>
-            <Select
-              options={modalOptions}
-              classNamePrefix="selectcategory"
-              placeholder="select"
-              value={{ value: modelName, label: modelName }}
-              isSearchable={false}
-              onChange={(e) => {
-                setModalName(e.value);
-                setError({ ...error, modelName: '' });
-              }}
-            />
+            <div className="editable-field">
+              <Select
+                options={option.model_name}
+                classNamePrefix="selectcategory"
+                placeholder="select"
+                value={modelName}
+                isSearchable={false}
+                isDisabled={
+                  edit === 'completed'
+                    ? editableStatus('model_name') === 'editable'
+                      ? false
+                      : editableStatus('model_name') === 'sensitive'
+                      ? enabled.model_name
+                      : true
+                    : false
+                }
+                onChange={(e) => {
+                  setModalName(e);
+                  setError({ ...error, modelName: '' });
+                }}
+              />
+              {edit === 'completed' &&
+                editableStatus('model_name') === 'sensitive' &&
+                editAndSaveButton('model_name')}
+            </div>
             {error.modelName && (
               <div className="connection__fail">
                 <p>{error.modelName}</p>
@@ -253,17 +403,31 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                 <img src={Help} alt="Help" />
               </Tooltip>
             </label>
-            <Select
-              options={sensitivityOptions}
-              classNamePrefix="selectcategory"
-              value={{ value: Sensitivity, label: Sensitivity }}
-              placeholder="select"
-              isSearchable={false}
-              onChange={(e) => {
-                setSensitivity(e.value);
-                setError({ ...error, sensitivity: '' });
-              }}
-            />
+            <div className="editable-field">
+              <Select
+                options={option.sensitivity}
+                classNamePrefix="selectcategory"
+                value={Sensitivity}
+                isDisabled={
+                  edit === 'completed'
+                    ? editableStatus('sensitivity') === 'editable'
+                      ? false
+                      : editableStatus('sensitivity') === 'sensitive'
+                      ? enabled.sensitivity
+                      : true
+                    : false
+                }
+                placeholder="select"
+                isSearchable={false}
+                onChange={(e) => {
+                  setSensitivity(e);
+                  setError({ ...error, sensitivity: '' });
+                }}
+              />
+              {edit === 'completed' &&
+                editableStatus('sensitivity') === 'sensitive' &&
+                editAndSaveButton('sensitivity')}
+            </div>
             {error.sensitivity && (
               <div className="connection__fail">
                 <p>{error.sensitivity}</p>
@@ -285,17 +449,31 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                 <img src={Help} alt="Help" />
               </Tooltip>
             </label>
-            <Select
-              options={frequencyOptions}
-              classNamePrefix="selectcategory"
-              placeholder="select"
-              isSearchable={false}
-              value={{ value: frequency, label: frequency }}
-              onChange={(e) => {
-                setFrequency(e.value);
-                setError({ ...error, frequency: '' });
-              }}
-            />
+            <div className="editable-field">
+              <Select
+                options={option.frequency}
+                classNamePrefix="selectcategory"
+                placeholder="select"
+                isSearchable={false}
+                value={frequency}
+                isDisabled={
+                  edit === 'completed'
+                    ? editableStatus('frequency') === 'editable'
+                      ? false
+                      : editableStatus('frequency') === 'sensitive'
+                      ? enabled.sensitivity
+                      : true
+                    : false
+                }
+                onChange={(e) => {
+                  setFrequency(e);
+                  setError({ ...error, frequency: '' });
+                }}
+              />
+              {edit === 'completed' &&
+                editableStatus('model_name') === 'sensitive' &&
+                editAndSaveButton('model_name')}
+            </div>
             {error.frequency && (
               <div className="connection__fail">
                 <p>{error.frequency}</p>
@@ -305,14 +483,24 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
 
           <div className="form-group">
             <label>Schedule</label>
-
-            <TimePicker
-              onChange={handleValueChange}
-              defaultValue={schedule}
-              className="time-picker"
-              focusOnOpen={true}
-              showSecond={false}
-            />
+            <div className="editable-field">
+              <TimePicker
+                onChange={handleValueChange}
+                defaultValue={schedule}
+                className="time-picker"
+                disabled={
+                  edit === 'completed'
+                    ? editableStatus('scheduler_params_time') === 'editable'
+                      ? false
+                      : editableStatus('scheduler_params_time') === 'sensitive'
+                      ? enabled.schedule
+                      : true
+                    : false
+                }
+                focusOnOpen={true}
+                showSecond={false}
+              />
+            </div>
           </div>
           <div className="form-group">
             <label>Expected Seasonality in Data</label>

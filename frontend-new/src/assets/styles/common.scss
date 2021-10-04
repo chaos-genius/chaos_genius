@@ -1181,3 +1181,14 @@ a:hover {
   width: 10px;
   height: 10px;
 }
+.time-stamp {
+  p {
+    font-weight: $font-weight-400;
+    font-size: $font-size-12;
+    line-height: $line-height-14;
+    color: $grey_variation-3;
+    span {
+      color: $black_variation-2 !important;
+    }
+  }
+}

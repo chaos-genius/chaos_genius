@@ -19,6 +19,8 @@ import * as am4charts from '@amcharts/amcharts4/charts';
 import HierarchicalTable from '../HierarchicalTable';
 import DeepdrillsEmptyState from '../DeepdrillsEmptyState';
 
+import { formatDate } from '../../utils/date-helper';
+
 import {
   getDashboardAggregation,
   getDashboardLinechart,
@@ -332,6 +334,14 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
           <div className="dashboard-layout dashboard-layout-change">
             <div className="dashboard-container">
               <div className="dashboard-subcategory">
+                <div className="time-stamp">
+                  <p>
+                    Last updated:{' '}
+                    <span>
+                      {formatDate(aggregationData?.analysis_date) || '-'}
+                    </span>
+                  </p>
+                </div>
                 <Select
                   value={monthWeek}
                   options={data}

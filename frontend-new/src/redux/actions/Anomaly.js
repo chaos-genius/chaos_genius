@@ -45,7 +45,7 @@ export const anomalyDetection = (kpi) => {
     if (error) {
       dispatch(anomalyDetectionFailure());
     } else if (data && status === 200) {
-      dispatch(anomalyDetectionSuccess(data.data));
+      dispatch(anomalyDetectionSuccess(data));
     }
   };
 };

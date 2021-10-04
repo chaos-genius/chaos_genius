@@ -448,15 +448,10 @@ ANOMALY_PARAMS_META = {
             ]
         },
         {
-            "name": "scheduler_params",
-            "fields": [
-                {
-                    "name": "time",
-                    "is_editable": True,
-                    "is_sensitive": False,
-                    "type": "time",
-                },
-            ],
+            "name": "scheduler_params_time",
+            "is_editable": True,
+            "is_sensitive": False,
+            "type": "time",
         },
     ],
 }

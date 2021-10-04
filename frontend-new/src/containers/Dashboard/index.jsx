@@ -36,8 +36,6 @@ const Dashboard = () => {
 
   useEffect(() => {
     getAllDashboardSidebar();
-    getAnomalySetting(kpi);
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -48,6 +46,13 @@ const Dashboard = () => {
   const getAnomalySetting = (id) => {
     dispatch(anomalySetting(id));
   };
+
+  useEffect(() => {
+    if (kpi) {
+      getAnomalySetting(kpi);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kpi]);
 
   useEffect(() => {
     if (sidebarList && sidebarList.length !== 0 && kpi === undefined) {
@@ -68,6 +73,7 @@ const Dashboard = () => {
           ?.aggregation
       );
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sidebarList]);
 

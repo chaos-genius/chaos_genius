@@ -59,7 +59,7 @@ const multidimensional = [
   }
 ];
 
-const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
+const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
   const dispatch = useDispatch();
 
   const [activeDimension, setActiveDimension] = useState('');

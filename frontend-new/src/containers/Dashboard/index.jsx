@@ -13,7 +13,7 @@ import FilterWithTab from '../../components/FilterWithTab';
 import Anomaly from '../../components/Anomaly';
 import Analystics from '../../components/Analystics';
 
-import { getDashboardSidebar } from '../../redux/actions';
+import { getDashboardSidebar, anomalySetting } from '../../redux/actions';
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -26,17 +26,27 @@ const Dashboard = () => {
     return state.sidebar;
   });
 
+  const { anomalySettingData } = useSelector((state) => {
+    return state.anomaly;
+  });
+
   const [active, setActive] = useState('');
   const [kpiAggregate, SetKpiAggregate] = useState('');
   const [tab, setTabs] = useState('deepdrills');
 
   useEffect(() => {
     getAllDashboardSidebar();
+    getAnomalySetting(kpi);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getAllDashboardSidebar = () => {
     dispatch(getDashboardSidebar());
+  };
+
+  const getAnomalySetting = (id) => {
+    dispatch(anomalySetting(id));
   };
 
   useEffect(() => {
@@ -134,9 +144,12 @@ const Dashboard = () => {
                 kpi={kpi}
                 kpiName={active}
                 kpiAggregate={kpiAggregate}
+                anomalystatus={anomalySettingData}
               />
             )}
-            {tab === 'anomaly' && kpi && <Anomaly kpi={kpi} />}
+            {tab === 'anomaly' && kpi && (
+              <Anomaly kpi={kpi} anomalystatus={anomalySettingData} />
+            )}
 
             {location[2] === 'settings' && (
               <div className="table-section setting-section">

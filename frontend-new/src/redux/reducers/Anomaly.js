@@ -7,7 +7,10 @@ import {
   ANOMALYDETECTIONSUCCESS,
   ANOMALYDRILLDOWNREQUEST,
   ANOMALYDRILLDOWNSUCCESS,
-  ANOMALYDRILLDOWNFAILURE
+  ANOMALYDRILLDOWNFAILURE,
+  ANOMALYSETTINGREQUEST,
+  ANOMALYSETTINGSUCCESS,
+  ANOMALYSETTINGFAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -19,7 +22,10 @@ const initialState = {
   anomalyQualityDataError: false,
   anomalyDrilldownLoading: true,
   anomalyDrilldownData: [],
-  anomalyDrilldownError: false
+  anomalyDrilldownError: false,
+  anomalySettingLoading: true,
+  anomalySettingData: [],
+  anomalySettingError: false
 };
 
 export const anomaly = (state = initialState, action) => {
@@ -86,6 +92,25 @@ export const anomaly = (state = initialState, action) => {
         ...state,
         anomalyDrilldownLoading: true,
         anomalyDrilldownError: false
+      };
+    }
+    case ANOMALYSETTINGREQUEST: {
+      return {
+        ...state,
+        anomalySettingLoading: true,
+        anomalySettingError: false
+      };
+    }
+    case ANOMALYSETTINGSUCCESS: {
+      return {
+        anomalySettingLoading: false,
+        anomalySettingData: action.data
+      };
+    }
+    case ANOMALYSETTINGFAILURE: {
+      return {
+        anomalySettingLoading: false,
+        anomalySettingError: true
       };
     }
     case 'RESET': {

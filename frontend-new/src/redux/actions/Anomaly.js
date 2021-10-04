@@ -160,7 +160,7 @@ export const anomalySetting = (id) => {
     if (error) {
       dispatch(anomalySettingFailure());
     } else if (data && status === 200) {
-      dispatch(anomalySettingSuccess(data.data));
+      dispatch(anomalySettingSuccess(data));
     }
   };
 };

@@ -1,4 +1,8 @@
-import { attachParams, BASE_URL } from '../../utils/url-helper';
+import {
+  attachParams,
+  BASE_URL,
+  SETTING_META_INFO_URL
+} from '../../utils/url-helper';
 
 import { getRequest } from '../../utils/http-helper';
 import {
@@ -10,7 +14,13 @@ import {
   ANOMALYDETECTIONSUCCESS,
   ANOMALYDRILLDOWNREQUEST,
   ANOMALYDRILLDOWNSUCCESS,
-  ANOMALYDRILLDOWNFAILURE
+  ANOMALYDRILLDOWNFAILURE,
+  ANOMALYSETTINGREQUEST,
+  ANOMALYSETTINGSUCCESS,
+  ANOMALYSETTINGFAILURE,
+  SETTING_META_INFO_REQUEST,
+  SETTING_META_INFO_SUCCESS,
+  SETTING_META_INFO_FAILURE
 } from './ActionConstants';
 
 export const anomalyDetectionRequest = () => {
@@ -117,6 +127,74 @@ export const anomalyDrilldown = (kpi, params) => {
       dispatch(anomalyDrilldownFailure());
     } else if (data && status === 200) {
       dispatch(anomalyDrilldownSuccess(data.data));
+    }
+  };
+};
+
+export const anomalySettingRequested = () => {
+  return {
+    type: ANOMALYSETTINGREQUEST
+  };
+};
+
+export const anomalySettingSuccess = (response) => {
+  return {
+    type: ANOMALYSETTINGSUCCESS,
+    data: response
+  };
+};
+
+export const anomalySettingFailure = () => {
+  return {
+    type: ANOMALYSETTINGFAILURE
+  };
+};
+
+export const anomalySetting = (id) => {
+  return async (dispatch) => {
+    dispatch(anomalySettingRequested());
+
+    const { data, error, status } = await getRequest({
+      url: `${BASE_URL}/api/anomaly-data/${id}/settings`
+    });
+    if (error) {
+      dispatch(anomalySettingFailure());
+    } else if (data && status === 200) {
+      dispatch(anomalySettingSuccess(data.data));
+    }
+  };
+};
+
+export const settingMetaInfoRequest = () => {
+  return {
+    type: SETTING_META_INFO_REQUEST
+  };
+};
+
+export const settingMetaInfoSuccess = (response) => {
+  return {
+    type: SETTING_META_INFO_SUCCESS,
+    data: response
+  };
+};
+
+export const settingMetaInfoFailure = () => {
+  return {
+    type: SETTING_META_INFO_FAILURE
+  };
+};
+
+export const settingMetaInfo = () => {
+  return async (dispatch) => {
+    dispatch(settingMetaInfoRequest());
+
+    const { data, error, status } = await getRequest({
+      url: SETTING_META_INFO_URL
+    });
+    if (error) {
+      dispatch(settingMetaInfoFailure());
+    } else if (data && status === 200) {
+      dispatch(settingMetaInfoSuccess(data.data));
     }
   };
 };

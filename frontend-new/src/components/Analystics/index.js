@@ -164,7 +164,9 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
         } || ''
       );
       setSeasonality(kpiEditData?.anomaly_params?.seasonality || []);
+      setSchedule(kpiEditData?.anomaly_params?.scheduler_params?.time);
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiEditData]);
 
@@ -569,7 +571,9 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                 }
                 focusOnOpen={true}
                 showSecond={false}
+                value={schedule && moment(schedule, 'hh:mm')}
               />
+
               {edit === 'completed' &&
                 editableStatus('scheduler_params_time') === 'sensitive' &&
                 editAndSaveButton('schedule')}

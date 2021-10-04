@@ -153,7 +153,7 @@ const Dashboard = () => {
                 anomalystatus={anomalySettingData}
               />
             )}
-            {tab === 'anomaly' && kpi && (
+            {tab === 'anomaly' && kpi && anomalySettingData && (
               <Anomaly kpi={kpi} anomalystatus={anomalySettingData} />
             )}
 

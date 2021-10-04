@@ -65,6 +65,7 @@ const KpiExplorer = () => {
       })
     );
   };
+
   useEffect(() => {
     const fetchFilter = () => {
       if (kpiFilter.length === 0) {

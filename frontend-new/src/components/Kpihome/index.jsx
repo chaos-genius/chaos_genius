@@ -43,8 +43,10 @@ const Kpihome = () => {
   const { homeKpiData, homeKpiLoading } = useSelector(
     (state) => state.onboarding
   );
-  const [kpiHomeData, setKpiHomeData] = useState(homeKpiData);
+
   const [search, setSearch] = useState('');
+  const [kpiHomeData, setKpiHomeData] = useState(homeKpiData);
+
   const [timeline, setTimeLine] = useState({
     value: 'mom',
     label: 'Current Month on Last Month'
@@ -53,68 +55,6 @@ const Kpihome = () => {
   useEffect(() => {
     dispatch(getHomeKpi({ timeline: timeline.value }));
   }, [dispatch, timeline]);
-
-  // const sparklineGraph = (graphData) => {
-  //   return {
-  //     title: { text: '' },
-  //     xAxis: {
-  //       visible: true,
-  //       type: 'text',
-  //       categories: graphData.map((chart) => chart.value),
-  //       startOnTick: false,
-  //       endOnTick: false,
-  //       gridLineWidth: 0
-  //     },
-  //     yAxis: {
-  //       visible: true,
-  //       type: 'text',
-  //       categories: graphData.map((chart) => chart.date),
-  //       gridLineWidth: 0,
-  //       title: '',
-  //       labels: {
-  //         enabled: false,
-  //         step: 1,
-  //         formatter: function () {
-  //           return Highcharts.dateFormat('%d %b', this.value);
-  //         }
-  //       }
-  //     },
-  // tooltip: {
-  //   enabled: false
-  // },
-  //     credits: false,
-  //     series: [
-  //       {
-  //         color: '#60CA9A',
-  //         dashStyle: 'Solid',
-  //         showInLegend: false,
-  //         data: graphData.map((chart) => chart.value),
-  // marker: {
-  //   radius: 0,
-  //   // fillColor: '#E96560',
-  //   states: {
-  //     hover: {
-  //       enabled: false
-  //     }
-  //   }
-  //         }
-  //       }
-  //     ],
-
-  //   chart: {
-  // backgroundColor: null,
-  // borderWidth: 0,
-  // type: 'line',
-  // margin: [2, 0, 2, 0],
-  // width: 200,
-  // height: 40,
-  // style: {
-  //   overflow: 'visible'
-  // },
-  // skipClone: false
-  //   }
-  // };
-  // };
 
   useEffect(() => {
     if (search !== '') {
@@ -143,7 +83,8 @@ const Kpihome = () => {
       setKpiHomeData(homeKpiData);
     }
   };
-  const newHighChart = (line) => {
+
+  const lineChart = (line) => {
     if (line) {
       let demoChart = {
         chart: {
@@ -176,11 +117,10 @@ const Kpihome = () => {
           text: ''
         },
         yAxis: {
-          // type: 'value',
           step: 1,
           title: '',
-          gridLineWidth: 0
-          // lineWidth: 1
+          gridLineWidth: 0,
+          lineWidth: 1
         },
         plotOptions: {
           line: {
@@ -201,7 +141,6 @@ const Kpihome = () => {
             data: line.map((linedata) => linedata.value),
             marker: {
               radius: 0,
-              // fillColor: '#E96560',
               states: {
                 hover: {
                   enabled: false
@@ -227,16 +166,10 @@ const Kpihome = () => {
         <div className="heading-option">
           <div className="heading-title">
             <h3>My KPIs</h3>
-            {/* <p>Lorem ipsum is a dummy text</p> */}
           </div>
         </div>
         <div className="homepage-setup-card-wrapper">
           <div className="homepage-options">
-            {/* <Select
-              classNamePrefix="selectcategory"
-              placeholder="Sort by"
-              isSearchable={false}
-            /> */}
             <div></div>
             <div className="homepage-search-dropdown">
               <div className="form-group icon search-filter">
@@ -268,7 +201,6 @@ const Kpihome = () => {
                   <div className="kpi-card" key={item.id}>
                     <div className="kpi-content kpi-content-label">
                       <h3>{item.name}</h3>
-                      {/* <label>{item.metric}</label> */}
                     </div>
                     <div className="kpi-content">
                       <label>
@@ -310,33 +242,20 @@ const Kpihome = () => {
                         </label>
                       </span>
                     </div>
-                    {/* <div className="kpi-content">
-                      <label>Anomalies</label>
-                      <span>
-                        {item.anomaly_count}
-                        <label className="anomalies-period">
-                          {timeline.value === 'wow'
-                            ? '(last week)'
-                            : timeline.value === 'mom'
-                            ? '(last month)'
-                            : ' (last day)'}
-                        </label>
-                      </span>
-                    </div> */}
+
                     <div className=" kpi-content kpi-graph ">
                       {item.graph_data && item.graph_data.length !== 0 && (
                         <HighchartsReact
                           className="sparkline-graph"
                           highcharts={Highcharts}
-                          // options={sparklineGraph(item.graph_data)}
-                          options={newHighChart(item.graph_data)}
+                          options={lineChart(item.graph_data)}
                         />
                       )}
                     </div>
                     <div
                       className="kpi-content kpi-details"
                       onClick={() =>
-                        history.push(`/dashboard/autorca/${item.id}`)
+                        history.push(`/dashboard/deepdrills/${item.id}`)
                       }>
                       Details
                     </div>

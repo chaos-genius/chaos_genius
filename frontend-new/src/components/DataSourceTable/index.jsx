@@ -250,7 +250,8 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
                   </tr>
                 );
               })
-            : tableData !== '' && (
+            : tableData &&
+              tableData !== '' && (
                 <tr className="empty-table">
                   <td colSpan={7}>
                     <Noresult text={search} title="Data source" />

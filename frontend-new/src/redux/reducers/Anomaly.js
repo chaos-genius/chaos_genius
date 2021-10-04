@@ -103,12 +103,14 @@ export const anomaly = (state = initialState, action) => {
     }
     case ANOMALYSETTINGSUCCESS: {
       return {
+        ...state,
         anomalySettingLoading: false,
         anomalySettingData: action.data
       };
     }
     case ANOMALYSETTINGFAILURE: {
       return {
+        ...state,
         anomalySettingLoading: false,
         anomalySettingError: true
       };

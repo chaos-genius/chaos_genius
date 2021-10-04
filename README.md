@@ -43,7 +43,7 @@ Backend
 
 4.  Remove all created containers with `docker-compose rm`.
 
-5. Delete all data from volumes with `docker volumes prune`. 
+5. Delete all data from volumes with `docker volume prune`. 
    Make sure you don't have data from other containers. If yes, then we need to do this manually.
 
 ### From Image (Recommended)

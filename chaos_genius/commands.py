@@ -134,6 +134,19 @@ def run_alert(id):
 
 @click.command()
 @with_appcontext
+def run_anomaly_rca_scheduler():
+    """Run the anomaly_scheduler celery task.
+
+    Note: a celery worker needs to be active for this to work.
+    """
+    from chaos_genius.jobs.anomaly_tasks import anomaly_scheduler
+    res = anomaly_scheduler.delay()
+    res.get()
+    click.echo("Completed running scheduler. Tasks should be running in the worker.")
+
+
+@click.command()
+@with_appcontext
 def reinstall_db():
     """Delete the db and reinstall again."""
     from chaos_genius.settings import META_DATABASE

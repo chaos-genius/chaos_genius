@@ -5,10 +5,11 @@ import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Slack from '../../assets/images/alerts/slack.svg';
-import Gmail from '../../assets/images/alerts/gmail.svg';
+import Email from '../../assets/images/alerts/email.svg';
 import Datadog from '../../assets/images/alerts/datadog.svg';
 import Asana from '../../assets/images/alerts/asana.svg';
 import Teams from '../../assets/images/alerts/teams.svg';
+import PagerDuty from '../../assets/images/alerts/pagerduty.svg';
 import Succestick from '../../assets/images/setupcard/success-tick.svg';
 
 import '../SetupCard/setupcard.scss';
@@ -83,7 +84,7 @@ const AlertsCard = () => {
           </Link>
         </div>
         <div className="setup-card">
-          <img src={Gmail} className="in-active" alt="Gmail" />
+          <img src={Email} className="in-active" alt="Email" />
 
           <h1>
             Email
@@ -123,6 +124,7 @@ const AlertsCard = () => {
           </h1>
           <p>Select the data you want to monitor and analyse</p>
           <button
+            disabled
             className={
               statusChecking('datadog')
                 ? 'btn black-button'
@@ -134,17 +136,19 @@ const AlertsCard = () => {
                 : 'Connect Datadog'}
             </span>
           </button>
+          <h3>Soon</h3>
         </div>
         <div className="setup-card">
           <img src={Asana} className="in-active" alt="Asana" />
           <h1>
-            Asana{' '}
+            Asana
             {statusChecking('asana') && (
               <img src={Succestick} alt="success tik"></img>
             )}
           </h1>
           <p>Select the data you want to monitor and analyse</p>
           <button
+            disabled
             className={
               statusChecking('asana') ? 'btn black-button' : 'btn white-button'
             }>
@@ -154,6 +158,7 @@ const AlertsCard = () => {
                 : 'Connect Asana'}
             </span>
           </button>
+          <h3>Soon</h3>
         </div>
         <div className="setup-card">
           <img src={Teams} className="in-active" alt="Teams" />
@@ -165,6 +170,7 @@ const AlertsCard = () => {
           </h1>
           <p>Select the data you want to monitor and analyse</p>
           <button
+            disabled
             className={
               statusChecking('teams') ? 'btn black-button' : 'btn white-button'
             }>
@@ -172,6 +178,30 @@ const AlertsCard = () => {
               {statusChecking('teams')
                 ? 'Edit Teams Connection'
                 : 'Connect Teams'}
+            </span>
+          </button>
+          <h3>Soon</h3>
+        </div>
+        <div className="setup-card">
+          <img src={PagerDuty} className="in-active" alt="Pager Duty" />
+          <h1>
+            PagerDuty
+            {statusChecking('pagerduty') && (
+              <img src={Succestick} alt="success tik"></img>
+            )}
+          </h1>
+          <p>Select the data you want to monitor and analyse</p>
+          <button
+            disabled
+            className={
+              statusChecking('pagerduty')
+                ? 'btn black-button'
+                : 'btn white-button'
+            }>
+            <span>
+              {statusChecking('datadog')
+                ? 'Edit PagerDuty Connection'
+                : 'Connect PagerDuty'}
             </span>
           </button>
           <h3>Soon</h3>

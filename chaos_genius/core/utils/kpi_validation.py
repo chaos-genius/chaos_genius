@@ -8,6 +8,8 @@ from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from chaos_genius.core.rca.rca_controller import RootCauseAnalysisController
 from chaos_genius.core.rca.root_cause_analysis import SUPPORTED_AGGREGATIONS
 
+TAIL_SIZE = 10
+
 
 def validate_kpi(
     kpi_info: Dict[str, Any]
@@ -20,7 +22,8 @@ def validate_kpi(
     :rtype: Tuple[bool, str]
     """
     try:
-        base_df, rca_df = RootCauseAnalysisController(kpi_info)._load_data()
+        rca = RootCauseAnalysisController(kpi_info)
+        base_df, rca_df = rca._load_data(tail=TAIL_SIZE)
         df = pd.concat([base_df, rca_df])
     except Exception as e:  # noqa: B902
         return False, "Could not load data. Error: " + str(e)

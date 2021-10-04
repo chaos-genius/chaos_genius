@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Link } from 'react-router-dom';
 
-import Request from '../../assets/images/request.svg';
+// import Request from '../../assets/images/request.svg';
 import rightarrow from '../../assets/images/rightarrow.svg';
 
 import AlertsCard from '../../components/AlertsCard';
@@ -36,12 +36,12 @@ const Channelconfiguration = () => {
             </Link>
           </div>
         </div>
-        <div className="option-button">
+        {/* <div className="option-button">
           <Link to="/alerts/new" className="btn black-button">
             <img src={Request} alt="Request" />
             <span>Request a new channel</span>
           </Link>
-        </div>
+        </div> */}
       </div>
       <div className="homepage-setup-card-wrapper">
         <AlertsCard />

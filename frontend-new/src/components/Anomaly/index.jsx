@@ -11,6 +11,7 @@ import Toparrow from '../../assets/images/toparrow.svg';
 
 import Anomalygraph from '../Anomalygraph';
 import Noresult from '../Noresult';
+// import AnomalyEmptyState from '../AnomalyEmptyState';
 
 import './anomaly.scss';
 
@@ -420,9 +421,12 @@ const Anomaly = ({ kpi }) => {
           </div>
         </>
       ) : (
-        <Noresult title="Anomaly" />
+        anomalyDetectionData !== '' && <Noresult title="Anomaly" />
       )}
     </>
+    // <div className="dashboard-layout setup-layout-empty">
+    //   <AnomalyEmptyState />
+    // </div>
   );
 };
 

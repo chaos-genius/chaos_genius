@@ -23,13 +23,14 @@ const DataSource = () => {
   const dispatch = useDispatch();
 
   const [search, setSearch] = useState('');
-  const [dataSourceData, setDataSourceData] = useState([]);
+
   const [dataSourceFilter, setDataSourceFilter] = useState([]);
   const [data, setData] = useState(false);
 
   const { isLoading, dataSourcesList } = useSelector(
     (state) => state.dataSource
   );
+  const [dataSourceData, setDataSourceData] = useState(dataSourcesList);
 
   useEffect(() => {
     store.dispatch(RESET_ACTION);

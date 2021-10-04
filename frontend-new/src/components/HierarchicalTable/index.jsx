@@ -14,15 +14,15 @@ const HierarchicalTable = ({ hierarchicalData }) => {
       roots = [],
       i;
 
-    for (i = 0; i < hierarchicalData.length; i += 1) {
-      map[hierarchicalData[i].id] = i;
-      hierarchicalData[i].children = [];
+    for (i = 0; i < hierarchicalData.data_table.length; i += 1) {
+      map[hierarchicalData.data_table[i].id] = i;
+      hierarchicalData.data_table[i].children = [];
     }
 
-    for (i = 0; i < hierarchicalData.length; i += 1) {
-      node = hierarchicalData[i];
+    for (i = 0; i < hierarchicalData.data_table.length; i += 1) {
+      node = hierarchicalData.data_table[i];
       if (node.parentId !== '0' && node.parentId !== null) {
-        hierarchicalData[map[node.parentId]].children.push(node);
+        hierarchicalData.data_table[map[node.parentId]].children.push(node);
       } else {
         roots.push(node);
       }
@@ -34,22 +34,25 @@ const HierarchicalTable = ({ hierarchicalData }) => {
     <div className="common-drilldown-table table-section">
       <table className="table">
         <thead>
-          <tr>
-            <th></th>
-            <th>Subgroup Name</th>
-            <th>Prev month Avg</th>
-            <th>Prev month Size</th>
-            <th>prev month Count</th>
-            <th>Curr month Avg</th>
-            <th>Curr month Size</th>
-            <th>Curr month Count</th>
-            <th>Impact</th>
-          </tr>
+          {hierarchicalData &&
+            hierarchicalData.data_columns &&
+            hierarchicalData.data_columns.length !== 0 && (
+              <>
+                <tr>
+                  <th></th>
+                  {hierarchicalData.data_columns.map((data) => {
+                    return <th>{data.title}</th>;
+                  })}
+                </tr>
+              </>
+            )}
         </thead>
         <tbody>
-          {hierarchicalData && hierarchicalData.length !== 0 && (
-            <Tree data={parentChildData()} />
-          )}
+          {hierarchicalData &&
+            hierarchicalData.data_table &&
+            hierarchicalData.data_table.length !== 0 && (
+              <Tree data={parentChildData()} />
+            )}
         </tbody>
       </table>
     </div>
@@ -100,11 +103,11 @@ const TreeNode = ({ node, child }) => {
         </td>
         <td className="date-column-formated">{node.subgroup}</td>
         <td className="date-column-formated">{node.g1_agg}</td>
+        <td className="date-column-formated">{node.g1_size}</td>
         <td className="date-column-formated">{node.g1_count}</td>
         <td className="date-column-formated">{node.g2_agg}</td>
-        <td className="date-column-formated">{node.g1_size}</td>
-        <td className="date-column-formated">{node.g2_count}</td>
         <td className="date-column-formated">{node.g2_size}</td>
+        <td className="date-column-formated">{node.g2_count}</td>
         <td className="date-column-formated">
           {node.impact > 0 ? (
             <div className="connection__success">

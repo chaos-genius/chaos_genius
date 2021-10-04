@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import { useSelector, useDispatch } from 'react-redux';
 
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 
 import './dashboard.scss';
 
@@ -19,16 +19,16 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const history = useHistory();
 
-  const [active, setActive] = useState('');
-  const [kpi, setKpi] = useState();
-  const [kpiAggregate, SetKpiAggregate] = useState('');
-  const [tab, setTabs] = useState('autorca');
-
   const location = history.location.pathname.split('/');
+  const kpi = useParams().kpi;
 
   const { sidebarLoading, sidebarList } = useSelector((state) => {
     return state.sidebar;
   });
+
+  const [active, setActive] = useState('');
+  const [kpiAggregate, SetKpiAggregate] = useState('');
+  const [tab, setTabs] = useState('deepdrills');
 
   useEffect(() => {
     getAllDashboardSidebar();
@@ -42,14 +42,20 @@ const Dashboard = () => {
   useEffect(() => {
     if (sidebarList && sidebarList.length !== 0 && kpi === undefined) {
       setActive(sidebarList[0]?.name);
-      setKpi(sidebarList[0]?.id);
+      //setKpi(sidebarList[0]?.id);
       setTabs(location[2]);
       SetKpiAggregate(sidebarList[0]?.aggregation);
 
-      window.history.pushState(
-        '',
-        '',
-        `/#/dashboard/${location[2]}/${sidebarList[0]?.id}`
+      history.push(`/dashboard/${location[2]}/${sidebarList[0]?.id}`);
+    } else if (sidebarList && sidebarList.length !== 0) {
+      setActive(
+        sidebarList.find((item) => item.id.toString() === kpi.toString())?.name
+      );
+      setTabs(location[2]);
+
+      SetKpiAggregate(
+        sidebarList.find((item) => item.id.toString() === kpi.toString())
+          ?.aggregation
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -59,9 +65,6 @@ const Dashboard = () => {
     setTabs(tabs);
     window.history.pushState('', '', `/#/dashboard/${tabs}/${kpi}`);
   };
-  // const onSettingClick = (option) => {
-  //   history.push(`/kpi/settings/${kpi}`);
-  // };
 
   if (sidebarLoading) {
     return (
@@ -82,11 +85,10 @@ const Dashboard = () => {
         <div className="explore-wrapper">
           {/* filter section */}
           <div className="filter-section">
-            {sidebarList && (
+            {sidebarList && kpi && (
               <FilterWithTab
                 tabs={tab}
                 kpi={kpi}
-                setKpi={setKpi}
                 data={sidebarList}
                 setActive={setActive}
                 SetKpiAggregate={SetKpiAggregate}
@@ -102,9 +104,9 @@ const Dashboard = () => {
                   <div className="common-tab">
                     <ul>
                       <li
-                        className={tab === 'autorca' ? 'active' : ''}
-                        onClick={() => onTabClick('autorca')}>
-                        AutoRCA
+                        className={tab === 'deepdrills' ? 'active' : ''}
+                        onClick={() => onTabClick('deepdrills')}>
+                        DeepDrills
                       </li>
 
                       <li
@@ -115,10 +117,7 @@ const Dashboard = () => {
                     </ul>
                   </div>
                   <Link to={`/kpi/settings/${kpi}`}>
-                    <div
-                      className="common-option"
-                      // onClick={() => onSettingClick('settings')}
-                    >
+                    <div className="common-option">
                       <button className="btn grey-button">
                         <img src={Setting} alt="Setting" />
                         <span>Settings</span>
@@ -130,7 +129,7 @@ const Dashboard = () => {
             ) : (
               ''
             )}
-            {tab === 'autorca' && kpi && active && (
+            {tab === 'deepdrills' && kpi && active && (
               <Dashboardgraph
                 kpi={kpi}
                 kpiName={active}

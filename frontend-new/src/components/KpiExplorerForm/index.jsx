@@ -14,8 +14,9 @@ import Fail from '../../assets/images/fail.svg';
 
 import '../../assets/styles/addform.scss';
 
-import { toastMessage } from '../../utils/toast-helper';
-import { ToastContainer, toast } from 'react-toastify';
+import { useToast } from 'react-toast-wnm';
+
+import { CustomContent, CustomActions } from '../../utils/toast-helper';
 
 import {
   getAllKpiExplorerForm,
@@ -64,8 +65,11 @@ const customSingleValue = ({ data }) => (
 const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   const dispatch = useDispatch();
 
+  const toast = useToast();
+
   const history = useHistory();
   const data = history.location.pathname.split('/');
+
   const kpiId = useParams().id;
   const connectionType = JSON.parse(localStorage.getItem('connectionType'));
   const [option, setOption] = useState({
@@ -87,7 +91,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     aggregate: '',
     datetimecolumns: '',
     addfilter: [],
-    adddimentsions: []
+    dimensions: []
   });
 
   const [errorMsg, setErrorMsg] = useState({
@@ -99,7 +103,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     query: false,
     metriccolumns: false,
     aggregate: false,
-    datetimecolumns: false
+    datetimecolumns: false,
+    dimension: false
   });
 
   const [dataset, setDataset] = useState({ value: 'Table', label: 'Table' });
@@ -149,7 +154,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       obj['aggregate'] = kpiEditData?.aggregation || '';
       obj['datetimecolumns'] = kpiEditData?.datetime_column || '';
       obj['addfilter'] = kpiEditData?.filters || [];
-      obj['adddimentsions'] = kpiEditData?.dimensions || [];
+      obj['dimensions'] = kpiEditData?.dimensions || [];
       setDataset({
         label: kpiEditData?.kpi_type,
         value: kpiEditData?.kpi_type
@@ -209,33 +214,108 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     );
   };
 
+  const customToast = (data) => {
+    const { type, header, description } = data;
+    toast({
+      autoDismiss: true,
+      enableAnimation: true,
+      delay: type === 'success' ? '5000' : '60000',
+      backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
+      borderRadius: '6px',
+      color: '#222222',
+      position: 'bottom-right',
+      minWidth: '240px',
+      width: 'auto',
+      boxShadow: '4px 6px 32px -2px rgba(226, 226, 234, 0.24)',
+      padding: '17px 14px',
+      height: 'auto',
+      border: type === 'success' ? '1px solid #60ca9a' : '1px solid #FEF6F5',
+      type: type,
+      actions: <CustomActions />,
+      content: (
+        <CustomContent
+          header={header}
+          description={description}
+          failed={type === 'success' ? false : true}
+        />
+      )
+    });
+  };
+
   useEffect(() => {
-    if (kpiSubmit && kpiSubmit.status === 'success' && onboarding !== true) {
-      history.push('/kpiexplorer');
-    } else if (
-      kpiSubmit &&
-      kpiSubmit.status === 'success' &&
-      onboarding === true
-    ) {
+    if (kpiSubmit && kpiSubmit.status === 'success' && onboarding === true) {
       setModal(true);
       setText('kpi');
+    } else if (
+      kpiSubmit &&
+      kpiSubmit.status === 'failure' &&
+      onboarding === true
+    ) {
+      customToast({
+        type: 'error',
+        header: 'Failed to Add',
+        description: kpiSubmit.error
+      });
     }
     if (
       kpiUpdateData &&
       kpiUpdateData.status === 'success' &&
       onboarding !== true
     ) {
-      //history.push('/kpiexplorer');
-      toastMessage({ type: 'success', message: 'Successfully updated' });
+      customToast({
+        type: 'success',
+        header: 'Successfully updated',
+        description: kpiUpdateData.message
+      });
     } else if (
       kpiUpdateData &&
       kpiUpdateData.status === 'failed' &&
       onboarding !== true
     ) {
-      toastMessage({ type: 'error', message: 'Failed to update' });
+      customToast({
+        type: 'error',
+        header: 'Failed to update',
+        description: kpiUpdateData.message
+      });
+    }
+    if (kpiSubmit && kpiSubmit.status === 'success' && data[2] === 'add') {
+      history.push('/kpiexplorer');
+      customToast({
+        type: 'success',
+        header: 'Successfully Added',
+        description: kpiSubmit.message
+      });
+    } else if (
+      kpiSubmit &&
+      kpiSubmit.status === 'failure' &&
+      data[2] === 'add'
+    ) {
+      customToast({
+        type: 'error',
+        header: 'Failed to Added',
+        description: kpiSubmit.error
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSubmit, kpiUpdateData]);
+
+  useEffect(() => {
+    if (testQueryData && testQueryData?.status === 'success') {
+      customToast({
+        type: 'success',
+        header: 'Test Connection Success',
+        description: testQueryData.msg
+      });
+    }
+    if (testQueryData && testQueryData?.status === 'failure') {
+      customToast({
+        type: 'error',
+        header: 'Test Connection Failed',
+        description: testQueryData.msg
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [testQueryData]);
 
   const fieldData = () => {
     if (kpiFormData && kpiFormLoading === false) {
@@ -262,7 +342,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       metriccolumns: '',
       aggregate: '',
       datetimecolumns: '',
-      adddimentsions: ''
+      dimensions: []
     });
     setTableAdditional({
       ...tableAdditional,
@@ -318,22 +398,12 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     }
   };
 
-  // useEffect(() => {
-  //   if (kpiField) {
-  //     tableName();
-  //   }
-  //   if (option.tableoption) {
-  //     console.log('Option :', option.tableoption.value);
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [option.tableoption]);
-
   const tableName = (e) => {
     if (kpiField) {
       setErrorMsg({ tablename: false });
       var optionValueArr = [];
       for (const [key, value] of Object.entries(kpiField.tables)) {
-        const valueData = key;
+        const valueData = e.value;
         if (key === valueData) {
           value.table_columns.forEach((data) => {
             optionValueArr.push({
@@ -341,9 +411,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               label: data.name
             });
           });
-
-          setOption({ ...option, metricOption: optionValueArr });
         }
+        setOption({ ...option, metricOption: optionValueArr });
         setFormdata({ ...formdata, tablename: valueData });
       }
 
@@ -364,7 +433,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       metriccolumns: '',
       aggregate: '',
       datetimecolumns: '',
-      adddimentsions: [],
+      dimensions: [],
       tablename: ''
     });
     setTableAdditional({
@@ -430,6 +499,14 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         };
       });
     }
+    if (formdata.dimensions.length === 0) {
+      setErrorMsg((prev) => {
+        return {
+          ...prev,
+          dimension: true
+        };
+      });
+    }
     if (formdata.query === '') {
       setErrorMsg((prev) => {
         return {
@@ -456,7 +533,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         metric: formdata.metriccolumns,
         aggregation: formdata.aggregate,
         datetime_column: formdata.datetimecolumns,
-        dimensions: formdata.adddimentsions,
+        dimensions: formdata.dimensions,
         filters: formdata.addfilter
       };
       if (data[2] === 'edit') {
@@ -479,6 +556,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     };
     dispatch(getTestQuery(data));
   };
+
+  /* This is add filter function code */
 
   // const handleAddClick = () => {
   //   setInputList([...inputList, { country: '', operator: '', value: '' }]);
@@ -523,7 +602,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     );
   } else {
     return (
-      <div>
+      <>
         <div className="form-group">
           <label>KPI Name *</label>
           <input
@@ -581,7 +660,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           <Select
             value={dataset}
             options={datasettype}
-            // options={datasettype}
             classNamePrefix="selectcategory"
             placeholder="Select Dataset Type"
             onChange={(e) => handleDataset(e)}
@@ -673,11 +751,15 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             ) : null}
           </div>
         )}
-        <div>
+        <>
           <div className="form-group">
             <label>Metric Columns *</label>
             <Select
-              options={option.metricOption !== '' && option.metricOption}
+              options={
+                option.metricOption && option.metricOption.length !== 0
+                  ? option.metricOption
+                  : []
+              }
               value={
                 formdata.metriccolumns !== '' && {
                   label: formdata.metriccolumns,
@@ -739,8 +821,13 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           </div>
           <div className="form-group">
             <label>Datetime Columns *</label>
+
             <Select
-              options={option.metricOption !== '' && option.metricOption}
+              options={
+                option.metricOption && option.metricOption.length !== 0
+                  ? option.metricOption
+                  : []
+              }
               value={
                 formdata.datetimecolumns !== '' && {
                   label: formdata.datetimecolumns,
@@ -768,41 +855,48 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               </div>
             ) : null}
           </div>
-          {tableAdditional.tabledimension === true ? (
-            <div className="form-group">
-              <label>Dimensions</label>
-              <Select
-                closeMenuOnSelect={false}
-                blurInputOnSelect={false}
-                value={
-                  formdata.adddimentsions.length !== 0
-                    ? formdata.adddimentsions.map((el) => {
-                        return {
-                          label: el,
-                          value: el
-                        };
-                      })
-                    : []
-                }
-                isMulti
-                options={option.metricOption !== '' && option.metricOption}
-                isDisabled={
-                  data[2] === 'edit' ? editableStatus('dimensions') : false
-                }
-                classNamePrefix="selectcategory"
-                placeholder="Select Dimensions"
-                menuPlacement="top"
-                onChange={(e) => {
-                  setFormdata({
-                    ...formdata,
-                    adddimentsions: e.map((el) => el.value)
-                  });
-                  setOption({ ...option, datetime_column: e.value });
-                }}
-              />
-            </div>
-          ) : null}
 
+          <div className="form-group">
+            <label>Dimensions *</label>
+            <Select
+              closeMenuOnSelect={false}
+              blurInputOnSelect={false}
+              value={
+                formdata.dimensions.length !== 0
+                  ? formdata.dimensions.map((el) => {
+                      return {
+                        label: el,
+                        value: el
+                      };
+                    })
+                  : []
+              }
+              isMulti
+              options={
+                option.metricOption && option.metricOption.length !== 0
+                  ? option.metricOption
+                  : []
+              }
+              isDisabled={
+                data[2] === 'edit' ? editableStatus('dimensions') : false
+              }
+              classNamePrefix="selectcategory"
+              placeholder="Select Dimensions"
+              menuPlacement="top"
+              onChange={(e) => {
+                setFormdata({
+                  ...formdata,
+                  dimensions: e.map((el) => el.value)
+                });
+                setOption({ ...option, datetime_column: e.value });
+              }}
+            />
+            {errorMsg.dimension === true ? (
+              <div className="connection__fail">
+                <p>Select Dimension</p>
+              </div>
+            ) : null}
+          </div>
           {/* {inputList && inputList.length !== 0 && (
             <div className="form-group">
               <label>Filters</label>
@@ -845,6 +939,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
 
           {/* add option form */}
           <div className="add-options-wrapper">
+            {/*Add filter code*/}
             {/* <div
               className="add-options"
               onClick={() =>
@@ -856,19 +951,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               }>
               <label>+ Add Filters</label>
             </div> */}
-
-            {tableAdditional.tabledimension === false ? (
-              <div
-                className="add-options"
-                onClick={() =>
-                  setTableAdditional({
-                    ...tableAdditional,
-                    tabledimension: true
-                  })
-                }>
-                <label> + Add Dimensions</label>
-              </div>
-            ) : null}
           </div>
 
           <div className="form-action">
@@ -896,12 +978,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               </div>
             </button>
           </div>
-        </div>
-        <ToastContainer
-          position={toast.POSITION.BOTTOM_RIGHT}
-          autoClose={5000}
-        />
-      </div>
+        </>
+      </>
     );
   }
 };

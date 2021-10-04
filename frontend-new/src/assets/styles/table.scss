@@ -64,6 +64,7 @@
           height: 56px;
           vertical-align: middle;
           padding: 16px;
+
           &.child-rotate {
             img {
               transform: rotate(90deg);
@@ -164,7 +165,7 @@
   }
   .table-actions {
     display: flex;
-    // justify-content: center;
+    justify-content: center;
     align-items: center;
     .table-action-icon {
       margin-right: 12px;
@@ -200,11 +201,17 @@
     }
   }
   .table-loader {
+    &:hover {
+      background-color: inherit !important;
+    }
     td {
       border: none;
       .load {
         min-height: 80vh;
       }
     }
+  }
+  .data-centered {
+    text-align: center;
   }
 }

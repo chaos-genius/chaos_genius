@@ -88,15 +88,15 @@ def edit_alert(alert_id):
         data = request.get_json()
         meta_info = Alert.meta_info()
         if(data.get('alert_name') and data.get('alert_type')):
-            if alert_obj and alert_obj.active == True:
-                for key,values in data.items():
-                    if chech_editable_field(meta_info,key):
-                        setattr(alert_obj,key,values)
+            if alert_obj:
+                for key, values in data.items():
+                    if chech_editable_field(meta_info, key):
+                        setattr(alert_obj, key, values)
                 alert_obj.save(commit=True)
                 status = "success"
                 message = "Alert updated successfully"
             else:
-                message = "Alert not found or disabled"
+                message = "Alert not found"
                 status = "failure"
         else:
             message = "Alert Name or Type cannot be empty"
@@ -126,6 +126,26 @@ def disable_alert(alert_id):
     except Exception as err:
         status = "failure"
         current_app.logger.info(f"Error in disabling the Alert: {err}")
+    return jsonify({"message": message, "status": status})
+
+
+@blueprint.route("/<int:alert_id>/enable", methods=["GET"])
+def enable_alert(alert_id):
+    """enable alert details."""
+    status, message = "", ""
+    try:
+        alert_obj = Alert.get_by_id(alert_id)
+        if alert_obj:
+            alert_obj.active = True
+            alert_obj.save(commit=True)
+            message = "Alert enabled Successfully"
+            status = "success"
+        else:
+            message = "Alert not found"
+            status = "failure"
+    except Exception as err:
+        status = "failure"
+        current_app.logger.info(f"Error in enabling the Alert: {err}")
     return jsonify({"message": message, "status": status})
 
 

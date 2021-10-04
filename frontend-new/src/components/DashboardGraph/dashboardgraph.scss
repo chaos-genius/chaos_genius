@@ -95,10 +95,16 @@
     padding-bottom: 23px;
     .common-graph {
       width: 49%;
-      min-height: 300px;
+      min-height: 333px;
       border: 1px solid $grey_variation-4;
       box-sizing: border-box;
       border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      .highcharts-container {
+        margin-bottom: 0px;
+      }
     }
   }
   .dashboard-header-wrapper {
@@ -114,7 +120,8 @@
         line-height: $line-height-22;
         letter-spacing: $letter-spacing-point4;
         color: $black_variation-2;
-        padding: 24px 24px 18px 24px;
+        // padding: 24px 24px 18px 24px;
+        padding: 24px;
       }
     }
     &.header-wrapper-disable {
@@ -123,7 +130,8 @@
     .header-collapse {
       cursor: pointer;
       img {
-        padding: 24px 24px 18px 24px;
+        // padding: 24px 24px 18px 24px;
+        padding: 24px;
       }
     }
     .header-disable {

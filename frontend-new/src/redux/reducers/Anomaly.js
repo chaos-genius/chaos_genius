@@ -12,7 +12,7 @@ import {
 
 const initialState = {
   anomalyDetectionLoading: true,
-  anomalyDetectionData: [],
+  anomalyDetectionData: '',
   anomalyDetectionError: false,
   anomalyQualityData: [],
   anomalyQualityDataLoading: true,
@@ -42,7 +42,8 @@ export const anomaly = (state = initialState, action) => {
       return {
         ...state,
         anomalyDetectionError: true,
-        anomalyDetectionLoading: false
+        anomalyDetectionLoading: false,
+        anomalyDetectionData: []
       };
     }
     case ANOMALYDATAQUALITYREQUEST: {

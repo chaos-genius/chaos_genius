@@ -4,6 +4,11 @@ import Select from 'react-select';
 import Tooltip from 'react-tooltip-lite';
 import Modal from 'react-modal';
 
+import moment from 'moment';
+
+import TimePicker from 'rc-time-picker';
+import 'rc-time-picker/assets/index.css';
+
 import Help from '../../assets/images/help.svg';
 import Close from '../../assets/images/close.svg';
 import Success from '../../assets/images/successful.svg';
@@ -13,8 +18,9 @@ import './analystics.scss';
 import { kpiSettingSetup, kpiEditSetup } from '../../redux/actions';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { toastMessage } from '../../utils/toast-helper';
-import { ToastContainer, toast } from 'react-toastify';
+import { useToast } from 'react-toast-wnm';
+
+import { CustomContent, CustomActions } from '../../utils/toast-helper';
 
 const modalOptions = [
   { value: 'prophet', label: 'Prophet' },
@@ -37,11 +43,16 @@ const frequencyOptions = [
 const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   const dispatch = useDispatch();
 
+  const toast = useToast();
+
   const [modelName, setModalName] = useState('');
   const [Sensitivity, setSensitivity] = useState('');
   const [frequency, setFrequency] = useState('');
   const [seasonality, setSeasonality] = useState([]);
   const [isModalOpen, setModalOpen] = useState(false);
+
+  const [schedule, setSchedule] = useState(moment());
+
   const [error, setError] = useState({
     modelName: '',
     sensitivity: '',
@@ -71,12 +82,59 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   useEffect(() => {
     if (kpiSettingData && kpiSettingData.status === 'success' && onboarding) {
       setAnalystics(true);
+    } else if (
+      kpiSettingData &&
+      kpiSettingData.status === 'failure' &&
+      onboarding
+    ) {
+      customToast({
+        type: 'error',
+        header: 'Failed to Add',
+        description: kpiSettingData.msg
+      });
     } else if (kpiSettingData && kpiSettingData.status === 'success') {
-      // setModalOpen(true);
-      toastMessage({ type: 'success', message: 'Successfully updated' });
+      customToast({
+        type: 'success',
+        header: 'Successfully updated',
+        description: kpiSettingData.msg
+      });
+    } else if (kpiSettingData && kpiSettingData.status === 'failure') {
+      customToast({
+        type: 'error',
+        header: 'Failed to update',
+        description: kpiSettingData.msg
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSettingData]);
+
+  const customToast = (data) => {
+    const { type, header, description } = data;
+    toast({
+      autoDismiss: true,
+      enableAnimation: true,
+      delay: type === 'success' ? '5000' : '60000',
+      backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
+      borderRadius: '6px',
+      color: '#222222',
+      position: 'bottom-right',
+      minWidth: '240px',
+      width: 'auto',
+      boxShadow: '4px 6px 32px -2px rgba(226, 226, 234, 0.24)',
+      padding: '17px 14px',
+      height: 'auto',
+      border: type === 'success' ? '1px solid #60ca9a' : '1px solid #FEF6F5',
+      type: type,
+      actions: <CustomActions />,
+      content: (
+        <CustomContent
+          header={header}
+          description={description}
+          failed={type === 'success' ? false : true}
+        />
+      )
+    });
+  };
 
   const onSettingSave = () => {
     var obj = { ...error };
@@ -103,9 +161,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
           sensitivity: Sensitivity,
           seasonality: seasonality,
           frequency: frequency,
-          scheduler_params: {
-            time: '1 minute'
-          }
+          scheduler_params: { time: schedule.format('HH:mm:00') }
         }
       };
       dispatch(kpiSettingSetup(kpi, data));
@@ -124,6 +180,9 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   const closeModal = () => {
     setModalOpen(false);
   };
+  const handleValueChange = (data) => {
+    setSchedule(data);
+  };
 
   if (kpiEditLoading) {
     return (
@@ -137,7 +196,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
         <div className="dashboard-subheader">
           <div className="common-tab configure-tab">
             <ul>
-              <li>Configure Anomoly Detector for Selected KPI</li>
+              <li>Configure Anomaly Detector for Selected KPI</li>
             </ul>
           </div>
         </div>
@@ -243,6 +302,18 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
               </div>
             )}
           </div>
+
+          <div className="form-group">
+            <label>Schedule</label>
+
+            <TimePicker
+              onChange={handleValueChange}
+              defaultValue={schedule}
+              className="time-picker"
+              focusOnOpen={true}
+              showSecond={false}
+            />
+          </div>
           <div className="form-group">
             <label>Expected Seasonality in Data</label>
             <div className="seasonality-setting">
@@ -258,7 +329,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     onSeasonalityChange(e);
                   }}
                 />
-                <label for="monthly">Monthly</label>
+                <label htmlFor="monthly">Monthly</label>
               </div>
               <div className="form-check check-box">
                 <input
@@ -272,8 +343,9 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     onSeasonalityChange(e);
                   }}
                 />
-                <label for="weekly">Weekly</label>
+                <label htmlFor="weekly">Weekly</label>
               </div>
+
               <div className="form-check check-box">
                 <input
                   className="form-check-input"
@@ -286,7 +358,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     onSeasonalityChange(e);
                   }}
                 />
-                <label for="daily">Daily</label>
+                <label htmlFor="daily">Daily</label>
               </div>
             </div>
           </div>
@@ -328,10 +400,6 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
             </div>
           </div>
         </Modal>
-        <ToastContainer
-          position={toast.POSITION.BOTTOM_RIGHT}
-          autoClose={5000}
-        />
       </>
     );
   }

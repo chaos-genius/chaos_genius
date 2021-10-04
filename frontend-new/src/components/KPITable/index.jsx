@@ -23,10 +23,16 @@ import Dimension from './dimension';
 import { formatDate } from '../../utils/date-helper';
 import { kpiDisable } from '../../redux/actions';
 
+import { useToast } from 'react-toast-wnm';
+
+import { CustomContent, CustomActions } from '../../utils/toast-helper';
+
 const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
   const connectionType = JSON.parse(localStorage.getItem('connectionType'));
 
   const dispatch = useDispatch();
+
+  const toast = useToast();
 
   const [data, setData] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -42,16 +48,27 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
 
   useEffect(() => {
     if (kpiDisableData && kpiDisableData.status === 'success') {
+      customToast({
+        type: 'success',
+        header: 'Successfully KPI Deleted',
+        description: kpiDisableData.message
+      });
       changeData((prev) => !prev);
-      setIsOpen(false);
+    } else if (kpiDisableData && kpiDisableData.status === 'failed') {
+      customToast({
+        type: 'error',
+        header: 'Failed to Delete',
+        description: kpiDisableData.message
+      });
     }
+    setIsOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [changeData, kpiDisableData]);
 
   const datasourceIcon = (type) => {
     let textHtml;
     connectionType.find((item) => {
-      if (item.name === type) {
+      if (item.name === type.data_source.connection_type) {
         textHtml = item.icon;
       }
       return '';
@@ -62,10 +79,39 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
           dangerouslySetInnerHTML={{ __html: textHtml }}
           className="datasource-svgicon"
         />
-        <span>{type || '-'}</span>
+        <span>{type?.data_source?.name || '-'}</span>
       </>
     );
   };
+
+  const customToast = (data) => {
+    const { type, header, description } = data;
+    toast({
+      autoDismiss: true,
+      enableAnimation: true,
+      delay: type === 'success' ? '5000' : '60000',
+      backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
+      borderRadius: '6px',
+      color: '#222222',
+      position: 'bottom-right',
+      minWidth: '240px',
+      width: 'auto',
+      boxShadow: '4px 6px 32px -2px rgba(226, 226, 234, 0.24)',
+      padding: '17px 14px',
+      height: 'auto',
+      border: type === 'success' ? '1px solid #60ca9a' : '1px solid #FEF6F5',
+      type: type,
+      actions: <CustomActions />,
+      content: (
+        <CustomContent
+          header={header}
+          description={description}
+          failed={type === 'success' ? false : true}
+        />
+      )
+    });
+  };
+
   return (
     <div class="table-responsive">
       <table className="table">
@@ -73,9 +119,9 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
           <tr>
             <th>KPI Name</th>
             <th>Dimensions</th>
-            <th>Data Source Type</th>
+            <th>Data Source</th>
             <th>Created On</th>
-            <th>Last Modified</th>
+            {/* <th>Last Modified</th> */}
 
             <th></th>
           </tr>
@@ -91,107 +137,110 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
             </tr>
           ) : (
             <>
-              {kpiData && kpiData.length !== 0 ? (
-                kpiData.map((kpi) => {
-                  return (
-                    <tr key={uuidv4()}>
-                      <td>{kpi.name}</td>
-                      <td>
-                        {kpi.dimensions.length !== 0 ? (
-                          <Dimension data={kpi.dimensions}></Dimension>
-                        ) : (
-                          '-'
-                        )}
-                      </td>
-                      <td>
-                        <div className="source-type">
-                          {connectionType
-                            ? datasourceIcon(kpi.connection_type)
-                            : '-'}
-                        </div>
-                      </td>
-                      <td className="date-column-formated">
-                        {formatDate(kpi.created_at) || '-'}
-                      </td>
-                      <td className="date-column-formated">
-                        {formatDate(kpi.created_at) || '-'}
-                      </td>
-                      <td>
-                        <div className="dropdown more-dropdown">
-                          <div
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                            aria-haspopup="true">
-                            <img
-                              src={More}
-                              alt="More"
-                              className="moreoption"
-                              data-bs-toggle="tooltip"
-                              data-bs-placement="bottom"
-                              title="Actions"
-                            />
-                            <img
-                              src={Moreactive}
-                              alt="More"
-                              className="moreoption-active"
-                              data-bs-toggle="tooltip"
-                              data-bs-placement="bottom"
-                              title="Actions"
-                            />
+              {kpiData && kpiData.length !== 0
+                ? kpiData.map((kpi) => {
+                    return (
+                      <tr key={uuidv4()}>
+                        <td>{kpi.name}</td>
+                        <td>
+                          {kpi.dimensions.length !== 0 ? (
+                            <Dimension data={kpi.dimensions}></Dimension>
+                          ) : (
+                            '-'
+                          )}
+                        </td>
+                        <td>
+                          <div className="source-type">
+                            {connectionType ? datasourceIcon(kpi) : '-'}
                           </div>
-                          <ul className="dropdown-menu">
-                            <Link to={`/kpi/settings/${kpi.id}`}>
-                              <li>
-                                <img
-                                  src={Setting}
-                                  alt="Configure Analytics"
-                                  className="action-disable"
-                                />
-                                <img
-                                  src={Settingactive}
-                                  alt="Configure Analytics"
-                                  className="action-active"
-                                />
-                                Configure Analytics
+                        </td>
+                        <td className="date-column-formated">
+                          {formatDate(kpi.created_at) || '-'}
+                        </td>
+                        <td>
+                          {/* dropdown */}
+
+                          <div
+                            className={
+                              kpiData.length !== 1
+                                ? ' more-dropdown dropdown'
+                                : ' more-dropdown '
+                            }>
+                            <div
+                              data-bs-toggle="dropdown"
+                              aria-expanded="false"
+                              aria-haspopup="true">
+                              <img
+                                src={More}
+                                alt="More"
+                                className="moreoption"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="bottom"
+                                title="Actions"
+                              />
+                              <img
+                                src={Moreactive}
+                                alt="More"
+                                className="moreoption-active"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="bottom"
+                                title="Actions"
+                              />
+                            </div>
+                            <ul className="dropdown-menu ">
+                              <Link to={`/kpi/settings/${kpi.id}`}>
+                                <li>
+                                  <img
+                                    src={Setting}
+                                    alt="Configure Analytics"
+                                    className="action-disable"
+                                  />
+                                  <img
+                                    src={Settingactive}
+                                    alt="Configure Analytics"
+                                    className="action-active"
+                                  />
+                                  Configure Analytics
+                                </li>
+                              </Link>
+                              <Link to={`/kpiexplorer/edit/${kpi.id}`}>
+                                <li>
+                                  <img
+                                    src={Edit}
+                                    alt="Edit"
+                                    className="action-disable"
+                                  />
+                                  <img
+                                    src={EditActive}
+                                    alt="Edit"
+                                    className="action-active"
+                                  />
+                                  Edit
+                                </li>
+                              </Link>
+                              <li
+                                className="delete-item"
+                                onClick={() => {
+                                  setIsOpen(true);
+                                  setData(kpi);
+                                }}>
+                                <img src={DeleteActive} alt="Delete" />
+                                Delete
                               </li>
-                            </Link>
-                            <Link to={`/kpiexplorer/edit/${kpi.id}`}>
-                              <li>
-                                <img
-                                  src={Edit}
-                                  alt="Edit"
-                                  className="action-disable"
-                                />
-                                <img
-                                  src={EditActive}
-                                  alt="Edit"
-                                  className="action-active"
-                                />
-                                Edit
-                              </li>
-                            </Link>
-                            <li
-                              className="delete-item"
-                              onClick={() => {
-                                setIsOpen(true);
-                                setData(kpi);
-                              }}>
-                              <img src={DeleteActive} alt="Delete" />
-                              Delete
-                            </li>
-                          </ul>
-                        </div>
+                            </ul>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                : kpiData &&
+                  kpiData !== '' && (
+                    <tr className="empty-table">
+                      <td colSpan={6}>
+                        <Noresult text={kpiSearch} title="KPI" />
                       </td>
                     </tr>
-                  );
-                })
-              ) : (
-                <tr className="empty-table">
-                  <td colSpan={6}>
-                    <Noresult text={kpiSearch} title="KPI" />
-                  </td>
-                </tr>
-              )}
+                  )}
             </>
           )}
         </tbody>

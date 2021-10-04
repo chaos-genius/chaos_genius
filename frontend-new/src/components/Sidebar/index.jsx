@@ -9,8 +9,8 @@ import dashboard from '../../assets/images/sidebar/dashboard.svg';
 import dashboardactive from '../../assets/images/sidebar/dashboard-active.svg';
 import kpi from '../../assets/images/sidebar/kpiexplorer.svg';
 import kpiactive from '../../assets/images/sidebar/kpiexplorer-active.svg';
-import anomolies from '../../assets/images/sidebar/anomolies.svg';
-import anomoliesactive from '../../assets/images/sidebar/anomolies-active.svg';
+//import anomolies from '../../assets/images/sidebar/anomolies.svg';
+//import anomoliesactive from '../../assets/images/sidebar/anomolies-active.svg';
 import datasource from '../../assets/images/sidebar/datasource.svg';
 import datasourceactive from '../../assets/images/sidebar/datasource-active.svg';
 import alerts from '../../assets/images/sidebar/alerts.svg';
@@ -47,10 +47,10 @@ const Sidebar = () => {
               <span>Home</span>
             </Link>
           </li>
-          <li className={location[2] === 'autorca' ? 'active' : ''}>
-            <Link to="/dashboard/autorca/">
+          <li className={location[1] === 'dashboard' ? 'active' : ''}>
+            <Link to="/dashboard/deepdrills/">
               <img
-                src={location[2] === 'autorca' ? dashboardactive : dashboard}
+                src={location[1] === 'dashboard' ? dashboardactive : dashboard}
                 alt="Dashboard"
               />
               <span>Dashboard</span>
@@ -65,7 +65,7 @@ const Sidebar = () => {
               <span>KPI Explorer</span>
             </Link>
           </li>
-          <li className={location[2] === 'anomaly' ? 'active' : ''}>
+          {/* <li className={location[2] === 'anomaly' ? 'active' : ''}>
             <Link to="/dashboard/anomaly/kpi">
               <img
                 src={location[2] === 'anomaly' ? anomoliesactive : anomolies}
@@ -73,7 +73,7 @@ const Sidebar = () => {
               />
               <span>Anomaly</span>
             </Link>
-          </li>
+          </li> */}
         </ul>
         <ul>
           <li className={location[1] === 'datasource' ? 'active' : ''}>

@@ -24,13 +24,13 @@ const KpiExplorer = () => {
   const dispatch = useDispatch();
 
   const [kpiSearch, setKpiSearch] = useState('');
-  const [kpiExplorerData, setKpiExplorerData] = useState([]);
   const [data, setData] = useState(false);
   const [kpiFilter, setKpiFilter] = useState([]);
 
   const { isLoading, kpiExplorerList } = useSelector(
     (state) => state.kpiExplorer
   );
+  const [kpiExplorerData, setKpiExplorerData] = useState(kpiExplorerList);
 
   useEffect(() => {
     store.dispatch(KPI_RESET);
@@ -65,6 +65,7 @@ const KpiExplorer = () => {
       })
     );
   };
+
   useEffect(() => {
     const fetchFilter = () => {
       if (kpiFilter.length === 0) {
@@ -74,7 +75,7 @@ const KpiExplorer = () => {
         kpiFilter &&
           kpiFilter.forEach((data) => {
             kpiExplorerList.forEach((list) => {
-              if (list.connection_type.toLowerCase() === data.toLowerCase()) {
+              if (list.data_source.name.toLowerCase() === data.toLowerCase()) {
                 arr.push(list);
               }
             });
@@ -94,7 +95,7 @@ const KpiExplorer = () => {
     );
   } else {
     return (
-      <div>
+      <>
         {/* common heading and options */}
         <div className="heading-option">
           <div className="heading-title">
@@ -120,17 +121,15 @@ const KpiExplorer = () => {
           </div>
           {/* table section */}
           <div className="table-section">
-            {kpiExplorerList && (
-              <KPITable
-                kpiData={kpiExplorerData}
-                kpiSearch={kpiSearch}
-                changeData={setData}
-                kpiLoading={isLoading}
-              />
-            )}
+            <KPITable
+              kpiData={kpiExplorerData}
+              kpiSearch={kpiSearch}
+              changeData={setData}
+              kpiLoading={isLoading}
+            />
           </div>
         </div>
-      </div>
+      </>
     );
   }
 };

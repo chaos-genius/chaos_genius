@@ -33,7 +33,7 @@ const Routes = () => (
     />
     <PrivateRouteWithSidebar
       exact
-      path={['/dashboard/autorca/', '/dashboard/autorca/:kpi']}
+      path={['/dashboard/deepdrills/', '/dashboard/deepdrills/:kpi']}
       component={(props) => <Dashboard {...props} />}
     />
     <PrivateRouteWithSidebar
@@ -98,7 +98,7 @@ const Routes = () => (
     />
     <PrivateRouteWithSidebar
       exact
-      path="/alerts/new/kpi-alert"
+      path={['/alerts/new/kpi-alert', '/alerts/edit/kpi-alert/:id']}
       component={(props) => <AddKpiAlert {...props} />}
     />
     <PrivateRouteWithSidebar
@@ -119,11 +119,6 @@ const Routes = () => (
       path="/noresult"
       component={(props) => <Result {...props} />}
     />
-    {/* <PrivateRouteWithSidebar
-exact
-path="/kpi/settings"
-component={(props) => <Kpisetting {...props} />}
-/> */}
     <PrivateRouteWithSidebar
       exact
       component={(props) => <Anomolies {...props} />}

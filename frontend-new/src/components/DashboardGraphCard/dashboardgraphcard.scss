@@ -26,8 +26,10 @@
       color: #222222;
       font-size: initial;
       margin-top: 18px;
+      min-width: 45px;
       &:first-child {
         margin-top: 0px;
+        // min-width: 40px;
       }
     }
     span {

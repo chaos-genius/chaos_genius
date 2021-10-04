@@ -159,8 +159,8 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
       );
       setFrequency(
         {
-          label: kpiEditData?.anomaly_params?.frequency,
-          value: kpiEditData?.anomaly_params?.frequency
+          label: kpiEditData?.anomaly_params?.ts_frequency,
+          value: kpiEditData?.anomaly_params?.ts_frequency
         } || ''
       );
       setSeasonality(kpiEditData?.anomaly_params?.seasonality || []);

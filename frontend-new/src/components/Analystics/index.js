@@ -63,7 +63,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     return state.setting;
   });
 
-  const { anomalySettingData } = useSelector((state) => {
+  const { anomalySettingData, anomalySettingLoading } = useSelector((state) => {
     return state.anomaly;
   });
 
@@ -338,7 +338,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     );
   };
 
-  if (metaInfoLoading || kpiEditLoading) {
+  if (metaInfoLoading || kpiEditLoading || anomalySettingLoading) {
     return (
       <div className="load">
         <div className="preload"></div>
@@ -570,6 +570,9 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                 focusOnOpen={true}
                 showSecond={false}
               />
+              {edit === 'completed' &&
+                editableStatus('scheduler_params_time') === 'sensitive' &&
+                editAndSaveButton('schedule')}
             </div>
           </div>
           <div className="form-group">

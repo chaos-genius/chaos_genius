@@ -142,6 +142,10 @@ const AlertsForm = () => {
         webhook_url: editData?.config_setting?.webhook_url,
         channel_name: editData?.config_setting?.channel_name
       });
+      setSlackData({
+        ...slackData,
+        channel_name: editData?.config_setting?.channel_name
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editData]);
@@ -515,7 +519,7 @@ const AlertsForm = () => {
                 <input
                   type="text"
                   className="form-control"
-                  placeholder={placeholderSlack.channel_name || 'Channel Name'}
+                  placeholder="Channel Name"
                   disabled={
                     data[4] === 'edit'
                       ? slackEditableStatus('channel_name') === 'editable'

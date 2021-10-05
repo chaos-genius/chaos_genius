@@ -21,7 +21,7 @@ import store from '../../redux/store';
 import Noalert from '../../components/Noalert';
 
 const RESET_ACTION = {
-  type: 'RESET_EMAIL_DATA'
+  type: 'RESET_ALERT_DATA_Data'
 };
 const RESET_ENABLE_DISABLE_DATA = {
   type: 'RESET_ENABLE_DISABLE_DATA'
@@ -32,8 +32,12 @@ const Alerts = () => {
 
   const toast = useToast();
 
-  const { alertLoading, alertList, kpiAlertEnableData, kpiAlertDisableData } =
-    useSelector((state) => state.alert);
+  const {
+    alertLoading,
+    alertList,
+    kpiAlertEnableData,
+    kpiAlertDisableData
+  } = useSelector((state) => state.alert);
 
   const [alertData, setAlertData] = useState(alertList);
   const [alertSearch, setAlertSearch] = useState('');

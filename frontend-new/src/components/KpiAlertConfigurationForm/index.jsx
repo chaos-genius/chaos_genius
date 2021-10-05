@@ -172,7 +172,7 @@ const KpiAlertConfigurationForm = ({
           optionArr.push({
             value: data.name,
             id: data.id,
-            datasource_id: data.data_source,
+            datasource_id: data?.data_source?.id,
             label: <div className="optionlabel">{datasourceIcon(data)}</div>
           });
           setOption(optionArr);

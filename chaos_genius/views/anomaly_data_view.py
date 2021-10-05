@@ -141,10 +141,8 @@ def kpi_anomaly_params(kpi_id: int):
 
     # when method is GET we just return the anomaly params
     if request.method == "GET":
-        anomaly_params = kpi.as_dict["anomaly_params"]
-        anomaly_params["scheduler_params"] = kpi.as_dict["scheduler_params"]
         return jsonify({
-            "anomaly_params": anomaly_params,
+            "anomaly_params": get_anomaly_params_dict(kpi),
         })
 
     # when it's POST, update anomaly params
@@ -640,6 +638,39 @@ def update_anomaly_params(kpi: Kpi, new_anomaly_params: Dict[str, Any], run_anom
     new_kpi = cast(Kpi, kpi.update(commit=True, anomaly_params=anomaly_params, run_anomaly=run_anomaly))
 
     return new_kpi
+
+
+def get_anomaly_params_dict(kpi: Kpi):
+    anomaly_params = DEFAULT_ANOMALY_PARAMS.copy()
+
+    if kpi.anomaly_params is None:
+        return anomaly_params
+
+    kpi_dict = kpi.as_dict
+
+    anomaly_params_db = kpi_dict["anomaly_params"]
+    scheduler_params_db = kpi_dict.get("scheduler_params")
+
+    # FIXME: temporary sanitation
+    if "period" in anomaly_params_db and "anomaly_period" not in anomaly_params_db:
+        anomaly_params_db["anomaly_period"] = anomaly_params_db["period"]
+    if "ts_frequency" in anomaly_params_db and "frequency" not in anomaly_params_db:
+        anomaly_params_db["frequency"] = anomaly_params_db["ts_frequency"]
+
+    anomaly_params.update(
+        {k: v for k, v in anomaly_params_db.items() if k in ANOMALY_PARAM_FIELDS}
+    )
+
+    if scheduler_params_db is not None:
+        anomaly_params.update(
+            {k: v for k, v in scheduler_params_db.items() if k in ANOMALY_PARAM_FIELDS}
+        )
+
+        anomaly_params["scheduler_params_time"] = (
+            scheduler_params_db.get("time", DEFAULT_ANOMALY_PARAMS["scheduler_params_time"])
+        )
+
+    return anomaly_params
 
 
 SCHEDULER_PARAM_FIELDS = {"time"}

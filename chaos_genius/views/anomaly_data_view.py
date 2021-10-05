@@ -366,7 +366,8 @@ ANOMALY_PARAM_FIELDS = {
     "sensitivity",
     "seasonality",
     "frequency",
-    "scheduler_params_time"
+    "scheduler_params_time",
+    "scheduler_frequency",
 }
 
 ANOMALY_PARAMS_META = {
@@ -452,6 +453,18 @@ ANOMALY_PARAMS_META = {
             "is_sensitive": False,
             "type": "time",
         },
+        {
+            "name": "scheduler_frequency",
+            "is_editable": True,
+            "is_sensitive": False,
+            "type": "select",
+            "options": [
+                {
+                    "value": "D",
+                    "name": "Daily",
+                },
+            ]
+        },
     ],
 }
 
@@ -493,22 +506,38 @@ def validate_partial_anomaly_params(anomaly_params: Dict[str, Any]) -> Tuple[str
                 anomaly_params
             )
 
-    frequency_types = {"D", "H"}
-    if "frequency" in anomaly_params:
-        frequency = anomaly_params["frequency"]
-
+    def validate_frequency(frequency, field_name):
+        frequency_types = {"D", "H"}
         if not isinstance(frequency, str):
             return (
-                f"frequency must be a string, one of: {', '.join(frequency_types)}. Got: {frequency}",
+                f"{field_name} must be a string, one of: {', '.join(frequency_types)}. Got: {frequency}",
                 anomaly_params)
 
-        anomaly_params["frequency"] = frequency
+        anomaly_params[field_name] = frequency
 
         if frequency not in frequency_types:
             return (
-                f"frequency must be one of: {', '.join(frequency_types)}. Got: {frequency}",
+                f"{field_name} must be one of: {', '.join(frequency_types)}. Got: {frequency}",
                 anomaly_params
             )
+
+        return "", anomaly_params
+
+    if "frequency" in anomaly_params:
+        frequency = anomaly_params["frequency"]
+
+        err, anomaly_params = validate_frequency(frequency, "frequency")
+
+        if err != "":
+            return err, anomaly_params
+
+    if "scheduler_frequency" in anomaly_params:
+        frequency = anomaly_params["scheduler_frequency"]
+
+        err, anomaly_params = validate_frequency(frequency, "scheduler_frequency")
+
+        if err != "":
+            return err, anomaly_params
 
     sensitivity_types = {"high", "low", "medium"}
     if "sensitivity" in anomaly_params:
@@ -578,7 +607,9 @@ def update_anomaly_params(kpi: Kpi, new_anomaly_params: Dict[str, Any], run_anom
 
     # update the non-nested fields directly
     # currently the only nested field is scheduler_params
-    for field in (fields - {"scheduler_params_time"}) & new_anomaly_params.keys():
+    for field in (
+        fields - {"scheduler_params_time", "scheduler_frequency"}
+    ) & new_anomaly_params.keys():
         anomaly_params[field] = new_anomaly_params[field]
 
     if "scheduler_params_time" in new_anomaly_params:
@@ -589,6 +620,18 @@ def update_anomaly_params(kpi: Kpi, new_anomaly_params: Dict[str, Any], run_anom
             scheduler_params = {}
 
         scheduler_params["time"] = new_anomaly_params["scheduler_params_time"]
+
+        kpi.scheduler_params = scheduler_params
+        flag_modified(kpi, "scheduler_params")
+
+    if "scheduler_frequency" in new_anomaly_params:
+        # TODO: use JSONB functions to update these, to avoid data races
+        scheduler_params: Optional[dict] = kpi.scheduler_params
+
+        if scheduler_params is None:
+            scheduler_params = {}
+
+        scheduler_params["scheduler_frequency"] = new_anomaly_params["scheduler_frequency"]
 
         kpi.scheduler_params = scheduler_params
         flag_modified(kpi, "scheduler_params")
@@ -683,7 +726,18 @@ def anomaly_settings_status(kpi_id):
 
         response = DEFAULT_ANOMALY_PARAMS.copy()
         response.update({k: v for k, v in data.items() if k in ANOMALY_PARAM_FIELDS})
-        response["scheduler_params_time"] = scheduler_params["time"] if scheduler_params else None
+        response["scheduler_params_time"] = (
+            scheduler_params.get("time", DEFAULT_SCHEDULER_PARAMS["time"])
+            if scheduler_params
+            else DEFAULT_SCHEDULER_PARAMS["time"]
+        )
+        response["scheduler_frequency"] = (
+            scheduler_params.get(
+                "scheduler_frequency", DEFAULT_SCHEDULER_PARAMS["scheduler_frequency"]
+            )
+            if scheduler_params
+            else DEFAULT_SCHEDULER_PARAMS["scheduler_frequency"]
+        )
         response['is_anomaly_setup'] = True
 
     rca_data = RcaData.query.filter(
@@ -703,17 +757,19 @@ DEFAULT_SCHEDULER_PARAMS = {
     "anomaly_status": None,
     "last_scheduled_time": None,
     "rca_status": None,
-    "time": None
-  }
+    "time": "11:00:00",
+    "scheduler_frequency": "D",
+}
 
 DEFAULT_ANOMALY_PARAMS = {
-  "anomaly_period": None,
-  "frequency": None,
-  "model_name": None,
-  "scheduler_params_time": None,
-  "seasonality": [],
-  "sensitivity": None,
-  "is_anomaly_setup": False
+    "anomaly_period": None,
+    "frequency": None,
+    "model_name": None,
+    "scheduler_params_time": None,
+    "scheduler_frequency": None,
+    "seasonality": [],
+    "sensitivity": None,
+    "is_anomaly_setup": False
 }
 
 

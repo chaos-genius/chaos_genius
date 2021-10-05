@@ -730,46 +730,20 @@ def validate_partial_scheduler_params(scheduler_params: Dict[str, Any]) -> Tuple
 @blueprint.route("/<int:kpi_id>/settings", methods=["GET"])
 # @cache.memoize(timeout=30000)
 def anomaly_settings_status(kpi_id):
-    current_app.logger.info(f"Retreiving anomaly settings for kpi: {kpi_id}")
-    data = None
-    scheduler_params = None
-    try:
-        kpi_info = get_kpi_data_from_id(kpi_id)
-        data = kpi_info.get('anomaly_params')
-        scheduler_params = kpi_info.get('scheduler_params')
-    except ValueError:
-        current_app.logger.info(f"No KPI with id: {kpi_id} exists")
-    except Exception as err:
-        print(traceback.format_exc())
-        current_app.logger.info(f"Error Found: {err}")
+    current_app.logger.info(f"Retrieving anomaly settings for kpi: {kpi_id}")
+    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
 
-    if data is None:
-        response = DEFAULT_ANOMALY_PARAMS.copy()
-    else:
-        # FIXME: temporary sanitation
-        if 'period' in data:
-            data['anomaly_period'] = data['period']
-            data.pop('period')
+    if kpi is None:
+        return jsonify(
+            {"error": f"Could not find KPI for ID: {kpi_id}", "status": "failure"}
+        ), 400
 
-        if 'ts_frequency' in data:
-            data['frequency'] = data['ts_frequency']
-            data.pop('ts_frequency')
+    response = DEFAULT_STATUS.copy()
 
-        response = DEFAULT_ANOMALY_PARAMS.copy()
-        response.update({k: v for k, v in data.items() if k in ANOMALY_PARAM_FIELDS})
-        response["scheduler_params_time"] = (
-            scheduler_params.get("time", DEFAULT_SCHEDULER_PARAMS["time"])
-            if scheduler_params
-            else DEFAULT_SCHEDULER_PARAMS["time"]
-        )
-        response["scheduler_frequency"] = (
-            scheduler_params.get(
-                "scheduler_frequency", DEFAULT_SCHEDULER_PARAMS["scheduler_frequency"]
-            )
-            if scheduler_params
-            else DEFAULT_SCHEDULER_PARAMS["scheduler_frequency"]
-        )
-        response['is_anomaly_setup'] = True
+    if kpi.scheduler_params is not None:
+        response.update({k: v for k, v in kpi.scheduler_params.items() if k in DEFAULT_STATUS})
+
+    response["is_anomaly_setup"] = kpi.anomaly_params is not None
 
     rca_data = RcaData.query.filter(
         RcaData.kpi_id == kpi_id
@@ -784,23 +758,24 @@ def anomaly_settings_status(kpi_id):
     return jsonify(response)
 
 
-DEFAULT_SCHEDULER_PARAMS = {
-    "anomaly_status": None,
-    "last_scheduled_time": None,
-    "rca_status": None,
-    "time": "11:00:00",
-    "scheduler_frequency": "D",
-}
-
 DEFAULT_ANOMALY_PARAMS = {
     "anomaly_period": None,
     "frequency": None,
     "model_name": None,
-    "scheduler_params_time": None,
-    "scheduler_frequency": None,
     "seasonality": [],
     "sensitivity": None,
-    "is_anomaly_setup": False
+    "is_anomaly_setup": False,
+
+    # scheduler params
+    "scheduler_params_time": "11:00:00",
+    "scheduler_frequency": "D",
+}
+
+DEFAULT_STATUS: Dict[str, Any] = {
+    "anomaly_status": None,
+    "last_scheduled_time_anomaly": None,
+    "last_scheduled_time_rca": None,
+    "rca_status": None,
 }
 
 

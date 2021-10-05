@@ -146,7 +146,14 @@ def kpi_anomaly_params(kpi_id: int):
         })
 
     # when it's POST, update anomaly params
-    current_app.logger.info(f"Updating anomaly parameters for KPI ID: {kpi_id}")
+
+    # check if this is first time anomaly setup or edit config
+    is_first_time = kpi.anomaly_params is None
+
+    if is_first_time:
+        current_app.logger.info(f"Adding anomaly parameters for KPI ID: {kpi_id}")
+    else:
+        current_app.logger.info(f"Updating existing anomaly parameters for KPI ID: {kpi_id}")
 
     if not request.is_json:
         return jsonify(
@@ -165,14 +172,14 @@ def kpi_anomaly_params(kpi_id: int):
     if err != "":
         return jsonify({"error": err, "status": "failure"}), 400
 
-    new_kpi = update_anomaly_params(kpi, new_anomaly_params)
+    err, new_kpi = update_anomaly_params(kpi, new_anomaly_params, check_editable=not is_first_time)
+
+    if err != "":
+        return jsonify({"error": err, "status": "failure"}), 400
 
     # we ensure anomaly task is run as soon as analytics is configured
-    # we consider anomaly to be configured when the payload has model_name in it
-    # otherwise, it's an update of the existing anomaly_params, so we avoid running
-    #
     # we also run RCA at the same time
-    if "model_name" in new_anomaly_params:
+    if is_first_time:
         # TODO: move this import to top and fix import issue
         from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task, ready_rca_task
         anomaly_task = ready_anomaly_task(new_kpi.id)
@@ -541,7 +548,9 @@ def anomaly_params_field_is_editable(field_name: str):
     return False
 
 
-def validate_partial_anomaly_params(anomaly_params: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
+def validate_partial_anomaly_params(
+    anomaly_params: Dict[str, Any]
+) -> Tuple[str, Dict[str, Any]]:
     """Check if given *partial* anomaly parameters have valid keys and values.
 
     Returns an error string. Empty string "" means the params are valid.
@@ -578,8 +587,7 @@ def validate_partial_anomaly_params(anomaly_params: Dict[str, Any]) -> Tuple[str
                 anomaly_params
             )
 
-    def validate_frequency(frequency, field_name):
-        frequency_types = {"D", "H"}
+    def validate_frequency(frequency, field_name, frequency_types={"D", "H"}):
         if not isinstance(frequency, str):
             return (
                 f"{field_name} must be a string, one of: {', '.join(frequency_types)}. Got: {frequency}",
@@ -606,7 +614,7 @@ def validate_partial_anomaly_params(anomaly_params: Dict[str, Any]) -> Tuple[str
     if "scheduler_frequency" in anomaly_params:
         frequency = anomaly_params["scheduler_frequency"]
 
-        err, anomaly_params = validate_frequency(frequency, "scheduler_frequency")
+        err, anomaly_params = validate_frequency(frequency, "scheduler_frequency", {"D"})
 
         if err != "":
             return err, anomaly_params
@@ -664,24 +672,43 @@ def validate_partial_anomaly_params(anomaly_params: Dict[str, Any]) -> Tuple[str
     return "", anomaly_params
 
 
-def update_anomaly_params(kpi: Kpi, new_anomaly_params: Dict[str, Any], run_anomaly=True) -> Kpi:
+def update_anomaly_params(
+    kpi: Kpi,
+    new_anomaly_params: Dict[str, Any],
+    run_anomaly=True,
+    check_editable=False
+) -> Tuple[str, Kpi]:
     """Update anomaly_params for the kpi with the given *partial* *validated* anomaly parameters.
 
     The new_anomaly_params must be validated using validate_partial_anomaly_params.
 
     run_anomaly is also set to True in the Kpi table, by default.
+
+    If check_editable is set to True, only the editable fields are allowed to be updated.
     """
     fields = ANOMALY_PARAM_FIELDS
 
     anomaly_params: dict = kpi.anomaly_params or {}
 
-    # TODO: check if fields are marked as non-editable
+    def is_editable(field_name: str, old_val, new_val):
+        if not check_editable:
+            return ""
+
+        if not anomaly_params_field_is_editable(field_name):
+            if old_val != new_val:
+                return f"{field_name} is not editable. Old value: {old_val}, New value: {new_val}"
+
+        return ""
 
     # update the non-nested fields directly
     # currently the only nested field is scheduler_params
     for field in (
         fields - {"scheduler_params_time", "scheduler_frequency"}
     ) & new_anomaly_params.keys():
+        err = is_editable(field, anomaly_params.get(field), new_anomaly_params[field])
+        if err != "":
+            return err, kpi
+
         anomaly_params[field] = new_anomaly_params[field]
 
     if "scheduler_params_time" in new_anomaly_params:
@@ -690,6 +717,14 @@ def update_anomaly_params(kpi: Kpi, new_anomaly_params: Dict[str, Any], run_anom
 
         if scheduler_params is None:
             scheduler_params = {}
+
+        err = is_editable(
+            "scheduler_params_time",
+            scheduler_params.get("time"),
+            new_anomaly_params["scheduler_params_time"]
+        )
+        if err != "":
+            return err, kpi
 
         scheduler_params["time"] = new_anomaly_params["scheduler_params_time"]
 
@@ -703,6 +738,14 @@ def update_anomaly_params(kpi: Kpi, new_anomaly_params: Dict[str, Any], run_anom
         if scheduler_params is None:
             scheduler_params = {}
 
+        err = is_editable(
+            "scheduler_frequency",
+            scheduler_params.get("scheduler_frequency"),
+            new_anomaly_params["scheduler_frequency"]
+        )
+        if err != "":
+            return err, kpi
+
         scheduler_params["scheduler_frequency"] = new_anomaly_params["scheduler_frequency"]
 
         kpi.scheduler_params = scheduler_params
@@ -711,7 +754,7 @@ def update_anomaly_params(kpi: Kpi, new_anomaly_params: Dict[str, Any], run_anom
     flag_modified(kpi, "anomaly_params")
     new_kpi = cast(Kpi, kpi.update(commit=True, anomaly_params=anomaly_params, run_anomaly=run_anomaly))
 
-    return new_kpi
+    return "", new_kpi
 
 
 def get_anomaly_params_dict(kpi: Kpi):

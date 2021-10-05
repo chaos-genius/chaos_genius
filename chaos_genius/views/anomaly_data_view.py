@@ -192,6 +192,37 @@ def kpi_anomaly_params(kpi_id: int):
     })
 
 
+@blueprint.route("/<int:kpi_id>/settings", methods=["GET"])
+# @cache.memoize(timeout=30000)
+def anomaly_settings_status(kpi_id):
+    current_app.logger.info(f"Retrieving anomaly settings for kpi: {kpi_id}")
+    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
+
+    if kpi is None:
+        return jsonify(
+            {"error": f"Could not find KPI for ID: {kpi_id}", "status": "failure"}
+        ), 400
+
+    response = DEFAULT_STATUS.copy()
+
+    if kpi.scheduler_params is not None:
+        response.update({k: v for k, v in kpi.scheduler_params.items() if k in DEFAULT_STATUS})
+
+    response["is_anomaly_setup"] = kpi.anomaly_params is not None
+
+    rca_data = RcaData.query.filter(
+        RcaData.kpi_id == kpi_id
+    ).all()
+    if len(rca_data) == 0:
+        is_precomputed = False
+    else:
+        is_precomputed = True
+    response["is_rca_precomputed"] = is_precomputed
+
+    current_app.logger.info(f"Anomaly settings retrieved for kpi: {kpi_id}")
+    return jsonify(response)
+
+
 def fill_graph_data(row, graph_data, precision=2):
     """Fills graph_data with intervals, values, and predicted_values for
     a given row.
@@ -358,16 +389,15 @@ def get_end_date(kpi_info: dict) -> datetime:
     return end_date
 
 
-ANOMALY_PARAM_FIELDS = {
-    "anomaly_period",
-    "model_name",
-    "sensitivity",
-    "seasonality",
-    "frequency",
-    "scheduler_params_time",
-    "scheduler_frequency",
-}
+def get_anomaly_end_date(kpi_id: int):
+    anomaly_end_date = AnomalyDataOutput.query.filter(
+            AnomalyDataOutput.kpi_id == kpi_id
+        ).order_by(AnomalyDataOutput.data_datetime.desc()).first()
+    print(anomaly_end_date.as_dict['data_datetime'])
+    return anomaly_end_date.as_dict['data_datetime']
 
+
+# --- anomaly params meta information --- #
 ANOMALY_PARAMS_META = {
     "name": "anomaly_params",
     "fields": [
@@ -465,6 +495,50 @@ ANOMALY_PARAMS_META = {
         },
     ],
 }
+
+
+ANOMALY_PARAM_FIELDS = {
+    "anomaly_period",
+    "model_name",
+    "sensitivity",
+    "seasonality",
+    "frequency",
+    "scheduler_params_time",
+    "scheduler_frequency",
+}
+
+
+DEFAULT_ANOMALY_PARAMS = {
+    "anomaly_period": None,
+    "frequency": None,
+    "model_name": None,
+    "seasonality": [],
+    "sensitivity": None,
+    "is_anomaly_setup": False,
+
+    # scheduler params
+    "scheduler_params_time": "11:00:00",
+    "scheduler_frequency": "D",
+}
+
+
+DEFAULT_STATUS: Dict[str, Any] = {
+    "anomaly_status": None,
+    "last_scheduled_time_anomaly": None,
+    "last_scheduled_time_rca": None,
+    "rca_status": None,
+}
+
+
+# --- anomaly params helper functions --- #
+# TODO: move default, meta and anomaly_params helpers to a class?
+
+def anomaly_params_field_is_editable(field_name: str):
+    for field in ANOMALY_PARAMS_META["fields"]:
+        if field["name"] == field_name:
+            return field["is_editable"]
+
+    return False
 
 
 def validate_partial_anomaly_params(anomaly_params: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
@@ -673,9 +747,6 @@ def get_anomaly_params_dict(kpi: Kpi):
     return anomaly_params
 
 
-SCHEDULER_PARAM_FIELDS = {"time"}
-
-
 def validate_scheduled_time(time):
     if not isinstance(time, str):
         return f"time must be a string. Got: {type(time).__name__}", time
@@ -709,79 +780,3 @@ def validate_scheduled_time(time):
         return (f"second must be between 0 and 60 (inclusive). Got: {second}", time)
 
     return "", time
-
-
-def validate_partial_scheduler_params(scheduler_params: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
-    """Check if the given *partial* scheduler params have valid keys and values.
-
-    see validate_partial_anomaly_params for return value meaning.
-    """
-    if "time" in scheduler_params:
-        time = scheduler_params["time"]
-
-        err, time = validate_scheduled_time(time)
-
-        if err != "":
-            return err, scheduler_params
-
-    return "", scheduler_params
-
-
-@blueprint.route("/<int:kpi_id>/settings", methods=["GET"])
-# @cache.memoize(timeout=30000)
-def anomaly_settings_status(kpi_id):
-    current_app.logger.info(f"Retrieving anomaly settings for kpi: {kpi_id}")
-    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
-
-    if kpi is None:
-        return jsonify(
-            {"error": f"Could not find KPI for ID: {kpi_id}", "status": "failure"}
-        ), 400
-
-    response = DEFAULT_STATUS.copy()
-
-    if kpi.scheduler_params is not None:
-        response.update({k: v for k, v in kpi.scheduler_params.items() if k in DEFAULT_STATUS})
-
-    response["is_anomaly_setup"] = kpi.anomaly_params is not None
-
-    rca_data = RcaData.query.filter(
-        RcaData.kpi_id == kpi_id
-    ).all()
-    if len(rca_data) == 0:
-        is_precomputed = False
-    else:
-        is_precomputed = True
-    response["is_rca_precomputed"] = is_precomputed
-
-    current_app.logger.info(f"Anomaly settings retrieved for kpi: {kpi_id}")
-    return jsonify(response)
-
-
-DEFAULT_ANOMALY_PARAMS = {
-    "anomaly_period": None,
-    "frequency": None,
-    "model_name": None,
-    "seasonality": [],
-    "sensitivity": None,
-    "is_anomaly_setup": False,
-
-    # scheduler params
-    "scheduler_params_time": "11:00:00",
-    "scheduler_frequency": "D",
-}
-
-DEFAULT_STATUS: Dict[str, Any] = {
-    "anomaly_status": None,
-    "last_scheduled_time_anomaly": None,
-    "last_scheduled_time_rca": None,
-    "rca_status": None,
-}
-
-
-def get_anomaly_end_date(kpi_id: int):
-    anomaly_end_date = AnomalyDataOutput.query.filter(
-            AnomalyDataOutput.kpi_id == kpi_id
-        ).order_by(AnomalyDataOutput.data_datetime.desc()).first()
-    print(anomaly_end_date.as_dict['data_datetime'])
-    return anomaly_end_date.as_dict['data_datetime']

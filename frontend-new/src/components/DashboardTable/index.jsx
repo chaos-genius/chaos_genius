@@ -131,8 +131,8 @@ const DashboardTable = ({ rcaAnalysisData }) => {
                         <td className="date-column-formated">
                           {data.g1_count}
                         </td>
-                        <td className="date-column-formated">{data.g2_agg}</td>
                         <td className="date-column-formated">{data.g1_size}</td>
+                        <td className="date-column-formated">{data.g2_agg}</td>
                         <td className="date-column-formated">
                           {data.g2_count}
                         </td>

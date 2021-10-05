@@ -2,6 +2,7 @@ import os
 import io
 import json
 import pickle
+from typing import Optional
 import pandas as pd
 import datetime
 from chaos_genius.utils.io_helper import is_file_exists
@@ -175,7 +176,6 @@ class AnomalyAlertController:
             print(f"Skipping alert with ID {self.alert_info['id']} since it was already run")
             return True
 
-        lower_limit_dt = curr_date_time - check_time
         alert.update(commit=True, last_alerted=curr_date_time)
 
         lower_limit_dt = curr_date_time - datetime.timedelta(hours = 72, minutes = 0) #TODO - the delta needs to be variable

@@ -17,6 +17,7 @@ import * as am4core from '@amcharts/amcharts4/core';
 import * as am4charts from '@amcharts/amcharts4/charts';
 
 import HierarchicalTable from '../HierarchicalTable';
+// import DeepdrillsEmptyState from '../DeepdrillsEmptyState';
 
 import {
   getDashboardAggregation,
@@ -70,8 +71,8 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
     label: 'Current Month on Last Month'
   });
   const [dimension, setDimension] = useState({
-    value: 'multidimension',
-    label: 'Multidimension'
+    value: 'singledimension',
+    label: 'Singledimension'
   });
 
   const { aggregationData, aggregationLoading } = useSelector(
@@ -520,9 +521,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
                 <>
                   {hierarchicalData &&
                     hierarchicalData?.data_table.length !== 0 && (
-                      <HierarchicalTable
-                        hierarchicalData={hierarchicalData.data_table}
-                      />
+                      <HierarchicalTable hierarchicalData={hierarchicalData} />
                     )}
                 </>
               )}
@@ -531,6 +530,9 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
         </div>
       </div>
     </>
+    // <div className="dashboard-layout setup-layout-empty">
+    //   <DeepdrillsEmptyState />
+    // </div>
   );
 };
 export default Dashboardgraph;

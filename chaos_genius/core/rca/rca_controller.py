@@ -313,18 +313,26 @@ class RootCauseAnalysisController:
         df = df.fillna(np.nan).replace([np.nan], [None])
         return df.to_dict(orient="records")
 
-    def _get_rca(self, rca: RootCauseAnalysis, dimension: str = None) -> dict:
+    def _get_rca(
+        self,
+        rca: RootCauseAnalysis,
+        dimension: str = None,
+        timeline: str = "mom"
+    ) -> dict:
         """Get RCA output for specific dimension.
 
         :param rca: RootCauseAnalysis object
         :type rca: RootCauseAnalysis
         :param dimension: dimension to compute for, defaults to None
         :type dimension: str, optional
+        :param timeline: dimension to compute for, defaults to "mom"
+        :type timeline: str, optional
         :return: rca dictionary
         :rtype: dict
         """
-        impact_table, impact_table_col_map = rca.get_impact_rows_with_columns(
-            dimension)
+        impact_table = rca.get_impact_rows(dimension)
+        impact_table_col_map = rca.get_impact_column_map(timeline)
+
         impact_table = self._process_rca_output(impact_table)
 
         waterfall_table = rca.get_waterfall_table_rows(dimension)
@@ -340,18 +348,29 @@ class RootCauseAnalysisController:
             },
         }
 
-    def _get_htable(self, rca: RootCauseAnalysis, dimension: str) -> dict:
+    def _get_htable(
+        self,
+        rca: RootCauseAnalysis,
+        dimension: str,
+        timeline: str = "mom"
+    ) -> dict:
         """Get hierarchical table output for specific dimension.
 
         :param rca: RootCauseAnalysis object
         :type rca: RootCauseAnalysis
         :param dimension: dimension to compute for
         :type dimension: str
+        :param timeline: dimension to compute for, defaults to "mom"
+        :type timeline: str, optional
         :return: hierarchical table data
         :rtype: dict
         """
         htable = rca.get_hierarchical_table(dimension)
-        return {"data_table": self._process_rca_output(htable)}
+        impact_table_col_map = rca.get_impact_column_map(timeline)
+        return {
+            'data_table': self._process_rca_output(htable),
+            "data_columns": impact_table_col_map
+        }
 
     def compute(self):
         """Compute RCA for KPI and store results."""
@@ -377,7 +396,7 @@ class RootCauseAnalysisController:
             for dim in dims:
                 # RCA
                 try:
-                    rca_data = self._get_rca(rca, dim)
+                    rca_data = self._get_rca(rca, dim, timeline)
                     output.append(
                         self._output_to_row("rca", rca_data, timeline, dim))
                 except:  # noqa E722
@@ -385,7 +404,7 @@ class RootCauseAnalysisController:
                 # Hierarchical Table
                 if dim is not None:
                     try:
-                        htable_data = self._get_htable(rca, dim)
+                        htable_data = self._get_htable(rca, dim, timeline)
                         output.append(
                             self._output_to_row(
                                 "htable", htable_data, timeline, dim)

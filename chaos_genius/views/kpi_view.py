@@ -23,11 +23,11 @@ from chaos_genius.core.utils.kpi_validation import validate_kpi
 from chaos_genius.core.utils.round import round_number
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.databases.models.kpi_model import Kpi
+from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.extensions import cache, db
 from chaos_genius.databases.db_utils import chech_editable_field
-
 
 blueprint = Blueprint("api_kpi", __name__)
 
@@ -58,25 +58,54 @@ def kpi():
         # Perform KPI Validation
         status, message = validate_kpi(new_kpi.as_dict)
         if status is not True:
-            return jsonify({"error": message, "status": "failure"})
+            return jsonify({
+                "error": message,
+                "status": "failure",
+                "is_critical": "true"
+                })
 
         new_kpi.save(commit=True)
+
+        # TODO: Fix circular import error
+        from chaos_genius.jobs.anomaly_tasks import ready_rca_task
+        # run rca as soon as new KPI is added
+        rca_task = ready_rca_task(new_kpi.id)
+        if rca_task is None:
+            print(f"Could not run RCA task since newly added KPI was not found: {new_kpi.id}")
+        else:
+            rca_task.apply_async()
+
         return jsonify({"message": f"KPI {new_kpi.name} has been created successfully.", "status": "success"})
 
     elif request.method == 'GET':
         results = db.session.query(Kpi, DataSource) \
             .join(DataSource, Kpi.data_source == DataSource.id) \
+            .filter(Kpi.active==True) \
             .order_by(Kpi.created_at.desc()) \
             .all()
         kpis = []
         for row in results:
-            kpi = row[0].safe_dict
-            data_source = row[1].safe_dict
-            data_source.update(kpi)
-            # TODO: Provision to active and deactivate the KPI
-            if data_source['active'] == True:
-                kpis.append(data_source)
+            kpi_info = row[0].safe_dict
+            data_source_info = row[1].safe_dict
+            kpi_info["data_source"] = data_source_info
+            kpis.append(kpi_info)
         return jsonify({"count": len(kpis), "data": kpis})
+
+
+TIME_DICT = {
+    "mom": {
+        "expansion": "month", 
+        "time_delta": timedelta(days = 30, hours = 0, minutes = 0)
+    },
+    "wow": {
+        "expansion": "week", 
+        "time_delta": timedelta(days = 7, hours = 0, minutes = 0)
+    },
+    "dod": {
+        "expansion": "day", 
+        "time_delta": timedelta(days = 1, hours = 0, minutes = 0)
+    }
+}
 
 
 @blueprint.route("/get-dashboard-list", methods=["GET"])
@@ -85,7 +114,7 @@ def get_all_kpis():
 
     status, message = "success", ""
     timeline = request.args.get("timeline", "wow")
-    results = Kpi.query.filter(Kpi.active == True).all()
+    results = Kpi.query.filter(Kpi.active == True).order_by(Kpi.created_at.desc()).all()
 
     ret = []
     static = None
@@ -105,9 +134,10 @@ def get_all_kpis():
             info['current'] = 0
             info['change'] = 0
 
-        info["timeline"] = "week" if timeline == "wow" else "month"
-        info['anomaly_count'] = random.randint(1, 20) #TODO
+        info["timeline"] = TIME_DICT[timeline]["expansion"]
+        info['anomaly_count'] = get_anomaly_count(kpi.id, timeline)
         info['graph_data'] = kpi_line_data(kpi.id)
+        info['percentage_change'] = find_percentage_change(info['current'], info['prev'])
         ret.append(info)
 
     return jsonify({"data": ret, "message": message, "status": status})
@@ -368,3 +398,26 @@ def get_end_date(kpi_id):
         return datetime.today().date()
     else:
         return datetime.strptime(end_date, "%Y-%m-%d").date()
+
+def find_percentage_change(curr_val, prev_val):
+
+    if prev_val == 0:
+        return "--"
+
+    change = curr_val - prev_val
+    percentage_change = (change / prev_val) * 100
+    return str(round_number(percentage_change))
+
+def get_anomaly_count(kpi_id, timeline):
+
+    curr_date = datetime.now()
+    lower_time_dt = curr_date - TIME_DICT[timeline]["time_delta"]
+
+    anomaly_data = AnomalyDataOutput.query.filter(
+                        AnomalyDataOutput.kpi_id == kpi_id,
+                        AnomalyDataOutput.anomaly_type == 'overall',
+                        AnomalyDataOutput.is_anomaly == 1,
+                        AnomalyDataOutput.data_datetime >= lower_time_dt
+                    ).all() 
+
+    return len(anomaly_data)

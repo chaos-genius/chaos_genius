@@ -24,3 +24,12 @@ RESAMPLE_FREQUENCY = {
     "daily": "D",
     "hourly": "H"
 }
+
+MODEL_NAME_MAPPING = {
+    "StdDeviModel": "Standard Deviation",
+    "ProphetModel": "Prophet",
+    "EWSTDModel": "Exponentially Weighted Std Dev",
+    "NeuralProphetModel": "NeuralProphet",
+    "GreyKiteModel": "Greykite",
+    "ETSModel": "ETS"
+}

@@ -11,7 +11,7 @@ const initialState = {
   onboardingList: [],
   isLoading: true,
   error: false,
-  homeKpiData: [],
+  homeKpiData: '',
   homeKpiLoading: false,
   homeKpiError: false
 };
@@ -57,6 +57,7 @@ export const onboarding = (state = initialState, action) => {
       return {
         ...state,
         homeKpiLoading: false,
+        homeKpiData: [],
         homeKpiError: true
       };
     }

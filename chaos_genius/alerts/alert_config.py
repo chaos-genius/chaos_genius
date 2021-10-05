@@ -10,7 +10,8 @@ EMAIL_CONFIGS_EXPOSE = {
 }
 
 SLACK_CONFIGS_EXPOSE = {
-    "webhook_url": False
+    "webhook_url": False,
+    "channel_name": True
 }
 
 
@@ -26,8 +27,10 @@ def modified_config_state(config_state):
     config_name = config_state.get("name")
     modified_state = {}
     for key, val in helper_objects.get(config_name, {}).items():
-        if val == True:
+        if val is True:
             modified_state[key] = config_settings.get(key)
+        else:
+            real_val = config_settings.get(key, "")
+            modified_state[key] = f"{real_val[:2]}********{real_val[-2:]}"
     config_obj["config_setting"] = modified_state
     return config_obj
-

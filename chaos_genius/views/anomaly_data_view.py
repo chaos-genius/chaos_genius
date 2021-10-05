@@ -7,10 +7,12 @@ from typing import Any, Dict, Optional, Tuple, cast
 from flask import Blueprint, current_app, jsonify, request
 import pandas as pd
 from sqlalchemy.orm.attributes import flag_modified
+from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
 
 from chaos_genius.extensions import cache
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
+from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.views.kpi_view import get_kpi_data_from_id
 
@@ -49,7 +51,11 @@ def kpi_anomaly_detection(kpi_id):
         print(traceback.format_exc())
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("Anomaly Detection Done")
-    return jsonify({"data": data, "msg": ""})
+    return jsonify({
+        "data": data,
+        "msg": "",
+        "anomaly_end_date": get_anomaly_end_date(kpi_id)
+        })
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-drilldown", methods=["GET"])
@@ -78,7 +84,11 @@ def kpi_anomaly_drilldown(kpi_id):
         print(traceback.format_exc())
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("Anomaly Drilldown Done")
-    return jsonify({"data": subdim_graphs, "msg": ""})
+    return jsonify({
+        "data": subdim_graphs,
+        "msg": "",
+        "anomaly_end_date": get_anomaly_end_date(kpi_id)
+        })
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-data-quality", methods=["GET"])
@@ -106,11 +116,17 @@ def kpi_anomaly_data_quality(kpi_id):
         current_app.logger.info(f"Error Found: {err}")
 
     current_app.logger.info("Anomaly Drilldown Done")
-    return jsonify({"data": data, "msg": msg, "status": status})
+    return jsonify({
+        "data": data,
+        "msg": msg,
+        "status": status,
+        "anomaly_end_date": get_anomaly_end_date(kpi_id)
+        })
 
 
 @blueprint.route("/anomaly-params/meta-info", methods=["GET"])
 def kpi_anomaly_params_meta():
+    # TODO: Move this dict into the corresponding data model
     return jsonify(ANOMALY_PARAMS_META)
 
 
@@ -120,7 +136,7 @@ def kpi_anomaly_params(kpi_id: int):
 
     if kpi is None:
         return jsonify(
-            {"error": f"Could not find KPI for ID: {kpi_id}"}
+            {"error": f"Could not find KPI for ID: {kpi_id}", "status": "failure"}
         ), 400
 
     # when method is GET we just return the anomaly params
@@ -134,26 +150,46 @@ def kpi_anomaly_params(kpi_id: int):
 
     if not request.is_json:
         return jsonify(
-            {"error": "Request body must be a JSON (and Content-Type header must be set correctly)"}
+            {"error": "Request body must be a JSON (and Content-Type header must be set correctly)", "status": "failure"}
         ), 400
 
     req_data: dict = cast(dict, request.get_json())
 
     if "anomaly_params" not in req_data:
         return jsonify(
-            {"error": "The request JSON needs to have anomaly_params as a field"}
+            {"error": "The request JSON needs to have anomaly_params as a field", "status": "failure"}
         ), 400
 
     err, new_anomaly_params = validate_partial_anomaly_params(req_data["anomaly_params"])
 
     if err != "":
-        return jsonify({"error": err}), 400
+        return jsonify({"error": err, "status": "failure"}), 400
 
     new_kpi = update_anomaly_params(kpi, new_anomaly_params)
+
+    # we ensure anomaly task is run as soon as analytics is configured
+    # we consider anomaly to be configured when the payload has model_name in it
+    # otherwise, it's an update of the existing anomaly_params, so we avoid running
+    #
+    # we also run RCA at the same time
+    if "model_name" in new_anomaly_params:
+        # TODO: move this import to top and fix import issue
+        from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task, ready_rca_task
+        anomaly_task = ready_anomaly_task(new_kpi.id)
+        rca_task = ready_rca_task(new_kpi.id)
+        if anomaly_task is None or rca_task is None:
+            print(
+                "Could not run anomaly task since newly configured KPI was not found: "
+                f"{new_kpi.id}"
+            )
+        else:
+            anomaly_task.apply_async()
+            rca_task.apply_async()
 
     return jsonify({
         "msg": "Successfully updated Anomaly params",
         "anomaly_params": new_kpi.as_dict["anomaly_params"],
+        "status": "success"
     })
 
 
@@ -339,26 +375,75 @@ ANOMALY_PARAMS_META = {
             "name": "anomaly_period",
             "is_editable": False,
             "is_sensitive": False,
+            "type": "integer",
         },
         {
             "name": "model_name",
             "is_editable": False,
             "is_sensitive": False,
+            "type": "select",
+            "options": [
+                {
+                    "value": key,
+                    "name": value,
+                } for key, value in MODEL_NAME_MAPPING.items()
+            ]
         },
         {
             "name": "sensitivity",
             "is_editable": True,
             "is_sensitive": False,
+            "type": "select",
+            "options": [
+                {
+                    "value": "high",
+                    "name": "High",
+                },
+                {
+                    "value": "medium",
+                    "name": "Medium",
+                },
+                {
+                    "value": "low",
+                    "name": "Low",
+                }
+            ]
         },
         {
             "name": "seasonality",
             "is_editable": False,
             "is_sensitive": False,
+            "type": "multiselect",
+            "options": [
+                {
+                    "value": "M",
+                    "name": "Monthly",
+                },
+                {
+                    "value": "W",
+                    "name": "Weekly",
+                },
+                {
+                    "value": "D",
+                    "name": "Daily",
+                }
+            ]
         },
         {
             "name": "frequency",
             "is_editable": False,
             "is_sensitive": False,
+            "type": "select",
+            "options": [
+                {
+                    "value": "D",
+                    "name": "Daily",
+                },
+                {
+                    "value": "H",
+                    "name": "Hourly",
+                }
+            ]
         },
         {
             "name": "scheduler_params",
@@ -367,11 +452,13 @@ ANOMALY_PARAMS_META = {
                     "name": "time",
                     "is_editable": True,
                     "is_sensitive": False,
+                    "type": "time",
                 },
             ],
         },
     ],
 }
+
 
 def validate_partial_anomaly_params(anomaly_params: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
     """Check if given *partial* anomaly parameters have valid keys and values.
@@ -471,10 +558,11 @@ def validate_partial_anomaly_params(anomaly_params: Dict[str, Any]) -> Tuple[str
                     anomaly_params
                 )
 
-    err, scheduler_params = validate_partial_scheduler_params(anomaly_params["scheduler_params"])
-    if err != "":
-        return err, anomaly_params
-    anomaly_params["scheduler_params"] = scheduler_params
+    if "scheduler_params" in anomaly_params:
+        err, scheduler_params = validate_partial_scheduler_params(anomaly_params["scheduler_params"])
+        if err != "":
+            return err, anomaly_params
+        anomaly_params["scheduler_params"] = scheduler_params
 
     return "", anomaly_params
 
@@ -558,3 +646,74 @@ def validate_partial_scheduler_params(scheduler_params: Dict[str, Any]) -> Tuple
             return (f"second must be between 0 and 60 (inclusive). Got: {second}", scheduler_params)
 
     return "", scheduler_params
+
+
+@blueprint.route("/<int:kpi_id>/settings", methods=["GET"])
+# @cache.memoize(timeout=30000)
+def anomaly_settings_status(kpi_id):
+    current_app.logger.info(f"Retreiving anomaly settings for kpi: {kpi_id}")
+    data = None
+    try:
+        kpi_info = get_kpi_data_from_id(kpi_id)
+        data = kpi_info.get('anomaly_params')
+    except ValueError:
+        current_app.logger.info(f"No KPI with id: {kpi_id} exists")
+    except Exception as err:
+        print(traceback.format_exc())
+        current_app.logger.info(f"Error Found: {err}")
+
+    if data is None:
+        response = DEFAULT_ANOMALY_PARAMS.copy()
+    else:
+        #FIXME: temporary sanitation
+        if 'period' in data:
+            data['anomaly_period'] = data['period']
+            data.pop('period')
+
+        if 'ts_frequency' in data:
+            data['frequency'] = data['ts_frequency']
+            data.pop('ts_frequency')
+
+        response = DEFAULT_ANOMALY_PARAMS.copy()
+        response.update(data)
+        response['scheduler_params'] = DEFAULT_SCHEDULER_PARAMS.copy()
+        response['scheduler_params'].update(data['scheduler_params'])
+        response['is_anomaly_setup'] = True
+
+    rca_data = RcaData.query.filter(
+        RcaData.kpi_id == kpi_id
+    ).all()
+    if len(rca_data) == 0:
+        is_precomputed = False
+    else:
+        is_precomputed = True
+    response["is_rca_precomputed"] = is_precomputed
+
+    current_app.logger.info(f"Anomaly settings retrieved for kpi: {kpi_id}")
+    return jsonify(response)
+
+
+DEFAULT_SCHEDULER_PARAMS = {
+    "anomaly_status": None,
+    "last_scheduled_time": None,
+    "rca_status": None,
+    "time": None
+  }
+
+DEFAULT_ANOMALY_PARAMS = {
+  "anomaly_period": None,
+  "frequency": None,
+  "model_name": None,
+  "scheduler_params": DEFAULT_SCHEDULER_PARAMS,
+  "seasonality": [],
+  "sensitivity": None,
+  "is_anomaly_setup": False
+}
+
+
+def get_anomaly_end_date(kpi_id: int):
+    anomaly_end_date = AnomalyDataOutput.query.filter(
+            AnomalyDataOutput.kpi_id == kpi_id
+        ).order_by(AnomalyDataOutput.data_datetime.desc()).first()
+    print(anomaly_end_date.as_dict['data_datetime'])
+    return anomaly_end_date.as_dict['data_datetime']

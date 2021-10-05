@@ -96,7 +96,9 @@ def set_config():
         if config_obj:
             config_obj.active = False
             config_obj.save(commit=True)
-        new_config = create_config_object(config_name, data.get("config_settings", {}))
+        config_settings = config_obj.config_setting
+        config_settings.update(data.get("config_settings", {}))
+        new_config = create_config_object(config_name, config_settings)
         new_config.save(commit=True)
         return jsonify({"message": f"Config {config_name} has been saved successfully.", "status": "success"})
     else:
@@ -165,10 +167,9 @@ def edit_config_setting():
         data = request.get_json()
         config_obj = get_config_object(data.get('config_name'))
         meta_info = ConfigSetting.meta_info()
-        if config_obj and config_obj.active == True:
-            if chech_editable_field(meta_info,'config_setting'):
-                config_obj.config_setting=data.get('config_setting')
-        
+        if config_obj and config_obj.active is True:
+            if chech_editable_field(meta_info, 'config_setting'):
+                config_obj.config_setting = data.get('config_setting')
                 config_obj.save(commit=True)
             status = "success"
         else:
@@ -179,4 +180,3 @@ def edit_config_setting():
         current_app.logger.info(f"Error in updating the Config Setting: {err}")
         message = str(err)
     return jsonify({"message": message, "status": status})
-

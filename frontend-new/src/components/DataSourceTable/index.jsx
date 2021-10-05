@@ -19,8 +19,8 @@ import DeleteActive from '../../assets/images/delete-active.svg';
 import Close from '../../assets/images/close.svg';
 import More from '../../assets/images/more.svg';
 import Moreactive from '../../assets/images/more-active.svg';
-import Viewlog from '../../assets/images/viewlog.svg';
-import ViewlogActive from '../../assets/images/viewlog-active.svg';
+// import Viewlog from '../../assets/images/viewlog.svg';
+// import ViewlogActive from '../../assets/images/viewlog-active.svg';
 
 import '../../assets/styles/table.scss';
 import '../Modal/modal.scss';
@@ -96,73 +96,79 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
           </tr>
         </thead>
         <tbody>
-          {tableData && tableData.length !== 0 ? (
-            tableData.map((datasource) => {
-              return (
-                <tr key={uuidv4()}>
-                  <td>{datasource.name}</td>
-                  <td>
-                    <div
-                      className={
-                        datasource.active ? 'live-status' : 'broken-status'
-                      }>
-                      <span>{datasource.active ? 'Live' : 'Broken'}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="source-type">
-                      {connectionType
-                        ? datasourceIcon(datasource.connection_type)
-                        : '-'}
-                    </div>
-                  </td>
-                  <td>{datasource.kpi_count || '-'}</td>
-                  <td className="date-column-formated">
-                    {formatDate(datasource.last_sync)}
-                  </td>
-                  <td className="date-column-formated">
-                    {formatDate(datasource.created_at)}
-                  </td>
-                  <td>
-                    <div className="dropdown more-dropdown">
+          {tableData && tableData.length !== 0
+            ? tableData.map((datasource) => {
+                return (
+                  <tr key={uuidv4()}>
+                    <td>{datasource.name}</td>
+                    <td>
                       <div
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                        aria-haspopup="true">
-                        <img
-                          src={More}
-                          alt="More"
-                          className="moreoption"
-                          data-bs-toggle="tooltip"
-                          data-bs-placement="bottom"
-                          title="Actions"
-                        />
-                        <img
-                          src={Moreactive}
-                          alt="More"
-                          className="moreoption-active"
-                          data-bs-toggle="tooltip"
-                          data-bs-placement="bottom"
-                          title="Actions"
-                        />
+                        className={
+                          datasource.active ? 'live-status' : 'broken-status'
+                        }>
+                        <span>{datasource.active ? 'Live' : 'Broken'}</span>
                       </div>
-                      <ul className="dropdown-menu">
-                        <Link to="/alerts">
-                          <li>
-                            <img
-                              src={Alert}
-                              alt="Alert"
-                              className="action-disable"
-                            />
-                            <img
-                              src={AlertActive}
-                              alt="Alert"
-                              className="action-active"
-                            />
-                            Set Alerts
-                          </li>
-                        </Link>
-                        <li>
+                    </td>
+                    <td>
+                      <div className="source-type">
+                        {connectionType
+                          ? datasourceIcon(datasource.connection_type)
+                          : '-'}
+                      </div>
+                    </td>
+                    <td>{datasource.kpi_count || '-'}</td>
+                    <td className="date-column-formated">
+                      {formatDate(datasource.last_sync)}
+                    </td>
+                    <td className="date-column-formated">
+                      {formatDate(datasource.created_at)}
+                    </td>
+                    <td>
+                      {/* dropdown */}
+                      <div
+                        className={
+                          tableData.length !== 1
+                            ? ' more-dropdown dropdown '
+                            : ' more-dropdown '
+                        }>
+                        <div
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                          aria-haspopup="true">
+                          <img
+                            src={More}
+                            alt="More"
+                            className="moreoption"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom"
+                            title="Actions"
+                          />
+                          <img
+                            src={Moreactive}
+                            alt="More"
+                            className="moreoption-active"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom"
+                            title="Actions"
+                          />
+                        </div>
+                        <ul className="dropdown-menu">
+                          <Link to="/alerts">
+                            <li>
+                              <img
+                                src={Alert}
+                                alt="Alert"
+                                className="action-disable"
+                              />
+                              <img
+                                src={AlertActive}
+                                alt="Alert"
+                                className="action-active"
+                              />
+                              Set Alerts
+                            </li>
+                          </Link>
+                          {/* <li>
                           <img
                             src={Viewlog}
                             alt="View Log"
@@ -174,44 +180,44 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
                             className="action-active"
                           />
                           View Logs
-                        </li>
-                        <Link to={`/datasource/edit/${datasource.id}`}>
-                          <li>
-                            <img
-                              src={Edit}
-                              alt="Edit"
-                              className="action-disable"
-                            />
-                            <img
-                              src={EditActive}
-                              alt="Edit"
-                              className="action-active"
-                            />
-                            Edit
+                        </li> */}
+                          <Link to={`/datasource/edit/${datasource.id}`}>
+                            <li>
+                              <img
+                                src={Edit}
+                                alt="Edit"
+                                className="action-disable"
+                              />
+                              <img
+                                src={EditActive}
+                                alt="Edit"
+                                className="action-active"
+                              />
+                              Edit
+                            </li>
+                          </Link>
+                          <li
+                            className="delete-item"
+                            onClick={() => {
+                              setIsOpen(true);
+                              setData(datasource);
+                            }}>
+                            <img src={DeleteActive} alt="Delete" />
+                            Delete
                           </li>
-                        </Link>
-                        <li
-                          className="delete-item"
-                          onClick={() => {
-                            setIsOpen(true);
-                            setData(datasource);
-                          }}>
-                          <img src={DeleteActive} alt="Delete" />
-                          Delete
-                        </li>
-                      </ul>
-                    </div>
+                        </ul>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            : tableData !== '' && (
+                <tr className="empty-table">
+                  <td colSpan={7}>
+                    <Noresult text={search} title="Data source" />
                   </td>
                 </tr>
-              );
-            })
-          ) : (
-            <tr className="empty-table">
-              <td colSpan={7}>
-                <Noresult text={search} title="Data source" />
-              </td>
-            </tr>
-          )}
+              )}
         </tbody>
       </table>
 

@@ -1,17 +1,66 @@
 import React from 'react';
 
+import { Link } from 'react-router-dom';
+
+// import Modal from 'react-modal';
+
 import '../../assets/styles/table.scss';
 import './alerttable.scss';
 
 import Slack from '../../assets/images/table/slack.svg';
 import Asana from '../../assets/images/table/asana.svg';
 import Datadog from '../../assets/images/table/datadog.svg';
-import Rectangle from '../../assets/images/table/downarrow.svg';
+import Email from '../../assets/images/table/email.svg';
+import Noresult from '../Noresult';
+import More from '../../assets/images/more.svg';
+import Moreactive from '../../assets/images/more-active.svg';
+import Edit from '../../assets/images/edit.svg';
+import EditActive from '../../assets/images/datasourceedit-active.svg';
+// import DeleteActive from '../../assets/images/delete-active.svg';
+// import Close from '../../assets/images/close.svg';
 
-const AlertTable = () => {
+import { useDispatch } from 'react-redux';
+
+import { formatDate } from '../../utils/date-helper';
+import { kpiAlertDisable, kpiAlertEnable } from '../../redux/actions';
+
+import store from '../../redux/store';
+
+const RESET_ENABLE_DISABLE_DATA = {
+  type: 'RESET_ENABLE_DISABLE_DATA'
+};
+
+const AlertTable = ({ alertData, alertSearch }) => {
+  const dispatch = useDispatch();
+
+  // const [isOpen, setIsOpen] = useState(false);
+  // const [data, setData] = useState('');
+
+  // const closeModal = () => {
+  //   setIsOpen(false);
+  // };
+
+  // const onDelete = (id) => {
+  //   dispatch(kpiAlertDisable(id));
+  // };
+
+  const onChecking = (alert) => {
+    store.dispatch(RESET_ENABLE_DISABLE_DATA);
+    if (alert.active === true) {
+      onDisable(alert.id);
+    } else if (alert.active === false) {
+      onEnable(alert.id);
+    }
+  };
+  const onDisable = (id) => {
+    dispatch(kpiAlertDisable(id));
+  };
+  const onEnable = (id) => {
+    dispatch(kpiAlertEnable(id));
+  };
+
   return (
-    <div class="table-responsive">
-      {' '}
+    <div className="table-responsive">
       <table className="table">
         <thead>
           <tr>
@@ -19,147 +68,152 @@ const AlertTable = () => {
             <th>Alert Type</th>
             <th>Last Modified</th>
             <th>Status</th>
-            <th className="cursor-pointer">
-              Triggered <img src={Rectangle} alt="down arrow" />
-            </th>
+            {/* <th className="cursor-pointer">
+              Triggered */}
+            {/* <img src={Rectangle} alt="down arrow" /> */}
+            {/* </th> */}
             <th>Channel</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Changes In DAU's</td>
-            <td className="date-column-formated">KPI Based</td>
-            <td className="date-column-formated">12/06/2021</td>
-            <td>
-              <div className="alert-status">
-                <label>Active</label>
-                <div className="form-check form-switch">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="removeoverlap"
-                  />
-                </div>
-              </div>
-            </td>
-            <td>22</td>
-            <td>
-              <div className="table-actions">
-                <div className="table-action-icon">
-                  <img src={Slack} alt="slack" />
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>Changes In DAU's</td>
-            <td className="date-column-formated">KPI Based</td>
-            <td className="date-column-formated">12/06/2021</td>
-            <td>
-              <div className="alert-status">
-                <label>Active</label>
-                <div className="form-check form-switch ">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="removeoverlap"
-                  />
-                </div>
-              </div>
-            </td>
-            <td>22</td>
-            <td>
-              <div className="table-actions">
-                <div className="table-action-icon">
-                  <img src={Slack} alt="slack" />
-                </div>
-                <div className="table-action-icon">
-                  <img src={Datadog} alt="data dog" />
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>Anamoly Detected</td>
-            <td className="date-column-formated">Event Based</td>
-            <td className="date-column-formated">12/06/2021</td>
-            <td>
-              <div className="alert-status">
-                <label>InActive</label>
-                <div className="form-check form-switch">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="removeoverlap"
-                  />
-                </div>
-              </div>
-            </td>
-            <td>16</td>
-            <td>
-              <div className="table-actions">
-                <div className="table-action-icon">
-                  <img src={Slack} alt="" />
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>Changes In DAU's</td>
-            <td className="date-column-formated">KPI Based</td>
-            <td className="date-column-formated">12/06/2021</td>
-            <td>
-              <div className="alert-status">
-                <label>Active</label>
-                <div className="form-check form-switch">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="removeoverlap"
-                  />
-                </div>
-              </div>
-            </td>
-            <td>22</td>
-            <td>
-              <div className="table-actions">
-                <div className="table-action-icon">
-                  <img src={Slack} alt="" />
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>Changes In DAU's</td>
-            <td className="date-column-formated">Event Based</td>
-            <td className="date-column-formated">12/06/2021</td>
-            <td>
-              <div className="alert-status">
-                <label>Active</label>
-                <div className="form-check form-switch">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="removeoverlap"
-                  />
-                </div>
-              </div>
-            </td>
-            <td>22</td>
-            <td>
-              <div className="table-actions">
-                <div className="table-action-icon">
-                  <img src={Slack} alt="" />
-                </div>
-
-                <div className="table-action-icon">
-                  <img src={Asana} alt="" />
-                </div>
-              </div>
-            </td>
-          </tr>
+          {alertData && alertData.length !== 0
+            ? alertData.map((alert) => {
+                return (
+                  <tr>
+                    <td>{alert.alert_name || '-'}</td>
+                    <td className="date-column-formated">
+                      {alert.alert_type || '-'}
+                    </td>
+                    <td className="date-column-formated data-centered">
+                      {formatDate(alert.last_sync) || '-'}
+                    </td>
+                    <td>
+                      <div className="alert-status">
+                        <label>{alert.active ? 'Active' : 'InActive'}</label>
+                        <div className="form-check form-switch">
+                          <input
+                            className="form-check-input"
+                            type="checkbox"
+                            id="removeoverlap"
+                            checked={alert.active}
+                            onChange={() => onChecking(alert)}
+                          />
+                        </div>
+                      </div>
+                    </td>
+                    {/* <td>{alert.severity_cutoff_score || '-'}</td> */}
+                    <td>
+                      <div className="table-actions">
+                        <div className="table-action-icon">
+                          <img
+                            src={
+                              alert.alert_channel === 'slack'
+                                ? Slack
+                                : alert.alert_channel === 'email'
+                                ? Email
+                                : alert.alert_channel === 'asana'
+                                ? Asana
+                                : Datadog
+                            }
+                            alt={alert.alert_channel}
+                          />
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div
+                        className={
+                          alertData.length !== 1
+                            ? ' more-dropdown dropdown '
+                            : ' more-dropdown '
+                        }>
+                        <div
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                          aria-haspopup="true">
+                          <img
+                            src={More}
+                            alt="More"
+                            className="moreoption"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom"
+                            title="Actions"
+                          />
+                          <img
+                            src={Moreactive}
+                            alt="More"
+                            className="moreoption-active"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom"
+                            title="Actions"
+                          />
+                        </div>
+                        <ul className="dropdown-menu">
+                          <Link to={`/alerts/edit/kpi-alert/${alert.id}`}>
+                            <li>
+                              <img
+                                src={Edit}
+                                alt="Edit"
+                                className="action-disable"
+                              />
+                              <img
+                                src={EditActive}
+                                alt="Edit"
+                                className="action-active"
+                              />
+                              Edit
+                            </li>
+                          </Link>
+                          {/* <li
+                            className="delete-item"
+                            onClick={() => {
+                              setIsOpen(true);
+                              setData(alert);
+                            }}>
+                            <img src={DeleteActive} alt="Delete" />
+                            Delete
+                          </li> */}
+                        </ul>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            : alertData !== '' && (
+                <tr className="empty-table">
+                  <td colSpan={6}>
+                    <Noresult text={alertSearch} title="Alerts" />
+                  </td>
+                </tr>
+              )}
         </tbody>
       </table>
+      {/* <Modal
+        portalClassName="deletemodal"
+        isOpen={isOpen}
+        shouldCloseOnOverlayClick={false}
+        className="deleteModal">
+        <div className="modal-close">
+          <img src={Close} alt="Close" onClick={closeModal} />
+        </div>
+        <div className="modal-body">
+          <div className="modal-contents">
+            <h3>Delete {data.name} ?</h3>
+            <p>Are you sure you want to delete </p>
+            <div className="next-step-navigate">
+              <button className="btn white-button" onClick={closeModal}>
+                <span>Cancel</span>
+              </button>
+              <button
+                className="btn black-button"
+                onClick={() => onDelete(data.id)}>
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Modal> */}
     </div>
   );
 };

@@ -553,27 +553,32 @@ class RootCauseAnalysis:
 
         return round_df(impact_table).to_dict("records")
 
-    def get_impact_rows_with_columns(
-        self, single_dim=None
-    ) -> Tuple[List[Dict[str, object]], List[Dict[str, str]]]:
-        impact_table = self.get_impact_rows(single_dim)
+    def get_impact_column_map(
+        self, timeline: str = "mom"
+    ) -> List[Dict[str, str]]:
+
+        timestr = ""
+        if timeline == "mom":
+            timestr = "Month"
+        elif timeline == "wow":
+            timestr = "Week"
+        elif timeline == "dod":
+            timestr = "Day"
+
         mapping = [
             ("subgroup", "Subgroup Name"),
-            ("g1_count", "Prev Month Count"),
-            ("g1_size", "Prev Month Size"),
-            ("g2_count", "Current Month Count"),
-            ("g2_size", "Current Month Size"),
+            ("g1_agg", f"Last {timestr} Value"),
+            ("g1_count", f"Last {timestr} Count (#)"),
+            ("g1_size", f"Last {timestr} Size (%)"),
+            ("g2_agg", f"Current {timestr} Value"),
+            ("g2_count", f"Current {timestr} Count (#)"),
+            ("g2_size", f"Current {timestr} Size (%)"),
             ("impact", "Impact"),
         ]
-        if self._agg != "count":
-            # insert before g1_count
-            mapping.insert(1, ("g1_agg", "Prev Month Agg"))
-            # insert before g2_count (but add 1 because of previous insertion)
-            mapping.insert(3, ("g2_agg", "Current Month Agg"))
 
         mapping = [{"title": v, "field": k} for k, v in mapping]
 
-        return impact_table, mapping
+        return mapping
 
     def get_waterfall_table_rows(
         self,

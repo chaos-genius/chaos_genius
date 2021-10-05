@@ -13,6 +13,12 @@ load_dotenv(".env")  # loads environment variables from .env
 
 CWD = os.getcwd()
 
+def get_bool(bool_str):
+    if bool_str.lower()=='false':
+        return False
+    else:
+        return True
+
 ENV = os.getenv("FLASK_ENV", default="production")
 DEBUG = ENV == "development"
 SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL_CG_DB")
@@ -40,3 +46,19 @@ INTEGRATION_DB_USERNAME = os.getenv("INTEGRATION_DB_USERNAME")
 INTEGRATION_DB_PASSWORD = os.getenv("INTEGRATION_DB_PASSWORD")
 INTEGRATION_DB_PORT = os.getenv("INTEGRATION_DB_PORT")
 INTEGRATION_DATABASE = os.getenv("INTEGRATION_DATABASE")
+
+SOURCE_GOOGLE_ANALYTICS = get_bool(os.getenv('SOURCE_GOOGLE_ANALYTICS','true'))
+SOURCE_GOOGLE_SHEETS = get_bool(os.getenv('SOURCE_GOOGLE_SHEETS','true'))
+SOURCE_MYSQL = get_bool(os.getenv('SOURCE_MYSQL'),'false')
+SOURCE_POSTGRES = get_bool(os.getenv('SOURCE_POSTGRES','false'))
+SOURCE_SHOPIFY = get_bool(os.getenv('SOURCE_SHOPIFY','true'))
+SOURCE_STRIPE = get_bool(os.getenv('SOURCE_STRIPE','true'))
+SOURCE_GOOGLE_ADS = get_bool(os.getenv('SOURCE_GOOGLE_ADS','true'))
+SOURCE_FACEBOOK_ADS = get_bool(os.getenv('SOURCE_FACEBOOK_ADS','true'))
+SOURCE_BING_ADS = get_bool(os.getenv('SOURCE_BING_ADS','true'))
+SOURCE_GOOGLE_BIG_QUERY = get_bool(os.getenv('SOURCE_GOOGLE_BIG_QUERY','false'))
+SOURCE_SNOWFLAKE = get_bool(os.getenv('SOURCE_SNOWFLAKE','false'))
+
+
+
+

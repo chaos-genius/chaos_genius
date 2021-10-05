@@ -188,7 +188,7 @@ class AnomalyAlertController:
                                             AnomalyDataOutput.kpi_id == kpi_id,
                                             AnomalyDataOutput.anomaly_type == 'overall',
                                             AnomalyDataOutput.is_anomaly == 1,
-                                            AnomalyDataOutput.data_datetime >= lower_limit_dt
+                                            AnomalyDataOutput.data_datetime > lower_limit_dt
                                         ).all()
 
         if len(anomaly_data) == 0:

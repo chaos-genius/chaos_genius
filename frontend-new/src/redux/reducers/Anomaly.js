@@ -123,6 +123,7 @@ export const anomaly = (state = initialState, action) => {
         anomalyQualityData: []
       };
     }
+
     default:
       return state;
   }

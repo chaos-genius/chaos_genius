@@ -15,6 +15,12 @@ import Analystics from '../../components/Analystics';
 
 import { getDashboardSidebar, anomalySetting } from '../../redux/actions';
 
+import store from '../../redux/store';
+
+const SETTING_RESET = {
+  type: 'SETTING_RESET'
+};
+
 const Dashboard = () => {
   const dispatch = useDispatch();
   const history = useHistory();
@@ -36,6 +42,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     getAllDashboardSidebar();
+    store.dispatch(SETTING_RESET);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

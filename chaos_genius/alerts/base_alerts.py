@@ -156,6 +156,7 @@ class StaticEventAlertController:
 
 
 class AnomalyAlertController:
+
     def __init__(self, alert_info):
         self.alert_info = alert_info
 
@@ -178,13 +179,13 @@ class AnomalyAlertController:
 
         alert.update(commit=True, last_alerted=curr_date_time)
 
-        lower_limit_dt = curr_date_time - datetime.timedelta(hours = 72, minutes = 0) #TODO - the delta needs to be variable
+        lower_limit_dt = curr_date_time - FREQUENCY_DICT[self.alert_info['alert_frequency']]
 
         anomaly_data = AnomalyDataOutput.query.filter(
                                             AnomalyDataOutput.kpi_id == kpi_id,
                                             AnomalyDataOutput.anomaly_type == 'overall',
                                             AnomalyDataOutput.is_anomaly == 1,
-                                            AnomalyDataOutput.data_datetime >= lower_limit_dt
+                                            AnomalyDataOutput.data_datetime > lower_limit_dt
                                         ).all()
 
         if len(anomaly_data) == 0:

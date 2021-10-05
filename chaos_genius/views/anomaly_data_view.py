@@ -141,8 +141,10 @@ def kpi_anomaly_params(kpi_id: int):
 
     # when method is GET we just return the anomaly params
     if request.method == "GET":
+        anomaly_params = kpi.as_dict["anomaly_params"]
+        anomaly_params["scheduler_params"] = kpi.as_dict["scheduler_params"]
         return jsonify({
-            "anomaly_params": kpi.as_dict["anomaly_params"],
+            "anomaly_params": anomaly_params,
         })
 
     # when it's POST, update anomaly params
@@ -446,15 +448,10 @@ ANOMALY_PARAMS_META = {
             ]
         },
         {
-            "name": "scheduler_params",
-            "fields": [
-                {
-                    "name": "time",
-                    "is_editable": True,
-                    "is_sensitive": False,
-                    "type": "time",
-                },
-            ],
+            "name": "scheduler_params_time",
+            "is_editable": True,
+            "is_sensitive": False,
+            "type": "time",
         },
     ],
 }
@@ -586,7 +583,8 @@ def update_anomaly_params(kpi: Kpi, new_anomaly_params: Dict[str, Any], run_anom
         anomaly_params[field] = new_anomaly_params[field]
 
     if "scheduler_params" in new_anomaly_params:
-        scheduler_params: Optional[dict] = anomaly_params["scheduler_params"]
+        # TODO: use JSONB functions to update these, to avoid data races
+        scheduler_params: Optional[dict] = kpi.scheduler_params
 
         if scheduler_params is None:
             scheduler_params = {}
@@ -595,7 +593,8 @@ def update_anomaly_params(kpi: Kpi, new_anomaly_params: Dict[str, Any], run_anom
         #       we should not let those be changed from the API.
         scheduler_params.update(new_anomaly_params["scheduler_params"])
 
-        anomaly_params["scheduler_params"] = scheduler_params
+        kpi.scheduler_params = scheduler_params
+        flag_modified(kpi, "scheduler_params")
 
     flag_modified(kpi, "anomaly_params")
     new_kpi = cast(Kpi, kpi.update(commit=True, anomaly_params=anomaly_params, run_anomaly=run_anomaly))

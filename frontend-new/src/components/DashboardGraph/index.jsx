@@ -136,6 +136,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
       })
     );
   };
+
   function getAllRCA() {
     if (dimension.value === 'singledimension') {
       dispatch(
@@ -277,7 +278,8 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
       })
     );
   };
-  const newHighChart = (line) => {
+
+  const lineChart = (line) => {
     if (line) {
       let demoChart = {
         chart: {
@@ -371,7 +373,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate }) => {
                   {linechartData && linechartData.length !== 0 && (
                     <HighchartsReact
                       highcharts={Highcharts}
-                      options={newHighChart(linechartData)}
+                      options={lineChart(linechartData)}
                     />
                   )}
                 </>

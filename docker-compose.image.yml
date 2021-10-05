@@ -140,6 +140,17 @@ services:
     volumes:
       - ./temporal/dynamicconfig:/etc/temporal/config/dynamicconfig
 
+  chaosgenius-init:
+    image: docker
+    command: >
+      sh -c "apk update && 
+             apk upgrade && 
+             apk add bash && 
+             bash /setup/docker/setup-airbyte-images.sh"
+    volumes:
+      - ./setup:/setup
+      - /var/run/docker.sock:/var/run/docker.sock
+
   chaosgenius-webapp:
     image: chaosgenius/chaosgenius-webapp
     ports:

@@ -24,7 +24,7 @@ const initialState = {
   anomalyDrilldownData: [],
   anomalyDrilldownError: false,
   anomalySettingLoading: true,
-  anomalySettingData: [],
+  anomalySettingData: '',
   anomalySettingError: false
 };
 
@@ -112,7 +112,8 @@ export const anomaly = (state = initialState, action) => {
       return {
         ...state,
         anomalySettingLoading: false,
-        anomalySettingError: true
+        anomalySettingError: true,
+        anomalySettingData: []
       };
     }
     case 'RESET': {

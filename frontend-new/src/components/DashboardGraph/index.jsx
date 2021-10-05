@@ -552,9 +552,11 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
           </div>
         </>
       ) : (
-        <div className="dashboard-layout setup-layout-empty">
-          <DeepdrillsEmptyState />
-        </div>
+        anomalystatus !== '' && (
+          <div className="dashboard-layout setup-layout-empty">
+            <DeepdrillsEmptyState />
+          </div>
+        )
       )}
     </>
   );

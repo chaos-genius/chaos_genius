@@ -29,24 +29,6 @@ import { CustomContent, CustomActions } from '../../utils/toast-helper';
 
 import Edit from '../../assets/images/disable-edit.svg';
 
-const modalOptions = [
-  { value: 'prophet', label: 'Prophet' },
-  { value: 'Standard Deviation', label: 'Standard Deviation' },
-  { value: 'NeuralProphet ', label: 'NeuralProphet ' },
-  { value: 'Greykite ', label: 'Greykite ' }
-];
-
-const sensitivityOptions = [
-  { value: 'High', label: 'High' },
-  { value: 'Medium', label: 'Medium' },
-  { value: 'Low', label: 'Low' }
-];
-
-const frequencyOptions = [
-  { value: 'daily', label: 'Daily' },
-  { value: 'hourly', label: 'Hourly' }
-];
-
 const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   const dispatch = useDispatch();
 
@@ -141,6 +123,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     if (anomalySettingData) {
       setEdit(anomalySettingData?.scheduler_params?.anomaly_status);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [metaInfoData, anomalySettingData]);
 
   useEffect(() => {
@@ -159,8 +142,8 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
       );
       setFrequency(
         {
-          label: kpiEditData?.anomaly_params?.ts_frequency,
-          value: kpiEditData?.anomaly_params?.ts_frequency
+          label: kpiEditData?.anomaly_params?.frequency,
+          value: kpiEditData?.anomaly_params?.frequency
         } || ''
       );
       setSeasonality(kpiEditData?.anomaly_params?.seasonality || []);
@@ -252,7 +235,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
           sensitivity: Sensitivity.value,
           seasonality: seasonality,
           frequency: frequency.value,
-          scheduler_params: { time: schedule.format('HH:mm:00') }
+          scheduler_params: { time: schedule }
         }
       };
       dispatch(kpiSettingSetup(kpi, data));
@@ -273,7 +256,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   };
 
   const handleValueChange = (data) => {
-    setSchedule(data);
+    setSchedule(data.format('hh:mm:00'));
   };
 
   const onSaveInput = (name) => {

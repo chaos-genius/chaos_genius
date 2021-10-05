@@ -26,7 +26,7 @@ const Dashboard = () => {
     return state.sidebar;
   });
 
-  const { anomalySettingData } = useSelector((state) => {
+  const { anomalySettingData, anomalySettingLoading } = useSelector((state) => {
     return state.anomaly;
   });
 
@@ -82,7 +82,7 @@ const Dashboard = () => {
     window.history.pushState('', '', `/#/dashboard/${tabs}/${kpi}`);
   };
 
-  if (sidebarLoading) {
+  if (sidebarLoading || anomalySettingLoading) {
     return (
       <div className="load loader-page">
         <div className="preload"></div>

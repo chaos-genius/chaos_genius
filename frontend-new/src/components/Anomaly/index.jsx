@@ -349,7 +349,8 @@ const Anomaly = ({ kpi, anomalystatus }) => {
     <>
       {anomalystatus &&
       anomalystatus?.scheduler_params &&
-      anomalystatus?.scheduler_params?.anomaly_status !== 'completed' ? (
+      anomalystatus?.scheduler_params?.anomaly_status !== 'completed' &&
+      anomalystatus !== '' ? (
         <div className="dashboard-layout setup-layout-empty">
           <AnomalyEmptyState />
         </div>

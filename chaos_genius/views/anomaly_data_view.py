@@ -190,7 +190,6 @@ def kpi_anomaly_params(kpi_id: int):
 
     return jsonify({
         "msg": "Successfully updated Anomaly params",
-        "anomaly_params": new_kpi.as_dict["anomaly_params"],
         "status": "success"
     })
 
@@ -367,7 +366,7 @@ ANOMALY_PARAM_FIELDS = {
     "sensitivity",
     "seasonality",
     "frequency",
-    "scheduler_params"
+    "scheduler_params_time"
 }
 
 ANOMALY_PARAMS_META = {
@@ -494,7 +493,7 @@ def validate_partial_anomaly_params(anomaly_params: Dict[str, Any]) -> Tuple[str
                 anomaly_params
             )
 
-    frequency_types = {"daily", "hourly"}
+    frequency_types = {"D", "H"}
     if "frequency" in anomaly_params:
         frequency = anomaly_params["frequency"]
 
@@ -503,8 +502,6 @@ def validate_partial_anomaly_params(anomaly_params: Dict[str, Any]) -> Tuple[str
                 f"frequency must be a string, one of: {', '.join(frequency_types)}. Got: {frequency}",
                 anomaly_params)
 
-        # we compare (and store) only lower case for this field
-        frequency = frequency.lower()
         anomaly_params["frequency"] = frequency
 
         if frequency not in frequency_types:
@@ -555,11 +552,13 @@ def validate_partial_anomaly_params(anomaly_params: Dict[str, Any]) -> Tuple[str
                     anomaly_params
                 )
 
-    if "scheduler_params" in anomaly_params:
-        err, scheduler_params = validate_partial_scheduler_params(anomaly_params["scheduler_params"])
+    if "scheduler_params_time" in anomaly_params:
+        err, time = validate_scheduled_time(anomaly_params["scheduler_params_time"])
+
         if err != "":
             return err, anomaly_params
-        anomaly_params["scheduler_params"] = scheduler_params
+
+        anomaly_params["scheduler_params_time"] = time
 
     return "", anomaly_params
 
@@ -573,25 +572,23 @@ def update_anomaly_params(kpi: Kpi, new_anomaly_params: Dict[str, Any], run_anom
     """
     fields = ANOMALY_PARAM_FIELDS
 
-    anomaly_params: dict = kpi.anomaly_params
+    anomaly_params: dict = kpi.anomaly_params or {}
 
     # TODO: check if fields are marked as non-editable
 
     # update the non-nested fields directly
     # currently the only nested field is scheduler_params
-    for field in (fields - {"scheduler_params"}) & new_anomaly_params.keys():
+    for field in (fields - {"scheduler_params_time"}) & new_anomaly_params.keys():
         anomaly_params[field] = new_anomaly_params[field]
 
-    if "scheduler_params" in new_anomaly_params:
+    if "scheduler_params_time" in new_anomaly_params:
         # TODO: use JSONB functions to update these, to avoid data races
         scheduler_params: Optional[dict] = kpi.scheduler_params
 
         if scheduler_params is None:
             scheduler_params = {}
 
-        # TODO: check for fields that might be used by the celery scheduler.
-        #       we should not let those be changed from the API.
-        scheduler_params.update(new_anomaly_params["scheduler_params"])
+        scheduler_params["time"] = new_anomaly_params["scheduler_params_time"]
 
         kpi.scheduler_params = scheduler_params
         flag_modified(kpi, "scheduler_params")
@@ -602,7 +599,42 @@ def update_anomaly_params(kpi: Kpi, new_anomaly_params: Dict[str, Any], run_anom
     return new_kpi
 
 
-SCHEDULER_PARAM_FIELDS = {"hour"}
+SCHEDULER_PARAM_FIELDS = {"time"}
+
+
+def validate_scheduled_time(time):
+    if not isinstance(time, str):
+        return f"time must be a string. Got: {type(time).__name__}", time
+
+    times = time.split(":")
+
+    err_msg = "time must be in the format HH:MM:SS"
+
+    if len(times) != 3:
+        return f"{err_msg}. Got: {time}", time
+
+    hour, minute, second = times
+
+    if not hour.isdigit() or not minute.isdigit() or not second.isdigit():
+        return (
+            f"hour, minute, second must be numbers. Got: {hour}, {minute}, {second}",
+            time
+        )
+
+    hour = int(hour)
+
+    if hour < 0 or hour > 23:
+        return (f"hour must be between 0 and 23 (inclusive). Got: {hour}", time)
+
+    minute, second = int(minute), int(second)
+
+    if minute < 0 or minute > 60:
+        return (f"minute must be between 0 and 60 (inclusive). Got: {minute}", time)
+
+    if second < 0 or second > 60:
+        return (f"second must be between 0 and 60 (inclusive). Got: {second}", time)
+
+    return "", time
 
 
 def validate_partial_scheduler_params(scheduler_params: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
@@ -613,36 +645,10 @@ def validate_partial_scheduler_params(scheduler_params: Dict[str, Any]) -> Tuple
     if "time" in scheduler_params:
         time = scheduler_params["time"]
 
-        if not isinstance(time, str):
-            return f"time must be a string. Got: {type(time).__name__}", scheduler_params
+        err, time = validate_scheduled_time(time)
 
-        times = time.split(":")
-
-        err_msg = "time must be in the format HH:MM:SS"
-
-        if len(times) != 3:
-            return f"{err_msg}. Got: {time}", scheduler_params
-
-        hour, minute, second = times
-
-        if not hour.isdigit() or not minute.isdigit() or not second.isdigit():
-            return (
-                f"hour, minute, second must be numbers. Got: {hour}, {minute}, {second}",
-                scheduler_params
-            )
-
-        hour = int(hour)
-
-        if hour < 0 or hour > 23:
-            return (f"hour must be between 0 and 23 (inclusive). Got: {hour}", scheduler_params)
-
-        minute, second = int(minute), int(second)
-
-        if minute < 0 or minute > 60:
-            return (f"minute must be between 0 and 60 (inclusive). Got: {minute}", scheduler_params)
-
-        if second < 0 or second > 60:
-            return (f"second must be between 0 and 60 (inclusive). Got: {second}", scheduler_params)
+        if err != "":
+            return err, scheduler_params
 
     return "", scheduler_params
 
@@ -652,9 +658,11 @@ def validate_partial_scheduler_params(scheduler_params: Dict[str, Any]) -> Tuple
 def anomaly_settings_status(kpi_id):
     current_app.logger.info(f"Retreiving anomaly settings for kpi: {kpi_id}")
     data = None
+    scheduler_params = None
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
         data = kpi_info.get('anomaly_params')
+        scheduler_params = kpi_info.get('scheduler_params')
     except ValueError:
         current_app.logger.info(f"No KPI with id: {kpi_id} exists")
     except Exception as err:
@@ -664,7 +672,7 @@ def anomaly_settings_status(kpi_id):
     if data is None:
         response = DEFAULT_ANOMALY_PARAMS.copy()
     else:
-        #FIXME: temporary sanitation
+        # FIXME: temporary sanitation
         if 'period' in data:
             data['anomaly_period'] = data['period']
             data.pop('period')
@@ -674,9 +682,8 @@ def anomaly_settings_status(kpi_id):
             data.pop('ts_frequency')
 
         response = DEFAULT_ANOMALY_PARAMS.copy()
-        response.update(data)
-        response['scheduler_params'] = DEFAULT_SCHEDULER_PARAMS.copy()
-        response['scheduler_params'].update(data['scheduler_params'])
+        response.update({k: v for k, v in data.items() if k in ANOMALY_PARAM_FIELDS})
+        response["scheduler_params_time"] = scheduler_params["time"] if scheduler_params else None
         response['is_anomaly_setup'] = True
 
     rca_data = RcaData.query.filter(
@@ -703,7 +710,7 @@ DEFAULT_ANOMALY_PARAMS = {
   "anomaly_period": None,
   "frequency": None,
   "model_name": None,
-  "scheduler_params": DEFAULT_SCHEDULER_PARAMS,
+  "scheduler_params_time": None,
   "seasonality": [],
   "sensitivity": None,
   "is_anomaly_setup": False

@@ -8,6 +8,8 @@ import Slack from '../../assets/images/alerts/slack.svg';
 import Email from '../../assets/images/alerts/email.svg';
 import Edit from '../../assets/images/disable-edit.svg';
 
+import { useToast } from 'react-toast-wnm';
+
 import {
   getAllAlertEmail,
   getEditChannel,
@@ -15,10 +17,12 @@ import {
   getSlackMetaInfo
 } from '../../redux/actions';
 
-import { toastMessage } from '../../utils/toast-helper';
+import { CustomContent, CustomActions } from '../../utils/toast-helper';
 
 const AlertsForm = () => {
   const history = useHistory();
+
+  const toast = useToast();
 
   const data = history.location.pathname.split('/');
 
@@ -138,21 +142,61 @@ const AlertsForm = () => {
         webhook_url: editData?.config_setting?.webhook_url,
         channel_name: editData?.config_setting?.channel_name
       });
+      setSlackData({
+        ...slackData,
+        channel_name: editData?.config_setting?.channel_name
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editData]);
 
   useEffect(() => {
     if (emailData && emailData.status === 'success') {
-      toastMessage({ type: 'success', message: 'Successfully updated' });
+      customToast({
+        type: 'success',
+        header: 'Successfully updated',
+        description: emailData.message
+      });
     } else if (emailData && emailData.status === 'failed') {
-      toastMessage({ type: 'error', message: 'Failed to update' });
+      customToast({
+        type: 'error',
+        header: 'Failed to update',
+        description: emailData.message
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [emailData]);
+  const customToast = (data) => {
+    const { type, header, description } = data;
+    toast({
+      autoDismiss: true,
+      enableAnimation: true,
+      delay: type === 'success' ? '5000' : '60000',
+      backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
+      borderRadius: '6px',
+      color: '#222222',
+      position: 'bottom-right',
+      minWidth: '240px',
+      width: 'auto',
+      boxShadow: '4px 6px 32px -2px rgba(226, 226, 234, 0.24)',
+      padding: '17px 14px',
+      height: 'auto',
+      border: type === 'success' ? '1px solid #60ca9a' : '1px solid #FEF6F5',
+      type: type,
+      actions: <CustomActions />,
+      content: (
+        <CustomContent
+          header={header}
+          description={description}
+          failed={type === 'success' ? false : true}
+        />
+      )
+    });
+  };
 
   const validateEmail = (email) => {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    const re =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
   };
 
@@ -475,7 +519,7 @@ const AlertsForm = () => {
                 <input
                   type="text"
                   className="form-control"
-                  placeholder={placeholderSlack.channel_name || 'Channel Name'}
+                  placeholder="Channel Name"
                   disabled={
                     data[4] === 'edit'
                       ? slackEditableStatus('channel_name') === 'editable'

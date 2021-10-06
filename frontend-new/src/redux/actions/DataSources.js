@@ -191,15 +191,15 @@ export const deleteDatesourceFailure = () => {
 
 export const deleteDatasource = (id) => {
   return async (dispatch) => {
-    dispatch(deleteDatasourceRequested);
+    dispatch(deleteDatasourceRequested());
     const { data, error, status } = await postRequest({
       url: DELETE_DATASOURCE,
       data: id
     });
     if (error) {
-      dispatch(deleteDatesourceFailure);
+      dispatch(deleteDatesourceFailure());
     } else if (data && status === 200) {
-      dispatch(deleteDatasourceSuccess(data.data));
+      dispatch(deleteDatasourceSuccess(data));
     }
   };
 };

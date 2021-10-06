@@ -111,6 +111,7 @@ def register_commands(app):
     app.cli.add_command(commands.run_alert)
     app.cli.add_command(commands.reinstall_db)
     app.cli.add_command(commands.insert_demo_data)
+    app.cli.add_command(commands.run_anomaly_rca_scheduler)
 
 
 def configure_logger(app):

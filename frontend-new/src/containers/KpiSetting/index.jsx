@@ -71,7 +71,7 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
             <nav aria-label="breadcrumb">
               <ol className="breadcrumb">
                 <li className="breadcrumb-item">
-                  <Link to={`/dashboard/autorca/${location[3]}`}>
+                  <Link to={`/dashboard/deepdrills/${location[3]}`}>
                     Dashboard
                   </Link>
                 </li>
@@ -82,7 +82,7 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
             </nav>
             {/* Back */}
             <div className="backnavigation">
-              <Link to={`/dashboard/autorca/${location[3]}`}>
+              <Link to={`/dashboard/deepdrills/${location[3]}`}>
                 <img src={rightarrow} alt="Back" />
                 <span>Settings</span>
               </Link>

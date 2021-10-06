@@ -22,10 +22,6 @@
     }
     tbody {
       tr {
-        // display: none;
-        // &:last-child {
-        //   display: contents;
-        // }
         &.child-row {
           background-color: $grey_variation-2;
           td {

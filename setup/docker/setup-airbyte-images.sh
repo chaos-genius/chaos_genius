@@ -11,56 +11,57 @@ echo "#############################################"
     #docker pull $image
 #done
 
-if  $SOURCE_GOOGLE_ADS -eq 'true'
+if  [ "$SOURCE_GOOGLE_ADS" = 'true' ];
 then
     docker pull airbyte/source-google-ads:0.1.8
 fi
 
-if  $SOURCE_POSTGRES -eq 'true'
+if  [ "$SOURCE_POSTGRES" = 'true' ];
 then
     docker pull airbyte/source-postgres:0.3.9
 fi
 
-if  $SOURCE_SNOWFLAKE -eq 'true'
+if  [ "$SOURCE_SNOWFLAKE" = 'true' ]; 
 then
     docker pull airbyte/source-snowflake:0.1.1
 fi
 
-if  $SOURCE_MYSQL -eq 'true'
+if  [ "$SOURCE_MYSQL" = 'true' ];
 then
     docker pull airbyte/source-mysql:0.4.3
 fi
 
-if  $SOURCE_BING_ADS -eq 'true'
+if  [ "$SOURCE_BING_ADS" = 'true' ];
+then
     docker pull airbyte/source-bing-ads:0.1.0
 fi
 
-if  $SOURCE_GOOGLE_SHEETS -eq 'true'
+if  [ "$SOURCE_GOOGLE_SHEETS" = 'true' ];
 then
     docker pull airbyte/source-google-sheets:0.2.4
 fi
 
-if  $SOURCE_SHOPIFY -eq 'true'
+if  [ "$SOURCE_SHOPIFY" = 'true' ];
 then
     docker pull airbyte/source-shopify:0.1.12
 fi
 
-if  $SOURCE_STRIPE -eq 'true'
+if  [ "$SOURCE_STRIPE" = 'true' ];
 then
     docker pull airbyte/source-stripe:0.1.16
 fi
 
-if  $SOURCE_GOOGLE_BIG_QUERY -eq 'true'
+if  [ "$SOURCE_GOOGLE_BIG_QUERY" = 'true' ];
 then
     docker pull airbyte/source-bigquery:0.1.1
 fi
 
-if  $SOURCE_FACEBOOK_ADS -eq 'true'
+if  [ "$SOURCE_FACEBOOK_ADS" = 'true' ];
 then
     docker pull airbyte/source-facebook-marketing:0.2.14
 fi
 
-if  $SOURCE_GOOGLE_ANALYTICS -eq 'true'
+if  [ "$SOURCE_GOOGLE_ANALYTICS" = 'true' ];
 then
     docker pull airbyte/source-googleanalytics-singer:0.2.6
 fi

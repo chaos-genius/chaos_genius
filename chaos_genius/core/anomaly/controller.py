@@ -12,6 +12,9 @@ from chaos_genius.core.anomaly.utils import (fill_data, get_anomaly_df,
 from chaos_genius.databases.models.anomaly_data_model import (
     AnomalyDataOutput, db)
 from chaos_genius.databases.models.data_source_model import DataSource
+from chaos_genius.logger import configure_logger
+
+logger = configure_logger(__name__)
 
 FILTER_MAX_SUBGROUPS = 100
 
@@ -40,6 +43,8 @@ class AnomalyDetectionController(object):
         :param debug: enable debugging outputs, defaults to False
         :type debug: bool, optional
         """
+        logger.info(
+            f"Anomaly Controller initialized with KPI:{kpi_info['id']}")
         self.kpi_info = kpi_info
 
         # TODO: Add these in kpi_info
@@ -54,7 +59,7 @@ class AnomalyDetectionController(object):
             self.debug = False
         self.slack = self.kpi_info["anomaly_params"].get("slack", 3)
 
-        #FIXME: temporary fix
+        # FIXME: temporary fix
         # if both period and anomaly period are present, precedence is
         # given to anomaly period
         if 'anomaly_period' in self.kpi_info['anomaly_params']:
@@ -290,11 +295,8 @@ class AnomalyDetectionController(object):
         period = self.kpi_info["anomaly_params"]["period"]
 
         series_data = None
-
+        logger.debug(f"Formatting input data for {series}-{subgroup}")
         last_date = self._get_last_date_in_db(series, subgroup)
-        # if last_date is None:
-        #     if "Tuesday" in subgroup:
-        #         print(f"None subg: {series}, {subgroup}")
 
         if series == "dq":
             temp_input_data = input_data[[dt_col, metric_col]]
@@ -365,56 +367,51 @@ class AnomalyDetectionController(object):
 
         model_name = self.kpi_info["anomaly_params"]["model_name"]
 
+        logger.debug(f"Running anomaly detection for {series}-{subgroup}")
         overall_anomaly_output = self._detect_anomaly(
             model_name, series_data, last_date, series, subgroup, freq
         )
 
+        logger.debug(f"Saving Anomaly output for {series}-{subgroup}")
         self._save_anomaly_output(overall_anomaly_output, series, subgroup)
 
     def detect(self) -> None:
         """Perform the anomaly detection for given KPI."""
         # TODO: Docstring
-        if self.debug:
-            print(self.kpi_info["anomaly_params"]["model_name"])
+        model_name = self.kpi_info["anomaly_params"]["model_name"]
+        logger.debug(f"Anomaly Model is {model_name}")
 
+        logger.info(f"Loading Input Data for KPI {self.kpi_info['id']}")
         input_data = self._load_anomaly_data()
 
-        if self.debug:
-            print("overall")
-
+        logger.info("Running anomaly for series -> overall")
         self._run_anomaly_for_series(input_data, "overall")
 
         subgroups = self._get_subgroup_list(input_data)
 
-        if self.debug:
-            print(f"Generated {len(subgroups)} subgroups")
+        logger.debug(f"Generated {len(subgroups)} subgroups")
 
         # FIXME: Fix filtering logic
         filtered_subgroups = self._filter_subgroups(subgroups, input_data)
 
-        if self.debug:
-            print(f"Filtered {len(filtered_subgroups)} subgroups")
+        logger.debug(f"Filtered {len(filtered_subgroups)} subgroups")
 
         if self.debug:
             filtered_subgroups = filtered_subgroups[:DEBUG_MAX_SUBGROUPS]
 
+        logger.info("Running anomaly for filtered subgroups")
         for subgroup in filtered_subgroups:
-            if self.debug:
-                print(subgroup)
-
             try:
                 self._run_anomaly_for_series(input_data, "subdim", subgroup)
-            except Exception as e:  # noqa: B902
-                print(e)
+            except Exception:  # noqa: B902
+                logger.exception(f"Exception occured for: subdim - {subgroup}")
 
         agg = self.kpi_info["aggregation"]
         dq_list = ["max", "count", "mean"] \
             if agg != "mean" else ["max", "count"]
+        logger.info("Running anomaly for data quality subgroups")
         for dq in dq_list:
-            if self.debug:
-                print(dq)
-
             try:
                 self._run_anomaly_for_series(input_data, "dq", dq)
-            except Exception as e:  # noqa: B902
-                print(e)
+            except Exception:  # noqa: B902
+                logger.exception(f"Exception occured for: data quality - {dq}")

@@ -6,6 +6,9 @@ import pandas as pd
 from chaos_genius.core.anomaly.constants import FREQUENCY_DELTA
 from chaos_genius.core.anomaly.models import MODEL_MAPPER, AnomalyModel
 from chaos_genius.core.anomaly.utils import bound_between, get_timedelta
+from chaos_genius.logger import configure_logger
+
+logger = configure_logger(__name__)
 
 ZSCORE_UPPER_BOUND = 2.5
 
@@ -74,8 +77,10 @@ class ProcessAnomalyDetection:
         """
         model = self._get_model()
 
+        logger.debug(f"Running Prediction for {self.series}-{self.subgroup}")
         pred_series = self._predict(model)
 
+        logger.debug(f"Detecting severity for {self.series}-{self.subgroup}")
         anomaly_df = self._detect_severity(self._detect_anomalies(pred_series))
 
         self._save_model(model)
@@ -108,9 +113,11 @@ class ProcessAnomalyDetection:
 
                 prediction["y"] = input_data["y"]
                 pred_series = prediction
+            else:
+                logger.warning(
+                    f"Insufficient slack for {self.series}-{self.subgroup}")
 
         else:
-
             while self.last_date <= input_last_date:
                 curr_period = self.last_date - input_first_date
 

@@ -11,25 +11,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from chaos_genius.core.rca.rca_utils.string_helpers import (
+    convert_df_dims_to_query_strings, convert_query_string_to_user_string)
+from chaos_genius.core.rca.rca_utils.waterfall_utils import (
+    get_best_subgroups_using_superset_algo, get_waterfall_ylims,
+    waterfall_plot_mpl)
 from chaos_genius.core.utils.round import round_df, round_number
-
-from .rca_utils.string_helpers import (convert_df_dims_to_query_strings,
-                                       convert_query_string_to_user_string)
-from .rca_utils.waterfall_utils import (get_best_subgroups_using_superset_algo,
-                                        get_waterfall_ylims,
-                                        waterfall_plot_mpl)
-
-try:
-    from IPython.display import display
-except ModuleNotFoundError:
-    display = print
-
 
 SUPPORTED_AGGREGATIONS = ["mean", "sum", "count"]
 EPSILON = 1e-8
 
 
 class RootCauseAnalysis:
+    """RCA Processor class which computes the RCA."""
+
     def __init__(
         self,
         grp1_df: pd.DataFrame,
@@ -37,11 +32,24 @@ class RootCauseAnalysis:
         dims: List[str],
         metric: str,
         num_dim_combs: List[int] = None,
-        agg: str = "mean",
-        debug: bool = False,
-        precision: int = 3,
+        agg: str = "mean"
     ) -> None:
+        """Initialize the RCA class.
 
+        :param grp1_df: baseline dataframe
+        :type grp1_df: pd.DataFrame
+        :param grp2_df: rca/focus dataframe
+        :type grp2_df: pd.DataFrame
+        :param dims: list of dimensions to consider
+        :type dims: List[str]
+        :param metric: name of metric column
+        :type metric: str
+        :param num_dim_combs: which number of dimension combinations to
+        consider, defaults to None
+        :type num_dim_combs: List[int], optional
+        :param agg: aggregation to use, defaults to "mean"
+        :type agg: str, optional
+        """
         self._grp1_df = grp1_df
         self._grp2_df = grp2_df
         self._preprocess_rca_dfs()
@@ -73,9 +81,6 @@ class RootCauseAnalysis:
                     "Passing more than 4 values for n will take a while."
                 )
         self._num_dim_combs_to_consider = num_dim_combs
-
-        self._debug = debug
-        self._precision = precision
 
         self._impact_table = None
         self._waterfall_table = None
@@ -485,6 +490,11 @@ class RootCauseAnalysis:
         return best_subgroups
 
     def get_panel_metrics(self) -> "OrderedDict[str, List[float]]":
+        """Return panel metrics for the KPI.
+
+        :return: ordered dictionary with metrics
+        :rtype: OrderedDict[str, List[float]]
+        """
         panel_metrics = []
         for data in [self._grp1_df, self._grp2_df]:
             len_data = len(data[self._metric])
@@ -534,8 +544,17 @@ class RootCauseAnalysis:
 
         return panel_metrics
 
-    def get_impact_rows(self, single_dim=None) -> List[Dict[str, object]]:
+    def get_impact_rows(
+        self,
+        single_dim: str = None
+    ) -> List[Dict[str, object]]:
+        """Return impact dataframe as a list.
 
+        :param single_dim: dimension to use, defaults to None
+        :type single_dim: str, optional
+        :return: list with rows of impact table
+        :rtype: List[Dict[str, object]]
+        """
         if self._impact_table is None:
             self._impact_table = self._initialize_impact_table()
 
@@ -556,7 +575,13 @@ class RootCauseAnalysis:
     def get_impact_column_map(
         self, timeline: str = "mom"
     ) -> List[Dict[str, str]]:
+        """Return a mapping of column names to values for UI.
 
+        :param timeline: timeline to use, defaults to "mom"
+        :type timeline: str, optional
+        :return: List of mappings
+        :rtype: List[Dict[str, str]]
+        """
         timestr = ""
         if timeline == "mom":
             timestr = "Month"
@@ -582,11 +607,20 @@ class RootCauseAnalysis:
 
     def get_waterfall_table_rows(
         self,
-        single_dim=None,
+        single_dim: str = None,
         max_waterfall_columns: int = None,  # defaults to 5 or last value
         max_subgroups_considered: int = None,  # defaults to 100 or last value
-    ) -> Dict:
+    ) -> List[Dict]:
+        """Return rows for the waterfall table.
 
+        :param single_dim: dimension to use, defaults to None
+        :type single_dim: str, optional
+        :param max_waterfall_columns: max columns in waterfall, defaults to
+        None
+        :type max_waterfall_columns: int, optional
+        :return: list of all rows in table
+        :rtype: List[Dict]
+        """
         best_subgroups = self._get_best_subgroups_waterfall(
             single_dim, max_waterfall_columns, max_subgroups_considered
         )
@@ -599,13 +633,26 @@ class RootCauseAnalysis:
 
     def get_waterfall_plot_data(
         self,
-        single_dim=None,
+        single_dim: str = None,
         plot_in_mpl: bool = False,
         word_wrap_num: int = 15,
         max_waterfall_columns: int = None,  # defaults to 5 or last value
         max_subgroups_considered: int = None,  # defaults to 100 or last value
-    ) -> Tuple[Dict, List[float]]:
+    ) -> Tuple[List[Dict], List[float, float]]:
+        """Return plot data for waterfall chart.
 
+        :param single_dim: dimension to use, defaults to None
+        :type single_dim: str, optional
+        :param plot_in_mpl: flag to plot in matplotlib, defaults to False
+        :type plot_in_mpl: bool, optional
+        :param word_wrap_num: wordwrapping for columns, defaults to 15
+        :type word_wrap_num: int, optional
+        :param max_waterfall_columns: max columns in waterfall, defaults to
+        None
+        :type max_waterfall_columns: int, optional
+        :return: plot data for waterfall chart
+        :rtype: Tuple[List[Dict], List[float, float]]
+        """
         best_subgroups = self._get_best_subgroups_waterfall(
             single_dim, max_waterfall_columns, max_subgroups_considered
         )
@@ -631,8 +678,20 @@ class RootCauseAnalysis:
         max_depth: int = 3,
         max_children: int = 5,
         max_parents: int = 5,
-    ) -> Dict:
+    ) -> List[Dict]:
+        """Return rows for hierarchical table.
 
+        :param single_dim: dimension to use
+        :type single_dim: str
+        :param max_depth: maximum depth for the hierarchy, defaults to 3
+        :type max_depth: int, optional
+        :param max_children: max children per row, defaults to 5
+        :type max_children: int, optional
+        :param max_parents: max first level rows, defaults to 5
+        :type max_parents: int, optional
+        :return: list of rows for the table
+        :rtype: List[Dict]
+        """
         other_dims = self._dims[:]
         other_dims.remove(single_dim)
 

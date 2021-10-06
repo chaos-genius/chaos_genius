@@ -46,9 +46,10 @@ import {
 import {
   anomalyDetection,
   getAnomalyQualityData,
-  anomalyDrilldown
+  anomalyDrilldown,
+  anomalySetting
 } from './Anomaly';
-import { kpiSettingSetup, kpiEditSetup } from './setting';
+import { kpiSettingSetup, kpiEditSetup, settingMetaInfo } from './setting';
 export {
   getAllDataSources,
   getConnectionType,
@@ -91,5 +92,7 @@ export {
   getKpiAlertById,
   updateKpiAlert,
   kpiAlertDisable,
-  kpiAlertEnable
+  kpiAlertEnable,
+  anomalySetting,
+  settingMetaInfo
 };

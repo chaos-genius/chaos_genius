@@ -3,6 +3,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 // import Select from 'react-select';
 
+import { useHistory } from 'react-router-dom';
+
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import highchartsMore from 'highcharts/highcharts-more';
@@ -11,7 +13,9 @@ import Toparrow from '../../assets/images/toparrow.svg';
 
 import Anomalygraph from '../Anomalygraph';
 import Noresult from '../Noresult';
-// import AnomalyEmptyState from '../AnomalyEmptyState';
+import AnomalyEmptyState from '../AnomalyEmptyState';
+
+import { formatDate } from '../../utils/date-helper';
 
 import './anomaly.scss';
 
@@ -39,8 +43,9 @@ const RESET_ACTION = {
 //   }
 // ];
 
-const Anomaly = ({ kpi }) => {
+const Anomaly = ({ kpi, anomalystatus }) => {
   const dispatch = useDispatch();
+  const history = useHistory();
   // const [graphData, setGraphData] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [drilldownCollapse, setDrilldownCollapse] = useState(false);
@@ -69,9 +74,9 @@ const Anomaly = ({ kpi }) => {
 
   useEffect(() => {
     if (anomalyDetectionData) {
-      idRef.current = anomalyDetectionData?.base_anomaly_id;
-      renderChart(anomalyDetectionData?.chart_data);
-      handleDataQuality(anomalyDetectionData?.base_anomaly_id);
+      idRef.current = anomalyDetectionData?.data?.base_anomaly_id;
+      renderChart(anomalyDetectionData?.data?.chart_data);
+      handleDataQuality(anomalyDetectionData?.data?.base_anomaly_id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anomalyDetectionData]);
@@ -80,7 +85,7 @@ const Anomaly = ({ kpi }) => {
   if (
     anomalyDrilldownData &&
     anomalyDrilldownData.length !== 0 &&
-    anomalyDetectionData?.chart_data
+    anomalyDetectionData?.data?.chart_data
   ) {
     anomalyDrilldownData.map((obj) => {
       itemList.push(<Anomalygraph key={`dl-${obj.title}`} drilldown={obj} />);
@@ -96,6 +101,12 @@ const Anomaly = ({ kpi }) => {
       return '';
     });
   }
+  useEffect(() => {
+    if (anomalystatus && anomalystatus?.is_anomaly_setup === false) {
+      history.push(`/kpi/settings/${kpi}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [anomalystatus]);
 
   const renderChart = (graphData) => {
     if (graphData !== undefined) {
@@ -232,6 +243,7 @@ const Anomaly = ({ kpi }) => {
           }
         ]
       };
+
       setChartData(demoChart);
       // this.setState({
       //   chartData: demoChart
@@ -335,98 +347,120 @@ const Anomaly = ({ kpi }) => {
 
   return (
     <>
-      {anomalyDetectionData && anomalyDetectionData.length !== 0 ? (
+      {anomalystatus &&
+      anomalystatus?.anomaly_status &&
+      anomalystatus?.anomaly_status !== 'completed' &&
+      anomalystatus !== '' ? (
+        <div className="dashboard-layout setup-layout-empty">
+          <AnomalyEmptyState />
+        </div>
+      ) : (
         <>
-          <div className="dashboard-layout dashboard-layout-change">
-            <div className="dashboard-container">
-              {/* <div className="dashboard-subcategory anomaly-subcategory">
-                <Select
-                  value={category}
-                  options={data}
-                  classNamePrefix="selectcategory"
-                  placeholder="select"
-                  isSearchable={false}
-                  onChange={(e) => setCategory(e)}
-                />
-              </div> */}
+          {anomalyDetectionData && anomalyDetectionData !== '' ? (
+            <>
+              <div className="dashboard-layout dashboard-layout-change">
+                <div className="dashboard-container">
+                  <div className="dashboard-subcategory anomaly-subcategory">
+                    <div className="time-stamp">
+                      <p>
+                        Last updated:{' '}
+                        <span>
+                          {formatDate(anomalyDetectionData?.anomaly_end_date) ||
+                            '-'}
+                        </span>
+                      </p>
+                    </div>
+                    {/* <Select
+                      value={category}
+                      options={data}
+                      classNamePrefix="selectcategory"
+                      placeholder="select"
+                      isSearchable={false}
+                      onChange={(e) => setCategory(e)}
+                    /> */}
+                  </div>
 
-              {chartData && chartData.length !== 0 && (
-                <HighchartsReact highcharts={Highcharts} options={chartData} />
-              )}
-            </div>
-          </div>
-          {itemList && anomalyDrilldownData.length !== 0 ? (
-            <div className="dashboard-layout">
-              <div
-                className={
-                  drilldownCollapse && itemList.length !== 0
-                    ? 'dashboard-header-wrapper '
-                    : 'dashboard-header-wrapper header-wrapper-disable '
-                }>
-                <div className="dashboard-header">
-                  <h3>Drill Downs</h3>
-                </div>
-                <div
-                  className={
-                    !drilldownCollapse && itemList.length !== 0
-                      ? 'header-collapse header-disable'
-                      : 'header-collapse'
-                  }
-                  onClick={() => setDrilldownCollapse(!drilldownCollapse)}>
-                  <img src={Toparrow} alt="CollapseOpen" />
+                  {chartData && chartData.length !== 0 && (
+                    <HighchartsReact
+                      highcharts={Highcharts}
+                      options={chartData}
+                    />
+                  )}
                 </div>
               </div>
-              {drilldownCollapse && itemList.length !== 0 ? (
-                <div
-                  className={
-                    drilldownCollapse
-                      ? 'dashboard-container'
-                      : 'dashboard-container drilldown-disable'
-                  }>
-                  {itemList}
+              {itemList && anomalyDrilldownData.length !== 0 ? (
+                <div className="dashboard-layout">
+                  <div
+                    className={
+                      drilldownCollapse && itemList.length !== 0
+                        ? 'dashboard-header-wrapper '
+                        : 'dashboard-header-wrapper header-wrapper-disable '
+                    }>
+                    <div className="dashboard-header">
+                      <h3>Drill Downs</h3>
+                    </div>
+                    <div
+                      className={
+                        !drilldownCollapse && itemList.length !== 0
+                          ? 'header-collapse header-disable'
+                          : 'header-collapse'
+                      }
+                      onClick={() => setDrilldownCollapse(!drilldownCollapse)}>
+                      <img src={Toparrow} alt="CollapseOpen" />
+                    </div>
+                  </div>
+                  {drilldownCollapse && itemList.length !== 0 ? (
+                    <div
+                      className={
+                        drilldownCollapse
+                          ? 'dashboard-container'
+                          : 'dashboard-container drilldown-disable'
+                      }>
+                      {itemList}
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
-            </div>
-          ) : null}
-          <div className="dashboard-layout">
-            <div
-              className={
-                !dataQualityCollapse
-                  ? 'dashboard-header-wrapper header-wrapper-disable'
-                  : 'dashboard-header-wrapper'
-              }>
-              <div className="dashboard-header">
-                <h3>Data Quality</h3>
+              <div className="dashboard-layout">
+                <div
+                  className={
+                    !dataQualityCollapse
+                      ? 'dashboard-header-wrapper header-wrapper-disable'
+                      : 'dashboard-header-wrapper'
+                  }>
+                  <div className="dashboard-header">
+                    <h3>Data Quality</h3>
+                  </div>
+                  <div
+                    className={
+                      !dataQualityCollapse
+                        ? 'header-collapse header-disable'
+                        : 'header-collapse'
+                    }
+                    onClick={() =>
+                      setDataQualityCollapse(!dataQualityCollapse)
+                    }>
+                    <img src={Toparrow} alt="CollapseOpen" />
+                  </div>
+                </div>
+                {dataQualityCollapse ? (
+                  <div
+                    className={
+                      dataQualityCollapse
+                        ? 'dashboard-container'
+                        : 'dashboard-container drilldown-disable'
+                    }>
+                    {dataQualityList}
+                  </div>
+                ) : null}
               </div>
-              <div
-                className={
-                  !dataQualityCollapse
-                    ? 'header-collapse header-disable'
-                    : 'header-collapse'
-                }
-                onClick={() => setDataQualityCollapse(!dataQualityCollapse)}>
-                <img src={Toparrow} alt="CollapseOpen" />
-              </div>
-            </div>
-            {dataQualityCollapse ? (
-              <div
-                className={
-                  dataQualityCollapse
-                    ? 'dashboard-container'
-                    : 'dashboard-container drilldown-disable'
-                }>
-                {dataQualityList}
-              </div>
-            ) : null}
-          </div>
+            </>
+          ) : (
+            anomalyDetectionData !== '' && <Noresult title="Anomaly" />
+          )}
         </>
-      ) : (
-        anomalyDetectionData !== '' && <Noresult title="Anomaly" />
       )}
     </>
-    // <div className="dashboard-layout setup-layout-empty">
-    //   <AnomalyEmptyState />
-    // </div>
   );
 };
 

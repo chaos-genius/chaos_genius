@@ -10,7 +10,10 @@ import {
   ANOMALYDETECTIONSUCCESS,
   ANOMALYDRILLDOWNREQUEST,
   ANOMALYDRILLDOWNSUCCESS,
-  ANOMALYDRILLDOWNFAILURE
+  ANOMALYDRILLDOWNFAILURE,
+  ANOMALYSETTINGREQUEST,
+  ANOMALYSETTINGSUCCESS,
+  ANOMALYSETTINGFAILURE
 } from './ActionConstants';
 
 export const anomalyDetectionRequest = () => {
@@ -42,7 +45,7 @@ export const anomalyDetection = (kpi) => {
     if (error) {
       dispatch(anomalyDetectionFailure());
     } else if (data && status === 200) {
-      dispatch(anomalyDetectionSuccess(data.data));
+      dispatch(anomalyDetectionSuccess(data));
     }
   };
 };
@@ -117,6 +120,40 @@ export const anomalyDrilldown = (kpi, params) => {
       dispatch(anomalyDrilldownFailure());
     } else if (data && status === 200) {
       dispatch(anomalyDrilldownSuccess(data.data));
+    }
+  };
+};
+
+export const anomalySettingRequested = () => {
+  return {
+    type: ANOMALYSETTINGREQUEST
+  };
+};
+
+export const anomalySettingSuccess = (response) => {
+  return {
+    type: ANOMALYSETTINGSUCCESS,
+    data: response
+  };
+};
+
+export const anomalySettingFailure = () => {
+  return {
+    type: ANOMALYSETTINGFAILURE
+  };
+};
+
+export const anomalySetting = (id) => {
+  return async (dispatch) => {
+    dispatch(anomalySettingRequested());
+
+    const { data, error, status } = await getRequest({
+      url: `${BASE_URL}/api/anomaly-data/${id}/settings`
+    });
+    if (error) {
+      dispatch(anomalySettingFailure());
+    } else if (data && status === 200) {
+      dispatch(anomalySettingSuccess(data));
     }
   };
 };

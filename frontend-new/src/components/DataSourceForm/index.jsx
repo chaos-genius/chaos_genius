@@ -336,7 +336,8 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const checkTestConnection = () => {
     const payload = {
       connectionConfiguration: dsFormData,
-      sourceDefinitionId: sourceDefinitionId
+      sourceDefinitionId: sourceDefinitionId,
+      connection_type: selectedDatasource.value
     };
     dispatch(testDatasourceConnection(payload));
   };

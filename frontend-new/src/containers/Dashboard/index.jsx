@@ -13,7 +13,13 @@ import FilterWithTab from '../../components/FilterWithTab';
 import Anomaly from '../../components/Anomaly';
 import Analystics from '../../components/Analystics';
 
-import { getDashboardSidebar } from '../../redux/actions';
+import { getDashboardSidebar, anomalySetting } from '../../redux/actions';
+
+import store from '../../redux/store';
+
+const SETTING_RESET = {
+  type: 'SETTING_RESET'
+};
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -26,18 +32,34 @@ const Dashboard = () => {
     return state.sidebar;
   });
 
+  const { anomalySettingData, anomalySettingLoading } = useSelector((state) => {
+    return state.anomaly;
+  });
+
   const [active, setActive] = useState('');
   const [kpiAggregate, SetKpiAggregate] = useState('');
   const [tab, setTabs] = useState('deepdrills');
 
   useEffect(() => {
     getAllDashboardSidebar();
+    store.dispatch(SETTING_RESET);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getAllDashboardSidebar = () => {
     dispatch(getDashboardSidebar());
   };
+
+  const getAnomalySetting = (id) => {
+    dispatch(anomalySetting(id));
+  };
+
+  useEffect(() => {
+    if (kpi) {
+      getAnomalySetting(kpi);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kpi]);
 
   useEffect(() => {
     if (sidebarList && sidebarList.length !== 0 && kpi === undefined) {
@@ -58,6 +80,7 @@ const Dashboard = () => {
           ?.aggregation
       );
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sidebarList]);
 
@@ -66,7 +89,7 @@ const Dashboard = () => {
     window.history.pushState('', '', `/#/dashboard/${tabs}/${kpi}`);
   };
 
-  if (sidebarLoading) {
+  if (sidebarLoading || anomalySettingLoading) {
     return (
       <div className="load loader-page">
         <div className="preload"></div>
@@ -129,14 +152,17 @@ const Dashboard = () => {
             ) : (
               ''
             )}
-            {tab === 'deepdrills' && kpi && active && (
+            {tab === 'deepdrills' && kpi && active && anomalySettingData && (
               <Dashboardgraph
                 kpi={kpi}
                 kpiName={active}
                 kpiAggregate={kpiAggregate}
+                anomalystatus={anomalySettingData}
               />
             )}
-            {tab === 'anomaly' && kpi && <Anomaly kpi={kpi} />}
+            {tab === 'anomaly' && kpi && anomalySettingData && (
+              <Anomaly kpi={kpi} anomalystatus={anomalySettingData} />
+            )}
 
             {location[2] === 'settings' && (
               <div className="table-section setting-section">

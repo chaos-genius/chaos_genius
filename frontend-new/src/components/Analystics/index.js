@@ -53,6 +53,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   const [modelName, setModalName] = useState({});
   const [Sensitivity, setSensitivity] = useState({});
   const [frequency, setFrequency] = useState({});
+  const [modalFrequency, setModalFrequency] = useState({});
   const [seasonality, setSeasonality] = useState([]);
   const [isModalOpen, setModalOpen] = useState(false);
   const [edit, setEdit] = useState('');
@@ -70,21 +71,24 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     model_name: true,
     sensitivity: true,
     frequency: true,
-    schedule: true
+    schedule: true,
+    modalFrequency: true
   });
 
   const [sensitiveData, setSensitiveData] = useState({
     anomaly_period: 0,
     model_name: {},
     sensitivity: {},
-    frequency: {}
+    frequency: {},
+    modalFrequency: {}
   });
 
   const [option, setOption] = useState({
     model_name: [],
     sensitivity: [],
     seasonality: [],
-    frequency: []
+    frequency: [],
+    modalFrequency: []
   });
 
   useEffect(() => {
@@ -117,6 +121,11 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
           .find((item) => item.name === 'sensitivity')
           .options.map((item) => {
             return { value: item.value, label: item.name };
+          }),
+        modalFrequency: metaInfoData.fields
+          .find((item) => item.name === 'scheduler_frequency')
+          .options.map((item) => {
+            return { value: item.value, label: item.name };
           })
       });
     }
@@ -142,12 +151,27 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
       );
       setFrequency(
         {
-          label: kpiEditData?.anomaly_params?.frequency,
-          value: kpiEditData?.anomaly_params?.frequency
+          label:
+            kpiEditData?.anomaly_params?.frequency === 'D' ? 'Daily' : 'Hourly',
+          value:
+            kpiEditData?.anomaly_params?.frequency === 'D' ? 'Daily' : 'Hourly'
+        } || ''
+      );
+      setModalFrequency(
+        {
+          label:
+            kpiEditData?.anomaly_params?.scheduler_frequency === 'D'
+              ? 'Daily'
+              : 'Hourly',
+          value:
+            kpiEditData?.anomaly_params?.scheduler_frequency === 'D'
+              ? 'Daily'
+              : 'Hourly'
         } || ''
       );
       setSeasonality(kpiEditData?.anomaly_params?.seasonality || []);
-      setSchedule(kpiEditData?.anomaly_params?.scheduler_params?.time);
+
+      setSchedule(kpiEditData?.anomaly_params?.scheduler_params_time);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -231,11 +255,12 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
       const data = {
         anomaly_params: {
           anomaly_period: anomalyPeriod,
+          frequency: frequency.value === 'daily' ? 'D' : 'H',
           model_name: modelName.value,
           sensitivity: Sensitivity.value,
           seasonality: seasonality,
-          frequency: frequency.value,
-          scheduler_params: { time: schedule }
+          scheduler_frequency: 'D',
+          scheduler_params_time: schedule
         }
       };
       dispatch(kpiSettingSetup(kpi, data));
@@ -387,6 +412,12 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                 type="text"
                 className="form-control"
                 placeholder="Daily"
+                // value={option.modalFrequency ? frequency.value : ''}
+                value={
+                  enabled.modalFrequency
+                    ? modalFrequency.value
+                    : sensitiveData.modalFrequency
+                }
                 disabled
               />
             </div>

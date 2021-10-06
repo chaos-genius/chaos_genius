@@ -8,8 +8,6 @@ import pandas as pd
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.core.rca.constants import TIMELINE_NUM_DAYS_MAP
 
-# TODO: Update docstrings
-
 
 def rca_load_data(
     kpi_info: dict,
@@ -21,6 +19,14 @@ def rca_load_data(
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Load data for performing RCA.
 
+    :param kpi_info: kpi info to load data for, defaults to "mom"
+    :type kpi_info: dict, optional
+    :param connection_info: connection info of the kpi, defaults to "mom"
+    :type connection_info: dict, optional
+    :param dt_col: datetime column name, defaults to "mom"
+    :type dt_col: str, optional
+    :param end_date: end date to load data for, defaults to "mom"
+    :type end_date: datetime, optional
     :param timeline: timeline to load data for, defaults to "mom"
     :type timeline: str, optional
     :param tail: limit data loaded to this number of rows, defaults to None
@@ -62,6 +68,12 @@ def _get_kpi_table_data(
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Load RCA data for KPI with table defined.
 
+    :param kpi_info: kpi info to load data for, defaults to "mom"
+    :type kpi_info: dict, optional
+    :param connection_info: connection info of the kpi, defaults to "mom"
+    :type connection_info: dict, optional
+    :param dt_col: datetime column name, defaults to "mom"
+    :type dt_col: str, optional
     :param base_dt: start date to load data for
     :type base_dt: str
     :param mid_dt: mid date to load data for
@@ -130,6 +142,12 @@ def _get_kpi_query_data(
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Load data for KPI with query defined.
 
+    :param kpi_info: kpi info to load data for, defaults to "mom"
+    :type kpi_info: dict, optional
+    :param connection_info: connection info of the kpi, defaults to "mom"
+    :type connection_info: dict, optional
+    :param dt_col: datetime column name, defaults to "mom"
+    :type dt_col: str, optional
     :param end_dt_obj: end data to load data for
     :type end_dt_obj: datetime
     :param base_dt_obj: start date to load data for

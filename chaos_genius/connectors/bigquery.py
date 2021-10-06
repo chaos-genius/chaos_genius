@@ -1,0 +1,61 @@
+import json
+import pandas as pd
+from sqlalchemy.engine import create_engine
+from sqlalchemy import text
+from .base_db import BaseDb
+
+
+class BigQueryDb(BaseDb):
+    db_name = "bigquery"
+    test_db_query = "SELECT 1"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def get_db_uri(self):
+        db_info = self.ds_info
+        project_id = db_info.get("project_id")
+        credentials_json = db_info.get("credentials_json")
+        dataset_id = db_info.get("dataset_id")
+        if not (dataset_id and project_id and credentials_json):
+            raise NotImplementedError("Credentials not found for Google BigQuery.")
+        self.sqlalchemy_db_uri = f"bigquery://{project_id}"
+        return self.sqlalchemy_db_uri
+
+    def get_db_engine(self):
+        db_uri = self.get_db_uri()
+        credentials_info = self.ds_info.get("credentials_json")
+        if not credentials_info:
+            raise NotImplementedError("Credentials JSON not found for Google BigQuery.")
+        credentials_info = json.loads(credentials_info)
+        self.engine = create_engine(db_uri, credentials_info=credentials_info)
+        return self.engine
+
+    def test_connection(self):
+        if not hasattr(self, 'engine') or not self.engine:
+            self.engine = self.get_db_engine()
+        query_text = text(self.test_db_query)
+        status, message = None, ""
+        try:
+            with self.engine.connect() as connection:
+                cursor = connection.execute(query_text)
+                results = cursor.all()
+                if results[0][0] == 1:
+                    status = True
+                else:
+                    status = False
+        except Exception as err_msg:
+            status = False
+            message = str(err_msg)
+        return status, message
+
+    def run_query(self, query, as_df=True):
+        engine = self.get_db_engine()
+        if as_df == True:
+            return pd.read_sql_query(query, engine)
+        else:
+            return []
+
+    def get_schema(self):
+        self.schema = None
+        return self.schema

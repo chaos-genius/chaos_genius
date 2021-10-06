@@ -28,7 +28,9 @@ from chaos_genius.third_party.integration_server_config import (
     DATA_SOURCE_ABBREVIATION
 )
 from chaos_genius.databases.db_utils import create_sqlalchemy_uri
-from chaos_genius.databases.db_metadata import DbMetadata, get_metadata
+from chaos_genius.connectors import get_metadata, test_connection
+from chaos_genius.third_party.integration_utils import get_connection_config
+# from chaos_genius.databases.db_metadata import DbMetadata, get_metadata
 
 from chaos_genius.controllers.data_source_controller import (
     get_datasource_data_from_id, mask_sensitive_info
@@ -84,9 +86,10 @@ def list_data_source_type():
     """DataSource Type view."""
     connection_types, msg, status = [], "", "success"
     try:
-        connector_client = connector.connection
-        connector_client.init_source_def_conf()
-        connection_types = connector_client.source_conf
+        # connector_client = connector.connection
+        # connector_client.init_source_def_conf()
+        # connection_types = connector_client.source_conf
+        connection_types = get_connection_config()
     except Exception as err_msg:
         print(err_msg)
         msg = str(err_msg)
@@ -100,8 +103,17 @@ def test_data_source():
     connection_status, msg, status= [], "", "success"
     try:
         payload = request.get_json()
-        connector_client = connector.connection
-        connection_status = connector_client.test_connection(payload)
+        is_third_party = SOURCE_WHITELIST_AND_TYPE[payload["sourceDefinitionId"]]
+        if is_third_party:
+            connector_client = connector.connection
+            payload.pop('connection_type', None)
+            connection_status = connector_client.test_connection(payload)
+        else:
+            db_status, message = test_connection(payload)
+            connection_status = {
+                "message": message,
+                "status": "succeeded" if db_status is True else "failed"
+            }
     except Exception as err_msg:
         print(err_msg)
         msg = str(err_msg)
@@ -211,7 +223,7 @@ def create_data_source():
             dbConfig={"tables": stream_tables, "db_connection_uri": db_connection_uri}
         )
         new_connection.save(commit=True)
-        msg = f"DataSource {new_connection.name} has been created successfully."
+        msg = f"Connection {new_connection.name} has been created successfully."
 
     except Exception as err_msg:
         print('-'*60)

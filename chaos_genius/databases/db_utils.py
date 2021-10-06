@@ -1,5 +1,6 @@
 
 
+# TODO: Delete this function and attached functionality
 def create_sqlalchemy_uri(db_type, host, port, database, username, password):
     db_uri = ""
     if db_type == "postgres":

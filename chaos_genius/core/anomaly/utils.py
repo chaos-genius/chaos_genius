@@ -3,7 +3,9 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 
-from chaos_genius.connectors.base_connector import get_df_from_db_uri
+# from chaos_genius.connectors.base_connector import get_df_from_db_uri
+from chaos_genius.connectors import get_sqla_db_conn
+
 
 def bound_between(min_val, val, max_val):
     return min(max(val, min_val), max_val)
@@ -67,7 +69,11 @@ def get_anomaly_df(kpi_info, connection_info, last_date_in_db=None, end_date= No
     else:
         raise ValueError(f"kpi_type:'{kpi_type}' is not from ['table', 'query']")
 
-    return get_df_from_db_uri(connection_info["db_uri"], base_query)
+    db_connection = get_sqla_db_conn(data_source_info=connection_info)
+    query_df = db_connection.run_query(base_query)
+    return query_df
+    # return get_df_from_db_uri(connection_info["db_uri"], base_query)
+
 
 
 def get_last_date_in_db(kpi_id, series, subgroup=None):

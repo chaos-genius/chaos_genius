@@ -10,6 +10,7 @@ from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.connectors.base_connector import get_df_from_db_uri
+from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.alerts.email import send_static_alert_email
 
 
@@ -34,18 +35,18 @@ class StaticEventAlertController:
     """
     PICKLE_DIR = '.alert'
 
-    def __init__(self, alert_info: dict, db_uri: str):
+    def __init__(self, alert_info: dict, data_source_info: dict):
         """Initiate the static event controller class
 
         Args:
             alert_info (dict): alert information
-            db_uri (str): db_uri for the corresponding data connection
+            data_source_info (dict): data_source_info for the corresponding data connection
 
         Raises:
             Exception: Raise if Alert id not found
         """
         self.alert_info = alert_info
-        self.db_uri = db_uri
+        self.data_source_info = data_source_info
         self.alert_id = alert_info["id"]
         if not self.alert_id:
             raise Exception('Alert ID is required')
@@ -72,7 +73,9 @@ class StaticEventAlertController:
     def load_query_data(self):
         """Load the query data from the data source
         """
-        self.query_df = get_df_from_db_uri(self.db_uri, self.alert_info['alert_query'])
+        db_connection = get_sqla_db_conn(data_source_info=self.data_source_info)
+        self.query_df = db_connection.run_query(self.alert_info['alert_query'])
+        # self.query_df = get_df_from_db_uri(self.data_source_info, self.alert_info['alert_query'])
 
     def check_and_prepare_alert(self):
         """Check for the alert and trigger the appropriate trigger
@@ -249,8 +252,8 @@ def check_and_trigger_alert(alert_id):
     if alert_info.alert_type == "Event Alert":
         data_source_id = alert_info.data_source
         data_source_obj = DataSource.get_by_id(data_source_id)
-        db_uri = data_source_obj.db_uri
-        static_alert_obj = StaticEventAlertController(alert_info.as_dict, db_uri)
+        # db_uri = data_source_obj.db_uri
+        static_alert_obj = StaticEventAlertController(alert_info.as_dict, data_source_obj.as_dict)
         static_alert_obj.check_and_prepare_alert()
     elif alert_info.alert_type == "KPI Alert" and alert_info.kpi_alert_type == "Anomaly":
         anomaly_obj = AnomalyAlertController(alert_info.as_dict)

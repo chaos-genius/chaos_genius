@@ -638,7 +638,7 @@ class RootCauseAnalysis:
         word_wrap_num: int = 15,
         max_waterfall_columns: int = None,  # defaults to 5 or last value
         max_subgroups_considered: int = None,  # defaults to 100 or last value
-    ) -> Tuple[List[Dict], List[float, float]]:
+    ) -> Tuple[List[Dict], List[float]]:
         """Return plot data for waterfall chart.
 
         :param single_dim: dimension to use, defaults to None

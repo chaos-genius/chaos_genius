@@ -60,3 +60,7 @@ Flask-Caching>=1.7.2
 
 # Environment variable parsing
 python-dotenv==0.18.0
+
+# Logging
+python-json-logger==2.0.2
+

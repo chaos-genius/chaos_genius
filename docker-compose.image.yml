@@ -27,7 +27,7 @@ services:
       - POSTGRES_USER=${DATABASE_USER}
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
     volumes:
-      - ./docker/airbyte-db:/var/lib/postgresql/data
+      - db:/var/lib/postgresql/data
   scheduler:
     image: airbyte/scheduler:${VERSION}
     logging: *default-logging
@@ -141,6 +141,7 @@ services:
       - ./temporal/dynamicconfig:/etc/temporal/config/dynamicconfig
 
   chaosgenius-init:
+    container_name: chaosgenius-init
     image: docker
     command: >
       sh -c "apk update && 
@@ -164,6 +165,7 @@ services:
       - SOURCE_SNOWFLAKE=${SOURCE_SNOWFLAKE}
 
   chaosgenius-webapp:
+    container_name: chaosgenius-webapp
     image: chaosgenius/chaosgenius-webapp
     ports:
       - "3000:3000"
@@ -176,6 +178,7 @@ services:
     command: npm run start
 
   chaosgenius-server:
+    container_name: chaosgenius-server
     image: chaosgenius/chaosgenius-server
     command: sh setup/run-backend-docker.sh
     ports:
@@ -207,6 +210,7 @@ services:
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
 
   chaosgenius-db:
+    container_name: chaosgenius-db
     image: postgres:13
     restart: always
     healthcheck:
@@ -220,16 +224,18 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - ./docker/cg-db-setup:/docker-entrypoint-initdb.d/
-      - ./docker/cg-db:/var/lib/postgresql/data
+      - cg-db:/var/lib/postgresql/data
     ports:
       - 5433:5432
 
   redis:
+    container_name: redis
     image: "redis:6.2-alpine"
     ports:
       - 6379:6379
     
   celery-scheduler:
+    container_name: chaosgenius-scheduler
     image: chaosgenius/chaosgenius-server
     command: celery -A run.celery beat --loglevel=DEBUG
     environment:
@@ -258,6 +264,7 @@ services:
       - redis
   
   celery-worker:
+    container_name: chaosgenius-worker
     image: chaosgenius/chaosgenius-server
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes
     environment:
@@ -293,3 +300,5 @@ volumes:
     name: ${DATA_DOCKER_MOUNT}
   db:
     name: ${DB_DOCKER_MOUNT}
+  cg-db:
+    name: ${CG_DB_DOCKER_MOUNT}

@@ -81,7 +81,8 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     sensitivity: {},
     frequency: {},
     modalFrequency: {},
-    scheduler_frequency: {}
+    scheduler_frequency: {},
+    seasonality: []
   });
 
   const [option, setOption] = useState({
@@ -265,11 +266,25 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   };
 
   const onSeasonalityChange = (e) => {
-    if (e.target.checked) {
-      let selected = seasonality.concat(e.target.value);
-      setSeasonality(selected);
-    } else if (e.target.checked === false) {
-      setSeasonality(seasonality.filter((item) => item !== e.target.value));
+    if (enabled.seasonality) {
+      if (e.target.checked) {
+        let selected = seasonality.concat(e.target.value);
+        setSeasonality(selected);
+      } else if (e.target.checked === false) {
+        setSeasonality(seasonality.filter((item) => item !== e.target.value));
+      }
+    } else {
+      if (e.target.checked) {
+        let selected = sensitiveData.seasonality.concat(e.target.value);
+        setSensitiveData({ ...sensitiveData, seasonality: selected });
+      } else if (e.target.checked === false) {
+        setSensitiveData({
+          ...sensitiveData,
+          seasonality: sensitiveData.seasonality.filter(
+            (item) => item !== e.target.value
+          )
+        });
+      }
     }
   };
 
@@ -291,6 +306,8 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
       setSensitivity(sensitiveData.sensitivity);
     } else if (name === 'anomaly_period') {
       setAnomalyPeriod(sensitiveData.anomaly_period);
+    } else if (name === 'seasonality') {
+      setSeasonality(sensitiveData.seasonality);
     }
   };
 
@@ -627,14 +644,18 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     className="form-check-input"
                     type="checkbox"
                     value="M"
-                    checked={seasonality.includes('M')}
+                    checked={
+                      enabled.seasonality
+                        ? seasonality.includes('M')
+                        : sensitiveData.seasonality.includes('M')
+                    }
                     name="Month"
                     id="monthly"
                     disabled={
                       edit
                         ? editableStatus('seasonality') === 'editable'
                           ? false
-                          : editableStatus('seasonlity') === 'sensitive'
+                          : editableStatus('seasonality') === 'sensitive'
                           ? enabled.seasonality
                           : true
                         : false
@@ -652,12 +673,16 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     value="W"
                     name="week"
                     id="weekly"
-                    checked={seasonality.includes('W')}
+                    checked={
+                      enabled.seasonality
+                        ? seasonality.includes('W')
+                        : sensitiveData.seasonality.includes('W')
+                    }
                     disabled={
                       edit
                         ? editableStatus('seasonality') === 'editable'
                           ? false
-                          : editableStatus('seasonlity') === 'sensitive'
+                          : editableStatus('seasonality') === 'sensitive'
                           ? enabled.seasonality
                           : true
                         : false
@@ -675,12 +700,16 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     value="D"
                     name="daily"
                     id="daily"
-                    checked={seasonality.includes('D')}
+                    checked={
+                      enabled.seasonality
+                        ? seasonality.includes('D')
+                        : sensitiveData.seasonality.includes('D')
+                    }
                     disabled={
                       edit
                         ? editableStatus('seasonality') === 'editable'
                           ? false
-                          : editableStatus('seasonlity') === 'sensitive'
+                          : editableStatus('seasonality') === 'sensitive'
                           ? enabled.seasonality
                           : true
                         : false

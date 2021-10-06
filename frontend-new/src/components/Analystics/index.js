@@ -67,12 +67,12 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
 
   const [enabled, setEnabled] = useState({
     anomaly_period: true,
-    model_frequency: true,
     model_name: true,
     sensitivity: true,
     frequency: true,
     schedule: true,
-    modalFrequency: true
+    scheduler_frequency: true,
+    seasonality: true
   });
 
   const [sensitiveData, setSensitiveData] = useState({
@@ -80,7 +80,8 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     model_name: {},
     sensitivity: {},
     frequency: {},
-    modalFrequency: {}
+    modalFrequency: {},
+    scheduler_frequency: {}
   });
 
   const [option, setOption] = useState({
@@ -130,7 +131,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
       });
     }
     if (anomalySettingData) {
-      setEdit(anomalySettingData?.scheduler_params?.anomaly_status);
+      setEdit(anomalySettingData?.is_anomaly_setup);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [metaInfoData, anomalySettingData]);
@@ -153,8 +154,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
         {
           label:
             kpiEditData?.anomaly_params?.frequency === 'D' ? 'Daily' : 'Hourly',
-          value:
-            kpiEditData?.anomaly_params?.frequency === 'D' ? 'Daily' : 'Hourly'
+          value: kpiEditData?.anomaly_params?.frequency
         } || ''
       );
       setModalFrequency(
@@ -163,10 +163,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
             kpiEditData?.anomaly_params?.scheduler_frequency === 'D'
               ? 'Daily'
               : 'Hourly',
-          value:
-            kpiEditData?.anomaly_params?.scheduler_frequency === 'D'
-              ? 'Daily'
-              : 'Hourly'
+          value: kpiEditData?.anomaly_params?.scheduler_frequency
         } || ''
       );
       setSeasonality(kpiEditData?.anomaly_params?.seasonality || []);
@@ -255,11 +252,11 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
       const data = {
         anomaly_params: {
           anomaly_period: anomalyPeriod,
-          frequency: frequency.value === 'daily' ? 'D' : 'H',
+          frequency: frequency.value,
           model_name: modelName.value,
           sensitivity: Sensitivity.value,
           seasonality: seasonality,
-          scheduler_frequency: 'D',
+          scheduler_frequency: modalFrequency.value,
           scheduler_params_time: schedule
         }
       };
@@ -380,7 +377,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     : sensitiveData.anomaly_period
                 }
                 disabled={
-                  edit === 'completed'
+                  edit
                     ? editableStatus('anomaly_period') === 'editable'
                       ? false
                       : editableStatus('anomaly_period') === 'sensitive'
@@ -400,7 +397,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                   setError({ ...error, anomaly_period: '' });
                 }}
               />
-              {edit === 'completed' &&
+              {edit &&
                 editableStatus('anomaly_period') === 'sensitive' &&
                 editAndSaveButton('anomaly_period')}
             </div>
@@ -408,18 +405,39 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
           <div className="form-group">
             <label>Model Frequency</label>
             <div className="editable-field">
-              <input
+              <Select
                 type="text"
-                className="form-control"
-                placeholder="Daily"
-                // value={option.modalFrequency ? frequency.value : ''}
+                options={option.modalFrequency}
+                classNamePrefix="selectcategory"
+                placeholder="select"
                 value={
-                  enabled.modalFrequency
-                    ? modalFrequency.value
-                    : sensitiveData.modalFrequency
+                  enabled.scheduler_frequency
+                    ? modalFrequency
+                    : sensitiveData.scheduler_frequency
                 }
-                disabled
+                disabled={
+                  edit
+                    ? editableStatus('scheduler_frequency') === 'editable'
+                      ? false
+                      : editableStatus('scheduler_frequency') === 'sensitive'
+                      ? enabled.scheduler_frequency
+                      : true
+                    : false
+                }
+                onChange={(e) => {
+                  if (enabled.scheduler_frequency) {
+                    setModalFrequency(e);
+                  } else {
+                    setSensitiveData({
+                      ...sensitiveData,
+                      scheduler_frequency: e
+                    });
+                  }
+                }}
               />
+              {edit &&
+                editableStatus('scheduler_frequency') === 'sensitive' &&
+                editAndSaveButton('scheduler_frequency')}
             </div>
           </div>
           <div className="form-group">
@@ -434,7 +452,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                 }
                 isSearchable={false}
                 isDisabled={
-                  edit === 'completed'
+                  edit
                     ? editableStatus('model_name') === 'editable'
                       ? false
                       : editableStatus('model_name') === 'sensitive'
@@ -454,7 +472,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                   setError({ ...error, modelName: '' });
                 }}
               />
-              {edit === 'completed' &&
+              {edit &&
                 editableStatus('model_name') === 'sensitive' &&
                 editAndSaveButton('model_name')}
             </div>
@@ -487,7 +505,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                   enabled.sensitivity ? Sensitivity : sensitiveData.sensitivity
                 }
                 isDisabled={
-                  edit === 'completed'
+                  edit
                     ? editableStatus('sensitivity') === 'editable'
                       ? false
                       : editableStatus('sensitivity') === 'sensitive'
@@ -506,7 +524,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                   setError({ ...error, sensitivity: '' });
                 }}
               />
-              {edit === 'completed' &&
+              {edit &&
                 editableStatus('sensitivity') === 'sensitive' &&
                 editAndSaveButton('sensitivity')}
             </div>
@@ -539,7 +557,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                 isSearchable={false}
                 value={enabled.frequency ? frequency : sensitiveData.frequency}
                 isDisabled={
-                  edit === 'completed'
+                  edit
                     ? editableStatus('frequency') === 'editable'
                       ? false
                       : editableStatus('frequency') === 'sensitive'
@@ -556,7 +574,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                   setError({ ...error, frequency: '' });
                 }}
               />
-              {edit === 'completed' &&
+              {edit &&
                 editableStatus('frequency') === 'sensitive' &&
                 editAndSaveButton('frequency')}
             </div>
@@ -575,7 +593,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                 defaultValue={schedule}
                 className="time-picker"
                 disabled={
-                  edit === 'completed'
+                  edit
                     ? editableStatus('scheduler_params_time') === 'editable'
                       ? false
                       : editableStatus('scheduler_params_time') === 'sensitive'
@@ -588,7 +606,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                 value={schedule && moment(schedule, 'hh:mm')}
               />
 
-              {edit === 'completed' &&
+              {edit &&
                 editableStatus('scheduler_params_time') === 'sensitive' &&
                 editAndSaveButton('schedule')}
             </div>
@@ -604,6 +622,15 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                   checked={seasonality.includes('M')}
                   name="Month"
                   id="monthly"
+                  disabled={
+                    edit
+                      ? editableStatus('seasonality') === 'editable'
+                        ? false
+                        : editableStatus('seasonlity') === 'sensitive'
+                        ? enabled.seasonality
+                        : true
+                      : false
+                  }
                   onChange={(e) => {
                     onSeasonalityChange(e);
                   }}
@@ -618,6 +645,15 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                   name="week"
                   id="weekly"
                   checked={seasonality.includes('W')}
+                  disabled={
+                    edit
+                      ? editableStatus('seasonality') === 'editable'
+                        ? false
+                        : editableStatus('seasonlity') === 'sensitive'
+                        ? enabled.seasonality
+                        : true
+                      : false
+                  }
                   onChange={(e) => {
                     onSeasonalityChange(e);
                   }}
@@ -633,6 +669,15 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                   name="daily"
                   id="daily"
                   checked={seasonality.includes('D')}
+                  disabled={
+                    edit
+                      ? editableStatus('seasonality') === 'editable'
+                        ? false
+                        : editableStatus('seasonlity') === 'sensitive'
+                        ? enabled.seasonality
+                        : true
+                      : false
+                  }
                   onChange={(e) => {
                     onSeasonalityChange(e);
                   }}
@@ -662,6 +707,9 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
               </div>
             </button>
           </div>
+          {edit &&
+            editableStatus('seasonality') === 'sensitive' &&
+            editAndSaveButton('seasonality')}
         </div>
         <Modal
           isOpen={isModalOpen}

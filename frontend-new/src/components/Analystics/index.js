@@ -345,7 +345,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
       <div className="edit-configuresetting">
         {enabled[name] ? (
           <button
-            className="btn black-button"
+            className="btn black-button edit-setting-btn"
             onClick={() => setEnabled({ ...enabled, [name]: false })}>
             <img src={Edit} alt="Edit" />
             <span>Edit</span>
@@ -353,7 +353,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
         ) : (
           <>
             <button
-              className="btn black-button"
+              className="btn black-button "
               onClick={() => onSaveInput(name)}>
               <span>Save</span>
             </button>

@@ -49,7 +49,7 @@ INTEGRATION_DATABASE = os.getenv("INTEGRATION_DATABASE")
 
 SOURCE_GOOGLE_ANALYTICS = get_bool(os.getenv('SOURCE_GOOGLE_ANALYTICS','true'))
 SOURCE_GOOGLE_SHEETS = get_bool(os.getenv('SOURCE_GOOGLE_SHEETS','true'))
-SOURCE_MYSQL = get_bool(os.getenv('SOURCE_MYSQL'),'false')
+SOURCE_MYSQL = get_bool(os.getenv('SOURCE_MYSQL','false'))
 SOURCE_POSTGRES = get_bool(os.getenv('SOURCE_POSTGRES','false'))
 SOURCE_SHOPIFY = get_bool(os.getenv('SOURCE_SHOPIFY','true'))
 SOURCE_STRIPE = get_bool(os.getenv('SOURCE_STRIPE','true'))

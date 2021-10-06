@@ -109,7 +109,8 @@ class ThirdPartyClient(object):
         sources = self.get_source_def_list()
         sources_list = sources["sourceDefinitions"]
         available_sources = [source for source in sources_list
-            if source["sourceDefinitionId"] in SOURCE_DEF_ID]
+            if (source["sourceDefinitionId"] in SOURCE_DEF_ID) and
+            (SOURCE_DEF_ID[source["sourceDefinitionId"]])]
         
         while True:
             if self.check_sources_availability(available_sources):

@@ -140,6 +140,30 @@ services:
     volumes:
       - ./temporal/dynamicconfig:/etc/temporal/config/dynamicconfig
 
+
+  chaosgenius-init:
+    image: docker
+    command: >
+      sh -c "apk update && 
+             apk upgrade && 
+             apk add bash && 
+             bash /setup/docker/setup-airbyte-images.sh"
+    volumes:
+      - ./setup:/setup
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - SOURCE_GOOGLE_ANALYTICS=${SOURCE_GOOGLE_ANALYTICS}
+      - SOURCE_GOOGLE_SHEETS=${SOURCE_GOOGLE_SHEETS}
+      - SOURCE_MYSQL=${SOURCE_MYSQL}
+      - SOURCE_POSTGRES=${SOURCE_POSTGRES}
+      - SOURCE_SHOPIFY=${SOURCE_SHOPIFY}
+      - SOURCE_STRIPE=${SOURCE_STRIPE}
+      - SOURCE_GOOGLE_ADS=${SOURCE_GOOGLE_ADS}
+      - SOURCE_FACEBOOK_ADS=${SOURCE_FACEBOOK_ADS}
+      - SOURCE_BING_ADS=${SOURCE_BING_ADS}
+      - SOURCE_GOOGLE_BIG_QUERY=${SOURCE_GOOGLE_BIG_QUERY}
+      - SOURCE_SNOWFLAKE=${SOURCE_SNOWFLAKE}
+
   chaosgenius-webapp:
     build:
       context: ./frontend-new
@@ -263,6 +287,7 @@ services:
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
     depends_on:
       - redis
+      - chaosgenius-db
 
 volumes:
   workspace:

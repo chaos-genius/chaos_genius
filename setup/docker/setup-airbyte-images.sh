@@ -4,9 +4,63 @@ echo "#############################################"
 
 #TODO: check if images exist before pulling
 
-declare -a image_names=("airbyte/source-google-ads:0.1.8" "airbyte/source-postgres:0.3.9" "airbyte/source-snowflake:0.1.1" "airbyte/source-mysql:0.4.3" "airbyte/source-bing-ads:0.1.0" "airbyte/source-google-sheets:0.2.4" "airbyte/source-shopify:0.1.12" "airbyte/source-stripe:0.1.16" "airbyte/source-bigquery:0.1.1" "airbyte/source-facebook-marketing:0.2.14" "airbyte/source-googleanalytics-singer:0.2.6")
+#declare -a image_names=("airbyte/source-google-ads:0.1.8" "airbyte/source-postgres:0.3.9" "airbyte/source-snowflake:0.1.1" "airbyte/source-mysql:0.4.3" "airbyte/source-bing-ads:0.1.0" "airbyte/source-google-sheets:0.2.4" "airbyte/source-shopify:0.1.12" "airbyte/source-stripe:0.1.16" "airbyte/source-bigquery:0.1.1" "airbyte/source-facebook-marketing:0.2.14" "airbyte/source-googleanalytics-singer:0.2.6")
 
-for image in "${image_names[@]}"
-do
-    docker pull $image
-done
+#for image in "${image_names[@]}"
+#do
+    #docker pull $image
+#done
+
+if  $SOURCE_GOOGLE_ADS -eq 'true'
+then
+    docker pull airbyte/source-google-ads:0.1.8
+fi
+
+if  $SOURCE_POSTGRES -eq 'true'
+then
+    docker pull airbyte/source-postgres:0.3.9
+fi
+
+if  $SOURCE_SNOWFLAKE -eq 'true'
+then
+    docker pull airbyte/source-snowflake:0.1.1
+fi
+
+if  $SOURCE_MYSQL -eq 'true'
+then
+    docker pull airbyte/source-mysql:0.4.3
+fi
+
+if  $SOURCE_BING_ADS -eq 'true'
+    docker pull airbyte/source-bing-ads:0.1.0
+fi
+
+if  $SOURCE_GOOGLE_SHEETS -eq 'true'
+then
+    docker pull airbyte/source-google-sheets:0.2.4
+fi
+
+if  $SOURCE_SHOPIFY -eq 'true'
+then
+    docker pull airbyte/source-shopify:0.1.12
+fi
+
+if  $SOURCE_STRIPE -eq 'true'
+then
+    docker pull airbyte/source-stripe:0.1.16
+fi
+
+if  $SOURCE_GOOGLE_BIG_QUERY -eq 'true'
+then
+    docker pull airbyte/source-bigquery:0.1.1
+fi
+
+if  $SOURCE_FACEBOOK_ADS -eq 'true'
+then
+    docker pull airbyte/source-facebook-marketing:0.2.14
+fi
+
+if  $SOURCE_GOOGLE_ANALYTICS -eq 'true'
+then
+    docker pull airbyte/source-googleanalytics-singer:0.2.6
+fi

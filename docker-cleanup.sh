@@ -1,6 +1,6 @@
 echo "###### REMOVING CONTAINERS ###########"
-docker-compose -f docker-compose-img.yml down
-docker-compose -f docker-compose-img.yml rm -v -f
+docker-compose -f docker-compose.image.yml down
+docker-compose -f docker-compose.image.yml rm -v -f
 
 echo "#### CLEANING UP LOCAL DIRECTORIES ###############"
 rm -rf docker/airbyte-db
@@ -10,7 +10,7 @@ rm -rf /tmp/airbyte_local
 rm -rf temporal
 echo "Done"
 echo "####### REMOVING ALL RELATED IMAGES ##############"
-declare -a image_names=("chaos_genius_celery-scheduler" "chaos_genius_celery-worker" "chaos_genius_chaosgenius-server" "chaos_genius_chaosgenius-webapp" "airbyte/webapp" "airbyte/server" "airbyte/worker" "airbyte/scheduler" "airbyte/db" "airbyte/init" "airbyte/source-google-ads" "airbyte/source-postgres" "airbyte/source-snowflake" "airbyte/source-mysql" "airbyte/source-bing-ads" "airbyte/source-google-sheets" "airbyte/source-shopify" "airbyte/source-stripe" "airbyte/source-bigquery" "airbyte/source-facebook-marketing" "airbyte/source-googleanalytics-singer" "temporalio/auto-setup" "redis" "node" "postgres" "chaosgenius/chaosgenius-server" "chaosgenius/chaosgenius-webapp")
+declare -a image_names=("chaos_genius_celery-scheduler" "chaos_genius_celery-worker" "chaos_genius_chaosgenius-server" "chaos_genius_chaosgenius-webapp" "airbyte/webapp" "airbyte/server" "airbyte/worker" "airbyte/scheduler" "airbyte/db" "airbyte/init" "airbyte/source-google-ads" "airbyte/source-postgres" "airbyte/source-snowflake" "airbyte/source-mysql" "airbyte/source-bing-ads" "airbyte/source-google-sheets" "airbyte/source-shopify" "airbyte/source-stripe" "airbyte/source-bigquery" "airbyte/source-facebook-marketing" "airbyte/source-googleanalytics-singer" "temporalio/auto-setup" "redis" "node" "postgres" "chaosgenius/chaosgenius-server" "chaosgenius/chaosgenius-webapp" "docker")
 
 for image in "${image_names[@]}"
 do

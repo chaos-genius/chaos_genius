@@ -1,10 +1,11 @@
-"""Provides utility functions for generating waterfalls"""
+"""Provides utility functions for generating waterfalls."""
 
 from itertools import combinations
 from typing import Tuple
-import pandas as pd
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 
 def get_best_subgroups_using_superset_algo(
@@ -12,17 +13,29 @@ def get_best_subgroups_using_superset_algo(
     max_waterfall_columns: int,
     max_subgroups_considered: int,
 ) -> pd.DataFrame:
+    """Return best subgroups using superset algorithm.
 
+    :param df_subgroups: dataframe with all subgroups
+    :type df_subgroups: pd.DataFrame
+    :param max_waterfall_columns: max number of waterfall columns
+    :type max_waterfall_columns: int
+    :param max_subgroups_considered: max number of columns to consider
+    :type max_subgroups_considered: int
+    :return: filtered dataframe with best subgroups
+    :rtype: pd.DataFrame
+    """
     current_comb = []
     current_comb_filters = []
     i = -1
 
-    while i < len(df_subgroups) - 1 and i < max_subgroups_considered \
-            and len([i[-1] for i in current_comb if i[-1] is False]) < max_waterfall_columns:
+    while (
+        i < len(df_subgroups) - 1
+        and i < max_subgroups_considered
+        and len([i[-1] for i in current_comb if i[-1] is False])
+        < max_waterfall_columns
+    ):
 
         i += 1
-        ignored = False
-
         curr_filter_string = df_subgroups.iloc[i]["string"]
         curr_filter_split = curr_filter_string.split(" and ")
         len_curr_filters = len(curr_filter_split)
@@ -41,8 +54,8 @@ def get_best_subgroups_using_superset_algo(
             elif len_curr_filters > len_comb_filter:
                 curr_filter_combs = combinations(
                     curr_filter_split, len_comb_filter)
-                curr_filter_combs = [" and ".join(
-                    i) for i in curr_filter_combs]
+                curr_filter_combs = [
+                    " and ".join(i) for i in curr_filter_combs]
                 if comb_filter_string in curr_filter_combs:
                     curr_filters_exist_in_comb = True
                     break
@@ -50,30 +63,17 @@ def get_best_subgroups_using_superset_algo(
             else:
                 continue
 
-        if curr_filters_exist_in_comb:
-            ignored = True
-
+        ignored = curr_filters_exist_in_comb
         if not ignored:
             current_comb_filters.append((curr_filter_string, len_curr_filters))
 
-        current_comb.append([
-            df_subgroups.iloc[i]["string"],
-            ignored
-        ])
+        current_comb.append([df_subgroups.iloc[i]["string"], ignored])
 
-    return pd.DataFrame(
-        current_comb,
-        columns=[
-            "string", "ignored"
-        ]
-    )
+    return pd.DataFrame(current_comb, columns=["string", "ignored"])
 
 
-def get_waterfall_ylims(
-    trans: pd.DataFrame,
-    col: str
-) -> Tuple[float, float]:
-    """Returns y limits for the Y axis of a waterfall plot
+def get_waterfall_ylims(trans: pd.DataFrame, col: str) -> Tuple[float, float]:
+    """Return y limits for the Y axis of a waterfall plot.
 
     :param trans: Dataframe to use
     :type trans: pd.DataFrame
@@ -82,7 +82,6 @@ def get_waterfall_ylims(
     :return: y-axis limits for waterfall
     :rtype: Tuple[float, float]
     """
-
     blank = trans[col].cumsum().shift(1).fillna(0).shift(-1)
     blank.iloc[-1] = trans.iloc[-1]
 
@@ -98,7 +97,7 @@ def waterfall_plot_mpl(
     y_lims: Tuple[float, float] = None,
     rot: int = 0
 ) -> plt.Axes:
-    """Plots waterfall and returns a plt.Axes object.
+    """Plot waterfall and returns a plt.Axes object.
 
     :param data_df: Input Data for plotting
     :type data_df: pd.DataFrame
@@ -113,12 +112,6 @@ def waterfall_plot_mpl(
     """
     waterfall_bottom = data_df[col].cumsum().shift(1).fillna(0)
 
-    # Get the net total number for the final element in the waterfall
-    # TODO: Remove this after checking
-    # total = trans.sum()[col]
-    # trans.loc["net"] = total
-    # blank.loc["net"] = total
-
     # The steps graphically show the levels
     # as well as used for label placement
     step = waterfall_bottom.reset_index(drop=True).repeat(3).shift(-1)
@@ -128,8 +121,7 @@ def waterfall_plot_mpl(
     # Set the blank to 0
     waterfall_bottom.loc["end"] = 0
 
-    #Plot and label
-
+    # Plot and label
     df_copy = data_df.copy()
 
     df_copy["pos"] = df_copy[col]
@@ -139,11 +131,15 @@ def waterfall_plot_mpl(
     df_copy.drop(col, axis=1, inplace=True)
 
     my_plot = df_copy.plot(
-        kind='bar', stacked=True, bottom=waterfall_bottom,
-        legend=None, figsize=(15, 5), rot=rot,
-        color={"pos": "green", "neg": "red"}
+        kind="bar",
+        stacked=True,
+        bottom=waterfall_bottom,
+        legend=None,
+        figsize=(15, 5),
+        rot=rot,
+        color={"pos": "green", "neg": "red"},
     )
-    my_plot.plot(step.index, step.values, 'k')
+    my_plot.plot(step.index, step.values, "k")
 
     plt.ylim(y_lims)
 

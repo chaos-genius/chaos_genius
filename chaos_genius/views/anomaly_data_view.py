@@ -396,14 +396,6 @@ def get_end_date(kpi_info: dict) -> datetime:
     return end_date
 
 
-def get_anomaly_end_date(kpi_id: int):
-    anomaly_end_date = AnomalyDataOutput.query.filter(
-            AnomalyDataOutput.kpi_id == kpi_id
-        ).order_by(AnomalyDataOutput.data_datetime.desc()).first()
-    print(anomaly_end_date.as_dict['data_datetime'])
-    return anomaly_end_date.as_dict['data_datetime']
-
-
 # --- anomaly params meta information --- #
 ANOMALY_PARAMS_META = {
     "name": "anomaly_params",
@@ -823,3 +815,17 @@ def validate_scheduled_time(time):
         return (f"second must be between 0 and 60 (inclusive). Got: {second}", time)
 
     return "", time
+
+def get_anomaly_end_date(kpi_id: int):
+    anomaly_end_date = AnomalyDataOutput.query.filter(
+            AnomalyDataOutput.kpi_id == kpi_id
+        ).order_by(AnomalyDataOutput.data_datetime.desc()).first()
+    
+    try:
+        anomaly_end_date = anomaly_end_date.as_dict['data_datetime']
+    except AttributeError:
+        anomaly_end_date = None
+    except Exception as err:
+        current_app.logger.info(f"Error Found: {err}")
+
+    return anomaly_end_date

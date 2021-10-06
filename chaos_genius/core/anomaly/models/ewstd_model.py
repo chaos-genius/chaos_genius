@@ -1,6 +1,9 @@
+"""Provides the EWSTDModel for anomaly detection."""
+
+import pandas as pd
+
 from chaos_genius.core.anomaly.models import AnomalyModel
 from chaos_genius.core.anomaly.utils import get_timedelta
-import pandas as pd
 
 EWSTDSENS = {
     'high': 0.8,
@@ -8,23 +11,38 @@ EWSTDSENS = {
     'low': 0.95
 }
 
+
 class EWSTDModel(AnomalyModel):
+    """EWSTD model for anomaly detection."""
+
     def __init__(self, *args, model_kwargs={}, **kwargs):
+        """Initialize the EWSTDModel.
+
+        :param model_kwargs: model specific configuration, defaults to {}
+        :type model_kwargs: dict, optional
+        """
         super().__init__(*args, **kwargs)
         self.model_kwargs = model_kwargs
 
     def predict(
-        self, 
-        df: pd.DataFrame, 
-        sensitivity,
-        frequency,
+        self,
+        df: pd.DataFrame,
+        sensitivity: str,
+        frequency: str,
         pred_df: pd.DataFrame = None
     ) -> pd.DataFrame:
-        """Takes in pd.DataFrame with 2 columns, dt and y, and returns a
-        pd.DataFrame with 3 columns, dt, y, and yhat_lower, yhat_upper.
+        """Predict anomalies on data.
+
+        If pred_df is None, will predict on the last data point.
 
         :param df: Input Dataframe with dt, y columns
         :type df: pd.DataFrame
+        :param sensitivity: sensitivity to use for anomaly detection
+        :type sensitivity: str
+        :param frequency: frequency to use in the model
+        :type frequency: str
+        :param pred_df: dataframe to predict on, defaults to None
+        :type pred_df: pd.DataFrame, optional
         :return: Output Dataframe with dt, y, yhat_lower, yhat_upper
         columns
         :rtype: pd.DataFrame
@@ -33,36 +51,34 @@ class EWSTDModel(AnomalyModel):
 
         # span = window size
         ew_mean = df["y"].ewm(span=len(df)).mean().iloc[-1]
-        ew_stddevi = df["y"].ewm(span=len(df)).std().iloc[-1]
+        ew_std_dev = df["y"].ewm(span=len(df)).std().iloc[-1]
 
-        #TODO: Set values for numDevi_u, numDevi_l in sensitivity
-        numDevi = EWSTDSENS[sensitivity.lower()]
-        numDevi_u = None
-        numDevi_l = None
+        num_dev = EWSTDSENS[sensitivity.lower()]
+        num_dev_u = None
+        num_dev_l = None
 
-        if numDevi_u is None:
-            numDevi_u = numDevi
-        if numDevi_l is None:
-            numDevi_l = numDevi
-        
-        threshold_u = ew_mean + (numDevi_u * ew_stddevi)
-        threshold_l = ew_mean - (numDevi_l * ew_stddevi)
+        if num_dev_u is None:
+            num_dev_u = num_dev
+        if num_dev_l is None:
+            num_dev_l = num_dev
 
-        #TODO: COMMIT AS PART OF ANOMALY MAJOR FIX
-        # MAYBE COMMIT AS PREDICTION MAKER IN EWSTD
+        threshold_u = ew_mean + (num_dev_u * ew_std_dev)
+        threshold_l = ew_mean - (num_dev_l * ew_std_dev)
+
         if pred_df is None:
             forecast_time = df['ds'].iloc[-1] + get_timedelta(frequency, 1)
             forecast_value = (threshold_l + threshold_u)/2
-            df = df.append({'ds': forecast_time, 'y': forecast_value}, ignore_index=True)
+            df = df.append(
+                {'ds': forecast_time, 'y': forecast_value}, ignore_index=True)
 
         df['yhat_lower'] = threshold_l
         df['yhat_upper'] = threshold_u
         df['yhat'] = (threshold_l + threshold_u)/2
-        
-        df_anomaly = self.detect_anomalies(df)
+
+        df_anomaly = self._detect_anomalies(df)
 
         df_anomaly = df_anomaly[['ds', 'yhat', 'yhat_lower', 'yhat_upper']]
-        
+
         return df_anomaly.rename(columns={
             'ds': 'dt',
             'yhat': 'y',
@@ -70,7 +86,7 @@ class EWSTDModel(AnomalyModel):
             'yhat_upper': 'yhat_upper'
         })
 
-    def detect_anomalies(self, forecast):
+    def _detect_anomalies(self, forecast):
         forecasted = forecast[['ds', 'yhat',
                                'yhat_lower', 'yhat_upper', 'y']].copy()
         forecasted['anomaly'] = 0

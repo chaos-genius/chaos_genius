@@ -1,12 +1,12 @@
+"""Provides the Greykite model for anomaly detection."""
+
 import warnings
 
-from greykite.framework.templates.forecaster import Forecaster
-from greykite.framework.utils.result_summary import summarize_grid_search_results
-from greykite.framework.templates.model_templates import ModelTemplateEnum
-from greykite.framework.templates.autogen.forecast_config import MetadataParam
-from greykite.framework.templates.autogen.forecast_config import ForecastConfig
-
 import pandas as pd
+from greykite.framework.templates.autogen.forecast_config import (
+    ForecastConfig, MetadataParam)
+from greykite.framework.templates.forecaster import Forecaster
+from greykite.framework.templates.model_templates import ModelTemplateEnum
 
 from chaos_genius.core.anomaly.models import AnomalyModel
 
@@ -22,24 +22,39 @@ GKFREQ = {
     'hourly': 'H',
     'daily': 'D'
 }
+
+
 class GreyKiteModel(AnomalyModel):
+    """EWSTD model for anomaly detection."""
 
     def __init__(self, *args, model_kwargs={}, **kwargs) -> None:
+        """Initialize the GreyKiteModel.
+
+        :param model_kwargs: model specific configuration, defaults to {}
+        :type model_kwargs: dict, optional
+        """
         super().__init__(*args, **kwargs)
         self.model_kwargs = model_kwargs
 
     def predict(
         self,
         df: pd.DataFrame,
-        sensitivity,
-        frequency,
+        sensitivity: str,
+        frequency: str,
         pred_df: pd.DataFrame = None
     ) -> pd.DataFrame:
-        """Takes in pd.DataFrame with 2 columns, dt and y, and returns a
-        pd.DataFrame with 3 columns, dt, y, and yhat_lower, yhat_upper.
+        """Predict anomalies on data.
+
+        If pred_df is None, will predict on the last data point.
 
         :param df: Input Dataframe with dt, y columns
         :type df: pd.DataFrame
+        :param sensitivity: sensitivity to use for anomaly detection
+        :type sensitivity: str
+        :param frequency: frequency to use in the model
+        :type frequency: str
+        :param pred_df: dataframe to predict on, defaults to None
+        :type pred_df: pd.DataFrame, optional
         :return: Output Dataframe with dt, y, yhat_lower, yhat_upper
         columns
         :rtype: pd.DataFrame
@@ -52,7 +67,7 @@ class GreyKiteModel(AnomalyModel):
         )
 
         # Creates forecasts and stores the result
-        forecaster = Forecaster()  
+        forecaster = Forecaster()
 
         # result is also stored as forecaster.forecast_result
         result = forecaster.run_forecast_config(
@@ -61,7 +76,7 @@ class GreyKiteModel(AnomalyModel):
                 model_template=ModelTemplateEnum.SILVERKITE.name,
                 forecast_horizon=1,  # forecasts 1 step
                 **self.model_kwargs,
-                coverage= GKSENS[sensitivity.lower()],
+                coverage=GKSENS[sensitivity.lower()],
                 metadata_param=metadata
             )
         )

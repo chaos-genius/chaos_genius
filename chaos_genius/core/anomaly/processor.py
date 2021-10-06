@@ -57,8 +57,8 @@ class ProcessAnomalyDetection:
         self.input_data = data
         self.last_date = last_date
         self.period = period
-        self.table_name = (table_name,)
-        self.series = (series,)
+        self.table_name = table_name
+        self.series = series
         self.subgroup = subgroup
         self.model_path = self._gen_model_save_path()
         self.model_kwargs = model_kwargs

@@ -11,11 +11,12 @@ from chaos_genius.core.rca.constants import (LINE_DATA_TIMESTAMP_FORMAT,
                                              STATIC_END_DATA_FORMAT, TIMELINES)
 from chaos_genius.core.rca.rca_utils.data_loader import rca_load_data
 from chaos_genius.core.rca.root_cause_analysis import RootCauseAnalysis
+from chaos_genius.core.utils.round import round_series
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.rca_data_model import RcaData, db
 from chaos_genius.logger import configure_logger
 
-logger = configure_logger("rca_controller")
+logger = configure_logger(__name__)
 
 
 class RootCauseAnalysisController:
@@ -29,6 +30,7 @@ class RootCauseAnalysisController:
         :param end_date: end date for analysis, defaults to None
         :type end_date: datetime, optional
         """
+        logger.info(f"RCA Controller initialized with KPI: {kpi_info['id']}")
         self.kpi_info = kpi_info
 
         if end_date is None and self.kpi_info["is_static"]:
@@ -38,6 +40,8 @@ class RootCauseAnalysisController:
 
         if end_date is None:
             end_date = datetime.today()
+
+        logger.debug(f"RCA Controller end date: {end_date}")
 
         self.end_date = end_date
         self.connection_info = DataSource.get_by_id(kpi_info["data_source"])
@@ -68,7 +72,7 @@ class RootCauseAnalysisController:
         """
         return rca_load_data(
             self.kpi_info, self.connection_info, self.dt_col, self.end_date,
-            timeline)
+            timeline, tail)
 
     def _output_to_row(
         self,
@@ -113,7 +117,6 @@ class RootCauseAnalysisController:
             .agg({self.metric: self.agg})
             .reset_index()
         )
-        rca_df = rca_df.round(self.kpi_info.get("metric_precision", 3))
 
         rca_df[self.dt_col] = rca_df[self.dt_col].dt.strftime(
             LINE_DATA_TIMESTAMP_FORMAT
@@ -123,6 +126,9 @@ class RootCauseAnalysisController:
             self.dt_col: "date",
             self.metric: "value"
         })
+        rca_df["value"] = round_series(rca_df["value"])
+
+        logger.debug(f"Line data has {len(rca_df)} rows.")
 
         return rca_df.to_dict(orient="records")
 
@@ -142,7 +148,6 @@ class RootCauseAnalysisController:
             metric=self.metric,
             agg=self.agg,
             num_dim_combs=self.num_dim_combs,
-            precision=self.kpi_info.get("metric_precision", 3),
         )
 
     def _get_aggregation(self, rca: RootCauseAnalysis) -> dict:
@@ -249,33 +254,38 @@ class RootCauseAnalysisController:
         """Compute RCA for KPI and store results."""
         output = []
 
-        # Line Data
+        logger.info("Getting Line Data for KPI.")
         line_data = self._get_line_data()
         output.append(self._output_to_row("line", line_data))
 
         for timeline in TIMELINES:
-            # Get RCA Object
+            logger.info(f"Running RCA for timeline: {timeline}")
             rca = self._load_rca_obj(timeline)
 
             try:
-                # Aggregations
+                logger.debug("Computing aggregations.")
                 agg_data = self._get_aggregation(rca)
                 output.append(self._output_to_row("agg", agg_data, timeline))
-            except:  # noqa E722
-                print(f"Error in agg for {timeline}. Skipping timeline.")
+            except Exception as e:  # noqa E722
+                logger.error(
+                    f"Error in agg for {timeline}. Skipping timeline.",
+                    exc_info=1)
                 continue
 
             dims = [None] + self.dimensions
             for dim in dims:
-                # RCA
+                logger.debug(f"Computing RCA for dimension: {dim}")
                 try:
                     rca_data = self._get_rca(rca, dim, timeline)
                     output.append(
                         self._output_to_row("rca", rca_data, timeline, dim))
                 except:  # noqa E722
-                    print(f"Error in RCA for {timeline, dim}")
-                # Hierarchical Table
+                    logger.error(
+                        f"Error in RCA for {timeline, dim}", exc_info=1)
+
                 if dim is not None:
+                    logger.debug(
+                        f"Computing Hierarchical table for dimension: {dim}")
                     try:
                         htable_data = self._get_htable(rca, dim, timeline)
                         output.append(
@@ -283,14 +293,18 @@ class RootCauseAnalysisController:
                                 "htable", htable_data, timeline, dim)
                         )
                     except:  # noqa E722
-                        print(f"Error in htable for {timeline, dim}")
+                        logger.error(
+                            f"Error in htable for {timeline, dim}", exc_info=1)
 
-        # Store Output
-        output = pd.DataFrame(output)
-        output["created_at"] = datetime.now()
-        output.to_sql(
-            RcaData.__tablename__,
-            db.engine,
-            if_exists="append",
-            index=False
-        )
+        try:
+            logger.info(f"Storing output for KPI {self.kpi_info['id']}")
+            output = pd.DataFrame(output)
+            output["created_at"] = datetime.now()
+            output.to_sql(
+                RcaData.__tablename__,
+                db.engine,
+                if_exists="append",
+                index=False
+            )
+        except:  # noqa E722
+            logger.error("Error in storing output.", exc_info=1)

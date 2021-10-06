@@ -584,7 +584,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     ? editableStatus('frequency') === 'editable'
                       ? false
                       : editableStatus('frequency') === 'sensitive'
-                      ? enabled.sensitivity
+                      ? enabled.frequency
                       : true
                     : false
                 }

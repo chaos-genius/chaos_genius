@@ -293,7 +293,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   };
 
   const handleValueChange = (data) => {
-    setSchedule(data.format('hh:mm:00'));
+    setSchedule(data ? data.format('hh:mm:00') : '');
   };
 
   const onSaveInput = (name) => {

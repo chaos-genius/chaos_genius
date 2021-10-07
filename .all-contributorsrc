@@ -37,6 +37,16 @@
         "review",
         "tool"
       ]
+    },
+    {
+      "login": "kartikay-bagla",
+      "name": "Kartikay Bagla",
+      "avatar_url": "https://avatars.githubusercontent.com/u/19384906?v=4",
+      "profile": "http://kartikaybagla.com",
+      "contributions": [
+        "code",
+        "maintenance"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -45,7 +45,19 @@
       "profile": "http://kartikaybagla.com",
       "contributions": [
         "code",
-        "maintenance"
+        "maintenance",
+         "research"
+      ]
+    },
+    {
+      "login": "varunp2k",
+      "name": "Varun P",
+      "avatar_url": "https://avatars.githubusercontent.com/u/46447751?v=4",
+      "profile": "https://github.com/varunp2k",
+      "contributions": [
+        "code",
+        "maintenance",
+        "research"
       ]
     }
   ],

@@ -124,6 +124,17 @@
         "tool",
         "platform"
       ]
+    },
+    {
+      "login": "NaikAayush",
+      "name": "Aayush Naik",
+      "avatar_url": "https://avatars.githubusercontent.com/u/57558584?v=4",
+      "profile": "https://github.com/NaikAayush",
+      "contributions": [
+        "code",
+        "tool",
+        "platform"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -10,7 +10,7 @@ from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.kpi_model import Kpi
-from chaos_genius.connectors.base_connector import get_df_from_db_uri
+# from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import anomaly_alert_slack, anomaly_alert_slack_formatted

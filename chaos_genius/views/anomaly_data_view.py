@@ -10,7 +10,6 @@ from sqlalchemy.orm.attributes import flag_modified
 from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
 
 from chaos_genius.extensions import cache
-from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.databases.models.kpi_model import Kpi

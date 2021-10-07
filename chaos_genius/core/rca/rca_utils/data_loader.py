@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 from typing import Tuple
 
 import pandas as pd
-
-from chaos_genius.connectors.base_connector import get_df_from_db_uri
+from chaos_genius.connectors import get_sqla_db_conn
+# from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.core.rca.constants import TIMELINE_NUM_DAYS_MAP
 
 
@@ -124,9 +124,11 @@ def _get_kpi_table_data(
         base_query += limit_query
         rca_query += limit_query
 
-    db_uri = connection_info["db_uri"]
-    base_df = get_df_from_db_uri(db_uri, base_query)
-    rca_df = get_df_from_db_uri(db_uri, rca_query)
+    db_connection = get_sqla_db_conn(data_source_info=connection_info)
+    base_df = db_connection.run_query(base_query)
+    rca_df = db_connection.run_query(rca_query)
+    # base_df = get_df_from_db_uri(db_uri, base_query)
+    # rca_df = get_df_from_db_uri(db_uri, rca_query)
 
     return base_df, rca_df
 
@@ -167,7 +169,9 @@ def _get_kpi_query_data(
         query[0] += limit_query
         query = ";".join(query)
 
-    query_df = get_df_from_db_uri(connection_info["db_uri"], query)
+    db_connection = get_sqla_db_conn(data_source_info=connection_info)
+    query_df = db_connection.run_query(query)
+    # query_df = get_df_from_db_uri(connection_info["db_uri"], query)
     query_df[dt_col] = pd.to_datetime(query_df[dt_col])
     base_df = query_df[
         (query_df[dt_col] > base_dt_obj)

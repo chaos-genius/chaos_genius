@@ -70,6 +70,16 @@
         "data",
         "doc"
       ]
+    },
+    {
+      "login": "dajkatal",
+      "name": "Daj Katal",
+      "avatar_url": "https://avatars.githubusercontent.com/u/47812481?v=4",
+      "profile": "https://github.com/dajkatal",
+      "contributions": [
+        "plugin",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

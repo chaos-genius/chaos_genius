@@ -60,9 +60,12 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   const [schedule, setSchedule] = useState(moment());
 
   const [error, setError] = useState({
+    anomaly_period: '',
     modelName: '',
     sensitivity: '',
-    frequency: ''
+    frequency: '',
+    model_frequency: '',
+    seasonality: ''
   });
 
   const [enabled, setEnabled] = useState({
@@ -97,6 +100,14 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     dispatch(anomalySetting(kpi));
     dispatch(settingMetaInfo());
     dispatch(kpiEditSetup(kpi));
+    setError({
+      anomaly_period: '',
+      modelName: '',
+      sensitivity: '',
+      frequency: '',
+      model_frequency: '',
+      seasonality: ''
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpi]);
 
@@ -139,36 +150,32 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
 
   useEffect(() => {
     if (kpiEditData && kpiEditData?.anomaly_params !== null) {
-      setSensitivity(
-        {
-          label: kpiEditData?.anomaly_params?.sensitivity,
-          value: kpiEditData?.anomaly_params?.sensitivity
-        } || ''
-      );
-      setModalName(
-        {
-          label: kpiEditData?.anomaly_params?.model_name,
-          value: kpiEditData?.anomaly_params?.model_name
-        } || ''
-      );
-      setFrequency(
-        {
-          label:
-            kpiEditData?.anomaly_params?.frequency === 'D' ? 'Daily' : 'Hourly',
-          value: kpiEditData?.anomaly_params?.frequency
-        } || ''
-      );
-      setModalFrequency(
-        {
-          label:
-            kpiEditData?.anomaly_params?.scheduler_frequency === 'D'
-              ? 'Daily'
-              : 'Hourly',
-          value: kpiEditData?.anomaly_params?.scheduler_frequency
-        } || ''
-      );
+      setSensitivity({
+        label: kpiEditData?.anomaly_params?.sensitivity,
+        value: kpiEditData?.anomaly_params?.sensitivity
+      });
+      setModalName({
+        label: kpiEditData?.anomaly_params?.model_name,
+        value: kpiEditData?.anomaly_params?.model_name
+      });
+      setFrequency({
+        label: kpiEditData?.anomaly_params?.frequency
+          ? kpiEditData?.anomaly_params?.frequency === 'D'
+            ? 'Daily'
+            : 'Hourly'
+          : '',
+        value: kpiEditData?.anomaly_params?.frequency
+      });
+      setModalFrequency({
+        label: kpiEditData?.anomaly_params?.scheduler_frequency
+          ? kpiEditData?.anomaly_params?.scheduler_frequency === 'D'
+            ? 'Daily'
+            : 'Hourly'
+          : '',
+        value: kpiEditData?.anomaly_params?.scheduler_frequency
+      });
       setSeasonality(kpiEditData?.anomaly_params?.seasonality || []);
-
+      setAnomalyPeriod(kpiEditData?.anomaly_params?.anomaly_period || 0);
       setSchedule(kpiEditData?.anomaly_params?.scheduler_params_time);
     }
 
@@ -235,24 +242,32 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   const onSettingSave = () => {
     var obj = { ...error };
 
-    if (modelName.value === '') {
+    if (anomalyPeriod === '' || anomalyPeriod === 0) {
+      obj['anomaly_period'] = 'Enter Time Window';
+    }
+    if (modalFrequency.value === '' || modalFrequency.value === null) {
+      obj['model_frequency'] = 'Enter Model Frequency';
+    }
+    if (modelName.value === '' || modelName.value === null) {
       obj['modelName'] = 'Enter Model';
     }
-    if (Sensitivity.value === '') {
+    if (Sensitivity.value === '' || Sensitivity.value === null) {
       obj['sensitivity'] = 'Enter Sensitivity';
     }
-    if (frequency.value === '') {
+    if (frequency.value === '' || frequency.value === null) {
       obj['frequency'] = 'Enter Frequency';
     }
     setError(obj);
     if (
+      obj.anomaly_period === '' &&
+      obj.model_frequency === '' &&
       obj.modelName === '' &&
       obj.sensitivity === '' &&
       obj.frequency === ''
     ) {
       const data = {
         anomaly_params: {
-          anomaly_period: anomalyPeriod,
+          anomaly_period: Number(anomalyPeriod),
           frequency: frequency.value,
           model_name: modelName.value,
           sensitivity: Sensitivity.value,
@@ -409,6 +424,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     : false
                 }
                 onChange={(e) => {
+                  setError({ ...error, anomaly_period: '' });
                   if (enabled.anomaly_period) {
                     setAnomalyPeriod(e.target.value);
                   } else {
@@ -424,6 +440,11 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                 editableStatus('anomaly_period') === 'sensitive' &&
                 editAndSaveButton('anomaly_period')}
             </div>
+            {error.anomaly_period && (
+              <div className="connection__fail">
+                <p>{error.anomaly_period}</p>
+              </div>
+            )}
           </div>
           <div className="form-group">
             <label>Model Frequency</label>
@@ -462,6 +483,11 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                 editableStatus('scheduler_frequency') === 'sensitive' &&
                 editAndSaveButton('scheduler_frequency')}
             </div>
+            {error.model_frequency && (
+              <div className="connection__fail">
+                <p>{error.model_frequency}</p>
+              </div>
+            )}
           </div>
           <div className="form-group">
             <label>Select a Model</label>

@@ -156,11 +156,15 @@
 }
 .edit-configuresetting {
   position: absolute;
-  left: 765px;
+  right: -205px;
   display: flex;
   align-items: center;
+  .edit-setting-btn {
+    margin-left: -179px;
+  }
 }
 .editable-field {
+  position: relative;
   .seasonality-setting {
     width: 100%;
   }

@@ -26,6 +26,17 @@
         "content",
         "review"
       ]
+    },
+    {
+      "login": "manassolanki",
+      "name": "Manas Solanki",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20757311?v=4",
+      "profile": "https://www.manassolanki.com/",
+      "contributions": [
+        "code",
+        "review",
+        "tool"
+      ]
     }
   ],
   "contributorsPerLine": 7,

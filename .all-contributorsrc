@@ -13,7 +13,8 @@
       "contributions": [
         "projectManagement",
         "doc",
-        "ideas"
+        "ideas",
+        "design"
       ]
     },
     {
@@ -79,6 +80,111 @@
       "contributions": [
         "plugin",
         "doc"
+      ]
+    },
+    {
+      "login": "Amatullah",
+      "name": "Amatullah Sethjiwala",
+      "avatar_url": "https://avatars.githubusercontent.com/u/22439823?v=4",
+      "profile": "https://github.com/Amatullah",
+      "contributions": [
+        "code",
+        "data",
+        "test"
+      ]
+    },
+    {
+      "login": "juzarbhori",
+      "name": "juzarbhori",
+      "avatar_url": "https://avatars.githubusercontent.com/u/49563636?v=4",
+      "profile": "https://github.com/juzarbhori",
+      "contributions": [
+        "code",
+        "design"
+      ]
+    },
+    {
+      "login": "Fletchersan",
+      "name": "Amogh Dhar Diwan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/41579921?v=4",
+      "profile": "https://github.com/amoghdhardiwan",
+      "contributions": [
+        "code",
+        "tool",
+        "data"
+      ]
+    },
+    {
+      "login": "Samyak2",
+      "name": "Samyak Sarnayak",
+      "avatar_url": "https://avatars.githubusercontent.com/u/34161949?v=4",
+      "profile": "http://samyaks.xyz",
+      "contributions": [
+        "code",
+        "tool",
+        "platform"
+      ]
+    },
+    {
+      "login": "NaikAayush",
+      "name": "Aayush Naik",
+      "avatar_url": "https://avatars.githubusercontent.com/u/57558584?v=4",
+      "profile": "https://github.com/NaikAayush",
+      "contributions": [
+        "code",
+        "tool",
+        "platform"
+      ]
+    },
+    {
+      "login": "kshitij123456",
+      "name": "Kshitij Agarwal",
+      "avatar_url": "https://avatars.githubusercontent.com/u/42891697?v=4",
+      "profile": "https://github.com/kshitij123456",
+      "contributions": [
+        "code",
+        "tool",
+        "bug"
+      ]
+    },
+    {
+      "login": "bhargavsk1077",
+      "name": "Bhargav S. Kumar",
+      "avatar_url": "https://avatars.githubusercontent.com/u/51043479?v=4",
+      "profile": "https://github.com/bhargavsk1077",
+      "contributions": [
+        "code",
+        "platform",
+        "bug"
+      ]
+    },
+    {
+      "login": "moghankumar06",
+      "name": "moghankumar06",
+      "avatar_url": "https://avatars.githubusercontent.com/u/87368217?v=4",
+      "profile": "https://github.com/moghankumar06",
+      "contributions": [
+        "code",
+        "design"
+      ]
+    },
+    {
+      "login": "Santhoshkumar1023",
+      "name": "Santhoshkumar1023",
+      "avatar_url": "https://avatars.githubusercontent.com/u/87367866?v=4",
+      "profile": "https://github.com/Santhoshkumar1023",
+      "contributions": [
+        "code",
+        "design"
+      ]
+    },
+    {
+      "login": "Mansi-Chauhan27",
+      "name": "Mansi-Chauhan27",
+      "avatar_url": "https://avatars.githubusercontent.com/u/86592223?v=4",
+      "profile": "https://github.com/Mansi-Chauhan27",
+      "contributions": [
+        "plugin"
       ]
     }
   ],

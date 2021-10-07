@@ -56,3 +56,18 @@
     }
   }
 }
+.channel-tip {
+  p {
+    font-weight: $font-weight-400;
+    font-size: $font-size-12;
+    line-height: $line-height-16;
+    letter-spacing: $letter-spacing;
+    color: $grey_variation-3;
+    margin-top: 8px;
+    Link,
+    a {
+      text-decoration: underline;
+      text-decoration-color: $grey_variation-3;
+    }
+  }
+}

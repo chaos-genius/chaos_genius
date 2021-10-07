@@ -1,6 +1,6 @@
 # 🔮 Chaos Genius
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-7-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-17-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 Chaos Genius is an open-source business observability platform.Chaos Genius enables businesses to monitor thousands of KPIs, across multiple data sources, and perform automated root cause analysis for any deviation in the KPIs. 
@@ -89,7 +89,7 @@ Want to contribute? Visit our Github repo and get started with:
 
 ## Roadmap
 
-Check out our Roadmap 
+Check out our [Roadmap](roadmap.md) to know what we are building.  
 
 ## License
 
@@ -104,13 +104,27 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center"><a href="https://github.com/pshrimal21"><img src="https://avatars.githubusercontent.com/u/83073282?v=4?s=100" width="100px;" alt=""/><br /><sub><b>pshrimal21</b></sub></a><br /><a href="#projectManagement-pshrimal21" title="Project Management">📆</a> <a href="https://github.com/chaos-genius/chaos_genius/commits?author=pshrimal21" title="Documentation">📖</a> <a href="#ideas-pshrimal21" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://github.com/pshrimal21"><img src="https://avatars.githubusercontent.com/u/83073282?v=4?s=100" width="100px;" alt=""/><br /><sub><b>pshrimal21</b></sub></a><br /><a href="#projectManagement-pshrimal21" title="Project Management">📆</a> <a href="https://github.com/chaos-genius/chaos_genius/commits?author=pshrimal21" title="Documentation">📖</a> <a href="#ideas-pshrimal21" title="Ideas, Planning, & Feedback">🤔</a> <a href="#design-pshrimal21" title="Design">🎨</a></td>
     <td align="center"><a href="http://harshitsurana.com"><img src="https://avatars.githubusercontent.com/u/948291?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Harshit Surana</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=suranah" title="Code">💻</a> <a href="#content-suranah" title="Content">🖋</a> <a href="https://github.com/chaos-genius/chaos_genius/pulls?q=is%3Apr+reviewed-by%3Asuranah" title="Reviewed Pull Requests">👀</a></td>
     <td align="center"><a href="https://www.manassolanki.com/"><img src="https://avatars.githubusercontent.com/u/20757311?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Manas Solanki</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=manassolanki" title="Code">💻</a> <a href="https://github.com/chaos-genius/chaos_genius/pulls?q=is%3Apr+reviewed-by%3Amanassolanki" title="Reviewed Pull Requests">👀</a> <a href="#tool-manassolanki" title="Tools">🔧</a></td>
     <td align="center"><a href="http://kartikaybagla.com"><img src="https://avatars.githubusercontent.com/u/19384906?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Kartikay Bagla</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=kartikay-bagla" title="Code">💻</a> <a href="#maintenance-kartikay-bagla" title="Maintenance">🚧</a> <a href="#research-kartikay-bagla" title="Research">🔬</a></td>
     <td align="center"><a href="https://github.com/varunp2k"><img src="https://avatars.githubusercontent.com/u/46447751?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Varun P</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=varunp2k" title="Code">💻</a> <a href="#maintenance-varunp2k" title="Maintenance">🚧</a> <a href="#research-varunp2k" title="Research">🔬</a></td>
-    <td align="center"><a href="http://keshprad.ml"><img src="https://avatars.githubusercontent.com/u/32313895?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Keshav Pradeep</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=keshprad" title="Code">💻</a> <a href="#data-keshprad" title="Data">🔣</a> <a href="https://github.com/chaos-genius/chaos_genius/commits?author=keshprad" title="Documentation">📖</a></td>
+    <td align="center"><a href="http://keshprad.ml"><img src="https://avatars.githubusercontent.com/u/32313895?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Keshav Pradeep</b></sub></a><br /> <a href="#data-keshprad" title="Data">🔣</a> <a href="https://github.com/chaos-genius/chaos_genius/commits?author=keshprad" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/dajkatal"><img src="https://avatars.githubusercontent.com/u/47812481?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Daj Katal</b></sub></a><br /><a href="#plugin-dajkatal" title="Plugin/utility libraries">🔌</a> <a href="https://github.com/chaos-genius/chaos_genius/commits?author=dajkatal" title="Documentation">📖</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/Amatullah"><img src="https://avatars.githubusercontent.com/u/22439823?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Amatullah Sethjiwala</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=Amatullah" title="Code">💻</a> <a href="#data-Amatullah" title="Data">🔣</a> <a href="https://github.com/chaos-genius/chaos_genius/commits?author=Amatullah" title="Tests">⚠️</a></td>
+    <td align="center"><a href="https://github.com/juzarbhori"><img src="https://avatars.githubusercontent.com/u/49563636?v=4?s=100" width="100px;" alt=""/><br /><sub><b>juzarbhori</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=juzarbhori" title="Code">💻</a> <a href="#design-juzarbhori" title="Design">🎨</a></td>
+    <td align="center"><a href="https://github.com/amoghdhardiwan"><img src="https://avatars.githubusercontent.com/u/41579921?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Amogh Dhar Diwan</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=Fletchersan" title="Code">💻</a> <a href="#tool-Fletchersan" title="Tools">🔧</a> <a href="#data-Fletchersan" title="Data">🔣</a></td>
+    <td align="center"><a href="http://samyaks.xyz"><img src="https://avatars.githubusercontent.com/u/34161949?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Samyak Sarnayak</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=Samyak2" title="Code">💻</a> <a href="#tool-Samyak2" title="Tools">🔧</a> <a href="#platform-Samyak2" title="Packaging/porting to new platform">📦</a></td>
+    <td align="center"><a href="https://github.com/NaikAayush"><img src="https://avatars.githubusercontent.com/u/57558584?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Aayush Naik</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=NaikAayush" title="Code">💻</a> <a href="#tool-NaikAayush" title="Tools">🔧</a> <a href="#platform-NaikAayush" title="Packaging/porting to new platform">📦</a></td>
+    <td align="center"><a href="https://github.com/kshitij123456"><img src="https://avatars.githubusercontent.com/u/42891697?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Kshitij Agarwal</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=kshitij123456" title="Code">💻</a> <a href="#tool-kshitij123456" title="Tools">🔧</a> <a href="https://github.com/chaos-genius/chaos_genius/issues?q=author%3Akshitij123456" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/bhargavsk1077"><img src="https://avatars.githubusercontent.com/u/51043479?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Bhargav S. Kumar</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=bhargavsk1077" title="Code">💻</a> <a href="#platform-bhargavsk1077" title="Packaging/porting to new platform">📦</a> <a href="https://github.com/chaos-genius/chaos_genius/issues?q=author%3Abhargavsk1077" title="Bug reports">🐛</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/moghankumar06"><img src="https://avatars.githubusercontent.com/u/87368217?v=4?s=100" width="100px;" alt=""/><br /><sub><b>moghankumar06</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=moghankumar06" title="Code">💻</a> <a href="#design-moghankumar06" title="Design">🎨</a></td>
+    <td align="center"><a href="https://github.com/Santhoshkumar1023"><img src="https://avatars.githubusercontent.com/u/87367866?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Santhoshkumar1023</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=Santhoshkumar1023" title="Code">💻</a> <a href="#design-Santhoshkumar1023" title="Design">🎨</a></td>
+    <td align="center"><a href="https://github.com/Mansi-Chauhan27"><img src="https://avatars.githubusercontent.com/u/86592223?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mansi-Chauhan27</b></sub></a><br /><a href="#plugin-Mansi-Chauhan27" title="Plugin/utility libraries">🔌</a></td>
   </tr>
 </table>
 

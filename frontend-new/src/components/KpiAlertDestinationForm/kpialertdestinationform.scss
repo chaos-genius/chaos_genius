@@ -64,5 +64,10 @@
     letter-spacing: $letter-spacing;
     color: $grey_variation-3;
     margin-top: 8px;
+    Link,
+    a {
+      text-decoration: underline;
+      text-decoration-color: $grey_variation-3;
+    }
   }
 }

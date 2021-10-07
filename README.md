@@ -37,11 +37,11 @@ With Chaos Genius, we aim to automate the diagnosis and root-cause-analysis for 
 
 [See more on our website. ](https://chaosgenius.io/)
 
-## Architecture
+<!-- ## Architecture
 
-![image](/img/cg-high-level-arch.png)
+![image](/img/cg-high-level-arch.png) -->
 
-## Quick Install
+## ⚙️ Quick Install
 
 ```
 git clone https://github.com/chaos-genius/chaos_genius
@@ -57,7 +57,7 @@ Follow this [Quick Install guide](https://github.com/chaos-genius/.github) showi
 
 If you want to schedule office hours with our team to help you get set up, please select [some time directly here.](https://calendly.com/pshrimal/30min)
 
-## :octocat: Community
+## :seedling: Community
 
 Chaos Genius is a community driven initiative. For any help, discussions, suggestions feel free to reach out to the Chaos Genius team and the Community on either of the following channels. 
 
@@ -70,7 +70,7 @@ Chaos Genius is a community driven initiative. For any help, discussions, sugges
 -   [Blog](https://chaosgenius.io/blog/) (Follow us on latest trends on Data, Machine Learning, Open Source and more)
 
 
-## 🛣️ Roadmap
+## 🚦 Roadmap
 
 Our goal is to make Chaos Genius production ready for all organisations irrespective of their data infrasturcture, data sources and scale requirements. With that in mind we have created the following [roadmap](roadmap.md) for Chaos Genius. If you see something missing or wish to make suggestions, please drop us a line on our community Slack or raise an issue.
 
@@ -95,7 +95,7 @@ Want to contribute? Visit our Github repo and get started with:
 -   Show us some love - Give us a star!
 
 
-## License
+## 📜 License
 
 Chaos Genius is licensed under the MIT license. See the LICENSE file for licensing information.
 

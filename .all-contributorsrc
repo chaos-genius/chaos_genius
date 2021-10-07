@@ -146,6 +146,17 @@
         "tool",
         "bug"
       ]
+    },
+    {
+      "login": "bhargavsk1077",
+      "name": "Bhargav S. Kumar",
+      "avatar_url": "https://avatars.githubusercontent.com/u/51043479?v=4",
+      "profile": "https://github.com/bhargavsk1077",
+      "contributions": [
+        "code",
+        "platform",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -92,6 +92,16 @@
         "data",
         "test"
       ]
+    },
+    {
+      "login": "juzarbhori",
+      "name": "juzarbhori",
+      "avatar_url": "https://avatars.githubusercontent.com/u/49563636?v=4",
+      "profile": "https://github.com/juzarbhori",
+      "contributions": [
+        "code",
+        "design"
+      ]
     }
   ],
   "contributorsPerLine": 7,

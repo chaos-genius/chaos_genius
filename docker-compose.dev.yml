@@ -266,10 +266,41 @@ services:
     depends_on:
       - redis
   
-  celery-worker:
-    container_name: chaosgenius-worker
-    build: .
-    command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes
+  celery-worker-analytics:
+    container_name: chaosgenius-worker-analytics
+    image: chaosgenius/chaosgenius-server:0.1.0
+    command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
+    environment:
+      - FLASK_APP=${FLASK_APP}
+      - FLASK_ENV=${FLASK_ENV}
+      - FLASK_DEBUG=${FLASK_DEBUG}
+      - FLASK_RUN_PORT=${FLASK_RUN_PORT}
+      - SECRET_KEY=${SECRET_KEY}
+      - SEND_FILE_MAX_AGE_DEFAULT=${SEND_FILE_MAX_AGE_DEFAULT}
+      - DB_HOST=${DB_HOST}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_PORT=${DB_PORT}
+      - META_DATABASE=${META_DATABASE}
+      - DATA_DATABASE=${DATA_DATABASE}
+      - DATABASE_URL_CG_DB=${DATABASE_URL_CG_DB}
+      - INTEGRATION_SERVER=${INTEGRATION_SERVER}
+      - INTEGRATION_DB_HOST=${INTEGRATION_DB_HOST}
+      - INTEGRATION_DB_USERNAME=${INTEGRATION_DB_USERNAME}
+      - INTEGRATION_DB_PASSWORD=${INTEGRATION_DB_PASSWORD}
+      - INTEGRATION_DB_PORT=${INTEGRATION_DB_PORT}
+      - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+    depends_on:
+      - redis
+      - chaosgenius-db
+
+
+  celery-worker-alerts:
+    container_name: chaosgenius-worker-alerts
+    image: chaosgenius/chaosgenius-server:0.1.0
+    command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
     environment:
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}

@@ -268,7 +268,7 @@ services:
   
   celery-worker-analytics:
     container_name: chaosgenius-worker-analytics
-    image: chaosgenius/chaosgenius-server:0.1.0
+    build: .
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
     environment:
       - FLASK_APP=${FLASK_APP}
@@ -299,7 +299,7 @@ services:
 
   celery-worker-alerts:
     container_name: chaosgenius-worker-alerts
-    image: chaosgenius/chaosgenius-server:0.1.0
+    build: .
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
     environment:
       - FLASK_APP=${FLASK_APP}

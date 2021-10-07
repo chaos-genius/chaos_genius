@@ -181,9 +181,9 @@ def get_timedelta(freq, diff):
     :rtype: timdelta
     """
     offset = {}
-    if freq == "daily":
+    if freq == "D":
         offset["days"] = diff
-    elif freq == "hourly":
+    elif freq == "H":
         offset["hours"] = diff
     return timedelta(**offset)
 

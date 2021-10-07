@@ -103,7 +103,7 @@ class AnomalyDetectionController(object):
             conn.as_dict,
             last_date_in_db,
             end_date,
-            self.kpi_info["anomaly_params"]["period"],
+            self.kpi_info["anomaly_params"]["anomaly_period"],
         )
 
         dt_col = self.kpi_info["datetime_column"]
@@ -162,7 +162,7 @@ class AnomalyDetectionController(object):
             model_name,
             input_data,
             last_date,
-            self.kpi_info["anomaly_params"]["period"],
+            self.kpi_info["anomaly_params"]["anomaly_period"],
             self.kpi_info["table_name"],
             freq,
             sensitivity,
@@ -268,7 +268,7 @@ class AnomalyDetectionController(object):
                 filter_data_len = grouped_input_data.query(subgroup)[
                     self.kpi_info["metric"]
                 ].sum()
-                period = self.kpi_info["anomaly_params"]["period"]
+                period = self.kpi_info["anomaly_params"]["anomaly_period"]
                 if filter_data_len >= period:
                     filtered_subgroups.append((subgroup, filter_data_len))
             except IndexError:
@@ -292,7 +292,7 @@ class AnomalyDetectionController(object):
         metric_col = self.kpi_info["metric"]
         freq = self.kpi_info["anomaly_params"]["ts_frequency"]
         agg = self.kpi_info["aggregation"]
-        period = self.kpi_info["anomaly_params"]["period"]
+        period = self.kpi_info["anomaly_params"]["anomaly_period"]
 
         series_data = None
         logger.debug(f"Formatting input data for {series}-{subgroup}")
@@ -383,6 +383,7 @@ class AnomalyDetectionController(object):
 
         logger.info(f"Loading Input Data for KPI {self.kpi_info['id']}")
         input_data = self._load_anomaly_data()
+        logger.debug(f"Loaded {len(input_data)} rows of input data.")
 
         logger.info("Running anomaly for series -> overall")
         self._run_anomaly_for_series(input_data, "overall")

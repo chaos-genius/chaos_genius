@@ -1,42 +1,33 @@
 from chaos_genius.controllers.config_controller import get_config_object
 
-def get_creds(name):
 
+def get_creds(name):
     return HELPER_FUNC_DICT[name](name)
 
-def get_email_creds(name):
 
+def get_email_creds(name):
     config_obj = get_config_object(name)
     if config_obj is None:
-        return [
-            "", "", "", "", "", False
-        ]
+        return "", "", "", "", ""
 
-    try:
-        return [
-            config_obj.config_setting['server'],
-            int(config_obj.config_setting['port']),
-            config_obj.config_setting['username'],
-            config_obj.config_setting['password'],
-            config_obj.config_setting['sender_email'],
-            False
-        ]
-    except:
-        return [
-            "", "", "", "", "", False
-        ]
+    configs = config_obj.as_dict.get('config_setting', {})
+    return (
+        configs.get('server', ''),
+        configs.get('port', ''),
+        configs.get('username', ''),
+        configs.get('password', ''),
+        configs.get('sender_email', '')
+    )
+
 
 def get_slack_creds(name):
-
     config_obj = get_config_object(name)
     if config_obj is None:
         return ""
 
-    try:
-        temp_var = config_obj.config_setting['webhook_url']
-        return temp_var
-    except:
-        return ""
+    configs = config_obj.as_dict.get('config_setting', {})
+    return configs.get('webhook_url', '')
+
 
 HELPER_FUNC_DICT = {
     "email": get_email_creds,

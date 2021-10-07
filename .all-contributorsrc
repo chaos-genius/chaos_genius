@@ -102,6 +102,17 @@
         "code",
         "design"
       ]
+    },
+    {
+      "login": "Fletchersan",
+      "name": "Amogh Dhar Diwan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/41579921?v=4",
+      "profile": "https://github.com/amoghdhardiwan",
+      "contributions": [
+        "code",
+        "tool",
+        "data"
+      ]
     }
   ],
   "contributorsPerLine": 7,

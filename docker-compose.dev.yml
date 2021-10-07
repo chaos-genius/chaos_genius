@@ -231,13 +231,13 @@ services:
     ports:
       - 5433:5432
 
-  redis:
-    container_name: redis
+  chaosgenius-redis:
+    container_name: chaosgenius-redis
     image: "redis:6.2-alpine"
     ports:
       - 6379:6379
     
-  celery-scheduler:
+  chaosgenius-scheduler:
     container_name: chaosgenius-scheduler
     build: .
     command: celery -A run.celery beat --loglevel=DEBUG
@@ -264,9 +264,9 @@ services:
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
     depends_on:
-      - redis
+      - chaosgenius-redis
   
-  celery-worker-analytics:
+  chaosgenius-worker-analytics:
     container_name: chaosgenius-worker-analytics
     build: .
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
@@ -293,11 +293,11 @@ services:
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
     depends_on:
-      - redis
+      - chaosgenius-redis
       - chaosgenius-db
 
 
-  celery-worker-alerts:
+  chaosgenius-worker-alerts:
     container_name: chaosgenius-worker-alerts
     build: .
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
@@ -324,7 +324,7 @@ services:
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
     depends_on:
-      - redis
+      - chaosgenius-redis
       - chaosgenius-db
 
 volumes:

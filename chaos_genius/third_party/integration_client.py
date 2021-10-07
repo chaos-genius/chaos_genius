@@ -5,6 +5,7 @@ import requests
 import pprint
 import traceback
 import click
+import time
 from dotenv import dotenv_values
 
 from chaos_genius.utils.io_helper import cg_print
@@ -83,6 +84,19 @@ class ThirdPartyClient(object):
         conf = self.get_destination_specs(self.destination_def_id)
         self.destination_conf = conf
 
+    def check_sources_availability(self, sources_list):
+        # TODO: hardcode the snowflake, remove this
+        sources_list += ["e2d65910-8c8b-40a1-ae7d-ee2416b2bfa2"]
+        for source in sources_list:
+                source_specs = self.get_source_def_specs(source["sourceDefinitionId"])
+                try:
+                    if not source_specs.get("connectionSpecification"):
+                        return False
+                except:
+                    return False
+        return True
+
+
     def init_source_def_conf(self):
         """Load the available third party connection and
         configuration during the initialisation
@@ -90,7 +104,13 @@ class ThirdPartyClient(object):
         sources = self.get_source_def_list()
         sources_list = sources["sourceDefinitions"]
         available_sources = [source for source in sources_list
-            if source["sourceDefinitionId"] in SOURCE_DEF_ID]
+            if (source["sourceDefinitionId"] in SOURCE_DEF_ID) and (SOURCE_DEF_ID.get(source["sourceDefinitionId"]))]
+        
+        while True:
+            if self.check_sources_availability(available_sources):
+                break
+            time.sleep(60)
+
         for source in available_sources:
             source_specs = self.get_source_def_specs(source["sourceDefinitionId"])
             source["connectionSpecification"] = source_specs["connectionSpecification"]

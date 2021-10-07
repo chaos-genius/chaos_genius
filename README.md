@@ -1,4 +1,4 @@
-# 🔮 Chaos Genius
+# Chaos Genius 🔮
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-17-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
@@ -14,7 +14,7 @@ With Chaos Genius, we aim to automate the diagnosis and root-cause-analysis for 
 ![](https://chaosgenius-public.s3.amazonaws.com/test-cg-1-small.gif)
 
 
-## Key Use-Cases
+## :white_check_mark: Key Use-Cases
 
 **Business KPI Observability**  - All important business KPIs such as Sign Ups, Payment Gateway Failures, Fraud Detection, Ad Spend, Campaign Performance, DAUs, Retention, Engagement and many others. 
 
@@ -25,7 +25,7 @@ With Chaos Genius, we aim to automate the diagnosis and root-cause-analysis for 
 **IOT/Device KPI Observability** - Device metrics like performance, data volumes, uptime and many others. 
 
 
-## Key Features
+## 🧰 Key Features
 
 **DeepDrills** - Multidimensional drill-downs & waterfall analysis to identify the top drivers of change in a KPI across multiple dimensions. 
 
@@ -51,13 +51,13 @@ cd chaos_genius
 docker-compose up
 ```
 
-Visit[  http://localhost:8000](http://localhost:8000/)
+Visit[  http://localhost:8080](http://localhost:8080/)
 
 Follow this [Quick Install guide](https://github.com/chaos-genius/.github) showing you how to connect a data source, define your first KPI, configure Anomaly Detector on your local machine. 
 
 If you want to schedule office hours with our team to help you get set up, please select [some time directly here.](https://calendly.com/pshrimal/30min)
 
-## Community
+## :octocat: Community
 
 Chaos Genius is a community driven initiative. For any help, discussions, suggestions feel free to reach out to the Chaos Genius team and the Community on either of the following channels. 
 
@@ -69,7 +69,14 @@ Chaos Genius is a community driven initiative. For any help, discussions, sugges
 
 -   [Blog](https://chaosgenius.io/blog/) (Follow us on latest trends on Data, Machine Learning, Open Source and more)
 
-## Contributing
+
+## 🛣️ Roadmap
+
+Our goal is to make Chaos Genius production ready for all organisations irrespective of their data infrasturcture, data sources and scale requirements. With that in mind we have created the following [roadmap](roadmap.md) for Chaos Genius. If you see something missing or wish to make suggestions, please drop us a line on our community Slack or raise an issue.
+
+
+
+## 🐛 Contributing 
 
 Here's a shout out to all our contributors.
 
@@ -87,11 +94,6 @@ Want to contribute? Visit our Github repo and get started with:
 
 -   Show us some love - Give us a star!
 
-
-
-## Roadmap
-
-Check out our [Roadmap](roadmap.md) to know what we are building.  
 
 ## License
 

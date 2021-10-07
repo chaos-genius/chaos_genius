@@ -11,6 +11,8 @@ Standard BI dashboards enable data visualization to track how select metrics are
 
 With Chaos Genius, we aim to automate the diagnosis and root-cause-analysis for deviations in different business and system KPIs at scale. 
 
+![](https://chaosgenius-public.s3.amazonaws.com/test-cg-1-small.gif)
+
 
 ## Key Use-Cases
 

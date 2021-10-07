@@ -135,6 +135,17 @@
         "tool",
         "platform"
       ]
+    },
+    {
+      "login": "kshitij123456",
+      "name": "Kshitij Agarwal",
+      "avatar_url": "https://avatars.githubusercontent.com/u/42891697?v=4",
+      "profile": "https://github.com/kshitij123456",
+      "contributions": [
+        "code",
+        "tool",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

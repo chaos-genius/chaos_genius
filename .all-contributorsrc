@@ -46,7 +46,7 @@
       "contributions": [
         "code",
         "maintenance",
-         "research"
+        "research"
       ]
     },
     {
@@ -58,6 +58,17 @@
         "code",
         "maintenance",
         "research"
+      ]
+    },
+    {
+      "login": "keshprad",
+      "name": "Keshav Pradeep",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32313895?v=4",
+      "profile": "http://keshprad.ml",
+      "contributions": [
+        "code",
+        "data",
+        "doc"
       ]
     }
   ],

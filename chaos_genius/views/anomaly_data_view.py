@@ -226,6 +226,11 @@ def anomaly_settings_status(kpi_id):
         is_precomputed = True
     response["is_rca_precomputed"] = is_precomputed
 
+    anomaly_data = AnomalyDataOutput.query.filter(
+        AnomalyDataOutput.kpi_id == kpi_id
+    ).all()
+    response["is_anomaly_precomputed"] = len(anomaly_data) != 0
+
     current_app.logger.info(f"Anomaly settings retrieved for kpi: {kpi_id}")
     return jsonify(response)
 
@@ -524,7 +529,6 @@ DEFAULT_ANOMALY_PARAMS = {
     "model_name": None,
     "seasonality": [],
     "sensitivity": None,
-    "is_anomaly_setup": False,
 
     # scheduler params
     "scheduler_params_time": "11:00:00",

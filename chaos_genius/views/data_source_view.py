@@ -79,7 +79,7 @@ def data_source():
 
 
 @blueprint.route("/types", methods=["GET"])
-@cache.memoize(timeout=30000)
+@cache.memoize()
 def list_data_source_type():
     """DataSource Type view."""
     connection_types, msg, status = [], "", "success"

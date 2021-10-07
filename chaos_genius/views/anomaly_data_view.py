@@ -23,14 +23,14 @@ blueprint = Blueprint("anomaly_data", __name__)
 
 
 @blueprint.route("/", methods=["GET"])
-@cache.memoize(timeout=30000)
+@cache.memoize()
 def list_anomaly_data():
     # FIXME: Update home route
     return jsonify({"data": "Hello World!"})
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-detection", methods=["GET"])
-@cache.memoize(timeout=30000)
+@cache.memoize()
 def kpi_anomaly_detection(kpi_id):
     current_app.logger.info(f"Anomaly Detection Started for KPI ID: {kpi_id}")
     data = []
@@ -200,7 +200,7 @@ def kpi_anomaly_params(kpi_id: int):
 
 
 @blueprint.route("/<int:kpi_id>/settings", methods=["GET"])
-# @cache.memoize(timeout=30000)
+# @cache.memoize()
 def anomaly_settings_status(kpi_id):
     current_app.logger.info(f"Retrieving anomaly settings for kpi: {kpi_id}")
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))

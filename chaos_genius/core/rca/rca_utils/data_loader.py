@@ -94,11 +94,12 @@ def _get_kpi_table_data(
     dt_col_str = f"{indentifier}{dt_col}{indentifier}"
 
     start_query = f"{dt_col_str} > '{base_dt}'"
-    mid_query = f"{dt_col_str} <= '{mid_dt}'"
+    mid_start_query = f"{dt_col_str} <= '{mid_dt}'"
+    mid_end_query = f"{dt_col_str} > '{mid_dt}'"
     end_query = f"{dt_col_str} <= '{end_dt}'"
 
-    base_filter = f" where {start_query} and {mid_query} "
-    rca_filter = f" where {mid_query} and {end_query} "
+    base_filter = f" where {start_query} and {mid_start_query} "
+    rca_filter = f" where {mid_end_query} and {end_query} "
 
     table_name = kpi_info['table_name']
     base_query = f"select * from {table_name} {base_filter} "

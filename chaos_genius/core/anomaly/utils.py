@@ -5,7 +5,8 @@ from typing import Any
 
 import pandas as pd
 
-from chaos_genius.connectors.base_connector import get_df_from_db_uri
+# from chaos_genius.connectors.base_connector import get_df_from_db_uri
+from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.core.anomaly.constants import FREQUENCY_DELTA
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 
@@ -98,7 +99,11 @@ def get_anomaly_df(
         raise ValueError(
             f"kpi_type:'{kpi_type}' is not from ['table', 'query']")
 
-    return get_df_from_db_uri(connection_info["db_uri"], base_query)
+    db_connection = get_sqla_db_conn(data_source_info=connection_info)
+    query_df = db_connection.run_query(base_query)
+    return query_df
+    # return get_df_from_db_uri(connection_info["db_uri"], base_query)
+
 
 
 def get_last_date_in_db(

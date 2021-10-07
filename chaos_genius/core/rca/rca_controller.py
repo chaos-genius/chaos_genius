@@ -7,6 +7,8 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 
+# from chaos_genius.connectors.base_connector import get_df_from_db_uri
+from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.core.rca.constants import (LINE_DATA_TIMESTAMP_FORMAT,
                                              STATIC_END_DATA_FORMAT, TIMELINES)
 from chaos_genius.core.rca.rca_utils.data_loader import rca_load_data

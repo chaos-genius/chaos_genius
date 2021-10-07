@@ -83,6 +83,12 @@ DATABASE_CONFIG_MAPPER = {
         "username": "username",
         "password": "password",
         "db_type": "mysql"
+    },
+    "bfd1ddf8-ae8a-4620-b1d7-55597d2ba08c": {
+        "credentials_json": "credentials_json",
+        "dataset_id": "dataset_id",
+        "project_id": "project_id",
+        "db_type": "bigquery"
     }
 }
 

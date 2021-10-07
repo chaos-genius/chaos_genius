@@ -16,6 +16,7 @@ Flask-SQLAlchemy==2.5.1
 SQLAlchemy==1.4.15
 psycopg2-binary==2.8.6
 PyMySQL==1.0.2
+sqlalchemy-bigquery==1.2.0
 
 # Migrations
 Flask-Migrate==2.7.0

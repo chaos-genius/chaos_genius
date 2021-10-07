@@ -21,7 +21,6 @@ import random
 from chaos_genius.core.rca import RootCauseAnalysis
 from chaos_genius.core.utils.kpi_validation import validate_kpi
 from chaos_genius.core.utils.round import round_number
-from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.data_source_model import DataSource

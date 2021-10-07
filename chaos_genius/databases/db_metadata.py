@@ -2,7 +2,7 @@ import json
 from sqlalchemy import text
 from flask_sqlalchemy import SQLAlchemy
 
-# TODO: Write the method for closing the connection
+# TODO: Delete this file
 
 class DbMetadata:
     """

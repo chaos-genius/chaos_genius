@@ -338,11 +338,22 @@ def get_dq_and_subdim_data(
 
 
 def get_drilldowns_series_type(kpi_id, drilldown_date, no_of_graphs=5):
+    # First we get direction of anomaly
+    # Then we get relevant subdims for that anomaly
+    is_anomaly = AnomalyDataOutput.query.filter(
+        (AnomalyDataOutput.kpi_id == kpi_id)
+        & (AnomalyDataOutput.data_datetime == drilldown_date)
+        & (AnomalyDataOutput.anomaly_type == "overall")
+    ).first().is_anomaly
+
+    if is_anomaly == 0:
+        raise ValueError(f"No anomaly found for date {drilldown_date}")
+
     query = AnomalyDataOutput.query.filter(
         (AnomalyDataOutput.kpi_id == kpi_id)
         & (AnomalyDataOutput.data_datetime == drilldown_date)
         & (AnomalyDataOutput.anomaly_type == "subdim")
-        & (AnomalyDataOutput.severity > 0)
+        & (AnomalyDataOutput.is_anomaly == is_anomaly)
     ).order_by(AnomalyDataOutput.severity.desc()).limit(no_of_graphs)
 
     results = pd.read_sql(query.statement, query.session.bind)

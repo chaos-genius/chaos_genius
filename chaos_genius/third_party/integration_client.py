@@ -85,10 +85,12 @@ class ThirdPartyClient(object):
         self.destination_conf = conf
 
     def check_sources_availability(self, sources_list):
+        # TODO: hardcode the snowflake, remove this
+        sources_list += ["e2d65910-8c8b-40a1-ae7d-ee2416b2bfa2"]
         for source in sources_list:
                 source_specs = self.get_source_def_specs(source["sourceDefinitionId"])
                 try:
-                    if "connectionSpecification" not in list(source_specs.keys())
+                    if not source_specs.get("connectionSpecification"):
                         return False
                 except:
                     return False
@@ -102,7 +104,7 @@ class ThirdPartyClient(object):
         sources = self.get_source_def_list()
         sources_list = sources["sourceDefinitions"]
         available_sources = [source for source in sources_list
-            if source["sourceDefinitionId"] in SOURCE_DEF_ID]
+            if (source["sourceDefinitionId"] in SOURCE_DEF_ID) and (SOURCE_DEF_ID.get(source["sourceDefinitionId"]))]
         
         while True:
             if self.check_sources_availability(available_sources):

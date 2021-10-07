@@ -5,6 +5,99 @@ config = dotenv_values(".env")
 url = config.get("SLACK_WEBHOOK_URL")
 webhook = WebhookClient(url)
 
+def anomaly_alert_slack(alert_name, kpi_name, data_source_name, alert_body):
+	response = webhook.send(
+		text = f"Anomaly Alert: {kpi_name}",
+		blocks = [
+			{
+				"type": "header",
+				"text": {
+					"type": "plain_text",
+					"text": f"Alert: {alert_name}",
+					"emoji": True
+				}
+			},
+			{
+				"type": "section",
+				"text": {
+					"type": "mrkdwn",
+					"text": f"This is the alert generated from KPI *{kpi_name}* and Data Source *{data_source_name}*."
+				}
+			},
+			{
+				"type": "divider"
+			},
+			{
+				"type": "section",
+				"text": {
+						"type": "mrkdwn",
+						"text": f"{alert_body}"
+					}
+			},
+		]
+	)
+	return response.body
+
+def anomaly_alert_slack_formatted(alert_name, kpi_name, data_source_name, **kwargs):
+	response = webhook.send(
+		text = f"Anomaly Alert: {kpi_name}",
+		blocks = [
+			{
+				"type": "header",
+				"text": {
+					"type": "plain_text",
+					"text": f"Alert: {alert_name}",
+					"emoji": True
+				}
+			},
+			{
+				"type": "section",
+				"text": {
+					"type": "mrkdwn",
+					"text": f"This is the alert generated from KPI *{kpi_name}* and Data Source *{data_source_name}*."
+				}
+			},
+			{
+				"type": "divider"
+			},
+			{
+				"type": "section",
+				"fields": [
+					{
+						"type": "mrkdwn",
+						"text": f"*Value:*\n{kwargs['highest_value']}"
+					},
+					{
+						"type": "mrkdwn",
+						"text": f"*Time of Occurrence:*\n{kwargs['time_of_anomaly']}"
+					}
+				]
+			},
+			{
+				"type": "section",
+				"fields": [
+					{
+						"type": "mrkdwn",
+						"text": f"*Lower Bound of Range:*\n{kwargs['lower_bound']}"
+					},
+					{
+						"type": "mrkdwn",
+						"text": f"*Upper Bound of Range:*\n{kwargs['upper_bound']}"
+					}
+				]
+			},
+			{
+				"type": "section",
+				"fields": [
+					{
+						"type": "mrkdwn",
+						"text": f"*Severity Value:*\n{kwargs['severity_value']}"
+					}
+				]
+			}
+		]
+	)
+	return response.body
 
 def trigger_overall_kpi_stats(alert_name, kpi_name, data_source_name, alert_body, stats):
 	response = webhook.send(

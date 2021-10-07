@@ -118,7 +118,7 @@ def send_static_alert_email(recipient_emails, subject, messsage_body, alert_info
 
         msgAlternative = MIMEMultipart('alternative')
         # msgText = MIMEText(parsed_template, 'html')
-        msgText = MIMEText(messsage_body, 'plain') #TODO - To be changed according to use 
+        msgText = MIMEText(messsage_body, 'html') #TODO - To be changed according to use 
         msgAlternative.attach(msgText)
         message.attach(msgAlternative)
 

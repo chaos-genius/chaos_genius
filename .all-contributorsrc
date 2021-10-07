@@ -15,6 +15,17 @@
         "doc",
         "ideas"
       ]
+    },
+    {
+      "login": "suranah",
+      "name": "Harshit Surana",
+      "avatar_url": "https://avatars.githubusercontent.com/u/948291?v=4",
+      "profile": "http://harshitsurana.com",
+      "contributions": [
+        "code",
+        "content",
+        "review"
+      ]
     }
   ],
   "contributorsPerLine": 7,

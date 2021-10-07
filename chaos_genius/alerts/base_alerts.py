@@ -262,10 +262,6 @@ class AnomalyAlertController:
         kpi_name = Kpi.get_by_id(self.alert_info["kpi"]).safe_dict['name']
         data_source_name = DataSource.\
             get_by_id(self.alert_info["data_source"]).safe_dict["name"]
-        alert_body = self.alert_info["alert_message"]
-        alert_body = alert_body + "\n" + f"The highest value *{round(getattr(anomaly, 'y'), 1)}* Occurred at *{str(getattr(anomaly, 'data_datetime'))}*"
-        alert_body = alert_body + "\n" + f"The expected range is *{round(getattr(anomaly, 'yhat_lower'), 2)}* to *{round(getattr(anomaly, 'yhat_upper'), 2)}*"
-        alert_body = alert_body + "\n" + f"The severity value of this anomaly was *{round(getattr(anomaly, 'severity'), 2)}*"
         test = anomaly_alert_slack_formatted(
             alert_name,
             kpi_name,

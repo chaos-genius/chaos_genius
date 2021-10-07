@@ -3,12 +3,12 @@
 
 ### Features
 
-These are main features that we enable soon:
+These are the main features that we will enable soon:
 
 -   Anomaly detection
     -   Sub-Dimensional Anomaly Alert
     -   Enable Anomaly w/o Sub-Dimension
--   Code/ API level configuration for
+-   Code/API level configuration for
     -   Hyperparameters for any algorithms
     -   Subpopulation calculation logic 
 -   Alerting
@@ -16,17 +16,17 @@ These are main features that we enable soon:
 
 ### New Connectors 
 
-We will enabling the following new connectors soon:
+We will be enabling the following new connectors soon:
 
--   Redshift
--   Hubspot
--   Salesforce
--   Google Analytics Custom Report (will likely already enabled)
--   CSV
+- [ ] Redshift
+- [ ] Hubspot
+- [ ] Salesforce
+- [ ] Google Analytics Custom Report (will likely already enabled)
+- [ ] CSV
 
 ### Scalability & Robustness Improvements
 
-We are working on following to improve & support data at larger scale:
+We are working on the following to improve & support data at larger scale:
 
 -   Data ingestion
     -   Support for materialized views across dataware houses for large scale processing
@@ -44,7 +44,7 @@ We are working on following to improve & support data at larger scale:
 
 ### Features
 
-These are main features that we enable in the next quarter
+These are the main features that we will enable in the next quarter
 
 -   Correlation - AutoRCA
 -   KPI Import
@@ -69,14 +69,14 @@ These are main features that we enable in the next quarter
 
 We will enabling the following new connectors:
 
--   S3
--   Data lake support including Delta Lake
--   Google Playstore
--   RPA based connectors platform (longer term)
+- [ ] S3
+- [ ] Data lake support including Delta Lake
+- [ ] Google Playstore
+- [ ] RPA based connectors platform (longer term)
 
 ### Scalability & Robustness Improvements 
 
-We are working on following to improve & support data at larger scale:
+We are working on the following to improve & support data at larger scale:
 
 -   Data scalability 
     -   Distributed Pandas support - Koalas, Dask

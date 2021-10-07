@@ -4,7 +4,10 @@ import {
   KPIEDITSUCCESS,
   KPISETTINGFAILURE,
   KPISETTINGREQUEST,
-  KPISETTINGSUCCESS
+  KPISETTINGSUCCESS,
+  SETTING_META_INFO_REQUEST,
+  SETTING_META_INFO_SUCCESS,
+  SETTING_META_INFO_FAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -13,7 +16,10 @@ const initialState = {
   kpiSettingError: false,
   kpiEditData: [],
   kpiEditLoading: false,
-  kpiEditError: []
+  kpiEditError: [],
+  metaInfoLoading: false,
+  metaInfoData: [],
+  metaInfoError: false
 };
 export const setting = (state = initialState, action) => {
   switch (action.type) {
@@ -56,6 +62,26 @@ export const setting = (state = initialState, action) => {
         ...state,
         kpiSettingLoading: false,
         kpiSettingError: true
+      };
+    }
+    case SETTING_META_INFO_REQUEST: {
+      return {
+        ...state,
+        metaInfoLoading: true
+      };
+    }
+    case SETTING_META_INFO_SUCCESS: {
+      return {
+        ...state,
+        metaInfoLoading: false,
+        metaInfoData: action.data
+      };
+    }
+    case SETTING_META_INFO_FAILURE: {
+      return {
+        ...state,
+        metaInfoLoading: false,
+        metaInfoError: true
       };
     }
     case 'SETTING_RESET': {

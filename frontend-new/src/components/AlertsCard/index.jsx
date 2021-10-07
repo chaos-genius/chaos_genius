@@ -62,7 +62,7 @@ const AlertsCard = () => {
               <img src={Succestick} alt="success tik"></img>
             )}
           </h1>
-          <p>Select the data you want to monitor and analyse</p>
+          <p>Update the configuration for the channel to receive alerts</p>
           <Link
             to={
               statusChecking('slack')
@@ -93,7 +93,7 @@ const AlertsCard = () => {
             )}
           </h1>
 
-          <p>Select the data you want to monitor and analyse</p>
+          <p>Update the configuration for the channel to receive alerts</p>
           <Link
             to={
               statusChecking('email')
@@ -122,7 +122,7 @@ const AlertsCard = () => {
               <img src={Succestick} alt="success tik"></img>
             )}
           </h1>
-          <p>Select the data you want to monitor and analyse</p>
+          <p>Update the configuration for the channel to receive alerts</p>
           <button
             disabled
             className={
@@ -146,7 +146,7 @@ const AlertsCard = () => {
               <img src={Succestick} alt="success tik"></img>
             )}
           </h1>
-          <p>Select the data you want to monitor and analyse</p>
+          <p>Update the configuration for the channel to receive alerts</p>
           <button
             disabled
             className={
@@ -168,7 +168,7 @@ const AlertsCard = () => {
               <img src={Succestick} alt="success tik"></img>
             )}
           </h1>
-          <p>Select the data you want to monitor and analyse</p>
+          <p>Update the configuration for the channel to receive alerts</p>
           <button
             disabled
             className={
@@ -190,7 +190,7 @@ const AlertsCard = () => {
               <img src={Succestick} alt="success tik"></img>
             )}
           </h1>
-          <p>Select the data you want to monitor and analyse</p>
+          <p>Update the configuration for the channel to receive alerts</p>
           <button
             disabled
             className={

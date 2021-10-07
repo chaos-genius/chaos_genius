@@ -13,6 +13,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  .form-check {
+    margin-top: 0px;
+  }
   .check-box {
     margin-bottom: 0px;
   }
@@ -148,6 +151,27 @@
           font-size: $font-size-18;
         }
       }
+    }
+  }
+}
+.edit-configuresetting {
+  position: absolute;
+  right: -205px;
+  display: flex;
+  align-items: center;
+  .edit-setting-btn {
+    margin-left: -179px;
+  }
+}
+.editable-field {
+  position: relative;
+  .seasonality-setting {
+    width: 100%;
+  }
+  .form-check {
+    .form-check-input {
+      width: 1em;
+      height: 1em;
     }
   }
 }

@@ -23,14 +23,14 @@ blueprint = Blueprint("anomaly_data", __name__)
 
 
 @blueprint.route("/", methods=["GET"])
-@cache.memoize(timeout=30000)
+@cache.memoize()
 def list_anomaly_data():
     # FIXME: Update home route
     return jsonify({"data": "Hello World!"})
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-detection", methods=["GET"])
-@cache.memoize(timeout=30000)
+@cache.memoize()
 def kpi_anomaly_detection(kpi_id):
     current_app.logger.info(f"Anomaly Detection Started for KPI ID: {kpi_id}")
     data = []
@@ -200,7 +200,7 @@ def kpi_anomaly_params(kpi_id: int):
 
 
 @blueprint.route("/<int:kpi_id>/settings", methods=["GET"])
-# @cache.memoize(timeout=30000)
+# @cache.memoize()
 def anomaly_settings_status(kpi_id):
     current_app.logger.info(f"Retrieving anomaly settings for kpi: {kpi_id}")
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
@@ -225,6 +225,11 @@ def anomaly_settings_status(kpi_id):
     else:
         is_precomputed = True
     response["is_rca_precomputed"] = is_precomputed
+
+    anomaly_data = AnomalyDataOutput.query.filter(
+        AnomalyDataOutput.kpi_id == kpi_id
+    ).all()
+    response["is_anomaly_precomputed"] = len(anomaly_data) != 0
 
     current_app.logger.info(f"Anomaly settings retrieved for kpi: {kpi_id}")
     return jsonify(response)
@@ -338,11 +343,22 @@ def get_dq_and_subdim_data(
 
 
 def get_drilldowns_series_type(kpi_id, drilldown_date, no_of_graphs=5):
+    # First we get direction of anomaly
+    # Then we get relevant subdims for that anomaly
+    is_anomaly = AnomalyDataOutput.query.filter(
+        (AnomalyDataOutput.kpi_id == kpi_id)
+        & (AnomalyDataOutput.data_datetime == drilldown_date)
+        & (AnomalyDataOutput.anomaly_type == "overall")
+    ).first().is_anomaly
+
+    if is_anomaly == 0:
+        raise ValueError(f"No anomaly found for date {drilldown_date}")
+
     query = AnomalyDataOutput.query.filter(
         (AnomalyDataOutput.kpi_id == kpi_id)
         & (AnomalyDataOutput.data_datetime == drilldown_date)
         & (AnomalyDataOutput.anomaly_type == "subdim")
-        & (AnomalyDataOutput.severity > 0)
+        & (AnomalyDataOutput.is_anomaly == is_anomaly)
     ).order_by(AnomalyDataOutput.severity.desc()).limit(no_of_graphs)
 
     results = pd.read_sql(query.statement, query.session.bind)
@@ -394,14 +410,6 @@ def get_end_date(kpi_info: dict) -> datetime:
         end_date = datetime.today()
 
     return end_date
-
-
-def get_anomaly_end_date(kpi_id: int):
-    anomaly_end_date = AnomalyDataOutput.query.filter(
-            AnomalyDataOutput.kpi_id == kpi_id
-        ).order_by(AnomalyDataOutput.data_datetime.desc()).first()
-    print(anomaly_end_date.as_dict['data_datetime'])
-    return anomaly_end_date.as_dict['data_datetime']
 
 
 # --- anomaly params meta information --- #
@@ -521,7 +529,6 @@ DEFAULT_ANOMALY_PARAMS = {
     "model_name": None,
     "seasonality": [],
     "sensitivity": None,
-    "is_anomaly_setup": False,
 
     # scheduler params
     "scheduler_params_time": "11:00:00",
@@ -823,3 +830,17 @@ def validate_scheduled_time(time):
         return (f"second must be between 0 and 60 (inclusive). Got: {second}", time)
 
     return "", time
+
+def get_anomaly_end_date(kpi_id: int):
+    anomaly_end_date = AnomalyDataOutput.query.filter(
+            AnomalyDataOutput.kpi_id == kpi_id
+        ).order_by(AnomalyDataOutput.data_datetime.desc()).first()
+    
+    try:
+        anomaly_end_date = anomaly_end_date.as_dict['data_datetime']
+    except AttributeError:
+        anomaly_end_date = None
+    except Exception as err:
+        current_app.logger.info(f"Error Found: {err}")
+
+    return anomaly_end_date

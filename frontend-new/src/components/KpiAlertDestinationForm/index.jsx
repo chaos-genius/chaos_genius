@@ -4,7 +4,7 @@ import Select from 'react-select';
 
 import { useDispatch, useSelector } from 'react-redux';
 
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory, useParams, Link } from 'react-router-dom';
 
 import Slack from '../../assets/images/table/slack.svg';
 import Email from '../../assets/images/alerts/email.svg';
@@ -19,6 +19,9 @@ import { CustomContent, CustomActions } from '../../utils/toast-helper';
 import ReactTagInput from '@pathofdev/react-tag-input';
 import '@pathofdev/react-tag-input/build/index.css';
 
+import { getChannelStatus } from '../../redux/actions';
+import store from '../../redux/store';
+
 const customSingleValue = ({ data }) => (
   <div className="input-select">
     <div className="input-select__single-value">
@@ -27,26 +30,21 @@ const customSingleValue = ({ data }) => (
     </div>
   </div>
 );
-const option = [
-  {
+const RESET_ACTION = {
+  type: 'RESET_ALERT_DATA_Data'
+};
+
+const getOption = (channel) => {
+  return {
     label: (
       <div className="optionlabel">
-        <img src={Slack} alt="datasource" />
-        Slack
-      </div>
-    ),
-    value: 'slack'
-  },
-  {
-    label: (
-      <div className="optionlabel">
-        <img src={Email} alt="datasource" />
+        <img src={channel === 'email' ? Email : Slack} alt="datasource" />
         Email
       </div>
     ),
-    value: 'email'
-  }
-];
+    value: channel
+  };
+};
 
 const KpiAlertDestinationForm = ({
   event,
@@ -64,7 +62,7 @@ const KpiAlertDestinationForm = ({
   const history = useHistory();
   const kpiId = useParams().id;
   const path = history.location.pathname.split('/');
-
+  const [option, setOption] = useState([]);
   /* add another channel state*/
 
   // const [anotherChannel, setAnotherChannel] = useState(false);
@@ -74,10 +72,12 @@ const KpiAlertDestinationForm = ({
     createKpiAlertLoading,
     updateKpiAlertLoading,
     createKpiAlertData,
-    updateKpiAlertData
+    updateKpiAlertData,
+    channelStatusData
   } = useSelector((state) => {
     return state.alert;
   });
+
   const [error, setError] = useState({
     alert_channel: '',
     add_recepients: ''
@@ -96,6 +96,10 @@ const KpiAlertDestinationForm = ({
   const [field, setField] = useState('');
 
   useEffect(() => {
+    dispatch(getChannelStatus());
+  }, [dispatch]);
+
+  useEffect(() => {
     if (path[2] === 'edit') {
       setresp(
         alertFormData?.alert_channel_conf?.[alertFormData.alert_channel] || []
@@ -105,26 +109,57 @@ const KpiAlertDestinationForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (channelStatusData && channelStatusData.length !== 0) {
+      setOption(
+        channelStatusData.map((channel) => {
+          return getOption(channel.name);
+        })
+      );
+    }
+  }, [channelStatusData]);
+
+  useEffect(() => {
+    if (createKpiAlertData && createKpiAlertData.status === 'success') {
+      history.push('/alerts');
+      customToast({
+        type: 'success',
+        header: 'Successfully created',
+        description: createKpiAlertData.message
+      });
+    } else if (createKpiAlertData && createKpiAlertData.status === 'failure') {
+      customToast({
+        type: 'error',
+        header: 'Failed to create',
+        description: createKpiAlertData.message
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createKpiAlertData]);
+
+  useEffect(() => {
+    if (updateKpiAlertData && updateKpiAlertData.status === 'success') {
+      customToast({
+        type: 'success',
+        header: 'Successfully updated',
+        description: updateKpiAlertData.message
+      });
+    } else if (updateKpiAlertData && updateKpiAlertData.status === 'failure') {
+      customToast({
+        type: 'error',
+        header: 'Failed to update',
+        description: updateKpiAlertData.message
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [updateKpiAlertData]);
+
   const onBack = () => {
+    store.dispatch(RESET_ACTION);
     if (event) {
       setEventSteps(1);
     } else {
       setKpiSteps(1);
-    }
-  };
-
-  const onKpiAlertSubmit = () => {
-    var obj = { ...error };
-    if (alertFormData.alert_channel === '') {
-      obj['alert_channel'] = 'Enter Channel';
-    }
-    setError(obj);
-    if (error.alert_channel === '') {
-      if (path[2] === 'edit') {
-        dispatch(updateKpiAlert(kpiId, alertFormData));
-      } else {
-        dispatch(createKpiAlert(alertFormData));
-      }
     }
   };
 
@@ -182,6 +217,20 @@ const KpiAlertDestinationForm = ({
       </>
     );
   };
+
+  const handleChange = (tags) => {
+    setresp(tags);
+
+    setAlertFormData((prev) => {
+      return {
+        ...prev,
+        alert_channel_conf: {
+          [alertFormData['alert_channel']]: tags
+        }
+      };
+    });
+  };
+
   const customToast = (data) => {
     const { type, header, description } = data;
     toast({
@@ -210,59 +259,25 @@ const KpiAlertDestinationForm = ({
     });
   };
 
-  useEffect(() => {
-    if (createKpiAlertData && createKpiAlertData.status === 'success') {
-      history.push('/alerts');
-
-      customToast({
-        type: 'success',
-        header: 'Successfully created',
-        description: createKpiAlertData.message
-      });
-    } else if (createKpiAlertData && createKpiAlertData.status === 'failure') {
-      customToast({
-        type: 'error',
-        header: 'Failed to create',
-        description: createKpiAlertData.message
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [createKpiAlertData]);
-
-  useEffect(() => {
-    if (updateKpiAlertData && updateKpiAlertData.status === 'success') {
-      customToast({
-        type: 'success',
-        header: 'Successfully updated',
-        description: updateKpiAlertData.message
-      });
-    } else if (updateKpiAlertData && updateKpiAlertData.status === 'failure') {
-      customToast({
-        type: 'error',
-        header: 'Failed to update',
-        description: updateKpiAlertData.message
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [updateKpiAlertData]);
-
-  const handleChange = (tags) => {
-    setresp(tags);
-
-    setAlertFormData((prev) => {
-      return {
-        ...prev,
-        alert_channel_conf: {
-          [alertFormData['alert_channel']]: tags
-        }
-      };
-    });
-  };
-
   const validateEmail = (email) => {
     const re =
       /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
+  };
+
+  const onKpiAlertSubmit = () => {
+    var obj = { ...error };
+    if (alertFormData.alert_channel === '') {
+      obj['alert_channel'] = 'Enter Channel';
+    }
+    setError(obj);
+    if (error.alert_channel === '') {
+      if (path[2] === 'edit') {
+        dispatch(updateKpiAlert(kpiId, alertFormData));
+      } else {
+        dispatch(createKpiAlert(alertFormData));
+      }
+    }
   };
 
   /*add anonter channel function*/
@@ -361,6 +376,13 @@ const KpiAlertDestinationForm = ({
           {path[2] === 'edit' &&
             editableStatus('alert_channnel') === 'sensitive' &&
             editAndSaveButton('alert_channel')}
+        </div>
+        <div className="channel-tip">
+          <p>
+            Tip: Go to{' '}
+            <Link to="/alerts/channelconfiguration">Channel configuration</Link>{' '}
+            to connect channel
+          </p>
         </div>
         {error.alert_channel && (
           <div className="connection__fail">

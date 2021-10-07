@@ -161,7 +161,6 @@ def disable_kpi(kpi_id):
 
 
 @blueprint.route("/<int:kpi_id>/get-dimensions", methods=["GET"])
-@cache.memoize(timeout=30000)
 def kpi_get_dimensions(kpi_id):
     dimensions = []
     try:
@@ -267,7 +266,7 @@ def get_kpi_info(kpi_id):
 
 
 
-@cache.memoize(timeout=30000)
+@cache.memoize()
 def kpi_aggregation(kpi_id, timeline="mom"):
     try:
         end_date = get_end_date(kpi_id)
@@ -294,7 +293,7 @@ def kpi_aggregation(kpi_id, timeline="mom"):
     return final_data
 
 
-@cache.memoize(timeout=30000)
+@cache.memoize()
 def kpi_line_data(kpi_id):
     try:
         end_date = get_end_date(kpi_id)
@@ -313,7 +312,7 @@ def kpi_line_data(kpi_id):
     return final_data
 
 
-@cache.memoize(timeout=30000)
+@cache.memoize()
 def rca_analysis(kpi_id, timeline="mom", dimension=None):
     try:
         end_date = get_end_date(kpi_id)
@@ -340,7 +339,7 @@ def rca_analysis(kpi_id, timeline="mom", dimension=None):
     return final_data
 
 
-@cache.memoize(timeout=30000)
+@cache.memoize()
 def rca_hierarchical_data(kpi_id, timeline="mom", dimension=None):
     try:
         end_date = get_end_date(kpi_id)

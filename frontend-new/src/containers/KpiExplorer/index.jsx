@@ -20,6 +20,10 @@ const KPI_RESET = {
   type: 'KPI_RESET'
 };
 
+const SETTING_RESET = {
+  type: 'SETTING_RESET'
+};
+
 const KpiExplorer = () => {
   const dispatch = useDispatch();
 
@@ -34,6 +38,7 @@ const KpiExplorer = () => {
 
   useEffect(() => {
     store.dispatch(KPI_RESET);
+    store.dispatch(SETTING_RESET);
     dispatchGetAllKpiExplorer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);

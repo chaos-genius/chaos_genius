@@ -93,11 +93,12 @@ def set_config():
         if config_name not in ["email", "slack"]:
             return jsonify({"status": "not_found", "message": "Config doesn't exist"})
         config_obj = get_config_object(config_name)
+        config_settings = data.get("config_settings", {})
         if config_obj:
             config_obj.active = False
             config_obj.save(commit=True)
-        config_settings = config_obj.config_setting
-        config_settings.update(data.get("config_settings", {}))
+            config_settings = config_obj.config_setting
+            config_settings.update(data.get("config_settings", {}))
         new_config = create_config_object(config_name, config_settings)
         new_config.save(commit=True)
         return jsonify({"message": f"Config {config_name} has been saved successfully.", "status": "success"})

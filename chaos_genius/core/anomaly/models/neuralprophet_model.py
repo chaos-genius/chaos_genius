@@ -1,39 +1,54 @@
-from neuralprophet import NeuralProphet
+"""Provides the Neural Prophet model for anomaly detection."""
 
 import pandas as pd
+from neuralprophet import NeuralProphet
 
 from chaos_genius.core.anomaly.models import AnomalyModel
 
 
 class NeuralProphetModel(AnomalyModel):
+    """Neural Prophet model for anomaly detection."""
+
     def __init__(self, *args, model_kwargs={}, **kwargs) -> None:
+        """Initialize the NeuralProphetModel.
+
+        :param model_kwargs: model specific configuration, defaults to {}
+        :type model_kwargs: dict, optional
+        """
         super().__init__(*args, **kwargs)
         self.model = None
         self.prevModel = None
         self.model_kwargs = model_kwargs
 
     def predict(
-        self, df: pd.DataFrame, 
-        sensitivity,
-        frequency,
+        self,
+        df: pd.DataFrame,
+        sensitivity: str,
+        frequency: str,
         pred_df: pd.DataFrame = None
     ) -> pd.DataFrame:
-        """Takes in pd.DataFrame with 2 columns, dt and y, and returns a
-        pd.DataFrame with 3 columns, dt, y, and yhat_lower, yhat_upper.
+        """Predict anomalies on data.
+
+        If pred_df is None, will predict on the last data point.
 
         :param df: Input Dataframe with dt, y columns
         :type df: pd.DataFrame
+        :param sensitivity: sensitivity to use for anomaly detection
+        :type sensitivity: str
+        :param frequency: frequency to use in the model
+        :type frequency: str
+        :param pred_df: dataframe to predict on, defaults to None
+        :type pred_df: pd.DataFrame, optional
         :return: Output Dataframe with dt, y, yhat_lower, yhat_upper
         columns
         :rtype: pd.DataFrame
         """
-
         frequency = self.model_kwargs.get('freq', 'D')
         df = df.rename(columns={"dt": "ds", "y": "y"})
 
         # TODO: add support for customizable seasonality here
         self.model = NeuralProphet()
-        metrics = self.model.fit(df, freq=frequency)
+        self.model.fit(df, freq=frequency)
 
         if pred_df is None:
             future = self.model.make_future_dataframe(
@@ -41,24 +56,20 @@ class NeuralProphetModel(AnomalyModel):
         else:
             future = self.model.make_future_dataframe(
                 df=df, periods=0, n_historic_predictions=True)
-        
+
         forecast = self.model.predict(future)
         forecast = forecast[["ds", "y", "yhat1"]].rename(
             {"yhat1": "yhat"}, axis=1)
 
         # adding confidence intervals
         mean = forecast["yhat"].mean()
-        stddevi = forecast["yhat"].std()
-        numDevi = self.model_kwargs.get('numDevi', 2)
-        numDevi_u = self.model_kwargs.get('numDevi_u')
-        numDevi_l = self.model_kwargs.get('numDevi_l')
+        std_dev = forecast["yhat"].std()
+        num_dev = self.model_kwargs.get('numDev', 2)
+        num_dev_u = self.model_kwargs.get('numDev_u', num_dev)
+        num_dev_l = self.model_kwargs.get('numDev_l', num_dev)
 
-        if numDevi_u is None:
-            numDevi_u = numDevi
-        if numDevi_l is None:
-            numDevi_l = numDevi
-        threshold_u = mean + (numDevi_u * stddevi)
-        threshold_l = mean - (numDevi_l * stddevi)
+        threshold_u = mean + (num_dev_u * std_dev)
+        threshold_l = mean - (num_dev_l * std_dev)
         forecast['yhat_lower'] = threshold_l
         forecast['yhat_upper'] = threshold_u
         forecast = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']]

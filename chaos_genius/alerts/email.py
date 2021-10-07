@@ -4,15 +4,16 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
-# TODO: Fetch these params from the db
-from chaos_genius.settings import (
-    EMAIL_HOST,
-    EMAIL_HOST_PORT,
-    EMAIL_HOST_USER,
-    EMAIL_HOST_PASSWORD,
-    EMAIL_SENDER,
-    DEBUG
-)
+# TODO: Need little refactoring
+
+from chaos_genius.alerts.alert_channel_creds import get_creds
+
+EMAIL_HOST = None
+EMAIL_HOST_PORT = None
+EMAIL_HOST_USER = None
+EMAIL_HOST_PASSWORD = None
+EMAIL_SENDER = None
+DEBUG = False
 
 TEMPLATE_DIR = "chaos_genius/alerts/templates"
 EMAIL_TEMPLATE_MAPPING = {
@@ -88,6 +89,16 @@ def send_email(recipient_emails, message, count=0):
         print(traceback.format_exc())
 
 
+def initialize_env_variables():
+    global EMAIL_HOST
+    global EMAIL_HOST_PORT
+    global EMAIL_HOST_USER
+    global EMAIL_HOST_PASSWORD
+    global EMAIL_SENDER
+    global DEBUG
+    creds = get_creds('email')
+    EMAIL_HOST, EMAIL_HOST_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, EMAIL_SENDER = creds
+
 
 def send_static_alert_email(recipient_emails, subject, messsage_body, alert_info, files=[]):
     """Send the static event alert email with the CSV attachment
@@ -103,22 +114,17 @@ def send_static_alert_email(recipient_emails, subject, messsage_body, alert_info
         bool: status of the email
     """
     status = False
+    initialize_env_variables()
+    
     try:
         message = MIMEMultipart()
         message['From'] = EMAIL_SENDER
         message['To'] = ",".join(recipient_emails)
         message['Subject'] = subject
 
-        # parse the email template
-        # email_template = EMAIL_TEMPLATE_MAPPING["STATIC_ALERT"]
-        # template_path = f"{TEMPLATE_DIR}/{email_template}"
-        # with open(template_path) as f:
-        #     template = Template(f.read())
-        # parsed_template = template.render(**job_details)
-
         msgAlternative = MIMEMultipart('alternative')
         # msgText = MIMEText(parsed_template, 'html')
-        msgText = MIMEText(messsage_body, 'plain') #TODO - To be changed according to use 
+        msgText = MIMEText(messsage_body, 'html') # TODO: To be changed according to use 
         msgAlternative.attach(msgText)
         message.attach(msgAlternative)
 

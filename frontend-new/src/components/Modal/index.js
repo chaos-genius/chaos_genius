@@ -42,7 +42,7 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
       history.push('/onboarding/2');
     } else {
       store.dispatch(SETTING_RESET);
-      history.push('/dashboard/autorca');
+      history.push('/dashboard/deepdrills');
     }
     setIsOpen(false);
   };
@@ -55,7 +55,7 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
       history.push('/datasource');
     } else if (text === 'activateanalytics') {
       store.dispatch(SETTING_RESET);
-      history.push('/dashboard/autorca');
+      history.push('/dashboard/deepdrills');
     }
   };
   return (

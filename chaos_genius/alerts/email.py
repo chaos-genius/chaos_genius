@@ -5,14 +5,23 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 # TODO: Fetch these params from the db
-from chaos_genius.settings import (
-    EMAIL_HOST,
-    EMAIL_HOST_PORT,
-    EMAIL_HOST_USER,
-    EMAIL_HOST_PASSWORD,
-    EMAIL_SENDER,
-    DEBUG
-)
+# from chaos_genius.settings import (
+#     EMAIL_HOST,
+#     EMAIL_HOST_PORT,
+#     EMAIL_HOST_USER,
+#     EMAIL_HOST_PASSWORD,
+#     EMAIL_SENDER,
+#     DEBUG
+# )
+
+from chaos_genius.alerts.alert_channel_creds import get_creds
+
+EMAIL_HOST = None
+EMAIL_HOST_PORT = None
+EMAIL_HOST_USER = None
+EMAIL_HOST_PASSWORD = None
+EMAIL_SENDER = None
+DEBUG = None
 
 TEMPLATE_DIR = "chaos_genius/alerts/templates"
 EMAIL_TEMPLATE_MAPPING = {
@@ -87,7 +96,18 @@ def send_email(recipient_emails, message, count=0):
     except Exception:
         print(traceback.format_exc())
 
+def initialize_env_variables():
 
+    global EMAIL_HOST
+    global EMAIL_HOST_PORT
+    global EMAIL_HOST_USER
+    global EMAIL_HOST_PASSWORD
+    global EMAIL_SENDER
+    global DEBUG
+
+    creds = get_creds('email')
+
+    EMAIL_HOST, EMAIL_HOST_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, EMAIL_SENDER, DEBUG = creds
 
 def send_static_alert_email(recipient_emails, subject, messsage_body, alert_info, files=[]):
     """Send the static event alert email with the CSV attachment
@@ -103,6 +123,8 @@ def send_static_alert_email(recipient_emails, subject, messsage_body, alert_info
         bool: status of the email
     """
     status = False
+    initialize_env_variables()
+    
     try:
         message = MIMEMultipart()
         message['From'] = EMAIL_SENDER

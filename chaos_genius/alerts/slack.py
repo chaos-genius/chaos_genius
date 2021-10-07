@@ -1,11 +1,20 @@
 from slack_sdk.webhook import WebhookClient
 from dotenv import dotenv_values
 
-config = dotenv_values(".env")
-url = config.get("SLACK_WEBHOOK_URL")
-webhook = WebhookClient(url)
+from chaos_genius.alerts.alert_channel_creds import get_creds
+
+# config = dotenv_values(".env")
+# url = config.get("SLACK_WEBHOOK_URL")
+
+webhook = None
+
+def initialize_creds():
+	global webhook
+	url = get_creds('slack')
+	webhook = WebhookClient(url)
 
 def anomaly_alert_slack(alert_name, kpi_name, data_source_name, alert_body):
+	initialize_creds()
 	response = webhook.send(
 		text = f"Anomaly Alert: {kpi_name}",
 		blocks = [
@@ -39,6 +48,7 @@ def anomaly_alert_slack(alert_name, kpi_name, data_source_name, alert_body):
 	return response.body
 
 def anomaly_alert_slack_formatted(alert_name, kpi_name, data_source_name, **kwargs):
+	initialize_creds()
 	response = webhook.send(
 		text = f"Anomaly Alert: {kpi_name}",
 		blocks = [
@@ -100,6 +110,7 @@ def anomaly_alert_slack_formatted(alert_name, kpi_name, data_source_name, **kwar
 	return response.body
 
 def trigger_overall_kpi_stats(alert_name, kpi_name, data_source_name, alert_body, stats):
+	initialize_creds()
 	response = webhook.send(
 		text="fallback",
 		blocks=[
@@ -161,6 +172,7 @@ def trigger_overall_kpi_stats(alert_name, kpi_name, data_source_name, alert_body
 
 
 def test():
+	initialize_creds()
 	response = webhook.send(
 		text="fallback",
 		blocks=[

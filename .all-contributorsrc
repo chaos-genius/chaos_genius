@@ -16,6 +16,71 @@
         "ideas",
         "design"
       ]
+    },
+    {
+      "login": "suranah",
+      "name": "Harshit Surana",
+      "avatar_url": "https://avatars.githubusercontent.com/u/948291?v=4",
+      "profile": "http://harshitsurana.com",
+      "contributions": [
+        "code",
+        "content",
+        "review"
+      ]
+    },
+    {
+      "login": "manassolanki",
+      "name": "Manas Solanki",
+      "avatar_url": "https://avatars.githubusercontent.com/u/20757311?v=4",
+      "profile": "https://www.manassolanki.com/",
+      "contributions": [
+        "code",
+        "review",
+        "tool"
+      ]
+    },
+    {
+      "login": "kartikay-bagla",
+      "name": "Kartikay Bagla",
+      "avatar_url": "https://avatars.githubusercontent.com/u/19384906?v=4",
+      "profile": "http://kartikaybagla.com",
+      "contributions": [
+        "code",
+        "maintenance",
+        "research"
+      ]
+    },
+    {
+      "login": "varunp2k",
+      "name": "Varun P",
+      "avatar_url": "https://avatars.githubusercontent.com/u/46447751?v=4",
+      "profile": "https://github.com/varunp2k",
+      "contributions": [
+        "code",
+        "maintenance",
+        "research"
+      ]
+    },
+    {
+      "login": "keshprad",
+      "name": "Keshav Pradeep",
+      "avatar_url": "https://avatars.githubusercontent.com/u/32313895?v=4",
+      "profile": "http://keshprad.ml",
+      "contributions": [
+        "code",
+        "data",
+        "doc"
+      ]
+    },
+    {
+      "login": "dajkatal",
+      "name": "Daj Katal",
+      "avatar_url": "https://avatars.githubusercontent.com/u/47812481?v=4",
+      "profile": "https://github.com/dajkatal",
+      "contributions": [
+        "plugin",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

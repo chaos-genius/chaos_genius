@@ -4,7 +4,7 @@ import Select from 'react-select';
 
 import { useDispatch, useSelector } from 'react-redux';
 
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory, useParams, Link } from 'react-router-dom';
 
 import Slack from '../../assets/images/table/slack.svg';
 import Email from '../../assets/images/alerts/email.svg';
@@ -378,7 +378,11 @@ const KpiAlertDestinationForm = ({
             editAndSaveButton('alert_channel')}
         </div>
         <div className="channel-tip">
-          <p>Tip: Go to Channel configuration to connect channel</p>
+          <p>
+            Tip: Go to{' '}
+            <Link to="/alerts/channelconfiguration">Channel configuration</Link>{' '}
+            to connect channel
+          </p>
         </div>
         {error.alert_channel && (
           <div className="connection__fail">

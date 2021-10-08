@@ -39,7 +39,7 @@ const getOption = (channel) => {
     label: (
       <div className="optionlabel">
         <img src={channel === 'email' ? Email : Slack} alt="datasource" />
-        Email
+        {channel}
       </div>
     ),
     value: channel
@@ -63,6 +63,7 @@ const KpiAlertDestinationForm = ({
   const kpiId = useParams().id;
   const path = history.location.pathname.split('/');
   const [option, setOption] = useState([]);
+  const [channelName, setChannelName] = useState('');
   /* add another channel state*/
 
   // const [anotherChannel, setAnotherChannel] = useState(false);
@@ -101,10 +102,17 @@ const KpiAlertDestinationForm = ({
 
   useEffect(() => {
     if (path[2] === 'edit') {
-      setresp(
-        alertFormData?.alert_channel_conf?.[alertFormData.alert_channel] || []
-      );
       setField(alertFormData?.alert_channel);
+
+      if (alertFormData?.alert_channel === 'email') {
+        setresp(
+          alertFormData?.alert_channel_conf?.[alertFormData.alert_channel] || []
+        );
+      } else {
+        setChannelName(
+          alertFormData?.alert_channel_conf?.[alertFormData.alert_channel] || ''
+        );
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -219,16 +227,28 @@ const KpiAlertDestinationForm = ({
   };
 
   const handleChange = (tags) => {
-    setresp(tags);
+    if (field === 'email') {
+      setresp(tags);
 
-    setAlertFormData((prev) => {
-      return {
-        ...prev,
-        alert_channel_conf: {
-          [alertFormData['alert_channel']]: tags
-        }
-      };
-    });
+      setAlertFormData((prev) => {
+        return {
+          ...prev,
+          alert_channel_conf: {
+            [alertFormData['alert_channel']]: tags
+          }
+        };
+      });
+    } else {
+      setChannelName(tags);
+      setAlertFormData((prev) => {
+        return {
+          ...prev,
+          alert_channel_conf: {
+            [alertFormData['alert_channel']]: tags
+          }
+        };
+      });
+    }
   };
 
   const customToast = (data) => {
@@ -260,8 +280,7 @@ const KpiAlertDestinationForm = ({
   };
 
   const validateEmail = (email) => {
-    const re =
-      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
   };
 
@@ -403,7 +422,7 @@ const KpiAlertDestinationForm = ({
             <ReactTagInput
               tags={resp}
               placeholder="Add Recepients"
-              onChange={(newTags) => handleChange(newTags)}
+              onChange={(newTags) => handleChange(newTags, 'email')}
               validator={(value) => {
                 const isEmail = validateEmail(value);
                 if (!isEmail) {
@@ -431,6 +450,8 @@ const KpiAlertDestinationForm = ({
               className="form-control"
               placeholder="Channel Name"
               disabled={true}
+              value={channelName}
+              onChange={(e) => handleChange(e.target.value, 'slack')}
             />
           </div>
         </div>

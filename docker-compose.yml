@@ -40,7 +40,7 @@ services:
       - NODE_ENV=production
       - HOST=0.0.0.0
       - PORT=3000
-      - REACT_APP_BASE_URL=http://localhost:5000
+      - REACT_APP_BASE_URL=${REACT_APP_BASE_URL}
     stdin_open: true
     command: npm run start
 

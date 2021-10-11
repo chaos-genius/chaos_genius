@@ -93,7 +93,7 @@ Want to contribute? Visit our Github repo and get started with:
 
 -   Share a part of the documentation that you find difficult to follow.
 
--   [Translate our Readme](https://github.com/chaos-genius/.github/blob/main/README.md).
+-   [Translate our Readme](https://github.com/chaos-genius/chaos_genius/blob/main/README.md).
 
 -   Show us some love - Give us a star!
 

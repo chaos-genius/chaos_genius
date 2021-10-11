@@ -9,7 +9,7 @@ x-logging: &default-logging
 services:
   chaosgenius-init:
     container_name: chaosgenius-init
-    image: docker:20.10
+    image: docker:latest
     command: >
       sh -c "apk update && 
              apk upgrade && 
@@ -33,7 +33,7 @@ services:
 
   chaosgenius-webapp:
     container_name: chaosgenius-webapp
-    image: chaosgenius/chaosgenius-webapp:0.1.2
+    image: chaosgenius/chaosgenius-webapp:latest
     ports:
       - "8080:3000"
     environment:
@@ -46,7 +46,7 @@ services:
 
   chaosgenius-server:
     container_name: chaosgenius-server
-    image: chaosgenius/chaosgenius-server:0.1.2
+    image: chaosgenius/chaosgenius-server:latest
     command: sh setup/run-backend-docker.sh
     ports:
       - "5000:5000"
@@ -104,7 +104,7 @@ services:
     
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler
-    image: chaosgenius/chaosgenius-server:0.1.2
+    image: chaosgenius/chaosgenius-server:latest
     command: celery -A run.celery beat --loglevel=DEBUG
     environment:
       - FLASK_APP=${FLASK_APP}
@@ -133,7 +133,7 @@ services:
   
   chaosgenius-worker-analytics:
     container_name: chaosgenius-worker-analytics
-    image: chaosgenius/chaosgenius-server:0.1.2
+    image: chaosgenius/chaosgenius-server:latest
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
     environment:
       - FLASK_APP=${FLASK_APP}
@@ -163,7 +163,7 @@ services:
 
   chaosgenius-worker-alerts:
     container_name: chaosgenius-worker-alerts
-    image: chaosgenius/chaosgenius-server:0.1.2
+    image: chaosgenius/chaosgenius-server:latest
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
     environment:
       - FLASK_APP=${FLASK_APP}

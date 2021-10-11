@@ -8,7 +8,7 @@ from chaos_genius.core.anomaly.models import AnomalyModel
 
 ETS_SENS = {"high": 0.8, "medium": 0.9, "low": 0.95}
 
-ETS_FREQ = {"hourly": "H", "daily": "D"}
+ETS_FREQ = {"hourly": "H", "daily": "D", "d": "D", "h": "H"}
 
 
 class ExpTSModel(AnomalyModel):

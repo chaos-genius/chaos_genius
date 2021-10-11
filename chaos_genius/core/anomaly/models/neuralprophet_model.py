@@ -5,6 +5,7 @@ from neuralprophet import NeuralProphet
 
 from chaos_genius.core.anomaly.models import AnomalyModel
 
+NP_FREQ = ["d": "D", "h": "H"]
 
 class NeuralProphetModel(AnomalyModel):
     """Neural Prophet model for anomaly detection."""
@@ -43,12 +44,12 @@ class NeuralProphetModel(AnomalyModel):
         columns
         :rtype: pd.DataFrame
         """
-        frequency = self.model_kwargs.get('freq', 'D')
+
         df = df.rename(columns={"dt": "ds", "y": "y"})
 
         # TODO: add support for customizable seasonality here
         self.model = NeuralProphet()
-        self.model.fit(df, freq=frequency)
+        self.model.fit(df, freq=NP_FREQ[frequency.lower()])
 
         if pred_df is None:
             future = self.model.make_future_dataframe(

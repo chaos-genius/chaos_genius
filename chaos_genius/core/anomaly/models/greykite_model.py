@@ -20,7 +20,9 @@ GKSENS = {
 
 GKFREQ = {
     'hourly': 'H',
-    'daily': 'D'
+    'daily': 'D',
+     "d" : "D", 
+     "h" : "H"
 }
 
 

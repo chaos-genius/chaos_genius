@@ -111,7 +111,8 @@
       "contributions": [
         "code",
         "tool",
-        "data"
+        "data",
+        "bug"
       ]
     },
     {

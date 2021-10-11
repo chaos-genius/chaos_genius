@@ -16,6 +16,7 @@ With Chaos Genius, we aim to automate the diagnosis and root-cause-analysis for 
 
 ![](https://chaosgenius-public.s3.amazonaws.com/test-cg-1-small.gif)
 
+Find detailed [Documentation](https://docs.chaosgenius.io/docs/introduction)here!
 
 ## :white_check_mark: Key Use-Cases
 

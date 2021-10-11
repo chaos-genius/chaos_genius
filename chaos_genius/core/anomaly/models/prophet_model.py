@@ -8,7 +8,7 @@ from chaos_genius.core.utils.supress_output import suppress_stdout_stderr
 
 PROPHETSENS = {"high": 0.8, "medium": 0.9, "low": 0.95}
 
-PROPHETFREQ = {"hourly": "H", "daily": "D"}
+PROPHETFREQ = {"hourly": "H", "daily": "D", "d" : "D", "h" : "H"}
 
 
 class ProphetModel(AnomalyModel):

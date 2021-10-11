@@ -56,7 +56,7 @@ docker-compose up
 
 Visit[  http://localhost:8080](http://localhost:8080/)
 
-Follow this [Quick Install guide](https://github.com/chaos-genius/.github) showing you how to connect a data source, define your first KPI, configure Anomaly Detector on your local machine. 
+Follow this [Quick Start guide](https://docs.chaosgenius.io/docs/Quick_Start/Install-Chaos-Genius) showing you how to connect a data source, define your first KPI, configure Anomaly Detector on your local machine. 
 
 If you want to schedule office hours with our team to help you get set up, please select [some time directly here.](https://calendly.com/pshrimal/30min)
 
@@ -68,14 +68,14 @@ Chaos Genius is a community driven initiative. For any help, discussions, sugges
 
 -   Slack (For discussion with the Community and Chaos Genius team)
 
--   Book Office Hours (Set Up time with Chaos Genius team for any questions or help with setup)
+-   [Book Office Hours](https://calendly.com/pshrimal/30min)(Set Up time with Chaos Genius team for any questions or help with setup)
 
 -   [Blog](https://chaosgenius.io/blog/) (Follow us on latest trends on Data, Machine Learning, Open Source and more)
 
 
 ## 🚦 Roadmap
 
-Our goal is to make Chaos Genius production ready for all organisations irrespective of their data infrasturcture, data sources and scale requirements. With that in mind we have created the following [roadmap](roadmap.md) for Chaos Genius. If you see something missing or wish to make suggestions, please drop us a line on our community Slack or raise an issue.
+Our goal is to make Chaos Genius production ready for all organisations irrespective of their data infrasturcture, data sources and scale requirements. With that in mind we have created the following [roadmap](https://docs.chaosgenius.io/docs/Roadmap/Roadmap) for Chaos Genius. If you see something missing or wish to make suggestions, please drop us a line on our community Slack or raise an issue.
 
 
 
@@ -100,7 +100,7 @@ Want to contribute? Visit our Github repo and get started with:
 
 ## 📜 License
 
-Chaos Genius is licensed under the MIT license. See the LICENSE file for licensing information.
+Chaos Genius is licensed under the MIT license.
 
 ## Contributors ✨
 

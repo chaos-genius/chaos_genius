@@ -108,10 +108,6 @@ const KpiAlertDestinationForm = ({
         setresp(
           alertFormData?.alert_channel_conf?.[alertFormData.alert_channel] || []
         );
-      } else {
-        setChannelName(
-          alertFormData?.alert_channel_conf?.[alertFormData.alert_channel] || ''
-        );
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -125,6 +121,11 @@ const KpiAlertDestinationForm = ({
         })
       );
     }
+    channelStatusData.forEach((data) => {
+      if (data.name === 'slack') {
+        setChannelName(data?.config_setting.channel_name || '');
+      }
+    });
   }, [channelStatusData]);
 
   useEffect(() => {
@@ -225,21 +226,9 @@ const KpiAlertDestinationForm = ({
       </>
     );
   };
-
   const handleChange = (tags) => {
     if (field === 'email') {
       setresp(tags);
-
-      setAlertFormData((prev) => {
-        return {
-          ...prev,
-          alert_channel_conf: {
-            [alertFormData['alert_channel']]: tags
-          }
-        };
-      });
-    } else {
-      setChannelName(tags);
       setAlertFormData((prev) => {
         return {
           ...prev,
@@ -280,7 +269,8 @@ const KpiAlertDestinationForm = ({
   };
 
   const validateEmail = (email) => {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    const re =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
   };
 
@@ -451,7 +441,6 @@ const KpiAlertDestinationForm = ({
               placeholder="Channel Name"
               disabled={true}
               value={channelName}
-              onChange={(e) => handleChange(e.target.value, 'slack')}
             />
           </div>
         </div>

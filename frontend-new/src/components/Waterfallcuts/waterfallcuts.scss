@@ -1,0 +1,58 @@
+@import '../../assets/styles/variable.scss';
+
+.cuts-container {
+  display: flex;
+  justify-content: space-between;
+  width: 97%;
+  margin: 0 auto 48px;
+  div {
+    margin-right: 8px;
+    width: 110px;
+    &:last-child {
+      margin-right: 0px;
+    }
+    label {
+      background: $grey_variation-2;
+      border-radius: 4px;
+      font-weight: $font-weight-400;
+      font-size: $font-size-12;
+      line-height: $line-height-15;
+      color: $black_variation-2;
+      padding: 4px 8px;
+      margin-bottom: 12px;
+      max-width: 118px;
+      &:last-child {
+        margin-bottom: 0px;
+      }
+    }
+  }
+  .cuts-period {
+    padding: 13px;
+    background: $grey_variation-2;
+    border-radius: 4px;
+    border-left: 4px solid $grey_variation-3;
+    width: 140px;
+    max-height: 60px;
+    h2 {
+      font-weight: $font-weight-500;
+      font-size: $font-size-14;
+      line-height: $line-height-17;
+      color: $black_variation-2;
+      margin-bottom: 3px;
+    }
+    h3 {
+      font-weight: $font-weight-400;
+      font-size: $font-size-12;
+      line-height: $line-height-15;
+      color: $grey_variation-3;
+    }
+    &.current-period {
+      border-left: 4px solid $green;
+    }
+  }
+
+  .cuts-separator {
+    border: 1px solid rgba(34, 34, 34, 0.12);
+    width: fit-content;
+  }
+}

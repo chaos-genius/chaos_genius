@@ -89,6 +89,16 @@ DATABASE_CONFIG_MAPPER = {
         "dataset_id": "dataset_id",
         "project_id": "project_id",
         "db_type": "bigquery"
+    },
+    "e2d65910-8c8b-40a1-ae7d-ee2416b2bfa2": {
+        "host": "host",
+        "role": "role",
+        "warehouse": "warehouse",
+        "database": "database",
+        "schema": "schema",
+        "username": "username",
+        "password": "password",
+        "db_type": "snowflake"
     }
 }
 

@@ -339,6 +339,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       sourceDefinitionId: sourceDefinitionId,
       connection_type: selectedDatasource.value
     };
+
     dispatch(testDatasourceConnection(payload));
   };
 
@@ -461,6 +462,17 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             components={{ SingleValue: customSingleValue }}
           />
         </div>
+        {/* {sourceDefinitionId === '47f25999-dd5e-4636-8c39-e7cea2453331' && (
+          <div className="form-group">
+            <label>Accounts</label>
+            <input
+              type="text"
+              className="form-control"
+              required
+              onChange={(e) => console.log('EVENT:', e.target.value)}
+            />
+          </div>
+        )} */}
 
         {selectedDatasource &&
           selectedDatasource !== undefined &&

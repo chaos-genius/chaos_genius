@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
+
+import Tooltip from 'react-tooltip-lite';
+
 import Edit from '../../assets/images/disable-edit.svg';
+import Help from '../../assets/images/help.svg';
+
 const Textfield = ({
   element,
   type,
@@ -80,7 +85,17 @@ const Textfield = ({
 
   return (
     <div className="form-group">
-      <label>{element[1]?.title ? element[1]?.title : element[0]}</label>
+      <label className="help-label">
+        {element[1]?.title ? element[1]?.title : element[0]}{' '}
+        {(element[0] === 'replication_method' || element[0] === 'port') && (
+          <Tooltip
+            className="sensitivity-tooltip"
+            direction="right"
+            content={element[1].description}>
+            <img src={Help} alt="Help" />
+          </Tooltip>
+        )}
+      </label>
       <div className="editable-field">
         <input
           type={element[1]?.['airbyte_secret'] ? 'password' : type}
@@ -90,15 +105,24 @@ const Textfield = ({
               : false
           }
           className="form-control"
-          value={
-            element[1]?.['airbyte_secret'] && path[2] === 'edit'
-              ? enabled
-                ? inputValues
-                : editState
-              : inputValues
+          defaultValue={
+            element[0] === 'replication_method'
+              ? element[1]?.default
+              : element[0] === 'port'
+              ? element[1]?.default
+              : ''
           }
+          // value={
+          //   element[1]?.['airbyte_secret'] && path[2] === 'edit'
+          //     ? enabled
+          //       ? inputValues
+          //       : editState
+          //     : inputValues
+          // }
           name={element[0]}
-          onChange={(e) => onhandleInput(e)}
+          onChange={(e) => {
+            onhandleInput(e);
+          }}
         />
         {element[1]?.['airbyte_secret'] &&
           path[2] === 'edit' &&

@@ -122,7 +122,8 @@
       "contributions": [
         "code",
         "tool",
-        "platform"
+        "platform",
+        "bug"
       ]
     },
     {

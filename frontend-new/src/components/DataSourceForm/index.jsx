@@ -314,6 +314,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const testConnection = () => {
     const { connectionSpecification } = selectedDatasource.selected;
     const { required } = connectionSpecification;
+
     var newobj = { ...formError };
     if (Object.keys(required).length > 0) {
       required.map((obj) => {
@@ -414,6 +415,20 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     }
   };
 
+  const handleChange = (e, key) => {
+    setDsFormData((prev) => {
+      return {
+        ...prev,
+        [key]:
+          e.target.type === 'number'
+            ? parseInt(e.target.value.trim())
+            : e.target.value.trim()
+      };
+    });
+    setFormError([]);
+    setStatus('');
+  };
+
   if (metaInfoLoading || datasourceLoading) {
     return (
       <div className="load ">
@@ -422,7 +437,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     );
   } else {
     return (
-      <div>
+      <>
         <div className="form-group">
           <label>Connection Name</label>
           <input
@@ -462,17 +477,22 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             components={{ SingleValue: customSingleValue }}
           />
         </div>
-        {/* {sourceDefinitionId === '47f25999-dd5e-4636-8c39-e7cea2453331' && (
+        {sourceDefinitionId === '47f25999-dd5e-4636-8c39-e7cea2453331' && (
           <div className="form-group">
             <label>Accounts</label>
             <input
               type="text"
               className="form-control"
               required
-              onChange={(e) => console.log('EVENT:', e.target.value)}
+              onChange={(e) => handleChange(e, 'accounts')}
             />
+            {formError['accounts'] && (
+              <div className="connection__fail">
+                <p>{formError['accounts']}</p>
+              </div>
+            )}
           </div>
-        )} */}
+        )}
 
         {selectedDatasource &&
           selectedDatasource !== undefined &&
@@ -579,7 +599,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             )}
           </div>
         )}
-      </div>
+      </>
     );
   }
 };

@@ -134,14 +134,14 @@ def create_data_source():
         conn_type = payload.get('connection_type')
         source_form = payload.get('sourceForm')
         is_third_party = SOURCE_WHITELIST_AND_TYPE[source_form["sourceDefinitionId"]]
-        connector_client = connector.connection
         sourceCreationPayload = {
             "name": f"CG-{conn_name}",
             "sourceDefinitionId": source_form.get("sourceDefinitionId"),
-            "workspaceId": connector_client.workspace_id,
             "connectionConfiguration": source_form.get("connectionConfiguration")
         }
         if is_third_party:
+            connector_client = connector.connection
+            sourceCreationPayload["workspaceId"] = connector_client.workspace_id
             # Create the source
             sourceRecord = connector_client.create_source(sourceCreationPayload)
             sourceRecord["connectionConfiguration"] = sourceCreationPayload["connectionConfiguration"]

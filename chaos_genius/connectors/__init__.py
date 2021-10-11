@@ -1,11 +1,13 @@
 from chaos_genius.connectors.bigquery import BigQueryDb
 from chaos_genius.connectors.postgres import PostgresDb
 from chaos_genius.connectors.mysql import MysqlDb
+from chaos_genius.connectors.snowflake import SnowflakeDb
 
 DB_CLASS_MAPPER = {
     "Postgres": PostgresDb,
     "MySQL": MysqlDb,
     "BigQuery": BigQueryDb,
+    "Snowflake": SnowflakeDb
 }
 
 

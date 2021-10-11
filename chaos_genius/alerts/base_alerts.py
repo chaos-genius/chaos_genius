@@ -15,6 +15,9 @@ from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import anomaly_alert_slack, anomaly_alert_slack_formatted
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from chaos_genius.logger import configure_logger
+
+logger = configure_logger(__name__)
 
 FREQUENCY_DICT = {
     "weekly": datetime.timedelta(days = 7, hours = 0, minutes = 0),
@@ -174,12 +177,12 @@ class AnomalyAlertController:
 
         alert: Optional[Alert] = Alert.get_by_id(self.alert_info["id"])
         if alert is None:
-            print(f"Could not find alert by ID: {self.alert_info['id']}")
+            logger.debug(f"Could not find alert by ID: {self.alert_info['id']}")
             return False
 
         if alert.last_alerted is not None and \
                 alert.last_alerted > (curr_date_time - check_time):
-            print(f"Skipping alert with ID {self.alert_info['id']} since it was already run")
+            logger.debug(f"Skipping alert with ID {self.alert_info['id']} since it was already run")
             return True
 
         alert.update(commit=True, last_alerted=curr_date_time)
@@ -195,13 +198,17 @@ class AnomalyAlertController:
                                         ).all()
 
         if len(anomaly_data) == 0:
-            return f'No anomaly exists (Alert ID - {alert_id})'
+            logger.debug(f"No anomaly exists (Alert ID - {alert_id})")
+            return True
 
         anomaly_data.sort(key = lambda anomaly: getattr(anomaly, 'severity'), reverse = True)
         anomaly = anomaly_data[0]
         
         if getattr(anomaly, 'severity') < self.alert_info['severity_cutoff_score']:
-            return f"The anomaliy's severity score is below the threshold (Alert ID - {alert_id})"
+            logger.debug(f"The anomaliy's severity score is below the threshold (Alert ID - {alert_id})")
+            return True
+
+        logger.info(f"Alert ID {alert_id} is sent to the respective alert channel")
 
         if self.alert_info["alert_channel"] == "email":
             return self.send_alert_email(anomaly)
@@ -226,7 +233,8 @@ class AnomalyAlertController:
             kpi_obj = Kpi.get_by_id(kpi_id)
             
             if kpi_obj is None:
-                return f"No KPI exists for Alert ID - {self.alert_info['id']}"
+                logger.debug(f"No KPI exists for Alert ID - {self.alert_info['id']}")
+                return False
 
             kpi_name = getattr(kpi_obj, 'name')
 
@@ -242,10 +250,11 @@ class AnomalyAlertController:
                                             kpi_name = kpi_name,
                                             alert_frequency = self.alert_info['alert_frequency'].capitalize()
                                         )
-            return f"Status for Alert ID - {self.alert_info['id']} : {test}"
+            logger.debug(f"Status for Alert ID - {self.alert_info['id']} : {test}")
+            return True
         else:
-
-            return f"No receipent email available (Alert ID - {self.alert_info['id']})"
+            logger.debug(f"No receipent email available (Alert ID - {self.alert_info['id']})")
+            return False
 
     def send_template_email(self, template, recipient_emails, subject, **kwargs):
         """Sends an email using a template."""
@@ -258,6 +267,12 @@ class AnomalyAlertController:
 
         template = env.get_template(template)
         test = send_static_alert_email(recipient_emails, subject, template.render(**kwargs), self.alert_info)
+
+        if test == True:
+            logger.info(f"The email for Alert ID - {self.alert_info['id']} was successfully sent")
+        else:
+            logger.debug(f"The email for Alert ID - {self.alert_info['id']} has not been sent")
+        
         return test
 
     def send_slack_alert(self, anomaly):
@@ -275,6 +290,12 @@ class AnomalyAlertController:
             upper_bound = round(getattr(anomaly, 'yhat_upper'), 2),
             severity_value = round(getattr(anomaly, 'severity'), 2)
             )
+
+        if test == "ok":
+            logger.info(f"The slack alert for Alert ID - {self.alert_info['id']} was successfully sent")
+        else:
+            logger.debug(f"The slack alert for Alert ID - {self.alert_info['id']} has not been sent")
+        
         message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
         return message
 

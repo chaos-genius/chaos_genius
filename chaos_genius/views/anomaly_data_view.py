@@ -257,7 +257,7 @@ def fill_graph_data(row, graph_data, precision=2):
         graph_data['intervals'].append(interval)
 
         # Create and append a point for the value
-        value = [timestamp, round(row['y'])]
+        value = [timestamp, round(row['y'], precision)]
         graph_data['values'].append(value)
 
         # Create and append a point for the severity

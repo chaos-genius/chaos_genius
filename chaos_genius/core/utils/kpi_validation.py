@@ -9,6 +9,7 @@ from chaos_genius.core.rca.rca_controller import RootCauseAnalysisController
 from chaos_genius.core.rca.root_cause_analysis import SUPPORTED_AGGREGATIONS
 
 TAIL_SIZE = 10
+MAX_NUM_ROWS = 5000000
 
 
 def validate_kpi(
@@ -30,6 +31,7 @@ def validate_kpi(
 
     return _validate_kpi_from_df(
         df,
+        kpi_info,
         kpi_column_name=kpi_info['metric'],
         agg_type=kpi_info['aggregation'],
         date_column_name=kpi_info['datetime_column'],
@@ -40,6 +42,7 @@ def validate_kpi(
 
 def _validate_kpi_from_df(
     df: pd.core.frame.DataFrame,
+    kpi_info: dict,
     kpi_column_name: str,
     agg_type: str,
     date_column_name: str,
@@ -105,6 +108,15 @@ def _validate_kpi_from_df(
                 unix_unit=unix_unit,
             ),
         },
+        {
+            "debug_str": (
+                "Check #4: Validate KPI has no more than "
+                f"{MAX_NUM_ROWS} rows"
+            ),
+            "status": _validate_for_maximum_kpi_size(
+                kpi_info, num_rows=MAX_NUM_ROWS
+            )
+        }
     ]
     for validation in validations:
         status_bool, status_msg = validation["status"]
@@ -271,3 +283,35 @@ def _validate_date_column_is_parseable(
 
     # datetime column is parseable if code reaches here.
     return True, valid_str
+
+
+def _validate_for_maximum_kpi_size(
+    kpi_info: dict,
+    num_rows: int
+) -> Tuple[bool, str]:
+    """Validate if KPI size is less than maximum permissible size
+    :param kpi_info: Dictionary with all KPI info
+    :type kpi_info: dict
+    :param num_rows: maximum number of rows for the KPI
+    :type num_rows: int
+    :return: returns a tuple with the status as a bool and a status message
+    :rtype: Tuple[bool, str]
+    """
+    try:
+        rca = RootCauseAnalysisController(kpi_info)
+        base_df, rca_df = rca._load_data()
+        df = pd.concat([base_df, rca_df])
+    except Exception as e:  # noqa: B902
+        return False, "Could not load data. Error: " + str(e)
+    valid_str = "Accepted!"
+    # Exit early if len df is less than num_rows
+    if len(df) <= num_rows:
+        return True, valid_str
+
+    error_message = (
+        "Chaos Genius does not currently support datasets with "
+        f"monthly rows greater than {num_rows}. Please try materialized views"
+        "for such datasets (coming soon)."
+    )
+
+    return False, error_message

@@ -1,3 +1,4 @@
+import logging
 import os
 import io
 import json
@@ -15,9 +16,8 @@ from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import anomaly_alert_slack, anomaly_alert_slack_formatted
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from chaos_genius.logger import configure_logger
 
-logger = configure_logger(__name__)
+logger = logging.getLogger()
 
 FREQUENCY_DICT = {
     "weekly": datetime.timedelta(days = 7, hours = 0, minutes = 0),

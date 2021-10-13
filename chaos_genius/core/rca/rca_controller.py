@@ -2,13 +2,12 @@
 
 import json
 from datetime import datetime
+import logging
 from typing import Tuple
 
 import numpy as np
 import pandas as pd
 
-# from chaos_genius.connectors.base_connector import get_df_from_db_uri
-from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.core.rca.constants import (LINE_DATA_TIMESTAMP_FORMAT,
                                              STATIC_END_DATA_FORMAT, TIMELINES)
 from chaos_genius.core.rca.rca_utils.data_loader import rca_load_data
@@ -16,9 +15,8 @@ from chaos_genius.core.rca.root_cause_analysis import RootCauseAnalysis
 from chaos_genius.core.utils.round import round_series
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.rca_data_model import RcaData, db
-from chaos_genius.logger import configure_logger
 
-logger = configure_logger(__name__)
+logger = logging.getLogger()
 
 
 class RootCauseAnalysisController:

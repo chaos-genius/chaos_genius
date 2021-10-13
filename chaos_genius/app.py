@@ -8,6 +8,7 @@ from flask import Flask, render_template
 from flask_cors import CORS
 
 from chaos_genius import commands
+from chaos_genius.logger import configure_logger
 from chaos_genius.views import (
     data_source_view,
     kpi_view,
@@ -112,10 +113,3 @@ def register_commands(app):
     app.cli.add_command(commands.reinstall_db)
     app.cli.add_command(commands.insert_demo_data)
     app.cli.add_command(commands.run_anomaly_rca_scheduler)
-
-
-def configure_logger(app):
-    """Configure loggers."""
-    handler = logging.StreamHandler(sys.stdout)
-    if not app.logger.handlers:
-        app.logger.addHandler(handler)

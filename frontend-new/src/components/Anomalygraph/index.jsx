@@ -131,7 +131,7 @@ const Anomalygraph = ({ key, drilldown }) => {
             s =
               s +
               '<br>Datetime: <b>' +
-              Highcharts.dateFormat('%Y %b %d %H:%M', this.x) +
+              Highcharts.dateFormat('%H:%M %a %d %b %Y', this.x) +
               '</b>';
             return s;
           }

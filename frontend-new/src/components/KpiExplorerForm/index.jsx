@@ -302,7 +302,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     ) {
       customToast({
         type: 'error',
-        header: 'Failed to Added',
+        header: 'Failed to Add',
         description: kpiSubmit.error
       });
     }

@@ -8,6 +8,7 @@ from flask import Blueprint, current_app, jsonify, request
 import pandas as pd
 from sqlalchemy.orm.attributes import flag_modified
 from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
+from chaos_genius.core.utils.round import round_number
 
 from chaos_genius.extensions import cache
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
@@ -234,7 +235,7 @@ def anomaly_settings_status(kpi_id):
     return jsonify(response)
 
 
-def fill_graph_data(row, graph_data, precision=2):
+def fill_graph_data(row, graph_data):
     """Fills graph_data with intervals, values, and predicted_values for
     a given row.
 
@@ -242,9 +243,6 @@ def fill_graph_data(row, graph_data, precision=2):
     :type row: pandas.core.series.Series
     :param graph_data: Dictionary object with the current graph
     :type graph_data: Dict
-    :param precision: Precision to round y and yhat values to, defaults
-        to 2
-    :type precision: int, optional
     """
     # Do not include rows where there is no data
     if row.notna()['y']:
@@ -252,16 +250,16 @@ def fill_graph_data(row, graph_data, precision=2):
         timestamp = row['data_datetime'].timestamp() * 1000
 
         # Create and append a point for the interval
-        interval = [timestamp, round(row['yhat_lower'], precision), round(
-            row['yhat_upper'], precision)]
+        interval = [timestamp, round_number(row['yhat_lower']), round_number(
+            row['yhat_upper'])]
         graph_data['intervals'].append(interval)
 
         # Create and append a point for the value
-        value = [timestamp, round(row['y'], precision)]
+        value = [timestamp, round_number(row['y'])]
         graph_data['values'].append(value)
 
         # Create and append a point for the severity
-        severity = [timestamp, round(row['severity'], precision)]
+        severity = [timestamp, round_number(row['severity'])]
         graph_data['severity'].append(severity)
 
 
@@ -270,7 +268,6 @@ def convert_to_graph_json(
     kpi_id, 
     anomaly_type="overall", 
     series_type=None, 
-    precision=2
 ):
     kpi_info = get_kpi_data_from_id(kpi_id)
 
@@ -293,7 +290,7 @@ def convert_to_graph_json(
     }
 
     results.apply(
-        lambda row: fill_graph_data(row, graph_data, precision),
+        lambda row: fill_graph_data(row, graph_data),
         axis=1
     )
 

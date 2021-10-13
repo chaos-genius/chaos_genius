@@ -105,20 +105,20 @@ const Textfield = ({
               : false
           }
           className="form-control"
-          defaultValue={
-            element[0] === 'replication_method'
-              ? element[1]?.default
-              : element[0] === 'port'
-              ? element[1]?.default
-              : ''
-          }
-          // value={
-          //   element[1]?.['airbyte_secret'] && path[2] === 'edit'
-          //     ? enabled
-          //       ? inputValues
-          //       : editState
-          //     : inputValues
+          // defaultValue={
+          //   element[0] === 'replication_method'
+          //     ? element[1]?.default
+          //     : element[0] === 'port'
+          //     ? element[1]?.default
+          //     : ''
           // }
+          value={
+            element[1]?.['airbyte_secret'] && path[2] === 'edit'
+              ? enabled
+                ? inputValues
+                : editState
+              : inputValues
+          }
           name={element[0]}
           onChange={(e) => {
             onhandleInput(e);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -18,6 +18,7 @@ import './kpialertconfigurationform.scss';
 
 import { getAllKpiExplorer } from '../../redux/actions';
 import { getKpiAlertById } from '../../redux/actions';
+import { connectionContext } from '../context';
 
 const alertFrequency = [
   {
@@ -40,7 +41,8 @@ const KpiAlertConfigurationForm = ({
 
   const path = history.location.pathname.split('/');
   const dispatch = useDispatch();
-  const connectionType = JSON.parse(localStorage.getItem('connectionType'));
+
+  const connectionType = useContext(connectionContext);
   const [type, setType] = useState('anomoloy');
   const [conditionType, setConditionType] = useState('');
   const [value, setValue] = useState([90]);
@@ -158,11 +160,11 @@ const KpiAlertConfigurationForm = ({
   };
 
   useEffect(() => {
-    if (kpiExplorerList) {
+    if (kpiExplorerList && connectionType) {
       fieldData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpiExplorerList]);
+  }, [kpiExplorerList, connectionType]);
 
   const fieldData = () => {
     if (kpiExplorerList && isLoading === false) {
@@ -183,8 +185,9 @@ const KpiAlertConfigurationForm = ({
   const datasourceIcon = (type) => {
     let textHtml = '';
     connectionType &&
+      connectionType.length !== 0 &&
       connectionType.find((item) => {
-        if (item.name === type.connection_type) {
+        if (item.name === type?.data_source?.connection_type) {
           textHtml = item.icon;
         }
         return '';

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import Select from 'react-select';
 
@@ -27,6 +27,8 @@ import { renderTextFields } from './Formhelper';
 
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
 
+import { connectionContext } from '../context';
+
 const customSingleValue = ({ data }) => (
   <div className="input-select">
     <div className="input-select__single-value">
@@ -51,7 +53,7 @@ const datasourceIcon = (type) => {
 
 const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const dispatch = useDispatch();
-
+  const connectionType = useContext(connectionContext);
   const toast = useToast();
 
   const dsId = useParams().id;
@@ -66,7 +68,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const [status, setStatus] = useState('');
   const history = useHistory();
   const path = history.location.pathname.split('/');
-  const connectionType = JSON.parse(localStorage.getItem('connectionType'));
+
   const {
     testLoading,
     testConnectionResponse,
@@ -105,11 +107,11 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       });
       setOption(arr);
     };
-    if (connectionType) {
+    if (connectionType && connectionType.length !== 0) {
       fetchData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [connectionType]);
 
   useEffect(() => {
     if (datasourceData && datasourceData.length !== 0 && path[2] === 'edit') {

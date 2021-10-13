@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 
 import { Link } from 'react-router-dom';
 import Modal from 'react-modal';
@@ -29,13 +29,14 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { v4 as uuidv4 } from 'uuid';
 import { useToast } from 'react-toast-wnm';
+import { connectionContext } from '../context';
 
 const DataSourceTable = ({ tableData, changeData, search }) => {
   const dispatch = useDispatch();
+  const connectionType = useContext(connectionContext);
   const toast = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [data, setData] = useState('');
-  const connectionType = JSON.parse(localStorage.getItem('connectionType'));
 
   const { deleteDataSourceResponse } = useSelector((state) => state.dataSource);
 

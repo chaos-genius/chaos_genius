@@ -42,7 +42,7 @@ def validate_kpi(
 
 def _validate_kpi_from_df(
     df: pd.core.frame.DataFrame,
-    kpi_info: dict,
+    kpi_info: Dict[str, Any],
     kpi_column_name: str,
     agg_type: str,
     date_column_name: str,
@@ -54,6 +54,8 @@ def _validate_kpi_from_df(
 
     :param df: A pandas DataFrame
     :type df: pd.core.frame.DataFrame
+    :param kpi_info: Dictionary with all params for the KPI
+    :type kpi_info: Dict[str, Any]
     :param kpi_column_name: Name of the column used for KPI
     :type kpi_column_name: str
     :param agg_type: A supported aggregation function
@@ -286,12 +288,12 @@ def _validate_date_column_is_parseable(
 
 
 def _validate_for_maximum_kpi_size(
-    kpi_info: dict,
+    kpi_info: Dict[str, Any],
     num_rows: int
 ) -> Tuple[bool, str]:
     """Validate if KPI size is less than maximum permissible size
-    :param kpi_info: Dictionary with all KPI info
-    :type kpi_info: dict
+    :param kpi_info: Dictionary with all params for the KPI
+    :type kpi_info: Dict[str, Any]
     :param num_rows: maximum number of rows for the KPI
     :type num_rows: int
     :return: returns a tuple with the status as a bool and a status message
@@ -304,7 +306,7 @@ def _validate_for_maximum_kpi_size(
     except Exception as e:  # noqa: B902
         return False, "Could not load data. Error: " + str(e)
     valid_str = "Accepted!"
-    # Exit early if len df is less than num_rows
+
     if len(df) <= num_rows:
         return True, valid_str
 

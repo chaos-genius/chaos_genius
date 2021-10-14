@@ -32,12 +32,8 @@ const Alerts = () => {
 
   const toast = useToast();
 
-  const {
-    alertLoading,
-    alertList,
-    kpiAlertEnableData,
-    kpiAlertDisableData
-  } = useSelector((state) => state.alert);
+  const { alertLoading, alertList, kpiAlertEnableData, kpiAlertDisableData } =
+    useSelector((state) => state.alert);
 
   const [alertData, setAlertData] = useState(alertList);
   const [alertSearch, setAlertSearch] = useState('');
@@ -67,13 +63,12 @@ const Alerts = () => {
 
       customToast({
         type: 'success',
-        header: 'Successfully Disabled',
-        description: kpiAlertDisableData.message
+        header: 'Successfully Disabled'
       });
     } else if (kpiAlertDisableData && kpiAlertDisableData === 'failure') {
       customToast({
         type: 'error',
-        header: 'Failed to disable',
+        header: 'Failed to disable selected alert',
         description: kpiAlertDisableData.message
       });
     } else if (kpiAlertEnableData && kpiAlertEnableData.status === 'success') {
@@ -81,13 +76,12 @@ const Alerts = () => {
 
       customToast({
         type: 'success',
-        header: 'Successfully Enabled',
-        description: kpiAlertEnableData.message
+        header: 'Successfully Enabled'
       });
     } else if (kpiAlertEnableData && kpiAlertEnableData.status === 'failure') {
       customToast({
         type: 'error',
-        header: 'Failed to Enable',
+        header: 'Failed to enable selected alert',
         description: kpiAlertEnableData.message
       });
     }

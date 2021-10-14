@@ -133,13 +133,12 @@ const KpiAlertDestinationForm = ({
       history.push('/alerts');
       customToast({
         type: 'success',
-        header: 'Successfully created',
-        description: createKpiAlertData.message
+        header: 'Successfully created'
       });
     } else if (createKpiAlertData && createKpiAlertData.status === 'failure') {
       customToast({
         type: 'error',
-        header: 'Failed to create',
+        header: 'Failed to create KPI',
         description: createKpiAlertData.message
       });
     }
@@ -150,13 +149,12 @@ const KpiAlertDestinationForm = ({
     if (updateKpiAlertData && updateKpiAlertData.status === 'success') {
       customToast({
         type: 'success',
-        header: 'Successfully updated',
-        description: updateKpiAlertData.message
+        header: 'Successfully updated'
       });
     } else if (updateKpiAlertData && updateKpiAlertData.status === 'failure') {
       customToast({
         type: 'error',
-        header: 'Failed to update',
+        header: 'Failed to update selected alert',
         description: updateKpiAlertData.message
       });
     }
@@ -418,8 +416,8 @@ const KpiAlertDestinationForm = ({
                 if (!isEmail) {
                   customToast({
                     type: 'error',
-                    header: 'Failed to enter',
-                    description: 'Please enter an valid email address'
+                    header: 'Invalid Email',
+                    description: 'Please enter a valid email ID'
                   });
                 }
                 // Return boolean to indicate validity

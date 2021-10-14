@@ -1,3 +1,5 @@
+#!/bin/sh
+
 echo "########### REMOVING OLD CONTAINERS ################"
 declare -a cont_list=("chaos_genius_chaosgenius-server_1" "chaos_genius_celery-worker_1" "chaos_genius_celery-scheduler_1" "airbyte-temporal" "chaos_genius_chaosgenius-webapp_1" "chaos_genius_chaosgenius-db_1" "chaos_genius_redis_1" "airbyte-webapp" "airbyte-db" "init" "airbyte-scheduler" "airbyte-server" "chaosgenius-server" "chaosgenius-webapp" "chaosgenius-scheduler" "chaosgenius-worker-alerts" "chaosgenius-worker-analytics" "init" "chaosgenius-init" "chaosgenius-redis")
 

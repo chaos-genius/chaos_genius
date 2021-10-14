@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """anomaly data view."""
+from chaos_genius.databases.base_model import get_readable_validation_error
 from datetime import datetime, timedelta
 import traceback
 from typing import Any, Dict, Optional, Tuple, cast
 
 from flask import Blueprint, current_app, jsonify, request
+from marshmallow.exceptions import ValidationError
 import pandas as pd
 from sqlalchemy.orm.attributes import flag_modified
 from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
@@ -13,6 +15,7 @@ from chaos_genius.extensions import cache
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.databases.models.kpi_model import Kpi
+from chaos_genius.databases.models.anomaly_params_model import anomaly_params_api_schema
 from chaos_genius.views.kpi_view import get_kpi_data_from_id
 
 from chaos_genius.core.rca.rca_utils.string_helpers import convert_query_string_to_user_string
@@ -125,8 +128,7 @@ def kpi_anomaly_data_quality(kpi_id):
 
 @blueprint.route("/anomaly-params/meta-info", methods=["GET"])
 def kpi_anomaly_params_meta():
-    # TODO: Move this dict into the corresponding data model
-    return jsonify(ANOMALY_PARAMS_META)
+    return jsonify(anomaly_params_api_schema.get_meta_info())
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-params", methods=["POST", "GET"])
@@ -141,7 +143,7 @@ def kpi_anomaly_params(kpi_id: int):
     # when method is GET we just return the anomaly params
     if request.method == "GET":
         return jsonify({
-            "anomaly_params": get_anomaly_params_dict(kpi),
+            "anomaly_params": anomaly_params_api_schema.load_from_kpi(kpi),
         })
 
     # when it's POST, update anomaly params
@@ -166,12 +168,17 @@ def kpi_anomaly_params(kpi_id: int):
             {"error": "The request JSON needs to have anomaly_params as a field", "status": "failure"}
         ), 400
 
-    err, new_anomaly_params = validate_partial_anomaly_params(req_data["anomaly_params"])
+    try:
+        new_anomaly_params = anomaly_params_api_schema.load(req_data["anomaly_params"], partial=True)
+    except ValidationError as e:
+        current_app.logger.error(
+            "Could not load anomaly-params from API request for KPI %s",
+            kpi_id,
+            exc_info=e
+        )
+        return jsonify({"error": get_readable_validation_error(e), "status": "failure"}), 400
 
-    if err != "":
-        return jsonify({"error": err, "status": "failure"}), 400
-
-    err, new_kpi = update_anomaly_params(kpi, new_anomaly_params, check_editable=not is_first_time)
+    err, new_kpi = anomaly_params_api_schema.update_anomaly_params(kpi, new_anomaly_params, check_editable=not is_first_time)
 
     if err != "":
         return jsonify({"error": err, "status": "failure"}), 400
@@ -411,129 +418,7 @@ def get_end_date(kpi_info: dict) -> datetime:
     return end_date
 
 
-# --- anomaly params meta information --- #
-ANOMALY_PARAMS_META = {
-    "name": "anomaly_params",
-    "fields": [
-        {
-            "name": "anomaly_period",
-            "is_editable": False,
-            "is_sensitive": False,
-            "type": "integer",
-        },
-        {
-            "name": "model_name",
-            "is_editable": False,
-            "is_sensitive": False,
-            "type": "select",
-            "options": [
-                {
-                    "value": key,
-                    "name": value,
-                } for key, value in MODEL_NAME_MAPPING.items()
-            ]
-        },
-        {
-            "name": "sensitivity",
-            "is_editable": True,
-            "is_sensitive": False,
-            "type": "select",
-            "options": [
-                {
-                    "value": "high",
-                    "name": "High",
-                },
-                {
-                    "value": "medium",
-                    "name": "Medium",
-                },
-                {
-                    "value": "low",
-                    "name": "Low",
-                }
-            ]
-        },
-        {
-            "name": "seasonality",
-            "is_editable": False,
-            "is_sensitive": False,
-            "type": "multiselect",
-            "options": [
-                {
-                    "value": "M",
-                    "name": "Monthly",
-                },
-                {
-                    "value": "W",
-                    "name": "Weekly",
-                },
-                {
-                    "value": "D",
-                    "name": "Daily",
-                }
-            ]
-        },
-        {
-            "name": "frequency",
-            "is_editable": False,
-            "is_sensitive": False,
-            "type": "select",
-            "options": [
-                {
-                    "value": "D",
-                    "name": "Daily",
-                },
-                {
-                    "value": "H",
-                    "name": "Hourly",
-                }
-            ]
-        },
-        {
-            "name": "scheduler_params_time",
-            "is_editable": True,
-            "is_sensitive": False,
-            "type": "time",
-        },
-        {
-            "name": "scheduler_frequency",
-            "is_editable": True,
-            "is_sensitive": False,
-            "type": "select",
-            "options": [
-                {
-                    "value": "D",
-                    "name": "Daily",
-                },
-            ]
-        },
-    ],
-}
-
-
-ANOMALY_PARAM_FIELDS = {
-    "anomaly_period",
-    "model_name",
-    "sensitivity",
-    "seasonality",
-    "frequency",
-    "scheduler_params_time",
-    "scheduler_frequency",
-}
-
-
-DEFAULT_ANOMALY_PARAMS = {
-    "anomaly_period": None,
-    "frequency": None,
-    "model_name": None,
-    "seasonality": [],
-    "sensitivity": None,
-
-    # scheduler params
-    "scheduler_params_time": "11:00:00",
-    "scheduler_frequency": "D",
-}
-
+# --- defaults --- #
 
 DEFAULT_STATUS: Dict[str, Any] = {
     "anomaly_status": None,
@@ -542,293 +427,6 @@ DEFAULT_STATUS: Dict[str, Any] = {
     "rca_status": None,
 }
 
-
-# --- anomaly params helper functions --- #
-# TODO: move default, meta and anomaly_params helpers to a class?
-
-def anomaly_params_field_is_editable(field_name: str):
-    for field in ANOMALY_PARAMS_META["fields"]:
-        if field["name"] == field_name:
-            return field["is_editable"]
-
-    return False
-
-
-def validate_partial_anomaly_params(
-    anomaly_params: Dict[str, Any]
-) -> Tuple[str, Dict[str, Any]]:
-    """Check if given *partial* anomaly parameters have valid keys and values.
-
-    Returns an error string. Empty string "" means the params are valid.
-
-    Also returns the validated anomaly_params, with some conversions applied. This is undefined
-    when the anomaly_params is not valid. The passed anomaly_params is modified in-place.
-    """
-    fields = ANOMALY_PARAM_FIELDS
-
-    if fields.isdisjoint(set(anomaly_params.keys())):
-        # we don't have any of the possible fields
-        return f"anomaly_params needs to have one of the following fields: {', '.join(fields)}", {}
-
-    extra_fields = anomaly_params.keys() - fields
-    if extra_fields:
-        # some unexpected fields. Return an explicit error instead of ignoring them.
-        return (
-            f"Got extra fields in anomaly_params: {', '.join(extra_fields)}",
-            {k: v for k, v in anomaly_params.items() if k in fields}
-        )
-
-    # validate values of available fields
-    # maybe there's declarative way to do this?
-
-    # see the returned error messages for validations performed
-
-    if "anomaly_period" in anomaly_params:
-        anomaly_period = anomaly_params["anomaly_period"]
-
-        if not isinstance(anomaly_period, int):
-            return (
-                f"anomaly_period must be an integer number. Got: {repr(anomaly_period)}"
-                f" (of type: {type(anomaly_period).__name__})",
-                anomaly_params
-            )
-
-    def validate_frequency(frequency, field_name, frequency_types={"D", "H"}):
-        if not isinstance(frequency, str):
-            return (
-                f"{field_name} must be a string, one of: {', '.join(frequency_types)}. Got: {frequency}",
-                anomaly_params)
-
-        anomaly_params[field_name] = frequency
-
-        if frequency not in frequency_types:
-            return (
-                f"{field_name} must be one of: {', '.join(frequency_types)}. Got: {frequency}",
-                anomaly_params
-            )
-
-        return "", anomaly_params
-
-    if "frequency" in anomaly_params:
-        frequency = anomaly_params["frequency"]
-
-        err, anomaly_params = validate_frequency(frequency, "frequency")
-
-        if err != "":
-            return err, anomaly_params
-
-    if "scheduler_frequency" in anomaly_params:
-        frequency = anomaly_params["scheduler_frequency"]
-
-        err, anomaly_params = validate_frequency(frequency, "scheduler_frequency", {"D"})
-
-        if err != "":
-            return err, anomaly_params
-
-    sensitivity_types = {"high", "low", "medium"}
-    if "sensitivity" in anomaly_params:
-        sensitivity = anomaly_params["sensitivity"]
-
-        if not isinstance(sensitivity, str):
-            return (
-                f"sensitivity must be a string, one of: {', '.join(sensitivity_types)}. Got: {sensitivity}",
-                anomaly_params)
-
-        # we compare (and store) only lower case for this field
-        sensitivity = sensitivity.lower()
-        anomaly_params["sensitivity"] = sensitivity
-
-        if sensitivity not in sensitivity_types:
-            return (
-                f"sensitivity must be one of: {', '.join(sensitivity_types)}. Got: {sensitivity}",
-                anomaly_params
-            )
-
-    if "seasonality" in anomaly_params:
-        seasonality = anomaly_params["seasonality"]
-
-        if not isinstance(seasonality, list):
-            return f"seasonality must be a list. Got: {repr(seasonality)}", anomaly_params
-
-        seasonality_types = {"D", "M", "W"}
-        for s in seasonality:
-
-            if not isinstance(s, str):
-                return (
-                    f"All of the seasonalities must be a string, one of: {', '.join(seasonality_types)}. One of them was: {s}",
-                    anomaly_params)
-
-            # no lower case for this since the expecetd values are upper case
-
-            if s not in seasonality_types:
-                return (
-                    f"All of the seasonalities must one one of: {', '.join(seasonality_types)}. "
-                    f"One of them was: {s}",
-                    anomaly_params
-                )
-
-    if "scheduler_params_time" in anomaly_params:
-        err, time = validate_scheduled_time(anomaly_params["scheduler_params_time"])
-
-        if err != "":
-            return err, anomaly_params
-
-        anomaly_params["scheduler_params_time"] = time
-
-    return "", anomaly_params
-
-
-def update_anomaly_params(
-    kpi: Kpi,
-    new_anomaly_params: Dict[str, Any],
-    run_anomaly=True,
-    check_editable=False
-) -> Tuple[str, Kpi]:
-    """Update anomaly_params for the kpi with the given *partial* *validated* anomaly parameters.
-
-    The new_anomaly_params must be validated using validate_partial_anomaly_params.
-
-    run_anomaly is also set to True in the Kpi table, by default.
-
-    If check_editable is set to True, only the editable fields are allowed to be updated.
-    """
-    fields = ANOMALY_PARAM_FIELDS
-
-    anomaly_params: dict = kpi.anomaly_params or {}
-
-    def is_editable(field_name: str, old_val, new_val):
-        if not check_editable:
-            return ""
-
-        if not anomaly_params_field_is_editable(field_name):
-            if old_val != new_val:
-                return f"{field_name} is not editable. Old value: {old_val}, New value: {new_val}"
-
-        return ""
-
-    # update the non-nested fields directly
-    # currently the only nested field is scheduler_params
-    for field in (
-        fields - {"scheduler_params_time", "scheduler_frequency"}
-    ) & new_anomaly_params.keys():
-        err = is_editable(field, anomaly_params.get(field), new_anomaly_params[field])
-        if err != "":
-            return err, kpi
-
-        anomaly_params[field] = new_anomaly_params[field]
-
-    if "scheduler_params_time" in new_anomaly_params:
-        # TODO: use JSONB functions to update these, to avoid data races
-        scheduler_params: Optional[dict] = kpi.scheduler_params
-
-        if scheduler_params is None:
-            scheduler_params = {}
-
-        err = is_editable(
-            "scheduler_params_time",
-            scheduler_params.get("time"),
-            new_anomaly_params["scheduler_params_time"]
-        )
-        if err != "":
-            return err, kpi
-
-        scheduler_params["time"] = new_anomaly_params["scheduler_params_time"]
-
-        kpi.scheduler_params = scheduler_params
-        flag_modified(kpi, "scheduler_params")
-
-    if "scheduler_frequency" in new_anomaly_params:
-        # TODO: use JSONB functions to update these, to avoid data races
-        scheduler_params: Optional[dict] = kpi.scheduler_params
-
-        if scheduler_params is None:
-            scheduler_params = {}
-
-        err = is_editable(
-            "scheduler_frequency",
-            scheduler_params.get("scheduler_frequency"),
-            new_anomaly_params["scheduler_frequency"]
-        )
-        if err != "":
-            return err, kpi
-
-        scheduler_params["scheduler_frequency"] = new_anomaly_params["scheduler_frequency"]
-
-        kpi.scheduler_params = scheduler_params
-        flag_modified(kpi, "scheduler_params")
-
-    flag_modified(kpi, "anomaly_params")
-    new_kpi = cast(Kpi, kpi.update(commit=True, anomaly_params=anomaly_params, run_anomaly=run_anomaly))
-
-    return "", new_kpi
-
-
-def get_anomaly_params_dict(kpi: Kpi):
-    anomaly_params = DEFAULT_ANOMALY_PARAMS.copy()
-
-    if kpi.anomaly_params is None:
-        return anomaly_params
-
-    kpi_dict = kpi.as_dict
-
-    anomaly_params_db = kpi_dict["anomaly_params"]
-    scheduler_params_db = kpi_dict.get("scheduler_params")
-
-    # FIXME: temporary sanitation
-    if "period" in anomaly_params_db and "anomaly_period" not in anomaly_params_db:
-        anomaly_params_db["anomaly_period"] = anomaly_params_db["period"]
-    if "ts_frequency" in anomaly_params_db and "frequency" not in anomaly_params_db:
-        anomaly_params_db["frequency"] = anomaly_params_db["ts_frequency"]
-
-    anomaly_params.update(
-        {k: v for k, v in anomaly_params_db.items() if k in ANOMALY_PARAM_FIELDS}
-    )
-
-    if scheduler_params_db is not None:
-        anomaly_params.update(
-            {k: v for k, v in scheduler_params_db.items() if k in ANOMALY_PARAM_FIELDS}
-        )
-
-        anomaly_params["scheduler_params_time"] = (
-            scheduler_params_db.get("time", DEFAULT_ANOMALY_PARAMS["scheduler_params_time"])
-        )
-
-    return anomaly_params
-
-
-def validate_scheduled_time(time):
-    if not isinstance(time, str):
-        return f"time must be a string. Got: {type(time).__name__}", time
-
-    times = time.split(":")
-
-    err_msg = "time must be in the format HH:MM:SS"
-
-    if len(times) != 3:
-        return f"{err_msg}. Got: {time}", time
-
-    hour, minute, second = times
-
-    if not hour.isdigit() or not minute.isdigit() or not second.isdigit():
-        return (
-            f"hour, minute, second must be numbers. Got: {hour}, {minute}, {second}",
-            time
-        )
-
-    hour = int(hour)
-
-    if hour < 0 or hour > 23:
-        return (f"hour must be between 0 and 23 (inclusive). Got: {hour}", time)
-
-    minute, second = int(minute), int(second)
-
-    if minute < 0 or minute > 60:
-        return (f"minute must be between 0 and 60 (inclusive). Got: {minute}", time)
-
-    if second < 0 or second > 60:
-        return (f"second must be between 0 and 60 (inclusive). Got: {second}", time)
-
-    return "", time
 
 def get_anomaly_end_date(kpi_id: int):
     anomaly_end_date = AnomalyDataOutput.query.filter(

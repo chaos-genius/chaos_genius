@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 """Database module, including the SQLAlchemy database object and DB-related utilities."""
+
+from typing import AbstractSet
+from marshmallow import Schema, post_dump, pre_load
+from marshmallow.exceptions import ValidationError
+
 from chaos_genius.extensions import db
 
 # Alias common SQLAlchemy names
@@ -78,3 +83,57 @@ def reference_col(
         nullable=nullable,
         **column_kwargs,
     )
+
+
+# Marshmallow base classes follow
+def get_readable_validation_error(excp: ValidationError):
+    """Return a human-readable string for given ValidationError."""
+    msg = "Incorrect data received\n"
+
+    for field_name, error in excp.normalized_messages().items():
+        if isinstance(error, list):
+            error = ", ".join(error)
+
+        msg += f"{field_name}: {error}\n"
+
+    return msg
+
+
+class BaseSchema(Schema):
+    """Base class for all chaosgenius marshmallow schemas."""
+
+    # different names of certain fields
+    # the format is: alias -> original name
+    _aliases = {}
+
+    # these two functions map the aliases
+    @pre_load
+    def _preprocess_aliases(self, in_data: dict, **kwargs):
+        for alias, orig_name in self._aliases.items():
+            if alias in in_data:
+                if orig_name not in in_data:
+                    in_data[orig_name] = in_data[alias]
+
+                in_data.pop(alias)
+
+        return in_data
+
+    @post_dump
+    def _postprocess_aliases(self, out_data: dict, **kwargs):
+        for alias, orig_name in self._aliases.items():
+            if orig_name in out_data:
+                out_data[alias] = out_data[orig_name]
+
+        return out_data
+
+    @staticmethod
+    def _validate_oneof_maker(choices: AbstractSet[str]):
+        """Create validator that checks if the value is one of `choices`."""
+
+        def validator(value):
+            if value not in choices:
+                raise ValidationError(
+                    f"must be one of {', '.join(choices)}. Got: {value}"
+                )
+
+        return validator

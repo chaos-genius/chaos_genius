@@ -1,6 +1,7 @@
 """Provides AnomalyDetectionController to compute Anomaly Detection."""
 
 from datetime import datetime
+import logging
 
 import pandas as pd
 
@@ -12,9 +13,8 @@ from chaos_genius.core.anomaly.utils import (fill_data, get_anomaly_df,
 from chaos_genius.databases.models.anomaly_data_model import (
     AnomalyDataOutput, db)
 from chaos_genius.databases.models.data_source_model import DataSource
-from chaos_genius.logger import configure_logger
 
-logger = configure_logger(__name__)
+logger = logging.getLogger()
 
 FILTER_MAX_SUBGROUPS = 100
 

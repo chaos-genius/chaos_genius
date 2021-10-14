@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 echo "###### REMOVING CONTAINERS ###########"
 docker-compose -f docker-compose.image.yml down

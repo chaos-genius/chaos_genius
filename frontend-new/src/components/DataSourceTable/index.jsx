@@ -48,7 +48,7 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
     if (deleteDataSourceResponse && deleteDataSourceResponse.status) {
       customToast({
         type: 'success',
-        header: 'Successfully Datasource Deleted',
+        header: 'Data source deleted successfully.',
         description: deleteDataSourceResponse.msg
       });
       changeData((prev) => !prev);

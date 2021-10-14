@@ -288,7 +288,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     ) {
       customToast({
         type: 'success',
-        header: 'Test Connection Success',
+        header: 'Test Connection Successful',
         description: testConnectionResponse.msg
       });
     } else if (

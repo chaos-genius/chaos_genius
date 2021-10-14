@@ -490,7 +490,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
             )}
           </div>
           <div className="form-group">
-            <label>Select a Model</label>
+            <label>Model Name</label>
             <div className="editable-field">
               <Select
                 options={option.model_name}

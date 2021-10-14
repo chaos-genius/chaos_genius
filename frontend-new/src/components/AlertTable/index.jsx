@@ -84,8 +84,8 @@ const AlertTable = ({ alertData, alertSearch }) => {
                     <td className="date-column-formated">
                       {alert.alert_type || '-'}
                     </td>
-                    <td className="date-column-formated data-centered">
-                      {formatDate(alert.last_sync) || '-'}
+                    <td className="date-column-formated">
+                      {formatDate(alert.created_at) || '-'}
                     </td>
                     <td>
                       <div className="alert-status">

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import Select from 'react-select';
 
@@ -27,6 +27,8 @@ import { renderTextFields } from './Formhelper';
 
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
 
+import { connectionContext } from '../context';
+
 const customSingleValue = ({ data }) => (
   <div className="input-select">
     <div className="input-select__single-value">
@@ -51,7 +53,7 @@ const datasourceIcon = (type) => {
 
 const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const dispatch = useDispatch();
-
+  const connectionType = useContext(connectionContext);
   const toast = useToast();
 
   const dsId = useParams().id;
@@ -66,7 +68,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const [status, setStatus] = useState('');
   const history = useHistory();
   const path = history.location.pathname.split('/');
-  const connectionType = JSON.parse(localStorage.getItem('connectionType'));
+
   const {
     testLoading,
     testConnectionResponse,
@@ -105,11 +107,11 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       });
       setOption(arr);
     };
-    if (connectionType) {
+    if (connectionType && connectionType.length !== 0) {
       fetchData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [connectionType]);
 
   useEffect(() => {
     if (datasourceData && datasourceData.length !== 0 && path[2] === 'edit') {
@@ -314,6 +316,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const testConnection = () => {
     const { connectionSpecification } = selectedDatasource.selected;
     const { required } = connectionSpecification;
+
     var newobj = { ...formError };
     if (Object.keys(required).length > 0) {
       required.map((obj) => {
@@ -339,6 +342,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       sourceDefinitionId: sourceDefinitionId,
       connection_type: selectedDatasource.value
     };
+
     dispatch(testDatasourceConnection(payload));
   };
 
@@ -413,6 +417,20 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     }
   };
 
+  const handleChange = (e, key) => {
+    setDsFormData((prev) => {
+      return {
+        ...prev,
+        [key]:
+          e.target.type === 'number'
+            ? parseInt(e.target.value.trim())
+            : e.target.value.trim()
+      };
+    });
+    setFormError([]);
+    setStatus('');
+  };
+
   if (metaInfoLoading || datasourceLoading) {
     return (
       <div className="load ">
@@ -421,7 +439,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     );
   } else {
     return (
-      <div>
+      <>
         <div className="form-group">
           <label>Connection Name</label>
           <input
@@ -461,6 +479,22 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             components={{ SingleValue: customSingleValue }}
           />
         </div>
+        {sourceDefinitionId === '47f25999-dd5e-4636-8c39-e7cea2453331' && (
+          <div className="form-group">
+            <label>Accounts</label>
+            <input
+              type="text"
+              className="form-control"
+              required
+              onChange={(e) => handleChange(e, 'accounts')}
+            />
+            {formError['accounts'] && (
+              <div className="connection__fail">
+                <p>{formError['accounts']}</p>
+              </div>
+            )}
+          </div>
+        )}
 
         {selectedDatasource &&
           selectedDatasource !== undefined &&
@@ -567,7 +601,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             )}
           </div>
         )}
-      </div>
+      </>
     );
   }
 };

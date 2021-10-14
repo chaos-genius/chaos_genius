@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 
 import { useHistory, useParams } from 'react-router-dom';
 
@@ -27,6 +27,7 @@ import {
   getKpibyId,
   getUpdatekpi
 } from '../../redux/actions';
+import { connectionContext } from '../context';
 
 const datasettype = [
   {
@@ -71,7 +72,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   const data = history.location.pathname.split('/');
 
   const kpiId = useParams().id;
-  const connectionType = JSON.parse(localStorage.getItem('connectionType'));
+
+  const connectionType = useContext(connectionContext);
   const [option, setOption] = useState({
     datasource: '',
     tableoption: '',
@@ -140,9 +142,16 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   }, []);
 
   useEffect(() => {
-    if (kpiFormData) {
+    if (kpiFormData && connectionType) {
       fieldData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kpiFormData, connectionType]);
+
+  useEffect(() => {
+    // if (kpiFormData) {
+    //   fieldData();
+    // }
     if (kpiEditData && data[2] === 'edit') {
       const obj = { ...formdata };
       obj['kpiname'] = kpiEditData?.name || '';
@@ -162,7 +171,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       setFormdata(obj);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpiFormData, kpiEditData]);
+  }, [kpiEditData]);
 
   const dispatchGetAllKpiExplorerForm = () => {
     dispatch(getAllKpiExplorerForm());
@@ -197,6 +206,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   const datasourceIcon = (type) => {
     let textHtml = '';
     connectionType &&
+      connectionType.length !== 0 &&
       connectionType.find((item) => {
         if (item.name === type.connection_type) {
           textHtml = item.icon;
@@ -292,7 +302,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     ) {
       customToast({
         type: 'error',
-        header: 'Failed to Added',
+        header: 'Failed to Add',
         description: kpiSubmit.error
       });
     }

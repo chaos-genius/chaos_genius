@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -13,8 +13,11 @@ import Sidebar from '../components/Sidebar';
 
 import { getConnectionType } from '../redux/actions';
 
+import { connectionContext } from '../components/context';
+
 const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
   const dispatch = useDispatch();
+  const [stateValue, setState] = useState();
   const { connectionType } = useSelector((state) => state.dataSource);
 
   useEffect(() => {
@@ -28,7 +31,7 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
 
   useEffect(() => {
     if (connectionType && connectionType.length !== 0) {
-      localStorage.setItem('connectionType', JSON.stringify(connectionType));
+      setState(connectionType);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectionType]);
@@ -38,19 +41,21 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
       {...rest}
       render={(props) => (
         <>
-          <div className="container-wrapper">
-            <Sidebar />
-            <main>
-              <Navbar />
-              <div className="body-container">
-                <Component {...props} />
-              </div>
-            </main>
-            <ToastContainer
-              position={toast.POSITION.BOTTOM_RIGHT}
-              autoClose={5000}
-            />
-          </div>
+          <connectionContext.Provider value={stateValue}>
+            <div className="container-wrapper">
+              <Sidebar />
+              <main>
+                <Navbar />
+                <div className="body-container">
+                  <Component {...props} />
+                </div>
+              </main>
+              <ToastContainer
+                position={toast.POSITION.BOTTOM_RIGHT}
+                autoClose={5000}
+              />
+            </div>
+          </connectionContext.Provider>
         </>
       )}
     />

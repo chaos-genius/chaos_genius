@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 
 import { Link } from 'react-router-dom';
 
@@ -26,9 +26,10 @@ import { kpiDisable } from '../../redux/actions';
 import { useToast } from 'react-toast-wnm';
 
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
+import { connectionContext } from '../context';
 
 const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
-  const connectionType = JSON.parse(localStorage.getItem('connectionType'));
+  const connectionType = useContext(connectionContext);
 
   const dispatch = useDispatch();
 

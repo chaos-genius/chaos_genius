@@ -1,8 +1,8 @@
 #!/bin/bash
 
 echo "###### REMOVING CONTAINERS ###########"
-docker-compose -f docker-compose.image.yml down
-docker-compose -f docker-compose.image.yml rm -v -f
+docker-compose -f docker-compose.yml down
+docker-compose -f docker-compose.yml rm -v -f
 
 echo "#### CLEANING UP LOCAL DIRECTORIES ###############"
 rm -rf docker/airbyte-db

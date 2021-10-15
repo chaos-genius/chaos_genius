@@ -213,35 +213,39 @@ class AnomalyDetectionController(object):
 
         results = []
 
-        def querify(x):
-            q = [f'`{y[0]}`=="{y[1]}"' for y in x]
-            return " and ".join(q)
+        for subdim in valid_subdims:
+            for val in input_data[subdim].unique():
+                results.append(f'`{subdim}`=="{val}"')
 
-        def func(curr_values: list, curr_col_no: int, length_of_segment):
+        # def querify(x):
+        #     q = [f'`{y[0]}`=="{y[1]}"' for y in x]
+        #     return " and ".join(q)
 
-            if curr_col_no >= len(valid_subdims):
-                if len(curr_values) == length_of_segment:
-                    results.append(querify(curr_values))
-                return -1
+        # def func(curr_values: list, curr_col_no: int, length_of_segment):
 
-            if len(curr_values) == length_of_segment:
-                results.append(querify(curr_values))
-                return -1
+        #     if curr_col_no >= len(valid_subdims):
+        #         if len(curr_values) == length_of_segment:
+        #             results.append(querify(curr_values))
+        #         return -1
 
-            func(curr_values, curr_col_no + 1, length_of_segment)
+        #     if len(curr_values) == length_of_segment:
+        #         results.append(querify(curr_values))
+        #         return -1
 
-            unique_valid_subdims = list(
-                input_data.loc[:, valid_subdims[curr_col_no]].unique())
+        #     func(curr_values, curr_col_no + 1, length_of_segment)
 
-            for val in unique_valid_subdims:
-                func(
-                    curr_values + [(valid_subdims[curr_col_no], val)],
-                    curr_col_no + 1,
-                    length_of_segment,
-                )
+        #     unique_valid_subdims = list(
+        #         input_data.loc[:, valid_subdims[curr_col_no]].unique())
 
-        for i in range(1, len(valid_subdims) + 1):
-            func([], 0, i)
+        #     for val in unique_valid_subdims:
+        #         func(
+        #             curr_values + [(valid_subdims[curr_col_no], val)],
+        #             curr_col_no + 1,
+        #             length_of_segment,
+        #         )
+
+        # for i in range(1, len(valid_subdims) + 1):
+        #     func([], 0, i)
 
         return results
 

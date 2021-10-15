@@ -164,18 +164,19 @@ fi
 
 #echo "Images Created :"
 #docker images | grep '$BIMAGE_NAME\|$FIMAGE_NAME'
-
-read -p "Continue to pushing images to Dockerhub ?(y/n): " temp_ans3
-ans3=$(echo $temp_ans3 | xargs)
-while [[ ! " ${EXP_ANS[*]} " =~ " ${ans3} " ]];
-do
-    echo "unexpected Input - $ans3, Enter 'y' or press Enter for yes, Enter 'n' for no"
+if [ "$FTAG" != "" ] || [ "$BTAG" != "" ];
+then
     read -p "Continue to pushing images to Dockerhub ?(y/n): " temp_ans3
     ans3=$(echo $temp_ans3 | xargs)
-done
-if [ "$ans3" = 'y' ] || [ "$ans3" = '' ];
-then
-    /bin/bash $BASE_DIR/scripts/docker/docker-push.sh
+    while [[ ! " ${EXP_ANS[*]} " =~ " ${ans3} " ]];
+    do
+        echo "unexpected Input - $ans3, Enter 'y' or press Enter for yes, Enter 'n' for no"
+        read -p "Continue to pushing images to Dockerhub ?(y/n): " temp_ans3
+        ans3=$(echo $temp_ans3 | xargs)
+    done
+    if [ "$ans3" = 'y' ] || [ "$ans3" = '' ];
+    then
+        /bin/bash $BASE_DIR/scripts/docker/docker-push.sh
+    fi
 fi
-
 echo "Exiting...."

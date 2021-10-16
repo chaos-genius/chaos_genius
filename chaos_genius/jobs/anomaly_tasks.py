@@ -189,11 +189,11 @@ def anomaly_scheduler():
             scheduled_time = scheduled_time.replace(
                 hour=hour, minute=minute, second=second
             )
-        elif scheduler_params is not None:
+        else:
             # today's date, but at rca time (tR) or at kpi creation time
             scheduled_time = datetime.now()
             # this is tR
-            if "rca_time" in scheduler_params:
+            if scheduler_params is not None and "rca_time" in scheduler_params:
                 hour, minute, second = map(int, scheduler_params["rca_time"].split(":"))
                 scheduled_time = scheduled_time.replace(
                     hour=hour, minute=minute, second=second

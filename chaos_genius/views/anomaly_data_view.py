@@ -516,6 +516,7 @@ ANOMALY_PARAM_FIELDS = {
     "frequency",
     "scheduler_params_time",
     "scheduler_frequency",
+    "run_optional",
 }
 
 
@@ -548,7 +549,7 @@ def anomaly_params_field_is_editable(field_name: str):
         if field["name"] == field_name:
             return field["is_editable"]
 
-    return False
+    return True
 
 
 def validate_partial_anomaly_params(
@@ -671,6 +672,34 @@ def validate_partial_anomaly_params(
             return err, anomaly_params
 
         anomaly_params["scheduler_params_time"] = time
+
+    if "run_optional" in anomaly_params:
+        run_optional = anomaly_params['run_optional']
+        if not isinstance(run_optional, dict):
+            err = (
+                "The run_optional parameter must be a dictionary."
+                f"Got {repr(run_optional)}"
+            )
+            return err, anomaly_params
+
+        run_optional_types = {"overall", "subdim", "data_quality"}
+
+        for option, choice in run_optional.items():
+            if option not in run_optional_types:
+                err = (
+                    "Optional choices must be one of: "
+                    f"{', '.join(run_optional_types)}. One of them was: "
+                    f"{option}"
+                )
+                return err, anomaly_params
+            if not isinstance(choice, bool):
+
+                err = (
+                    "Optional choice values must be of boolean type. The "
+                    f"{repr(option)} field is not a boolean value"
+                )
+
+                return err, anomaly_params
 
     return "", anomaly_params
 

@@ -379,19 +379,15 @@ class AnomalyDetectionController(object):
         logger.debug(f"Saving Anomaly output for {series}-{subgroup}")
         self._save_anomaly_output(overall_anomaly_output, series, subgroup)
 
-    def detect(self) -> None:
-        """Perform the anomaly detection for given KPI."""
-        # TODO: Docstring
-        model_name = self.kpi_info["anomaly_params"]["model_name"]
-        logger.debug(f"Anomaly Model is {model_name}")
+    def _detect_subdimensions(
+        self,
+        input_data: pd.DataFrame
+    ) -> None:
+        """Perform anomaly detection for subdimensions
 
-        logger.info(f"Loading Input Data for KPI {self.kpi_info['id']}")
-        input_data = self._load_anomaly_data()
-        logger.debug(f"Loaded {len(input_data)} rows of input data.")
-
-        logger.info("Running anomaly for series -> overall")
-        self._run_anomaly_for_series(input_data, "overall")
-
+        :param input_data: Dataframe with all of the relevant KPI data
+        :type input_data: pd.DataFrame
+        """
         subgroups = self._get_subgroup_list(input_data)
 
         logger.debug(f"Generated {len(subgroups)} subgroups")
@@ -411,6 +407,15 @@ class AnomalyDetectionController(object):
             except Exception:  # noqa: B902
                 logger.exception(f"Exception occured for: subdim - {subgroup}")
 
+    def _detect_data_quality(
+        self,
+        input_data: pd.DataFrame
+    ) -> None:
+        """Perform anomaly detection for data quality metrics
+
+        :param input_data: Dataframe with all of the relevant KPI data
+        :type input_data: pd.DataFrame
+        """
         agg = self.kpi_info["aggregation"]
         dq_list = ["max", "count", "mean"] \
             if agg != "mean" else ["max", "count"]
@@ -420,3 +425,24 @@ class AnomalyDetectionController(object):
                 self._run_anomaly_for_series(input_data, "dq", dq)
             except Exception:  # noqa: B902
                 logger.exception(f"Exception occured for: data quality - {dq}")
+
+    def detect(self) -> None:
+        """Perform the anomaly detection for given KPI."""
+        model_name = self.kpi_info["anomaly_params"]["model_name"]
+        logger.debug(f"Anomaly Model is {model_name}")
+
+        logger.info(f"Loading Input Data for KPI {self.kpi_info['id']}")
+        input_data = self._load_anomaly_data()
+        logger.debug(f"Loaded {len(input_data)} rows of input data.")
+
+        run_optional = self.kpi_info.get('run_optional', None)
+
+        if run_optional is None or run_optional['overall'] is True:
+            logger.info("Running anomaly for series -> overall")
+            self._run_anomaly_for_series(input_data, "overall")
+
+        if run_optional is None or run_optional['subdim'] is True:
+            self._detect_subdimensions(input_data)
+
+        if run_optional is None or run_optional['data_quality'] is True:
+            self._detect_data_quality(input_data)

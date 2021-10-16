@@ -424,7 +424,6 @@ class AnomalyDetectionController(object):
 
     def detect(self) -> None:
         """Perform the anomaly detection for given KPI."""
-        # TODO: Docstring
         model_name = self.kpi_info["anomaly_params"]["model_name"]
         logger.debug(f"Anomaly Model is {model_name}")
 
@@ -432,9 +431,14 @@ class AnomalyDetectionController(object):
         input_data = self._load_anomaly_data()
         logger.debug(f"Loaded {len(input_data)} rows of input data.")
 
-        logger.info("Running anomaly for series -> overall")
-        self._run_anomaly_for_series(input_data, "overall")
+        run_optional = self.kpi_info.get('run_optional', None)
 
-        self._detect_subdimensions(input_data)
+        if run_optional is None or run_optional['overall'] is True:
+            logger.info("Running anomaly for series -> overall")
+            self._run_anomaly_for_series(input_data, "overall")
 
-        self._detect_data_quality(input_data)
+        if run_optional is None or run_optional['subdim'] is True:
+            self._detect_subdimensions(input_data)
+
+        if run_optional is None or run_optional['data_quality'] is True:
+            self._detect_data_quality(input_data)

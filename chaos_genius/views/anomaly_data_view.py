@@ -338,7 +338,7 @@ def get_dq_and_subdim_data(
     return convert_to_graph_json(results, kpi_id, anomaly_type, series_type)
 
 
-def get_drilldowns_series_type(kpi_id, drilldown_date, no_of_graphs=5):
+def get_drilldowns_series_type(kpi_id, drilldown_date, no_of_graphs=10):
     # First we get direction of anomaly
     # Then we get relevant subdims for that anomaly
     is_anomaly = AnomalyDataOutput.query.filter(

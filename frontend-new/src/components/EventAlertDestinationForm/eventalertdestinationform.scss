@@ -1,0 +1,73 @@
+@import '../../assets/styles/variable.scss';
+
+.alerts-button {
+  display: flex !important;
+  justify-content: space-between !important;
+}
+.options-spacing {
+  min-height: 150px;
+}
+.form-group {
+  .react-tag-input {
+    min-height: 48px;
+    height: auto;
+    background: $white;
+    border: 1px solid $grey_variation-1;
+    box-sizing: border-box;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding: 2px 8px;
+    width: 100%;
+    .react-tag-input__input {
+      font-weight: $font-weight-400;
+      font-size: $font-size-14;
+      line-height: $line-height-20;
+      letter-spacing: $letter-spacing-point1;
+      color: $black_variation-2;
+      width: 100%;
+      &::placeholder {
+        color: $grey_variation-1;
+      }
+    }
+    .react-tag-input__tag {
+      background: $grey_variation-2;
+      box-sizing: border-box;
+      border: none;
+      border-radius: 2px;
+      .react-tag-input__tag__content {
+        font-weight: $font-weight-400;
+        font-size: $font-size-14;
+        line-height: $line-height-16;
+        letter-spacing: $letter-spacing;
+        color: $black_variation-2;
+        background: $grey_variation-2;
+        padding: 3px 3px 3px 6px;
+      }
+      .react-tag-input__tag__remove {
+        background: $grey_variation-2;
+        &::after {
+          background-color: $green;
+        }
+        &::before {
+          background-color: $green;
+        }
+      }
+    }
+  }
+}
+.channel-tip {
+  p {
+    font-weight: $font-weight-400;
+    font-size: $font-size-12;
+    line-height: $line-height-16;
+    letter-spacing: $letter-spacing;
+    color: $grey_variation-3;
+    margin-top: 8px;
+    Link,
+    a {
+      text-decoration: underline;
+      text-decoration-color: $grey_variation-3;
+    }
+  }
+}

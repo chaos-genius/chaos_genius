@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 
 import Select from 'react-select';
 
 import './eventalertform.scss';
-
 import Play from '../../assets/images/play-green.png';
+
+import { connectionContext } from '../context';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllKpiExplorerForm, getTestQuery } from '../../redux/actions';
 
 const customSingleValue = ({ data }) => (
   <div className="input-select">
@@ -16,10 +19,77 @@ const customSingleValue = ({ data }) => (
 );
 
 const EventAlertForm = ({ setSteps }) => {
+  const dispatch = useDispatch();
   const [setting, setSetting] = useState('');
+  const connectionType = useContext(connectionContext);
+  const [option, setOption] = useState([]);
+  const [datasourceid, setDataSourceId] = useState('');
+  const [query, setQuery] = useState('');
+  const { kpiFormLoading, kpiFormData } = useSelector(
+    (state) => state.kpiExplorer
+  );
+
   const onSubmit = () => {
     setSteps(2);
   };
+
+  useEffect(() => {
+    dispatch(getAllKpiExplorerForm());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (kpiFormData && connectionType) {
+      fieldData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kpiFormData, connectionType]);
+
+  const fieldData = () => {
+    if (kpiFormData && kpiFormLoading === false) {
+      var optionArr = [];
+      kpiFormData &&
+        kpiFormData.data.forEach((data) => {
+          optionArr.push({
+            value: data.name,
+            id: data.id,
+            label: <div className="optionlabel">{datasourceIcon(data)}</div>
+          });
+          setOption(optionArr);
+        });
+    }
+  };
+
+  const datasourceIcon = (type) => {
+    let textHtml = '';
+    connectionType &&
+      connectionType.length !== 0 &&
+      connectionType.find((item) => {
+        if (item.name === type.connection_type) {
+          textHtml = item.icon;
+        }
+        return '';
+      });
+    return (
+      <>
+        <span
+          dangerouslySetInnerHTML={{ __html: textHtml }}
+          className="datasource-svgicon"
+        />
+        {type.name}
+      </>
+    );
+  };
+
+  const onTestQuery = () => {
+    const payload = {
+      data_source_id: datasourceid,
+      from_query: true,
+      query: query
+    };
+    dispatch(getTestQuery(payload));
+  };
+
   return (
     <>
       <div className="form-group">
@@ -34,16 +104,24 @@ const EventAlertForm = ({ setSteps }) => {
       <div className="form-group">
         <label>Select Data Source*</label>
         <Select
+          options={option}
           classNamePrefix="selectcategory"
           placeholder="Select Data Source"
           components={{ SingleValue: customSingleValue }}
+          onChange={(e) => {
+            setDataSourceId(e.id);
+          }}
         />
       </div>
       <div className="form-group query-form">
         <label>Query *</label>
-        <textarea placeholder="Enter Query"></textarea>
+        <textarea
+          placeholder="Enter Query"
+          onChange={(e) => {
+            setQuery(e.target.value);
+          }}></textarea>
         <div className="test-query-connection">
-          <div className="test-query">
+          <div className="test-query" onClick={() => onTestQuery()}>
             <span>
               <img src={Play} alt="Play" />
               Test Query

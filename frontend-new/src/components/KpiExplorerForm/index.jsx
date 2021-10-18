@@ -292,8 +292,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       history.push('/kpiexplorer');
       customToast({
         type: 'success',
-        header: 'Successfully Added',
-        description: kpiSubmit.message
+        header: 'Successfully Added'
       });
     } else if (
       kpiSubmit &&
@@ -313,7 +312,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     if (testQueryData && testQueryData?.status === 'success') {
       customToast({
         type: 'success',
-        header: 'Test Connection Success',
+        header: 'Test Connection Successful',
         description: testQueryData.msg
       });
     }

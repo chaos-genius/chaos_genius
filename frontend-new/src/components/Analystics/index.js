@@ -192,14 +192,13 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     ) {
       customToast({
         type: 'error',
-        header: 'Failed to Add',
+        header: 'Configuration failed',
         description: kpiSettingData.msg
       });
     } else if (kpiSettingData && kpiSettingData.status === 'success') {
       customToast({
         type: 'success',
-        header: 'Successfully updated',
-        description: kpiSettingData.msg
+        header: 'Successfully updated'
       });
     } else if (kpiSettingData && kpiSettingData.status === 'failure') {
       customToast({
@@ -490,7 +489,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
             )}
           </div>
           <div className="form-group">
-            <label>Select a Model</label>
+            <label>Model Name</label>
             <div className="editable-field">
               <Select
                 options={option.model_name}

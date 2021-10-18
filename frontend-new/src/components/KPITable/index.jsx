@@ -51,7 +51,7 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
     if (kpiDisableData && kpiDisableData.status === 'success') {
       customToast({
         type: 'success',
-        header: 'Successfully KPI Deleted',
+        header: 'KPI deleted successfully',
         description: kpiDisableData.message
       });
       changeData((prev) => !prev);

@@ -1,8 +1,9 @@
 import React from 'react';
 
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 import Plus from '../../assets/images/plus.svg';
+import DisablePlus from '../../assets/images/disableplus.svg';
 import EventAlert from '../../assets/images/alerts/eventalert.svg';
 import KpiAlert from '../../assets/images/alerts/kpialert.svg';
 import rightarrow from '../../assets/images/rightarrow.svg';
@@ -10,6 +11,7 @@ import rightarrow from '../../assets/images/rightarrow.svg';
 import './setalerts.scss';
 
 const SetAlerts = () => {
+  const history = useHistory();
   return (
     <>
       <div className="heading-option alert-heading">
@@ -45,13 +47,14 @@ const SetAlerts = () => {
             <h3>Event Alert</h3>
             <p>Tap ‘New Alert‘ button below to add your first alert</p>{' '}
             <div className="alert-button">
-              <Link to="/alerts/new/event-alert">
-                {/* added disable button */}
-                <button className="btn black-button" disabled>
-                  <img src={Plus} alt="Plus" />
-                  <span>New Alert</span>
-                </button>
-              </Link>
+              {/* added disable button */}
+              <button
+                className="btn black-button"
+                disabled
+                onClick={() => history.push('/alerts/new/event-alert')}>
+                <img src={DisablePlus} alt="Plus" />
+                <span>New Alert</span>
+              </button>
             </div>
             <h5>Soon</h5>
           </div>
@@ -60,12 +63,12 @@ const SetAlerts = () => {
             <h3>KPI Alert</h3>
             <p>Tap ‘New Alert‘ button below to add your first alert</p>
             <div className="alert-button">
-              <Link to="/alerts/new/kpi-alert">
-                <button className="btn black-button">
-                  <img src={Plus} alt="Plus" />
-                  <span>New Alert</span>
-                </button>
-              </Link>
+              <button
+                className="btn black-button"
+                onClick={() => history.push('/alerts/new/kpi-alert')}>
+                <img src={Plus} alt="Plus" />
+                <span>New Alert</span>
+              </button>
             </div>
           </div>
         </div>

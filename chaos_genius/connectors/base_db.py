@@ -70,10 +70,14 @@ class BaseDb:
         query_text = text(query)
         with self.engine.connect() as connection:
             results = connection.execute(query_text)
-            columns = results.cursor.description
+            # Using the ResultProxy's keys method instead of the
+            # DBAPI cursor description. Some DB/DW (snowflake) can
+            # create inconsistency becuase of their case insensitive
+            # nature and can do automated case conversion for metadata
+            columns = results.keys()
             for col in columns:
                 table_columns.append({
-                    'name': col.name,
+                    'name': col,
                     'type': 'TEXT'
                 })
             table_dictionary_info["table_columns"] = table_columns

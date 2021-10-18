@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """DataSource views for creating and viewing the data source."""
-import re
 from uuid import uuid4
-import random
+from copy import deepcopy
 from datetime import datetime
 from flask import (
     Blueprint,
@@ -28,12 +27,14 @@ from chaos_genius.third_party.integration_server_config import (
     DATA_SOURCE_ABBREVIATION
 )
 from chaos_genius.databases.db_utils import create_sqlalchemy_uri
-from chaos_genius.connectors import get_metadata, test_connection
+from chaos_genius.connectors import get_metadata
 from chaos_genius.third_party.integration_utils import get_connection_config
 # from chaos_genius.databases.db_metadata import DbMetadata, get_metadata
 
 from chaos_genius.controllers.data_source_controller import (
-    get_datasource_data_from_id, mask_sensitive_info
+    get_datasource_data_from_id,
+    mask_sensitive_info,
+    test_data_source
 )
 
 # from chaos_genius.utils import flash_errors
@@ -98,22 +99,12 @@ def list_data_source_type():
 
 
 @blueprint.route("/test", methods=["POST"])
-def test_data_source():
+def test_data_source_connection():
     """Test DataSource."""
-    connection_status, msg, status= [], "", "success"
+    connection_status, msg, status = [], "", "success"
     try:
         payload = request.get_json()
-        is_third_party = SOURCE_WHITELIST_AND_TYPE[payload["sourceDefinitionId"]]
-        if is_third_party:
-            connector_client = connector.connection
-            payload.pop('connection_type', None)
-            connection_status = connector_client.test_connection(payload)
-        else:
-            db_status, message = test_connection(payload)
-            connection_status = {
-                "message": message,
-                "status": "succeeded" if db_status is True else "failed"
-            }
+        connection_status = test_data_source(payload)
     except Exception as err_msg:
         print(err_msg)
         msg = str(err_msg)
@@ -323,16 +314,14 @@ def get_data_source_info(datasource_id):
         ds_obj = get_datasource_data_from_id(datasource_id, as_obj=True)
         data_source_def = ds_obj.sourceConfig["sourceDefinitionId"]
         if data_source_def:
-            connector_client = connector.connection
-            connector_client.init_source_def_conf()
-            connection_types = connector_client.source_conf
+            connection_types = get_connection_config()
             connection_def = next((source_def for source_def in connection_types if source_def["sourceDefinitionId"] == data_source_def), None)
             masked_details = {}
             if connection_def:
                 masked_details = mask_sensitive_info(connection_def, ds_obj.sourceConfig["connectionConfiguration"])
         data = ds_obj.safe_dict
         data["sourceForm"] = masked_details
-        status = "success" 
+        status = "success"
     except Exception as err:
         status = "failure"
         message = str(err)
@@ -348,12 +337,20 @@ def update_data_source_info(datasource_id):
     try:
         payload = request.get_json()
         conn_name = payload.get('name')
-        conn_type = payload.get('connection_type')
         source_form = payload.get('sourceForm')
         ds_obj = get_datasource_data_from_id(datasource_id, as_obj=True)
         ds_obj.name = conn_name
+        connection_config = deepcopy(ds_obj.sourceConfig)
+        connection_config["connectionConfiguration"].update(
+            source_form.get("connectionConfiguration", {})
+        )
+        connection_config["connection_type"] = ds_obj.connection_type
+        connection_status = test_data_source(connection_config)
+        if connection_status["status"] == "failed":
+            raise Exception(connection_status['message'])
+        ds_obj.sourceConfig = connection_config
         ds_obj.save(commit=True)
-        status = "success" 
+        status = "success"
     except Exception as err:
         status = "failure"
         message = str(err)

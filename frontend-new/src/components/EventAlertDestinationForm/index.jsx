@@ -10,7 +10,11 @@ import Email from '../../assets/images/alerts/email.svg';
 
 import './eventalertdestinationform.scss';
 
-import { getChannelStatus } from '../../redux/actions';
+import {
+  getChannelStatus,
+  createKpiAlert,
+  updateKpiAlert
+} from '../../redux/actions';
 
 import ReactTagInput from '@pathofdev/react-tag-input';
 import '@pathofdev/react-tag-input/build/index.css';
@@ -97,11 +101,20 @@ const EventAlertDestinationForm = ({
   const handleChange = (tags) => {
     if (field === 'email') {
       setresp(tags);
+      setAlertFormData((prev) => {
+        return {
+          ...prev,
+          alert_channel_conf: {
+            [alertFormData['alert_channel']]: tags
+          }
+        };
+      });
     }
   };
 
   const validateEmail = (email) => {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    const re =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
   };
 
@@ -111,12 +124,11 @@ const EventAlertDestinationForm = ({
       obj['alert_channel'] = 'Enter Channel';
     }
     setError(obj);
-    console.log(alertFormData);
     if (error.alert_channel === '') {
       if (path[2] === 'edit') {
         // dispatch(updateKpiAlert(kpiId, alertFormData));
       } else {
-        //dispatch(createKpiAlert(alertFormData));
+        dispatch(createKpiAlert(alertFormData));
       }
     }
   };

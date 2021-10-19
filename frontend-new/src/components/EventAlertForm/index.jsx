@@ -324,6 +324,7 @@ const EventAlertForm = ({
               id="newentry"
               name="alert"
               value={setting}
+              checked={alertFormData.alert_settings === 'newentry'}
               onChange={(e) => {
                 setSetting(e.target.value);
                 setError({ ...error, alert_settings: '' });
@@ -350,6 +351,7 @@ const EventAlertForm = ({
               id="allchanges"
               name="alert"
               value={setting}
+              checked={alertFormData.alert_settings === 'allchanges'}
               onChange={(e) => {
                 setSetting(e.target.value);
                 setError({ ...error, alert_settings: '' });
@@ -376,6 +378,7 @@ const EventAlertForm = ({
               id="alwayssend"
               name="alert"
               value={setting}
+              checked={alertFormData.alert_settings === 'alwayssend'}
               onChange={(e) => {
                 setSetting(e.target.value);
                 setError({ ...error, alert_settings: '' });

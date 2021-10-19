@@ -190,7 +190,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       });
     } else if (
       updateDatasource &&
-      updateDatasource.status === 'failed' &&
+      updateDatasource.status === 'failure' &&
       path[2] === 'edit'
     ) {
       customToast({

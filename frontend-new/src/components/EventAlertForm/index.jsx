@@ -4,6 +4,7 @@ import Select from 'react-select';
 
 import './eventalertform.scss';
 import Play from '../../assets/images/play-green.png';
+import Edit from '../../assets/images/disable-edit.svg';
 
 import { connectionContext } from '../context';
 import { useDispatch, useSelector } from 'react-redux';
@@ -25,20 +26,82 @@ const alertFrequency = [
   }
 ];
 
-const EventAlertForm = ({ setSteps, alertFormData, setAlertFormData }) => {
+const EventAlertForm = ({
+  setSteps,
+  alertFormData,
+  setAlertFormData,
+  kpiAlertMetaInfo
+}) => {
   const dispatch = useDispatch();
-  const [setting, setSetting] = useState('');
   const connectionType = useContext(connectionContext);
-  const [option, setOption] = useState([]);
-  const [datasourceid, setDataSourceId] = useState('');
-  const [query, setQuery] = useState('');
   const { kpiFormLoading, kpiFormData } = useSelector(
     (state) => state.kpiExplorer
   );
 
+  const [setting, setSetting] = useState('');
+  const [option, setOption] = useState([]);
+  const [datasourceid, setDataSourceId] = useState('');
+  const [query, setQuery] = useState('');
+  const [error, setError] = useState({
+    alert_name: '',
+    data_source: '',
+    alert_type: '',
+    alert_query: '',
+    alert_settings: '',
+    alert_message: '',
+    alert_frequency: ''
+  });
+  const [sensitiveData, setSensitveData] = useState({
+    alert_name: '',
+    data_source: '',
+    alert_type: '',
+    alert_query: '',
+    alert_settings: '',
+    alert_message: '',
+    alert_frequency: ''
+  });
+
+  const [enabled, setEnabled] = useState({
+    alert_name: true,
+    data_source: true,
+    alert_type: true,
+    alert_query: true,
+    alert_settings: true,
+    alert_message: true,
+    alert_frequency: true
+  });
+
   const onSubmit = () => {
-    setSteps(2);
-    console.log(alertFormData);
+    var obj = { ...error };
+    if (alertFormData.alert_name === '') {
+      obj['alert_name'] = 'Enter Name of Your Alert';
+    }
+    if (alertFormData.data_source === 0 || alertFormData.data_source === null) {
+      obj['data_source'] = 'Enter Data Source';
+    }
+    if (alertFormData.alert_query === '') {
+      obj['alert_query'] = 'Enter Query';
+    }
+    if (alertFormData.alert_settings === '') {
+      obj['alert_settings'] = 'Enter Alert Settings';
+    }
+    if (alertFormData.alert_frequency === '') {
+      obj['alert_frequency'] = 'Enter Alert Frequency';
+    }
+    if (alertFormData.alert_message === '') {
+      obj['alert_message'] = 'Enter Alert Frequency';
+    }
+    setError(obj);
+    if (
+      obj.alert_name === '' &&
+      obj.data_source === '' &&
+      obj.alert_query === '' &&
+      obj.alert_settings === '' &&
+      obj.alert_frequency === '' &&
+      obj.alert_message === ''
+    ) {
+      setSteps(2);
+    }
   };
 
   useEffect(() => {
@@ -98,6 +161,61 @@ const EventAlertForm = ({ setSteps, alertFormData, setAlertFormData }) => {
     dispatch(getTestQuery(payload));
   };
 
+  const editableStatus = (type) => {
+    var status = '';
+    kpiAlertMetaInfo &&
+      kpiAlertMetaInfo.length !== 0 &&
+      kpiAlertMetaInfo.fields.find((field) => {
+        if (field.name === type) {
+          status =
+            field.is_editable && field.is_sensitive
+              ? 'sensitive'
+              : field.is_editable
+              ? 'editable'
+              : '';
+        }
+        return '';
+      });
+    return status;
+  };
+
+  const onSaveInput = (name) => {
+    setEnabled({ ...enabled, [name]: true });
+  };
+
+  const onCancelInput = (name) => {
+    setEnabled({ ...enabled, [name]: true });
+    setSensitveData({ ...sensitiveData, [name]: '' });
+  };
+
+  const editAndSaveButton = (name) => {
+    return (
+      <>
+        {enabled[name] ? (
+          <button
+            className="btn black-button"
+            onClick={() => setEnabled({ ...enabled, [name]: false })}>
+            <img src={Edit} alt="Edit" />
+            <span>Edit</span>
+          </button>
+        ) : (
+          <>
+            <button
+              className="btn black-button"
+              onClick={() => onSaveInput(name)}>
+              <span>Save</span>
+            </button>
+            <button
+              className="btn black-secondary-button"
+              onClick={() => onCancelInput(name)}>
+              <span>Cancel</span>
+            </button>
+          </>
+        )}
+      </>
+    );
+  };
+
   return (
     <>
       <div className="form-group">
@@ -108,13 +226,19 @@ const EventAlertForm = ({ setSteps, alertFormData, setAlertFormData }) => {
           placeholder="Enter Alert Name"
           required
           value={alertFormData.alert_name}
-          onChange={(e) =>
+          onChange={(e) => {
             setAlertFormData({
               ...alertFormData,
               alert_name: e.target.value
-            })
-          }
+            });
+            setError({ ...error, alert_name: '' });
+          }}
         />
+        {error.alert_name && (
+          <div className="connection__fail">
+            <p>{error.alert_name}</p>
+          </div>
+        )}
       </div>
       <div className="form-group">
         <label>Select Data Source*</label>
@@ -126,12 +250,18 @@ const EventAlertForm = ({ setSteps, alertFormData, setAlertFormData }) => {
           value={option.find((item) => alertFormData.data_source === item.id)}
           onChange={(e) => {
             setDataSourceId(e.id);
+            setError({ ...error, data_source: '' });
             setAlertFormData({
               ...alertFormData,
               data_source: e.id
             });
           }}
         />
+        {error.data_source && (
+          <div className="connection__fail">
+            <p>{error.data_source}</p>
+          </div>
+        )}
       </div>
       <div className="form-group query-form">
         <label>Query *</label>
@@ -140,6 +270,7 @@ const EventAlertForm = ({ setSteps, alertFormData, setAlertFormData }) => {
           value={alertFormData.alert_query}
           onChange={(e) => {
             setQuery(e.target.value);
+            setError({ ...error, alert_query: '' });
             setAlertFormData({
               ...alertFormData,
               alert_query: e.target.value
@@ -153,6 +284,11 @@ const EventAlertForm = ({ setSteps, alertFormData, setAlertFormData }) => {
             </span>
           </div>
         </div>
+        {error.alert_query && (
+          <div className="connection__fail">
+            <p>{error.alert_query}</p>
+          </div>
+        )}
       </div>
       <div className="form-group">
         <label>Alert Frequency *</label>
@@ -163,13 +299,19 @@ const EventAlertForm = ({ setSteps, alertFormData, setAlertFormData }) => {
             value: alertFormData.alert_frequency,
             label: alertFormData.alert_frequency
           }}
-          onChange={(e) =>
+          onChange={(e) => {
             setAlertFormData({
               ...alertFormData,
               alert_frequency: e.value
-            })
-          }
+            });
+            setError({ ...error, alert_frequency: '' });
+          }}
         />
+        {error.alert_frequency && (
+          <div className="connection__fail">
+            <p>{error.alert_frequency}</p>
+          </div>
+        )}
       </div>
 
       <div className="form-group">
@@ -184,6 +326,7 @@ const EventAlertForm = ({ setSteps, alertFormData, setAlertFormData }) => {
               value={setting}
               onChange={(e) => {
                 setSetting(e.target.value);
+                setError({ ...error, alert_settings: '' });
                 setAlertFormData({
                   ...alertFormData,
                   alert_settings: 'newentry'
@@ -209,6 +352,7 @@ const EventAlertForm = ({ setSteps, alertFormData, setAlertFormData }) => {
               value={setting}
               onChange={(e) => {
                 setSetting(e.target.value);
+                setError({ ...error, alert_settings: '' });
                 setAlertFormData({
                   ...alertFormData,
                   alert_settings: 'allchanges'
@@ -234,6 +378,7 @@ const EventAlertForm = ({ setSteps, alertFormData, setAlertFormData }) => {
               value={setting}
               onChange={(e) => {
                 setSetting(e.target.value);
+                setError({ ...error, alert_settings: '' });
                 setAlertFormData({
                   ...alertFormData,
                   alert_settings: 'alwayssend'
@@ -251,6 +396,11 @@ const EventAlertForm = ({ setSteps, alertFormData, setAlertFormData }) => {
             </label>
           </div>
         </div>
+        {error.alert_settings && (
+          <div className="connection__fail">
+            <p>{error.alert_settings}</p>
+          </div>
+        )}
       </div>
       <div className="form-group ">
         <label>Message Body *</label>
@@ -262,7 +412,13 @@ const EventAlertForm = ({ setSteps, alertFormData, setAlertFormData }) => {
               ...alertFormData,
               alert_message: e.target.value
             });
+            setError({ ...error, alert_message: '' });
           }}></textarea>
+        {error.alert_message && (
+          <div className="connection__fail">
+            <p>{error.alert_message}</p>
+          </div>
+        )}
       </div>
       <div className="form-action">
         <button className="btn black-button" onClick={() => onSubmit()}>

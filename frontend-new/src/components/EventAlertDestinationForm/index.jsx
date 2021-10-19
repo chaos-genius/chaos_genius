@@ -37,18 +37,38 @@ const getOption = (channel) => {
   };
 };
 
-const EventAlertDestinationForm = ({ setEventSteps }) => {
+const EventAlertDestinationForm = ({
+  setEventSteps,
+  alertFormData,
+  setAlertFormData,
+  kpiAlertMetaInfo
+}) => {
   const history = useHistory();
   const dispatch = useDispatch();
   const path = history.location.pathname.split('/');
 
-  const [resp, setresp] = useState([]);
-  const [option, setOption] = useState([]);
-  const [field, setField] = useState('email');
-  const [channelName, setChannelName] = useState('');
-
   const { channelStatusData } = useSelector((state) => {
     return state.alert;
+  });
+
+  const [resp, setresp] = useState([]);
+  const [option, setOption] = useState([]);
+  const [field, setField] = useState('');
+  const [channelName, setChannelName] = useState('');
+
+  const [error, setError] = useState({
+    alert_channel: '',
+    add_recepients: ''
+  });
+
+  const [enabled, setEnabled] = useState({
+    alert_channel: true,
+    add_recepients: true
+  });
+
+  const [sensitiveData, setSensitveData] = useState({
+    alert_channel: '',
+    add_recepients: ''
   });
 
   const onBack = () => {
@@ -85,6 +105,21 @@ const EventAlertDestinationForm = ({ setEventSteps }) => {
     return re.test(String(email).toLowerCase());
   };
 
+  const onSubmit = () => {
+    var obj = { ...error };
+    if (alertFormData.alert_channel === '') {
+      obj['alert_channel'] = 'Enter Channel';
+    }
+    setError(obj);
+    console.log(alertFormData);
+    if (error.alert_channel === '') {
+      if (path[2] === 'edit') {
+        // dispatch(updateKpiAlert(kpiId, alertFormData));
+      } else {
+        //dispatch(createKpiAlert(alertFormData));
+      }
+    }
+  };
   return (
     <>
       <div className="form-group">
@@ -99,7 +134,9 @@ const EventAlertDestinationForm = ({ setEventSteps }) => {
             placeholder="Select"
             components={{ SingleValue: customSingleValue }}
             onChange={(e) => {
+              setAlertFormData({ ...alertFormData, alert_channel: e.value });
               setField(e.value);
+              setError({ ...error, alert_channel: '' });
             }}
           />
         </div>
@@ -110,6 +147,11 @@ const EventAlertDestinationForm = ({ setEventSteps }) => {
             to connect channel
           </p>
         </div>
+        {error.alert_channel && (
+          <div className="connection__fail">
+            <p>{error.alert_channel}</p>
+          </div>
+        )}
       </div>
       {field === 'email' ? (
         <div className="form-group">
@@ -152,7 +194,7 @@ const EventAlertDestinationForm = ({ setEventSteps }) => {
         <button className="btn white-button" onClick={() => onBack()}>
           <span>Back</span>
         </button>
-        <button className="btn black-button">
+        <button className="btn black-button" onClick={() => onSubmit()}>
           <div className="btn-spinner">
             <div className="spinner-border" role="status">
               <span className="visually-hidden">Loading...</span>

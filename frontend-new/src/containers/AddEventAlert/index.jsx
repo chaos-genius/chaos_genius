@@ -1,13 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 import rightarrow from '../../assets/images/rightarrow.svg';
 import EventAlertDestinationForm from '../../components/EventAlertDestinationForm';
 
 import EventAlertForm from '../../components/EventAlertForm';
 
+import { kpiAlertMetaInfo } from '../../redux/actions';
+
 const AddEventAlert = () => {
+  const dispatch = useDispatch();
+  const history = useHistory();
+
+  const path = history.location.pathname.split('/');
+
+  const { kpiAlertMetaInfoData } = useSelector((state) => {
+    return state.alert;
+  });
+
   const [steps, setSteps] = useState(1);
   const [alertFormData, setAlertFormData] = useState({
     alert_name: '',
@@ -20,6 +32,14 @@ const AddEventAlert = () => {
     alert_channel: '',
     alert_channel_conf: '{}'
   });
+
+  useEffect(() => {
+    if (path[2] === 'edit') {
+      dispatch(kpiAlertMetaInfo());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch]);
+
   return (
     <>
       <div className="page-navigation">
@@ -56,9 +76,15 @@ const AddEventAlert = () => {
             setSteps={setSteps}
             setAlertFormData={setAlertFormData}
             alertFormData={alertFormData}
+            kpiAlertMetaInfo={kpiAlertMetaInfoData}
           />
         ) : (
-          <EventAlertDestinationForm setEventSteps={setSteps} />
+          <EventAlertDestinationForm
+            setEventSteps={setSteps}
+            setAlertFormData={setAlertFormData}
+            alertFormData={alertFormData}
+            kpiAlertMetaInfo={kpiAlertMetaInfoData}
+          />
         )}
       </div>
     </>

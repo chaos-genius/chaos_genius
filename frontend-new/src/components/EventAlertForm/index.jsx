@@ -18,7 +18,14 @@ const customSingleValue = ({ data }) => (
   </div>
 );
 
-const EventAlertForm = ({ setSteps }) => {
+const alertFrequency = [
+  {
+    value: 'daily',
+    label: 'Daily'
+  }
+];
+
+const EventAlertForm = ({ setSteps, alertFormData, setAlertFormData }) => {
   const dispatch = useDispatch();
   const [setting, setSetting] = useState('');
   const connectionType = useContext(connectionContext);
@@ -31,6 +38,7 @@ const EventAlertForm = ({ setSteps }) => {
 
   const onSubmit = () => {
     setSteps(2);
+    console.log(alertFormData);
   };
 
   useEffect(() => {
@@ -99,6 +107,13 @@ const EventAlertForm = ({ setSteps }) => {
           className="form-control"
           placeholder="Enter Alert Name"
           required
+          value={alertFormData.alert_name}
+          onChange={(e) =>
+            setAlertFormData({
+              ...alertFormData,
+              alert_name: e.target.value
+            })
+          }
         />
       </div>
       <div className="form-group">
@@ -108,8 +123,13 @@ const EventAlertForm = ({ setSteps }) => {
           classNamePrefix="selectcategory"
           placeholder="Select Data Source"
           components={{ SingleValue: customSingleValue }}
+          value={option.find((item) => alertFormData.data_source === item.id)}
           onChange={(e) => {
             setDataSourceId(e.id);
+            setAlertFormData({
+              ...alertFormData,
+              data_source: e.id
+            });
           }}
         />
       </div>
@@ -117,8 +137,13 @@ const EventAlertForm = ({ setSteps }) => {
         <label>Query *</label>
         <textarea
           placeholder="Enter Query"
+          value={alertFormData.alert_query}
           onChange={(e) => {
             setQuery(e.target.value);
+            setAlertFormData({
+              ...alertFormData,
+              alert_query: e.target.value
+            });
           }}></textarea>
         <div className="test-query-connection">
           <div className="test-query" onClick={() => onTestQuery()}>
@@ -131,7 +156,20 @@ const EventAlertForm = ({ setSteps }) => {
       </div>
       <div className="form-group">
         <label>Alert Frequency *</label>
-        <Select classNamePrefix="selectcategory" placeholder="Daily" />
+        <Select
+          classNamePrefix="selectcategory"
+          options={alertFrequency}
+          value={{
+            value: alertFormData.alert_frequency,
+            label: alertFormData.alert_frequency
+          }}
+          onChange={(e) =>
+            setAlertFormData({
+              ...alertFormData,
+              alert_frequency: e.value
+            })
+          }
+        />
       </div>
 
       <div className="form-group">
@@ -143,9 +181,13 @@ const EventAlertForm = ({ setSteps }) => {
               type="radio"
               id="newentry"
               name="alert"
-              value="newentry"
+              value={setting}
               onChange={(e) => {
                 setSetting(e.target.value);
+                setAlertFormData({
+                  ...alertFormData,
+                  alert_settings: 'newentry'
+                });
               }}
             />
             <label
@@ -164,9 +206,13 @@ const EventAlertForm = ({ setSteps }) => {
               type="radio"
               id="allchanges"
               name="alert"
-              value="allchanges"
+              value={setting}
               onChange={(e) => {
                 setSetting(e.target.value);
+                setAlertFormData({
+                  ...alertFormData,
+                  alert_settings: 'allchanges'
+                });
               }}
             />
             <label
@@ -185,8 +231,14 @@ const EventAlertForm = ({ setSteps }) => {
               type="radio"
               id="alwayssend"
               name="alert"
-              value="alwayssend"
-              onChange={(e) => setSetting(e.target.value)}
+              value={setting}
+              onChange={(e) => {
+                setSetting(e.target.value);
+                setAlertFormData({
+                  ...alertFormData,
+                  alert_settings: 'alwayssend'
+                });
+              }}
             />
             <label
               className={
@@ -202,7 +254,15 @@ const EventAlertForm = ({ setSteps }) => {
       </div>
       <div className="form-group ">
         <label>Message Body *</label>
-        <textarea placeholder="Enter Message Here"></textarea>
+        <textarea
+          placeholder="Enter Message Here"
+          value={alertFormData.alert_message}
+          onChange={(e) => {
+            setAlertFormData({
+              ...alertFormData,
+              alert_message: e.target.value
+            });
+          }}></textarea>
       </div>
       <div className="form-action">
         <button className="btn black-button" onClick={() => onSubmit()}>

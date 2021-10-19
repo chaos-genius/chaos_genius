@@ -9,6 +9,17 @@ import EventAlertForm from '../../components/EventAlertForm';
 
 const AddEventAlert = () => {
   const [steps, setSteps] = useState(1);
+  const [alertFormData, setAlertFormData] = useState({
+    alert_name: '',
+    alert_type: 'Event Alert',
+    data_source: 0,
+    alert_query: '',
+    alert_settings: '',
+    alert_message: '',
+    alert_frequency: '',
+    alert_channel: '',
+    alert_channel_conf: '{}'
+  });
   return (
     <>
       <div className="page-navigation">
@@ -41,7 +52,11 @@ const AddEventAlert = () => {
       </div>
       <div className="add-form-container">
         {steps === 1 ? (
-          <EventAlertForm setSteps={setSteps} />
+          <EventAlertForm
+            setSteps={setSteps}
+            setAlertFormData={setAlertFormData}
+            alertFormData={alertFormData}
+          />
         ) : (
           <EventAlertDestinationForm setEventSteps={setSteps} />
         )}

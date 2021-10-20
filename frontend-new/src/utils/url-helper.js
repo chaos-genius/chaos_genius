@@ -2,6 +2,7 @@
 
 export const BASE_URL = process.env.REACT_APP_BASE_URL || '';
 
+export const FLAG = process.env.ACTIVATE_FRONTEND_TELEMETRY;
 export const attachParams = (relativeUrl, params) => {
   let baseUrl = BASE_URL;
   if (baseUrl === '') {

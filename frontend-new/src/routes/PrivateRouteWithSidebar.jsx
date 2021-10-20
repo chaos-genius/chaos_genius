@@ -14,11 +14,18 @@ import Sidebar from '../components/Sidebar';
 import { getConnectionType } from '../redux/actions';
 
 import { connectionContext } from '../components/context';
+import posthog from 'posthog-js';
 
 const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
   const dispatch = useDispatch();
   const [stateValue, setState] = useState();
   const { connectionType } = useSelector((state) => state.dataSource);
+
+  posthog.init('phc_KcsaN1oBtVUwKUvd9owb3Cz42MYDpR6No00EJRLAprH', {
+    api_host: 'https://app.posthog.com'
+  });
+
+  posthog.capture('my event', { property: 'value' });
 
   useEffect(() => {
     dispatchGetConnectionType();

@@ -79,7 +79,8 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     datasourceData,
     datasourceLoading,
     updateDatasourceLoading,
-    updateDatasource
+    updateDatasource,
+    connectionTypeLoading
   } = useSelector((state) => state.dataSource);
 
   const getEditDatasource = () => {
@@ -114,13 +115,19 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   }, [connectionType]);
 
   useEffect(() => {
-    if (datasourceData && datasourceData.length !== 0 && path[2] === 'edit') {
+    if (
+      datasourceData &&
+      datasourceData.length !== 0 &&
+      connectionType &&
+      connectionType.length !== 0 &&
+      path[2] === 'edit'
+    ) {
       setConnectionName(datasourceData?.name);
       setDsFormData(datasourceData?.sourceForm);
       findDataType(datasourceData);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [datasourceData]);
+  }, [datasourceData, connectionType]);
 
   const customToast = (data) => {
     const { type, header, description } = data;
@@ -431,7 +438,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     setStatus('');
   };
 
-  if (metaInfoLoading || datasourceLoading) {
+  if (metaInfoLoading || datasourceLoading || connectionTypeLoading) {
     return (
       <div className="load ">
         <div className="preload"></div>
@@ -536,7 +543,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
                   ? 'btn black-button btn-loading'
                   : 'btn black-button'
               }
-              disabled={selectedDatasource !== undefined ? false : true}
+              disabled={Object.keys(editedForm).length === 0 ? true : false}
               onClick={() => {
                 updateDataSource();
               }}>

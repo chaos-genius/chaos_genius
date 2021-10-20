@@ -47,9 +47,15 @@ services:
   chaosgenius-server:
     container_name: chaosgenius-server
     image: chaosgenius/chaosgenius-server:latest
-    command: sh setup/run-backend-docker.sh
+    command: bash -c '
+      touch /var/log/chaosgenius-server.log &&
+      chmod -R 777 /var/log/ &&
+      bash setup/run-backend-docker.sh 2>&1 |
+      tee -a /var/log/chaosgenius-server.log'
     ports:
       - "5000:5000"
+    volumes:
+      - ./logs/chaosgenius-server:/var/log/
     depends_on:
       - chaosgenius-db
       - server
@@ -105,7 +111,13 @@ services:
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler
     image: chaosgenius/chaosgenius-server:latest
-    command: celery -A run.celery beat --loglevel=DEBUG
+    command: bash -c '
+      touch /var/log/chaosgenius-scheduler.log &&
+      chmod -R 777 /var/log/ &&
+      celery -A run.celery beat --loglevel=DEBUG 2>&1 |
+      tee -a /var/log/chaosgenius-scheduler.log'
+    volumes:
+      - ./logs/chaosgenius-scheduler:/var/log/
     environment:
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
@@ -134,7 +146,13 @@ services:
   chaosgenius-worker-analytics:
     container_name: chaosgenius-worker-analytics
     image: chaosgenius/chaosgenius-server:latest
-    command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
+    command: bash -c '
+      touch /var/log/chaosgenius-worker-analytics.log &&
+      chmod -R 777 /var/log/ &&
+      celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca 2>&1 | 
+      tee -a /var/log/chaosgenius-worker-analytics.log'
+    volumes:
+      - ./logs/chaosgenius-worker-analytics:/var/log/
     environment:
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
@@ -164,7 +182,13 @@ services:
   chaosgenius-worker-alerts:
     container_name: chaosgenius-worker-alerts
     image: chaosgenius/chaosgenius-server:latest
-    command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
+    command: bash -c '
+      touch /var/log/chaosgenius-worker-alerts.log &&
+      chmod -R 777 /var/log/ &&
+      celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts 2>&1 |
+      tee -a /var/log/chaosgenius-worker-alerts.log'
+    volumes:
+      - ./logs/chaosgenius-worker-alerts:/var/log/
     environment:
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}

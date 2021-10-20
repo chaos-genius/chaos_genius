@@ -21,11 +21,18 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
   const [stateValue, setState] = useState();
   const { connectionType } = useSelector((state) => state.dataSource);
 
-  posthog.init('phc_KcsaN1oBtVUwKUvd9owb3Cz42MYDpR6No00EJRLAprH', {
-    api_host: 'https://app.posthog.com'
-  });
+  useEffect(() => {
+    if (
+      process.env.REACT_APP_ACTIVATE_FRONTEND_TELEMETRY &&
+      process.env.NODE_ENV === 'production'
+    ) {
+      posthog.init('phc_KcsaN1oBtVUwKUvd9owb3Cz42MYDpR6No00EJRLAprH', {
+        api_host: 'https://app.posthog.com'
+      });
 
-  posthog.capture('my event', { property: 'value' });
+      posthog.capture('my event', { property: 'value' });
+    }
+  }, []);
 
   useEffect(() => {
     dispatchGetConnectionType();

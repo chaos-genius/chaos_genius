@@ -88,6 +88,7 @@ services:
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
       - CACHE_DEFAULT_TIMEOUT=${CACHE_DEFAULT_TIMEOUT}
+      - LOG_LOCATION=/var/log/
 
   chaosgenius-db:
     container_name: chaosgenius-db
@@ -149,6 +150,7 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - LOG_LOCATION=/var/log/
     depends_on:
       - chaosgenius-redis
   
@@ -184,6 +186,7 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - LOG_LOCATION=/var/log/
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db
@@ -220,6 +223,7 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - LOG_LOCATION=/var/log/
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db

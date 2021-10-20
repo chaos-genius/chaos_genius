@@ -1,7 +1,7 @@
 """Provides utility functions for logging."""
 import logging
 from logging.handlers import RotatingFileHandler
-
+from chaos_genius.settings import LOG_LOCATION
 from pythonjsonlogger import jsonlogger
 
 
@@ -11,7 +11,7 @@ def configure_logger(app):
     # TODO: Update debug based on env
     logger.setLevel(logging.DEBUG)
     json_handler = RotatingFileHandler(
-        "chaosgenius.log", maxBytes=4194304, backupCount=5)
+        "{}chaosgenius.log".format(LOG_LOCATION), maxBytes=4194304, backupCount=5)
     json_formatter = jsonlogger.JsonFormatter(
         "%(levelname)s %(message)s %(lineno)s %(funcName)s %(filename)s "
     )

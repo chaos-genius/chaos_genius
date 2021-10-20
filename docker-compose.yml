@@ -58,7 +58,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - .logs/chaosgenius-server:/var/log/
+      - ./logs/chaosgenius-server:/var/log/
     depends_on:
       - chaosgenius-db
       - server

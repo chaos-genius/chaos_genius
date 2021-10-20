@@ -10,15 +10,17 @@ services:
   chaosgenius-init:
     container_name: chaosgenius-init
     image: docker:20.10
-    logging: *default-logging
     command: >
-      sh -c "apk update && 
-             apk upgrade && 
-             apk add bash && 
-             bash /setup/docker/setup-airbyte-images.sh"
+      bash -c "apk update &&
+               apk upgrade &&
+               apk add bash &&
+               chmod -R 777 /logs &&
+               bash /setup/docker/setup-airbyte-images.sh 2>&1 |
+               tee -a /logs/init.log"
     volumes:
       - ./setup:/setup
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./logs:/logs
     environment:
       - SOURCE_GOOGLE_ANALYTICS=${SOURCE_GOOGLE_ANALYTICS}
       - SOURCE_GOOGLE_SHEETS=${SOURCE_GOOGLE_SHEETS}
@@ -35,7 +37,6 @@ services:
   chaosgenius-webapp:
     container_name: chaosgenius-webapp
     image: chaosgenius/chaosgenius-webapp:0.1.2
-    logging: *default-logging
     ports:
       - "8080:3000"
     environment:
@@ -43,13 +44,14 @@ services:
       - HOST=0.0.0.0
       - PORT=3000
       - REACT_APP_BASE_URL=${REACT_APP_BASE_URL}
+    volumes:
+      - ./logs/chaosgenius-webapp:/var/log/
     stdin_open: true
-    command: npm run start
+    command: bash -c "npm run start 2>&1 | tee -a /var/log/chaosgenius-webapp.log"
 
   chaosgenius-server:
     container_name: chaosgenius-server
     image: chaosgenius/chaosgenius-server:0.1.2
-    logging: *default-logging
     command: bash -c '
       touch /var/log/chaosgenius-server.log &&
       chmod -R 777 /var/log/ &&
@@ -89,7 +91,6 @@ services:
   chaosgenius-db:
     container_name: chaosgenius-db
     image: postgres:13
-    logging: *default-logging
     restart: always
     healthcheck:
       test: [ "CMD", "pg_isready", "-q", "-d", "chaosgenius_data", "-U", "postgres" ]
@@ -103,20 +104,21 @@ services:
     volumes:
       - ./docker/cg-db-setup:/docker-entrypoint-initdb.d/
       - cg-db:/var/lib/postgresql/data
+      - ./logs/chaosgenius-db:/var/log/
     ports:
       - 5433:5432
 
   chaosgenius-redis:
     container_name: chaosgenius-redis
     image: "redis:6.2-alpine"
-    logging: *default-logging
     ports:
       - 6379:6379
+    volumes:
+      - ./logs/chaosgenius-redis:/var/log/
     
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler
     image: chaosgenius/chaosgenius-server:0.1.2
-    logging: *default-logging
     command: bash -c '
       touch /var/log/chaosgenius-scheduler.log &&
       chmod -R 777 /var/log/ &&
@@ -152,7 +154,6 @@ services:
   chaosgenius-worker-analytics:
     container_name: chaosgenius-worker-analytics
     image: chaosgenius/chaosgenius-server:0.1.2
-    logging: *default-logging
     command: bash -c '
       touch /var/log/chaosgenius-worker-analytics.log &&
       chmod -R 777 /var/log/ &&
@@ -189,7 +190,6 @@ services:
   chaosgenius-worker-alerts:
     container_name: chaosgenius-worker-alerts
     image: chaosgenius/chaosgenius-server:0.1.2
-    logging: *default-logging
     command: bash -c '
       touch /var/log/chaosgenius-worker-alerts.log &&
       chmod -R 777 /var/log/ &&
@@ -237,6 +237,7 @@ services:
       - HACK_LOCAL_ROOT_PARENT=${HACK_LOCAL_ROOT_PARENT}
     volumes:
       - ${HACK_LOCAL_ROOT_PARENT}:/local_parent
+      - ./logs/airbyte/init:/var/log/
   db:
     image: airbyte/db:${VERSION}
     logging: *default-logging
@@ -247,6 +248,7 @@ services:
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
     volumes:
       - db:/var/lib/postgresql/data
+      - ./logs/airbyte/db:/var/log/
   scheduler:
     image: airbyte/scheduler:${VERSION}
     logging: *default-logging
@@ -288,6 +290,7 @@ services:
       - workspace:${WORKSPACE_ROOT}
       - ${LOCAL_ROOT}:${LOCAL_ROOT}
       - data:${CONFIG_ROOT}
+      - ./logs/airbyte/scheduler:/var/log/
   server:
     image: airbyte/server:${VERSION}
     logging: *default-logging
@@ -324,6 +327,7 @@ services:
       - workspace:${WORKSPACE_ROOT}
       - data:${CONFIG_ROOT}
       - ${LOCAL_ROOT}:${LOCAL_ROOT}
+      - ./logs/airbyte/server:/var/log/
   webapp:
     image: airbyte/webapp:${VERSION}
     logging: *default-logging
@@ -341,6 +345,8 @@ services:
       - OPENREPLAY=${OPENREPLAY:-}
       - TRACKING_STRATEGY=${TRACKING_STRATEGY}
       - INTERNAL_API_HOST=${INTERNAL_API_HOST}
+    volumes:
+      - ./logs/airbyte/webapp:/var/log/
   airbyte-temporal:
     image: temporalio/auto-setup:1.7.0
     logging: *default-logging
@@ -358,6 +364,7 @@ services:
       - LOG_LEVEL=${LOG_LEVEL}
     volumes:
       - ./temporal/dynamicconfig:/etc/temporal/config/dynamicconfig
+      - ./logs/airbyte/temporal:/var/log/
 
 volumes:
   workspace:

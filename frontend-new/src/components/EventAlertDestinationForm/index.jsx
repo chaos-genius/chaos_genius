@@ -6,7 +6,7 @@ import { useHistory, Link, useParams } from 'react-router-dom';
 
 import Slack from '../../assets/images/table/slack.svg';
 import Email from '../../assets/images/alerts/email.svg';
-//import Edit from '../../assets/images/disable-edit.svg';
+import Edit from '../../assets/images/disable-edit.svg';
 
 import './eventalertdestinationform.scss';
 
@@ -149,6 +149,62 @@ const EventAlertDestinationForm = ({
       }
     }
   };
+
+  const editableStatus = (type) => {
+    var status = '';
+    kpiAlertMetaInfo &&
+      kpiAlertMetaInfo.length !== 0 &&
+      kpiAlertMetaInfo.fields.find((field) => {
+        if (field.name === type) {
+          status =
+            field.is_editable && field.is_sensitive
+              ? 'sensitive'
+              : field.is_editable
+              ? 'editable'
+              : '';
+        }
+        return '';
+      });
+    return status;
+  };
+
+  const onSaveInput = (name) => {
+    setEnabled({ ...enabled, [name]: true });
+  };
+
+  const onCancelInput = (name) => {
+    setEnabled({ ...enabled, [name]: true });
+    setSensitveData({ ...sensitiveData, [name]: '' });
+  };
+
+  const editAndSaveButton = (name) => {
+    return (
+      <>
+        {enabled[name] ? (
+          <button
+            className="btn black-button"
+            onClick={() => setEnabled({ ...enabled, [name]: false })}>
+            <img src={Edit} alt="Edit" />
+            <span>Edit</span>
+          </button>
+        ) : (
+          <>
+            <button
+              className="btn black-button"
+              onClick={() => onSaveInput(name)}>
+              <span>Save</span>
+            </button>
+            <button
+              className="btn black-secondary-button"
+              onClick={() => onCancelInput(name)}>
+              <span>Cancel</span>
+            </button>
+          </>
+        )}
+      </>
+    );
+  };
+
   return (
     <>
       <div className="form-group">
@@ -162,20 +218,37 @@ const EventAlertDestinationForm = ({
             classNamePrefix="selectcategory"
             placeholder="Select"
             components={{ SingleValue: customSingleValue }}
-            value={{
-              label: (
-                <div className="optionlabel">
-                  <img
-                    src={
-                      alertFormData.alert_channel === 'email' ? Email : Slack
+            isDisabled={
+              path[2] === 'edit'
+                ? editableStatus('alert_channel') === 'editable'
+                  ? false
+                  : editableStatus('alert_channel') === 'sensitive'
+                  ? enabled.alert_channel
+                  : true
+                : false
+            }
+            value={
+              enabled.alert_channel
+                ? alertFormData.alert_channel
+                  ? {
+                      label: (
+                        <div className="optionlabel">
+                          <img
+                            src={
+                              alertFormData.alert_channel === 'email'
+                                ? Email
+                                : Slack
+                            }
+                            alt="datasource"
+                          />
+                          {alertFormData.alert_channel}
+                        </div>
+                      ),
+                      value: `${alertFormData.alert_channel}`
                     }
-                    alt="datasource"
-                  />
-                  {alertFormData.alert_channel}
-                </div>
-              ),
-              value: `${alertFormData.alert_channel}`
-            }}
+                  : 'none'
+                : sensitiveData.alert_channel
+            }
             onChange={(e) => {
               setAlertFormData({ ...alertFormData, alert_channel: e.value });
               setField(e.value);
@@ -189,6 +262,9 @@ const EventAlertDestinationForm = ({
             <Link to="/alerts/channelconfiguration">Channel configuration</Link>{' '}
             to connect channel
           </p>
+          {path[2] === 'edit' &&
+            editableStatus('alert_channnel') === 'sensitive' &&
+            editAndSaveButton('alert_channel')}
         </div>
         {error.alert_channel && (
           <div className="connection__fail">

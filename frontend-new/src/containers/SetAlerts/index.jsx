@@ -50,6 +50,7 @@ const SetAlerts = () => {
               {/* added disable button */}
               <button
                 className="btn black-button"
+                disabled={true}
                 onClick={() => history.push('/alerts/new/event-alert')}>
                 <img src={Plus} alt="Plus" />
                 <span>New Alert</span>

@@ -49,6 +49,7 @@ const EventAlertForm = ({
   const [option, setOption] = useState([]);
   const [datasourceid, setDataSourceId] = useState('');
   const [query, setQuery] = useState('');
+  const [selected, setSelected] = useState();
   const [error, setError] = useState({
     alert_name: '',
     data_source: '',
@@ -253,219 +254,301 @@ const EventAlertForm = ({
     );
   };
 
-  return (
-    <>
-      <div className="form-group">
-        <label>Name Of Your Alert *</label>
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Enter Alert Name"
-          required
-          value={alertFormData.alert_name}
-          onChange={(e) => {
-            setAlertFormData({
-              ...alertFormData,
-              alert_name: e.target.value
-            });
-            setError({ ...error, alert_name: '' });
-          }}
-        />
-        {error.alert_name && (
-          <div className="connection__fail">
-            <p>{error.alert_name}</p>
-          </div>
-        )}
+  if (kpiAlertEditLoading) {
+    return (
+      <div className="load">
+        <div className="preload"></div>
       </div>
-      <div className="form-group">
-        <label>Select Data Source*</label>
-        <Select
-          options={option}
-          classNamePrefix="selectcategory"
-          placeholder="Select Data Source"
-          components={{ SingleValue: customSingleValue }}
-          value={option.find((item) => alertFormData.data_source === item.id)}
-          onChange={(e) => {
-            setDataSourceId(e.id);
-            setError({ ...error, data_source: '' });
-            setAlertFormData({
-              ...alertFormData,
-              data_source: e.id
-            });
-          }}
-        />
-        {error.data_source && (
-          <div className="connection__fail">
-            <p>{error.data_source}</p>
+    );
+  } else {
+    return (
+      <>
+        <div className="form-group">
+          <label>Name Of Your Alert *</label>
+          <div className="editable-field">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Enter Alert Name"
+              required
+              value={
+                enabled.alert_name
+                  ? alertFormData?.alert_name
+                  : sensitiveData.alert_name
+              }
+              disabled={
+                path[2] === 'edit'
+                  ? editableStatus('alert_name') === 'editable'
+                    ? false
+                    : editableStatus('alert_name') === 'sensitive'
+                    ? enabled.alert_name
+                    : true
+                  : false
+              }
+              onChange={(e) => {
+                setAlertFormData({
+                  ...alertFormData,
+                  alert_name: e.target.value
+                });
+                setError({ ...error, alert_name: '' });
+              }}
+            />
+            {path[2] === 'edit' &&
+              editableStatus('alert_type') === 'sensitive' &&
+              editAndSaveButton('alert_type')}
           </div>
-        )}
-      </div>
-      <div className="form-group query-form">
-        <label>Query *</label>
-        <textarea
-          placeholder="Enter Query"
-          value={alertFormData.alert_query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setError({ ...error, alert_query: '' });
-            setAlertFormData({
-              ...alertFormData,
-              alert_query: e.target.value
-            });
-          }}></textarea>
-        <div className="test-query-connection">
-          <div className="test-query" onClick={() => onTestQuery()}>
-            <span>
-              <img src={Play} alt="Play" />
-              Test Query
-            </span>
-          </div>
+          {error.alert_name && (
+            <div className="connection__fail">
+              <p>{error.alert_name}</p>
+            </div>
+          )}
         </div>
-        {error.alert_query && (
-          <div className="connection__fail">
-            <p>{error.alert_query}</p>
+        <div className="form-group">
+          <label>Select Data Source*</label>
+          <div className="editable-field">
+            <Select
+              options={option}
+              classNamePrefix="selectcategory"
+              placeholder="Select Data Source"
+              components={{ SingleValue: customSingleValue }}
+              isDisabled={
+                path[2] === 'edit'
+                  ? editableStatus('alert_type') === 'editable'
+                    ? false
+                    : editableStatus('alert_type') === 'sensitive'
+                    ? enabled.alert_type
+                    : true
+                  : false
+              }
+              value={
+                enabled.data_source
+                  ? alertFormData.data_source
+                    ? option.find(
+                        (item) => alertFormData.data_source === item.id
+                      )
+                    : selected
+                  : sensitiveData.data_source
+              }
+              onChange={(e) => {
+                setDataSourceId(e.id);
+                setSelected(e);
+                setError({ ...error, data_source: '' });
+                setAlertFormData({
+                  ...alertFormData,
+                  data_source: e.id
+                });
+              }}
+            />
+            {path[2] === 'edit' &&
+              editableStatus('alert_type') === 'sensitive' &&
+              editAndSaveButton('alert_type')}
           </div>
-        )}
-      </div>
-      <div className="form-group">
-        <label>Alert Frequency *</label>
-        <Select
-          classNamePrefix="selectcategory"
-          options={alertFrequency}
-          value={{
-            value: alertFormData.alert_frequency,
-            label: alertFormData.alert_frequency
-          }}
-          onChange={(e) => {
-            setAlertFormData({
-              ...alertFormData,
-              alert_frequency: e.value
-            });
-            setError({ ...error, alert_frequency: '' });
-          }}
-        />
-        {error.alert_frequency && (
-          <div className="connection__fail">
-            <p>{error.alert_frequency}</p>
+          {error.data_source && (
+            <div className="connection__fail">
+              <p>{error.data_source}</p>
+            </div>
+          )}
+        </div>
+        <div className="form-group query-form">
+          <label>Query *</label>
+          <textarea
+            placeholder="Enter Query"
+            value={alertFormData.alert_query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setError({ ...error, alert_query: '' });
+              setAlertFormData({
+                ...alertFormData,
+                alert_query: e.target.value
+              });
+            }}></textarea>
+          <div className="test-query-connection">
+            <div className="test-query" onClick={() => onTestQuery()}>
+              <span>
+                <img src={Play} alt="Play" />
+                Test Query
+              </span>
+            </div>
           </div>
-        )}
-      </div>
+          {error.alert_query && (
+            <div className="connection__fail">
+              <p>{error.alert_query}</p>
+            </div>
+          )}
+        </div>
+        <div className="form-group">
+          <label>Alert Frequency *</label>
+          <div className="editable-field">
+            <Select
+              classNamePrefix="selectcategory"
+              options={alertFrequency}
+              value={
+                enabled.alert_frequency
+                  ? alertFormData.alert_frequency
+                    ? {
+                        value: alertFormData.alert_frequency,
+                        label: alertFormData.alert_frequency
+                      }
+                    : 'none'
+                  : sensitiveData.alert_frequency
+              }
+              isDisabled={
+                path[2] === 'edit'
+                  ? editableStatus('alert_frequency') === 'editable'
+                    ? false
+                    : editableStatus('alert_frequency') === 'sensitive'
+                    ? enabled.alert_frequency
+                    : true
+                  : false
+              }
+              onChange={(e) => {
+                setAlertFormData({
+                  ...alertFormData,
+                  alert_frequency: e.value
+                });
+                setError({ ...error, alert_frequency: '' });
+              }}
+            />
+            {path[2] === 'edit' &&
+              editableStatus('alert_frequency') === 'sensitive' &&
+              editAndSaveButton('alert_frequency')}
+          </div>
+          {error.alert_frequency && (
+            <div className="connection__fail">
+              <p>{error.alert_frequency}</p>
+            </div>
+          )}
+        </div>
 
-      <div className="form-group">
-        <label>Alert Settings *</label>
-        <div className="alert-setting">
-          <div className="form-check">
-            <input
-              className="form-check-input"
-              type="radio"
-              id="newentry"
-              name="alert"
-              value={setting}
-              checked={alertFormData.alert_settings === 'newentry'}
-              onChange={(e) => {
-                setSetting(e.target.value);
-                setError({ ...error, alert_settings: '' });
-                setAlertFormData({
-                  ...alertFormData,
-                  alert_settings: 'newentry'
-                });
-              }}
-            />
-            <label
-              className={
-                setting === 'newentry'
-                  ? 'form-check-label active'
-                  : 'form-check-label'
-              }
-              for="newentry">
-              New Entry
-            </label>
+        <div className="form-group">
+          <label>Alert Settings *</label>
+          <div className="alert-setting">
+            <div className="form-check">
+              <input
+                className="form-check-input"
+                type="radio"
+                id="newentry"
+                name="alert"
+                value={setting}
+                checked={alertFormData.alert_settings === 'newentry'}
+                onChange={(e) => {
+                  setSetting(e.target.value);
+                  setError({ ...error, alert_settings: '' });
+                  setAlertFormData({
+                    ...alertFormData,
+                    alert_settings: 'newentry'
+                  });
+                }}
+              />
+              <label
+                className={
+                  setting === 'newentry'
+                    ? 'form-check-label active'
+                    : 'form-check-label'
+                }
+                for="newentry">
+                New Entry
+              </label>
+            </div>
+            <div className="form-check">
+              <input
+                className="form-check-input"
+                type="radio"
+                id="allchanges"
+                name="alert"
+                value={setting}
+                checked={alertFormData.alert_settings === 'allchanges'}
+                onChange={(e) => {
+                  setSetting(e.target.value);
+                  setError({ ...error, alert_settings: '' });
+                  setAlertFormData({
+                    ...alertFormData,
+                    alert_settings: 'allchanges'
+                  });
+                }}
+              />
+              <label
+                className={
+                  setting === 'allchanges'
+                    ? 'form-check-label active'
+                    : 'form-check-label'
+                }
+                for="allchanges">
+                All Changes
+              </label>
+            </div>
+            <div className="form-check">
+              <input
+                className="form-check-input"
+                type="radio"
+                id="alwayssend"
+                name="alert"
+                value={setting}
+                checked={alertFormData.alert_settings === 'alwayssend'}
+                onChange={(e) => {
+                  setSetting(e.target.value);
+                  setError({ ...error, alert_settings: '' });
+                  setAlertFormData({
+                    ...alertFormData,
+                    alert_settings: 'alwayssend'
+                  });
+                }}
+              />
+              <label
+                className={
+                  setting === 'alwayssend'
+                    ? 'form-check-label active'
+                    : 'form-check-label'
+                }
+                for="alwayssend">
+                Always Send
+              </label>
+            </div>
           </div>
-          <div className="form-check">
-            <input
-              className="form-check-input"
-              type="radio"
-              id="allchanges"
-              name="alert"
-              value={setting}
-              checked={alertFormData.alert_settings === 'allchanges'}
-              onChange={(e) => {
-                setSetting(e.target.value);
-                setError({ ...error, alert_settings: '' });
-                setAlertFormData({
-                  ...alertFormData,
-                  alert_settings: 'allchanges'
-                });
-              }}
-            />
-            <label
-              className={
-                setting === 'allchanges'
-                  ? 'form-check-label active'
-                  : 'form-check-label'
-              }
-              for="allchanges">
-              All Changes
-            </label>
-          </div>
-          <div className="form-check">
-            <input
-              className="form-check-input"
-              type="radio"
-              id="alwayssend"
-              name="alert"
-              value={setting}
-              checked={alertFormData.alert_settings === 'alwayssend'}
-              onChange={(e) => {
-                setSetting(e.target.value);
-                setError({ ...error, alert_settings: '' });
-                setAlertFormData({
-                  ...alertFormData,
-                  alert_settings: 'alwayssend'
-                });
-              }}
-            />
-            <label
-              className={
-                setting === 'alwayssend'
-                  ? 'form-check-label active'
-                  : 'form-check-label'
-              }
-              for="alwayssend">
-              Always Send
-            </label>
-          </div>
+          {error.alert_settings && (
+            <div className="connection__fail">
+              <p>{error.alert_settings}</p>
+            </div>
+          )}
         </div>
-        {error.alert_settings && (
-          <div className="connection__fail">
-            <p>{error.alert_settings}</p>
-          </div>
-        )}
-      </div>
-      <div className="form-group ">
-        <label>Message Body *</label>
-        <textarea
-          placeholder="Enter Message Here"
-          value={alertFormData.alert_message}
-          onChange={(e) => {
-            setAlertFormData({
-              ...alertFormData,
-              alert_message: e.target.value
-            });
-            setError({ ...error, alert_message: '' });
-          }}></textarea>
-        {error.alert_message && (
-          <div className="connection__fail">
-            <p>{error.alert_message}</p>
-          </div>
-        )}
-      </div>
-      <div className="form-action">
-        <button className="btn black-button" onClick={() => onSubmit()}>
-          <span>Next Step</span>
-        </button>
-      </div>
-    </>
-  );
+        <div className="form-group alert-textarea">
+          <label>Message Body *</label>
+          <textarea
+            placeholder="Enter Message Here"
+            value={
+              enabled.alert_message
+                ? alertFormData.alert_message
+                : sensitiveData.alert_message
+            }
+            disabled={
+              path[2] === 'edit'
+                ? editableStatus('alert_message') === 'editable'
+                  ? false
+                  : editableStatus('alert_message') === 'sensitive'
+                  ? enabled.alert_message
+                  : true
+                : false
+            }
+            onChange={(e) => {
+              setAlertFormData({
+                ...alertFormData,
+                alert_message: e.target.value
+              });
+              setError({ ...error, alert_message: '' });
+            }}></textarea>
+          {error.alert_message && (
+            <div className="connection__fail">
+              <p>{error.alert_message}</p>
+            </div>
+          )}
+        </div>
+        <div className="form-action">
+          <button className="btn black-button" onClick={() => onSubmit()}>
+            <span>Next Step</span>
+          </button>
+        </div>
+      </>
+    );
+  }
 };
 export default EventAlertForm;

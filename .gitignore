@@ -281,19 +281,15 @@ temp/
 
 
 
-### react ###
+### FRONTEND ###
 .DS_*
 **/*.backup.*
 **/*.back.*
-
 node_modules
-
 *.sublime*
-
 psd
 thumb
 sketch
-
 
 # misc
 .DS_Store
@@ -306,19 +302,20 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-
-# Frontend 
-
 # dependencies
-frontend/node_modules
-frontend/.pnp
+frontend-new/node_modules
+frontend-new/.pnp
 .pnp.js
-
 # testing
-frontend/coverage
-
+frontend-new/coverage
 # production
-frontend/build
+
+frontend-new/build
+frontend-new/.env
+frontend-new/npm-debug.log*
+frontend-new/yarn-debug.log*
+frontend-new/yarn-error.log*
+
 
 # misc
 .DS_Store
@@ -327,9 +324,6 @@ frontend/build
 .env.test.local
 .env.production.local
 
-frontend/npm-debug.log*
-frontend/yarn-debug.log*
-frontend/yarn-error.log*
 
 
 ########### Docs gitignore ################

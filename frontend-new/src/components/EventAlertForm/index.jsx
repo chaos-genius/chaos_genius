@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-
+import { useHistory, useParams } from 'react-router-dom';
 import Select from 'react-select';
 
 import './eventalertform.scss';
@@ -8,7 +8,11 @@ import Edit from '../../assets/images/disable-edit.svg';
 
 import { connectionContext } from '../context';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAllKpiExplorerForm, getTestQuery } from '../../redux/actions';
+import {
+  getAllKpiExplorerForm,
+  getTestQuery,
+  getKpiAlertById
+} from '../../redux/actions';
 
 const customSingleValue = ({ data }) => (
   <div className="input-select">
@@ -33,6 +37,9 @@ const EventAlertForm = ({
   kpiAlertMetaInfo
 }) => {
   const dispatch = useDispatch();
+  const history = useHistory();
+  const kpiId = useParams().id;
+  const path = history.location.pathname.split('/');
   const connectionType = useContext(connectionContext);
   const { kpiFormLoading, kpiFormData } = useSelector(
     (state) => state.kpiExplorer
@@ -104,10 +111,40 @@ const EventAlertForm = ({
     }
   };
 
+  const { kpiAlertEditData, kpiAlertEditLoading } = useSelector((state) => {
+    return state.alert;
+  });
+
   useEffect(() => {
-    dispatch(getAllKpiExplorerForm());
+    if (path[2] === 'edit') {
+      dispatch(getKpiAlertById(kpiId));
+      dispatch(getAllKpiExplorerForm());
+    } else {
+      dispatch(getAllKpiExplorerForm());
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
+  }, []);
+
+  useEffect(() => {
+    if (
+      kpiAlertEditData &&
+      kpiAlertEditData.length !== 0 &&
+      path[2] === 'edit'
+    ) {
+      setAlertFormData({
+        alert_name: kpiAlertEditData?.alert_name,
+        alert_type: kpiAlertEditData?.alert_type,
+        data_source: kpiAlertEditData?.data_source,
+        alert_query: kpiAlertEditData?.alert_query,
+        alert_settings: kpiAlertEditData?.alert_settings,
+        alert_message: kpiAlertEditData?.alert_message,
+        alert_frequency: kpiAlertEditData?.alert_frequency,
+        alert_channel: kpiAlertEditData?.alert_channel,
+        alert_channel_conf: kpiAlertEditData?.alert_channel_conf
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kpiAlertEditData]);
 
   useEffect(() => {
     if (kpiFormData && connectionType) {

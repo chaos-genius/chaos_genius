@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import Select from 'react-select';
 
-import { useHistory, Link } from 'react-router-dom';
+import { useHistory, Link, useParams } from 'react-router-dom';
 
 import Slack from '../../assets/images/table/slack.svg';
 import Email from '../../assets/images/alerts/email.svg';
@@ -49,9 +49,14 @@ const EventAlertDestinationForm = ({
 }) => {
   const history = useHistory();
   const dispatch = useDispatch();
+  const kpiId = useParams().id;
   const path = history.location.pathname.split('/');
 
-  const { channelStatusData } = useSelector((state) => {
+  const {
+    createKpiAlertLoading,
+    updateKpiAlertLoading,
+    channelStatusData
+  } = useSelector((state) => {
     return state.alert;
   });
 
@@ -84,6 +89,19 @@ const EventAlertDestinationForm = ({
   }, [dispatch]);
 
   useEffect(() => {
+    if (path[2] === 'edit') {
+      setField(alertFormData?.alert_channel);
+
+      if (alertFormData?.alert_channel === 'email') {
+        setresp(
+          alertFormData?.alert_channel_conf?.[alertFormData.alert_channel] || []
+        );
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     if (channelStatusData && channelStatusData.length !== 0) {
       setOption(
         channelStatusData.map((channel) => {
@@ -113,8 +131,7 @@ const EventAlertDestinationForm = ({
   };
 
   const validateEmail = (email) => {
-    const re =
-      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
   };
 
@@ -126,7 +143,7 @@ const EventAlertDestinationForm = ({
     setError(obj);
     if (error.alert_channel === '') {
       if (path[2] === 'edit') {
-        // dispatch(updateKpiAlert(kpiId, alertFormData));
+        dispatch(updateKpiAlert(kpiId, alertFormData));
       } else {
         dispatch(createKpiAlert(alertFormData));
       }
@@ -145,6 +162,20 @@ const EventAlertDestinationForm = ({
             classNamePrefix="selectcategory"
             placeholder="Select"
             components={{ SingleValue: customSingleValue }}
+            value={{
+              label: (
+                <div className="optionlabel">
+                  <img
+                    src={
+                      alertFormData.alert_channel === 'email' ? Email : Slack
+                    }
+                    alt="datasource"
+                  />
+                  {alertFormData.alert_channel}
+                </div>
+              ),
+              value: `${alertFormData.alert_channel}`
+            }}
             onChange={(e) => {
               setAlertFormData({ ...alertFormData, alert_channel: e.value });
               setField(e.value);
@@ -206,7 +237,13 @@ const EventAlertDestinationForm = ({
         <button className="btn white-button" onClick={() => onBack()}>
           <span>Back</span>
         </button>
-        <button className="btn black-button" onClick={() => onSubmit()}>
+        <button
+          className={
+            createKpiAlertLoading || updateKpiAlertLoading
+              ? 'btn black-button btn-loading'
+              : 'btn black-button'
+          }
+          onClick={() => onSubmit()}>
           <div className="btn-spinner">
             <div className="spinner-border" role="status">
               <span className="visually-hidden">Loading...</span>

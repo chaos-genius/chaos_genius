@@ -113,7 +113,7 @@ const AlertFilter = ({
             onChange={(e) => onChangeStatusFilter(e)}
           />
           <label className="form-check-label" htmlFor="inactive">
-            In Active
+            Inactive
           </label>
         </div>
       </div>

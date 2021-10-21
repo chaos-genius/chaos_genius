@@ -318,7 +318,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   };
 
   const handleValueChange = (data) => {
-    setSchedule(data ? data.format('hh:mm:00') : '');
+    setSchedule(data ? data.format('HH:mm:00') : '');
   };
 
   const onSaveInput = (name) => {
@@ -680,7 +680,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                 }
                 focusOnOpen={true}
                 showSecond={false}
-                value={schedule && moment(schedule, 'hh:mm')}
+                value={schedule && moment(schedule, 'HH:mm')}
               />
 
               {edit &&

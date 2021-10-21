@@ -61,6 +61,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const [selectedDatasource, setSelectedDatasource] = useState();
   const [sourceDefinitionId, setSourceDefinitionId] = useState('');
   const [connectionName, setConnectionName] = useState('');
+  const [editedConnectionName, setEditedConnecitonName] = useState('');
   const [dsFormData, setDsFormData] = useState({});
   const [error, setError] = useState('');
   const [formError, setFormError] = useState({});
@@ -456,6 +457,9 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             value={connectionName}
             disabled={path[2] === 'edit' ? editableStatus('name') : false}
             onChange={(e) => {
+              if (path[2] === 'edit') {
+                setEditedConnecitonName(e.target.value);
+              }
               setConnectionName(e.target.value);
               setError('');
             }}
@@ -543,7 +547,12 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
                   ? 'btn black-button btn-loading'
                   : 'btn black-button'
               }
-              disabled={Object.keys(editedForm).length === 0 ? true : false}
+              disabled={
+                editedConnectionName === '' &&
+                Object.keys(editedForm).length === 0
+                  ? true
+                  : false
+              }
               onClick={() => {
                 updateDataSource();
               }}>

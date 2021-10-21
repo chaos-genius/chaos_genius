@@ -47,8 +47,6 @@ const getOption = (channel) => {
 };
 
 const KpiAlertDestinationForm = ({
-  event,
-  setEventSteps,
   setKpiSteps,
   setAlertFormData,
   alertFormData,
@@ -163,11 +161,7 @@ const KpiAlertDestinationForm = ({
 
   const onBack = () => {
     store.dispatch(RESET_ACTION);
-    if (event) {
-      setEventSteps(1);
-    } else {
-      setKpiSteps(1);
-    }
+    setKpiSteps(1);
   };
 
   const editableStatus = (type) => {

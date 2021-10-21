@@ -10,15 +10,24 @@ import Edit from '../../assets/images/disable-edit.svg';
 
 import './eventalertdestinationform.scss';
 
+import { CustomContent, CustomActions } from '../../utils/toast-helper';
+import { useToast } from 'react-toast-wnm';
+
 import {
   getChannelStatus,
   createKpiAlert,
   updateKpiAlert
 } from '../../redux/actions';
 
+import store from '../../redux/store';
+
 import ReactTagInput from '@pathofdev/react-tag-input';
 import '@pathofdev/react-tag-input/build/index.css';
 import { useDispatch, useSelector } from 'react-redux';
+
+const RESET_ACTION = {
+  type: 'RESET_ALERT_DATA_Data'
+};
 
 const customSingleValue = ({ data }) => (
   <div className="input-select">
@@ -50,12 +59,16 @@ const EventAlertDestinationForm = ({
   const history = useHistory();
   const dispatch = useDispatch();
   const kpiId = useParams().id;
+  const toast = useToast();
+
   const path = history.location.pathname.split('/');
 
   const {
     createKpiAlertLoading,
     updateKpiAlertLoading,
-    channelStatusData
+    channelStatusData,
+    createKpiAlertData,
+    updateKpiAlertData
   } = useSelector((state) => {
     return state.alert;
   });
@@ -81,6 +94,7 @@ const EventAlertDestinationForm = ({
   });
 
   const onBack = () => {
+    store.dispatch(RESET_ACTION);
     setEventSteps(1);
   };
 
@@ -115,6 +129,67 @@ const EventAlertDestinationForm = ({
       }
     });
   }, [channelStatusData]);
+
+  useEffect(() => {
+    if (createKpiAlertData && createKpiAlertData.status === 'success') {
+      history.push('/alerts');
+      customToast({
+        type: 'success',
+        header: 'Successfully created'
+      });
+    } else if (createKpiAlertData && createKpiAlertData.status === 'failure') {
+      customToast({
+        type: 'error',
+        header: 'Failed to create KPI',
+        description: createKpiAlertData.message
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createKpiAlertData]);
+
+  useEffect(() => {
+    if (updateKpiAlertData && updateKpiAlertData.status === 'success') {
+      customToast({
+        type: 'success',
+        header: 'Successfully updated'
+      });
+    } else if (updateKpiAlertData && updateKpiAlertData.status === 'failure') {
+      customToast({
+        type: 'error',
+        header: 'Failed to update selected alert',
+        description: updateKpiAlertData.message
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [updateKpiAlertData]);
+
+  const customToast = (data) => {
+    const { type, header, description } = data;
+    toast({
+      autoDismiss: true,
+      enableAnimation: true,
+      delay: type === 'success' ? '5000' : '60000',
+      backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
+      borderRadius: '6px',
+      color: '#222222',
+      position: 'bottom-right',
+      minWidth: '240px',
+      width: 'auto',
+      boxShadow: '4px 6px 32px -2px rgba(226, 226, 234, 0.24)',
+      padding: '17px 14px',
+      height: 'auto',
+      border: type === 'success' ? '1px solid #60ca9a' : '1px solid #FEF6F5',
+      type: type,
+      actions: <CustomActions />,
+      content: (
+        <CustomContent
+          header={header}
+          description={description}
+          failed={type === 'success' ? false : true}
+        />
+      )
+    });
+  };
 
   const handleChange = (tags) => {
     if (field === 'email') {

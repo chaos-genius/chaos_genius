@@ -45,7 +45,6 @@ const EventAlertForm = ({
     (state) => state.kpiExplorer
   );
 
-  const [setting, setSetting] = useState('');
   const [option, setOption] = useState([]);
   const [datasourceid, setDataSourceId] = useState('');
   const [query, setQuery] = useState('');
@@ -429,20 +428,18 @@ const EventAlertForm = ({
                 type="radio"
                 id="newentry"
                 name="alert"
-                value={setting}
-                checked={alertFormData.alert_settings === 'newentry'}
+                checked={alertFormData.alert_settings === 'new_entry_alert'}
                 onChange={(e) => {
-                  setSetting(e.target.value);
                   setError({ ...error, alert_settings: '' });
                   setAlertFormData({
                     ...alertFormData,
-                    alert_settings: 'newentry'
+                    alert_settings: 'new_entry_alert'
                   });
                 }}
               />
               <label
                 className={
-                  setting === 'newentry'
+                  alertFormData.alert_settings === 'new_entry_alert'
                     ? 'form-check-label active'
                     : 'form-check-label'
                 }
@@ -456,20 +453,18 @@ const EventAlertForm = ({
                 type="radio"
                 id="allchanges"
                 name="alert"
-                value={setting}
-                checked={alertFormData.alert_settings === 'allchanges'}
+                checked={alertFormData.alert_settings === 'change_alert'}
                 onChange={(e) => {
-                  setSetting(e.target.value);
                   setError({ ...error, alert_settings: '' });
                   setAlertFormData({
                     ...alertFormData,
-                    alert_settings: 'allchanges'
+                    alert_settings: 'change_alert'
                   });
                 }}
               />
               <label
                 className={
-                  setting === 'allchanges'
+                  alertFormData.alert_settings === 'change_alert'
                     ? 'form-check-label active'
                     : 'form-check-label'
                 }
@@ -483,20 +478,18 @@ const EventAlertForm = ({
                 type="radio"
                 id="alwayssend"
                 name="alert"
-                value={setting}
-                checked={alertFormData.alert_settings === 'alwayssend'}
+                checked={alertFormData.alert_settings === 'always_alert'}
                 onChange={(e) => {
-                  setSetting(e.target.value);
                   setError({ ...error, alert_settings: '' });
                   setAlertFormData({
                     ...alertFormData,
-                    alert_settings: 'alwayssend'
+                    alert_settings: 'always_alert'
                   });
                 }}
               />
               <label
                 className={
-                  setting === 'alwayssend'
+                  alertFormData.alert_settings === 'always_alert'
                     ? 'form-check-label active'
                     : 'form-check-label'
                 }

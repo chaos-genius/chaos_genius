@@ -47,18 +47,38 @@ const AddEventAlert = () => {
         <nav aria-label="breadcrumb">
           <ol className="breadcrumb">
             <li className="breadcrumb-item">
-              <Link to="/alerts/new">Alerts / New Alert</Link>
+              <Link to="/alerts">Alerts </Link>
             </li>
+            {path[2] !== 'edit' && (
+              <li className="breadcrumb-item">
+                <Link to="/alerts/new"> New Alert </Link>
+              </li>
+            )}
             <li className="breadcrumb-item active" aria-current="page">
-              {steps === 2 ? 'Alert Destination' : 'Event Alert'}
+              {path[2] !== 'edit'
+                ? steps === 1
+                  ? 'Event Alert'
+                  : ' Alert Destination'
+                : steps === 1
+                ? 'Edit Event Alert'
+                : 'Edit Alert Destination'}
             </li>
           </ol>
         </nav>
         {/* Back */}
         <div className="backnavigation">
-          <Link to="/alerts/new">
+          <Link to={`${path[2] === 'edit' ? '/alerts' : '/alerts/new'}`}>
             <img src={rightarrow} alt="Back" />
-            <span>{steps === 2 ? 'Alert Destination' : 'Event Alert'}</span>
+            <span>
+              {' '}
+              {path[2] !== 'edit'
+                ? steps === 1
+                  ? 'Event Alert'
+                  : ' Alert Destination'
+                : steps === 1
+                ? 'Edit Event Alert'
+                : 'Edit Alert Destination'}
+            </span>
           </Link>
         </div>
       </div>

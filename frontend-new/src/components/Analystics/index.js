@@ -514,10 +514,14 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                   }
                   setError({ ...error, anomaly_period: '' });
                 }}
-              />
+              />{' '}
               {edit &&
                 editableStatus('anomaly_period') === 'sensitive' &&
                 editAndSaveButton('anomaly_period')}
+            </div>{' '}
+            <div className="channel-tip">
+              {frequency.value === 'D' && <p>Min: 30 and Max: 90</p>}
+              {frequency.value === 'H' && <p>Min: 7 and Max: 21</p>}
             </div>
             {error.anomaly_period && (
               <div className="connection__fail">

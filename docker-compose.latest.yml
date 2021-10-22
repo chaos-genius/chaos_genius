@@ -2,9 +2,9 @@ version: "3.7"
 #https://github.com/compose-spec/compose-spec/blob/master/spec.md#using-extensions-as-fragments
 x-logging: &default-logging
   options:
-    max-size: "100m"
-    max-file: "5"
-  driver: json-file
+    fluentd-address: chaosgenius-fluentd:24224
+    fluentd-async: "true"
+  driver: fluentd
 
 services:
   chaosgenius-init:
@@ -30,6 +30,17 @@ services:
       - SOURCE_BING_ADS=${SOURCE_BING_ADS}
       - SOURCE_GOOGLE_BIG_QUERY=${SOURCE_GOOGLE_BIG_QUERY}
       - SOURCE_SNOWFLAKE=${SOURCE_SNOWFLAKE}
+    logging: *default-logging
+
+  chaosgenius-fluentd:
+    container_name: chaosgenius-fluentd
+    image: fluent/fluentd:latest
+    environment:
+      - FLUENTD_CONF=log.conf
+    ports:
+      - 24224:24224
+    volumes:
+      - ./setup/fluentd/log.conf:/fluentd/etc/log.conf
 
   chaosgenius-webapp:
     container_name: chaosgenius-webapp
@@ -43,6 +54,7 @@ services:
       - REACT_APP_BASE_URL=${REACT_APP_BASE_URL}
     stdin_open: true
     command: npm run start
+    logging: *default-logging
 
   chaosgenius-server:
     container_name: chaosgenius-server
@@ -76,6 +88,7 @@ services:
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
       - CACHE_DEFAULT_TIMEOUT=${CACHE_DEFAULT_TIMEOUT}
+    logging: *default-logging
 
   chaosgenius-db:
     container_name: chaosgenius-db
@@ -95,12 +108,14 @@ services:
       - cg-db:/var/lib/postgresql/data
     ports:
       - 5433:5432
+    logging: *default-logging
 
   chaosgenius-redis:
     container_name: chaosgenius-redis
     image: "redis:6.2-alpine"
     ports:
       - 6379:6379
+    logging: *default-logging
     
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler
@@ -130,6 +145,7 @@ services:
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
     depends_on:
       - chaosgenius-redis
+    logging: *default-logging
   
   chaosgenius-worker-analytics:
     container_name: chaosgenius-worker-analytics
@@ -160,6 +176,7 @@ services:
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db
+    logging: *default-logging
 
   chaosgenius-worker-alerts:
     container_name: chaosgenius-worker-alerts
@@ -190,6 +207,7 @@ services:
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db
+    logging: *default-logging
 
   # == airbyte services start here ==
   #

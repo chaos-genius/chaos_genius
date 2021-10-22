@@ -246,12 +246,12 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
 
     if (frequency.value === 'D') {
       if (!(30 <= anomalyPeriod && 90 >= anomalyPeriod)) {
-        obj['anomaly_period'] = 'Enter correct time';
+        obj['anomaly_period'] = 'Enter Valid Time Window';
       }
     }
     if (frequency.value === 'H') {
       if (!(7 <= anomalyPeriod && 21 >= anomalyPeriod)) {
-        obj['anomaly_period'] = 'Enter correct time';
+        obj['anomaly_period'] = 'Enter Valid Time Window';
       }
     }
     if (modalFrequency.value === '' || modalFrequency.value === null) {

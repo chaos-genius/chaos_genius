@@ -150,7 +150,7 @@ class StaticEventAlertController:
         """
         recipient_emails = self.alert_info["alert_channel_conf"].get("email", [])
         if recipient_emails:
-            subject = f"Static Alert Notification: {self.alert_info['alert_name']} [ID - {self.alert_info['id']}] [Type - {self.alert_info['alert_settings']}]"
+            subject = f"Event Alert Notification: [ID - {self.alert_info['id']}] [Type - {self.alert_info['alert_settings']}]"
             message = self.alert_info["alert_message"]
             files = []
             if not change_df.empty:
@@ -160,7 +160,38 @@ class StaticEventAlertController:
                     change_df.to_csv(buffer)
                     file_detail["fdata"] = buffer.getvalue()
                 files = [file_detail]
-            test = send_static_alert_email(recipient_emails, subject, message, self.alert_info, files)
+            
+            test = self.send_template_email('email_event_alert.html', 
+                                            recipient_emails, 
+                                            subject, 
+                                            files,
+                                            alert_message = message,
+                                            alert_frequency = self.alert_info['alert_frequency'].capitalize(),
+                                            alert_name = self.alert_info['alert_name']
+                                        )
+            return test
+        else:
+            logger.info(f"No email recipients available for Alert ID - {self.alert_info['id']} was successfully sent")
+            return False
+
+    def send_template_email(self, template, recipient_emails, subject, files, **kwargs):
+        """Sends an email using a template."""
+
+        path = os.path.join(os.path.dirname(__file__), 'email_templates')
+        env = Environment(
+            loader = FileSystemLoader(path),
+            autoescape = select_autoescape(['html', 'xml'])
+        )
+
+        template = env.get_template(template)
+        test = send_static_alert_email(recipient_emails, subject, template.render(**kwargs), self.alert_info, files)
+
+        if test == True:
+            logger.info(f"The email for Alert ID - {self.alert_info['id']} was successfully sent")
+        else:
+            logger.debug(f"The email for Alert ID - {self.alert_info['id']} has not been sent")
+        
+        return test
 
 
 class AnomalyAlertController:

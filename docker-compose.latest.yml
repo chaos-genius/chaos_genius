@@ -2,7 +2,7 @@ version: "3.7"
 #https://github.com/compose-spec/compose-spec/blob/master/spec.md#using-extensions-as-fragments
 x-logging: &default-logging
   options:
-    fluentd-address: chaosgenius-fluentd:24224
+    fluentd-address: localhost:24224
     fluentd-async: "true"
   driver: fluentd
 
@@ -30,17 +30,19 @@ services:
       - SOURCE_BING_ADS=${SOURCE_BING_ADS}
       - SOURCE_GOOGLE_BIG_QUERY=${SOURCE_GOOGLE_BIG_QUERY}
       - SOURCE_SNOWFLAKE=${SOURCE_SNOWFLAKE}
-    logging: *default-logging
+    # logging: *default-logging
 
   chaosgenius-fluentd:
     container_name: chaosgenius-fluentd
     image: fluent/fluentd:latest
     environment:
       - FLUENTD_CONF=log.conf
+      - FLUENT_UID=0
     ports:
       - 24224:24224
     volumes:
       - ./setup/fluentd/log.conf:/fluentd/etc/log.conf
+      - ./logs:/var/log/fluent
 
   chaosgenius-webapp:
     container_name: chaosgenius-webapp
@@ -55,6 +57,8 @@ services:
     stdin_open: true
     command: npm run start
     logging: *default-logging
+    depends_on:
+      - chaosgenius-fluentd
 
   chaosgenius-server:
     container_name: chaosgenius-server
@@ -65,6 +69,7 @@ services:
     depends_on:
       - chaosgenius-db
       - server
+      - chaosgenius-fluentd
     environment:
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
@@ -109,6 +114,8 @@ services:
     ports:
       - 5433:5432
     logging: *default-logging
+    depends_on:
+      - chaosgenius-fluentd
 
   chaosgenius-redis:
     container_name: chaosgenius-redis
@@ -116,6 +123,8 @@ services:
     ports:
       - 6379:6379
     logging: *default-logging
+    depends_on:
+      - chaosgenius-fluentd
     
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler
@@ -145,6 +154,7 @@ services:
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
     depends_on:
       - chaosgenius-redis
+      - chaosgenius-fluentd
     logging: *default-logging
   
   chaosgenius-worker-analytics:
@@ -176,6 +186,7 @@ services:
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db
+      - chaosgenius-fluentd
     logging: *default-logging
 
   chaosgenius-worker-alerts:
@@ -207,6 +218,7 @@ services:
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db
+      - chaosgenius-fluentd
     logging: *default-logging
 
   # == airbyte services start here ==
@@ -223,6 +235,8 @@ services:
       - HACK_LOCAL_ROOT_PARENT=${HACK_LOCAL_ROOT_PARENT}
     volumes:
       - ${HACK_LOCAL_ROOT_PARENT}:/local_parent
+    depends_on:
+      - chaosgenius-fluentd
   db:
     image: airbyte/db:${VERSION}
     logging: *default-logging
@@ -233,6 +247,8 @@ services:
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
     volumes:
       - db:/var/lib/postgresql/data
+    depends_on:
+      - chaosgenius-fluentd
   scheduler:
     image: airbyte/scheduler:${VERSION}
     logging: *default-logging
@@ -274,6 +290,8 @@ services:
       - workspace:${WORKSPACE_ROOT}
       - ${LOCAL_ROOT}:${LOCAL_ROOT}
       - data:${CONFIG_ROOT}
+    depends_on:
+      - chaosgenius-fluentd
   server:
     image: airbyte/server:${VERSION}
     logging: *default-logging
@@ -310,6 +328,8 @@ services:
       - workspace:${WORKSPACE_ROOT}
       - data:${CONFIG_ROOT}
       - ${LOCAL_ROOT}:${LOCAL_ROOT}
+    depends_on:
+      - chaosgenius-fluentd
   webapp:
     image: airbyte/webapp:${VERSION}
     logging: *default-logging
@@ -327,6 +347,8 @@ services:
       - OPENREPLAY=${OPENREPLAY:-}
       - TRACKING_STRATEGY=${TRACKING_STRATEGY}
       - INTERNAL_API_HOST=${INTERNAL_API_HOST}
+    depends_on:
+      - chaosgenius-fluentd
   airbyte-temporal:
     image: temporalio/auto-setup:1.7.0
     logging: *default-logging
@@ -344,6 +366,8 @@ services:
       - LOG_LEVEL=${LOG_LEVEL}
     volumes:
       - ./temporal/dynamicconfig:/etc/temporal/config/dynamicconfig
+    depends_on:
+      - chaosgenius-fluentd
 
 volumes:
   workspace:

@@ -90,12 +90,12 @@ export const getConnectionTypeFailure = () => {
 
 export const getConnectionType = () => {
   return async (dispatch) => {
-    dispatch(getConnectionTypeRequested);
+    dispatch(getConnectionTypeRequested());
     const { data, error, status } = await getRequest({
       url: CONNECTION_TYPE
     });
     if (error) {
-      dispatch(getConnectionTypeFailure);
+      dispatch(getConnectionTypeFailure());
     } else if (data && status === 200) {
       dispatch(getConnectionTypeSuccess(data.data));
     }

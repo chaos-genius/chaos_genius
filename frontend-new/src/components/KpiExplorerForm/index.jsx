@@ -229,7 +229,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     toast({
       autoDismiss: true,
       enableAnimation: true,
-      delay: type === 'success' ? '5000' : '60000',
+      delay: type === 'success' ? '5000' : '30000',
       backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
       borderRadius: '6px',
       color: '#222222',
@@ -530,7 +530,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         formdata.dataset &&
         formdata.metriccolumns &&
         formdata.aggregate &&
-        formdata.datetimecolumns) !== ''
+        formdata.datetimecolumns) !== '' &&
+      formdata.dimensions.length !== 0
     ) {
       const kpiInfo = {
         name: formdata.kpiname,
@@ -898,6 +899,12 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                   dimensions: e.map((el) => el.value)
                 });
                 setOption({ ...option, datetime_column: e.value });
+                setErrorMsg((prev) => {
+                  return {
+                    ...prev,
+                    dimension: false
+                  };
+                });
               }}
             />
             {errorMsg.dimension === true ? (

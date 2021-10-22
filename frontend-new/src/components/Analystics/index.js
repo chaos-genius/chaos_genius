@@ -215,7 +215,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     toast({
       autoDismiss: true,
       enableAnimation: true,
-      delay: type === 'success' ? '5000' : '60000',
+      delay: type === 'success' ? '5000' : '30000',
       backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
       borderRadius: '6px',
       color: '#222222',
@@ -240,9 +240,19 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
 
   const onSettingSave = () => {
     var obj = { ...error };
-
     if (anomalyPeriod === '' || anomalyPeriod === 0) {
       obj['anomaly_period'] = 'Enter Time Window';
+    }
+
+    if (frequency.value === 'D') {
+      if (!(30 <= anomalyPeriod && 90 >= anomalyPeriod)) {
+        obj['anomaly_period'] = 'Enter Valid Time Window';
+      }
+    }
+    if (frequency.value === 'H') {
+      if (!(7 <= anomalyPeriod && 21 >= anomalyPeriod)) {
+        obj['anomaly_period'] = 'Enter Valid Time Window';
+      }
     }
     if (modalFrequency.value === '' || modalFrequency.value === null) {
       obj['model_frequency'] = 'Enter Model Frequency';
@@ -257,6 +267,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
       obj['frequency'] = 'Enter Frequency';
     }
     setError(obj);
+
     if (
       obj.anomaly_period === '' &&
       obj.model_frequency === '' &&
@@ -307,7 +318,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   };
 
   const handleValueChange = (data) => {
-    setSchedule(data ? data.format('hh:mm:00') : '');
+    setSchedule(data ? data.format('HH:mm:00') : '');
   };
 
   const onSaveInput = (name) => {
@@ -399,15 +410,84 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
           </div>
         </div>
         <div className="form-container">
+          {' '}
           <div className="form-group">
-            <label>Time Window</label>
+            <label className="help-label">
+              Time Series Frequency
+              <Tooltip
+                className="timeseriesfrequency-tooltip"
+                direction="right"
+                content={
+                  <span>
+                    time series granularity to be considered for anomaly
+                    detection
+                  </span>
+                }>
+                <img src={Help} alt="Help" />
+              </Tooltip>
+            </label>
+            <div className="editable-field">
+              <Select
+                options={option.frequency}
+                classNamePrefix="selectcategory"
+                placeholder="select"
+                isSearchable={false}
+                value={enabled.frequency ? frequency : sensitiveData.frequency}
+                isDisabled={
+                  edit
+                    ? editableStatus('frequency') === 'editable'
+                      ? false
+                      : editableStatus('frequency') === 'sensitive'
+                      ? enabled.frequency
+                      : true
+                    : false
+                }
+                onChange={(e) => {
+                  if (enabled.frequency) {
+                    setFrequency(e);
+                    if (e.value === 'D') {
+                      setAnomalyPeriod(60);
+                    } else if (e.value === 'H') {
+                      setAnomalyPeriod(14);
+                    }
+                  } else {
+                    setSensitiveData({ ...sensitiveData, frequency: e });
+                  }
+                  setError({ ...error, frequency: '' });
+                }}
+              />
+              {edit &&
+                editableStatus('frequency') === 'sensitive' &&
+                editAndSaveButton('frequency')}
+            </div>
+            {error.frequency && (
+              <div className="connection__fail">
+                <p>{error.frequency}</p>
+              </div>
+            )}
+          </div>
+          <div className="form-group">
+            <label>Time Window (No of Days)</label>{' '}
             <div className="editable-field">
               <input
                 type="number"
                 className="form-control"
                 name="anomaly_period"
                 placeholder="90 Days"
-                min="0"
+                min={
+                  frequency.value === 'D'
+                    ? '30'
+                    : frequency.value === 'H'
+                    ? '7'
+                    : '0'
+                }
+                max={
+                  frequency.value === 'D'
+                    ? '90'
+                    : frequency.value === 'H'
+                    ? '21'
+                    : '100'
+                }
                 value={
                   enabled.anomaly_period
                     ? anomalyPeriod
@@ -434,10 +514,14 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                   }
                   setError({ ...error, anomaly_period: '' });
                 }}
-              />
+              />{' '}
               {edit &&
                 editableStatus('anomaly_period') === 'sensitive' &&
                 editAndSaveButton('anomaly_period')}
+            </div>{' '}
+            <div className="channel-tip">
+              {frequency.value === 'D' && <p>Min: 30 and Max: 90</p>}
+              {frequency.value === 'H' && <p>Min: 7 and Max: 21</p>}
             </div>
             {error.anomaly_period && (
               <div className="connection__fail">
@@ -583,57 +667,6 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
             )}
           </div>
           <div className="form-group">
-            <label className="help-label">
-              Time Series Frequency
-              <Tooltip
-                className="timeseriesfrequency-tooltip"
-                direction="right"
-                content={
-                  <span>
-                    time series granularity to be considered for anomaly
-                    detection
-                  </span>
-                }>
-                <img src={Help} alt="Help" />
-              </Tooltip>
-            </label>
-            <div className="editable-field">
-              <Select
-                options={option.frequency}
-                classNamePrefix="selectcategory"
-                placeholder="select"
-                isSearchable={false}
-                value={enabled.frequency ? frequency : sensitiveData.frequency}
-                isDisabled={
-                  edit
-                    ? editableStatus('frequency') === 'editable'
-                      ? false
-                      : editableStatus('frequency') === 'sensitive'
-                      ? enabled.frequency
-                      : true
-                    : false
-                }
-                onChange={(e) => {
-                  if (enabled.frequency) {
-                    setFrequency(e);
-                  } else {
-                    setSensitiveData({ ...sensitiveData, frequency: e });
-                  }
-                  setError({ ...error, frequency: '' });
-                }}
-              />
-              {edit &&
-                editableStatus('frequency') === 'sensitive' &&
-                editAndSaveButton('frequency')}
-            </div>
-            {error.frequency && (
-              <div className="connection__fail">
-                <p>{error.frequency}</p>
-              </div>
-            )}
-          </div>
-
-          <div className="form-group">
             <label>Schedule</label>
             <div className="editable-field">
               <TimePicker
@@ -651,7 +684,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                 }
                 focusOnOpen={true}
                 showSecond={false}
-                value={schedule && moment(schedule, 'hh:mm')}
+                value={schedule && moment(schedule, 'HH:mm')}
               />
 
               {edit &&

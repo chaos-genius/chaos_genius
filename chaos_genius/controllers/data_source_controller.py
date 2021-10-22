@@ -1,5 +1,11 @@
 from collections import defaultdict
 from chaos_genius.databases.models.data_source_model import DataSource
+from chaos_genius.extensions import integration_connector as connector
+from chaos_genius.third_party.integration_server_config import (
+    SOURCE_WHITELIST_AND_TYPE
+)
+from chaos_genius.connectors import test_connection
+
 
 def get_datasource_data_from_id(n: int, as_obj: bool = False) -> dict:
     """Returns the corresponding Data-Source data for the given Data-Source ID 
@@ -52,3 +58,26 @@ def mask_sensitive_info(data_source_type_def: dict, data_source_details: dict) -
                 else:
                     masked_dict[prop][inner_prop] = inner_value
     return masked_dict
+
+
+def test_data_source(payload: dict) -> dict:
+    """This will be used for testing the data source connection status
+
+    Args:
+        payload (dict): payload containing the source configuration and credentials
+
+    Returns:
+        dict: status of the connection
+    """
+    is_third_party = SOURCE_WHITELIST_AND_TYPE[payload["sourceDefinitionId"]]
+    if is_third_party:
+        connector_client = connector.connection
+        payload.pop('connection_type', None)
+        connection_status = connector_client.test_connection(payload)
+    else:
+        db_status, message = test_connection(payload)
+        connection_status = {
+            "message": message,
+            "status": "succeeded" if db_status is True else "failed"
+        }
+    return connection_status

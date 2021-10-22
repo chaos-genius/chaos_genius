@@ -61,6 +61,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const [selectedDatasource, setSelectedDatasource] = useState();
   const [sourceDefinitionId, setSourceDefinitionId] = useState('');
   const [connectionName, setConnectionName] = useState('');
+  const [editedConnectionName, setEditedConnecitonName] = useState('');
   const [dsFormData, setDsFormData] = useState({});
   const [error, setError] = useState('');
   const [formError, setFormError] = useState({});
@@ -79,7 +80,8 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     datasourceData,
     datasourceLoading,
     updateDatasourceLoading,
-    updateDatasource
+    updateDatasource,
+    connectionTypeLoading
   } = useSelector((state) => state.dataSource);
 
   const getEditDatasource = () => {
@@ -114,20 +116,26 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   }, [connectionType]);
 
   useEffect(() => {
-    if (datasourceData && datasourceData.length !== 0 && path[2] === 'edit') {
+    if (
+      datasourceData &&
+      datasourceData.length !== 0 &&
+      connectionType &&
+      connectionType.length !== 0 &&
+      path[2] === 'edit'
+    ) {
       setConnectionName(datasourceData?.name);
       setDsFormData(datasourceData?.sourceForm);
       findDataType(datasourceData);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [datasourceData]);
+  }, [datasourceData, connectionType]);
 
   const customToast = (data) => {
     const { type, header, description } = data;
     toast({
       autoDismiss: true,
       enableAnimation: true,
-      delay: type === 'success' ? '5000' : '60000',
+      delay: type === 'success' ? '5000' : '30000',
       backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
       borderRadius: '6px',
       color: '#222222',
@@ -190,7 +198,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       });
     } else if (
       updateDatasource &&
-      updateDatasource.status === 'failed' &&
+      updateDatasource.status === 'failure' &&
       path[2] === 'edit'
     ) {
       customToast({
@@ -431,7 +439,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     setStatus('');
   };
 
-  if (metaInfoLoading || datasourceLoading) {
+  if (metaInfoLoading || datasourceLoading || connectionTypeLoading) {
     return (
       <div className="load ">
         <div className="preload"></div>
@@ -449,6 +457,9 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             value={connectionName}
             disabled={path[2] === 'edit' ? editableStatus('name') : false}
             onChange={(e) => {
+              if (path[2] === 'edit') {
+                setEditedConnecitonName(e.target.value);
+              }
               setConnectionName(e.target.value);
               setError('');
             }}
@@ -536,7 +547,12 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
                   ? 'btn black-button btn-loading'
                   : 'btn black-button'
               }
-              disabled={selectedDatasource !== undefined ? false : true}
+              disabled={
+                editedConnectionName === '' &&
+                Object.keys(editedForm).length === 0
+                  ? true
+                  : false
+              }
               onClick={() => {
                 updateDataSource();
               }}>

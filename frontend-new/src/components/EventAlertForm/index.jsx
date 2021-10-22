@@ -588,29 +588,34 @@ const EventAlertForm = ({
         </div>
         <div className="form-group alert-textarea">
           <label>Message Body *</label>
-          <textarea
-            placeholder="Enter Message Here"
-            value={
-              enabled.alert_message
-                ? alertFormData.alert_message
-                : sensitiveData.alert_message
-            }
-            disabled={
-              path[2] === 'edit'
-                ? editableStatus('alert_message') === 'editable'
-                  ? false
-                  : editableStatus('alert_message') === 'sensitive'
-                  ? enabled.alert_message
-                  : true
-                : false
-            }
-            onChange={(e) => {
-              setAlertFormData({
-                ...alertFormData,
-                alert_message: e.target.value
-              });
-              setError({ ...error, alert_message: '' });
-            }}></textarea>
+          <div className="editable-field">
+            <textarea
+              placeholder="Enter Message Here"
+              value={
+                enabled.alert_message
+                  ? alertFormData.alert_message
+                  : sensitiveData.alert_message
+              }
+              disabled={
+                path[2] === 'edit'
+                  ? editableStatus('alert_message') === 'editable'
+                    ? false
+                    : editableStatus('alert_message') === 'sensitive'
+                    ? enabled.alert_message
+                    : true
+                  : false
+              }
+              onChange={(e) => {
+                setAlertFormData({
+                  ...alertFormData,
+                  alert_message: e.target.value
+                });
+                setError({ ...error, alert_message: '' });
+              }}></textarea>
+            {path[2] === 'edit' &&
+              editableStatus('alert_message') === 'sensitive' &&
+              editAndSaveButton('alert_message')}
+          </div>
           {error.alert_message && (
             <div className="connection__fail">
               <p>{error.alert_message}</p>

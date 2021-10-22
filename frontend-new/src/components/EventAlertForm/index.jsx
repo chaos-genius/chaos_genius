@@ -471,82 +471,114 @@ const EventAlertForm = ({
 
         <div className="form-group">
           <label>Alert Settings *</label>
-          <div className="alert-setting">
-            <div className="form-check">
-              <input
-                className="form-check-input"
-                type="radio"
-                id="newentry"
-                name="alert"
-                checked={alertFormData.alert_settings === 'new_entry_alert'}
-                onChange={(e) => {
-                  setError({ ...error, alert_settings: '' });
-                  setAlertFormData({
-                    ...alertFormData,
-                    alert_settings: 'new_entry_alert'
-                  });
-                }}
-              />
-              <label
-                className={
-                  alertFormData.alert_settings === 'new_entry_alert'
-                    ? 'form-check-label active'
-                    : 'form-check-label'
-                }
-                for="newentry">
-                New Entry
-              </label>
+          <div className="editable-field">
+            <div className="alert-setting">
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  id="newentry"
+                  name="alert"
+                  disabled={
+                    path[2] === 'edit'
+                      ? editableStatus('alert_settings') === 'editable'
+                        ? false
+                        : editableStatus('alert_settings') === 'sensitive'
+                        ? enabled.alert_settings
+                        : true
+                      : false
+                  }
+                  checked={alertFormData.alert_settings === 'new_entry_alert'}
+                  onChange={(e) => {
+                    setError({ ...error, alert_settings: '' });
+                    setAlertFormData({
+                      ...alertFormData,
+                      alert_settings: 'new_entry_alert'
+                    });
+                  }}
+                />
+                <label
+                  className={
+                    alertFormData.alert_settings === 'new_entry_alert'
+                      ? 'form-check-label active'
+                      : 'form-check-label'
+                  }
+                  for="newentry">
+                  New Entry
+                </label>
+              </div>
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  id="allchanges"
+                  name="alert"
+                  checked={alertFormData.alert_settings === 'change_alert'}
+                  disabled={
+                    path[2] === 'edit'
+                      ? editableStatus('alert_settings') === 'editable'
+                        ? false
+                        : editableStatus('alert_settings') === 'sensitive'
+                        ? enabled.alert_settings
+                        : true
+                      : false
+                  }
+                  onChange={(e) => {
+                    setError({ ...error, alert_settings: '' });
+                    setAlertFormData({
+                      ...alertFormData,
+                      alert_settings: 'change_alert'
+                    });
+                  }}
+                />
+                <label
+                  className={
+                    alertFormData.alert_settings === 'change_alert'
+                      ? 'form-check-label active'
+                      : 'form-check-label'
+                  }
+                  for="allchanges">
+                  All Changes
+                </label>
+              </div>
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  id="alwayssend"
+                  name="alert"
+                  disabled={
+                    path[2] === 'edit'
+                      ? editableStatus('alert_settings') === 'editable'
+                        ? false
+                        : editableStatus('alert_settings') === 'sensitive'
+                        ? enabled.alert_settings
+                        : true
+                      : false
+                  }
+                  checked={alertFormData.alert_settings === 'always_alert'}
+                  onChange={(e) => {
+                    setError({ ...error, alert_settings: '' });
+                    setAlertFormData({
+                      ...alertFormData,
+                      alert_settings: 'always_alert'
+                    });
+                  }}
+                />
+                <label
+                  className={
+                    alertFormData.alert_settings === 'always_alert'
+                      ? 'form-check-label active'
+                      : 'form-check-label'
+                  }
+                  for="alwayssend">
+                  Always Send
+                </label>
+              </div>
             </div>
-            <div className="form-check">
-              <input
-                className="form-check-input"
-                type="radio"
-                id="allchanges"
-                name="alert"
-                checked={alertFormData.alert_settings === 'change_alert'}
-                onChange={(e) => {
-                  setError({ ...error, alert_settings: '' });
-                  setAlertFormData({
-                    ...alertFormData,
-                    alert_settings: 'change_alert'
-                  });
-                }}
-              />
-              <label
-                className={
-                  alertFormData.alert_settings === 'change_alert'
-                    ? 'form-check-label active'
-                    : 'form-check-label'
-                }
-                for="allchanges">
-                All Changes
-              </label>
-            </div>
-            <div className="form-check">
-              <input
-                className="form-check-input"
-                type="radio"
-                id="alwayssend"
-                name="alert"
-                checked={alertFormData.alert_settings === 'always_alert'}
-                onChange={(e) => {
-                  setError({ ...error, alert_settings: '' });
-                  setAlertFormData({
-                    ...alertFormData,
-                    alert_settings: 'always_alert'
-                  });
-                }}
-              />
-              <label
-                className={
-                  alertFormData.alert_settings === 'always_alert'
-                    ? 'form-check-label active'
-                    : 'form-check-label'
-                }
-                for="alwayssend">
-                Always Send
-              </label>
-            </div>
+            {path[2] === 'edit' &&
+              editableStatus('alert_settings') === 'sensitive' &&
+              editAndSaveButton('alert_settings')}
           </div>
           {error.alert_settings && (
             <div className="connection__fail">

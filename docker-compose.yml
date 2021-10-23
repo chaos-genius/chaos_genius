@@ -2,9 +2,9 @@ version: "3.7"
 #https://github.com/compose-spec/compose-spec/blob/master/spec.md#using-extensions-as-fragments
 x-logging: &default-logging
   options:
-    max-size: "100m"
-    max-file: "5"
-  driver: json-file
+    fluentd-address: localhost:24224
+    fluentd-async: "true"
+  driver: fluentd
 
 services:
   chaosgenius-init:
@@ -31,9 +31,22 @@ services:
       - SOURCE_GOOGLE_BIG_QUERY=${SOURCE_GOOGLE_BIG_QUERY}
       - SOURCE_SNOWFLAKE=${SOURCE_SNOWFLAKE}
 
+  chaosgenius-fluentd:
+    container_name: chaosgenius-fluentd
+    image: fluent/fluentd:latest
+    environment:
+      - FLUENTD_CONF=log.conf
+      - FLUENT_UID=0
+    ports:
+      - 24224:24224
+    volumes:
+      - ./setup/fluentd/log.conf:/fluentd/etc/log.conf
+      - ./logs:/var/log/fluent
+
   chaosgenius-webapp:
     container_name: chaosgenius-webapp
     image: chaosgenius/chaosgenius-webapp:0.1.2
+    logging: *default-logging
     ports:
       - "8080:3000"
     environment:
@@ -43,16 +56,20 @@ services:
       - REACT_APP_BASE_URL=${REACT_APP_BASE_URL}
     stdin_open: true
     command: npm run start
+    depends_on:
+      - chaosgenius-fluentd
 
   chaosgenius-server:
     container_name: chaosgenius-server
     image: chaosgenius/chaosgenius-server:0.1.2
+    logging: *default-logging
     command: sh setup/run-backend-docker.sh
     ports:
       - "5000:5000"
     depends_on:
       - chaosgenius-db
       - server
+      - chaosgenius-fluentd
     environment:
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
@@ -80,6 +97,7 @@ services:
   chaosgenius-db:
     container_name: chaosgenius-db
     image: postgres:13
+    logging: *default-logging
     restart: always
     healthcheck:
       test: [ "CMD", "pg_isready", "-q", "-d", "chaosgenius_data", "-U", "postgres" ]
@@ -95,16 +113,22 @@ services:
       - cg-db:/var/lib/postgresql/data
     ports:
       - 5433:5432
+    depends_on:
+      - chaosgenius-fluentd
 
   chaosgenius-redis:
     container_name: chaosgenius-redis
     image: "redis:6.2-alpine"
+    logging: *default-logging
     ports:
       - 6379:6379
+    depends_on:
+      - chaosgenius-fluentd
     
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler
     image: chaosgenius/chaosgenius-server:0.1.2
+    logging: *default-logging
     command: celery -A run.celery beat --loglevel=DEBUG
     environment:
       - FLASK_APP=${FLASK_APP}
@@ -130,10 +154,12 @@ services:
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
     depends_on:
       - chaosgenius-redis
+      - chaosgenius-fluentd
   
   chaosgenius-worker-analytics:
     container_name: chaosgenius-worker-analytics
     image: chaosgenius/chaosgenius-server:0.1.2
+    logging: *default-logging
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
     environment:
       - FLASK_APP=${FLASK_APP}
@@ -160,10 +186,12 @@ services:
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db
+      - chaosgenius-fluentd
 
   chaosgenius-worker-alerts:
     container_name: chaosgenius-worker-alerts
     image: chaosgenius/chaosgenius-server:0.1.2
+    logging: *default-logging
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
     environment:
       - FLASK_APP=${FLASK_APP}
@@ -190,6 +218,7 @@ services:
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db
+      - chaosgenius-fluentd
 
   # == airbyte services start here ==
   #

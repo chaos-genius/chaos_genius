@@ -38,21 +38,21 @@ CELERYBEAT_SCHEDULE = {
         'schedule': crontab(hour="3"), # Daily: at 3am
         'args': ('daily',)
     },
-    'alerts-hourly': {
-        'task': 'chaos_genius.jobs.alert_tasks.check_alerts',
-        'schedule': crontab(hour="*"), # Hourly: at 0th minute
-        'args': ('hourly',)
-    },
-    'alerts-every-15-minute': {
-        'task': 'chaos_genius.jobs.alert_tasks.check_alerts',
-        'schedule': crontab(minute="*/15"), # Every 15 minutes
-        'args': ('every_15_minute',)
-    },
-    'alerts-every-minute': {
-        'task': 'chaos_genius.jobs.alert_tasks.check_alerts',
-        'schedule': crontab(minute="*"), # Every minutes
-        'args': ('every_minute',)
-    }
+    # 'alerts-hourly': {
+    #     'task': 'chaos_genius.jobs.alert_tasks.check_alerts',
+    #     'schedule': crontab(hour="*"), # Hourly: at 0th minute
+    #     'args': ('hourly',)
+    # },
+    # 'alerts-every-15-minute': {
+    #     'task': 'chaos_genius.jobs.alert_tasks.check_alerts',
+    #     'schedule': crontab(minute="*/15"), # Every 15 minutes
+    #     'args': ('every_15_minute',)
+    # },
+    # 'alerts-every-minute': {
+    #     'task': 'chaos_genius.jobs.alert_tasks.check_alerts',
+    #     'schedule': crontab(minute="*"), # Every minutes
+    #     'args': ('every_minute',)
+    # }
 }
 
 CELERY_ROUTES = {

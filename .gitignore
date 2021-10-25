@@ -8,6 +8,9 @@ instance/*
 .env.dev
 .alert
 
+### React App ###
+frontend-new/.env
+
 
 ### Flask.Python Stack ###
 # Byte-compiled / optimized / DLL files

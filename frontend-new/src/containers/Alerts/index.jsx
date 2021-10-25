@@ -93,7 +93,7 @@ const Alerts = () => {
     toast({
       autoDismiss: true,
       enableAnimation: true,
-      delay: type === 'success' ? '5000' : '60000',
+      delay: type === 'success' ? '5000' : '30000',
       backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
       borderRadius: '6px',
       color: '#222222',

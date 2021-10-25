@@ -28,6 +28,7 @@ import {
 const initialState = {
   dataSourcesList: '',
   connectionType: [],
+  connectionTypeLoading: false,
   testConnectionResponse: [],
   createDatasourceLoading: false,
   createDatasourceResponse: [],
@@ -75,19 +76,21 @@ export const dataSource = (state = initialState, action) => {
     case CONNECTIONTYPEREQUEST: {
       return {
         ...state,
-
+        connectionTypeLoading: true,
         error: false
       };
     }
     case CONNECTIONTYPESUCCESS: {
       return {
         ...state,
+        connectionTypeLoading: false,
         connectionType: action.data
       };
     }
     case CONNECTIONTYPEFAILURE: {
       return {
         ...state,
+        connectionTypeLoading: false,
         error: true
       };
     }

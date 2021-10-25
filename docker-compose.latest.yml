@@ -30,7 +30,6 @@ services:
       - SOURCE_BING_ADS=${SOURCE_BING_ADS}
       - SOURCE_GOOGLE_BIG_QUERY=${SOURCE_GOOGLE_BIG_QUERY}
       - SOURCE_SNOWFLAKE=${SOURCE_SNOWFLAKE}
-    # logging: *default-logging
 
   chaosgenius-fluentd:
     container_name: chaosgenius-fluentd

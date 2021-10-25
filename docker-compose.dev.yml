@@ -48,7 +48,6 @@ services:
     build:
       context: ./frontend-new
       dockerfile: Dockerfile
-    logging: *default-logging
     ports:
       - "8080:3000"
     environment:
@@ -58,13 +57,13 @@ services:
       - REACT_APP_BASE_URL=${REACT_APP_BASE_URL}
     stdin_open: true
     command: npm run start
+    logging: *default-logging
     depends_on:
       - chaosgenius-fluentd
 
   chaosgenius-server:
     container_name: chaosgenius-server
     build: .
-    logging: *default-logging
     command: sh setup/run-backend-docker.sh
     ports:
       - "5000:5000"
@@ -94,11 +93,12 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - CACHE_DEFAULT_TIMEOUT=${CACHE_DEFAULT_TIMEOUT}
+    logging: *default-logging
 
   chaosgenius-db:
     container_name: chaosgenius-db
     image: postgres:13
-    logging: *default-logging
     restart: always
     healthcheck:
       test: [ "CMD", "pg_isready", "-q", "-d", "chaosgenius_data", "-U", "postgres" ]
@@ -114,22 +114,22 @@ services:
       - cg-db:/var/lib/postgresql/data
     ports:
       - 5433:5432
+    logging: *default-logging
     depends_on:
       - chaosgenius-fluentd
 
   chaosgenius-redis:
     container_name: chaosgenius-redis
     image: "redis:6.2-alpine"
-    logging: *default-logging
     ports:
       - 6379:6379
+    logging: *default-logging
     depends_on:
       - chaosgenius-fluentd
     
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler
     build: .
-    logging: *default-logging
     command: celery -A run.celery beat --loglevel=DEBUG
     environment:
       - FLASK_APP=${FLASK_APP}
@@ -156,11 +156,11 @@ services:
     depends_on:
       - chaosgenius-redis
       - chaosgenius-fluentd
+    logging: *default-logging
   
   chaosgenius-worker-analytics:
     container_name: chaosgenius-worker-analytics
     build: .
-    logging: *default-logging
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
     environment:
       - FLASK_APP=${FLASK_APP}
@@ -188,11 +188,11 @@ services:
       - chaosgenius-redis
       - chaosgenius-db
       - chaosgenius-fluentd
+    logging: *default-logging
 
   chaosgenius-worker-alerts:
     container_name: chaosgenius-worker-alerts
     build: .
-    logging: *default-logging
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
     environment:
       - FLASK_APP=${FLASK_APP}
@@ -220,6 +220,7 @@ services:
       - chaosgenius-redis
       - chaosgenius-db
       - chaosgenius-fluentd
+    logging: *default-logging
 
   # == airbyte services start here ==
   #

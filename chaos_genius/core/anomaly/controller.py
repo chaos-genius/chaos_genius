@@ -79,7 +79,7 @@ class AnomalyDetectionController(object):
             period_int = int(period)
             period_fract = period-period_int
             period = period_int*24 + int(period_fract*24)
-            self.kpi_info['anomaly_paras']['period'] = period
+            self.kpi_info['anomaly_params']['period'] = period
 
     def _load_anomaly_data(self) -> pd.DataFrame:
         """Load KPI data, preprocess it and return it for anomaly detection.

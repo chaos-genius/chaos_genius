@@ -235,6 +235,8 @@ services:
       - HACK_LOCAL_ROOT_PARENT=${HACK_LOCAL_ROOT_PARENT}
     volumes:
       - ${HACK_LOCAL_ROOT_PARENT}:/local_parent
+    depends_on:
+      - chaosgenius-fluentd
   db:
     image: airbyte/db:${VERSION}
     logging: *default-logging
@@ -245,6 +247,8 @@ services:
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
     volumes:
       - db:/var/lib/postgresql/data
+    depends_on:
+      - chaosgenius-fluentd
   scheduler:
     image: airbyte/scheduler:${VERSION}
     logging: *default-logging
@@ -286,6 +290,8 @@ services:
       - workspace:${WORKSPACE_ROOT}
       - ${LOCAL_ROOT}:${LOCAL_ROOT}
       - data:${CONFIG_ROOT}
+    depends_on:
+      - chaosgenius-fluentd
   server:
     image: airbyte/server:${VERSION}
     logging: *default-logging
@@ -322,6 +328,8 @@ services:
       - workspace:${WORKSPACE_ROOT}
       - data:${CONFIG_ROOT}
       - ${LOCAL_ROOT}:${LOCAL_ROOT}
+    depends_on:
+      - chaosgenius-fluentd
   webapp:
     image: airbyte/webapp:${VERSION}
     logging: *default-logging
@@ -339,6 +347,8 @@ services:
       - OPENREPLAY=${OPENREPLAY:-}
       - TRACKING_STRATEGY=${TRACKING_STRATEGY}
       - INTERNAL_API_HOST=${INTERNAL_API_HOST}
+    depends_on:
+      - chaosgenius-fluentd
   airbyte-temporal:
     image: temporalio/auto-setup:1.7.0
     logging: *default-logging
@@ -356,6 +366,8 @@ services:
       - LOG_LEVEL=${LOG_LEVEL}
     volumes:
       - ./temporal/dynamicconfig:/etc/temporal/config/dynamicconfig
+    depends_on:
+      - chaosgenius-fluentd
 
 volumes:
   workspace:

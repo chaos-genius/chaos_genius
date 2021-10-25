@@ -2,7 +2,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy import text
 from .base_db import BaseDb
-
+from .connector_utils import merge_dataframe_chunks
 
 class MysqlDb(BaseDb):
     db_name = "mysql"
@@ -50,7 +50,9 @@ class MysqlDb(BaseDb):
     def run_query(self, query, as_df=True):
         engine = self.get_db_engine()
         if as_df == True:
-            return pd.read_sql_query(query, engine)
+            return merge_dataframe_chunks(pd.read_sql_query(query,
+                                                                 engine,
+                                                                 chunksize=50000))
         else:
             return []
 

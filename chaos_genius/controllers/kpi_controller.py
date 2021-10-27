@@ -61,7 +61,7 @@ def _get_end_date_for_rca_kpi(
         count += 1
         if count > RCA_SLACK_DAYS:
             raise ValueError(
-                "KPI has no data for the last f"{RCA_SLACK_DAYS} days.")
+                f"KPI has no data for the last {RCA_SLACK_DAYS} days.")
 
     return end_date
 

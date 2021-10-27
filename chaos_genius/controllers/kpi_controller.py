@@ -47,7 +47,7 @@ def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
     return True
 
 
-def _get_end_data_for_rca_kpi(
+def _get_end_date_for_rca_kpi(
     kpi_info: dict,
     end_date: datetime = None
 ) -> datetime:
@@ -56,21 +56,21 @@ def _get_end_data_for_rca_kpi(
         end_date = datetime.today() - timedelta(days=1)
 
     count = 0
-    while not _is_data_present_for_end_date(kpi_info, end_date) \
-            or count > RCA_SLACK_DAYS:
+    while not _is_data_present_for_end_date(kpi_info, end_date):
         end_date = end_date - timedelta(days=1)
         count += 1
+        if count > RCA_SLACK_DAYS:
+            raise ValueError(
+                f"KPI has no data for the last {RCA_SLACK_DAYS} days.")
 
     return end_date
 
 
-
 def run_rca_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
-
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
 
-        end_date = _get_end_data_for_rca_kpi(kpi_info, end_date)
+        end_date = _get_end_date_for_rca_kpi(kpi_info, end_date)
 
         rca_controller = RootCauseAnalysisController(kpi_info, end_date)
         rca_controller.compute()
@@ -80,3 +80,4 @@ def run_rca_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
         return False
 
     return True
+

@@ -54,7 +54,7 @@ class BigQueryDb(BaseDb):
         if as_df == True:
             return merge_dataframe_chunks(pd.read_sql_query(query,
                                                             engine,
-                                                            chunksize=20000))
+                                                            chunksize=self.CHUNKSIZE))
         else:
             return []
 

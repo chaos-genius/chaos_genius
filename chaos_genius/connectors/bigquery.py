@@ -5,6 +5,7 @@ from sqlalchemy import text
 from .base_db import BaseDb
 from .connector_utils import merge_dataframe_chunks
 
+
 class BigQueryDb(BaseDb):
     db_name = "bigquery"
     test_db_query = "SELECT 1"
@@ -28,7 +29,7 @@ class BigQueryDb(BaseDb):
         if not credentials_info:
             raise NotImplementedError("Credentials JSON not found for Google BigQuery.")
         credentials_info = json.loads(credentials_info)
-        self.engine = create_engine(db_uri, credentials_info=credentials_info)
+        self.engine = create_engine(db_uri, credentials_info=credentials_info, echo=self.debug)
         return self.engine
 
     def test_connection(self):

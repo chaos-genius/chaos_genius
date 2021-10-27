@@ -6,6 +6,7 @@ class BaseDb:
     def __init__(self, *args, **kwargs):
         self.ds_info = kwargs.get("connection_info")
         self.CHUNKSIZE = 20000
+        self.debug = False
 
     def get_db_uri(self):
         raise NotImplementedError()

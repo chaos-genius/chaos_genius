@@ -26,7 +26,7 @@ class PostgresDb(BaseDb):
 
     def get_db_engine(self):
         db_uri = self.get_db_uri()
-        self.engine = create_engine(db_uri)
+        self.engine = create_engine(db_uri, echo=self.debug)
         return self.engine
 
     def test_connection(self):

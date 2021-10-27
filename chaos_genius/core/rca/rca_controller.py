@@ -115,6 +115,7 @@ class RootCauseAnalysisController:
         rca_df = (
             rca_df.resample("D", on=self.dt_col)
             .agg({self.metric: self.agg})
+            .fillna(0)
             .reset_index()
         )
 

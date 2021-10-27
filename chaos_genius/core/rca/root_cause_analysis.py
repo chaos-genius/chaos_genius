@@ -303,6 +303,7 @@ class RootCauseAnalysis:
             d2_idxs = set(self._grp2_df.query(subgroup).index)
 
             overlap_indices_count = 0
+            curr_loc = 0
 
             for i in range(1, len(subgroups_df_output)):
                 for combo in other_combinations[i]:

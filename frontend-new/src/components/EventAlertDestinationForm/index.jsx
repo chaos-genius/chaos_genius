@@ -1,26 +1,33 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Select from 'react-select';
 
-import { useDispatch, useSelector } from 'react-redux';
-
-import { useHistory, useParams, Link } from 'react-router-dom';
+import { useHistory, Link, useParams } from 'react-router-dom';
 
 import Slack from '../../assets/images/table/slack.svg';
 import Email from '../../assets/images/alerts/email.svg';
 import Edit from '../../assets/images/disable-edit.svg';
 
-import './kpialertdestinationform.scss';
-import { createKpiAlert, updateKpiAlert } from '../../redux/actions';
-import { useToast } from 'react-toast-wnm';
+import './eventalertdestinationform.scss';
 
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
+import { useToast } from 'react-toast-wnm';
+
+import {
+  getChannelStatus,
+  createKpiAlert,
+  updateKpiAlert
+} from '../../redux/actions';
+
+import store from '../../redux/store';
 
 import ReactTagInput from '@pathofdev/react-tag-input';
 import '@pathofdev/react-tag-input/build/index.css';
+import { useDispatch, useSelector } from 'react-redux';
 
-import { getChannelStatus } from '../../redux/actions';
-import store from '../../redux/store';
+const RESET_ACTION = {
+  type: 'RESET_ALERT_DATA_Data'
+};
 
 const customSingleValue = ({ data }) => (
   <div className="input-select">
@@ -30,9 +37,6 @@ const customSingleValue = ({ data }) => (
     </div>
   </div>
 );
-const RESET_ACTION = {
-  type: 'RESET_ALERT_DATA_Data'
-};
 
 const getOption = (channel) => {
   return {
@@ -46,36 +50,33 @@ const getOption = (channel) => {
   };
 };
 
-const KpiAlertDestinationForm = ({
-  setKpiSteps,
-  setAlertFormData,
+const EventAlertDestinationForm = ({
+  setEventSteps,
   alertFormData,
+  setAlertFormData,
   kpiAlertMetaInfo
 }) => {
+  const history = useHistory();
   const dispatch = useDispatch();
-
+  const kpiId = useParams().id;
   const toast = useToast();
 
-  const [resp, setresp] = useState([]);
-  const history = useHistory();
-  const kpiId = useParams().id;
   const path = history.location.pathname.split('/');
-  const [option, setOption] = useState([]);
-  const [channelName, setChannelName] = useState('');
-  /* add another channel state*/
-
-  // const [anotherChannel, setAnotherChannel] = useState(false);
-  // const [anotherChannelTag, setAnotherChannelTag] = useState([]);
 
   const {
     createKpiAlertLoading,
     updateKpiAlertLoading,
+    channelStatusData,
     createKpiAlertData,
-    updateKpiAlertData,
-    channelStatusData
+    updateKpiAlertData
   } = useSelector((state) => {
     return state.alert;
   });
+
+  const [resp, setresp] = useState([]);
+  const [option, setOption] = useState([]);
+  const [field, setField] = useState('');
+  const [channelName, setChannelName] = useState('');
 
   const [error, setError] = useState({
     alert_channel: '',
@@ -92,7 +93,10 @@ const KpiAlertDestinationForm = ({
     add_recepients: ''
   });
 
-  const [field, setField] = useState('');
+  const onBack = () => {
+    store.dispatch(RESET_ACTION);
+    setEventSteps(1);
+  };
 
   useEffect(() => {
     dispatch(getChannelStatus());
@@ -159,9 +163,66 @@ const KpiAlertDestinationForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updateKpiAlertData]);
 
-  const onBack = () => {
-    store.dispatch(RESET_ACTION);
-    setKpiSteps(1);
+  const customToast = (data) => {
+    const { type, header, description } = data;
+    toast({
+      autoDismiss: true,
+      enableAnimation: true,
+      delay: type === 'success' ? '5000' : '60000',
+      backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
+      borderRadius: '6px',
+      color: '#222222',
+      position: 'bottom-right',
+      minWidth: '240px',
+      width: 'auto',
+      boxShadow: '4px 6px 32px -2px rgba(226, 226, 234, 0.24)',
+      padding: '17px 14px',
+      height: 'auto',
+      border: type === 'success' ? '1px solid #60ca9a' : '1px solid #FEF6F5',
+      type: type,
+      actions: <CustomActions />,
+      content: (
+        <CustomContent
+          header={header}
+          description={description}
+          failed={type === 'success' ? false : true}
+        />
+      )
+    });
+  };
+
+  const handleChange = (tags) => {
+    if (field === 'email') {
+      setresp(tags);
+      setAlertFormData((prev) => {
+        return {
+          ...prev,
+          alert_channel_conf: {
+            [alertFormData['alert_channel']]: tags
+          }
+        };
+      });
+    }
+  };
+
+  const validateEmail = (email) => {
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    return re.test(String(email).toLowerCase());
+  };
+
+  const onSubmit = () => {
+    var obj = { ...error };
+    if (alertFormData.alert_channel === '') {
+      obj['alert_channel'] = 'Enter Channel';
+    }
+    setError(obj);
+    if (error.alert_channel === '') {
+      if (path[2] === 'edit') {
+        dispatch(updateKpiAlert(kpiId, alertFormData));
+      } else {
+        dispatch(createKpiAlert(alertFormData));
+      }
+    }
   };
 
   const editableStatus = (type) => {
@@ -218,109 +279,6 @@ const KpiAlertDestinationForm = ({
       </>
     );
   };
-  const handleChange = (tags) => {
-    if (field === 'email') {
-      setresp(tags);
-      setAlertFormData((prev) => {
-        return {
-          ...prev,
-          alert_channel_conf: {
-            [alertFormData['alert_channel']]: tags
-          }
-        };
-      });
-    }
-  };
-
-  const customToast = (data) => {
-    const { type, header, description } = data;
-    toast({
-      autoDismiss: true,
-      enableAnimation: true,
-      delay: type === 'success' ? '5000' : '30000',
-      backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
-      borderRadius: '6px',
-      color: '#222222',
-      position: 'bottom-right',
-      minWidth: '240px',
-      width: 'auto',
-      boxShadow: '4px 6px 32px -2px rgba(226, 226, 234, 0.24)',
-      padding: '17px 14px',
-      height: 'auto',
-      border: type === 'success' ? '1px solid #60ca9a' : '1px solid #FEF6F5',
-      type: type,
-      actions: <CustomActions />,
-      content: (
-        <CustomContent
-          header={header}
-          description={description}
-          failed={type === 'success' ? false : true}
-        />
-      )
-    });
-  };
-
-  const validateEmail = (email) => {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
-    return re.test(String(email).toLowerCase());
-  };
-
-  const onKpiAlertSubmit = () => {
-    var obj = { ...error };
-    if (alertFormData.alert_channel === '') {
-      obj['alert_channel'] = 'Enter Channel';
-    }
-    setError(obj);
-    if (error.alert_channel === '') {
-      if (path[2] === 'edit') {
-        dispatch(updateKpiAlert(kpiId, alertFormData));
-      } else {
-        dispatch(createKpiAlert(alertFormData));
-      }
-    }
-  };
-
-  /*add anonter channel function*/
-
-  // const addChannel = () => {
-  //   return (
-  //     <>
-  //       <div className="form-group">
-  //         <label>Select Channel *</label>
-  //         <div className="editable-field">
-  //           <Select
-  //             options={option}
-  //             classNamePrefix="selectcategory"
-  //             placeholder="Select"
-  //             components={{ SingleValue: customSingleValue }}
-  //           />
-  //         </div>
-  //       </div>
-
-  //       <div className="form-group">
-  //         <label>Add Recepients </label>
-  //         <div className="editable-field">
-  //           <ReactTagInput
-  //             tags={anotherChannelTag}
-  //             placeholder="Add Recepients"
-  //             onChange={(e) => setAnotherChannelTag(e)}
-  //             validator={(value) => {
-  //               const isEmail = validateEmail(value);
-  //               if (!isEmail) {
-  //                 toastMessage({
-  //                   type: 'error',
-  //                   message: 'Please enter an valid email address'
-  //                 });
-  //               }
-  //               // Return boolean to indicate validity
-  //               return isEmail;
-  //             }}
-  //           />
-  //         </div>
-  //       </div>
-  //     </>
-  //   );
-  // };
 
   return (
     <>
@@ -334,6 +292,7 @@ const KpiAlertDestinationForm = ({
             options={option}
             classNamePrefix="selectcategory"
             placeholder="Select"
+            components={{ SingleValue: customSingleValue }}
             isDisabled={
               path[2] === 'edit'
                 ? editableStatus('alert_channel') === 'editable'
@@ -365,17 +324,12 @@ const KpiAlertDestinationForm = ({
                   : 'none'
                 : sensitiveData.alert_channel
             }
-            components={{ SingleValue: customSingleValue }}
             onChange={(e) => {
               setAlertFormData({ ...alertFormData, alert_channel: e.value });
               setField(e.value);
               setError({ ...error, alert_channel: '' });
             }}
           />
-
-          {path[2] === 'edit' &&
-            editableStatus('alert_channnel') === 'sensitive' &&
-            editAndSaveButton('alert_channel')}
         </div>
         <div className="channel-tip">
           <p>
@@ -383,6 +337,9 @@ const KpiAlertDestinationForm = ({
             <Link to="/alerts/channelconfiguration">Channel configuration</Link>{' '}
             to connect channel
           </p>
+          {path[2] === 'edit' &&
+            editableStatus('alert_channnel') === 'sensitive' &&
+            editAndSaveButton('alert_channel')}
         </div>
         {error.alert_channel && (
           <div className="connection__fail">
@@ -393,13 +350,7 @@ const KpiAlertDestinationForm = ({
       {field === 'email' ? (
         <div className="form-group">
           <label>Add Recepients </label>
-          {/* <Select isMulti classNamePrefix="selectcategory" placeholder="Select" /> */}
           <div className="editable-field">
-            {/* <TagsInput
-            value={resp}
-            onChange={(e) => handleChange(e)}
-            placeholder="Add Recepients"
-          /> */}
             <ReactTagInput
               tags={resp}
               placeholder="Add Recepients"
@@ -407,19 +358,11 @@ const KpiAlertDestinationForm = ({
               validator={(value) => {
                 const isEmail = validateEmail(value);
                 if (!isEmail) {
-                  customToast({
-                    type: 'error',
-                    header: 'Invalid Email',
-                    description: 'Please enter a valid email ID'
-                  });
                 }
                 // Return boolean to indicate validity
                 return isEmail;
               }}
             />
-            {path[2] === 'edit' &&
-              editableStatus('alert_channnel') === 'sensitive' &&
-              editAndSaveButton('alert_channel')}
           </div>
         </div>
       ) : field === 'slack' ? (
@@ -439,14 +382,6 @@ const KpiAlertDestinationForm = ({
         ''
       )}
       {/* commented add another channel*/}
-      {/* {anotherChannel && addChannel()}
-      {anotherChannel === false && (
-        <div className="add-options-wrapper options-spacing">
-          <div className="add-options" onClick={() => setAnotherChannel(true)}>
-            <label>+ Add Another Channel</label>
-          </div>
-        </div>
-      )} */}
       {/*Add empty space div*/}
       <div className="add-options-wrapper options-spacing"></div>
       <div className="form-action alerts-button">
@@ -459,7 +394,7 @@ const KpiAlertDestinationForm = ({
               ? 'btn black-button btn-loading'
               : 'btn black-button'
           }
-          onClick={() => onKpiAlertSubmit()}>
+          onClick={() => onSubmit()}>
           <div className="btn-spinner">
             <div className="spinner-border" role="status">
               <span className="visually-hidden">Loading...</span>
@@ -475,4 +410,4 @@ const KpiAlertDestinationForm = ({
   );
 };
 
-export default KpiAlertDestinationForm;
+export default EventAlertDestinationForm;

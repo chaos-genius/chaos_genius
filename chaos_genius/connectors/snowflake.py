@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import text
 from .base_db import BaseDb
 from snowflake.sqlalchemy import URL
-
+from .connector_utils import merge_dataframe_chunks
 
 class SnowflakeDb(BaseDb):
     db_name = "snowflake"
@@ -37,7 +37,7 @@ class SnowflakeDb(BaseDb):
 
     def get_db_engine(self):
         db_uri = self.get_db_uri()
-        self.engine = create_engine(db_uri)
+        self.engine = create_engine(db_uri, echo=self.debug)
         return self.engine
 
     def test_connection(self):
@@ -61,7 +61,9 @@ class SnowflakeDb(BaseDb):
     def run_query(self, query, as_df=True):
         engine = self.get_db_engine()
         if as_df == True:
-            return pd.read_sql_query(query, engine)
+            return merge_dataframe_chunks(pd.read_sql_query(query,
+                                                            engine,
+                                                            chunksize=self.CHUNKSIZE))
         else:
             return []
 

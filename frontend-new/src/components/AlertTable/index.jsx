@@ -149,7 +149,12 @@ const AlertTable = ({ alertData, alertSearch }) => {
                           />
                         </div>
                         <ul className="dropdown-menu">
-                          <Link to={`/alerts/edit/kpi-alert/${alert.id}`}>
+                          <Link
+                            to={
+                              alert.alert_type === 'KPI Alert'
+                                ? `/alerts/edit/kpi-alert/${alert.id}`
+                                : `/alerts/edit/event-alert/${alert.id}`
+                            }>
                             <li>
                               <img
                                 src={Edit}

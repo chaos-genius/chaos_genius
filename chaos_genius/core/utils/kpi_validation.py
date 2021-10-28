@@ -1,5 +1,6 @@
 """Provides utility functions for validating KPIs."""
 
+import logging
 from typing import Any, Dict, List, Tuple, Union
 
 import pandas as pd
@@ -11,6 +12,7 @@ from chaos_genius.core.rca.root_cause_analysis import SUPPORTED_AGGREGATIONS
 TAIL_SIZE = 10
 MAX_NUM_ROWS = 5000000
 
+logger = logging.getLogger()
 
 def validate_kpi(
     kpi_info: Dict[str, Any]
@@ -26,6 +28,7 @@ def validate_kpi(
         rca = RootCauseAnalysisController(kpi_info)
         base_df, rca_df = rca._load_data(tail=TAIL_SIZE)
         df = pd.concat([base_df, rca_df])
+        logger.info(f"Created df with {len(df)} rows for validation")
     except Exception as e:  # noqa: B902
         return False, "Could not load data. Error: " + str(e)
 
@@ -79,9 +82,8 @@ def _validate_kpi_from_df(
     status_bool, status_msg = _column_exists(
         df, column_name=[kpi_column_name, date_column_name]
     )
-    if debug:
-        print("Check #0: KPI column and Datetime column exist in DataFrame")
-        print(status_bool, status_msg, sep=", ")
+    logger.info("Check #0: KPI column and Datetime column exist in DataFrame")
+    logger.info(status_bool, status_msg, sep=", ")
     if not status_bool:
         return status_bool, status_msg
 
@@ -122,9 +124,8 @@ def _validate_kpi_from_df(
     ]
     for validation in validations:
         status_bool, status_msg = validation["status"]
-        if debug:
-            print(validation["debug_str"])
-            print(status_bool, status_msg, sep=", ")
+        logger.info(validation["debug_str"])
+        logger.info(status_bool, status_msg, sep=", ")
         if not status_bool:
             return status_bool, status_msg
 

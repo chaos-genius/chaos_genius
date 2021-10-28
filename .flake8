@@ -1,0 +1,9 @@
+[flake8]
+ignore = D203
+exclude =
+    .git,
+    __pycache__,
+    docs,
+    frontend-new,
+    sandbox
+max-complexity = 10

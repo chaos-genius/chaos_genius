@@ -3,6 +3,7 @@ from chaos_genius.connectors.postgres import PostgresDb
 from chaos_genius.connectors.mysql import MysqlDb
 from chaos_genius.connectors.snowflake import SnowflakeDb
 from chaos_genius.connectors.redshift import Redshift
+from chaos_genius.connectors.connector_utils import merge_dataframe_chunks 
 
 DB_CLASS_MAPPER = {
     "Postgres": PostgresDb,

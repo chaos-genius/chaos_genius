@@ -35,6 +35,7 @@ class ThirdPartyClient(object):
             server_uri (str): Server URL for which the API need to be hit
         """
         super().__init__()
+        # TODO: Get these values from the settings.py
         config = dotenv_values(".env")
         self.config = config
         self.server_uri = INTEGRATION_SERVER

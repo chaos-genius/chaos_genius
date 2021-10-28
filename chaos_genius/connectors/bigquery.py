@@ -3,6 +3,7 @@ import pandas as pd
 from sqlalchemy.engine import create_engine
 from sqlalchemy import text
 from .base_db import BaseDb
+from .connector_utils import merge_dataframe_chunks
 
 
 class BigQueryDb(BaseDb):
@@ -28,7 +29,7 @@ class BigQueryDb(BaseDb):
         if not credentials_info:
             raise NotImplementedError("Credentials JSON not found for Google BigQuery.")
         credentials_info = json.loads(credentials_info)
-        self.engine = create_engine(db_uri, credentials_info=credentials_info)
+        self.engine = create_engine(db_uri, credentials_info=credentials_info, echo=self.debug)
         return self.engine
 
     def test_connection(self):
@@ -52,7 +53,9 @@ class BigQueryDb(BaseDb):
     def run_query(self, query, as_df=True):
         engine = self.get_db_engine()
         if as_df == True:
-            return pd.read_sql_query(query, engine)
+            return merge_dataframe_chunks(pd.read_sql_query(query,
+                                                            engine,
+                                                            chunksize=self.CHUNKSIZE))
         else:
             return []
 

@@ -11,6 +11,12 @@ from dotenv import load_dotenv
 
 load_dotenv(".env")  # loads environment variables from .env
 
+# config = {
+#     **dotenv_values(".env"),  # load shared project variables
+#     **dotenv_values(".env.dev"),  # load developement/sensitive variables
+#     **os.environ,  # override loaded values with environment variables
+# }
+
 CWD = os.getcwd()
 
 ENV = os.getenv("FLASK_ENV", default="production")

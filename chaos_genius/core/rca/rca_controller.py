@@ -70,9 +70,11 @@ class RootCauseAnalysisController:
         :return: tuple with baseline data and rca data for
         :rtype: Tuple[pd.DataFrame, pd.DataFrame]
         """
-        return rca_load_data(
+        base_df, rca_df = rca_load_data(
             self.kpi_info, self.connection_info, self.dt_col, self.end_date,
             timeline, tail)
+        logger.info(f"Loaded {len(base_df)}, {len(rca_df)} rows of data")
+        return base_df, rca_df
 
     def _output_to_row(
         self,
@@ -115,6 +117,7 @@ class RootCauseAnalysisController:
         rca_df = (
             rca_df.resample("D", on=self.dt_col)
             .agg({self.metric: self.agg})
+            .fillna(0)
             .reset_index()
         )
 

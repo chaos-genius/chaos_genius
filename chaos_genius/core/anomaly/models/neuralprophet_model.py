@@ -5,7 +5,8 @@ from neuralprophet import NeuralProphet
 
 from chaos_genius.core.anomaly.models import AnomalyModel
 
-NP_FREQ = ["d": "D", "h": "H"]
+NP_FREQ = {"d": "D", "h": "H"}
+
 
 class NeuralProphetModel(AnomalyModel):
     """Neural Prophet model for anomaly detection."""

@@ -103,7 +103,7 @@ const Routes = () => (
     />
     <PrivateRouteWithSidebar
       exact
-      path="/alerts/new/event-alert"
+      path={['/alerts/new/event-alert', '/alerts/edit/event-alert/:id']}
       component={(props) => <AddEventAlert {...props} />}
     />
     <PrivateRouteWithSidebar

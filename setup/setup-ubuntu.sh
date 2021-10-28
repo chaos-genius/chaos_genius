@@ -154,6 +154,8 @@ fi
 
 printf "\n"
 
+# TODO: Install the redis server
+
 # Check & install DB & connector dependencies
 printf "${GREEN}-->${NC} Installing database and connectors.\n"
 
@@ -188,7 +190,7 @@ else
     printf "${BLUE}-->${NC} Pulling the connectors...\n"
     mkdir "$PWD/.connectors"
     cd "$PWD/.connectors"
-    wget https://raw.githubusercontent.com/airbytehq/airbyte/master/{.env,docker-compose.yaml}
+    wget https://raw.githubusercontent.com/airbytehq/airbyte/fb72f9ea51af3ba3a01133b397b1a1887f30875c/{.env,docker-compose.yaml}
 fi
 sudo docker-compose up -d
 printf "${BLUE}-->${NC} Updated the third party connectors\n"
@@ -239,27 +241,27 @@ printf "\n"
 
 
 printf "${GREEN}-->${NC} Creating the ENV file \n"
-touch .env
-echo "" > .env
-echo "FLASK_APP=run" >> .env
-echo "FLASK_ENV=production" >> .env
-echo "FLASK_DEBUG=0" >> .env
-echo "FLASK_RUN_PORT=5000" >> .env
-echo "SECRET_KEY=not-so-secret" >> .env
-echo "SEND_FILE_MAX_AGE_DEFAULT=31556926" >> .env
-echo "DB_HOST=localhost" >> .env
-echo "DB_USERNAME=postgres" >> .env
-echo "DB_PASSWORD='chaosgenius'" >> .env
-echo "DB_PORT=5432" >> .env
-echo "META_DATABASE=chaosgenius" >> .env
-echo "DATA_DATABASE=chaosgenius_data" >> .env
-echo "DATABASE_URL_CG_DB='postgresql+psycopg2://postgres:chaosgenius@localhost/chaosgenius'" >> .env
-echo "INTEGRATION_SERVER='http://localhost:8001'" >> .env
-echo "INTEGRATION_DB_HOST='localhost'" >> .env
-echo "INTEGRATION_DB_USERNAME=$(whoami)" >> .env
-echo "INTEGRATION_DB_PASSWORD=''" >> .env
-echo "INTEGRATION_DB_PORT=5432" >> .env
-echo "INTEGRATION_DATABASE=chaosgenius_data" >> .env
+touch .env.dev
+echo "" > .env.dev
+echo "FLASK_APP=run" >> .env.dev
+echo "FLASK_ENV=production" >> .env.dev
+echo "FLASK_DEBUG=0" >> .env.dev
+echo "FLASK_RUN_PORT=5000" >> .env.dev
+echo "SECRET_KEY=not-so-secret" >> .env.dev
+echo "SEND_FILE_MAX_AGE_DEFAULT=31556926" >> .env.dev
+echo "DB_HOST=localhost" >> .env.dev
+echo "DB_USERNAME=postgres" >> .env.dev
+echo "DB_PASSWORD='chaosgenius'" >> .env.dev
+echo "DB_PORT=5432" >> .env.dev
+echo "META_DATABASE=chaosgenius" >> .env.dev
+echo "DATA_DATABASE=chaosgenius_data" >> .env.dev
+echo "DATABASE_URL_CG_DB='postgresql+psycopg2://postgres:chaosgenius@localhost/chaosgenius'" >> .env.dev
+echo "INTEGRATION_SERVER='http://localhost:8001'" >> .env.dev
+echo "INTEGRATION_DB_HOST='localhost'" >> .env.dev
+echo "INTEGRATION_DB_USERNAME=$(whoami)" >> .env.dev
+echo "INTEGRATION_DB_PASSWORD=''" >> .env.dev
+echo "INTEGRATION_DB_PORT=5432" >> .env.dev
+echo "INTEGRATION_DATABASE=chaosgenius_data" >> .env.dev
 
 printf "${BLUE}-->${NC} Created the ENV file \n"
 

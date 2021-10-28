@@ -33,7 +33,7 @@ services:
   chaosgenius-webapp:
     container_name: chaosgenius-webapp
     build:
-      context: ./frontend-new
+      context: ./frontend
       dockerfile: Dockerfile
     ports:
       - "8080:3000"

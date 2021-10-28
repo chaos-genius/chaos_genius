@@ -9,7 +9,7 @@ instance/*
 .alert
 
 ### React App ###
-frontend-new/.env
+frontend/.env
 
 
 ### Flask.Python Stack ###
@@ -306,18 +306,18 @@ yarn-debug.log*
 yarn-error.log*
 
 # dependencies
-frontend-new/node_modules
-frontend-new/.pnp
+frontend/node_modules
+frontend/.pnp
 .pnp.js
 # testing
-frontend-new/coverage
+frontend/coverage
 # production
 
-frontend-new/build
-frontend-new/.env
-frontend-new/npm-debug.log*
-frontend-new/yarn-debug.log*
-frontend-new/yarn-error.log*
+frontend/build
+frontend/.env
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
 
 
 # misc

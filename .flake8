@@ -4,6 +4,6 @@ exclude =
     .git,
     __pycache__,
     docs,
-    frontend-new,
+    frontend,
     sandbox
 max-complexity = 10

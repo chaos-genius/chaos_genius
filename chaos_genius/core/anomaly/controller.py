@@ -381,12 +381,12 @@ class AnomalyDetectionController(object):
 
         model_name = self.kpi_info["anomaly_params"]["model_name"]
 
-        logger.debug(f"Running anomaly detection for {series}-{subgroup}")
+        logger.info(f"Running anomaly detection for {series}-{subgroup}")
         overall_anomaly_output = self._detect_anomaly(
             model_name, series_data, last_date, series, subgroup, freq
         )
 
-        logger.debug(f"Saving Anomaly output for {series}-{subgroup}")
+        logger.info(f"Saving Anomaly output for {series}-{subgroup}")
         self._save_anomaly_output(overall_anomaly_output, series, subgroup)
 
     def _detect_subdimensions(
@@ -443,12 +443,11 @@ class AnomalyDetectionController(object):
 
         logger.info(f"Loading Input Data for KPI {self.kpi_info['id']}")
         input_data = self._load_anomaly_data()
-        logger.debug(f"Loaded {len(input_data)} rows of input data.")
+        logger.info(f"Loaded {len(input_data)} rows of input data.")
 
         run_optional = self.kpi_info.get('run_optional', None)
 
         if run_optional is None or run_optional['overall'] is True:
-            logger.info("Running anomaly for series -> overall")
             self._run_anomaly_for_series(input_data, "overall")
 
         if run_optional is None or run_optional['subdim'] is True:

@@ -83,7 +83,7 @@ def _validate_kpi_from_df(
         df, column_name=[kpi_column_name, date_column_name]
     )
     logger.info("Check #0: KPI column and Datetime column exist in DataFrame")
-    logger.info(status_bool, status_msg, sep=", ")
+    logger.info(", ".join(map(str, [status_bool, status_msg])))
     if not status_bool:
         return status_bool, status_msg
 
@@ -125,7 +125,7 @@ def _validate_kpi_from_df(
     for validation in validations:
         status_bool, status_msg = validation["status"]
         logger.info(validation["debug_str"])
-        logger.info(status_bool, status_msg, sep=", ")
+        logger.info(", ".join(map(str, [status_bool, status_msg])))
         if not status_bool:
             return status_bool, status_msg
 

@@ -13,8 +13,8 @@ def configure_logger(app):
     json_handler = RotatingFileHandler(
         "chaosgenius.log", maxBytes=4194304, backupCount=5)
     json_formatter = jsonlogger.JsonFormatter(
-        "%(levelname)s %(message)s %(lineno)s %(funcName)s %(filename)s "
-    )
+        "%(asctime) %(levelname)s %(module) "
+        "%(message)s %(lineno)s %(funcName)s %(filename)s")
     json_handler.setFormatter(json_formatter)
 
     streamHandler = logging.StreamHandler()

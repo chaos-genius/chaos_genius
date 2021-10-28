@@ -134,6 +134,15 @@ def _get_kpi_data(
     base_df = db_connection.run_query(base_query)
     rca_df = db_connection.run_query(rca_query)
 
+    if base_df is None:
+        raise ValueError("Base dataframe is None.")
+    if rca_df is None:
+        raise ValueError("RCA dataframe is None.")
+    if len(base_df) == 0:
+        raise ValueError("Base df has 0 rows.")
+    if len(rca_df) == 0:
+        raise ValueError("RCA dataframe has 0 rows.")
+
     base_df[dt_col] = pd.to_datetime(base_df[dt_col])
     rca_df[dt_col] = pd.to_datetime(rca_df[dt_col])
 

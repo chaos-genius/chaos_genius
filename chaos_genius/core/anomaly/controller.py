@@ -212,6 +212,35 @@ class AnomalyDetectionController(object):
             AnomalyDataOutput.__tablename__, db.engine, if_exists="append"
         )
 
+    def _querify(self, col_names, raw_combinations):
+        query_list = []
+        for comb in raw_combinations:
+            if type(comb) == str:
+                unjoined_query = [f'`{col_names[0]}` == "{comb}"']
+            elif type(comb) == tuple:
+                unjoined_query = [
+                    f'`{col_names[i]}` == "{comb[i]}"'
+                    for i in range(len(comb))
+                ]
+            query_string = " and ".join(unjoined_query)
+            query_list.append(query_string)
+        return query_list
+
+    def _get_dimension_combinations(self, dimension_list):
+
+        if MULTIDIM_ANALYSIS:
+            # return subgroup combination of style AxBxC
+            return [dimension_list, ]
+        else:
+            # return subgroup combination of style A, B, C
+            return list(map(lambda x: [x], dimension_list))
+
+        # TODO: Uncomment when offering all levels of dimension grouping
+        # s = list(dimension_list)
+        # dim_comb = chain.from_iterable(
+        #   combinations(s, r) for r in range(1,len(s)+1)
+        # )
+
     def _get_subgroup_list(self, input_data: pd.DataFrame) -> list:
         """Return list of subgroups for which to run anomaly detection.
 
@@ -219,50 +248,24 @@ class AnomalyDetectionController(object):
         :rtype: list
         """
         valid_subdims = []
-        for dim in self.kpi_info["dimensions"]:
+        for dim in self.kpi_info['dimensions']:
             if len(input_data[dim].unique()) >= MAX_SUBDIM_CARDINALITY:
-                print(f"{dim} has a cardinality over {MAX_SUBDIM_CARDINALITY} skipping {dim}")
+                print((
+                    f"{dim} has a cardinality over "
+                    f"{MAX_SUBDIM_CARDINALITY} skipping {dim}"
+                ))
             else:
                 valid_subdims.append(dim)
 
-        results = []
-
-        def querify(x):
-            q = [f'`{y[0]}`=="{y[1]}"' for y in x]
-            return " and ".join(q)
-
-        def func(curr_values: list, curr_col_no: int, length_of_segment):
-
-            if curr_col_no >= len(valid_subdims):
-                if len(curr_values) == length_of_segment:
-                    results.append(querify(curr_values))
-                return -1
-
-            if len(curr_values) == length_of_segment:
-                results.append(querify(curr_values))
-                return -1
-
-            func(curr_values, curr_col_no + 1, length_of_segment)
-
-            unique_valid_subdims = list(
-                input_data.loc[:, valid_subdims[curr_col_no]].unique())
-
-            for val in unique_valid_subdims:
-                func(
-                    curr_values + [(valid_subdims[curr_col_no], val)],
-                    curr_col_no + 1,
-                    length_of_segment,
-                )
-
-        # for i in range(1, len(valid_subdims) + 1):
-        #     func([], 0, i)
-
-        if(MULTIDIM_ANALYSIS == "True"):
-            func([], 0, 3)
-        else:
-            func([], 0, 1)
-
-        return results
+        group_list = []
+        dim_comb = self._get_dimension_combinations(valid_subdims)
+        print(dim_comb)
+        for dim_list in dim_comb:
+            grouped_dims = input_data.groupby(dim_list)
+            subgroup_raw = list(grouped_dims.groups.keys())
+            subgroup_querified = self._querify(dim_list, subgroup_raw)
+            group_list.extend(subgroup_querified)
+        return group_list
 
     def _filter_subgroups(
         self,

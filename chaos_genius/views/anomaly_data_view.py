@@ -9,6 +9,7 @@ import pandas as pd
 from sqlalchemy.orm.attributes import flag_modified
 from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
 from chaos_genius.core.utils.round import round_number
+from chaos_genius.settings import TOP_DIMENSIONS
 
 from chaos_genius.extensions import cache
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
@@ -338,7 +339,7 @@ def get_dq_and_subdim_data(
     return convert_to_graph_json(results, kpi_id, anomaly_type, series_type)
 
 
-def get_drilldowns_series_type(kpi_id, drilldown_date, no_of_graphs=10):
+def get_drilldowns_series_type(kpi_id, drilldown_date):
     # First we get direction of anomaly
     # Then we get relevant subdims for that anomaly
     is_anomaly = AnomalyDataOutput.query.filter(
@@ -355,7 +356,7 @@ def get_drilldowns_series_type(kpi_id, drilldown_date, no_of_graphs=10):
         & (AnomalyDataOutput.data_datetime == drilldown_date)
         & (AnomalyDataOutput.anomaly_type == "subdim")
         & (AnomalyDataOutput.is_anomaly == is_anomaly)
-    ).order_by(AnomalyDataOutput.severity.desc()).limit(no_of_graphs)
+    ).order_by(AnomalyDataOutput.severity.desc()).limit(TOP_DIMENSIONS)
 
     results = pd.read_sql(query.statement, query.session.bind)
     if len(results) == 0:
@@ -377,7 +378,7 @@ def get_drilldowns_series_type(kpi_id, drilldown_date, no_of_graphs=10):
         results.sort_values(['distance', 'severity'], ascending = [True, False], inplace = True)
         results.drop('distance', axis = 1, inplace = True)
 
-        results = results.iloc[:no_of_graphs]
+        results = results.iloc[:TOP_DIMENSIONS]
 
     return results.series_type
 

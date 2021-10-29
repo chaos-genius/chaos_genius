@@ -5,6 +5,10 @@ import logging
 
 import pandas as pd
 
+from chaos_genius.settings import (MULTIDIM_ANALYSIS, 
+                                   MAX_SUBDIM_CARDINALITY, 
+                                   MIN_SUBPOPULATION)
+
 from chaos_genius.core.anomaly.constants import RESAMPLE_FREQUENCY
 from chaos_genius.core.anomaly.processor import ProcessAnomalyDetection
 from chaos_genius.core.anomaly.utils import (fill_data, get_anomaly_df,
@@ -216,46 +220,47 @@ class AnomalyDetectionController(object):
         """
         valid_subdims = []
         for dim in self.kpi_info["dimensions"]:
-            if len(input_data[dim].unique()) >= 100:
-                print(f"{dim} has a cardinality over 100 skipping {dim}")
+            if len(input_data[dim].unique()) >= MAX_SUBDIM_CARDINALITY:
+                print(f"{dim} has a cardinality over {MAX_SUBDIM_CARDINALITY} skipping {dim}")
             else:
                 valid_subdims.append(dim)
 
         results = []
 
-        for subdim in valid_subdims:
-            for val in input_data[subdim].unique():
-                results.append(f'`{subdim}`=="{val}"')
+        def querify(x):
+            q = [f'`{y[0]}`=="{y[1]}"' for y in x]
+            return " and ".join(q)
 
-        # def querify(x):
-        #     q = [f'`{y[0]}`=="{y[1]}"' for y in x]
-        #     return " and ".join(q)
+        def func(curr_values: list, curr_col_no: int, length_of_segment):
 
-        # def func(curr_values: list, curr_col_no: int, length_of_segment):
+            if curr_col_no >= len(valid_subdims):
+                if len(curr_values) == length_of_segment:
+                    results.append(querify(curr_values))
+                return -1
 
-        #     if curr_col_no >= len(valid_subdims):
-        #         if len(curr_values) == length_of_segment:
-        #             results.append(querify(curr_values))
-        #         return -1
+            if len(curr_values) == length_of_segment:
+                results.append(querify(curr_values))
+                return -1
 
-        #     if len(curr_values) == length_of_segment:
-        #         results.append(querify(curr_values))
-        #         return -1
+            func(curr_values, curr_col_no + 1, length_of_segment)
 
-        #     func(curr_values, curr_col_no + 1, length_of_segment)
+            unique_valid_subdims = list(
+                input_data.loc[:, valid_subdims[curr_col_no]].unique())
 
-        #     unique_valid_subdims = list(
-        #         input_data.loc[:, valid_subdims[curr_col_no]].unique())
-
-        #     for val in unique_valid_subdims:
-        #         func(
-        #             curr_values + [(valid_subdims[curr_col_no], val)],
-        #             curr_col_no + 1,
-        #             length_of_segment,
-        #         )
+            for val in unique_valid_subdims:
+                func(
+                    curr_values + [(valid_subdims[curr_col_no], val)],
+                    curr_col_no + 1,
+                    length_of_segment,
+                )
 
         # for i in range(1, len(valid_subdims) + 1):
         #     func([], 0, i)
+
+        if(MULTIDIM_ANALYSIS == "True"):
+            func([], 0, 3)
+        else:
+            func([], 0, 1)
 
         return results
 
@@ -282,8 +287,7 @@ class AnomalyDetectionController(object):
                 filter_data_len = grouped_input_data.query(subgroup)[
                     self.kpi_info["metric"]
                 ].sum()
-                period = self.kpi_info["anomaly_params"]["anomaly_period"]
-                if filter_data_len >= period:
+                if filter_data_len >= MIN_SUBPOPULATION:
                     filtered_subgroups.append((subgroup, filter_data_len))
             except IndexError:
                 pass

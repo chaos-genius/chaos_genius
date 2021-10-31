@@ -55,3 +55,4 @@ elif MULTIDIM_ANALYSIS == "False":
 MAX_SUBDIM_CARDINALITY = int(os.getenv('MAX_SUBDIM_CARDINALITY', default=100))
 TOP_DIMENSIONS = int(os.getenv('TOP_DIMENSIONS', default=10))
 MIN_SUBPOPULATION = int(os.getenv('MIN_SUBPOPULATION', default=90))
+MAX_ROWS = int(os.getenv("MAX_ROWS", default=10000000))

@@ -8,9 +8,6 @@ instance/*
 .env.dev
 .alert
 
-### React App ###
-frontend/.env
-
 
 ### Flask.Python Stack ###
 # Byte-compiled / optimized / DLL files
@@ -314,7 +311,6 @@ frontend/coverage
 # production
 
 frontend/build
-frontend/.env
 frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*

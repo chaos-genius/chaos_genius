@@ -9,7 +9,7 @@ import pandas as pd
 from sqlalchemy.orm.attributes import flag_modified
 from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
 from chaos_genius.core.utils.round import round_number
-from chaos_genius.settings import TOP_DIMENSIONS
+from chaos_genius.settings import TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN
 
 from chaos_genius.extensions import cache
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
@@ -356,7 +356,7 @@ def get_drilldowns_series_type(kpi_id, drilldown_date):
         & (AnomalyDataOutput.data_datetime == drilldown_date)
         & (AnomalyDataOutput.anomaly_type == "subdim")
         & (AnomalyDataOutput.is_anomaly == is_anomaly)
-    ).order_by(AnomalyDataOutput.severity.desc()).limit(TOP_DIMENSIONS)
+    ).order_by(AnomalyDataOutput.severity.desc()).limit(TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN)
 
     results = pd.read_sql(query.statement, query.session.bind)
     if len(results) == 0:
@@ -378,7 +378,7 @@ def get_drilldowns_series_type(kpi_id, drilldown_date):
         results.sort_values(['distance', 'severity'], ascending = [True, False], inplace = True)
         results.drop('distance', axis = 1, inplace = True)
 
-        results = results.iloc[:TOP_DIMENSIONS]
+        results = results.iloc[:TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN]
 
     return results.series_type
 

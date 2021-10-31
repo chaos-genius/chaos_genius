@@ -1,3 +1,3 @@
 source .venv/bin/activate
 source .env
-gunicorn -w 4 run:app --bind 0.0.0.0:5000
+gunicorn run:app -w 4 -b 0.0.0.0:5000 -t 120

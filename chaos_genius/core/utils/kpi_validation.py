@@ -8,9 +8,9 @@ from pandas.api.types import is_datetime64_any_dtype as is_datetime
 
 from chaos_genius.core.rca.rca_controller import RootCauseAnalysisController
 from chaos_genius.core.rca.root_cause_analysis import SUPPORTED_AGGREGATIONS
+from chaos_genius.settings import MAX_ROWS_FOR_DEEPDRILLS
 
 TAIL_SIZE = 10
-MAX_NUM_ROWS = 5000000
 
 logger = logging.getLogger()
 
@@ -115,10 +115,10 @@ def _validate_kpi_from_df(
         {
             "debug_str": (
                 "Check #4: Validate KPI has no more than "
-                f"{MAX_NUM_ROWS} rows"
+                f"{MAX_ROWS_FOR_DEEPDRILLS} rows"
             ),
             "status": _validate_for_maximum_kpi_size(
-                kpi_info, num_rows=MAX_NUM_ROWS
+                kpi_info, num_rows=MAX_ROWS_FOR_DEEPDRILLS
             )
         }
     ]
@@ -302,13 +302,13 @@ def _validate_for_maximum_kpi_size(
     """
     try:
         rca = RootCauseAnalysisController(kpi_info)
-        base_df, rca_df = rca._load_data()
-        df = pd.concat([base_df, rca_df])
+        base_df, rca_df = rca._load_data(get_count=True)
+        df = base_df + rca_df
     except Exception as e:  # noqa: B902
         return False, "Could not load data. Error: " + str(e)
     valid_str = "Accepted!"
 
-    if len(df) <= num_rows:
+    if df <= num_rows:
         return True, valid_str
 
     error_message = (
@@ -316,5 +316,4 @@ def _validate_for_maximum_kpi_size(
         f"monthly rows greater than {num_rows}. Please try materialized views"
         "for such datasets (coming soon)."
     )
-
     return False, error_message

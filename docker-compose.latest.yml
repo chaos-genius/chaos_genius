@@ -35,14 +35,9 @@ services:
     container_name: chaosgenius-webapp
     image: chaosgenius/chaosgenius-webapp:latest
     ports:
-      - "8080:3000"
+      - "8080:80"
     environment:
-      - NODE_ENV=production
-      - HOST=0.0.0.0
-      - PORT=3000
       - REACT_APP_BASE_URL=${REACT_APP_BASE_URL}
-    stdin_open: true
-    command: npm run start
 
   chaosgenius-server:
     container_name: chaosgenius-server

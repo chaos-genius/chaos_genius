@@ -5,9 +5,9 @@ import logging
 
 import pandas as pd
 
-from chaos_genius.settings import (MULTIDIM_ANALYSIS, 
+from chaos_genius.settings import (MULTIDIM_ANALYSIS_FOR_ANOMALY, 
                                    MAX_SUBDIM_CARDINALITY, 
-                                   MIN_SUBPOPULATION)
+                                   MIN_DATA_IN_SUBGROUPOUP)
 
 from chaos_genius.core.anomaly.constants import RESAMPLE_FREQUENCY
 from chaos_genius.core.anomaly.processor import ProcessAnomalyDetection
@@ -228,7 +228,7 @@ class AnomalyDetectionController(object):
 
     def _get_dimension_combinations(self, dimension_list):
 
-        if MULTIDIM_ANALYSIS:
+        if MULTIDIM_ANALYSIS_FOR_ANOMALY:
             # return subgroup combination of style AxBxC
             return [dimension_list, ]
         else:
@@ -290,7 +290,7 @@ class AnomalyDetectionController(object):
                 filter_data_len = grouped_input_data.query(subgroup)[
                     self.kpi_info["metric"]
                 ].sum()
-                if filter_data_len >= MIN_SUBPOPULATION:
+                if filter_data_len >= MIN_DATA_IN_SUBGROUPOUP:
                     filtered_subgroups.append((subgroup, filter_data_len))
             except IndexError:
                 pass

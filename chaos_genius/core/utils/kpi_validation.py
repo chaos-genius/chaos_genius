@@ -8,7 +8,7 @@ from pandas.api.types import is_datetime64_any_dtype as is_datetime
 
 from chaos_genius.core.rca.rca_controller import RootCauseAnalysisController
 from chaos_genius.core.rca.root_cause_analysis import SUPPORTED_AGGREGATIONS
-from chaos_genius.settings import MAX_ROWS
+from chaos_genius.settings import MAX_ROWS_FOR_DEEPDRILLS
 
 TAIL_SIZE = 10
 
@@ -115,10 +115,10 @@ def _validate_kpi_from_df(
         {
             "debug_str": (
                 "Check #4: Validate KPI has no more than "
-                f"{MAX_ROWS} rows"
+                f"{MAX_ROWS_FOR_DEEPDRILLS} rows"
             ),
             "status": _validate_for_maximum_kpi_size(
-                kpi_info, num_rows=MAX_ROWS
+                kpi_info, num_rows=MAX_ROWS_FOR_DEEPDRILLS
             )
         }
     ]

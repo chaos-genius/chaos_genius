@@ -21,7 +21,8 @@ def rca_load_data(
     dt_col: str,
     end_date: datetime,
     timeline: str = "mom",
-    tail: int = None
+    tail: int = None,
+    get_count: bool = False
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Load data for performing RCA.
 
@@ -37,6 +38,8 @@ def rca_load_data(
     :type timeline: str, optional
     :param tail: limit data loaded to this number of rows, defaults to None
     :type tail: int, optional
+    :param get_count: Return count values of data, defaults to False
+    :type get_count: bool, optional
     :return: tuple with baseline data and rca data for
     :rtype: Tuple[pd.DataFrame, pd.DataFrame]
     """
@@ -52,7 +55,9 @@ def rca_load_data(
     end_dt = str(end_dt_obj.date())
 
     base_df, rca_df = _get_kpi_data(
-        kpi_info, connection_info, dt_col, base_dt, mid_dt, end_dt, tail)
+        kpi_info, connection_info, dt_col,
+        base_dt, mid_dt, end_dt, tail, get_count
+    )
 
     return base_df, rca_df
 
@@ -64,9 +69,10 @@ def _get_kpi_data(
     base_dt: str,
     mid_dt: str,
     end_dt: str,
-    tail: int = None
+    tail: int = None,
+    get_count: bool = True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """Load RCA data for KPI with table defined.
+    """Load RCA data for KPI.
 
     :param kpi_info: kpi info to load data for, defaults to "mom"
     :type kpi_info: dict, optional
@@ -82,6 +88,8 @@ def _get_kpi_data(
     :type end_dt: str
     :param tail: limit data loaded to this number of rows, defaults to None
     :type tail: int, optional
+    :param get_count: Return count values of data, defaults to False
+    :type get_count: bool, optional
     :return: tuple with baseline data and rca data for
     :rtype: Tuple[pd.DataFrame, pd.DataFrame]
     """
@@ -107,8 +115,12 @@ def _get_kpi_data(
         table_name = f"({kpi_info['kpi_query']}) as " + \
                      f"{indentifier}{randomword(10)}{indentifier}"
 
-    base_query = f"select * from {table_name} {base_filter} "
-    rca_query = f"select * from {table_name} {rca_filter} "
+    if get_count:
+        base_query = f"select count (*) from {table_name} {base_filter} "
+        rca_query = f"select count (*) from {table_name} {rca_filter} "
+    else:
+        base_query = f"select * from {table_name} {base_filter} "
+        rca_query = f"select * from {table_name} {rca_filter} "
 
     kpi_filters = kpi_info["filters"]
     if kpi_filters:
@@ -134,6 +146,9 @@ def _get_kpi_data(
     base_df = db_connection.run_query(base_query)
     rca_df = db_connection.run_query(rca_query)
 
+    if get_count:
+        return base_df.iloc[0, 0], rca_df.iloc[0, 0]
+
     if base_df is None:
         raise ValueError("Base dataframe is None.")
     if rca_df is None:
@@ -147,4 +162,3 @@ def _get_kpi_data(
     rca_df[dt_col] = pd.to_datetime(rca_df[dt_col])
 
     return base_df, rca_df
-

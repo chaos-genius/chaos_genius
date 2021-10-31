@@ -302,13 +302,13 @@ def _validate_for_maximum_kpi_size(
     """
     try:
         rca = RootCauseAnalysisController(kpi_info)
-        base_df, rca_df = rca._load_data()
-        df = pd.concat([base_df, rca_df])
+        base_df, rca_df = rca._load_data(get_count=True)
+        df = base_df + rca_df
     except Exception as e:  # noqa: B902
         return False, "Could not load data. Error: " + str(e)
     valid_str = "Accepted!"
 
-    if len(df) <= num_rows:
+    if df <= num_rows:
         return True, valid_str
 
     error_message = (
@@ -316,5 +316,4 @@ def _validate_for_maximum_kpi_size(
         f"monthly rows greater than {num_rows}. Please try materialized views"
         "for such datasets (coming soon)."
     )
-
     return False, error_message

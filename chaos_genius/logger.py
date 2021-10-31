@@ -4,12 +4,14 @@ from logging.handlers import RotatingFileHandler
 
 from pythonjsonlogger import jsonlogger
 
+from chaos_genius.settings import ENV
+
 
 def configure_logger(app):
     """Configure loggers."""
     logger = logging.getLogger()
-    # TODO: Update debug based on env
-    logger.setLevel(logging.DEBUG)
+    log_level = logging.INFO if ENV == "production" else logging.DEBUG
+    logger.setLevel(log_level)
     json_handler = RotatingFileHandler(
         "chaosgenius.log", maxBytes=4194304, backupCount=5)
     json_formatter = jsonlogger.JsonFormatter(

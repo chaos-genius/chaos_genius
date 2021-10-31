@@ -39,12 +39,9 @@ prophet==1.0.1
 # greykite==0.2.0
 
 # Forms
-email-validator==1.1.2
-Flask-WTF==0.14.3
 WTForms==2.3.3
 
 # Deployment
-gevent==21.1.2
 gunicorn>=19.9.0
 supervisor==4.2.2
 
@@ -66,4 +63,4 @@ python-dotenv==0.18.0
 
 # Logging
 python-json-logger==2.0.2
-
+sentry-sdk==1.4.3

@@ -3,7 +3,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from pythonjsonlogger import jsonlogger
 
-from chaos_genius.utils.sentry import init_sentry
+from chaos_genius.utils.sentry import init_sentry, log_sentry_error
 from chaos_genius.settings import ENV, SENTRY_DSN
 
 
@@ -35,3 +35,8 @@ def configure_logger(app):
     if not app.logger.handlers:
         app.logger.addHandler(json_handler)
         app.logger.addHandler(streamHandler)
+
+
+def log_error(error):
+    """Log error."""
+    log_sentry_error(error)

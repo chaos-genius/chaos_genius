@@ -1,5 +1,6 @@
 import logging
 import sentry_sdk
+
 from sentry_sdk.integrations.logging import LoggingIntegration
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
@@ -35,3 +36,7 @@ def init_sentry(sentry_dsn, flask_integration=False, env=None):
 def strip_sensitive_data(event, hint):
     # modify event here
     return event
+
+
+def log_sentry_error(error):
+    sentry_sdk.capture_exception(error)

@@ -7,7 +7,7 @@ import pandas as pd
 
 from chaos_genius.settings import (MULTIDIM_ANALYSIS_FOR_ANOMALY, 
                                    MAX_SUBDIM_CARDINALITY, 
-                                   MIN_DATA_IN_SUBGROUPOUP)
+                                   MIN_DATA_IN_SUBGROUP)
 
 from chaos_genius.core.anomaly.constants import RESAMPLE_FREQUENCY
 from chaos_genius.core.anomaly.processor import ProcessAnomalyDetection
@@ -290,7 +290,7 @@ class AnomalyDetectionController(object):
                 filter_data_len = grouped_input_data.query(subgroup)[
                     self.kpi_info["metric"]
                 ].sum()
-                if filter_data_len >= MIN_DATA_IN_SUBGROUPOUP:
+                if filter_data_len >= MIN_DATA_IN_SUBGROUP:
                     filtered_subgroups.append((subgroup, filter_data_len))
             except IndexError:
                 pass

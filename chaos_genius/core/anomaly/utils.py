@@ -193,6 +193,20 @@ def get_timedelta(freq, diff):
     return timedelta(**offset)
 
 
+def date_time_checker(input_data, datetime_obj, dt_col, freq):
+    if freq == "D" or freq == "daily":
+        temp_dt = input_data[dt_col].apply(
+            lambda val: datetime(val.year, val.month, val.day))
+        dt_obj = datetime(datetime_obj.year, datetime_obj.month, datetime_obj.day)
+        return dt_obj not in temp_dt.to_list()
+
+    if freq == "H" or freq == "hourly":
+        temp_dt = input_data[dt_col].apply(
+            lambda val: datetime(val.year, val.month, val.day, val.hour))
+        dt_obj = datetime(datetime_obj.year, datetime_obj.month, datetime_obj.day, datetime_obj.hour)
+        return dt_obj not in temp_dt.to_list()
+
+
 def fill_data(
     input_data: pd.DataFrame,
     dt_col: str,
@@ -221,11 +235,15 @@ def fill_data(
     :return: filled dataframe
     :rtype: pd.DataFrame
     """
+
+    input_data[dt_col] = pd.to_datetime(input_data[dt_col])
+    
     if last_date is not None:
         last_date_diff_period = (
             last_date - get_timedelta(freq, period) + get_timedelta(freq, 1)
         )
-        if last_date_diff_period not in input_data[dt_col]:
+
+        if date_time_checker(input_data, last_date_diff_period, dt_col, freq) == True:
             input_data = pd.concat(
                 [
                     pd.DataFrame({
@@ -238,11 +256,12 @@ def fill_data(
 
     if end_date is not None:
         end_date_diff_1 = end_date - timedelta(**FREQUENCY_DELTA[freq])
-        if end_date_diff_1 not in input_data[dt_col]:
+
+        if date_time_checker(input_data, end_date_diff_1, dt_col, freq) == True:
             input_data = pd.concat(
                 [
-                    pd.DataFrame({dt_col: [end_date_diff_1], metric_col: [0]}),
-                    input_data
+                    input_data,
+                    pd.DataFrame({dt_col: [end_date_diff_1], metric_col: [0]})
                 ]
             )
 

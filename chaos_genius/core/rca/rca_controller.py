@@ -59,7 +59,8 @@ class RootCauseAnalysisController:
     def _load_data(
         self,
         timeline: str = "mom",
-        tail: int = None
+        tail: int = None,
+        get_count: bool = False
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Load data for performing RCA.
 
@@ -67,13 +68,18 @@ class RootCauseAnalysisController:
         :type timeline: str, optional
         :param tail: limit data loaded to this number of rows, defaults to None
         :type tail: int, optional
+        :param get_count: Return count values of data, defaults to False
+        :type get_count: bool, optional
         :return: tuple with baseline data and rca data for
         :rtype: Tuple[pd.DataFrame, pd.DataFrame]
         """
         base_df, rca_df = rca_load_data(
             self.kpi_info, self.connection_info, self.dt_col, self.end_date,
-            timeline, tail)
-        logger.info(f"Loaded {len(base_df)}, {len(rca_df)} rows of data")
+            timeline, tail, get_count)
+        if get_count:
+            logger.info(f"Loaded {base_df}, {rca_df} rows of data")
+        else:
+            logger.info(f"Loaded {len(base_df)}, {len(rca_df)} rows of data")
         return base_df, rca_df
 
     def _output_to_row(

@@ -40,7 +40,8 @@ def rca_load_data(
     base_dt = str(base_dt_obj.date())
     end_dt = str(end_dt_obj.date())
 
-    df = DataLoader(kpi_info, base_dt, end_dt, tail)
+    df = DataLoader(
+        kpi_info, end_date=end_dt, start_date=base_dt, tail=tail).get_data()
 
     base_df = df[df[dt_col] <= mid_dt_obj]
     rca_df = df[df[dt_col] > mid_dt_obj]

@@ -1,10 +1,12 @@
 """Provides the Prophet model for anomaly detection."""
 
 import pandas as pd
-import prophet as pt
 
 from chaos_genius.core.anomaly.models import AnomalyModel
 from chaos_genius.core.utils.supress_output import suppress_stdout_stderr
+
+with suppress_stdout_stderr():
+    import prophet as pt
 
 PROPHETSENS = {"high": 0.8, "medium": 0.9, "low": 0.95}
 

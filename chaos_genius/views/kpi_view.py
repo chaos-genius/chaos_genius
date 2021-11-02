@@ -278,18 +278,18 @@ def kpi_aggregation(kpi_id, timeline="mom"):
             & (RcaData.end_date <= end_date)
         ).order_by(RcaData.created_at.desc()).first()
 
-        final_data = data_point.data
-        final_data["analysis_date"] = data_point.end_date.strftime("%Y-%m-%d")
-
+        if data_point:
+            final_data = data_point.data
+            final_data["analysis_date"] = data_point.end_date.strftime("%Y-%m-%d")
+        else:
+            final_data = {
+                "panel_metrics": [],
+                "line_chart_data": [],
+                "insights": [],
+                "analysis_date": ""
+            }
     except Exception as err:
-        # print(traceback.format_exc())
         current_app.logger.error(f"Error in RCA Analysis: {err}")
-        final_data = {
-            "panel_metrics": [],
-            "line_chart_data": [],
-            "insights": [],
-            "analysis_date": ""
-        }
     return final_data
 
 
@@ -304,11 +304,12 @@ def kpi_line_data(kpi_id):
             & (RcaData.end_date <= end_date)
         ).order_by(RcaData.created_at.desc()).first()
 
-        final_data = data_point.data
+        final_data = []
+        if data_point:
+            final_data = data_point.data
 
     except Exception as err:
         current_app.logger.error(f'Error in RCA Analysis: {err}')
-        final_data = []
     return final_data
 
 
@@ -325,17 +326,17 @@ def rca_analysis(kpi_id, timeline="mom", dimension=None):
             & (RcaData.dimension == dimension)
         ).order_by(RcaData.created_at.desc()).first()
 
-        final_data = data_point.data
-        final_data["analysis_date"] = data_point.end_date.strftime("%Y-%m-%d")
-
+        if data_point:
+            final_data = data_point.data
+            final_data["analysis_date"] = data_point.end_date.strftime("%Y-%m-%d")
+        else:
+            final_data = {
+                "chart": {"chart_data": [], "y_axis_lim": [], "chart_table": []},
+                "data_table": [],
+                "analysis_date": ""
+            }
     except Exception as err:
-        # print(traceback.format_exc())
         current_app.logger.error(f"Error in RCA Analysis: {err}")
-        final_data = {
-            "chart": {"chart_data": [], "y_axis_lim": [], "chart_table": []},
-            "data_table": [],
-            "analysis_date": ""
-        }
     return final_data
 
 
@@ -352,18 +353,19 @@ def rca_hierarchical_data(kpi_id, timeline="mom", dimension=None):
             & (RcaData.dimension == dimension)
         ).order_by(RcaData.created_at.desc()).first()
 
-        final_data = data_point.data
-        final_data["analysis_date"] = data_point.end_date.strftime("%Y-%m-%d")
-
+        if data_point:
+            final_data = data_point.data
+            final_data["analysis_date"] = data_point.end_date.strftime("%Y-%m-%d")
+        else:
+            final_data = {
+                "data_table": [],
+                "analysis_date": ""
+            }
     except Exception as err:
-        # print(traceback.format_exc())
         current_app.logger.error(
             f"Error in RCA hierarchical table generation: {err}")
-        final_data = {
-            "data_table": [],
-            "analysis_date": ""
-        }
     return final_data
+
 
 def get_kpi_data_from_id(n: int) -> dict:
     """Returns the corresponding KPI data for the given KPI ID 

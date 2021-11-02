@@ -6,13 +6,14 @@ from typing import Any, Dict, List, Tuple, Union
 import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 
-from chaos_genius.core.rca.rca_controller import RootCauseAnalysisController
 from chaos_genius.core.rca.root_cause_analysis import SUPPORTED_AGGREGATIONS
+from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.settings import MAX_ROWS_FOR_DEEPDRILLS
 
 TAIL_SIZE = 10
 
 logger = logging.getLogger()
+
 
 def validate_kpi(
     kpi_info: Dict[str, Any]
@@ -25,9 +26,7 @@ def validate_kpi(
     :rtype: Tuple[bool, str]
     """
     try:
-        rca = RootCauseAnalysisController(kpi_info)
-        base_df, rca_df = rca._load_data(tail=TAIL_SIZE)
-        df = pd.concat([base_df, rca_df])
+        df = DataLoader(kpi_info, days_before=30, tail=TAIL_SIZE).get_data()
         logger.info(f"Created df with {len(df)} rows for validation")
     except Exception as e:  # noqa: B902
         return False, "Could not load data. Error: " + str(e)
@@ -117,9 +116,7 @@ def _validate_kpi_from_df(
                 "Check #4: Validate KPI has no more than "
                 f"{MAX_ROWS_FOR_DEEPDRILLS} rows"
             ),
-            "status": _validate_for_maximum_kpi_size(
-                kpi_info, num_rows=MAX_ROWS_FOR_DEEPDRILLS
-            )
+            "status": _validate_for_maximum_kpi_size()
         }
     ]
     for validation in validations:
@@ -290,26 +287,19 @@ def _validate_date_column_is_parseable(
 
 def _validate_for_maximum_kpi_size(
     kpi_info: Dict[str, Any],
-    num_rows: int
 ) -> Tuple[bool, str]:
     """Validate if KPI size is less than maximum permissible size
     :param kpi_info: Dictionary with all params for the KPI
     :type kpi_info: Dict[str, Any]
-    :param num_rows: maximum number of rows for the KPI
-    :type num_rows: int
     :return: returns a tuple with the status as a bool and a status message
     :rtype: Tuple[bool, str]
     """
     try:
-        rca = RootCauseAnalysisController(kpi_info)
-        base_df, rca_df = rca._load_data(get_count=True)
-        df = base_df + rca_df
+        num_rows = DataLoader(kpi_info, days_before=60).get_count()
     except Exception as e:  # noqa: B902
         return False, "Could not load data. Error: " + str(e)
-    valid_str = "Accepted!"
-
-    if df <= num_rows:
-        return True, valid_str
+    if num_rows <= MAX_ROWS_FOR_DEEPDRILLS:
+        return True, "Accepted!"
 
     error_message = (
         "Chaos Genius does not currently support datasets with "

@@ -4,6 +4,7 @@ from datetime import datetime
 import logging
 
 import pandas as pd
+from chaos_genius.core.utils.data_loader import DataLoader
 
 from chaos_genius.settings import (MULTIDIM_ANALYSIS_FOR_ANOMALY,
                                    MAX_SUBDIM_CARDINALITY,
@@ -11,12 +12,11 @@ from chaos_genius.settings import (MULTIDIM_ANALYSIS_FOR_ANOMALY,
 
 from chaos_genius.core.anomaly.constants import RESAMPLE_FREQUENCY
 from chaos_genius.core.anomaly.processor import ProcessAnomalyDetection
-from chaos_genius.core.anomaly.utils import (fill_data, get_anomaly_df,
+from chaos_genius.core.anomaly.utils import (fill_data,
                                              get_dq_missing_data,
                                              get_last_date_in_db)
 from chaos_genius.databases.models.anomaly_data_model import (
     AnomalyDataOutput, db)
-from chaos_genius.databases.models.data_source_model import DataSource
 
 logger = logging.getLogger()
 
@@ -92,7 +92,6 @@ class AnomalyDetectionController(object):
         N days/hours
         :rtype: pd.DataFrame
         """
-        conn = DataSource.get_by_id(self.kpi_info["data_source"])
 
         # If end_date is passed to self, use that
         # Otherwise check if kpi_info has end_date
@@ -111,20 +110,12 @@ class AnomalyDetectionController(object):
             end_date = self.end_date
 
         last_date_in_db = self._get_last_date_in_db("overall")
-
-        df = get_anomaly_df(
+        return DataLoader(
             self.kpi_info,
-            conn.as_dict,
-            last_date_in_db,
-            end_date,
-            self.kpi_info["anomaly_params"]["anomaly_period"],
-        )
-
-        dt_col = self.kpi_info["datetime_column"]
-
-        df[dt_col] = pd.to_datetime(df[dt_col])
-
-        return df
+            end_date=end_date,
+            start_date=last_date_in_db,
+            days_before=self.kpi_info["anomaly_params"]["anomaly_period"]
+        ).get_data()
 
     def _get_last_date_in_db(
         self,

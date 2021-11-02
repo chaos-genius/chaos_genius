@@ -1,23 +1,22 @@
 import traceback
 from datetime import datetime, timedelta
 
-from flask import current_app
+from flask import current_app  # noqa: F401
 
 from chaos_genius.core.anomaly.controller import AnomalyDetectionController
 from chaos_genius.core.rca.rca_controller import RootCauseAnalysisController
-from chaos_genius.core.rca.rca_utils.data_loader import rca_load_data
-from chaos_genius.databases.models.data_source_model import DataSource
+from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.views.kpi_view import get_kpi_data_from_id
 
 RCA_SLACK_DAYS = 5
 
 
-def _is_data_present_for_end_date(kpi_info: dict, end_date: datetime = None) -> bool:
-    connection_info = DataSource.get_by_id(kpi_info["data_source"]).as_dict
-    _, rca_df = rca_load_data(
-        kpi_info, connection_info, kpi_info["datetime_column"], end_date,
-        "dod", 100)
-    return len(rca_df) != 0
+def _is_data_present_for_end_date(
+    kpi_info: dict,
+    end_date: datetime = None
+) -> bool:
+    df_count = DataLoader(kpi_info, end_date, days_before=1).get_count()
+    return df_count != 0
 
 
 def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
@@ -40,7 +39,7 @@ def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
 
         adc.detect()
 
-    except Exception as e:
+    except Exception:  # noqa: B902
         traceback.print_exc()
         return False
 
@@ -75,9 +74,8 @@ def run_rca_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
         rca_controller = RootCauseAnalysisController(kpi_info, end_date)
         rca_controller.compute()
 
-    except Exception as e:
+    except Exception:  # noqa: B902
         traceback.print_exc()
         return False
 
     return True
-

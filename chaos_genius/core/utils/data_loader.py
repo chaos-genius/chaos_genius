@@ -9,17 +9,17 @@ from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.databases.models.data_source_model import DataSource
 
 
-SQL_IDENTIFIERS = {
+_SQL_IDENTIFIERS = {
     "mysql": "`",
     "postgres": "\"",
     "snowflake": "\"",
 }
 
 
-def randomword(length: int) -> str:
+def _randomword(length: int) -> str:
     """Return a random word of specified length."""
     letters = string.ascii_lowercase
-    return ''.join(random.choice(letters) for i in range(length))
+    return ''.join(random.choice(letters) for _ in range(length))
 
 
 class DataLoader:

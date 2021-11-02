@@ -102,14 +102,14 @@ def get_timedelta(freq, diff):
 
 
 def date_time_checker(input_data, datetime_obj, dt_col, freq):
-    if freq in ["D", "daily"]:
+    if freq in {"D", "daily"}:
         temp_dt = input_data[dt_col].apply(
             lambda val: datetime(val.year, val.month, val.day))
         dt_obj = datetime(
             datetime_obj.year, datetime_obj.month, datetime_obj.day)
         return dt_obj not in temp_dt.to_list()
 
-    if freq in ["H", "hourly"]:
+    if freq in {"H", "hourly"}:
         temp_dt = input_data[dt_col].apply(
             lambda val: datetime(val.year, val.month, val.day, val.hour))
         dt_obj = datetime(

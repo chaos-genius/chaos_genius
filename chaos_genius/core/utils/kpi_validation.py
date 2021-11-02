@@ -116,7 +116,7 @@ def _validate_kpi_from_df(
                 "Check #4: Validate KPI has no more than "
                 f"{MAX_ROWS_FOR_DEEPDRILLS} rows"
             ),
-            "status": _validate_for_maximum_kpi_size()
+            "status": _validate_for_maximum_kpi_size(kpi_info)
         }
     ]
     for validation in validations:

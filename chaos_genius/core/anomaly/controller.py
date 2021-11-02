@@ -5,8 +5,8 @@ import logging
 
 import pandas as pd
 
-from chaos_genius.settings import (MULTIDIM_ANALYSIS_FOR_ANOMALY, 
-                                   MAX_SUBDIM_CARDINALITY, 
+from chaos_genius.settings import (MULTIDIM_ANALYSIS_FOR_ANOMALY,
+                                   MAX_SUBDIM_CARDINALITY,
                                    MIN_DATA_IN_SUBGROUP)
 
 from chaos_genius.core.anomaly.constants import RESAMPLE_FREQUENCY
@@ -75,14 +75,14 @@ class AnomalyDetectionController(object):
             self.kpi_info['anomaly_params']['ts_frequency'] = self.\
                 kpi_info['anomaly_params']['frequency']
 
-        if (
-            self.kpi_info['anomaly_params']['ts_frequency'].lower() == 'hourly'
-            or self.kpi_info['anomaly_params']['ts_frequency'].lower() == 'h'
-        ):
+        if self.kpi_info['anomaly_params']['ts_frequency'].lower() in [
+            'hourly',
+            'h',
+        ]:
             period = self.kpi_info['anomaly_params']['period']
             period_int = int(period)
-            period_fract = period-period_int
-            period = period_int*24 + int(period_fract*24)
+            period_fract = period - period_int
+            period = period_int * 24 + int(period_fract * 24)
             self.kpi_info['anomaly_params']['period'] = period
 
     def _load_anomaly_data(self) -> pd.DataFrame:

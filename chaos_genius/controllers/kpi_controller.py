@@ -1,5 +1,4 @@
 import logging
-import traceback
 from datetime import datetime, timedelta
 
 from flask import current_app  # noqa: F401

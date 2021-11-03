@@ -6,17 +6,20 @@ import logging
 import pandas as pd
 from chaos_genius.core.utils.data_loader import DataLoader
 
-from chaos_genius.settings import (MULTIDIM_ANALYSIS_FOR_ANOMALY,
-                                   MAX_SUBDIM_CARDINALITY,
-                                   MIN_DATA_IN_SUBGROUP)
+from chaos_genius.settings import (
+    MULTIDIM_ANALYSIS_FOR_ANOMALY,
+    MAX_SUBDIM_CARDINALITY,
+    MIN_DATA_IN_SUBGROUP,
+)
 
 from chaos_genius.core.anomaly.constants import RESAMPLE_FREQUENCY
 from chaos_genius.core.anomaly.processor import ProcessAnomalyDetection
-from chaos_genius.core.anomaly.utils import (fill_data,
-                                             get_dq_missing_data,
-                                             get_last_date_in_db)
-from chaos_genius.databases.models.anomaly_data_model import (
-    AnomalyDataOutput, db)
+from chaos_genius.core.anomaly.utils import (
+    fill_data,
+    get_dq_missing_data,
+    get_last_date_in_db,
+)
+from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, db
 
 logger = logging.getLogger()
 
@@ -33,7 +36,7 @@ class AnomalyDetectionController(object):
         kpi_info: dict,
         end_date: datetime = None,
         save_model: bool = False,
-        debug: bool = False
+        debug: bool = False,
     ):
         """Initialize the controller.
 
@@ -47,8 +50,7 @@ class AnomalyDetectionController(object):
         :param debug: enable debugging outputs, defaults to False
         :type debug: bool, optional
         """
-        logger.info(
-            f"Anomaly Controller initialized with KPI:{kpi_info['id']}")
+        logger.info(f"Anomaly Controller initialized with KPI:{kpi_info['id']}")
         self.kpi_info = kpi_info
 
         # TODO: Add these in kpi_info
@@ -66,24 +68,26 @@ class AnomalyDetectionController(object):
         # FIXME: temporary fix
         # if both period and anomaly period are present, precedence is
         # given to anomaly period
-        if 'anomaly_period' in self.kpi_info['anomaly_params']:
-            self.kpi_info['anomaly_params']['period'] = self.\
-                kpi_info['anomaly_params']['anomaly_period']
+        if "anomaly_period" in self.kpi_info["anomaly_params"]:
+            self.kpi_info["anomaly_params"]["period"] = self.kpi_info["anomaly_params"][
+                "anomaly_period"
+            ]
         # if both frequency and ts_frequency are present precedence is
         # given to frequency
-        if 'frequency' in self.kpi_info['anomaly_params']:
-            self.kpi_info['anomaly_params']['ts_frequency'] = self.\
-                kpi_info['anomaly_params']['frequency']
+        if "frequency" in self.kpi_info["anomaly_params"]:
+            self.kpi_info["anomaly_params"]["ts_frequency"] = self.kpi_info[
+                "anomaly_params"
+            ]["frequency"]
 
-        if self.kpi_info['anomaly_params']['ts_frequency'].lower() in [
-            'hourly',
-            'h',
+        if self.kpi_info["anomaly_params"]["ts_frequency"].lower() in [
+            "hourly",
+            "h",
         ]:
-            period = self.kpi_info['anomaly_params']['period']
+            period = self.kpi_info["anomaly_params"]["period"]
             period_int = int(period)
             period_fract = period - period_int
             period = period_int * 24 + int(period_fract * 24)
-            self.kpi_info['anomaly_params']['period'] = period
+            self.kpi_info["anomaly_params"]["period"] = period
 
     def _load_anomaly_data(self) -> pd.DataFrame:
         """Load KPI data, preprocess it and return it for anomaly detection.
@@ -99,8 +103,7 @@ class AnomalyDetectionController(object):
         end_date = None
         if self.end_date is None:
             if self.kpi_info["is_static"]:
-                end_date = self.kpi_info.get(
-                    "static_params", {}).get("end_date")
+                end_date = self.kpi_info.get("static_params", {}).get("end_date")
                 if end_date is not None:
                     end_date = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
 
@@ -114,14 +117,10 @@ class AnomalyDetectionController(object):
             self.kpi_info,
             end_date=end_date,
             start_date=last_date_in_db,
-            days_before=self.kpi_info["anomaly_params"]["anomaly_period"]
+            days_before=self.kpi_info["anomaly_params"]["anomaly_period"],
         ).get_data()
 
-    def _get_last_date_in_db(
-        self,
-        series: str,
-        subgroup: str = None
-    ) -> datetime:
+    def _get_last_date_in_db(self, series: str, subgroup: str = None) -> datetime:
         """Return the last date for which we have data for the given series.
 
         :param series: Type of series
@@ -160,8 +159,7 @@ class AnomalyDetectionController(object):
             }
         )
 
-        sensitivity = self.kpi_info["anomaly_params"].get(
-            "sensitivity", "medium")
+        sensitivity = self.kpi_info["anomaly_params"].get("sensitivity", "medium")
 
         return ProcessAnomalyDetection(
             model_name,
@@ -210,8 +208,7 @@ class AnomalyDetectionController(object):
                 unjoined_query = [f'`{col_names[0]}` == "{comb}"']
             elif type(comb) == tuple:
                 unjoined_query = [
-                    f'`{col_names[i]}` == "{comb[i]}"'
-                    for i in range(len(comb))
+                    f'`{col_names[i]}` == "{comb[i]}"' for i in range(len(comb))
                 ]
             query_string = " and ".join(unjoined_query)
             query_list.append(query_string)
@@ -221,7 +218,9 @@ class AnomalyDetectionController(object):
 
         if MULTIDIM_ANALYSIS_FOR_ANOMALY:
             # return subgroup combination of style AxBxC
-            return [dimension_list, ]
+            return [
+                dimension_list,
+            ]
         else:
             # return subgroup combination of style A, B, C
             return list(map(lambda x: [x], dimension_list))
@@ -239,12 +238,9 @@ class AnomalyDetectionController(object):
         :rtype: list
         """
         valid_subdims = []
-        for dim in self.kpi_info['dimensions']:
+        for dim in self.kpi_info["dimensions"]:
             if len(input_data[dim].unique()) >= MAX_SUBDIM_CARDINALITY:
-                print((
-                    f"{dim} has a cardinality over "
-                    f"{MAX_SUBDIM_CARDINALITY} skipping {dim}"
-                ))
+                print(f"skipping {dim}, cardinality over {MAX_SUBDIM_CARDINALITY}")
             else:
                 valid_subdims.append(dim)
 
@@ -258,11 +254,7 @@ class AnomalyDetectionController(object):
             group_list.extend(subgroup_querified)
         return group_list
 
-    def _filter_subgroups(
-        self,
-        subgroups: list,
-        input_data: pd.DataFrame
-    ) -> list:
+    def _filter_subgroups(self, subgroups: list, input_data: pd.DataFrame) -> list:
         """Filter out irrelevant subgroups.
 
         :param subgroups: List of subgroups
@@ -270,9 +262,9 @@ class AnomalyDetectionController(object):
         :return: List of subgroups
         :rtype: list
         """
-        grouped_input_data = input_data.groupby(
-            self.kpi_info["dimensions"]).agg(
-                {self.kpi_info["metric"]: "count"})
+        grouped_input_data = input_data.groupby(self.kpi_info["dimensions"]).agg(
+            {self.kpi_info["metric"]: "count"}
+        )
 
         filtered_subgroups = []
 
@@ -324,10 +316,7 @@ class AnomalyDetectionController(object):
 
             if subgroup == "missing":
                 series_data = get_dq_missing_data(
-                    temp_input_data,
-                    dt_col,
-                    metric_col,
-                    RESAMPLE_FREQUENCY[freq]
+                    temp_input_data, dt_col, metric_col, RESAMPLE_FREQUENCY[freq]
                 )
 
             else:
@@ -374,8 +363,7 @@ class AnomalyDetectionController(object):
             )
 
         else:
-            raise ValueError(
-                f"series {series} not in ['dq', 'subdim', 'overall']")
+            raise ValueError(f"series {series} not in ['dq', 'subdim', 'overall']")
 
         model_name = self.kpi_info["anomaly_params"]["model_name"]
 
@@ -387,10 +375,7 @@ class AnomalyDetectionController(object):
         logger.info(f"Saving Anomaly output for {series}-{subgroup}")
         self._save_anomaly_output(overall_anomaly_output, series, subgroup)
 
-    def _detect_subdimensions(
-        self,
-        input_data: pd.DataFrame
-    ) -> None:
+    def _detect_subdimensions(self, input_data: pd.DataFrame) -> None:
         """Perform anomaly detection for subdimensions
 
         :param input_data: Dataframe with all of the relevant KPI data
@@ -415,18 +400,14 @@ class AnomalyDetectionController(object):
             except Exception:  # noqa: B902
                 logger.exception(f"Exception occured for: subdim - {subgroup}")
 
-    def _detect_data_quality(
-        self,
-        input_data: pd.DataFrame
-    ) -> None:
+    def _detect_data_quality(self, input_data: pd.DataFrame) -> None:
         """Perform anomaly detection for data quality metrics
 
         :param input_data: Dataframe with all of the relevant KPI data
         :type input_data: pd.DataFrame
         """
         agg = self.kpi_info["aggregation"]
-        dq_list = ["max", "count", "mean"] \
-            if agg != "mean" else ["max", "count"]
+        dq_list = ["max", "count", "mean"] if agg != "mean" else ["max", "count"]
         logger.info("Running anomaly for data quality subgroups")
         for dq in dq_list:
             try:
@@ -443,13 +424,13 @@ class AnomalyDetectionController(object):
         input_data = self._load_anomaly_data()
         logger.info(f"Loaded {len(input_data)} rows of input data.")
 
-        run_optional = self.kpi_info.get('run_optional', None)
+        run_optional = self.kpi_info.get("run_optional", None)
 
-        if run_optional is None or run_optional['overall'] is True:
+        if run_optional is None or run_optional["overall"] is True:
             self._run_anomaly_for_series(input_data, "overall")
 
-        if run_optional is None or run_optional['subdim'] is True:
+        if run_optional is None or run_optional["subdim"] is True:
             self._detect_subdimensions(input_data)
 
-        if run_optional is None or run_optional['data_quality'] is True:
+        if run_optional is None or run_optional["data_quality"] is True:
             self._detect_data_quality(input_data)

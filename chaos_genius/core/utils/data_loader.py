@@ -11,15 +11,15 @@ from chaos_genius.databases.models.data_source_model import DataSource
 
 _SQL_IDENTIFIERS = {
     "mysql": "`",
-    "postgres": "\"",
-    "snowflake": "\"",
+    "postgres": '"',
+    "snowflake": '"',
 }
 
 
 def _randomword(length: int) -> str:
     """Return a random word of specified length."""
     letters = string.ascii_lowercase
-    return ''.join(random.choice(letters) for _ in range(length))
+    return "".join(random.choice(letters) for _ in range(length))
 
 
 class DataLoader:
@@ -29,7 +29,7 @@ class DataLoader:
         end_date: str = None,
         start_date: str = None,
         days_before: int = 30,
-        tail: int = None
+        tail: int = None,
     ):
         """Initialize Data Loader for KPI.
 
@@ -58,19 +58,18 @@ class DataLoader:
 
         if start_date is None:
             if days_before is None:
-                raise ValueError(
-                    "Either start_date or days_before must be specified.")
+                raise ValueError("Either start_date or days_before must be specified.")
             start_date = pd.to_datetime(end_date) - timedelta(days=days_before)
             start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
 
         self.start_date = start_date
         self.end_date = end_date
 
-        self.connection_info = DataSource.get_by_id(
-            kpi_info["data_source"]).as_dict
+        self.connection_info = DataSource.get_by_id(kpi_info["data_source"]).as_dict
         self.dt_col = self.kpi_info["datetime_column"]
         self.identifier = _SQL_IDENTIFIERS.get(
-            self.connection_info["connection_type"], "")
+            self.connection_info["connection_type"], ""
+        )
 
     def _get_id_string(self, value):
         return f"{self.identifier}{value}{self.identifier}"
@@ -85,10 +84,11 @@ class DataLoader:
 
     def _get_table_name(self):
         if self.kpi_info["kpi_type"] == "table":
-            return self.kpi_info['table_name']
+            return self.kpi_info["table_name"]
         else:
-            return f"({self.kpi_info['kpi_query']}) as " \
-                + self._get_id_string(_randomword(10))
+            return f"({self.kpi_info['kpi_query']}) as " + self._get_id_string(
+                _randomword(10)
+            )
 
     def _get_filters_for_query(self):
         query = ""

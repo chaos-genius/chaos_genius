@@ -30,8 +30,7 @@ def rca_load_data(
 
     dt_col = kpi_info["datetime_column"]
 
-    end_dt_obj = datetime.today() if end_date is None \
-        else end_date
+    end_dt_obj = datetime.today() if end_date is None else end_date
     num_days = TIMELINE_NUM_DAYS_MAP[timeline]
 
     base_dt_obj = end_dt_obj - timedelta(days=2 * num_days)
@@ -40,8 +39,7 @@ def rca_load_data(
     base_dt = str(base_dt_obj.date())
     end_dt = str(end_dt_obj.date())
 
-    df = DataLoader(
-        kpi_info, end_date=end_dt, start_date=base_dt, tail=tail).get_data()
+    df = DataLoader(kpi_info, end_date=end_dt, start_date=base_dt, tail=tail).get_data()
 
     base_df = df[df[dt_col] <= mid_dt_obj]
     rca_df = df[df[dt_col] > mid_dt_obj]

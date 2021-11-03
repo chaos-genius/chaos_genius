@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """KPI views for creating and viewing the kpis."""
+import logging
 import traceback  # noqa: F401
 from datetime import datetime, timedelta
 
@@ -23,13 +24,20 @@ from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.extensions import cache, db
 from chaos_genius.databases.db_utils import chech_editable_field
 
+TIME_DICT = {
+    "mom": {"expansion": "month", "time_delta": timedelta(days=30, hours=0, minutes=0)},
+    "wow": {"expansion": "week", "time_delta": timedelta(days=7, hours=0, minutes=0)},
+    "dod": {"expansion": "day", "time_delta": timedelta(days=1, hours=0, minutes=0)},
+}
+
 blueprint = Blueprint("api_kpi", __name__)
+logger = logging.getLogger(__name__)
 
 
 @blueprint.route("/", methods=["GET", "POST"])
 def kpi():
     """kpi list view."""
-    current_app.logger.info("kpi list")
+    logger.info("kpi list")
     # Handle logging in
     if request.method == "POST":
         if not request.is_json:
@@ -94,13 +102,6 @@ def kpi():
         return jsonify({"count": len(kpis), "data": kpis})
 
 
-TIME_DICT = {
-    "mom": {"expansion": "month", "time_delta": timedelta(days=30, hours=0, minutes=0)},
-    "wow": {"expansion": "week", "time_delta": timedelta(days=7, hours=0, minutes=0)},
-    "dod": {"expansion": "day", "time_delta": timedelta(days=1, hours=0, minutes=0)},
-}
-
-
 @blueprint.route("/get-dashboard-list", methods=["GET"])
 def get_all_kpis():
     """returning all kpis"""
@@ -155,7 +156,7 @@ def disable_kpi(kpi_id):
             status = "failure"
     except Exception as err:
         status = "failure"
-        current_app.logger.info(f"Error in disabling the KPI: {err}")
+        logger.info(f"Error in disabling the KPI: {err}")
     return jsonify({"message": message, "status": status})
 
 
@@ -166,7 +167,7 @@ def kpi_get_dimensions(kpi_id):
         kpi_info = get_kpi_data_from_id(kpi_id)
         dimensions = kpi_info["dimensions"]
     except Exception as err:
-        current_app.logger.info(f"Error Found: {err}")
+        logger.info(f"Error Found: {err}")
     return jsonify({"dimensions": dimensions, "msg": ""})
 
 
@@ -177,7 +178,7 @@ def kpi_get_aggregation(kpi_id):
         timeline = request.args.get("timeline")
         data = kpi_aggregation(kpi_id, timeline)
     except Exception as err:
-        current_app.logger.info(f"Error Found: {err}")
+        logger.info(f"Error Found: {err}")
     return jsonify({"data": data, "msg": ""})
 
 
@@ -187,42 +188,42 @@ def kpi_get_line_data(kpi_id):
     try:
         data = kpi_line_data(kpi_id)
     except Exception as err:
-        current_app.logger.info(f"Error Found: {err}")
+        logger.info(f"Error Found: {err}")
     return jsonify({"data": data, "msg": ""})
 
 
 @blueprint.route("/<int:kpi_id>/rca-analysis", methods=["GET"])
 def kpi_rca_analysis(kpi_id):
-    current_app.logger.info(f"RCA Analysis Started for KPI ID: {kpi_id}")
+    logger.info(f"RCA Analysis Started for KPI ID: {kpi_id}")
     data = []
     try:
         timeline = request.args.get("timeline")
         dimension = request.args.get("dimension", None)
         data = rca_analysis(kpi_id, timeline, dimension)
     except Exception as err:
-        current_app.logger.info(f"Error Found: {err}")
-    current_app.logger.info("RCA Analysis Done")
+        logger.info(f"Error Found: {err}")
+    logger.info("RCA Analysis Done")
     return jsonify({"data": data, "msg": ""})
 
 
 @blueprint.route("/<int:kpi_id>/rca-hierarchical-data", methods=["GET"])
 def kpi_rca_hierarchical_data(kpi_id):
-    current_app.logger.info(f"RCA Analysis Started for KPI ID: {kpi_id}")
+    logger.info(f"RCA Analysis Started for KPI ID: {kpi_id}")
     data = []
     try:
         timeline = request.args.get("timeline")
         dimension = request.args.get("dimension", None)
         data = rca_hierarchical_data(kpi_id, timeline, dimension)
     except Exception as err:
-        current_app.logger.info(f"Error Found: {err}")
-    current_app.logger.info("RCA Analysis Done")
+        logger.info(f"Error Found: {err}")
+    logger.info("RCA Analysis Done")
     return jsonify({"data": data, "msg": ""})
 
 
 @blueprint.route("/meta-info", methods=["GET"])
 def kpi_meta_info():
     """kpi meta info view."""
-    current_app.logger.info("kpi meta info")
+    logger.info("kpi meta info")
     return jsonify({"data": Kpi.meta_info()})
 
 
@@ -246,7 +247,7 @@ def edit_kpi(kpi_id):
             status = "failure"
     except Exception as err:
         status = "failure"
-        current_app.logger.info(f"Error in updating the KPI: {err}")
+        logger.info(f"Error in updating the KPI: {err}")
         message = str(err)
     return jsonify({"message": message, "status": status})
 
@@ -263,7 +264,7 @@ def get_kpi_info(kpi_id):
     except Exception as err:
         status = "failure"
         message = str(err)
-        current_app.logger.info(f"Error in fetching the KPI: {err}")
+        logger.info(f"Error in fetching the KPI: {err}")
     return jsonify({"message": message, "status": status, "data": data})
 
 
@@ -294,7 +295,7 @@ def kpi_aggregation(kpi_id, timeline="mom"):
                 "analysis_date": "",
             }
     except Exception as err:
-        current_app.logger.error(f"Error in RCA Analysis: {err}", exc_info=1)
+        logger.error(f"Error in KPI aggregation retrieval: {err}", exc_info=1)
     return final_data
 
 
@@ -315,7 +316,7 @@ def kpi_line_data(kpi_id):
 
         final_data = data_point.data if data_point else []
     except Exception as err:
-        current_app.logger.error(f'Error in RCA Analysis: {err}', exc_info=1)
+        logger.error(f'Error in KPI Line data retrieval: {err}', exc_info=1)
     return final_data
 
 
@@ -346,7 +347,7 @@ def rca_analysis(kpi_id, timeline="mom", dimension=None):
                 "analysis_date": "",
             }
     except Exception as err:
-        current_app.logger.error(f"Error in RCA Analysis: {err}", exc_info=1)
+        logger.error(f"Error in RCA Analysis retrieval: {err}", exc_info=1)
     return final_data
 
 
@@ -373,8 +374,8 @@ def rca_hierarchical_data(kpi_id, timeline="mom", dimension=None):
         else:
             final_data = {"data_table": [], "analysis_date": ""}
     except Exception as err:
-        current_app.logger.error(
-            f"Error in RCA hierarchical table generation: {err}", exc_info=1
+        logger.error(
+            f"Error in RCA hierarchical table retrieval: {err}", exc_info=1
         )
     return final_data
 

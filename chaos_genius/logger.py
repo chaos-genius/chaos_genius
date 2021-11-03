@@ -9,16 +9,18 @@ from chaos_genius.settings import ENV, SENTRY_DSN
 
 def configure_logger(app):
     """Configure loggers."""
-    logger = logging.getLogger()
+    logger = logging.getLogger("chaos_genius")
     json_handler = RotatingFileHandler(
-        "chaosgenius.log", maxBytes=4194304, backupCount=5)
+        "chaosgenius.log", maxBytes=4194304, backupCount=5
+    )
     json_formatter = jsonlogger.JsonFormatter(
-        "%(asctime) %(levelname)s %(module) "
-        "%(message)s %(lineno)s %(funcName)s %(filename)s")
+        "%(asctime)s %(levelname)s %(name)s "
+        "%(message)s %(lineno)s %(funcName)s %(filename)s"
+    )
     json_handler.setFormatter(json_formatter)
     streamHandler = logging.StreamHandler()
 
-    if ENV == 'production':
+    if ENV == "production":
         streamHandler.setFormatter(json_formatter)
         log_level = logging.INFO
         if SENTRY_DSN:

@@ -21,7 +21,7 @@ def get_anomaly_df(
     connection_info: dict,
     last_date_in_db: datetime = None,
     end_date: datetime = None,
-    days_range: int = 90
+    days_range: int = 90,
 ) -> pd.DataFrame:
     """Retrieve dataframe for anomaly detection.
 
@@ -81,11 +81,9 @@ def get_anomaly_df(
 
     kpi_type = kpi_info.get("kpi_type")
     if kpi_type == "table":
-        base_query = " ".join([
-            f"select * from {kpi_info['table_name']}",
-            base_filter,
-            kpi_filters_query
-        ])
+        base_query = " ".join(
+            [f"select * from {kpi_info['table_name']}", base_filter, kpi_filters_query]
+        )
 
     elif kpi_type == "query":
         base_query = " ".join(
@@ -96,21 +94,13 @@ def get_anomaly_df(
             ]
         )
     else:
-        raise ValueError(
-            f"kpi_type:'{kpi_type}' is not from ['table', 'query']")
+        raise ValueError(f"kpi_type:'{kpi_type}' is not from ['table', 'query']")
 
     db_connection = get_sqla_db_conn(data_source_info=connection_info)
-    query_df = db_connection.run_query(base_query)
-    return query_df
-    # return get_df_from_db_uri(connection_info["db_uri"], base_query)
+    return db_connection.run_query(base_query)
 
 
-
-def get_last_date_in_db(
-    kpi_id: int,
-    series: str,
-    subgroup: str = None
-) -> Any or None:
+def get_last_date_in_db(kpi_id: int, series: str, subgroup: str = None) -> Any or None:
     """Get last date for which anomaly was computed.
 
     :param kpi_id: kpi id to check for
@@ -139,10 +129,7 @@ def get_last_date_in_db(
 
 
 def get_dq_missing_data(
-    input_data: pd.DataFrame,
-    dt_col: str,
-    metric_col: str,
-    freq: str
+    input_data: pd.DataFrame, dt_col: str, metric_col: str, freq: str
 ) -> pd.DataFrame:
     """Generate dataframe with information on missing data.
 
@@ -168,8 +155,9 @@ def get_dq_missing_data(
         .reset_index()[[dt_col, metric_col]]
     )
 
-    missing_data = pd.DataFrame(
-        missing_data, columns=[dt_col, metric_col]).set_index(dt_col)
+    missing_data = pd.DataFrame(missing_data, columns=[dt_col, metric_col]).set_index(
+        dt_col
+    )
 
     return missing_data
 
@@ -194,16 +182,20 @@ def get_timedelta(freq, diff):
 
 
 def date_time_checker(input_data, datetime_obj, dt_col, freq):
-    if freq == "D" or freq == "daily":
+    if freq in ["D", "daily"]:
         temp_dt = input_data[dt_col].apply(
-            lambda val: datetime(val.year, val.month, val.day))
+            lambda val: datetime(val.year, val.month, val.day)
+        )
         dt_obj = datetime(datetime_obj.year, datetime_obj.month, datetime_obj.day)
         return dt_obj not in temp_dt.to_list()
 
-    if freq == "H" or freq == "hourly":
+    if freq in ["H", "hourly"]:
         temp_dt = input_data[dt_col].apply(
-            lambda val: datetime(val.year, val.month, val.day, val.hour))
-        dt_obj = datetime(datetime_obj.year, datetime_obj.month, datetime_obj.day, datetime_obj.hour)
+            lambda val: datetime(val.year, val.month, val.day, val.hour)
+        )
+        dt_obj = datetime(
+            datetime_obj.year, datetime_obj.month, datetime_obj.day, datetime_obj.hour
+        )
         return dt_obj not in temp_dt.to_list()
 
 
@@ -214,7 +206,7 @@ def fill_data(
     last_date: datetime,
     period: int,
     end_date: datetime,
-    freq: str
+    freq: str,
 ) -> pd.DataFrame:
     """Fill data from input_data.
 
@@ -236,20 +228,18 @@ def fill_data(
     :rtype: pd.DataFrame
     """
 
-    input_data[dt_col] = pd.to_datetime(input_data[dt_col])
-    
+    input_data = input_data.copy()
+    input_data.loc[:, dt_col] = pd.to_datetime(input_data[dt_col])
+
     if last_date is not None:
         last_date_diff_period = (
             last_date - get_timedelta(freq, period) + get_timedelta(freq, 1)
         )
 
-        if date_time_checker(input_data, last_date_diff_period, dt_col, freq) == True:
+        if date_time_checker(input_data, last_date_diff_period, dt_col, freq):
             input_data = pd.concat(
                 [
-                    pd.DataFrame({
-                        dt_col: [last_date_diff_period],
-                        metric_col: [0]
-                    }),
+                    pd.DataFrame({dt_col: [last_date_diff_period], metric_col: [0]}),
                     input_data,
                 ]
             )
@@ -257,12 +247,9 @@ def fill_data(
     if end_date is not None:
         end_date_diff_1 = end_date - timedelta(**FREQUENCY_DELTA[freq])
 
-        if date_time_checker(input_data, end_date_diff_1, dt_col, freq) == True:
+        if date_time_checker(input_data, end_date_diff_1, dt_col, freq):
             input_data = pd.concat(
-                [
-                    input_data,
-                    pd.DataFrame({dt_col: [end_date_diff_1], metric_col: [0]})
-                ]
+                [input_data, pd.DataFrame({dt_col: [end_date_diff_1], metric_col: [0]})]
             )
 
     return input_data

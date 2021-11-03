@@ -88,7 +88,7 @@ class DataLoader:
             return self.kpi_info['table_name']
         else:
             return f"({self.kpi_info['kpi_query']}) as " \
-                + self._get_id_string(randomword(10))
+                + self._get_id_string(_randomword(10))
 
     def _get_filters_for_query(self):
         query = ""

@@ -69,7 +69,7 @@ class DataLoader:
         self.connection_info = DataSource.get_by_id(
             kpi_info["data_source"]).as_dict
         self.dt_col = self.kpi_info["datetime_column"]
-        self.identifier = SQL_IDENTIFIERS.get(
+        self.identifier = _SQL_IDENTIFIERS.get(
             self.connection_info["connection_type"], "")
 
     def _get_id_string(self, value):

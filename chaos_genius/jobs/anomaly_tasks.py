@@ -1,8 +1,9 @@
 from datetime import datetime
-from typing import cast
+from typing import Optional, cast
 
 from celery import chain, group
 from celery.app.base import Celery
+from celery.canvas import Signature
 from sqlalchemy import func
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.sql.functions import coalesce
@@ -100,7 +101,7 @@ def anomaly_kpi():
     return res
 
 
-def ready_anomaly_task(kpi_id: int):
+def ready_anomaly_task(kpi_id: int) -> Optional[Signature]:
     """Set anomaly in-progress and update last_scheduled_time for the KPI.
 
     Returns a Celery task that *must* be executed (using .apply_async) soon.
@@ -127,7 +128,7 @@ def ready_anomaly_task(kpi_id: int):
     return anomaly_single_kpi.s(kpi_id)
 
 
-def ready_rca_task(kpi_id: int):
+def ready_rca_task(kpi_id: int) -> Optional[Signature]:
     """Set RCA in-progress and update last_scheduled_time for the KPI.
 
     Returns a Celery task that *must* be executed (using .apply_async) soon.

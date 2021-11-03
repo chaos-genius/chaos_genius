@@ -8,7 +8,7 @@ from chaos_genius.core.anomaly.constants import FREQUENCY_DELTA
 from chaos_genius.core.anomaly.models import MODEL_MAPPER, AnomalyModel
 from chaos_genius.core.anomaly.utils import bound_between, get_timedelta
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 ZSCORE_UPPER_BOUND = 2.5
 
@@ -93,8 +93,7 @@ class ProcessAnomalyDetection:
 
         input_data = self.input_data
 
-        pred_series = pd.DataFrame(
-            columns=["dt", "y", "yhat_lower", "yhat_upper"])
+        pred_series = pd.DataFrame(columns=["dt", "y", "yhat_lower", "yhat_upper"])
 
         input_last_date = input_data["dt"].iloc[-1]
         input_first_date = input_data["dt"].iloc[0]
@@ -114,8 +113,7 @@ class ProcessAnomalyDetection:
                 prediction["y"] = input_data["y"]
                 pred_series = prediction
             else:
-                logger.warning(
-                    f"Insufficient slack for {self.series}-{self.subgroup}")
+                logger.warning(f"Insufficient slack for {self.series}-{self.subgroup}")
 
         else:
             while self.last_date <= input_last_date:
@@ -133,11 +131,9 @@ class ProcessAnomalyDetection:
                     to_append = prediction.iloc[-1].copy()
                     to_append.loc["y"] = df.iloc[-1]["y"]
 
-                    pred_series = pred_series.append(
-                        to_append, ignore_index=True)
+                    pred_series = pred_series.append(to_append, ignore_index=True)
 
-                self.last_date += datetime.timedelta(
-                    **FREQUENCY_DELTA[self.freq])
+                self.last_date += datetime.timedelta(**FREQUENCY_DELTA[self.freq])
 
         return pred_series
 

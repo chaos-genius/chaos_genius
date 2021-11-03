@@ -12,11 +12,10 @@ from chaos_genius.settings import MAX_ROWS_FOR_DEEPDRILLS
 
 TAIL_SIZE = 10
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
-def validate_kpi(
-    kpi_info: Dict[str, Any]
-) -> Tuple[bool, str]:
+
+def validate_kpi(kpi_info: Dict[str, Any]) -> Tuple[bool, str]:
     """Load data for KPI and invoke all validation checks.
 
     :param kpi_info: Dictionary with all params for the KPI
@@ -35,11 +34,11 @@ def validate_kpi(
     return _validate_kpi_from_df(
         df,
         kpi_info,
-        kpi_column_name=kpi_info['metric'],
-        agg_type=kpi_info['aggregation'],
-        date_column_name=kpi_info['datetime_column'],
-        date_format=kpi_info.get('date_format'),
-        unix_unit=kpi_info.get('unix_unit')
+        kpi_column_name=kpi_info["metric"],
+        agg_type=kpi_info["aggregation"],
+        date_column_name=kpi_info["datetime_column"],
+        date_format=kpi_info.get("date_format"),
+        unix_unit=kpi_info.get("unix_unit"),
     )
 
 
@@ -98,9 +97,7 @@ def _validate_kpi_from_df(
         {
             "debug_str": "Check #2: Validate kpi not datetime",
             "status": _validate_kpi_not_datetime(
-                df,
-                kpi_column_name=kpi_column_name,
-                date_column_name=date_column_name
+                df, kpi_column_name=kpi_column_name, date_column_name=date_column_name
             ),
         },
         {
@@ -119,8 +116,8 @@ def _validate_kpi_from_df(
             ),
             "status": _validate_for_maximum_kpi_size(
                 kpi_info, num_rows=MAX_ROWS_FOR_DEEPDRILLS
-            )
-        }
+            ),
+        },
     ]
     for validation in validations:
         status_bool, status_msg = validation["status"]
@@ -254,9 +251,7 @@ def _validate_date_column_is_parseable(
         # If a unix_unit is specified, it will try to convert with this unit
         try:
             pd.to_datetime(
-                df[date_column_name],
-                unit=unix_unit,
-                infer_datetime_format=True
+                df[date_column_name], unit=unix_unit, infer_datetime_format=True
             )
         except pd.errors.OutOfBoundsDatetime:
             return False, out_of_bounds_msg
@@ -266,9 +261,7 @@ def _validate_date_column_is_parseable(
         # If a date_format is specified, it will try to convert with it
         try:
             pd.to_datetime(
-                df[date_column_name],
-                format=date_format,
-                infer_datetime_format=True
+                df[date_column_name], format=date_format, infer_datetime_format=True
             )
         except pd.errors.OutOfBoundsDatetime:
             return False, out_of_bounds_msg
@@ -289,8 +282,7 @@ def _validate_date_column_is_parseable(
 
 
 def _validate_for_maximum_kpi_size(
-    kpi_info: Dict[str, Any],
-    num_rows: int
+    kpi_info: Dict[str, Any], num_rows: int
 ) -> Tuple[bool, str]:
     """Validate if KPI size is less than maximum permissible size
     :param kpi_info: Dictionary with all params for the KPI
@@ -306,10 +298,9 @@ def _validate_for_maximum_kpi_size(
         df = base_df + rca_df
     except Exception as e:  # noqa: B902
         return False, "Could not load data. Error: " + str(e)
-    valid_str = "Accepted!"
 
     if df <= num_rows:
-        return True, valid_str
+        return True, "Accepted!"
 
     error_message = (
         "Chaos Genius does not currently support datasets with "

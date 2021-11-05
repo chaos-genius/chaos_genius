@@ -1,5 +1,3 @@
-
-
 # TODO: Delete this function and attached functionality
 def create_sqlalchemy_uri(db_type, host, port, database, username, password):
     db_uri = ""
@@ -10,7 +8,10 @@ def create_sqlalchemy_uri(db_type, host, port, database, username, password):
     return db_uri
 
 
-def chech_editable_field(meta_info,field_name):
+def chech_editable_field(meta_info, field_name):
     # meta_info = Kpi.meta_info()
-    return next(item['is_editable'] for item in meta_info['fields'] if item["name"] == field_name)
-
+    return next(
+        item["is_editable"]
+        for item in meta_info["fields"]
+        if item["name"] == field_name
+    )

@@ -10,7 +10,7 @@ class DataSource(PkModel):
 
     __tablename__ = "data_source"
     name = Column(db.String(80), nullable=False)
-    connection_type = Column(db.String(80)) # TODO: Make the nullable=False
+    connection_type = Column(db.String(80))  # TODO: Make the nullable=False
     db_uri = Column(db.Text())
     active = Column(db.Boolean(), default=False)
     is_third_party = Column(db.Boolean(), default=True)
@@ -46,7 +46,7 @@ class DataSource(PkModel):
             "connection_status": self.connection_status,
             "sync_status": self.sync_status,
             "last_sync": self.last_sync,
-            "created_at": self.created_at
+            "created_at": self.created_at,
         }
 
     @property
@@ -65,15 +65,15 @@ class DataSource(PkModel):
             "dbConfig": self.dbConfig,
             "last_sync": self.last_sync,
             "active": self.active,
-            "created_at": self.created_at
+            "created_at": self.created_at,
         }
 
     @classmethod
     def meta_info(cls):
-        return{
+        return {
             "name": "data_source",
             "table_name": "data_source",
-            "fields":[
+            "fields": [
                 {
                     "name": "name",
                     "is_editable": True,
@@ -88,63 +88,51 @@ class DataSource(PkModel):
                     "name": "db_uri",
                     "is_editable": False,
                     "is_sensitive": False,
-
                 },
                 {
                     "name": "is_third_party",
                     "is_editable": False,
                     "is_sensitive": False,
-
                 },
                 {
                     "name": "connection_status",
                     "is_editable": False,
                     "is_sensitive": False,
-
                 },
                 {
                     "name": "sync_status",
                     "is_editable": False,
                     "is_sensitive": False,
-
                 },
                 {
                     "name": "sourceConfig",
                     "is_editable": True,
                     "is_sensitive": True,
-
                 },
                 {
                     "name": "destinationConfig",
                     "is_editable": True,
                     "is_sensitive": True,
-
                 },
                 {
                     "name": "connectionConfig",
                     "is_editable": True,
                     "is_sensitive": True,
-
                 },
                 {
                     "name": "dbConfig",
                     "is_editable": True,
                     "is_sensitive": True,
-
                 },
                 {
                     "name": "last_sync",
                     "is_editable": False,
                     "is_sensitive": False,
-
                 },
                 {
                     "name": "created_at",
                     "is_editable": False,
                     "is_sensitive": False,
-
-                }
-            ]
-
+                },
+            ],
         }
-

@@ -7,10 +7,11 @@ from chaos_genius.databases.base_model import Column, PkModel, db
 
 class Alert(PkModel):
     """Alert."""
+
     __tablename__ = "alert"
 
     alert_name = Column(db.Text(), nullable=False)
-    alert_type = Column(db.String(80), nullable=False) # Event Alert, KPI Alert
+    alert_type = Column(db.String(80), nullable=False)  # Event Alert, KPI Alert
 
     data_source = Column(db.Integer)
     alert_query = Column(db.Text())
@@ -54,16 +55,15 @@ class Alert(PkModel):
             "alert_channel": self.alert_channel,
             "alert_channel_conf": self.alert_channel_conf,
             "active": self.active,
-            "created_at": self.created_at
+            "created_at": self.created_at,
         }
-
 
     @classmethod
     def meta_info(cls):
-        return{
+        return {
             "name": "Alert",
             "table_name": "alert",
-            "fields":[
+            "fields": [
                 {
                     "name": "alert_name",
                     "is_editable": True,
@@ -78,63 +78,51 @@ class Alert(PkModel):
                     "name": "data_source",
                     "is_editable": True,
                     "is_sensitive": False,
-
                 },
                 {
                     "name": "alert_query",
                     "is_editable": True,
                     "is_sensitive": False,
-
                 },
                 {
                     "name": "alert_settings",
                     "is_editable": True,
                     "is_sensitive": False,
-
                 },
                 {
                     "name": "kpi",
                     "is_editable": True,
                     "is_sensitive": False,
-
                 },
                 {
                     "name": "kpi_alert_type",
                     "is_editable": False,
                     "is_sensitive": False,
-
                 },
                 {
                     "name": "severity_cutoff_score",
                     "is_editable": True,
                     "is_sensitive": False,
-
                 },
                 {
                     "name": "alert_message",
                     "is_editable": True,
                     "is_sensitive": False,
-
                 },
                 {
                     "name": "alert_frequency",
                     "is_editable": True,
                     "is_sensitive": False,
-
                 },
                 {
                     "name": "alert_channel",
                     "is_editable": True,
                     "is_sensitive": False,
-
                 },
                 {
                     "name": "alert_channel_conf",
                     "is_editable": True,
                     "is_sensitive": False,
-
-                }
-            ]
-
+                },
+            ],
         }
-

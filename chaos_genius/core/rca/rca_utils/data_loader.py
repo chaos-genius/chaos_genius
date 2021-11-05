@@ -5,6 +5,7 @@ from typing import Tuple
 
 import pandas as pd
 from chaos_genius.connectors import get_sqla_db_conn
+
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.core.rca.constants import TIMELINE_NUM_DAYS_MAP
 
@@ -15,7 +16,7 @@ def rca_load_data(
     dt_col: str,
     end_date: datetime,
     timeline: str = "mom",
-    tail: int = None
+    tail: int = None,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Load data for performing RCA.
 
@@ -34,8 +35,7 @@ def rca_load_data(
     :return: tuple with baseline data and rca data for
     :rtype: Tuple[pd.DataFrame, pd.DataFrame]
     """
-    end_dt_obj = datetime.today() if end_date is None \
-        else end_date
+    end_dt_obj = datetime.today() if end_date is None else end_date
     num_days = TIMELINE_NUM_DAYS_MAP[timeline]
 
     base_dt_obj = end_dt_obj - timedelta(days=2 * num_days)
@@ -47,12 +47,13 @@ def rca_load_data(
 
     if kpi_info["kpi_type"] == "table":
         base_df, rca_df = _get_kpi_table_data(
-            kpi_info, connection_info, dt_col, base_dt, mid_dt, end_dt, tail)
+            kpi_info, connection_info, dt_col, base_dt, mid_dt, end_dt, tail
+        )
 
     elif kpi_info["kpi_type"] == "query":
         base_df, rca_df = _get_kpi_query_data(
-            kpi_info, connection_info, dt_col, end_dt_obj, base_dt_obj,
-            mid_dt_obj, tail)
+            kpi_info, connection_info, dt_col, end_dt_obj, base_dt_obj, mid_dt_obj, tail
+        )
 
     return base_df, rca_df
 
@@ -64,7 +65,7 @@ def _get_kpi_table_data(
     base_dt: str,
     mid_dt: str,
     end_dt: str,
-    tail: int = None
+    tail: int = None,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Load RCA data for KPI with table defined.
 
@@ -101,7 +102,7 @@ def _get_kpi_table_data(
     base_filter = f" where {start_query} and {mid_start_query} "
     rca_filter = f" where {mid_end_query} and {end_query} "
 
-    table_name = kpi_info['table_name']
+    table_name = kpi_info["table_name"]
     base_query = f"select * from {table_name} {base_filter} "
     rca_query = f"select * from {table_name} {rca_filter} "
 
@@ -141,7 +142,7 @@ def _get_kpi_query_data(
     end_dt_obj: datetime,
     base_dt_obj: datetime,
     mid_dt_obj: datetime,
-    tail: int = None
+    tail: int = None,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Load data for KPI with query defined.
 
@@ -175,12 +176,10 @@ def _get_kpi_query_data(
     # query_df = get_df_from_db_uri(connection_info["db_uri"], query)
     query_df[dt_col] = pd.to_datetime(query_df[dt_col])
     base_df = query_df[
-        (query_df[dt_col] > base_dt_obj)
-        & (query_df[dt_col] <= mid_dt_obj)
+        (query_df[dt_col] > base_dt_obj) & (query_df[dt_col] <= mid_dt_obj)
     ]
     rca_df = query_df[
-        (query_df[dt_col] > mid_dt_obj)
-        & (query_df[dt_col] <= end_dt_obj)
+        (query_df[dt_col] > mid_dt_obj) & (query_df[dt_col] <= end_dt_obj)
     ]
 
     return base_df, rca_df

@@ -1,7 +1,6 @@
-from flask import current_app, _app_ctx_stack
 from celery import Celery
-from celery import current_app as current_celery_app
 import chaos_genius.celery_config as celeryconfig
+
 
 class CeleryExtension(object):
     """Celery Extension for the Application Factory Pattern"""
@@ -30,8 +29,8 @@ def make_celery(app):
     # else:
     celery = Celery(
         app.import_name,
-        backend=app.config['CELERY_RESULT_BACKEND'],
-        broker=app.config['CELERY_BROKER_URL']
+        backend=app.config["CELERY_RESULT_BACKEND"],
+        broker=app.config["CELERY_BROKER_URL"],
     )
     celery.conf.update(app.config)
     celery.config_from_object(celeryconfig)
@@ -43,10 +42,8 @@ def make_celery(app):
 
     class MyTask(celery.Task):
         def on_failure(self, exc, task_id, args, kwargs, einfo):
-            print('{0!r} failed: {1!r}'.format(task_id, exc))
-
+            print("{0!r} failed: {1!r}".format(task_id, exc))
 
     celery.Task = ContextTask
 
     return celery
-

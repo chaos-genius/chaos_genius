@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+  # -*- coding: utf-8 -*-,/.m8y6 t54
 """Application configuration.
 
 Most configuration is set via environment variables.

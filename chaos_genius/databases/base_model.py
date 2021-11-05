@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Database module, including the SQLAlchemy database object and DB-related utilities."""
+"""Database module, including the SQLAlchemy database object and DB-related utilities.
+"""
 from chaos_genius.extensions import db
 
 # Alias common SQLAlchemy names
@@ -8,7 +9,8 @@ relationship = db.relationship
 
 
 class CRUDMixin(object):
-    """Mixin that adds convenience methods for CRUD (create, read, update, delete) operations."""
+    """Mixin that adds convenience methods for CRUD (create, read, update,
+    delete) operations."""
 
     @classmethod
     def create(cls, **kwargs):
@@ -42,7 +44,8 @@ class Model(CRUDMixin, db.Model):
 
 
 class PkModel(Model):
-    """Base model class that includes CRUD convenience methods, plus adds a 'primary key' column named ``id``."""
+    """Base model class that includes CRUD convenience methods, plus adds a
+    'primary key' column named ``id``."""
 
     __abstract__ = True
     id = Column(db.Integer, primary_key=True)

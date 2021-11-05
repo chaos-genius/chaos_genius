@@ -1,5 +1,15 @@
 {
     "python.formatting.provider": "black",
     "python.linting.enabled": true,
-    "python.linting.flake8Enabled": true
+    "python.linting.flake8Enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.formatting.blackArgs": [
+        "--line-length",
+        "88"
+    ],
+    "python.linting.flake8Args": [
+        "--max-line-length=88",
+        "--ignore=E402",
+    ],
+    "python.pythonPath": "venv/bin/python"
 }

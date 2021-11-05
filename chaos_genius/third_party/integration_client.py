@@ -1,19 +1,12 @@
-
-import os
 import json
 import requests
-import pprint
-import traceback
-import click
 import time
 from dotenv import dotenv_values
-
-from chaos_genius.utils.io_helper import cg_print
 from chaos_genius.third_party.integration_server_config import (
     SOURCE_WHITELIST_AND_TYPE as SOURCE_DEF_ID,
     DESTINATION_DEF_ID,
     DEFAULT_WORKSPACE_ID,
-    SOURCE_ICON_OVERRIDE
+    SOURCE_ICON_OVERRIDE,
 )
 from chaos_genius.settings import (
     INTEGRATION_SERVER,
@@ -53,7 +46,7 @@ class ThirdPartyClient(object):
 
         # Check the third party server running status
         status = self.get_server_health()
-        if not status.get('db'):
+        if not status.get("db"):
             raise Exception("ERROR: Third Party Server not running.")
 
         # load the source and destination configuration
@@ -67,7 +60,7 @@ class ThirdPartyClient(object):
         """
         workspaces = self.get_workspace_list()
         if workspaces:
-            return workspaces[0]['workspaceId']
+            return workspaces[0]["workspaceId"]
         else:
             return DEFAULT_WORKSPACE_ID
 
@@ -88,14 +81,13 @@ class ThirdPartyClient(object):
         # TODO: hardcode the snowflake, remove this
         sources_list += [{"sourceDefinitionId": "e2d65910-8c8b-40a1-ae7d-ee2416b2bfa2"}]
         for source in sources_list:
-                source_specs = self.get_source_def_specs(source["sourceDefinitionId"])
-                try:
-                    if not source_specs.get("connectionSpecification"):
-                        return False
-                except:
+            source_specs = self.get_source_def_specs(source["sourceDefinitionId"])
+            try:
+                if not source_specs.get("connectionSpecification"):
                     return False
+            except:
+                return False
         return True
-
 
     def init_source_def_conf(self):
         """Load the available third party connection and
@@ -103,9 +95,13 @@ class ThirdPartyClient(object):
         """
         sources = self.get_source_def_list()
         sources_list = sources["sourceDefinitions"]
-        available_sources = [source for source in sources_list
-            if (source["sourceDefinitionId"] in SOURCE_DEF_ID) and (SOURCE_DEF_ID.get(source["sourceDefinitionId"]))]
-        
+        available_sources = [
+            source
+            for source in sources_list
+            if (source["sourceDefinitionId"] in SOURCE_DEF_ID)
+            and (SOURCE_DEF_ID.get(source["sourceDefinitionId"]))
+        ]
+
         while True:
             if self.check_sources_availability(available_sources):
                 break
@@ -117,7 +113,7 @@ class ThirdPartyClient(object):
             source["isThirdParty"] = SOURCE_DEF_ID[source["sourceDefinitionId"]]
             icon_found = SOURCE_ICON_OVERRIDE.get(source["sourceDefinitionId"])
             if icon_found:
-                source['icon'] = icon_found
+                source["icon"] = icon_found
         self.source_conf = available_sources
 
     def create_workspace(self, payload):
@@ -130,7 +126,7 @@ class ThirdPartyClient(object):
             dict: This is the status of the worksapce creation
 
         ---
-        For ex. Payload can be 
+        For ex. Payload can be
         {
             "email": "user@example.com",
             "anonymousDataCollection": False,
@@ -219,7 +215,8 @@ class ThirdPartyClient(object):
         and just for testing the connection configuration
 
         Args:
-            connectionConfiguration (dict): source connection detials required by the source configuration
+            connectionConfiguration (dict): source connection detials required by
+            the source configuration
 
         Returns:
             dict: status of the connection
@@ -266,7 +263,7 @@ class ThirdPartyClient(object):
         """
         payload = {"sourceId": source_id}
         api_url = f"{self.server_uri}/api/v1/sources/delete"
-        return post_request(api_url, payload, 'text')
+        return post_request(api_url, payload, "text")
 
     def get_source_schema(self, source_id):
         """This will be used to fetch the details of the created destination
@@ -312,8 +309,8 @@ class ThirdPartyClient(object):
                 "schema": "public",
                 "database": self.destination_db["database"],
                 "port": self.destination_db["port"],
-                "host": self.destination_db["host"]
-            }
+                "host": self.destination_db["host"],
+            },
         }
         api_url = f"{self.server_uri}/api/v1/destinations/create"
         response = post_request(api_url, payload)
@@ -331,7 +328,7 @@ class ThirdPartyClient(object):
         """
         payload = {"destinationId": destination_id}
         api_url = f"{self.server_uri}/api/v1/destinations/delete"
-        return post_request(api_url, payload, 'text')
+        return post_request(api_url, payload, "text")
 
     def get_destination_specs(self, destination_def_id=None):
         """This will be used to fetch the details of the destination configuration
@@ -411,7 +408,7 @@ class ThirdPartyClient(object):
         """
         payload = {"connectionId": connection_id}
         api_url = f"{self.server_uri}/api/v1/web_backend/connections/delete"
-        return post_request(api_url, payload, 'text')
+        return post_request(api_url, payload, "text")
 
     def reset_connection(self, connection_id):
         """This will be used to reset the connection. This can wipe the already saved data
@@ -449,7 +446,10 @@ class ThirdPartyClient(object):
         Returns:
             list: list of dict containing the job details
         """
-        payload = {"configId": connection_id, "configTypes": ["sync","reset_connection"]}
+        payload = {
+            "configId": connection_id,
+            "configTypes": ["sync", "reset_connection"],
+        }
         api_url = f"{self.server_uri}/api/v1/jobs/list"
         return post_request(api_url, payload)
 
@@ -488,12 +488,13 @@ class ThirdPartyClient(object):
 
 # Utils Function
 
-def post_request(url, payload, response_type='json'):
+
+def post_request(url, payload, response_type="json"):
     response_data = {}
     try:
         response = requests.post(url=url, json=payload, timeout=25)
         if response.ok:
-            if response_type == 'json':
+            if response_type == "json":
                 response_data = response.json()
             else:
                 response_data = {"response": response.text}
@@ -525,15 +526,16 @@ def read_config(url):
 
 # Third Party Server Setup and configs
 
-def init_integration_server():
-    """This will initialise the setup for the third party server. All the configuration will be
-    stored in the env file in the base directory. Third Party API endpoint and datails of
-    the Postgres db for storing the third party data will be stored.
 
+def init_integration_server():
+    """This will initialise the setup for the third party server. All the
+    configuration will be stored in the env file in the base directory. Third Party API
+    endpoint and datails of the Postgres db for storing the third party data will be
+    stored.
     """
     client = ThirdPartyClient()
     status = client.get_server_health()
-    if status.get('db', False):
+    if status.get("db", False):
         payload = {
             "workspaceId": client.workspace_id,
             "initialSetupComplete": True,
@@ -541,32 +543,34 @@ def init_integration_server():
             "email": "user@example.com",
             "anonymousDataCollection": False,
             "news": False,
-            "securityUpdates": False
+            "securityUpdates": False,
         }
         workspace = client.update_workspace(payload)
     else:
-        raise Exception("Integration Server isn't running. Run the server and then try again.")
+        raise Exception(
+            "Integration Server isn't running. Run the server and then try again."
+        )
 
     status = client.get_server_health()
     client.init_source_def_conf()
-    return status.get('db', False)
+    return status.get("db", False)
 
 
 def get_docker_host(db_host):
-    """ convert the localhost for accessing inside the docker
-        localhost ---> host.docker.internal
+    """convert the localhost for accessing inside the docker
+    localhost ---> host.docker.internal
     """
     converted_host = db_host
-    if db_host == 'localhost':
-        converted_host = 'host.docker.internal'
+    if db_host == "localhost":
+        converted_host = "host.docker.internal"
     return converted_host
 
 
 def get_localhost_host(db_host):
-    """ convert the docker accessible host name to parent machine one
-        host.docker.internal ---> localhost
+    """convert the docker accessible host name to parent machine one
+    host.docker.internal ---> localhost
     """
     converted_host = db_host
-    if db_host == 'host.docker.internal':
-        converted_host = 'localhost'
+    if db_host == "host.docker.internal":
+        converted_host = "localhost"
     return converted_host

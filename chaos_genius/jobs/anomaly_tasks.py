@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import cast
 
-from celery import chain, group
+from celery import group
 from celery.app.base import Celery
 from sqlalchemy import func
 from sqlalchemy.orm.attributes import flag_modified

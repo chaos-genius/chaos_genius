@@ -47,10 +47,7 @@ def get_last_date_in_db(
 
 
 def get_dq_missing_data(
-    input_data: pd.DataFrame,
-    dt_col: str,
-    metric_col: str,
-    freq: str
+    input_data: pd.DataFrame, dt_col: str, metric_col: str, freq: str
 ) -> pd.DataFrame:
     """Generate dataframe with information on missing data.
 
@@ -76,8 +73,9 @@ def get_dq_missing_data(
         .reset_index()[[dt_col, metric_col]]
     )
 
-    missing_data = pd.DataFrame(
-        missing_data, columns=[dt_col, metric_col]).set_index(dt_col)
+    missing_data = pd.DataFrame(missing_data, columns=[dt_col, metric_col]).set_index(
+        dt_col
+    )
 
     return missing_data
 
@@ -125,7 +123,7 @@ def fill_data(
     last_date: datetime,
     period: int,
     end_date: datetime,
-    freq: str
+    freq: str,
 ) -> pd.DataFrame:
     """Fill data from input_data.
 
@@ -147,7 +145,8 @@ def fill_data(
     :rtype: pd.DataFrame
     """
 
-    input_data[dt_col] = pd.to_datetime(input_data[dt_col])
+    input_data = input_data.copy()
+    input_data.loc[:, dt_col] = pd.to_datetime(input_data[dt_col])
 
     if last_date is not None:
         last_date_diff_period = (
@@ -157,10 +156,7 @@ def fill_data(
         if date_time_checker(input_data, last_date_diff_period, dt_col, freq):
             input_data = pd.concat(
                 [
-                    pd.DataFrame({
-                        dt_col: [last_date_diff_period],
-                        metric_col: [0]
-                    }),
+                    pd.DataFrame({dt_col: [last_date_diff_period], metric_col: [0]}),
                     input_data,
                 ]
             )
@@ -170,10 +166,7 @@ def fill_data(
 
         if date_time_checker(input_data, end_date_diff_1, dt_col, freq):
             input_data = pd.concat(
-                [
-                    input_data,
-                    pd.DataFrame({dt_col: [end_date_diff_1], metric_col: [0]})
-                ]
+                [input_data, pd.DataFrame({dt_col: [end_date_diff_1], metric_col: [0]})]
             )
 
     return input_data

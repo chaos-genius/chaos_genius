@@ -18,7 +18,7 @@ from chaos_genius.core.rca.root_cause_analysis import RootCauseAnalysis
 from chaos_genius.core.utils.round import round_series
 from chaos_genius.databases.models.rca_data_model import RcaData, db
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class RootCauseAnalysisController:
@@ -242,16 +242,18 @@ class RootCauseAnalysisController:
         logger.info("Getting Line Data for KPI.")
         line_data = self._get_line_data()
         output.append(self._output_to_row("line", line_data))
+        logger.info("Line Data for KPI completed.")
 
         for timeline in TIMELINES:
-            logger.info(f"Running RCA for timeline: {timeline}")
+            logger.info(f"Running RCA for timeline: {timeline}.")
             rca = self._load_rca_obj(timeline)
+            logger.info("RCA object created.")
 
             try:
-                logger.debug("Computing aggregations.")
+                logger.info("Computing aggregations.")
                 agg_data = self._get_aggregation(rca)
                 output.append(self._output_to_row("agg", agg_data, timeline))
-            except Exception as e:  # noqa E722
+            except Exception:
                 logger.error(
                     f"Error in agg for {timeline}. Skipping timeline.", exc_info=1
                 )
@@ -259,7 +261,7 @@ class RootCauseAnalysisController:
 
             dims = [None] + self.dimensions
             for dim in dims:
-                logger.debug(f"Computing RCA for dimension: {dim}")
+                logger.info(f"Computing RCA for dimension: {dim}")
                 try:
                     rca_data = self._get_rca(rca, dim, timeline)
                     output.append(self._output_to_row("rca", rca_data, timeline, dim))
@@ -267,7 +269,7 @@ class RootCauseAnalysisController:
                     logger.error(f"Error in RCA for {timeline, dim}", exc_info=1)
 
                 if dim is not None:
-                    logger.debug(f"Computing Hierarchical table for dimension: {dim}")
+                    logger.info(f"Computing Hierarchical table for dimension: {dim}")
                     try:
                         htable_data = self._get_htable(rca, dim, timeline)
                         output.append(

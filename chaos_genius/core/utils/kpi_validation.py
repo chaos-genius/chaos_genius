@@ -12,7 +12,7 @@ from chaos_genius.settings import MAX_ROWS_FOR_DEEPDRILLS
 
 TAIL_SIZE = 10
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 def validate_kpi(kpi_info: Dict[str, Any]) -> Tuple[bool, str]:
@@ -290,6 +290,7 @@ def _validate_for_maximum_kpi_size(
         num_rows = DataLoader(kpi_info, days_before=60).get_count()
     except Exception as e:  # noqa: B902
         return False, "Could not load data. Error: " + str(e)
+
     if num_rows <= MAX_ROWS_FOR_DEEPDRILLS:
         return True, "Accepted!"
 

@@ -5,8 +5,6 @@ from typing import Any
 
 import pandas as pd
 
-# from chaos_genius.connectors.base_connector import get_df_from_db_uri
-from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.core.anomaly.constants import FREQUENCY_DELTA
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 
@@ -16,91 +14,11 @@ def bound_between(min_val, val, max_val):
     return min(max(val, min_val), max_val)
 
 
-def get_anomaly_df(
-    kpi_info: dict,
-    connection_info: dict,
-    last_date_in_db: datetime = None,
-    end_date: datetime = None,
-    days_range: int = 90,
-) -> pd.DataFrame:
-    """Retrieve dataframe for anomaly detection.
-
-    :param kpi_info: KPI information
-    :type kpi_info: dict
-    :param connection_info: connection information for KPI
-    :type connection_info: dict
-    :param last_date_in_db: last date for which anomaly was computed, defaults
-    to None
-    :type last_date_in_db: datetime, optional
-    :param end_date: end date for which to run anomaly, defaults to None
-    :type end_date: datetime, optional
-    :param days_range: days for which to fetch data for, defaults to 90
-    :type days_range: int, optional
-    :raises ValueError: Raise error is KPI type is not supported.
-    :return: dataframe for anomaly detection
-    :rtype: pd.DataFrame
-    """
-    indentifier = ""
-    if connection_info["connection_type"] == "mysql":
-        indentifier = "`"
-    elif connection_info["connection_type"] == "postgresql":
-        indentifier = '"'
-
-    if end_date is None:
-        end_date = datetime.today()
-
-    num_days = days_range
-
-    freq = kpi_info["anomaly_params"]["ts_frequency"]
-
-    if last_date_in_db is None:
-        base_dt_obj = end_date - get_timedelta(freq, num_days)
-    else:
-        base_dt_obj = last_date_in_db - get_timedelta(freq, num_days)
-
-    base_dt = base_dt_obj.strftime("%Y-%m-%d %H:%M:%S")
-
-    cur_dt = end_date.strftime("%Y-%m-%d %H:%M:%S")
-
-    dt_col_string = f"{indentifier}{kpi_info['datetime_column']}{indentifier}"
-    gt_string = f"{dt_col_string} > '{base_dt}'"
-    lt_string = f"{dt_col_string} <= '{cur_dt}'"
-    base_filter = f"where {gt_string} and {lt_string}"
-
-    kpi_filters = kpi_info["filters"]
-    kpi_filters_query = " "
-    if kpi_filters:
-        kpi_filters_query = " "
-        for key, values in kpi_filters.items():
-            if values:
-                # TODO: Bad Hack to remove the last comma, fix it
-                values_str = str(tuple(values))
-                values_str = values_str[:-2] + ")"
-                key_str = f"{indentifier}{key}{indentifier}"
-                kpi_filters_query += f" and {key_str} in {values_str}"
-
-    kpi_type = kpi_info.get("kpi_type")
-    if kpi_type == "table":
-        base_query = " ".join(
-            [f"select * from {kpi_info['table_name']}", base_filter, kpi_filters_query]
-        )
-
-    elif kpi_type == "query":
-        base_query = " ".join(
-            [
-                f"select * from ({kpi_info['kpi_query']}) as temp_table",
-                base_filter,
-                kpi_filters_query,
-            ]
-        )
-    else:
-        raise ValueError(f"kpi_type:'{kpi_type}' is not from ['table', 'query']")
-
-    db_connection = get_sqla_db_conn(data_source_info=connection_info)
-    return db_connection.run_query(base_query)
-
-
-def get_last_date_in_db(kpi_id: int, series: str, subgroup: str = None) -> Any or None:
+def get_last_date_in_db(
+    kpi_id: int,
+    series: str,
+    subgroup: str = None
+) -> Any or None:
     """Get last date for which anomaly was computed.
 
     :param kpi_id: kpi id to check for
@@ -182,20 +100,19 @@ def get_timedelta(freq, diff):
 
 
 def date_time_checker(input_data, datetime_obj, dt_col, freq):
-    if freq in ["D", "daily"]:
+    if freq in {"D", "daily"}:
         temp_dt = input_data[dt_col].apply(
-            lambda val: datetime(val.year, val.month, val.day)
-        )
-        dt_obj = datetime(datetime_obj.year, datetime_obj.month, datetime_obj.day)
+            lambda val: datetime(val.year, val.month, val.day))
+        dt_obj = datetime(
+            datetime_obj.year, datetime_obj.month, datetime_obj.day)
         return dt_obj not in temp_dt.to_list()
 
-    if freq in ["H", "hourly"]:
+    if freq in {"H", "hourly"}:
         temp_dt = input_data[dt_col].apply(
-            lambda val: datetime(val.year, val.month, val.day, val.hour)
-        )
+            lambda val: datetime(val.year, val.month, val.day, val.hour))
         dt_obj = datetime(
-            datetime_obj.year, datetime_obj.month, datetime_obj.day, datetime_obj.hour
-        )
+            datetime_obj.year, datetime_obj.month,
+            datetime_obj.day, datetime_obj.hour)
         return dt_obj not in temp_dt.to_list()
 
 

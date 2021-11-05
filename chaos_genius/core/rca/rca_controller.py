@@ -16,7 +16,6 @@ from chaos_genius.core.rca.constants import (
 from chaos_genius.core.rca.rca_utils.data_loader import rca_load_data
 from chaos_genius.core.rca.root_cause_analysis import RootCauseAnalysis
 from chaos_genius.core.utils.round import round_series
-from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.rca_data_model import RcaData, db
 
 logger = logging.getLogger(__name__)
@@ -47,8 +46,6 @@ class RootCauseAnalysisController:
         logger.debug(f"RCA Controller end date: {end_date}")
 
         self.end_date = end_date
-        self.connection_info = DataSource.get_by_id(kpi_info["data_source"])
-        self.connection_info = self.connection_info.as_dict
 
         self.metric = kpi_info["metric"]
         self.dimensions = kpi_info["dimensions"]
@@ -71,15 +68,7 @@ class RootCauseAnalysisController:
         :return: tuple with baseline data and rca data for
         :rtype: Tuple[pd.DataFrame, pd.DataFrame]
         """
-        base_df, rca_df = rca_load_data(
-            self.kpi_info,
-            self.connection_info,
-            self.dt_col,
-            self.end_date,
-            timeline,
-            tail,
-            get_count,
-        )
+        base_df, rca_df = rca_load_data(self.kpi_info, self.end_date, timeline, tail)
         if get_count:
             logger.info(f"Loaded {base_df}, {rca_df} rows of data")
         else:

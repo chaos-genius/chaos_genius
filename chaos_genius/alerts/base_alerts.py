@@ -14,7 +14,7 @@ from chaos_genius.databases.models.kpi_model import Kpi
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.alerts.email import send_static_alert_email
-from chaos_genius.alerts.slack import anomaly_alert_slack, anomaly_alert_slack_formatted
+from chaos_genius.alerts.slack import anomaly_alert_slack_formatted
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 logger = logging.getLogger()
@@ -88,6 +88,11 @@ class StaticEventAlertController:
         Raises:
             Exception: Raise if the alert settings not found
         """
+
+        alert: Optional[Alert] = Alert.get_by_id(self.alert_info["id"])
+        curr_date_time = datetime.datetime.now()
+        alert.update(commit=True, last_alerted=curr_date_time)
+
         change_df = pd.DataFrame()
         if self.alert_info["alert_settings"] == "new_entry_alert":
             change_df = self.test_new_entry(self.query_df, self.unpickled_df)
@@ -148,7 +153,16 @@ class StaticEventAlertController:
         Args:
             change_df (DataFrame): Dataframe with only the rows with change
         """
-        recipient_emails = self.alert_info["alert_channel_conf"].get("email", [])
+        
+
+        alert_channel_conf = self.alert_info["alert_channel_conf"]
+
+        if type(alert_channel_conf) != dict:
+            logger.debug(f"The alert channel configuration is incorrect for Alert ID - {self.alert_info['id']}")
+            return False
+
+        recipient_emails = alert_channel_conf.get("email", [])
+
         if recipient_emails:
             subject = f"Event Alert Notification: [ID - {self.alert_info['id']}] [Type - {self.alert_info['alert_settings']}]"
             message = self.alert_info["alert_message"]
@@ -167,11 +181,12 @@ class StaticEventAlertController:
                                             files,
                                             alert_message = message,
                                             alert_frequency = self.alert_info['alert_frequency'].capitalize(),
-                                            alert_name = self.alert_info['alert_name']
+                                            alert_name = self.alert_info['alert_name'],
+                                            preview_text = "Static Event Alert"
                                         )
             return test
         else:
-            logger.info(f"No email recipients available for Alert ID - {self.alert_info['id']} was successfully sent")
+            logger.info(f"No email recipients available for Alert ID - {self.alert_info['id']}")
             return False
 
     def send_template_email(self, template, recipient_emails, subject, files, **kwargs):
@@ -189,7 +204,7 @@ class StaticEventAlertController:
         if test == True:
             logger.info(f"The email for Alert ID - {self.alert_info['id']} was successfully sent")
         else:
-            logger.debug(f"The email for Alert ID - {self.alert_info['id']} has not been sent")
+            logger.debug(f"The email for Alert ID - {self.alert_info['id']} was not sent")
         
         return test
 
@@ -249,7 +264,13 @@ class AnomalyAlertController:
         
     def send_alert_email(self, anomaly):
 
-        recipient_emails = self.alert_info["alert_channel_conf"].get("email", [])
+        alert_channel_conf = self.alert_info["alert_channel_conf"]
+
+        if type(alert_channel_conf) != dict:
+            logger.debug(f"The alert channel configuration is incorrect for Alert ID - {self.alert_info['id']}")
+            return False
+
+        recipient_emails = alert_channel_conf.get("email", [])
         
         if recipient_emails:
             subject = f"KPI Alert Notification: [Alert Name - {self.alert_info['alert_name']}] [Alert ID - {self.alert_info['id']}]"
@@ -279,7 +300,8 @@ class AnomalyAlertController:
                                             upper_bound = upper_bound,
                                             severity_value = severity_value,
                                             kpi_name = kpi_name,
-                                            alert_frequency = self.alert_info['alert_frequency'].capitalize()
+                                            alert_frequency = self.alert_info['alert_frequency'].capitalize(),
+                                            preview_text = "Anomaly Alert"
                                         )
             logger.debug(f"Status for Alert ID - {self.alert_info['id']} : {test}")
             return True
@@ -312,14 +334,14 @@ class AnomalyAlertController:
         data_source_name = DataSource.\
             get_by_id(self.alert_info["data_source"]).safe_dict["name"]
         test = anomaly_alert_slack_formatted(
-            alert_name,
-            kpi_name,
-            data_source_name,
-            highest_value = round(getattr(anomaly, 'y'), 1),
-            time_of_anomaly = str(getattr(anomaly, 'data_datetime')),
-            lower_bound = round(getattr(anomaly, 'yhat_lower'), 2),
-            upper_bound = round(getattr(anomaly, 'yhat_upper'), 2),
-            severity_value = round(getattr(anomaly, 'severity'), 2)
+                alert_name,
+                kpi_name,
+                data_source_name,
+                highest_value = round(getattr(anomaly, 'y'), 1),
+                time_of_anomaly = str(getattr(anomaly, 'data_datetime')),
+                lower_bound = round(getattr(anomaly, 'yhat_lower'), 2),
+                upper_bound = round(getattr(anomaly, 'yhat_upper'), 2),
+                severity_value = round(getattr(anomaly, 'severity'), 2)
             )
 
         if test == "ok":
@@ -359,9 +381,18 @@ def check_and_trigger_alert(alert_id):
         return True
 
     if alert_info.alert_type == "Event Alert":
+
         data_source_id = alert_info.data_source
         data_source_obj = DataSource.get_by_id(data_source_id)
-        # db_uri = data_source_obj.db_uri
+        
+        curr_date_time = datetime.datetime.now()
+        check_time = FREQUENCY_DICT[alert_info.alert_frequency]
+
+        if alert_info.last_alerted is not None and \
+                alert_info.last_alerted > (curr_date_time - check_time):
+            logger.debug(f"Skipping alert with ID {alert_info.id}")
+            return True
+
         static_alert_obj = StaticEventAlertController(alert_info.as_dict, data_source_obj.as_dict)
         static_alert_obj.check_and_prepare_alert()
     elif alert_info.alert_type == "KPI Alert" and alert_info.kpi_alert_type == "Anomaly":

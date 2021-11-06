@@ -6,12 +6,8 @@ from datetime import datetime
 from flask import (
     Blueprint,
     current_app,
-    flash,
-    redirect,
-    render_template,
     request,
-    url_for,
-    jsonify
+    jsonify,
 )
 from sqlalchemy import func
 from chaos_genius.extensions import cache, db
@@ -24,17 +20,18 @@ from chaos_genius.third_party.integration_server_config import (
     SOURCE_WHITELIST_AND_TYPE,
     DATABASE_CONFIG_MAPPER,
     DESTINATION_TYPE as db_type,
-    DATA_SOURCE_ABBREVIATION
+    DATA_SOURCE_ABBREVIATION,
 )
 from chaos_genius.databases.db_utils import create_sqlalchemy_uri
 from chaos_genius.connectors import get_metadata
 from chaos_genius.third_party.integration_utils import get_connection_config
+
 # from chaos_genius.databases.db_metadata import DbMetadata, get_metadata
 
 from chaos_genius.controllers.data_source_controller import (
     get_datasource_data_from_id,
     mask_sensitive_info,
-    test_data_source
+    test_data_source,
 )
 
 # from chaos_genius.utils import flash_errors
@@ -47,26 +44,38 @@ def data_source():
     """DataSource List view."""
     current_app.logger.info("DataSource list")
 
-    if request.method == 'POST':
+    if request.method == "POST":
         if request.is_json:
             data = request.get_json()
-            conn_name = data.get('name')
-            conn_type = data.get('connection_type')
-            conn_uri = data.get('db_uri')
-            new_data_source = DataSource(name=conn_name, db_uri=conn_uri, connection_type=conn_type)
+            conn_name = data.get("name")
+            conn_type = data.get("connection_type")
+            conn_uri = data.get("db_uri")
+            new_data_source = DataSource(
+                name=conn_name, db_uri=conn_uri, connection_type=conn_type
+            )
             new_data_source.save()
-            return jsonify({"message": f"DataSource {new_data_source.name} has been created successfully."})
+            return jsonify(
+                {
+                    "message": f"DataSource {new_data_source.name} has been created successfully."
+                }
+            )
         else:
             return jsonify({"error": "The request payload is not in JSON format"})
 
-    elif request.method == 'GET':
-        data_sources = DataSource.query.filter(DataSource.active==True).order_by(DataSource.created_at.desc()).all()
-        ds_kpi_count = db.session.query(DataSource.id, func.count(Kpi.id)) \
-                    .join(Kpi, Kpi.data_source == DataSource.id) \
-                    .filter(DataSource.active==True, Kpi.active==True) \
-                    .group_by(DataSource.id) \
-                    .order_by(DataSource.created_at.desc()) \
-                    .all()
+    elif request.method == "GET":
+        data_sources = (
+            DataSource.query.filter(DataSource.active is True)
+            .order_by(DataSource.created_at.desc())
+            .all()
+        )
+        ds_kpi_count = (
+            db.session.query(DataSource.id, func.count(Kpi.id))
+            .join(Kpi, Kpi.data_source == DataSource.id)
+            .filter(DataSource.active is True, Kpi.active is True)
+            .group_by(DataSource.id)
+            .order_by(DataSource.created_at.desc())
+            .all()
+        )
         data_source_kpi_map = {}
         for row in ds_kpi_count:
             data_source_kpi_map[row[0]] = row[1]
@@ -74,8 +83,8 @@ def data_source():
         for conn in data_sources:
             # TODO: Add the kpi_count, real sync details and sorting info
             conn_detail = conn.safe_dict
-            conn_detail['last_sync'] = datetime.now()
-            conn_detail['kpi_count'] = data_source_kpi_map.get(conn_detail['id'], 0)
+            conn_detail["last_sync"] = datetime.now()
+            conn_detail["kpi_count"] = data_source_kpi_map.get(conn_detail["id"], 0)
             results.append(conn_detail)
         results = sorted(results, reverse=True, key=lambda x: x["id"])
         return jsonify({"count": len(results), "data": results})
@@ -121,26 +130,30 @@ def create_data_source():
     db_connection_uri = ""
     try:
         payload = request.get_json()
-        conn_name = payload.get('name')
-        conn_type = payload.get('connection_type')
-        source_form = payload.get('sourceForm')
+        conn_name = payload.get("name")
+        conn_type = payload.get("connection_type")
+        source_form = payload.get("sourceForm")
         is_third_party = SOURCE_WHITELIST_AND_TYPE[source_form["sourceDefinitionId"]]
         sourceCreationPayload = {
             "name": f"CG-{conn_name}",
             "sourceDefinitionId": source_form.get("sourceDefinitionId"),
-            "connectionConfiguration": source_form.get("connectionConfiguration")
+            "connectionConfiguration": source_form.get("connectionConfiguration"),
         }
         if is_third_party:
             connector_client = connector.connection
             sourceCreationPayload["workspaceId"] = connector_client.workspace_id
             # Create the source
             sourceRecord = connector_client.create_source(sourceCreationPayload)
-            sourceRecord["connectionConfiguration"] = sourceCreationPayload["connectionConfiguration"]
+            sourceRecord["connectionConfiguration"] = sourceCreationPayload[
+                "connectionConfiguration"
+            ]
 
             # create the destination record
             desinationRecord = connector_client.create_destination(conn_name)
             # create the third_party_connection
-            mapping_config = SOURCE_CONFIG_MAPPING.get(source_form.get("sourceDefinitionId"), {})
+            mapping_config = SOURCE_CONFIG_MAPPING.get(
+                source_form.get("sourceDefinitionId"), {}
+            )
             source_schema = connector_client.get_source_schema(sourceRecord["sourceId"])
             stream_schema = source_schema["catalog"]["streams"]
             for stream in stream_schema:
@@ -153,10 +166,7 @@ def create_data_source():
             conn_payload = {
                 "sourceId": sourceRecord["sourceId"],
                 "destinationId": desinationRecord["destinationId"],
-                "schedule": {
-                    "units": 24,
-                    "timeUnit": "hours"
-                },
+                "schedule": {"units": 24, "timeUnit": "hours"},
                 "prefix": table_prefix,
                 "status": "active",
                 "operations": [
@@ -165,15 +175,11 @@ def create_data_source():
                         "workspaceId": connector_client.workspace_id,
                         "operatorConfiguration": {
                             "operatorType": "normalization",
-                            "normalization": {
-                                "option": "basic"
-                            }
-                        }
+                            "normalization": {"option": "basic"},
+                        },
                     }
                 ],
-                "syncCatalog": {
-                    "streams": stream_schema
-                }
+                "syncCatalog": {"streams": stream_schema},
             }
             connectionRecord = connector_client.create_connection(conn_payload)
             if not connectionRecord:
@@ -203,7 +209,7 @@ def create_data_source():
         # Save in the database
         new_connection = DataSource(
             name=conn_name,
-            db_uri=db_connection_uri, 
+            db_uri=db_connection_uri,
             connection_type=conn_type,
             active=True,
             is_third_party=is_third_party,
@@ -211,13 +217,13 @@ def create_data_source():
             sourceConfig=sourceRecord,
             destinationConfig=desinationRecord,
             connectionConfig=connectionRecord,
-            dbConfig={"tables": stream_tables, "db_connection_uri": db_connection_uri}
+            dbConfig={"tables": stream_tables, "db_connection_uri": db_connection_uri},
         )
         new_connection.save(commit=True)
         msg = f"Connection {new_connection.name} has been created successfully."
 
     except Exception as err_msg:
-        print('-'*60)
+        print("-" * 60)
         print(err_msg)
         msg = str(err_msg)
         # import traceback; print(traceback.format_exc())
@@ -238,10 +244,14 @@ def delete_data_source():
                 connector_client = connector.connection
                 # delete the connection
                 connection_details = ds_data["connectionConfig"]
-                status = connector_client.delete_connection(connection_details["connectionId"])
+                status = connector_client.delete_connection(
+                    connection_details["connectionId"]
+                )
                 # delete the destination
                 destination_details = ds_data["destinationConfig"]
-                status = connector_client.delete_destination(destination_details["destinationId"])
+                status = connector_client.delete_destination(
+                    destination_details["destinationId"]
+                )
                 # delete the source
                 source_details = ds_data["sourceConfig"]
                 status = connector_client.delete_source(source_details["sourceId"])
@@ -315,10 +325,19 @@ def get_data_source_info(datasource_id):
         data_source_def = ds_obj.sourceConfig["sourceDefinitionId"]
         if data_source_def:
             connection_types = get_connection_config()
-            connection_def = next((source_def for source_def in connection_types if source_def["sourceDefinitionId"] == data_source_def), None)
+            connection_def = next(
+                (
+                    source_def
+                    for source_def in connection_types
+                    if source_def["sourceDefinitionId"] == data_source_def
+                ),
+                None,
+            )
             masked_details = {}
             if connection_def:
-                masked_details = mask_sensitive_info(connection_def, ds_obj.sourceConfig["connectionConfiguration"])
+                masked_details = mask_sensitive_info(
+                    connection_def, ds_obj.sourceConfig["connectionConfiguration"]
+                )
         data = ds_obj.safe_dict
         data["sourceForm"] = masked_details
         status = "success"
@@ -336,8 +355,8 @@ def update_data_source_info(datasource_id):
     data = None
     try:
         payload = request.get_json()
-        conn_name = payload.get('name')
-        source_form = payload.get('sourceForm')
+        conn_name = payload.get("name")
+        source_form = payload.get("sourceForm")
         ds_obj = get_datasource_data_from_id(datasource_id, as_obj=True)
         ds_obj.name = conn_name
         connection_config = deepcopy(ds_obj.sourceConfig)
@@ -347,7 +366,7 @@ def update_data_source_info(datasource_id):
         connection_config["connection_type"] = ds_obj.connection_type
         connection_status = test_data_source(connection_config)
         if connection_status["status"] == "failed":
-            raise Exception(connection_status['message'])
+            raise Exception(connection_status["message"])
         ds_obj.sourceConfig = connection_config
         ds_obj.save(commit=True)
         status = "success"

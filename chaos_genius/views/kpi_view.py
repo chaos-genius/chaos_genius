@@ -108,9 +108,11 @@ def get_all_kpis():
 
     status, message = "success", ""
     timeline = request.args.get("timeline", "wow")
-    results = Kpi.query.filter(
-        Kpi.active == True  # noqa: E712
-    ).order_by(Kpi.created_at.desc()).all()
+    results = (
+        Kpi.query.filter(Kpi.active == True)  # noqa: E712
+        .order_by(Kpi.created_at.desc())
+        .all()
+    )
 
     ret = []
     metrics = ["name", "metric", "id"]
@@ -316,7 +318,7 @@ def kpi_line_data(kpi_id):
 
         final_data = data_point.data if data_point else []
     except Exception as err:
-        logger.error(f'Error in KPI Line data retrieval: {err}', exc_info=1)
+        logger.error(f"Error in KPI Line data retrieval: {err}", exc_info=1)
     return final_data
 
 
@@ -374,9 +376,7 @@ def rca_hierarchical_data(kpi_id, timeline="mom", dimension=None):
         else:
             final_data = {"data_table": [], "analysis_date": ""}
     except Exception as err:
-        logger.error(
-            f"Error in RCA hierarchical table retrieval: {err}", exc_info=1
-        )
+        logger.error(f"Error in RCA hierarchical table retrieval: {err}", exc_info=1)
     return final_data
 
 

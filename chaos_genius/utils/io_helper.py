@@ -2,6 +2,7 @@ import os
 import shutil
 import click
 
+
 def cg_print(info, color=None):
     click.echo(info)
 
@@ -29,8 +30,9 @@ def is_file_exists(file_path, is_relative=True):
     """Check if the file exists at the given location
 
     Args:
-        file_path (str): path of the file in the string
-        is_relative (bool, optional): is the path relative or absolute. Defaults to True.
+        file_path (str): path of the file in the
+        string is_relative (bool, optional): is the path relative or absolute.
+        Defaults to True.
 
     Returns:
         str: Return the full path if file found, None if not found

@@ -18,9 +18,11 @@ class PostgresDb(BaseDb):
         username = db_info.get("username")
         database = db_info.get("database")
         password = db_info.get("password")
-        if not(host and port and username and password and database):
+        if not (host and port and username and password and database):
             raise NotImplementedError("Database Credential not found for Postgresql.")
-        self.sqlalchemy_db_uri = f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}"
+        self.sqlalchemy_db_uri = (
+            f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}"
+        )
         return self.sqlalchemy_db_uri
 
     def get_db_engine(self):
@@ -29,7 +31,7 @@ class PostgresDb(BaseDb):
         return self.engine
 
     def test_connection(self):
-        if not hasattr(self, 'engine') or not self.engine:
+        if not hasattr(self, "engine") or not self.engine:
             self.engine = self.get_db_engine()
         query_text = text(self.test_db_query)
         status, message = None, ""
@@ -48,15 +50,15 @@ class PostgresDb(BaseDb):
 
     def run_query(self, query, as_df=True):
         engine = self.get_db_engine()
-        if as_df == True:
+        if as_df is True:
             return pd.read_sql_query(query, engine)
         else:
             return []
 
     def get_schema(self):
-        schema_name = self.ds_info.get('schema')
+        schema_name = self.ds_info.get("schema")
         if schema_name:
             self.schema = schema_name
         else:
-            self.schema = 'public'
+            self.schema = "public"
         return self.schema

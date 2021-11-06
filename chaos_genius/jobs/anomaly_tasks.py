@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import cast
 
-from celery import chain, group
+from celery import group
 from celery.app.base import Celery
 from sqlalchemy import func
 from sqlalchemy.orm.attributes import flag_modified
@@ -89,7 +89,7 @@ def rca_single_kpi(kpi_id: int):
 @celery.task
 def anomaly_kpi():
     kpis = Kpi.query.distinct("kpi_id").filter(
-        (Kpi.run_anomaly == True) & (Kpi.active == True)
+        (Kpi.run_anomaly is True) & (Kpi.active is True)
     )
     task_group = []
     for kpi in kpis:
@@ -163,7 +163,7 @@ def ready_rca_task(kpi_id: int):
 def anomaly_scheduler():
     # find KPIs
     kpis: Kpi = Kpi.query.distinct("kpi_id").filter(
-        (Kpi.active == True) & (Kpi.is_static == False)
+        (Kpi.active is True) & (Kpi.is_static is False)
     )
 
     task_group = []

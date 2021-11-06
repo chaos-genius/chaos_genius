@@ -11,12 +11,12 @@ def init_sentry(sentry_dsn, flask_integration=False, env=None):
     """This function will initialised the sentry DSN for the error logging
     and tracking if the env is production
     """
-    print('Initiated the sentry code')
+    print("Initiated the sentry code")
     integrations = []
 
     sentry_logging = LoggingIntegration(
-        level=logging.INFO,        # Capture info and above as breadcrumbs
-        event_level=logging.ERROR  # Send errors as events
+        level=logging.INFO,  # Capture info and above as breadcrumbs
+        event_level=logging.ERROR,  # Send errors as events
     )
     integrations.append(sentry_logging)
     integrations.append(RedisIntegration())
@@ -29,7 +29,7 @@ def init_sentry(sentry_dsn, flask_integration=False, env=None):
         dsn=sentry_dsn,
         integrations=integrations,
         environment=env,
-        before_send=strip_sensitive_data
+        before_send=strip_sensitive_data,
     )
 
 

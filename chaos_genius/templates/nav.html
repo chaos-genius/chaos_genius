@@ -1,10 +1,9 @@
-
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
   <a class="navbar-brand" href="{{ url_for('public.home') }}">
-     Chaos Genius 
+    Chaos Genius
   </a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-    aria-expanded="false" aria-label="Toggle navigation">
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
 
@@ -34,7 +33,8 @@
     <form class="form-inline" id="loginForm" method="POST" action="{{ url_for('public.home') }}" role="login">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
       <div class="input-group mb-2 mr-sm-2">
-        {{ form.username(placeholder="Username", class_="form-control mr-sm-1 my-auto") }} {{ form.password(placeholder="Password",
+        {{ form.username(placeholder="Username", class_="form-control mr-sm-1 my-auto") }} {{
+        form.password(placeholder="Password",
         class_="form-control mr-sm-1 my-auto") }}
         <button class="btn btn-light btn-primary m-auto" type="submit">Login</button>
       </div>
@@ -47,4 +47,3 @@
     {% endif %}
   </div><!-- /.navbar-collapse -->
 </nav>
-

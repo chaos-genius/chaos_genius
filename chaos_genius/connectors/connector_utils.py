@@ -1,5 +1,4 @@
 import pandas as pd
-from typing import cast
 
 
 def merge_dataframe_chunks(dataframe_chunk) -> pd.DataFrame:

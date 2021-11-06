@@ -17,7 +17,9 @@ from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.views.kpi_view import get_kpi_data_from_id
 
-from chaos_genius.core.rca.rca_utils.string_helpers import convert_query_string_to_user_string
+from chaos_genius.core.rca.rca_utils.string_helpers import (
+    convert_query_string_to_user_string,
+)
 
 
 blueprint = Blueprint("anomaly_data", __name__)
@@ -45,18 +47,16 @@ def kpi_anomaly_detection(kpi_id):
             "chart_data": anom_data,
             # TODO: base_anomaly_id not needed anymore
             # remove from here once updated in frontend
-            "base_anomaly_id": kpi_id
+            "base_anomaly_id": kpi_id,
         }
         data["chart_data"]["title"] = kpi_info["name"]
     except Exception as err:
         print(traceback.format_exc())
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("Anomaly Detection Done")
-    return jsonify({
-        "data": data,
-        "msg": "",
-        "anomaly_end_date": get_anomaly_end_date(kpi_id)
-        })
+    return jsonify(
+        {"data": data, "msg": "", "anomaly_end_date": get_anomaly_end_date(kpi_id)}
+    )
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-drilldown", methods=["GET"])
@@ -77,19 +77,20 @@ def kpi_anomaly_drilldown(kpi_id):
         end_date = get_end_date(kpi_info)
 
         for subdim in subdims:
-            results = get_dq_and_subdim_data(
-                kpi_id, end_date, "subdim", subdim)
+            results = get_dq_and_subdim_data(kpi_id, end_date, "subdim", subdim)
             subdim_graphs.append(results)
 
     except Exception as err:
         print(traceback.format_exc())
         current_app.logger.info(f"Error Found: {err}")
     current_app.logger.info("Anomaly Drilldown Done")
-    return jsonify({
-        "data": subdim_graphs,
-        "msg": "",
-        "anomaly_end_date": get_anomaly_end_date(kpi_id)
-        })
+    return jsonify(
+        {
+            "data": subdim_graphs,
+            "msg": "",
+            "anomaly_end_date": get_anomaly_end_date(kpi_id),
+        }
+    )
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-data-quality", methods=["GET"])
@@ -117,12 +118,14 @@ def kpi_anomaly_data_quality(kpi_id):
         current_app.logger.info(f"Error Found: {err}")
 
     current_app.logger.info("Anomaly Drilldown Done")
-    return jsonify({
-        "data": data,
-        "msg": msg,
-        "status": status,
-        "anomaly_end_date": get_anomaly_end_date(kpi_id)
-        })
+    return jsonify(
+        {
+            "data": data,
+            "msg": msg,
+            "status": status,
+            "anomaly_end_date": get_anomaly_end_date(kpi_id),
+        }
+    )
 
 
 @blueprint.route("/anomaly-params/meta-info", methods=["GET"])
@@ -136,15 +139,20 @@ def kpi_anomaly_params(kpi_id: int):
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
 
     if kpi is None:
-        return jsonify(
-            {"error": f"Could not find KPI for ID: {kpi_id}", "status": "failure"}
-        ), 400
+        return (
+            jsonify(
+                {"error": f"Could not find KPI for ID: {kpi_id}", "status": "failure"}
+            ),
+            400,
+        )
 
     # when method is GET we just return the anomaly params
     if request.method == "GET":
-        return jsonify({
-            "anomaly_params": get_anomaly_params_dict(kpi),
-        })
+        return jsonify(
+            {
+                "anomaly_params": get_anomaly_params_dict(kpi),
+            }
+        )
 
     # when it's POST, update anomaly params
 
@@ -154,26 +162,44 @@ def kpi_anomaly_params(kpi_id: int):
     if is_first_time:
         current_app.logger.info(f"Adding anomaly parameters for KPI ID: {kpi_id}")
     else:
-        current_app.logger.info(f"Updating existing anomaly parameters for KPI ID: {kpi_id}")
+        current_app.logger.info(
+            f"Updating existing anomaly parameters for KPI ID: {kpi_id}"
+        )
 
     if not request.is_json:
-        return jsonify(
-            {"error": "Request body must be a JSON (and Content-Type header must be set correctly)", "status": "failure"}
-        ), 400
+        return (
+            jsonify(
+                {
+                    "error": "Request body must be a JSON (and Content-Type header must be set correctly)",
+                    "status": "failure",
+                }
+            ),
+            400,
+        )
 
     req_data: dict = cast(dict, request.get_json())
 
     if "anomaly_params" not in req_data:
-        return jsonify(
-            {"error": "The request JSON needs to have anomaly_params as a field", "status": "failure"}
-        ), 400
+        return (
+            jsonify(
+                {
+                    "error": "The request JSON needs to have anomaly_params as a field",
+                    "status": "failure",
+                }
+            ),
+            400,
+        )
 
-    err, new_anomaly_params = validate_partial_anomaly_params(req_data["anomaly_params"])
+    err, new_anomaly_params = validate_partial_anomaly_params(
+        req_data["anomaly_params"]
+    )
 
     if err != "":
         return jsonify({"error": err, "status": "failure"}), 400
 
-    err, new_kpi = update_anomaly_params(kpi, new_anomaly_params, check_editable=not is_first_time)
+    err, new_kpi = update_anomaly_params(
+        kpi, new_anomaly_params, check_editable=not is_first_time
+    )
 
     if err != "":
         return jsonify({"error": err, "status": "failure"}), 400
@@ -183,6 +209,7 @@ def kpi_anomaly_params(kpi_id: int):
     if is_first_time:
         # TODO: move this import to top and fix import issue
         from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task, ready_rca_task
+
         anomaly_task = ready_anomaly_task(new_kpi.id)
         rca_task = ready_rca_task(new_kpi.id)
         if anomaly_task is None or rca_task is None:
@@ -194,10 +221,7 @@ def kpi_anomaly_params(kpi_id: int):
             anomaly_task.apply_async()
             rca_task.apply_async()
 
-    return jsonify({
-        "msg": "Successfully updated Anomaly params",
-        "status": "success"
-    })
+    return jsonify({"msg": "Successfully updated Anomaly params", "status": "success"})
 
 
 @blueprint.route("/<int:kpi_id>/settings", methods=["GET"])
@@ -207,20 +231,23 @@ def anomaly_settings_status(kpi_id):
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
 
     if kpi is None:
-        return jsonify(
-            {"error": f"Could not find KPI for ID: {kpi_id}", "status": "failure"}
-        ), 400
+        return (
+            jsonify(
+                {"error": f"Could not find KPI for ID: {kpi_id}", "status": "failure"}
+            ),
+            400,
+        )
 
     response = DEFAULT_STATUS.copy()
 
     if kpi.scheduler_params is not None:
-        response.update({k: v for k, v in kpi.scheduler_params.items() if k in DEFAULT_STATUS})
+        response.update(
+            {k: v for k, v in kpi.scheduler_params.items() if k in DEFAULT_STATUS}
+        )
 
     response["is_anomaly_setup"] = kpi.anomaly_params is not None
 
-    rca_data = RcaData.query.filter(
-        RcaData.kpi_id == kpi_id
-    ).all()
+    rca_data = RcaData.query.filter(RcaData.kpi_id == kpi_id).all()
     if len(rca_data) == 0:
         is_precomputed = False
     else:
@@ -246,33 +273,36 @@ def fill_graph_data(row, graph_data):
     :type graph_data: Dict
     """
     # Do not include rows where there is no data
-    if row.notna()['y']:
+    if row.notna()["y"]:
         # Convert to milliseconds for HighCharts
-        timestamp = row['data_datetime'].timestamp() * 1000
+        timestamp = row["data_datetime"].timestamp() * 1000
 
         # Create and append a point for the interval
-        interval = [timestamp, round_number(row['yhat_lower']), round_number(
-            row['yhat_upper'])]
-        graph_data['intervals'].append(interval)
+        interval = [
+            timestamp,
+            round_number(row["yhat_lower"]),
+            round_number(row["yhat_upper"]),
+        ]
+        graph_data["intervals"].append(interval)
 
         # Create and append a point for the value
-        value = [timestamp, round_number(row['y'])]
-        graph_data['values'].append(value)
+        value = [timestamp, round_number(row["y"])]
+        graph_data["values"].append(value)
 
         # Create and append a point for the severity
-        severity = [timestamp, round_number(row['severity'])]
-        graph_data['severity'].append(severity)
+        severity = [timestamp, round_number(row["severity"])]
+        graph_data["severity"].append(severity)
 
 
 def convert_to_graph_json(
-    results, 
-    kpi_id, 
-    anomaly_type="overall", 
-    series_type=None, 
+    results,
+    kpi_id,
+    anomaly_type="overall",
+    series_type=None,
 ):
     kpi_info = get_kpi_data_from_id(kpi_id)
 
-    if anomaly_type == "overall":    
+    if anomaly_type == "overall":
         title = kpi_info["name"]
     elif anomaly_type == "subdim":
         title = convert_query_string_to_user_string(series_type)
@@ -281,27 +311,24 @@ def convert_to_graph_json(
 
     kpi_name = kpi_info["metric"]
     graph_data = {
-        'title': title,
-        'y_axis_label': kpi_name,
-        'x_axis_label': 'Datetime',
-        'sub_dimension': anomaly_type,
-        'intervals': [],
-        'values': [],
-        'severity': []
+        "title": title,
+        "y_axis_label": kpi_name,
+        "x_axis_label": "Datetime",
+        "sub_dimension": anomaly_type,
+        "intervals": [],
+        "values": [],
+        "severity": [],
     }
 
-    results.apply(
-        lambda row: fill_graph_data(row, graph_data),
-        axis=1
-    )
+    results.apply(lambda row: fill_graph_data(row, graph_data), axis=1)
 
     return graph_data
 
 
 def get_overall_data(kpi_id, end_date: str, n=90):
     start_date = pd.to_datetime(end_date) - timedelta(days=n)
-    start_date = start_date.strftime('%Y-%m-%d %H:%M:%S')
-    end_date = end_date.strftime('%Y-%m-%d %H:%M:%S')
+    start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
+    end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
 
     query = AnomalyDataOutput.query.filter(
         (AnomalyDataOutput.kpi_id == kpi_id)
@@ -316,15 +343,11 @@ def get_overall_data(kpi_id, end_date: str, n=90):
 
 
 def get_dq_and_subdim_data(
-    kpi_id, 
-    end_date, 
-    anomaly_type="dq", 
-    series_type="max", 
-    n=90
+    kpi_id, end_date, anomaly_type="dq", series_type="max", n=90
 ):
     start_date = pd.to_datetime(end_date) - timedelta(days=n)
-    start_date = start_date.strftime('%Y-%m-%d %H:%M:%S')
-    end_date = end_date.strftime('%Y-%m-%d %H:%M:%S')
+    start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
+    end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
 
     query = AnomalyDataOutput.query.filter(
         (AnomalyDataOutput.kpi_id == kpi_id)
@@ -342,25 +365,33 @@ def get_dq_and_subdim_data(
 def get_drilldowns_series_type(kpi_id, drilldown_date):
     # First we get direction of anomaly
     # Then we get relevant subdims for that anomaly
-    is_anomaly = AnomalyDataOutput.query.filter(
-        (AnomalyDataOutput.kpi_id == kpi_id)
-        & (AnomalyDataOutput.data_datetime == drilldown_date)
-        & (AnomalyDataOutput.anomaly_type == "overall")
-    ).first().is_anomaly
+    is_anomaly = (
+        AnomalyDataOutput.query.filter(
+            (AnomalyDataOutput.kpi_id == kpi_id)
+            & (AnomalyDataOutput.data_datetime == drilldown_date)
+            & (AnomalyDataOutput.anomaly_type == "overall")
+        )
+        .first()
+        .is_anomaly
+    )
 
     if is_anomaly == 0:
         raise ValueError(f"No anomaly found for date {drilldown_date}")
 
-    query = AnomalyDataOutput.query.filter(
-        (AnomalyDataOutput.kpi_id == kpi_id)
-        & (AnomalyDataOutput.data_datetime == drilldown_date)
-        & (AnomalyDataOutput.anomaly_type == "subdim")
-        & (AnomalyDataOutput.is_anomaly == is_anomaly)
-    ).order_by(AnomalyDataOutput.severity.desc()).limit(TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN)
+    query = (
+        AnomalyDataOutput.query.filter(
+            (AnomalyDataOutput.kpi_id == kpi_id)
+            & (AnomalyDataOutput.data_datetime == drilldown_date)
+            & (AnomalyDataOutput.anomaly_type == "subdim")
+            & (AnomalyDataOutput.is_anomaly == is_anomaly)
+        )
+        .order_by(AnomalyDataOutput.severity.desc())
+        .limit(TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN)
+    )
 
     results = pd.read_sql(query.statement, query.session.bind)
     if len(results) == 0:
-        start_date = drilldown_date - timedelta(days = 1)
+        start_date = drilldown_date - timedelta(days=1)
         end_date = drilldown_date + timedelta(days=1)
         query = AnomalyDataOutput.query.filter(
             (AnomalyDataOutput.kpi_id == kpi_id)
@@ -372,11 +403,15 @@ def get_drilldowns_series_type(kpi_id, drilldown_date):
 
         results = pd.read_sql(query.statement, query.session.bind)
 
-        # Sorting by distance from drilldown data (ascending) and severity of 
+        # Sorting by distance from drilldown data (ascending) and severity of
         # anomaly (descending), created distance for this purpose only
-        results['distance'] = abs(results['data_datetime'] - pd.to_datetime(drilldown_date))
-        results.sort_values(['distance', 'severity'], ascending = [True, False], inplace = True)
-        results.drop('distance', axis = 1, inplace = True)
+        results["distance"] = abs(
+            results["data_datetime"] - pd.to_datetime(drilldown_date)
+        )
+        results.sort_values(
+            ["distance", "severity"], ascending=[True, False], inplace=True
+        )
+        results.drop("distance", axis=1, inplace=True)
 
         results = results.iloc[:TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN]
 
@@ -393,16 +428,16 @@ def get_end_date(kpi_info: dict) -> datetime:
 
     end_date = None
 
-    if kpi_info['is_static']:
-        end_date = kpi_info.get('static_params', {}).get('end_date', None)
+    if kpi_info["is_static"]:
+        end_date = kpi_info.get("static_params", {}).get("end_date", None)
         if end_date is not None:
-            try: end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
+            try:
+                end_date = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
             except:
                 end_date = end_date + " 00:00:00"
-                end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
+                end_date = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
 
-
-    #TODO: caused the non viewing of data post 00:00
+    # TODO: caused the non viewing of data post 00:00
     if end_date is None:
         end_date = datetime.today()
 
@@ -428,8 +463,9 @@ ANOMALY_PARAMS_META = {
                 {
                     "value": key,
                     "name": value,
-                } for key, value in MODEL_NAME_MAPPING.items()
-            ]
+                }
+                for key, value in MODEL_NAME_MAPPING.items()
+            ],
         },
         {
             "name": "sensitivity",
@@ -448,8 +484,8 @@ ANOMALY_PARAMS_META = {
                 {
                     "value": "low",
                     "name": "Low",
-                }
-            ]
+                },
+            ],
         },
         {
             "name": "seasonality",
@@ -468,8 +504,8 @@ ANOMALY_PARAMS_META = {
                 {
                     "value": "D",
                     "name": "Daily",
-                }
-            ]
+                },
+            ],
         },
         {
             "name": "frequency",
@@ -484,8 +520,8 @@ ANOMALY_PARAMS_META = {
                 {
                     "value": "H",
                     "name": "Hourly",
-                }
-            ]
+                },
+            ],
         },
         {
             "name": "scheduler_params_time",
@@ -503,7 +539,7 @@ ANOMALY_PARAMS_META = {
                     "value": "D",
                     "name": "Daily",
                 },
-            ]
+            ],
         },
     ],
 }
@@ -527,7 +563,6 @@ DEFAULT_ANOMALY_PARAMS = {
     "model_name": None,
     "seasonality": [],
     "sensitivity": None,
-
     # scheduler params
     "scheduler_params_time": "11:00:00",
     "scheduler_frequency": "D",
@@ -544,6 +579,7 @@ DEFAULT_STATUS: Dict[str, Any] = {
 
 # --- anomaly params helper functions --- #
 # TODO: move default, meta and anomaly_params helpers to a class?
+
 
 def anomaly_params_field_is_editable(field_name: str):
     for field in ANOMALY_PARAMS_META["fields"]:
@@ -567,14 +603,17 @@ def validate_partial_anomaly_params(
 
     if fields.isdisjoint(set(anomaly_params.keys())):
         # we don't have any of the possible fields
-        return f"anomaly_params needs to have one of the following fields: {', '.join(fields)}", {}
+        return (
+            f"anomaly_params needs to have one of the following fields: {', '.join(fields)}",
+            {},
+        )
 
     extra_fields = anomaly_params.keys() - fields
     if extra_fields:
         # some unexpected fields. Return an explicit error instead of ignoring them.
         return (
             f"Got extra fields in anomaly_params: {', '.join(extra_fields)}",
-            {k: v for k, v in anomaly_params.items() if k in fields}
+            {k: v for k, v in anomaly_params.items() if k in fields},
         )
 
     # validate values of available fields
@@ -589,21 +628,22 @@ def validate_partial_anomaly_params(
             return (
                 f"anomaly_period must be an integer number. Got: {repr(anomaly_period)}"
                 f" (of type: {type(anomaly_period).__name__})",
-                anomaly_params
+                anomaly_params,
             )
 
     def validate_frequency(frequency, field_name, frequency_types={"D", "H"}):
         if not isinstance(frequency, str):
             return (
                 f"{field_name} must be a string, one of: {', '.join(frequency_types)}. Got: {frequency}",
-                anomaly_params)
+                anomaly_params,
+            )
 
         anomaly_params[field_name] = frequency
 
         if frequency not in frequency_types:
             return (
                 f"{field_name} must be one of: {', '.join(frequency_types)}. Got: {frequency}",
-                anomaly_params
+                anomaly_params,
             )
 
         return "", anomaly_params
@@ -619,7 +659,9 @@ def validate_partial_anomaly_params(
     if "scheduler_frequency" in anomaly_params:
         frequency = anomaly_params["scheduler_frequency"]
 
-        err, anomaly_params = validate_frequency(frequency, "scheduler_frequency", {"D"})
+        err, anomaly_params = validate_frequency(
+            frequency, "scheduler_frequency", {"D"}
+        )
 
         if err != "":
             return err, anomaly_params
@@ -631,7 +673,8 @@ def validate_partial_anomaly_params(
         if not isinstance(sensitivity, str):
             return (
                 f"sensitivity must be a string, one of: {', '.join(sensitivity_types)}. Got: {sensitivity}",
-                anomaly_params)
+                anomaly_params,
+            )
 
         # we compare (and store) only lower case for this field
         sensitivity = sensitivity.lower()
@@ -640,14 +683,17 @@ def validate_partial_anomaly_params(
         if sensitivity not in sensitivity_types:
             return (
                 f"sensitivity must be one of: {', '.join(sensitivity_types)}. Got: {sensitivity}",
-                anomaly_params
+                anomaly_params,
             )
 
     if "seasonality" in anomaly_params:
         seasonality = anomaly_params["seasonality"]
 
         if not isinstance(seasonality, list):
-            return f"seasonality must be a list. Got: {repr(seasonality)}", anomaly_params
+            return (
+                f"seasonality must be a list. Got: {repr(seasonality)}",
+                anomaly_params,
+            )
 
         seasonality_types = {"D", "M", "W"}
         for s in seasonality:
@@ -655,7 +701,8 @@ def validate_partial_anomaly_params(
             if not isinstance(s, str):
                 return (
                     f"All of the seasonalities must be a string, one of: {', '.join(seasonality_types)}. One of them was: {s}",
-                    anomaly_params)
+                    anomaly_params,
+                )
 
             # no lower case for this since the expecetd values are upper case
 
@@ -663,7 +710,7 @@ def validate_partial_anomaly_params(
                 return (
                     f"All of the seasonalities must one one of: {', '.join(seasonality_types)}. "
                     f"One of them was: {s}",
-                    anomaly_params
+                    anomaly_params,
                 )
 
     if "scheduler_params_time" in anomaly_params:
@@ -675,7 +722,7 @@ def validate_partial_anomaly_params(
         anomaly_params["scheduler_params_time"] = time
 
     if "run_optional" in anomaly_params:
-        run_optional = anomaly_params['run_optional']
+        run_optional = anomaly_params["run_optional"]
         if not isinstance(run_optional, dict):
             err = (
                 "The run_optional parameter must be a dictionary."
@@ -706,10 +753,7 @@ def validate_partial_anomaly_params(
 
 
 def update_anomaly_params(
-    kpi: Kpi,
-    new_anomaly_params: Dict[str, Any],
-    run_anomaly=True,
-    check_editable=False
+    kpi: Kpi, new_anomaly_params: Dict[str, Any], run_anomaly=True, check_editable=False
 ) -> Tuple[str, Kpi]:
     """Update anomaly_params for the kpi with the given *partial* *validated* anomaly parameters.
 
@@ -754,7 +798,7 @@ def update_anomaly_params(
         err = is_editable(
             "scheduler_params_time",
             scheduler_params.get("time"),
-            new_anomaly_params["scheduler_params_time"]
+            new_anomaly_params["scheduler_params_time"],
         )
         if err != "":
             return err, kpi
@@ -774,18 +818,23 @@ def update_anomaly_params(
         err = is_editable(
             "scheduler_frequency",
             scheduler_params.get("scheduler_frequency"),
-            new_anomaly_params["scheduler_frequency"]
+            new_anomaly_params["scheduler_frequency"],
         )
         if err != "":
             return err, kpi
 
-        scheduler_params["scheduler_frequency"] = new_anomaly_params["scheduler_frequency"]
+        scheduler_params["scheduler_frequency"] = new_anomaly_params[
+            "scheduler_frequency"
+        ]
 
         kpi.scheduler_params = scheduler_params
         flag_modified(kpi, "scheduler_params")
 
     flag_modified(kpi, "anomaly_params")
-    new_kpi = cast(Kpi, kpi.update(commit=True, anomaly_params=anomaly_params, run_anomaly=run_anomaly))
+    new_kpi = cast(
+        Kpi,
+        kpi.update(commit=True, anomaly_params=anomaly_params, run_anomaly=run_anomaly),
+    )
 
     return "", new_kpi
 
@@ -816,8 +865,8 @@ def get_anomaly_params_dict(kpi: Kpi):
             {k: v for k, v in scheduler_params_db.items() if k in ANOMALY_PARAM_FIELDS}
         )
 
-        anomaly_params["scheduler_params_time"] = (
-            scheduler_params_db.get("time", DEFAULT_ANOMALY_PARAMS["scheduler_params_time"])
+        anomaly_params["scheduler_params_time"] = scheduler_params_db.get(
+            "time", DEFAULT_ANOMALY_PARAMS["scheduler_params_time"]
         )
 
     return anomaly_params
@@ -839,7 +888,7 @@ def validate_scheduled_time(time):
     if not hour.isdigit() or not minute.isdigit() or not second.isdigit():
         return (
             f"hour, minute, second must be numbers. Got: {hour}, {minute}, {second}",
-            time
+            time,
         )
 
     hour = int(hour)
@@ -857,13 +906,16 @@ def validate_scheduled_time(time):
 
     return "", time
 
+
 def get_anomaly_end_date(kpi_id: int):
-    anomaly_end_date = AnomalyDataOutput.query.filter(
-            AnomalyDataOutput.kpi_id == kpi_id
-        ).order_by(AnomalyDataOutput.data_datetime.desc()).first()
-    
+    anomaly_end_date = (
+        AnomalyDataOutput.query.filter(AnomalyDataOutput.kpi_id == kpi_id)
+        .order_by(AnomalyDataOutput.data_datetime.desc())
+        .first()
+    )
+
     try:
-        anomaly_end_date = anomaly_end_date.as_dict['data_datetime']
+        anomaly_end_date = anomaly_end_date.as_dict["data_datetime"]
     except AttributeError:
         anomaly_end_date = None
     except Exception as err:

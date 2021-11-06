@@ -1,18 +1,9 @@
 # -*- coding: utf-8 -*-
 """alert data view."""
 from chaos_genius.databases.models.alert_model import Alert
-from datetime import datetime, timedelta
 
-from flask import (
-    Blueprint,
-    current_app,
-    flash,
-    redirect,
-    render_template,
-    request,
-    url_for,
-    jsonify
-)
+
+from flask import Blueprint, current_app, request, jsonify
 from chaos_genius.controllers.alert_controller import get_alert_list, get_alert_info
 from chaos_genius.databases.db_utils import chech_editable_field
 
@@ -25,6 +16,7 @@ def list_alert():
     results = get_alert_list()
     return jsonify({"data": results})
 
+
 @blueprint.route("/<int:alert_id>/get-info", methods=["GET"])
 def get_alert_info_by_id(alert_id):
     """get alert details."""
@@ -33,13 +25,13 @@ def get_alert_info_by_id(alert_id):
     try:
         alert_obj = get_alert_info(alert_id)
         data = alert_obj
-        status = "success" 
+        status = "success"
         message = "Alert found Successfully"
     except Exception as err:
         status = "failure"
         message = str(err)
         current_app.logger.info(f"Error in fetching the Alert: {err}")
-    return jsonify({"message": message, "status": status, "data":data})
+    return jsonify({"message": message, "status": status, "data": data})
 
 
 @blueprint.route("/add", methods=["POST"])
@@ -51,29 +43,44 @@ def add_alert():
         if request.is_json:
             # TODO: Add the backend validation
             data = request.get_json()
-            if(data.get('alert_name') and data.get('alert_type')):
+            if data.get("alert_name") and data.get("alert_type"):
                 new_alert = Alert(
-                    alert_name=data.get('alert_name'),
-                    alert_type=data.get('alert_type'),
-                    data_source=data.get('data_source'),
-                    alert_query=data.get('alert_query'),
-                    alert_settings=data.get('alert_settings'),
-                    kpi=data.get('kpi'),
-                    kpi_alert_type=data.get('kpi_alert_type'),
-                    severity_cutoff_score=data.get('severity_cutoff_score'),
-                    alert_message=data.get('alert_message'),
-                    alert_frequency=data.get('alert_frequency'),
-                    alert_channel=data.get('alert_channel'),
-                    alert_channel_conf=data.get('alert_channel_conf'),
-                    active=True
+                    alert_name=data.get("alert_name"),
+                    alert_type=data.get("alert_type"),
+                    data_source=data.get("data_source"),
+                    alert_query=data.get("alert_query"),
+                    alert_settings=data.get("alert_settings"),
+                    kpi=data.get("kpi"),
+                    kpi_alert_type=data.get("kpi_alert_type"),
+                    severity_cutoff_score=data.get("severity_cutoff_score"),
+                    alert_message=data.get("alert_message"),
+                    alert_frequency=data.get("alert_frequency"),
+                    alert_channel=data.get("alert_channel"),
+                    alert_channel_conf=data.get("alert_channel_conf"),
+                    active=True,
                 )
                 new_alert.save(commit=True)
-                return jsonify({"message": f"Alert {new_alert.alert_name} has been created successfully.", "status": "success"})
+                return jsonify(
+                    {
+                        "message": f"Alert {new_alert.alert_name} has been created successfully.",
+                        "status": "success",
+                    }
+                )
             else:
-                return jsonify({"message": "Alert Name and Alert Type cannot be empty", "status": "failure"})
+                return jsonify(
+                    {
+                        "message": "Alert Name and Alert Type cannot be empty",
+                        "status": "failure",
+                    }
+                )
 
         else:
-            return jsonify({"message": "The request payload is not in JSON format", "status": "failure"})
+            return jsonify(
+                {
+                    "message": "The request payload is not in JSON format",
+                    "status": "failure",
+                }
+            )
     except Exception as e:
         current_app.logger.info(f"Error in adding the Alert: {e}")
         return jsonify({"message": str(e), "status": "failure"})
@@ -87,7 +94,7 @@ def edit_alert(alert_id):
         alert_obj = Alert.get_by_id(alert_id)
         data = request.get_json()
         meta_info = Alert.meta_info()
-        if(data.get('alert_name') and data.get('alert_type')):
+        if data.get("alert_name") and data.get("alert_type"):
             if alert_obj:
                 for key, values in data.items():
                     if chech_editable_field(meta_info, key):
@@ -153,6 +160,4 @@ def enable_alert(alert_id):
 def alert_meta_info():
     """alert meta info view."""
     current_app.logger.info("alert meta info")
-    return jsonify({"data": Alert.meta_info(), "status":"success"})
-
- 
+    return jsonify({"data": Alert.meta_info(), "status": "success"})

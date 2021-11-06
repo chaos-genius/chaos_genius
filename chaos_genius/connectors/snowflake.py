@@ -5,6 +5,7 @@ from .base_db import BaseDb
 from snowflake.sqlalchemy import URL
 from .connector_utils import merge_dataframe_chunks
 
+
 class SnowflakeDb(BaseDb):
     db_name = "snowflake"
     test_db_query = "SELECT 1"
@@ -21,17 +22,25 @@ class SnowflakeDb(BaseDb):
         schema = db_info.get("schema")
         username = db_info.get("username")
         password = db_info.get("password")
-        if not (host and role and username and password and database and warehouse and schema):
+        if not (
+            host
+            and role
+            and username
+            and password
+            and database
+            and warehouse
+            and schema
+        ):
             raise NotImplementedError("Database Credential not found for Snowflake.")
         sqlalchemy_db_uri = URL(
-                account=host,
-                user=username,
-                password=password,
-                database=database,
-                schema=schema,
-                warehouse=warehouse,
-                role=role,
-            )
+            account=host,
+            user=username,
+            password=password,
+            database=database,
+            schema=schema,
+            warehouse=warehouse,
+            role=role,
+        )
         self.sqlalchemy_db_uri = sqlalchemy_db_uri
         return self.sqlalchemy_db_uri
 
@@ -60,10 +69,10 @@ class SnowflakeDb(BaseDb):
 
     def run_query(self, query, as_df=True):
         engine = self.get_db_engine()
-        if as_df == True:
-            return merge_dataframe_chunks(pd.read_sql_query(query,
-                                                            engine,
-                                                            chunksize=self.CHUNKSIZE))
+        if as_df is True:
+            return merge_dataframe_chunks(
+                pd.read_sql_query(query, engine, chunksize=self.CHUNKSIZE)
+            )
         else:
             return []
 

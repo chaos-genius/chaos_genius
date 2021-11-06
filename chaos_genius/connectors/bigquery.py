@@ -29,11 +29,13 @@ class BigQueryDb(BaseDb):
         if not credentials_info:
             raise NotImplementedError("Credentials JSON not found for Google BigQuery.")
         credentials_info = json.loads(credentials_info)
-        self.engine = create_engine(db_uri, credentials_info=credentials_info, echo=self.debug)
+        self.engine = create_engine(
+            db_uri, credentials_info=credentials_info, echo=self.debug
+        )
         return self.engine
 
     def test_connection(self):
-        if not hasattr(self, 'engine') or not self.engine:
+        if not hasattr(self, "engine") or not self.engine:
             self.engine = self.get_db_engine()
         query_text = text(self.test_db_query)
         status, message = None, ""
@@ -52,10 +54,10 @@ class BigQueryDb(BaseDb):
 
     def run_query(self, query, as_df=True):
         engine = self.get_db_engine()
-        if as_df == True:
-            return merge_dataframe_chunks(pd.read_sql_query(query,
-                                                            engine,
-                                                            chunksize=self.CHUNKSIZE))
+        if as_df is True:
+            return merge_dataframe_chunks(
+                pd.read_sql_query(query, engine, chunksize=self.CHUNKSIZE)
+            )
         else:
             return []
 

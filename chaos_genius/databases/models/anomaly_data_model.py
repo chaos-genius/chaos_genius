@@ -44,6 +44,7 @@ class AnomalyDataOutput(PkModel):
             "index": self.index,
         }
 
+
 # TODO: Delete model after a couple of weeks
 
 
@@ -59,8 +60,7 @@ class AnomalyData(PkModel):
     chart_data = Column(db.JSON)
     severity_score = Column(db.Integer)
     anomaly_timestamp = Column(db.BigInteger)
-    created_at = Column(db.DateTime, nullable=False,
-                        default=dt.datetime.utcnow)
+    created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
 
     def __init__(self, **kwargs):
         """Create instance."""
@@ -81,5 +81,5 @@ class AnomalyData(PkModel):
             "chart_data": self.chart_data,
             "severity_score": self.severity_score,
             "anomaly_timestamp": self.anomaly_timestamp,
-            "created_at": self.created_at
+            "created_at": self.created_at,
         }

@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from celery.schedules import crontab, schedule
 
-CELERY_IMPORTS = ("chaos_genius.jobs")
+CELERY_IMPORTS = "chaos_genius.jobs"
 CELERY_TASK_RESULT_EXPIRES = 30
 CELERY_TIMEZONE = "UTC"
 
@@ -26,17 +26,17 @@ CELERYBEAT_SCHEDULE = {
         "task": "chaos_genius.jobs.anomaly_tasks.anomaly_scheduler",
         "schedule": schedule(timedelta(minutes=10)),
         # "schedule": schedule(timedelta(seconds=10)),
-        "args": ()
+        "args": (),
     },
-    'alerts-weekly': {
-        'task': 'chaos_genius.jobs.alert_tasks.check_alerts',
-        'schedule': crontab(day_of_week="0"), # Weekly: every sunday
-        'args': ('weekly',)
+    "alerts-weekly": {
+        "task": "chaos_genius.jobs.alert_tasks.check_alerts",
+        "schedule": crontab(day_of_week="0"),  # Weekly: every sunday
+        "args": ("weekly",),
     },
-    'alerts-daily': {
-        'task': 'chaos_genius.jobs.alert_tasks.check_alerts',
-        'schedule': crontab(hour="3"), # Daily: at 3am
-        'args': ('daily',)
+    "alerts-daily": {
+        "task": "chaos_genius.jobs.alert_tasks.check_alerts",
+        "schedule": crontab(hour="3"),  # Daily: at 3am
+        "args": ("daily",),
     },
     # 'alerts-hourly': {
     #     'task': 'chaos_genius.jobs.alert_tasks.check_alerts',

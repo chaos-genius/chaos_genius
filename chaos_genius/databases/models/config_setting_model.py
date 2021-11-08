@@ -54,7 +54,7 @@ class ConfigSetting(PkModel):
                 "channel_name": {
                     "is_editable": True,
                     "is_sensitive": False,
-                }
+                },
             },
             "email": {
                 "server": {
@@ -76,8 +76,8 @@ class ConfigSetting(PkModel):
                 "sender_email": {
                     "is_editable": True,
                     "is_sensitive": False,
-                }
-            }
+                },
+            },
         }
 
     @classmethod

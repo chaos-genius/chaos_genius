@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 """The app module, containing the app factory function."""
-import logging
-import sys
 import json
 
-from flask import Flask, render_template
+from flask import Flask
 from flask_cors import CORS
 
 from chaos_genius import commands
@@ -15,7 +13,7 @@ from chaos_genius.views import (
     public_view,
     anomaly_data_view,
     config_setting_view,
-    alert_view
+    alert_view,
 )
 from chaos_genius.extensions import (
     bcrypt,
@@ -23,10 +21,9 @@ from chaos_genius.extensions import (
     # csrf_protect,
     db,
     flask_static_digest,
-    login_manager,
     migrate,
     integration_connector,
-    celery
+    celery,
 )
 
 
@@ -43,7 +40,7 @@ def create_app(config_object="chaos_genius.settings"):
     register_shellcontext(app)
     register_commands(app)
     configure_logger(app)
-    CORS(app) # TODO: Remove the CORS in v1 release
+    CORS(app)  # TODO: Remove the CORS in v1 release
     return app
 
 
@@ -63,13 +60,13 @@ def register_extensions(app):
 
 def register_blueprints(app):
     """Register Flask blueprints."""
-    app.register_blueprint(public_view.blueprint, url_prefix='/')
-    app.register_blueprint(config_setting_view.blueprint, url_prefix='/api/config')
+    app.register_blueprint(public_view.blueprint, url_prefix="/")
+    app.register_blueprint(config_setting_view.blueprint, url_prefix="/api/config")
     # TODO: Rename the api endpoint to data source
-    app.register_blueprint(data_source_view.blueprint, url_prefix='/api/connection')
-    app.register_blueprint(kpi_view.blueprint, url_prefix='/api/kpi')
-    app.register_blueprint(anomaly_data_view.blueprint, url_prefix='/api/anomaly-data')
-    app.register_blueprint(alert_view.blueprint, url_prefix='/api/alert')
+    app.register_blueprint(data_source_view.blueprint, url_prefix="/api/connection")
+    app.register_blueprint(kpi_view.blueprint, url_prefix="/api/kpi")
+    app.register_blueprint(anomaly_data_view.blueprint, url_prefix="/api/anomaly-data")
+    app.register_blueprint(alert_view.blueprint, url_prefix="/api/alert")
     return None
 
 
@@ -79,11 +76,13 @@ def register_errorhandlers(app):
     def render_error(e):
         """Render error template."""
         response = e.get_response()
-        response.data = json.dumps({
-            "code": e.code,
-            "name": e.name,
-            "description": e.description,
-        })
+        response.data = json.dumps(
+            {
+                "code": e.code,
+                "name": e.name,
+                "description": e.description,
+            }
+        )
         response.content_type = "application/json"
         return response
 

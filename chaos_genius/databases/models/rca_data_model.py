@@ -11,12 +11,11 @@ class RcaData(PkModel):
     __tablename__ = "rca_data"
     kpi_id = Column(db.Integer, nullable=False)
     end_date = Column(db.DateTime, nullable=False)
-    data_type = Column(db.String(80), nullable=False) # line, agg, rca, htable
+    data_type = Column(db.String(80), nullable=False)  # line, agg, rca, htable
     timeline = Column(db.String(80), nullable=False)
     dimension = Column(db.Text(), nullable=True)
     data = Column(db.JSON, nullable=True)
-    created_at = Column(db.DateTime, nullable=False,
-                        default=dt.datetime.utcnow)
+    created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
 
     def __init__(self, name, **kwargs):
         """Create instance."""
@@ -25,8 +24,11 @@ class RcaData(PkModel):
     def __repr__(self):
         """Represent instance as a unique string."""
         unique_points = (
-            self.kpi_id, self.end_date, self.data_type,
-            self.timeline, self.dimension
+            self.kpi_id,
+            self.end_date,
+            self.data_type,
+            self.timeline,
+            self.dimension,
         )
         return f"<RCA Data{unique_points}>"
 
@@ -40,7 +42,7 @@ class RcaData(PkModel):
             "timeline": self.timeline,
             "dimension": self.dimension,
             "data": self.data,
-            "created_at": self.created_at
+            "created_at": self.created_at,
         }
 
     @property
@@ -53,5 +55,5 @@ class RcaData(PkModel):
             "timeline": self.timeline,
             "dimension": self.dimension,
             "data": self.data,
-            "created_at": self.created_at
+            "created_at": self.created_at,
         }

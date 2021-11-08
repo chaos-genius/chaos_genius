@@ -68,8 +68,8 @@ const AlertFilter = ({
       <div className="filter-layout">
         <h3>Channel</h3>
         {channelType &&
-        channelType[0] !== undefined &&
-        channelType.length !== 0 ? (
+          channelType[0] !== undefined &&
+          channelType.length !== 0 ? (
           channelType.map((type) => {
             return (
               <div className="form-check check-box">

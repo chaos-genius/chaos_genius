@@ -357,8 +357,8 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
             field.is_editable && field.is_sensitive
               ? 'sensitive'
               : field.is_editable
-              ? 'editable'
-              : '';
+                ? 'editable'
+                : '';
         }
         return '';
       });
@@ -438,8 +438,8 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     ? editableStatus('frequency') === 'editable'
                       ? false
                       : editableStatus('frequency') === 'sensitive'
-                      ? enabled.frequency
-                      : true
+                        ? enabled.frequency
+                        : true
                     : false
                 }
                 onChange={(e) => {
@@ -478,15 +478,15 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                   frequency.value === 'D'
                     ? '30'
                     : frequency.value === 'H'
-                    ? '7'
-                    : '0'
+                      ? '7'
+                      : '0'
                 }
                 max={
                   frequency.value === 'D'
                     ? '90'
                     : frequency.value === 'H'
-                    ? '21'
-                    : '100'
+                      ? '21'
+                      : '100'
                 }
                 value={
                   enabled.anomaly_period
@@ -498,8 +498,8 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     ? editableStatus('anomaly_period') === 'editable'
                       ? false
                       : editableStatus('anomaly_period') === 'sensitive'
-                      ? enabled.anomaly_period
-                      : true
+                        ? enabled.anomaly_period
+                        : true
                     : false
                 }
                 onChange={(e) => {
@@ -547,8 +547,8 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     ? editableStatus('scheduler_frequency') === 'editable'
                       ? false
                       : editableStatus('scheduler_frequency') === 'sensitive'
-                      ? enabled.scheduler_frequency
-                      : true
+                        ? enabled.scheduler_frequency
+                        : true
                     : false
                 }
                 onChange={(e) => {
@@ -588,8 +588,8 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     ? editableStatus('model_name') === 'editable'
                       ? false
                       : editableStatus('model_name') === 'sensitive'
-                      ? enabled.model_name
-                      : true
+                        ? enabled.model_name
+                        : true
                     : false
                 }
                 onChange={(e) => {
@@ -641,8 +641,8 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     ? editableStatus('sensitivity') === 'editable'
                       ? false
                       : editableStatus('sensitivity') === 'sensitive'
-                      ? enabled.sensitivity
-                      : true
+                        ? enabled.sensitivity
+                        : true
                     : false
                 }
                 placeholder="select"
@@ -678,8 +678,8 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     ? editableStatus('scheduler_params_time') === 'editable'
                       ? false
                       : editableStatus('scheduler_params_time') === 'sensitive'
-                      ? enabled.schedule
-                      : true
+                        ? enabled.schedule
+                        : true
                     : false
                 }
                 focusOnOpen={true}
@@ -714,8 +714,8 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                         ? editableStatus('seasonality') === 'editable'
                           ? false
                           : editableStatus('seasonality') === 'sensitive'
-                          ? enabled.seasonality
-                          : true
+                            ? enabled.seasonality
+                            : true
                         : false
                     }
                     onChange={(e) => {
@@ -741,8 +741,8 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                         ? editableStatus('seasonality') === 'editable'
                           ? false
                           : editableStatus('seasonality') === 'sensitive'
-                          ? enabled.seasonality
-                          : true
+                            ? enabled.seasonality
+                            : true
                         : false
                     }
                     onChange={(e) => {
@@ -768,8 +768,8 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                         ? editableStatus('seasonality') === 'editable'
                           ? false
                           : editableStatus('seasonality') === 'sensitive'
-                          ? enabled.seasonality
-                          : true
+                            ? enabled.seasonality
+                            : true
                         : false
                     }
                     onChange={(e) => {

@@ -355,8 +355,8 @@ const AlertsForm = () => {
             field.is_editable && field.is_sensitive
               ? 'sensitive'
               : field.is_editable
-              ? 'editable'
-              : '';
+                ? 'editable'
+                : '';
         }
         return '';
       });
@@ -401,8 +401,8 @@ const AlertsForm = () => {
             field.is_editable && field.is_sensitive
               ? 'sensitive'
               : field.is_editable
-              ? 'editable'
-              : '';
+                ? 'editable'
+                : '';
         }
         return '';
       });
@@ -442,8 +442,8 @@ const AlertsForm = () => {
                       ? slackEditableStatus('webhook_url') === 'editable'
                         ? false
                         : slackEditableStatus('webhook_url') === 'sensitive'
-                        ? slackEdit.webhook_url
-                        : true
+                          ? slackEdit.webhook_url
+                          : true
                       : false
                   }
                   onChange={(e) => {
@@ -525,8 +525,8 @@ const AlertsForm = () => {
                       ? slackEditableStatus('channel_name') === 'editable'
                         ? false
                         : slackEditableStatus('channel_name') === 'sensitive'
-                        ? slackEdit.channel_name
-                        : true
+                          ? slackEdit.channel_name
+                          : true
                       : false
                   }
                   value={
@@ -616,8 +616,8 @@ const AlertsForm = () => {
                       ? editableStatus('server') === 'editable'
                         ? false
                         : editableStatus('server') === 'sensitive'
-                        ? enabled.server
-                        : true
+                          ? enabled.server
+                          : true
                       : false
                   }
                   onChange={(e) => {
@@ -648,8 +648,8 @@ const AlertsForm = () => {
                       ? editableStatus('port') === 'editable'
                         ? false
                         : editableStatus('port') === 'sensitive'
-                        ? enabled.port
-                        : true
+                          ? enabled.port
+                          : true
                       : false
                   }
                   value={enabled.port ? email.port : sensitiveData.port}
@@ -680,8 +680,8 @@ const AlertsForm = () => {
                       ? editableStatus('username') === 'editable'
                         ? false
                         : editableStatus('username') === 'sensitive'
-                        ? enabled.username
-                        : true
+                          ? enabled.username
+                          : true
                       : false
                   }
                   value={
@@ -717,8 +717,8 @@ const AlertsForm = () => {
                       ? editableStatus('password') === 'editable'
                         ? false
                         : editableStatus('password') === 'sensitive'
-                        ? enabled.password
-                        : true
+                          ? enabled.password
+                          : true
                       : false
                   }
                   onChange={(e) => {
@@ -753,8 +753,8 @@ const AlertsForm = () => {
                       ? editableStatus('sender_email') === 'editable'
                         ? false
                         : editableStatus('sender_email') === 'sensitive'
-                        ? enabled.sender_email
-                        : true
+                          ? enabled.sender_email
+                          : true
                       : false
                   }
                   onChange={(e) => {

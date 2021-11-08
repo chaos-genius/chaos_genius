@@ -36,12 +36,12 @@ const Onboarding = () => {
               {data[2] === '1'
                 ? 'Add Data Sources'
                 : data[2] === '2'
-                ? 'Add KPI'
-                : data[2] === '3'
-                ? 'Activate Analytics'
-                : data[2] === '4'
-                ? 'Add Dashboard'
-                : null}
+                  ? 'Add KPI'
+                  : data[2] === '3'
+                    ? 'Activate Analytics'
+                    : data[2] === '4'
+                      ? 'Add Dashboard'
+                      : null}
             </li>
           </ol>
         </nav>
@@ -53,12 +53,12 @@ const Onboarding = () => {
               {data[2] === '1'
                 ? 'Add Data Sources'
                 : data[2] === '2'
-                ? 'Add KPI'
-                : data[2] === '3'
-                ? 'Activate Analytics'
-                : data[2] === '4'
-                ? 'Add Dashboard'
-                : null}
+                  ? 'Add KPI'
+                  : data[2] === '3'
+                    ? 'Activate Analytics'
+                    : data[2] === '4'
+                      ? 'Add Dashboard'
+                      : null}
             </span>
           </Link>
         </div>
@@ -106,9 +106,9 @@ const Onboarding = () => {
               setText={setText}
             />
           ) : // data[2] === '3' ? (
-          //   <DashboardForm />
-          // ) :
-          null}
+            //   <DashboardForm />
+            // ) :
+            null}
         </div>
       ) : (
         // <div className="explore-wrapper">

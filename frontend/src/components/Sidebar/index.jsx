@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { Link, useHistory } from 'react-router-dom';
 
@@ -15,15 +15,20 @@ import datasource from '../../assets/images/sidebar/datasource.svg';
 import datasourceactive from '../../assets/images/sidebar/datasource-active.svg';
 import alerts from '../../assets/images/sidebar/alerts.svg';
 import alertsactive from '../../assets/images/sidebar/alerts-active.svg';
-import { useSelector } from 'react-redux';
-
+import { useDispatch, useSelector } from 'react-redux';
+import { getHomeKpi } from '../../redux/actions';
 import './sidebar.scss';
 
 const Sidebar = () => {
   const history = useHistory();
+  const dispatch = useDispatch();
   const location = history.location.pathname.split('/');
 
   const { homeKpiData } = useSelector((state) => state.onboarding);
+
+  useEffect(() => {
+    dispatch(getHomeKpi({ timeline: 'mom' }));
+  }, [dispatch]);
 
   return (
     <div className="sidebar-menu">
@@ -60,7 +65,11 @@ const Sidebar = () => {
             }>
             <div
               className="options"
-              onClick={() => history.push('/dashboard/deepdrills/')}>
+              onClick={() => {
+                if (homeKpiData.length !== 0) {
+                  history.push('/dashboard/deepdrills/');
+                }
+              }}>
               <img
                 src={location[1] === 'dashboard' ? dashboardactive : dashboard}
                 alt="Dashboard"

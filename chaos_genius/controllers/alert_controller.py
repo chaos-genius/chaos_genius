@@ -2,7 +2,8 @@
 """alert controlller."""
 from chaos_genius.databases.models.alert_model import Alert
 
-def get_alert_list(frequency:str = None, as_obj:bool = False):
+
+def get_alert_list(frequency: str = None, as_obj: bool = False):
     """get the list of the alerts
 
     Args:
@@ -30,7 +31,7 @@ def get_alert_info(id: int):
         id (int): alert id
     """
     alert = Alert.get_by_id(id)
-    
+
     if not alert:
         raise Exception("Alert ID doesn't exist")
     else:

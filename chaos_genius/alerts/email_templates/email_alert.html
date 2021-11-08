@@ -2,38 +2,43 @@
 
 {% block content %}
 
-          <b><h2 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Alert: {{ kpi_name }} {{ alert_frequency }} Alert</h2></b>
-          <hr style="width:100%", size="2", color= #F6F5F5>
+<b>
+  <h2 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Alert: {{
+    kpi_name }} {{ alert_frequency }} Alert</h2>
+</b>
+<hr style="width:100%" , size="2" , color=#F6F5F5>
 
-          <h2 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Alert Message</h2>
-          <h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">{{ alert_message }}</h3>
-          
-          <b><h2 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Stats</h2></b>
-          <table style="border-spacing: 15px; color: #F6F5F5;text-align: left;">
-            <tr>
-              <th>Value</th>
-              <th>Time of Occurrence</th>
-            </tr>
-            <tr>
-              <td>{{ highest_value }}</td>
-              <td>{{ time_of_anomaly }}</td>
-            </tr>
-            <tr>
-              <th>Lower Bound of Range</th>
-              <th>Upper Bound of Range</th>
-            </tr>
-            <tr>
-              <td>{{ lower_bound }}</td>
-              <td>{{ upper_bound }}</td>
-            </tr>
-            <tr>
-              <th>Severity Value</th>
-            </tr>
-            <tr>
-              <td>{{ severity_value }}</td>
-            </tr>
-          </table>
+<h2 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Alert Message
+</h2>
+<h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">{{
+  alert_message }}</h3>
+
+<b>
+  <h2 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Stats</h2>
+</b>
+<table style="border-spacing: 15px; color: #F6F5F5;text-align: left;">
+  <tr>
+    <th>Value</th>
+    <th>Time of Occurrence</th>
+  </tr>
+  <tr>
+    <td>{{ highest_value }}</td>
+    <td>{{ time_of_anomaly }}</td>
+  </tr>
+  <tr>
+    <th>Lower Bound of Range</th>
+    <th>Upper Bound of Range</th>
+  </tr>
+  <tr>
+    <td>{{ lower_bound }}</td>
+    <td>{{ upper_bound }}</td>
+  </tr>
+  <tr>
+    <th>Severity Value</th>
+  </tr>
+  <tr>
+    <td>{{ severity_value }}</td>
+  </tr>
+</table>
 
 {% endblock %}
-
-                        

@@ -1,8 +1,7 @@
 import logging
 import os
 import io
-import json
-import pickle
+
 from typing import Optional
 import pandas as pd
 import datetime
@@ -11,20 +10,21 @@ from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.kpi_model import Kpi
+
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.alerts.email import send_static_alert_email
-from chaos_genius.alerts.slack import anomaly_alert_slack, anomaly_alert_slack_formatted
+from chaos_genius.alerts.slack import anomaly_alert_slack_formatted
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 logger = logging.getLogger()
 
 FREQUENCY_DICT = {
-    "weekly": datetime.timedelta(days = 7, hours = 0, minutes = 0),
-    "daily": datetime.timedelta(days = 1, hours = 0, minutes = 0),
-    "hourly": datetime.timedelta(days = 0, hours = 1, minutes = 0),
-    "every_15_minute": datetime.timedelta(days = 0, hours = 0, minutes = 15),
-    "every_minute": datetime.timedelta(days = 0, hours = 0, minutes = 1)
+    "weekly": datetime.timedelta(days=7, hours=0, minutes=0),
+    "daily": datetime.timedelta(days=1, hours=0, minutes=0),
+    "hourly": datetime.timedelta(days=0, hours=1, minutes=0),
+    "every_15_minute": datetime.timedelta(days=0, hours=0, minutes=15),
+    "every_minute": datetime.timedelta(days=0, hours=0, minutes=1),
 }
 
 
@@ -38,7 +38,8 @@ class StaticEventAlertController:
     Returns:
         object: object of the class
     """
-    PICKLE_DIR = '.alert'
+
+    PICKLE_DIR = ".alert"
 
     def __init__(self, alert_info: dict, data_source_info: dict):
         """Initiate the static event controller class
@@ -54,14 +55,13 @@ class StaticEventAlertController:
         self.data_source_info = data_source_info
         self.alert_id = alert_info["id"]
         if not self.alert_id:
-            raise Exception('Alert ID is required')
+            raise Exception("Alert ID is required")
         self.pickle_file_path = f"{self.PICKLE_DIR}/{self.alert_id}.pkl"
         self.load_pickled_df()
         self.load_query_data()
 
     def load_pickled_df(self):
-        """Load the pickled dataframe of the given alert id
-        """
+        """Load the pickled dataframe of the given alert id"""
         status = os.makedirs(f"./{self.PICKLE_DIR}", exist_ok=True)
         full_path = is_file_exists(self.pickle_file_path)
         if full_path:
@@ -70,16 +70,14 @@ class StaticEventAlertController:
             self.unpickled_df = pd.DataFrame()
 
     def pickle_df(self):
-        """Pickle and save the current dataframe state
-        """
+        """Pickle and save the current dataframe state"""
         pickle_path = f"./{self.pickle_file_path}"
         self.query_df.to_pickle(pickle_path)
 
     def load_query_data(self):
-        """Load the query data from the data source
-        """
+        """Load the query data from the data source"""
         db_connection = get_sqla_db_conn(data_source_info=self.data_source_info)
-        self.query_df = db_connection.run_query(self.alert_info['alert_query'])
+        self.query_df = db_connection.run_query(self.alert_info["alert_query"])
         # self.query_df = get_df_from_db_uri(self.data_source_info, self.alert_info['alert_query'])
 
     def check_and_prepare_alert(self):
@@ -119,7 +117,9 @@ class StaticEventAlertController:
         """
         if old_df.empty:
             return new_df
-        change = new_df.merge(old_df, how='outer', indicator=True).loc[lambda x : x['_merge']=='left_only']
+        change = new_df.merge(old_df, how="outer", indicator=True).loc[
+            lambda x: x["_merge"] == "left_only"
+        ]
         return change
 
     @staticmethod
@@ -136,9 +136,13 @@ class StaticEventAlertController:
         if old_df.empty:
             new_df["change"] = "added"
             return new_df
-        added_rows = new_df.merge(old_df, how='outer', indicator=True).loc[lambda x : x['_merge']=='left_only']
+        added_rows = new_df.merge(old_df, how="outer", indicator=True).loc[
+            lambda x: x["_merge"] == "left_only"
+        ]
         added_rows["change"] = "added"
-        deleted_rows = new_df.merge(old_df, how='outer', indicator=True).loc[lambda x : x['_merge']=='right_only']
+        deleted_rows = new_df.merge(old_df, how="outer", indicator=True).loc[
+            lambda x: x["_merge"] == "right_only"
+        ]
         deleted_rows["change"] = "deleted"
         return pd.concat([added_rows, deleted_rows])
 
@@ -160,83 +164,99 @@ class StaticEventAlertController:
                     change_df.to_csv(buffer)
                     file_detail["fdata"] = buffer.getvalue()
                 files = [file_detail]
-            
-            test = self.send_template_email('email_event_alert.html', 
-                                            recipient_emails, 
-                                            subject, 
-                                            files,
-                                            alert_message = message,
-                                            alert_frequency = self.alert_info['alert_frequency'].capitalize(),
-                                            alert_name = self.alert_info['alert_name']
-                                        )
+
+            test = self.send_template_email(
+                "email_event_alert.html",
+                recipient_emails,
+                subject,
+                files,
+                alert_message=message,
+                alert_frequency=self.alert_info["alert_frequency"].capitalize(),
+                alert_name=self.alert_info["alert_name"],
+            )
             return test
         else:
-            logger.info(f"No email recipients available for Alert ID - {self.alert_info['id']} was successfully sent")
+            logger.info(
+                f"No email recipients available for Alert ID - {self.alert_info['id']} was successfully sent"
+            )
             return False
 
     def send_template_email(self, template, recipient_emails, subject, files, **kwargs):
         """Sends an email using a template."""
 
-        path = os.path.join(os.path.dirname(__file__), 'email_templates')
+        path = os.path.join(os.path.dirname(__file__), "email_templates")
         env = Environment(
-            loader = FileSystemLoader(path),
-            autoescape = select_autoescape(['html', 'xml'])
+            loader=FileSystemLoader(path), autoescape=select_autoescape(["html", "xml"])
         )
 
         template = env.get_template(template)
-        test = send_static_alert_email(recipient_emails, subject, template.render(**kwargs), self.alert_info, files)
+        test = send_static_alert_email(
+            recipient_emails, subject, template.render(**kwargs), self.alert_info, files
+        )
 
-        if test == True:
-            logger.info(f"The email for Alert ID - {self.alert_info['id']} was successfully sent")
+        if test is True:
+            logger.info(
+                f"The email for Alert ID - {self.alert_info['id']} was successfully sent"
+            )
         else:
-            logger.debug(f"The email for Alert ID - {self.alert_info['id']} has not been sent")
-        
+            logger.debug(
+                f"The email for Alert ID - {self.alert_info['id']} has not been sent"
+            )
+
         return test
 
 
 class AnomalyAlertController:
-
     def __init__(self, alert_info):
         self.alert_info = alert_info
 
     def check_and_prepare_alert(self):
-        
+
         kpi_id = self.alert_info["kpi"]
 
         curr_date_time = datetime.datetime.now()
-        check_time = FREQUENCY_DICT[self.alert_info['alert_frequency']]
+        check_time = FREQUENCY_DICT[self.alert_info["alert_frequency"]]
 
         alert: Optional[Alert] = Alert.get_by_id(self.alert_info["id"])
         if alert is None:
             logger.debug(f"Could not find alert by ID: {self.alert_info['id']}")
             return False
 
-        if alert.last_alerted is not None and \
-                alert.last_alerted > (curr_date_time - check_time):
-            logger.debug(f"Skipping alert with ID {self.alert_info['id']} since it was already run")
+        if alert.last_alerted is not None and alert.last_alerted > (
+            curr_date_time - check_time
+        ):
+            logger.debug(
+                f"Skipping alert with ID {self.alert_info['id']} since it was already run"
+            )
             return True
 
         alert.update(commit=True, last_alerted=curr_date_time)
 
-        lower_limit_dt = curr_date_time - FREQUENCY_DICT[self.alert_info['alert_frequency']]
+        lower_limit_dt = (
+            curr_date_time - FREQUENCY_DICT[self.alert_info["alert_frequency"]]
+        )
         alert_id = self.alert_info["id"]
 
         anomaly_data = AnomalyDataOutput.query.filter(
-                                            AnomalyDataOutput.kpi_id == kpi_id,
-                                            AnomalyDataOutput.anomaly_type == 'overall',
-                                            AnomalyDataOutput.is_anomaly == 1,
-                                            AnomalyDataOutput.data_datetime > lower_limit_dt
-                                        ).all()
+            AnomalyDataOutput.kpi_id == kpi_id,
+            AnomalyDataOutput.anomaly_type == "overall",
+            AnomalyDataOutput.is_anomaly == 1,
+            AnomalyDataOutput.data_datetime > lower_limit_dt,
+        ).all()
 
         if len(anomaly_data) == 0:
             logger.debug(f"No anomaly exists (Alert ID - {alert_id})")
             return True
 
-        anomaly_data.sort(key = lambda anomaly: getattr(anomaly, 'severity'), reverse = True)
+        anomaly_data.sort(
+            key=lambda anomaly: getattr(anomaly, "severity"), reverse=True
+        )
         anomaly = anomaly_data[0]
-        
-        if getattr(anomaly, 'severity') < self.alert_info['severity_cutoff_score']:
-            logger.debug(f"The anomaliy's severity score is below the threshold (Alert ID - {alert_id})")
+
+        if getattr(anomaly, "severity") < self.alert_info["severity_cutoff_score"]:
+            logger.debug(
+                f"The anomaliy's severity score is below the threshold (Alert ID - {alert_id})"
+            )
             return True
 
         logger.info(f"Alert ID {alert_id} is sent to the respective alert channel")
@@ -245,90 +265,103 @@ class AnomalyAlertController:
             return self.send_alert_email(anomaly)
         elif self.alert_info["alert_channel"] == "slack":
             return self.send_slack_alert(anomaly)
- 
-        
+
     def send_alert_email(self, anomaly):
 
         recipient_emails = self.alert_info["alert_channel_conf"].get("email", [])
-        
+
         if recipient_emails:
             subject = f"KPI Alert Notification: [Alert Name - {self.alert_info['alert_name']}] [Alert ID - {self.alert_info['id']}]"
             alert_message = self.alert_info["alert_message"]
-            time_of_anomaly = str(getattr(anomaly, 'data_datetime'))
-            highest_value = round(getattr(anomaly, 'y'), 1)
-            lower_bound = round(getattr(anomaly, 'yhat_lower'), 2)
-            upper_bound = round(getattr(anomaly, 'yhat_upper'), 2)
-            severity_value = round(getattr(anomaly, 'severity'), 2)
+            time_of_anomaly = str(getattr(anomaly, "data_datetime"))
+            highest_value = round(getattr(anomaly, "y"), 1)
+            lower_bound = round(getattr(anomaly, "yhat_lower"), 2)
+            upper_bound = round(getattr(anomaly, "yhat_upper"), 2)
+            severity_value = round(getattr(anomaly, "severity"), 2)
 
             kpi_id = self.alert_info["kpi"]
             kpi_obj = Kpi.get_by_id(kpi_id)
-            
+
             if kpi_obj is None:
                 logger.debug(f"No KPI exists for Alert ID - {self.alert_info['id']}")
                 return False
 
-            kpi_name = getattr(kpi_obj, 'name')
+            kpi_name = getattr(kpi_obj, "name")
 
-            test = self.send_template_email('email_alert.html', 
-                                            recipient_emails, 
-                                            subject, 
-                                            alert_message = alert_message,
-                                            time_of_anomaly = time_of_anomaly,
-                                            highest_value = highest_value,
-                                            lower_bound = lower_bound, 
-                                            upper_bound = upper_bound,
-                                            severity_value = severity_value,
-                                            kpi_name = kpi_name,
-                                            alert_frequency = self.alert_info['alert_frequency'].capitalize()
-                                        )
+            test = self.send_template_email(
+                "email_alert.html",
+                recipient_emails,
+                subject,
+                alert_message=alert_message,
+                time_of_anomaly=time_of_anomaly,
+                highest_value=highest_value,
+                lower_bound=lower_bound,
+                upper_bound=upper_bound,
+                severity_value=severity_value,
+                kpi_name=kpi_name,
+                alert_frequency=self.alert_info["alert_frequency"].capitalize(),
+            )
             logger.debug(f"Status for Alert ID - {self.alert_info['id']} : {test}")
             return True
         else:
-            logger.debug(f"No receipent email available (Alert ID - {self.alert_info['id']})")
+            logger.debug(
+                f"No receipent email available (Alert ID - {self.alert_info['id']})"
+            )
             return False
 
     def send_template_email(self, template, recipient_emails, subject, **kwargs):
         """Sends an email using a template."""
 
-        path = os.path.join(os.path.dirname(__file__), 'email_templates')
+        path = os.path.join(os.path.dirname(__file__), "email_templates")
         env = Environment(
-            loader = FileSystemLoader(path),
-            autoescape = select_autoescape(['html', 'xml'])
+            loader=FileSystemLoader(path), autoescape=select_autoescape(["html", "xml"])
         )
 
         template = env.get_template(template)
-        test = send_static_alert_email(recipient_emails, subject, template.render(**kwargs), self.alert_info)
+        test = send_static_alert_email(
+            recipient_emails, subject, template.render(**kwargs), self.alert_info
+        )
 
-        if test == True:
-            logger.info(f"The email for Alert ID - {self.alert_info['id']} was successfully sent")
+        if test is True:
+            logger.info(
+                f"The email for Alert ID - {self.alert_info['id']} was successfully sent"
+            )
         else:
-            logger.debug(f"The email for Alert ID - {self.alert_info['id']} has not been sent")
-        
+            logger.debug(
+                f"The email for Alert ID - {self.alert_info['id']} has not been sent"
+            )
+
         return test
 
     def send_slack_alert(self, anomaly):
         alert_name = self.alert_info["alert_name"]
-        kpi_name = Kpi.get_by_id(self.alert_info["kpi"]).safe_dict['name']
-        data_source_name = DataSource.\
-            get_by_id(self.alert_info["data_source"]).safe_dict["name"]
+        kpi_name = Kpi.get_by_id(self.alert_info["kpi"]).safe_dict["name"]
+        data_source_name = DataSource.get_by_id(
+            self.alert_info["data_source"]
+        ).safe_dict["name"]
         test = anomaly_alert_slack_formatted(
             alert_name,
             kpi_name,
             data_source_name,
-            highest_value = round(getattr(anomaly, 'y'), 1),
-            time_of_anomaly = str(getattr(anomaly, 'data_datetime')),
-            lower_bound = round(getattr(anomaly, 'yhat_lower'), 2),
-            upper_bound = round(getattr(anomaly, 'yhat_upper'), 2),
-            severity_value = round(getattr(anomaly, 'severity'), 2)
-            )
+            highest_value=round(getattr(anomaly, "y"), 1),
+            time_of_anomaly=str(getattr(anomaly, "data_datetime")),
+            lower_bound=round(getattr(anomaly, "yhat_lower"), 2),
+            upper_bound=round(getattr(anomaly, "yhat_upper"), 2),
+            severity_value=round(getattr(anomaly, "severity"), 2),
+        )
 
         if test == "ok":
-            logger.info(f"The slack alert for Alert ID - {self.alert_info['id']} was successfully sent")
+            logger.info(
+                f"The slack alert for Alert ID - {self.alert_info['id']} was successfully sent"
+            )
         else:
-            logger.debug(f"The slack alert for Alert ID - {self.alert_info['id']} has not been sent")
-        
+            logger.debug(
+                f"The slack alert for Alert ID - {self.alert_info['id']} has not been sent"
+            )
+
         message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
         return message
+
 
 class StaticKpiAlertController:
     def __init__(self, alert_info):
@@ -362,12 +395,16 @@ def check_and_trigger_alert(alert_id):
         data_source_id = alert_info.data_source
         data_source_obj = DataSource.get_by_id(data_source_id)
         # db_uri = data_source_obj.db_uri
-        static_alert_obj = StaticEventAlertController(alert_info.as_dict, data_source_obj.as_dict)
+        static_alert_obj = StaticEventAlertController(
+            alert_info.as_dict, data_source_obj.as_dict
+        )
         static_alert_obj.check_and_prepare_alert()
-    elif alert_info.alert_type == "KPI Alert" and alert_info.kpi_alert_type == "Anomaly":
+    elif (
+        alert_info.alert_type == "KPI Alert" and alert_info.kpi_alert_type == "Anomaly"
+    ):
         anomaly_obj = AnomalyAlertController(alert_info.as_dict)
         return anomaly_obj.check_and_prepare_alert()
     elif alert_info.alert_type == "KPI Alert" and alert_info.kpi_alert_type == "Static":
         static_kpi_alert = StaticKpiAlertController(alert_info.as_dict)
-    
+
     return True

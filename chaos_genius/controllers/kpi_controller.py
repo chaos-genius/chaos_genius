@@ -35,6 +35,7 @@ def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
         # Check if n-1 data is available or not then try for n-2
         if not _is_data_present_for_end_date(kpi_info, end_date):
             end_date = end_date - timedelta(days=1)
+            logger.info("Decreasing end date by 1.")
 
         logger.info(f"End date is {end_date}.")
 

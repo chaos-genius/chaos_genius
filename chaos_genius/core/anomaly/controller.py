@@ -390,6 +390,14 @@ class AnomalyDetectionController(object):
         filtered_subgroups = self._filter_subgroups(subgroups, input_data)
         logger.info(f"Filtered {len(filtered_subgroups)} subgroups.")
 
+        logger.info(
+            f"Subgroup filtering complted for KPI ID: {self.kpi_info['id']}",
+            extra={
+                "generated": len(subgroups),
+                "filtered_in": len(filtered_subgroups)
+            }
+        )
+
         if self.debug:
             filtered_subgroups = filtered_subgroups[:DEBUG_MAX_SUBGROUPS]
 

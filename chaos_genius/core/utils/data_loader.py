@@ -1,6 +1,7 @@
 """Provides utilties for loading data from KPIs."""
 
 from datetime import datetime, timedelta
+import logging
 import random
 import string
 
@@ -14,6 +15,8 @@ _SQL_IDENTIFIERS = {
     "postgres": '"',
     "snowflake": '"',
 }
+
+logger = logging.getLogger(__name__)
 
 
 def _randomword(length: int) -> str:
@@ -136,9 +139,32 @@ class DataLoader:
         df = self._run_query(query)
         return df.iloc[0, 0]
 
+    def _get_data_stats(self, df: pd.DataFrame) -> None:
+        return {
+            "total_rows": len(df),
+            "data_start_date": df[self.dt_col].min(),
+            "data_end_date": df[self.dt_col].max(),
+            "dims": [{
+                "name": dim,
+                "card": len(df[dim].unique())
+            } for dim in self.kpi_info["dimensions"]]
+        }
+
     def get_data(self) -> pd.DataFrame:
         """Return dataframe with KPI data."""
+
+        kpi_id = self.kpi_info['id']
+
         query = self._build_query()
+        logger.info(f"Created query for KPI {kpi_id}", extra={"data_query": query})
+
         df = self._run_query(query)
+
+        if len(df) == 0:
+            raise ValueError("Dataframe is empty.")
         self._preprocess_df(df)
+
+        data_stats = self._get_data_stats(df)
+        logger.info(f"Data starts for KPI {kpi_id}", extra={"data_stats": data_stats})
+
         return df

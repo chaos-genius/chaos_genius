@@ -15,12 +15,15 @@ import datasource from '../../assets/images/sidebar/datasource.svg';
 import datasourceactive from '../../assets/images/sidebar/datasource-active.svg';
 import alerts from '../../assets/images/sidebar/alerts.svg';
 import alertsactive from '../../assets/images/sidebar/alerts-active.svg';
+import { useSelector } from 'react-redux';
 
 import './sidebar.scss';
 
 const Sidebar = () => {
   const history = useHistory();
   const location = history.location.pathname.split('/');
+
+  const { homeKpiData } = useSelector((state) => state.onboarding);
 
   return (
     <div className="sidebar-menu">

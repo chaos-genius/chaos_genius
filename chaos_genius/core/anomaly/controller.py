@@ -367,6 +367,9 @@ class AnomalyDetectionController(object):
 
         model_name = self.kpi_info["anomaly_params"]["model_name"]
 
+        # TODO: fix missing dates/values issue more robustly
+        series_data[metric_col] = series_data[metric_col].fillna(0)
+
         logger.info(f"Running anomaly detection for {series}-{subgroup}")
         overall_anomaly_output = self._detect_anomaly(
             model_name, series_data, last_date, series, subgroup, freq

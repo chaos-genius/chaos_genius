@@ -11,10 +11,12 @@ import pandas as pd
 from chaos_genius.core.rca.constants import (
     LINE_DATA_TIMESTAMP_FORMAT,
     STATIC_END_DATA_FORMAT,
+    TIMELINE_NUM_DAYS_MAP,
     TIMELINES,
 )
 from chaos_genius.core.rca.rca_utils.data_loader import rca_load_data
 from chaos_genius.core.rca.root_cause_analysis import RootCauseAnalysis
+from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.core.utils.round import round_series
 from chaos_genius.databases.models.rca_data_model import RcaData, db
 
@@ -108,7 +110,11 @@ class RootCauseAnalysisController:
         :return: dictionary with line data
         :rtype: dict
         """
-        _, rca_df = self._load_data(timeline)
+        rca_df = DataLoader(
+            self.kpi_info,
+            self.end_date,
+            days_before=TIMELINE_NUM_DAYS_MAP[timeline]
+        ).get_data()
         rca_df = (
             rca_df.resample("D", on=self.dt_col)
             .agg({self.metric: self.agg})

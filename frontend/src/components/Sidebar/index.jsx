@@ -50,14 +50,23 @@ const Sidebar = () => {
               <span>Home</span>
             </Link>
           </li>
-          <li className={location[1] === 'dashboard' ? 'active' : ''}>
-            <Link to="/dashboard/deepdrills/">
+          <li
+            className={
+              homeKpiData.length === 0
+                ? 'option-disabled'
+                : location[1] === 'dashboard'
+                ? 'active'
+                : ''
+            }>
+            <div
+              className="options"
+              onClick={() => history.push('/dashboard/deepdrills/')}>
               <img
                 src={location[1] === 'dashboard' ? dashboardactive : dashboard}
                 alt="Dashboard"
               />
               <span>Dashboard</span>
-            </Link>
+            </div>
           </li>
           <li className={location[1] === 'kpiexplorer' ? 'active' : ''}>
             <Link to="/kpiexplorer">

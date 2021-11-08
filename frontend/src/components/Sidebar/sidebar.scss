@@ -29,12 +29,19 @@
       list-style-type: none;
       padding: 0px;
       li {
-        a {
+        &.option-disabled {
+          a {
+            cursor: not-allowed;
+          }
+        }
+        a,
+        .options {
           display: flex;
           flex-direction: column;
           margin-bottom: 32px;
           align-items: center;
           text-decoration: none;
+          cursor: pointer;
           img {
             width: 24px;
             height: 24px;

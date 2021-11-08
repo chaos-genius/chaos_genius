@@ -30,7 +30,8 @@
       padding: 0px;
       li {
         &.option-disabled {
-          a {
+          a,
+          .options {
             cursor: not-allowed;
           }
         }

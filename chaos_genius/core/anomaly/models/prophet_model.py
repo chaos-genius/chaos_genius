@@ -10,7 +10,7 @@ with suppress_stdout_stderr():
 
 PROPHETSENS = {"high": 0.8, "medium": 0.9, "low": 0.95}
 
-PROPHETFREQ = {"hourly": "H", "daily": "D", "d" : "D", "h" : "H"}
+PROPHETFREQ = {"hourly": "H", "daily": "D", "d": "D", "h": "H"}
 
 
 class ProphetModel(AnomalyModel):
@@ -32,7 +32,7 @@ class ProphetModel(AnomalyModel):
         df: pd.DataFrame,
         sensitivity: str,
         frequency: str,
-        pred_df: pd.DataFrame = None
+        pred_df: pd.DataFrame = None,
     ) -> pd.DataFrame:
         """Predict anomalies on data.
 

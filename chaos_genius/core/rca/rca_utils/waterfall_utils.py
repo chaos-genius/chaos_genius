@@ -31,8 +31,7 @@ def get_best_subgroups_using_superset_algo(
     while (
         i < len(df_subgroups) - 1
         and i < max_subgroups_considered
-        and len([i[-1] for i in current_comb if i[-1] is False])
-        < max_waterfall_columns
+        and len([i[-1] for i in current_comb if i[-1] is False]) < max_waterfall_columns
     ):
 
         i += 1
@@ -52,10 +51,8 @@ def get_best_subgroups_using_superset_algo(
                     break
 
             elif len_curr_filters > len_comb_filter:
-                curr_filter_combs = combinations(
-                    curr_filter_split, len_comb_filter)
-                curr_filter_combs = [
-                    " and ".join(i) for i in curr_filter_combs]
+                curr_filter_combs = combinations(curr_filter_split, len_comb_filter)
+                curr_filter_combs = [" and ".join(i) for i in curr_filter_combs]
                 if comb_filter_string in curr_filter_combs:
                     curr_filters_exist_in_comb = True
                     break
@@ -92,10 +89,7 @@ def get_waterfall_ylims(trans: pd.DataFrame, col: str) -> Tuple[float, float]:
 
 
 def waterfall_plot_mpl(
-    data_df: pd.DataFrame,
-    col: str,
-    y_lims: Tuple[float, float] = None,
-    rot: int = 0
+    data_df: pd.DataFrame, col: str, y_lims: Tuple[float, float] = None, rot: int = 0
 ) -> plt.Axes:
     """Plot waterfall and returns a plt.Axes object.
 

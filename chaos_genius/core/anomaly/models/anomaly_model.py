@@ -24,7 +24,7 @@ class AnomalyModel(object):
         :param file_path: path to file
         :type file_path: str
         """
-        dir_path, _ = file_path.rsplit('/', 1)
+        dir_path, _ = file_path.rsplit("/", 1)
         try:
             os.makedirs(dir_path)
         except FileExistsError:

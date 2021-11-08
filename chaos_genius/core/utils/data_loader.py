@@ -144,16 +144,16 @@ class DataLoader:
             "total_rows": len(df),
             "data_start_date": df[self.dt_col].min(),
             "data_end_date": df[self.dt_col].max(),
-            "dims": [{
-                "name": dim,
-                "card": len(df[dim].unique())
-            } for dim in self.kpi_info["dimensions"]]
+            "dims": [
+                {"name": dim, "card": len(df[dim].unique())}
+                for dim in self.kpi_info["dimensions"]
+            ],
         }
 
     def get_data(self) -> pd.DataFrame:
         """Return dataframe with KPI data."""
 
-        kpi_id = self.kpi_info['id']
+        kpi_id = self.kpi_info["id"]
 
         query = self._build_query()
         logger.info(f"Created query for KPI {kpi_id}", extra={"data_query": query})

@@ -25,7 +25,7 @@ class StandardDeviationModel(AnomalyModel):
         df: pd.DataFrame,
         sensitivity: str,
         frequency: str,
-        pred_df: pd.DataFrame = None
+        pred_df: pd.DataFrame = None,
     ) -> pd.DataFrame:
         """Predict anomalies on data.
 
@@ -84,15 +84,12 @@ class StandardDeviationModel(AnomalyModel):
         )
 
     def _detect_anomalies(self, forecast):
-        forecasted = forecast[
-            ["ds", "yhat", "yhat_lower", "yhat_upper", "y"]].copy()
+        forecasted = forecast[["ds", "yhat", "yhat_lower", "yhat_upper", "y"]].copy()
         forecasted["anomaly"] = 0
 
-        forecasted.loc[
-            forecasted["y"] > forecasted["yhat_upper"], "anomaly"] = 1
+        forecasted.loc[forecasted["y"] > forecasted["yhat_upper"], "anomaly"] = 1
 
-        forecasted.loc[
-            forecasted["y"] < forecasted["yhat_lower"], "anomaly"] = -1
+        forecasted.loc[forecasted["y"] < forecasted["yhat_lower"], "anomaly"] = -1
 
         # anomaly importances
 

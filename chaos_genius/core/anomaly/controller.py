@@ -237,7 +237,9 @@ class AnomalyDetectionController(object):
         valid_subdims = []
         for dim in self.kpi_info["dimensions"]:
             if len(input_data[dim].unique()) >= MAX_SUBDIM_CARDINALITY:
-                logger.warn(f"skipping {dim}, cardinality over {MAX_SUBDIM_CARDINALITY}")
+                logger.warn(
+                    f"skipping {dim}, cardinality over {MAX_SUBDIM_CARDINALITY}"
+                )
             else:
                 valid_subdims.append(dim)
 
@@ -395,10 +397,7 @@ class AnomalyDetectionController(object):
 
         logger.info(
             f"Subgroup filtering complted for KPI ID: {self.kpi_info['id']}",
-            extra={
-                "generated": len(subgroups),
-                "filtered_in": len(filtered_subgroups)
-            }
+            extra={"generated": len(subgroups), "filtered_in": len(filtered_subgroups)},
         )
 
         if self.debug:

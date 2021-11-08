@@ -16,7 +16,7 @@ import datasourceactive from '../../assets/images/sidebar/datasource-active.svg'
 import alerts from '../../assets/images/sidebar/alerts.svg';
 import alertsactive from '../../assets/images/sidebar/alerts-active.svg';
 import { useDispatch, useSelector } from 'react-redux';
-import { getHomeKpi } from '../../redux/actions';
+import { getAllKpiExplorer } from '../../redux/actions';
 import './sidebar.scss';
 
 const Sidebar = () => {
@@ -24,10 +24,13 @@ const Sidebar = () => {
   const dispatch = useDispatch();
   const location = history.location.pathname.split('/');
 
-  const { homeKpiData } = useSelector((state) => state.onboarding);
+  const { kpiExplorerList } = useSelector((state) => state.kpiExplorer);
 
   useEffect(() => {
-    dispatch(getHomeKpi({ timeline: 'mom' }));
+    if (location[1] !== 'kpiexplorer') {
+      dispatch(getAllKpiExplorer());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
   return (
@@ -57,7 +60,7 @@ const Sidebar = () => {
           </li>
           <li
             className={
-              homeKpiData.length === 0
+              kpiExplorerList && kpiExplorerList.length === 0
                 ? 'option-disabled'
                 : location[1] === 'dashboard'
                 ? 'active'
@@ -66,7 +69,7 @@ const Sidebar = () => {
             <div
               className="options"
               onClick={() => {
-                if (homeKpiData.length !== 0) {
+                if (kpiExplorerList && kpiExplorerList.length !== 0) {
                   history.push('/dashboard/deepdrills/');
                 }
               }}>

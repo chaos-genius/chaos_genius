@@ -277,7 +277,7 @@ def convert_to_graph_json(
     elif anomaly_type == "subdim":
         title = convert_query_string_to_user_string(series_type)
     else:
-        title = "DQ " + series_type.capitalize()
+        title = series_type.title()
 
     kpi_name = kpi_info["metric"]
     graph_data = {

@@ -54,18 +54,10 @@ const Dashboard = () => {
     dispatch(anomalySetting(id));
   };
 
-  // useEffect(() => {
-  //   if (kpi) {
-  //     getAnomalySetting(kpi);
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [kpi]);
-
   useEffect(() => {
     if (sidebarList && sidebarList.length !== 0 && kpi === undefined) {
       setActive(sidebarList[0]?.name);
       //setKpi(sidebarList[0]?.id);
-      console.log('called');
       setTabs(location[2]);
       SetKpiAggregate(sidebarList[0]?.aggregation);
       getAnomalySetting(sidebarList[0]?.id);

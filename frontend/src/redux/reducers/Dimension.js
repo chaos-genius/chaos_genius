@@ -30,6 +30,11 @@ export const dimension = (state = initialState, action) => {
         dimensionLoading: false
       };
     }
+    case 'RESET_DATA': {
+      return {
+        dimensionData: []
+      };
+    }
     default:
       return state;
   }

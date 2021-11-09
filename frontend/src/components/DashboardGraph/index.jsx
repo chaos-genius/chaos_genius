@@ -108,7 +108,6 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
     if (kpi !== undefined) {
       getAllAggregationData();
       getAllLinechart();
-      getAllRCA();
       if (dimension.value === 'singledimension') {
         dispatchGetAllDashboardDimension();
       }
@@ -138,29 +137,6 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
       })
     );
   };
-
-  function getAllRCA() {
-    if (dimension.value === 'singledimension') {
-      dispatch(
-        getDashboardRcaAnalysis(kpi, {
-          timeline: monthWeek.value,
-          dimension: activeDimension
-        })
-      );
-      dispatch(
-        getAllDashboardHierarchical(kpi, {
-          timeline: monthWeek.value,
-          dimension: activeDimension
-        })
-      );
-    } else {
-      dispatch(
-        getDashboardRcaAnalysis(kpi, {
-          timeline: monthWeek.value
-        })
-      );
-    }
-  }
 
   const plotChart = () => {
     if (rcaAnalysisData?.chart) {
@@ -444,9 +420,9 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                             <img src={Next} alt="Previous" />
                           </li>
                         ) : null}
-                        {dimensionData &&
-                          dimensionData.dimensions.length !== 0 &&
-                          dimensionData.dimensions
+                        {dimensionData?.dimensions &&
+                          dimensionData?.dimensions.length !== 0 &&
+                          dimensionData?.dimensions
                             .slice(
                               0 + singleDimensionData,
                               3 + singleDimensionData
@@ -464,13 +440,13 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                                 </li>
                               );
                             })}
-                        {dimensionData &&
-                        dimensionData.dimensions.length > 3 &&
-                        dimensionData.dimensions.length !== 0 ? (
+                        {dimensionData?.dimensions &&
+                        dimensionData?.dimensions.length > 3 &&
+                        dimensionData?.dimensions.length !== 0 ? (
                           <li
                             className={
                               singleDimensionData + 1 >=
-                              dimensionData.dimensions.length
+                              dimensionData?.dimensions.length
                                 ? 'disable-next'
                                 : ''
                             }

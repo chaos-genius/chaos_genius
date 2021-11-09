@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { useHistory } from 'react-router-dom';
-
+import { useDispatch } from 'react-redux';
 import Search from '../../assets/images/search.svg';
 import GreenArrow from '../../assets/images/green-arrow.svg';
 
@@ -9,8 +9,17 @@ import Fuse from 'fuse.js';
 
 import { v4 as uuidv4 } from 'uuid';
 
+import store from '../../redux/store';
+
+import { anomalySetting } from '../../redux/actions';
+
+const RESET = {
+  type: 'RESET_DATA'
+};
+
 const DashboardFilter = ({ kpi, data, setActive, tabs, SetKpiAggregate }) => {
   const history = useHistory();
+  const dispatch = useDispatch();
   const [listData, setListData] = useState(data);
   const [searchData, setSearchData] = useState(data);
 
@@ -66,6 +75,8 @@ const DashboardFilter = ({ kpi, data, setActive, tabs, SetKpiAggregate }) => {
                     kpi.toString() === item.id.toString() ? 'active' : ''
                   }
                   onClick={() => {
+                    dispatch(anomalySetting(item.id));
+                    store.dispatch(RESET);
                     setActive(item.name);
                     SetKpiAggregate(item.aggregation);
                     history.push(`/dashboard/${tabs}/${item.id}`);

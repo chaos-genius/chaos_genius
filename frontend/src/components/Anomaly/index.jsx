@@ -124,7 +124,9 @@ const Anomaly = ({ kpi, anomalystatus }) => {
           type: 'datetime',
           title: {
             text: graphData.x_axis_label
-          }
+          },
+          min: graphData.x_axis_limits[0] * 1000,
+          max: graphData.x_axis_limits[1] * 1000,
         },
         yAxis: {
           title: {

@@ -138,29 +138,6 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
     );
   };
 
-  // function getAllRCA() {
-  //   if (dimension.value === 'singledimension') {
-  //     dispatch(
-  //       getDashboardRcaAnalysis(kpi, {
-  //         timeline: monthWeek.value,
-  //         dimension: activeDimension
-  //       })
-  //     );
-  //     dispatch(
-  //       getAllDashboardHierarchical(kpi, {
-  //         timeline: monthWeek.value,
-  //         dimension: activeDimension
-  //       })
-  //     );
-  //   } else {
-  //     dispatch(
-  //       getDashboardRcaAnalysis(kpi, {
-  //         timeline: monthWeek.value
-  //       })
-  //     );
-  //   }
-  // }
-
   const plotChart = () => {
     if (rcaAnalysisData?.chart) {
       am4core.options.autoDispose = true;

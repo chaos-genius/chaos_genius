@@ -108,7 +108,6 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
     if (kpi !== undefined) {
       getAllAggregationData();
       getAllLinechart();
-      //getAllRCA();
       if (dimension.value === 'singledimension') {
         dispatchGetAllDashboardDimension();
       }

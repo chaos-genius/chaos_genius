@@ -1,6 +1,6 @@
 """Provides AnomalyDetectionController to compute Anomaly Detection."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 
 import pandas as pd
@@ -111,12 +111,15 @@ class AnomalyDetectionController(object):
         else:
             end_date = self.end_date
 
-        last_date_in_db = self._get_last_date_in_db("overall")
+        last_date = self._get_last_date_in_db("overall")
+        period = self.kpi_info["anomaly_params"]["anomaly_period"]
+        start_date = last_date - timedelta(days=period) if last_date else None
+
         return DataLoader(
             self.kpi_info,
             end_date=end_date,
-            start_date=last_date_in_db,
-            days_before=self.kpi_info["anomaly_params"]["anomaly_period"],
+            start_date=start_date,
+            days_before=period,
         ).get_data()
 
     def _get_last_date_in_db(self, series: str, subgroup: str = None) -> datetime:

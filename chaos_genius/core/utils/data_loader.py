@@ -165,6 +165,6 @@ class DataLoader:
         self._preprocess_df(df)
 
         data_stats = self._get_data_stats(df)
-        logger.info(f"Data starts for KPI {kpi_id}", extra={"data_stats": data_stats})
+        logger.info(f"Data stats for KPI {kpi_id}", extra={"data_stats": data_stats})
 
         return df

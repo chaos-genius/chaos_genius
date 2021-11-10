@@ -99,6 +99,14 @@ class ProcessAnomalyDetection:
         input_first_date = input_data["dt"].iloc[0]
         max_period = get_timedelta(self.freq, self.period)
 
+        logger.info(f"Prediction data stats for {self.series}-{self.subgroup}", extra={
+            "period": self.period,
+            "inp_len": len(input_data),
+            "slack": self.slack,
+            "start_date": input_first_date,
+            "end_date": input_last_date
+        })
+
         if self.last_date is None:
             # pass complete input data frame in here as pred_df
             if self.period - len(input_data) <= self.slack:

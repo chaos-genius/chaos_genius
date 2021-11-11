@@ -123,7 +123,7 @@ const AlertTable = ({ alertData, alertSearch }) => {
                     <td>
                       <div
                         className={
-                          alertData.length !== 1
+                          alertData.length !== 2
                             ? ' more-dropdown dropdown '
                             : ' more-dropdown '
                         }>

@@ -167,7 +167,7 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
                       {/* dropdown */}
                       <div
                         className={
-                          tableData.length !== 1
+                          tableData.length !== 2
                             ? ' more-dropdown dropdown '
                             : ' more-dropdown '
                         }>

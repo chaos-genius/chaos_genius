@@ -80,7 +80,7 @@ class DataLoader:
     def _build_date_filter(self):
         dt_col_str = self._get_id_string(self.dt_col)
 
-        start_query = f"{dt_col_str} > '{self.start_date}'"
+        start_query = f"{dt_col_str} >= '{self.start_date}'"
         end_query = f"{dt_col_str} <= '{self.end_date}'"
 
         return f" where {start_query} and {end_query} "

@@ -1,7 +1,7 @@
 """Provides a controller class for performing RCA."""
 
 import json
-from datetime import datetime
+from datetime import datetime, date, timedelta
 import logging
 from typing import Tuple
 
@@ -14,7 +14,6 @@ from chaos_genius.core.rca.constants import (
     TIMELINE_NUM_DAYS_MAP,
     TIMELINES,
 )
-from chaos_genius.core.rca.rca_utils.data_loader import rca_load_data
 from chaos_genius.core.rca.root_cause_analysis import RootCauseAnalysis
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.core.utils.round import round_series
@@ -26,13 +25,13 @@ logger = logging.getLogger(__name__)
 class RootCauseAnalysisController:
     """RCA Controller class. Used to perform RCA analysis with Celery."""
 
-    def __init__(self, kpi_info: dict, end_date: datetime = None):
+    def __init__(self, kpi_info: dict, end_date: date = None):
         """Initialize the controller.
 
         :param kpi_info: KPI information as a dictionary
         :type kpi_info: dict
         :param end_date: end date for analysis, defaults to None
-        :type end_date: datetime, optional
+        :type end_date: date, optional
         """
         logger.info(f"RCA Controller initialized with KPI: {kpi_info['id']}")
         self.kpi_info = kpi_info
@@ -45,7 +44,9 @@ class RootCauseAnalysisController:
         if end_date is None:
             end_date = datetime.today()
 
-        logger.debug(f"RCA Controller end date: {end_date}")
+        end_date = end_date.date()
+
+        logger.info(f"RCA Controller end date: {end_date}")
 
         self.end_date = end_date
 
@@ -57,24 +58,29 @@ class RootCauseAnalysisController:
         self.num_dim_combs = list(range(1, min(4, len(kpi_info["dimensions"]) + 1)))
 
     def _load_data(
-        self, timeline: str = "mom", tail: int = None, get_count: bool = False
+        self, timeline: str = "mom"
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Load data for performing RCA.
 
         :param timeline: timeline to load data for, defaults to "mom"
         :type timeline: str, optional
-        :param tail: limit data loaded to this number of rows, defaults to None
-        :type tail: int, optional
-        :param get_count: Return count values of data, defaults to False
-        :type get_count: bool, optional
         :return: tuple with baseline data and rca data for
         :rtype: Tuple[pd.DataFrame, pd.DataFrame]
         """
-        base_df, rca_df = rca_load_data(self.kpi_info, self.end_date, timeline, tail)
-        if get_count:
-            logger.info(f"Loaded {base_df}, {rca_df} rows of data")
-        else:
-            logger.info(f"Loaded {len(base_df)}, {len(rca_df)} rows of data")
+
+        num_days = TIMELINE_NUM_DAYS_MAP[timeline]
+
+        df = DataLoader(
+            self.kpi_info,
+            end_date=pd.to_datetime(self.end_date),
+            days_before=num_days*2
+        ).get_data()
+
+        mid_date = pd.to_datetime(self.end_date - timedelta(days=num_days))
+        base_df = df[df[self.dt_col] < mid_date]
+        rca_df = df[df[self.dt_col] >= mid_date]
+
+        logger.info(f"Loaded {len(base_df)}, {len(rca_df)} rows of data")
         return base_df, rca_df
 
     def _output_to_row(
@@ -95,7 +101,7 @@ class RootCauseAnalysisController:
         """
         return {
             "kpi_id": self.kpi_info["id"],
-            "end_date": self.end_date.date(),
+            "end_date": self.end_date,
             "data_type": data_type,
             "timeline": timeline,
             "dimension": dimension,

@@ -11,9 +11,9 @@ from chaos_genius.databases.models.data_source_model import DataSource
 
 
 _SQL_IDENTIFIERS = {
-    "mysql": "`",
-    "postgres": '"',
-    "snowflake": '"',
+    "MySQL": "`",
+    "Postgres": '"',
+    "Snowflake": '"',
 }
 
 logger = logging.getLogger(__name__)

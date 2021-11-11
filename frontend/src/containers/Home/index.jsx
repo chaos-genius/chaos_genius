@@ -34,15 +34,13 @@ const Home = () => {
               <h3>Get Started with Chaos Genius setup</h3>
             </div>
 
-            {onboardingList.completion_precentage && (
-              <div className="progress-option">
-                <ProgressBar
-                  completed={onboardingList.completion_precentage}
-                  className="progressbar"
-                />
-                <p>{onboardingList.completion_precentage}% Completed</p>
-              </div>
-            )}
+            <div className="progress-option">
+              <ProgressBar
+                completed={onboardingList?.completion_precentage}
+                className="progressbar"
+              />
+              <p>{onboardingList?.completion_precentage}% Completed</p>
+            </div>
           </div>
           {/* homepage setup card wrapper */}
           <div className="homepage-setup-card-wrapper">

@@ -21,6 +21,10 @@ const SETTING_RESET = {
   type: 'SETTING_RESET'
 };
 
+const RESET = {
+  type: 'RESET_DATA'
+};
+
 const Dashboard = () => {
   const dispatch = useDispatch();
   const history = useHistory();
@@ -43,6 +47,7 @@ const Dashboard = () => {
   useEffect(() => {
     getAllDashboardSidebar();
     store.dispatch(SETTING_RESET);
+    store.dispatch(RESET);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

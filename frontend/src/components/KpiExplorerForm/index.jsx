@@ -392,7 +392,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   }, [kpiField, formdata.tablename]);
 
   const tableOption = () => {
-    if (kpiField && kpiFieldLoading === false) {
+    if (kpiField && kpiFieldLoading === false && kpiField?.tables) {
       var optionArr = [];
       for (const [key] of Object.entries(kpiField.tables)) {
         optionArr.push({
@@ -408,7 +408,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   };
 
   const tableName = (e) => {
-    if (kpiField) {
+    if (kpiField && kpiField?.tables) {
       setErrorMsg({ tablename: false });
       var optionValueArr = [];
       for (const [key, value] of Object.entries(kpiField.tables)) {

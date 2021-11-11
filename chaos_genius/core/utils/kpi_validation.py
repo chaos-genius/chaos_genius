@@ -24,9 +24,10 @@ def validate_kpi(kpi_info: Dict[str, Any]) -> Tuple[bool, str]:
     :rtype: Tuple[bool, str]
     """
     try:
-        df = DataLoader(kpi_info, days_before=30, tail=TAIL_SIZE).get_data()
+        df = DataLoader(kpi_info, tail=TAIL_SIZE, validation=True).get_data()
         logger.info(f"Created df with {len(df)} rows for validation")
     except Exception as e:  # noqa: B902
+        logger.error("Unable to load data for KPI validation", exc_info=1)
         return False, "Could not load data. Error: " + str(e)
 
     return _validate_kpi_from_df(
@@ -289,6 +290,7 @@ def _validate_for_maximum_kpi_size(
     try:
         num_rows = DataLoader(kpi_info, days_before=60).get_count()
     except Exception as e:  # noqa: B902
+        logger.error("Unable to load data for KPI validation of max size", exc_info=1)
         return False, "Could not load data. Error: " + str(e)
 
     if num_rows <= MAX_ROWS_FOR_DEEPDRILLS:

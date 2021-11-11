@@ -31,8 +31,9 @@ class DataLoader:
         kpi_info: dict,
         end_date: str = None,
         start_date: str = None,
-        days_before: int = 30,
+        days_before: int = None,
         tail: int = None,
+        validation: bool = False,
     ):
         """Initialize Data Loader for KPI.
 
@@ -50,18 +51,19 @@ class DataLoader:
         :type days_before: int, optional
         :param tail: limit data loaded to this number of rows, defaults to None
         :type tail: int, optional
+        :param validation: if validation is True, we do not perform preprocessing
+        :type validation: bool, optional
         :raises ValueError: Raises error if both start_date and days_before are
         not specified
         """
         self.kpi_info = kpi_info
         self.tail = tail
+        self.validation = validation
 
         if end_date is None:
             end_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        if start_date is None:
-            if days_before is None:
-                raise ValueError("Either start_date or days_before must be specified.")
+        if start_date is None and days_before is not None:
             start_date = pd.to_datetime(end_date) - timedelta(days=days_before)
             start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
 
@@ -112,14 +114,19 @@ class DataLoader:
 
     def _build_query(self, count=False):
         table_name = self._get_table_name()
-        date_filter = self._build_date_filter()
+
+        date_filter = self._build_date_filter() if self.start_date is not None else ""
 
         if count:
             query = f"select count (*) from {table_name} {date_filter} "
         else:
             query = f"select * from {table_name} {date_filter} "
 
-        query += self._get_filters_for_query()
+        filters_for_query = self._get_filters_for_query()
+        if date_filter.strip() == "" and filters_for_query.strip() != "":
+            query += " where "
+
+        query += filters_for_query
 
         if self.tail is not None:
             query += f" limit {self.tail} "
@@ -162,9 +169,11 @@ class DataLoader:
 
         if len(df) == 0:
             raise ValueError("Dataframe is empty.")
-        self._preprocess_df(df)
 
-        data_stats = self._get_data_stats(df)
-        logger.info(f"Data stats for KPI {kpi_id}", extra={"data_stats": data_stats})
+        if not self.validation:
+            self._preprocess_df(df)
+
+            data_stats = self._get_data_stats(df)
+            logger.info(f"Data stats for KPI {kpi_id}", extra={"data_stats": data_stats})
 
         return df

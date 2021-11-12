@@ -1,6 +1,6 @@
 """Provides AnomalyDetectionController to compute Anomaly Detection."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 import logging
 
 import pandas as pd
@@ -34,7 +34,7 @@ class AnomalyDetectionController(object):
     def __init__(
         self,
         kpi_info: dict,
-        end_date: datetime = None,
+        end_date: date = None,
         save_model: bool = False,
         debug: bool = False,
     ):
@@ -44,7 +44,7 @@ class AnomalyDetectionController(object):
         :type kpi_info: dict
         :param end_date: end date to perform anomaly detection for, defaults to
         None
-        :type end_date: datetime, optional
+        :type end_date: date, optional
         :param save_model: whether to save the model or not, defaults to False
         :type save_model: bool, optional
         """
@@ -104,10 +104,10 @@ class AnomalyDetectionController(object):
             if self.kpi_info["is_static"]:
                 end_date = self.kpi_info.get("static_params", {}).get("end_date")
                 if end_date is not None:
-                    end_date = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+                    end_date = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S").date()
 
             if end_date is None:
-                end_date = datetime.now()
+                end_date = datetime.now().date()
         else:
             end_date = self.end_date
 

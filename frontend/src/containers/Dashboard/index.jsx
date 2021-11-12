@@ -80,7 +80,7 @@ const Dashboard = () => {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sidebarList]);
+  }, [sidebarList, history.location.pathname]);
 
   const onTabClick = (tabs) => {
     setTabs(tabs);

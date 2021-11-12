@@ -430,7 +430,6 @@ const KpiAlertDestinationForm = ({
             <input
               type="text"
               className="form-control"
-              // placeholder="Channel Name"
               disabled={true}
               value={channelName}
             />

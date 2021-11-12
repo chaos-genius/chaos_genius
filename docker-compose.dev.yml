@@ -71,7 +71,7 @@ services:
     container_name: chaosgenius-webapp
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     volumes:
       - ./frontend/nginx:/etc/nginx/conf.d/
     ports:

@@ -195,8 +195,7 @@ const AlertsForm = () => {
   };
 
   const validateEmail = (email) => {
-    const re =
-      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
   };
 
@@ -254,11 +253,67 @@ const AlertsForm = () => {
           dispatchGetAllAlertEmail(data);
         }
       } else {
-        const data = {
-          config_name: 'email',
-          config_settings: editedData
-        };
-        dispatchGetAllAlertEmail(data);
+        if (Object.keys(editedData).length === 0) {
+          const data = {
+            config_name: 'email',
+            config_settings: editedData
+          };
+          //dispatchGetAllAlertEmail(data);
+        } else {
+          var objectErr = { ...emailError };
+          Object.entries(editedData).forEach((element) => {
+            if (element[0] === 'sender_email') {
+              if (element[1] === '') {
+                objectErr['sender_email'] = 'Enter Email';
+              }
+              if (element[1] !== '' && !validateEmail(element[1])) {
+                objectErr['sender_email'] = 'Enter Valid Email';
+              }
+            }
+            if (element[0] === 'server') {
+              if (element[1] === '') {
+                objectErr['server'] = 'Enter SMTP server';
+              }
+            }
+            if (element[0] === 'port') {
+              if (element[1] === '') {
+                objectErr['port'] = 'Enter Port';
+              }
+              if (
+                !(
+                  /^[1-9]\d*$/.test(element[1]) &&
+                  1 <= 1 * element[1] &&
+                  1 * element[1] <= 65535
+                ) &&
+                element[1] !== ''
+              ) {
+                objectErr['port'] = 'Enter Valid Port';
+              }
+            }
+            if (element[0] === 'username')
+              if (element[1] === '') {
+                objectErr['username'] = 'Enter Username';
+              }
+            if (element[0] === 'password')
+              if (element[1] === '') {
+                objectErr['password'] = 'Enter Password';
+              }
+          });
+          setEmailError(objectErr);
+          if (
+            objectErr.server === '' &&
+            objectErr.port === '' &&
+            objectErr.username === '' &&
+            objectErr.password === '' &&
+            objectErr.sender_email === ''
+          ) {
+            const data = {
+              config_name: 'email',
+              config_settings: editedData
+            };
+            dispatchGetAllAlertEmail(data);
+          }
+        }
       }
     } else if (data[3] === 'slack') {
       if (data[4] !== 'edit') {

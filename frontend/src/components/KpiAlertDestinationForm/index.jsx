@@ -271,7 +271,7 @@ const KpiAlertDestinationForm = ({
       obj['alert_channel'] = 'Enter Channel';
     }
     setError(obj);
-    if (error.alert_channel === '') {
+    if (obj.alert_channel === '') {
       if (path[2] === 'edit') {
         dispatch(updateKpiAlert(kpiId, alertFormData));
       } else {

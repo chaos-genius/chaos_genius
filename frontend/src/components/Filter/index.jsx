@@ -82,7 +82,7 @@ const DataSourceFilter = ({
         </div>
       </div>
       <div className="filter-layout">
-        <h3>Data Source</h3>
+        <h3>Data Source Type</h3>
         {datasourceType &&
         datasourceType[0] !== undefined &&
         datasourceType.length !== 0 ? (

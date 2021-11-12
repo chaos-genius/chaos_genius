@@ -38,7 +38,7 @@ const DataSourceFilter = ({
     }
     if (kpiList) {
       setDatasourceType([
-        ...new Set(kpiList.map((item) => item.data_source.name))
+        ...new Set(kpiList.map((item) => item.data_source.connection_type))
       ]);
     }
   }, [datasourceList, kpiList]);

@@ -80,7 +80,10 @@ const KpiExplorer = () => {
         kpiFilter &&
           kpiFilter.forEach((data) => {
             kpiExplorerList.forEach((list) => {
-              if (list.data_source.name.toLowerCase() === data.toLowerCase()) {
+              if (
+                list.data_source.connection_type.toLowerCase() ===
+                data.toLowerCase()
+              ) {
                 arr.push(list);
               }
             });

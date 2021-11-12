@@ -30,27 +30,11 @@ services:
       - SOURCE_GOOGLE_BIG_QUERY=${SOURCE_GOOGLE_BIG_QUERY}
       - SOURCE_SNOWFLAKE=${SOURCE_SNOWFLAKE}
 
-  chaosgenius-webapp:
-    container_name: chaosgenius-webapp
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "8080:3000"
-    environment:
-      - NODE_ENV=production
-      - HOST=0.0.0.0
-      - PORT=3000
-      - REACT_APP_BASE_URL=${REACT_APP_BASE_URL}
-    stdin_open: true
-    command: npm run start
 
   chaosgenius-server:
     container_name: chaosgenius-server
     build: .
     command: sh setup/run-backend-docker.sh
-    ports:
-      - "5000:5000"
     depends_on:
       - chaosgenius-db
       - server
@@ -76,11 +60,26 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - CACHE_DEFAULT_TIMEOUT=${CACHE_DEFAULT_TIMEOUT}
       - MULTIDIM_ANALYSIS_FOR_ANOMALY=${MULTIDIM_ANALYSIS_FOR_ANOMALY}
       - MAX_SUBDIM_CARDINALITY=${MAX_SUBDIM_CARDINALITY}
       - TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN=${TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN}
       - MIN_DATA_IN_SUBGROUP=${MIN_DATA_IN_SUBGROUP}
       - MAX_ROWS_FOR_DEEPDRILLS=${MAX_ROWS_FOR_DEEPDRILLS}
+
+  chaosgenius-webapp:
+    container_name: chaosgenius-webapp
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    volumes:
+      - ./frontend/nginx:/etc/nginx/conf.d/
+    ports:
+      - "8080:8080"
+    environment:
+            - REACT_APP_BASE_URL=chaosgenius-server:5000
+    depends_on:
+      - chaosgenius-server
 
   chaosgenius-db:
     container_name: chaosgenius-db

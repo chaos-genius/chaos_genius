@@ -121,7 +121,7 @@ const KpiAlertDestinationForm = ({
     }
     channelStatusData.forEach((data) => {
       if (data.name === 'slack') {
-        setChannelName(data?.config_setting.channel_name || '');
+        setChannelName(data?.config_setting.channel_name || ' ');
       }
     });
   }, [channelStatusData]);
@@ -261,7 +261,8 @@ const KpiAlertDestinationForm = ({
   };
 
   const validateEmail = (email) => {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    const re =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
   };
 
@@ -271,7 +272,7 @@ const KpiAlertDestinationForm = ({
       obj['alert_channel'] = 'Enter Channel';
     }
     setError(obj);
-    if (error.alert_channel === '') {
+    if (obj.alert_channel === '') {
       if (path[2] === 'edit') {
         dispatch(updateKpiAlert(kpiId, alertFormData));
       } else {
@@ -429,7 +430,6 @@ const KpiAlertDestinationForm = ({
             <input
               type="text"
               className="form-control"
-              placeholder="Channel Name"
               disabled={true}
               value={channelName}
             />

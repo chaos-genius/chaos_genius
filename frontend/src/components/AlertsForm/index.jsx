@@ -254,11 +254,68 @@ const AlertsForm = () => {
           dispatchGetAllAlertEmail(data);
         }
       } else {
-        const data = {
-          config_name: 'email',
-          config_settings: editedData
-        };
-        dispatchGetAllAlertEmail(data);
+        if (Object.keys(editedData).length === 0) {
+          const data = {
+            config_name: 'email',
+            config_settings: editedData
+          };
+          dispatchGetAllAlertEmail(data);
+        } else {
+          var obj = { ...emailError };
+          Object.entries(editedData).forEach((element) => {
+            if (element[0] === 'sender_email') {
+              if (element[1] === '') {
+                obj['sender_email'] = 'Enter Email';
+              }
+              if (element[1] !== '' && !validateEmail(element[1])) {
+                obj['sender_email'] = 'Enter Valid Email';
+              }
+            }
+            if (element[0] === 'server') {
+              if (element[1] === '') {
+                obj['server'] = 'Enter SMTP server';
+              }
+            }
+            if (element[0] === 'port') {
+              if (element[1] === '') {
+                obj['port'] = 'Enter Port';
+              }
+              if (
+                !(
+                  /^[1-9]\d*$/.test(element[1]) &&
+                  1 <= 1 * element[1] &&
+                  1 * element[1] <= 65535
+                ) &&
+                element[1] !== ''
+              ) {
+                obj['port'] = 'Enter Valid Port';
+              }
+            }
+            if (element[0] === 'username')
+              if (element[1] === '') {
+                obj['username'] = 'Enter Username';
+              }
+            if (element[0] === 'password')
+              if (element[1] === '') {
+                obj['password'] = 'Enter Password';
+              }
+          });
+          setEmailError(obj);
+          if (
+            obj.server === '' &&
+            obj.port === '' &&
+            obj.username === '' &&
+            obj.password === '' &&
+            obj.sender_email === ''
+          ) {
+            const data = {
+              config_name: 'email',
+              config_settings: editedData
+            };
+
+            dispatchGetAllAlertEmail(data);
+          }
+        }
       }
     } else if (data[3] === 'slack') {
       if (data[4] !== 'edit') {
@@ -539,6 +596,10 @@ const AlertsForm = () => {
                       setChannelNameError(false);
                       setSlackData({
                         ...slackData,
+                        channel_name: e.target.value
+                      });
+                      setEditedSlack({
+                        ...editedSlack,
                         channel_name: e.target.value
                       });
                     } else {

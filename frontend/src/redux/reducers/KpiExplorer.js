@@ -106,6 +106,7 @@ export const kpiExplorer = (state = initialState, action) => {
     }
     case KPIEXPLORERFIELDREQUEST: {
       return {
+        ...state,
         kpiFieldLoading: true,
         kpiFieldError: false
       };

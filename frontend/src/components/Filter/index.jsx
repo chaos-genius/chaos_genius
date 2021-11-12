@@ -38,7 +38,7 @@ const DataSourceFilter = ({
     }
     if (kpiList) {
       setDatasourceType([
-        ...new Set(kpiList.map((item) => item.data_source.name))
+        ...new Set(kpiList.map((item) => item.data_source.connection_type))
       ]);
     }
   }, [datasourceList, kpiList]);
@@ -82,7 +82,7 @@ const DataSourceFilter = ({
         </div>
       </div>
       <div className="filter-layout">
-        <h3>Data Source</h3>
+        <h3>Data Source Type</h3>
         {datasourceType &&
         datasourceType[0] !== undefined &&
         datasourceType.length !== 0 ? (

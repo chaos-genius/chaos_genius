@@ -91,7 +91,7 @@ const KpiAlertConfigurationForm = ({
       obj['alert_frequency'] = 'Enter Alert Frequency';
     }
     if (alertFormData.alert_message === '') {
-      obj['alert_message'] = 'Enter Alert Frequency';
+      obj['alert_message'] = 'Enter Alert Message';
     }
     setError(obj);
     if (

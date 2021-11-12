@@ -120,7 +120,7 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
           <tr>
             <th>KPI Name</th>
             <th>Dimensions</th>
-            <th>Data Source</th>
+            <th>Data Source Name</th>
             <th>Created On</th>
             {/* <th>Last Modified</th> */}
 
@@ -163,7 +163,7 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
 
                           <div
                             className={
-                              kpiData.length !== 1
+                              kpiData.length !== 2
                                 ? ' more-dropdown dropdown'
                                 : ' more-dropdown '
                             }>

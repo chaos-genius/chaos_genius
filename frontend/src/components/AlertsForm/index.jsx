@@ -261,24 +261,24 @@ const AlertsForm = () => {
           };
           dispatchGetAllAlertEmail(data);
         } else {
-          var objectErr = { ...emailError };
+          var obj = { ...emailError };
           Object.entries(editedData).forEach((element) => {
             if (element[0] === 'sender_email') {
               if (element[1] === '') {
-                objectErr['sender_email'] = 'Enter Email';
+                obj['sender_email'] = 'Enter Email';
               }
               if (element[1] !== '' && !validateEmail(element[1])) {
-                objectErr['sender_email'] = 'Enter Valid Email';
+                obj['sender_email'] = 'Enter Valid Email';
               }
             }
             if (element[0] === 'server') {
               if (element[1] === '') {
-                objectErr['server'] = 'Enter SMTP server';
+                obj['server'] = 'Enter SMTP server';
               }
             }
             if (element[0] === 'port') {
               if (element[1] === '') {
-                objectErr['port'] = 'Enter Port';
+                obj['port'] = 'Enter Port';
               }
               if (
                 !(
@@ -288,25 +288,25 @@ const AlertsForm = () => {
                 ) &&
                 element[1] !== ''
               ) {
-                objectErr['port'] = 'Enter Valid Port';
+                obj['port'] = 'Enter Valid Port';
               }
             }
             if (element[0] === 'username')
               if (element[1] === '') {
-                objectErr['username'] = 'Enter Username';
+                obj['username'] = 'Enter Username';
               }
             if (element[0] === 'password')
               if (element[1] === '') {
-                objectErr['password'] = 'Enter Password';
+                obj['password'] = 'Enter Password';
               }
           });
-          setEmailError(objectErr);
+          setEmailError(obj);
           if (
-            objectErr.server === '' &&
-            objectErr.port === '' &&
-            objectErr.username === '' &&
-            objectErr.password === '' &&
-            objectErr.sender_email === ''
+            obj.server === '' &&
+            obj.port === '' &&
+            obj.username === '' &&
+            obj.password === '' &&
+            obj.sender_email === ''
           ) {
             const data = {
               config_name: 'email',

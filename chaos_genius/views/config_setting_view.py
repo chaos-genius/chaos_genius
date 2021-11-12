@@ -28,7 +28,7 @@ def get_onboarding_status():
         if kpis:
             kpi_list = Kpi.query.filter(
                             Kpi.active == True,
-                            Kpi.anomaly_params is not None
+                            Kpi.anomaly_params != None
                         ).all()
 
             analytics = True if len(kpi_list) > 0 else False

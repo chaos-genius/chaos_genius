@@ -195,7 +195,8 @@ const AlertsForm = () => {
   };
 
   const validateEmail = (email) => {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+    const re =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
     return re.test(String(email).toLowerCase());
   };
 
@@ -258,7 +259,7 @@ const AlertsForm = () => {
             config_name: 'email',
             config_settings: editedData
           };
-          //dispatchGetAllAlertEmail(data);
+          dispatchGetAllAlertEmail(data);
         } else {
           var objectErr = { ...emailError };
           Object.entries(editedData).forEach((element) => {
@@ -311,6 +312,7 @@ const AlertsForm = () => {
               config_name: 'email',
               config_settings: editedData
             };
+
             dispatchGetAllAlertEmail(data);
           }
         }
@@ -594,6 +596,10 @@ const AlertsForm = () => {
                       setChannelNameError(false);
                       setSlackData({
                         ...slackData,
+                        channel_name: e.target.value
+                      });
+                      setEditedSlack({
+                        ...editedSlack,
                         channel_name: e.target.value
                       });
                     } else {

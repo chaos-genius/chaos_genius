@@ -95,6 +95,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     addfilter: [],
     dimensions: []
   });
+  
 
   const [errorMsg, setErrorMsg] = useState({
     kpiname: false,
@@ -131,6 +132,17 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     kpiUpdateLoading,
     kpiUpdateData
   } = useSelector((state) => state.kpiExplorer);
+
+  // const resetFieldsOnchangeDataSetTypeOrTable = () => {
+  //   setFormdata({
+  //     tablename: '',
+  //   query: '',
+  //   metriccolumns: '',
+  //   aggregate: '',
+  //   datetimecolumns: ''
+  //   });
+  // }
+
 
   useEffect(() => {
     dispatchGetAllKpiExplorerForm();
@@ -421,8 +433,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             });
           });
         }
+
         setOption({ ...option, metricOption: optionValueArr });
-        setFormdata({ ...formdata, tablename: valueData });
+        setFormdata({ ...formdata, tablename: valueData, metriccolumns: '', aggregate: '', datetimecolumns: '', dimensions:[]});
       }
 
       // setFormdata({ ...formdata, tablename: e.value });

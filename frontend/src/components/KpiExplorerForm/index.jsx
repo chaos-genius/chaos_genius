@@ -578,6 +578,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       query: formdata.query
     };
     dispatch(getTestQuery(data));
+    setFormdata({ ...formdata, metriccolumns: '', aggregate: '', datetimecolumns: '', dimensions:[]});
   };
 
   /* This is add filter function code */

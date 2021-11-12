@@ -7,6 +7,7 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.alerts.slack import trigger_overall_kpi_stats
 from chaos_genius.views.kpi_view import kpi_aggregation
 from chaos_genius.databases.models.config_setting_model import ConfigSetting
+from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 from chaos_genius.controllers.config_controller import (
     get_modified_config_file,
     get_config_object,
@@ -16,7 +17,6 @@ from chaos_genius.controllers.config_controller import (
 from chaos_genius.databases.db_utils import chech_editable_field
 
 blueprint = Blueprint("config_settings", __name__)
-
 
 @blueprint.route("/onboarding-status", methods=["GET"])
 def get_onboarding_status():
@@ -177,6 +177,26 @@ def get_config_meta_data(config):
         )
         return jsonify({"message": str(err), "status": "failure"})
 
+@blueprint.route("/dashboard_config", methods=["GET"])
+def multidim_status():
+    """check the number of dimensions in the kpi and return True if more than one dimension is present
+    False otherwise"""
+    status, message = "", ""
+    data = {}
+    try:
+        kpi_id = request.args.get("kpi_id")
+        multidim_status = False
+        kpi_info = get_kpi_data_from_id(kpi_id)
+        dimensions = kpi_info["dimensions"]
+        if len(dimensions)>1:
+            multidim_status = True
+        data["multidim_status"]=multidim_status
+        status="success"
+    except Exception as err:
+        status = "failure"
+        current_app.logger.info(f"Error in fetching Dashboad Config Data: {err}")
+        message = str(err)
+    return jsonify({"data": data, "msg": message, "status": status})
 
 @blueprint.route("/update", methods=["PUT"])
 def edit_config_setting():

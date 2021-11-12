@@ -55,7 +55,21 @@ class AnomalyDetectionController(object):
         self.kpi_info["freq"] = self.kpi_info.get("freq", "D")
 
         self.save_model = save_model
+
+        # If end_date is passed to self, use that
+        # Otherwise check if kpi_info has end_date
+        # If that also fails, use today as end_date
         self.end_date = end_date
+        if self.end_date is None and self.kpi_info["is_static"]:
+            self.end_date = self.kpi_info.get("static_params", {}).get("end_date")
+            if self.end_date is not None:
+                self.end_date = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S").date()
+
+        if self.end_date is None:
+            self.end_date = datetime.now().date()
+
+        self.end_date = pd.to_datetime(self.end_date)
+
         self.debug = self.kpi_info["anomaly_params"].get("debug", False)
         if self.debug == "True":
             self.debug = True
@@ -96,28 +110,13 @@ class AnomalyDetectionController(object):
         :rtype: pd.DataFrame
         """
 
-        # If end_date is passed to self, use that
-        # Otherwise check if kpi_info has end_date
-        # If that also fails, use today as end_date
-        end_date = None
-        if self.end_date is None:
-            if self.kpi_info["is_static"]:
-                end_date = self.kpi_info.get("static_params", {}).get("end_date")
-                if end_date is not None:
-                    end_date = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S").date()
-
-            if end_date is None:
-                end_date = datetime.now().date()
-        else:
-            end_date = self.end_date
-
         last_date = self._get_last_date_in_db("overall")
         period = self.kpi_info["anomaly_params"]["anomaly_period"]
         start_date = last_date - timedelta(days=period) if last_date else None
 
         return DataLoader(
             self.kpi_info,
-            end_date=end_date,
+            end_date=self.end_date,
             start_date=start_date,
             days_before=period,
         ).get_data()

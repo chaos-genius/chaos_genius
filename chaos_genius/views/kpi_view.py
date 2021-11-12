@@ -23,6 +23,7 @@ from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.extensions import cache, db
 from chaos_genius.databases.db_utils import chech_editable_field
+from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 
 TIME_DICT = {
     "mom": {"expansion": "month", "time_delta": timedelta(days=30, hours=0, minutes=0)},
@@ -378,27 +379,6 @@ def rca_hierarchical_data(kpi_id, timeline="mom", dimension=None):
             f"Error in RCA hierarchical table retrieval: {err}", exc_info=1
         )
     return final_data
-
-
-def get_kpi_data_from_id(n: int) -> dict:
-    """Returns the corresponding KPI data for the given KPI ID
-    from KPI_DATA.
-
-    :param n: ID of KPI
-    :type n: int
-
-    :raises: ValueError
-
-    :returns: KPI data
-    :rtype: dict
-    """
-    # TODO: Move to utils module
-
-    kpi_info = Kpi.get_by_id(n)
-    if kpi_info and kpi_info.as_dict:
-        return kpi_info.as_dict
-    raise ValueError(f"KPI ID {n} not found in KPI_DATA")
-
 
 def get_end_date(kpi_id):
     kpi_info = get_kpi_data_from_id(kpi_id)

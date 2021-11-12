@@ -6,7 +6,7 @@ from flask import current_app  # noqa: F401
 from chaos_genius.core.anomaly.controller import AnomalyDetectionController
 from chaos_genius.core.rca.rca_controller import RootCauseAnalysisController
 from chaos_genius.core.utils.data_loader import DataLoader
-from chaos_genius.views.kpi_view import get_kpi_data_from_id
+from chaos_genius.databases.models.kpi_model import Kpi
 
 RCA_SLACK_DAYS = 5
 logger = logging.getLogger(__name__)
@@ -19,6 +19,24 @@ def _is_data_present_for_end_date(
     df_count = DataLoader(kpi_info, end_date=end_date, days_before=1).get_count()
     return df_count != 0
 
+def get_kpi_data_from_id(n: int) -> dict:
+    """Returns the corresponding KPI data for the given KPI ID
+    from KPI_DATA.
+
+    :param n: ID of KPI
+    :type n: int
+
+    :raises: ValueError
+
+    :returns: KPI data
+    :rtype: dict
+    """
+    # TODO: Move to utils module
+
+    kpi_info = Kpi.get_by_id(n)
+    if kpi_info and kpi_info.as_dict:
+        return kpi_info.as_dict
+    raise ValueError(f"KPI ID {n} not found in KPI_DATA")
 
 def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
 

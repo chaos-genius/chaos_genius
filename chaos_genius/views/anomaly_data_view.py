@@ -15,7 +15,7 @@ from chaos_genius.extensions import cache
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.databases.models.kpi_model import Kpi
-from chaos_genius.views.kpi_view import get_kpi_data_from_id
+from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 
 from chaos_genius.core.rca.rca_utils.string_helpers import convert_query_string_to_user_string
 

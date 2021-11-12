@@ -11,7 +11,6 @@ from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
 from chaos_genius.core.utils.round import round_number
 from chaos_genius.settings import TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN
 
-from chaos_genius.extensions import cache
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.databases.models.kpi_model import Kpi
@@ -24,14 +23,12 @@ blueprint = Blueprint("anomaly_data", __name__)
 
 
 @blueprint.route("/", methods=["GET"])
-@cache.memoize()
 def list_anomaly_data():
     # FIXME: Update home route
     return jsonify({"data": "Hello World!"})
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-detection", methods=["GET"])
-@cache.memoize()
 def kpi_anomaly_detection(kpi_id):
     current_app.logger.info(f"Anomaly Detection Started for KPI ID: {kpi_id}")
     data = []
@@ -216,7 +213,6 @@ def kpi_anomaly_params(kpi_id: int):
 
 
 @blueprint.route("/<int:kpi_id>/settings", methods=["GET"])
-# @cache.memoize()
 def anomaly_settings_status(kpi_id):
     current_app.logger.info(f"Retrieving anomaly settings for kpi: {kpi_id}")
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))

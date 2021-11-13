@@ -48,7 +48,7 @@ def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
         logger.info("Selecting end date.")
         # by default we always calculate for n-1
         if end_date is None:
-            end_date = datetime.today() - timedelta(days=1)
+            end_date = datetime.today().date() - timedelta(days=1)
 
         # Check if n-1 data is available or not then try for n-2
         if not _is_data_present_for_end_date(kpi_info, end_date):

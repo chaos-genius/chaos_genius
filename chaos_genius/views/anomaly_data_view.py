@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """anomaly data view."""
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 import time
 from typing import Any, Dict, List, Optional, Tuple, cast
 
@@ -32,7 +32,7 @@ def list_anomaly_data():
 def kpi_anomaly_detection(kpi_id):
     current_app.logger.info(f"Anomaly Detection Started for KPI ID: {kpi_id}")
     data = []
-    anomaly_end_date = None
+    end_date = None
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
         period = kpi_info["anomaly_params"]["anomaly_period"]
@@ -41,8 +41,7 @@ def kpi_anomaly_detection(kpi_id):
 
         anom_data = get_overall_data(kpi_id, end_date, period)
 
-        anomaly_end_date = get_anomaly_end_date(kpi_id)
-        anom_data["x_axis_limits"] = get_anomaly_graph_x_lims(anomaly_end_date, period)
+        anom_data["x_axis_limits"] = get_anomaly_graph_x_lims(end_date, period)
 
         data = {
             "chart_data": anom_data,
@@ -59,7 +58,7 @@ def kpi_anomaly_detection(kpi_id):
     return jsonify({
         "data": data,
         "msg": "",
-        "anomaly_end_date": anomaly_end_date
+        "anomaly_end_date": end_date
         })
 
 
@@ -67,7 +66,7 @@ def kpi_anomaly_detection(kpi_id):
 def kpi_anomaly_drilldown(kpi_id):
     current_app.logger.info(f"Anomaly Drilldown Started for KPI ID: {kpi_id}")
     subdim_graphs = []
-    anomaly_end_date = None
+    end_date = None
     try:
 
         drilldown_date = request.args.get("date")
@@ -83,8 +82,7 @@ def kpi_anomaly_drilldown(kpi_id):
 
         end_date = get_end_date(kpi_info)
 
-        anomaly_end_date = get_anomaly_end_date(kpi_id)
-        graph_xlims = get_anomaly_graph_x_lims(anomaly_end_date, period)
+        graph_xlims = get_anomaly_graph_x_lims(end_date, period)
 
         for subdim in subdims:
             anom_data = get_dq_and_subdim_data(
@@ -99,7 +97,7 @@ def kpi_anomaly_drilldown(kpi_id):
     return jsonify({
         "data": subdim_graphs,
         "msg": "",
-        "anomaly_end_date": anomaly_end_date
+        "anomaly_end_date": end_date
         })
 
 
@@ -108,15 +106,14 @@ def kpi_anomaly_data_quality(kpi_id):
     current_app.logger.info(f"Anomaly Drilldown Started for KPI ID: {kpi_id}")
 
     data = []
-    anomaly_end_date = None
+    end_date = None
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
         period = kpi_info["anomaly_params"]["anomaly_period"]
 
         end_date = get_end_date(kpi_info)
 
-        anomaly_end_date = get_anomaly_end_date(kpi_id)
-        graph_xlims = get_anomaly_graph_x_lims(anomaly_end_date, period)
+        graph_xlims = get_anomaly_graph_x_lims(end_date, period)
 
         agg = kpi_info["aggregation"]
         dq_list = ["max", "count", "mean"] if agg != "mean" else ["max", "count"]
@@ -133,7 +130,7 @@ def kpi_anomaly_data_quality(kpi_id):
     return jsonify({
         "data": data,
         "msg": "",
-        "anomaly_end_date": anomaly_end_date
+        "anomaly_end_date": end_date
         })
 
 
@@ -394,9 +391,10 @@ def get_drilldowns_series_type(kpi_id, drilldown_date):
     return results.series_type
 
 
-def get_end_date(kpi_info: dict) -> datetime:
-    """Checks if the KPI has a static end date and returns it. Otherwise
-    returns today's date.
+def get_end_date(kpi_info: dict) -> date:
+    """Checks if the KPI has a static end date and returns it. Otherwise it tries to get
+    end date of overall anomaly detection, and will finally return today's date if that
+    is also not found.
 
     :return: end date for use with anomaly data output
     :rtype: datetime
@@ -415,7 +413,10 @@ def get_end_date(kpi_info: dict) -> datetime:
 
     # TODO: caused the non viewing of data post 00:00
     if end_date is None:
-        end_date = datetime.today()
+        end_date = get_anomaly_end_date(kpi_info["id"])
+
+    if end_date is None:
+        end_date = datetime.today().date()
 
     return end_date
 
@@ -870,23 +871,24 @@ def validate_scheduled_time(time):
 
 
 def get_anomaly_end_date(kpi_id: int):
-    anomaly_end_date = AnomalyDataOutput.query.filter(
-            AnomalyDataOutput.kpi_id == kpi_id
-        ).order_by(AnomalyDataOutput.data_datetime.desc()).first()
+    anomaly_end_date = None
+
+    anomaly_end_date_data = AnomalyDataOutput.query.filter(
+        (AnomalyDataOutput.kpi_id == kpi_id)
+        & (AnomalyDataOutput.anomaly_type == "overall")
+    ).order_by(AnomalyDataOutput.data_datetime.desc()).first()
 
     try:
-        anomaly_end_date = anomaly_end_date.as_dict['data_datetime']
-    except AttributeError:
-        anomaly_end_date = None
+        anomaly_end_date = anomaly_end_date_data.as_dict['data_datetime'].date()
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")
 
     return anomaly_end_date
 
 
-def get_anomaly_graph_x_lims(end_date: datetime, period: int) -> List[int]:
-    start_date = end_date.date() - timedelta(days=period)
+def get_anomaly_graph_x_lims(end_date: date, period: int) -> List[int]:
+    start_date = end_date - timedelta(days=period)
     return [
-        time.mktime((start_date + timedelta(days=1)).timetuple()),
+        time.mktime((start_date - timedelta(days=1)).timetuple()),
         time.mktime((end_date + timedelta(days=1)).timetuple())
     ]

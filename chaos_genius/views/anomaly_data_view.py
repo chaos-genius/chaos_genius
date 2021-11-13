@@ -507,7 +507,7 @@ ANOMALY_PARAMS_META = {
         },
         {
             "name": "scheduler_frequency",
-            "is_editable": True,
+            "is_editable": False,
             "is_sensitive": False,
             "type": "select",
             "options": [

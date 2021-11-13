@@ -142,6 +142,10 @@ class DataLoader:
     def get_count(self) -> int:
         """Return count of rows in KPI data."""
         query = self._build_query(count=True)
+        logger.info(
+            f"Created query for KPI {self.kpi_info['id']}",
+            extra={"data_query": query}
+        )
         df = self._run_query(query)
         return df.iloc[0, 0]
 

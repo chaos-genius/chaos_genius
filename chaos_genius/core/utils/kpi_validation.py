@@ -239,10 +239,12 @@ def _validate_date_column_is_parseable(
     if is_datetime(df[date_column_name]):
         return True, valid_str
 
-    generic_err_msg = f'Unable to parse "{date_column_name}" column. '
-    "Check that your date column is formatted properly and consistely."
-    out_of_bounds_msg = f'Timestamps in "{date_column_name}" were out of '
-    "bounds. Check that your date column is formatted properly and consistely."
+    generic_err_msg = f'Unable to parse "{date_column_name}" column. ' \
+                      + "Check that your date column is formatted properly " \
+                      + "and consistely."
+    out_of_bounds_msg = f'Timestamps in "{date_column_name}" were out of ' \
+                        + "bounds. Check that your date column is formatted " \
+                        + "properly and consistely."
 
     if unix_unit:
         # If a unix_unit is specified, it will try to convert with this unit

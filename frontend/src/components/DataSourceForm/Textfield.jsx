@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 
-import Tooltip from 'react-tooltip-lite';
-
 import Edit from '../../assets/images/disable-edit.svg';
-import Help from '../../assets/images/help.svg';
 
 const Textfield = ({
   element,

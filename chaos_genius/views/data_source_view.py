@@ -6,11 +6,7 @@ from datetime import datetime
 from flask import (
     Blueprint,
     current_app,
-    flash,
-    redirect,
-    render_template,
     request,
-    url_for,
     jsonify
 )
 from sqlalchemy import func
@@ -88,9 +84,6 @@ def list_data_source_type():
     """DataSource Type view."""
     connection_types, msg, status = [], "", "success"
     try:
-        # connector_client = connector.connection
-        # connector_client.init_source_def_conf()
-        # connection_types = connector_client.source_conf
         connection_types = get_connection_config()
     except Exception as err_msg:
         print(err_msg)
@@ -204,7 +197,7 @@ def create_data_source():
         # Save in the database
         new_connection = DataSource(
             name=conn_name,
-            db_uri=db_connection_uri, 
+            db_uri=db_connection_uri,
             connection_type=conn_type,
             active=True,
             is_third_party=is_third_party,

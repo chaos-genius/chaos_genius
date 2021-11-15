@@ -345,13 +345,23 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   };
 
   const checkTestConnection = () => {
-    const payload = {
-      connectionConfiguration: dsFormData,
-      sourceDefinitionId: sourceDefinitionId,
-      connection_type: selectedDatasource.value
-    };
-
-    dispatch(testDatasourceConnection(payload));
+    if (sourceDefinitionId === '47f25999-dd5e-4636-8c39-e7cea2453331') {
+      var obj = { ...dsFormData };
+      obj['accounts'] = { selection_strategy: 'all' };
+      const bingPayload = {
+        connectionConfiguration: obj,
+        sourceDefinitionId: sourceDefinitionId,
+        connection_type: selectedDatasource.value
+      };
+      dispatch(testDatasourceConnection(bingPayload));
+    } else {
+      const payload = {
+        connectionConfiguration: dsFormData,
+        sourceDefinitionId: sourceDefinitionId,
+        connection_type: selectedDatasource.value
+      };
+      dispatch(testDatasourceConnection(payload));
+    }
   };
 
   const saveDataSource = () => {
@@ -372,15 +382,29 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       setError('Please enter connection name');
     }
     if (Object.keys(newobj).length === 0 && connectionName !== '') {
-      const payload = {
-        connection_type: selectedDatasource.value,
-        name: connectionName,
-        sourceForm: {
-          connectionConfiguration: dsFormData,
-          sourceDefinitionId: sourceDefinitionId
-        }
-      };
-      dispatch(createDataSource(payload));
+      if (sourceDefinitionId === '47f25999-dd5e-4636-8c39-e7cea2453331') {
+        var obj = { ...dsFormData };
+        obj['accounts'] = { selection_strategy: 'all' };
+        const bingPayload = {
+          connection_type: selectedDatasource.value,
+          name: connectionName,
+          sourceForm: {
+            connectionConfiguration: obj,
+            sourceDefinitionId: sourceDefinitionId
+          }
+        };
+        dispatch(createDataSource(bingPayload));
+      } else {
+        const payload = {
+          connection_type: selectedDatasource.value,
+          name: connectionName,
+          sourceForm: {
+            connectionConfiguration: dsFormData,
+            sourceDefinitionId: sourceDefinitionId
+          }
+        };
+        dispatch(createDataSource(payload));
+      }
     }
   };
 
@@ -438,6 +462,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     setFormError([]);
     setStatus('');
   };
+
   const searchhref = (type) => {
     return (
       <>
@@ -501,7 +526,8 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
           />
         </div>
 
-        {sourceDefinitionId === '47f25999-dd5e-4636-8c39-e7cea2453331' && (
+        {selectedDatasource?.selected?.sourceDefinitionId ===
+          '47f25999-dd5e-4636-8c39-e7cea2453331' && (
           <div className="form-group">
             <label>Accounts</label>
             <input
@@ -510,10 +536,9 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
               required
               onChange={(e) => handleChange(e, 'accounts')}
               value={
-                selectedDatasource?.selected?.connectionSpecification
-                  ?.properties.accounts?.airbyte_secret && path === 'edit'
-                  ? dsFormData['accounts']
-                  : ''
+                path[2] === 'edit'
+                  ? dsFormData?.accounts['selection_strategy']
+                  : dsFormData?.accounts
               }
             />{' '}
             <div className="channel-tip">

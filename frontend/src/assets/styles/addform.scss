@@ -77,3 +77,11 @@
   margin-bottom: 40px;
   text-align: center;
 }
+.check-box-tip {
+  margin-bottom: 24px;
+  .form-check {
+    &.check-box {
+      margin-bottom: 0px;
+    }
+  }
+}

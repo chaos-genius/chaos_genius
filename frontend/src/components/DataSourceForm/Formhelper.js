@@ -47,24 +47,41 @@ export const checkBox = (
   child
 ) => {
   const textID = element[0];
+  const searchhref = (type) => {
+    return (
+      <>
+        <span
+          dangerouslySetInnerHTML={{ __html: type }}
+          className="datasource-svgicon"
+        />
+      </>
+    );
+  };
   return (
-    <div className="form-check check-box check-label">
-      <input
-        className="form-check-input"
-        type={type}
-        checked={
-          child === ''
-            ? formData?.[child]?.[textID]
-            : formData[textID]
-            ? formData[textID]
-            : false
-        }
-        id="flexCheckDefault"
-        onChange={(e) => handleInputChange(element[0], e)}
-      />
-      <label className="form-check-label" htmlFor="flexCheckDefault">
-        {element[1]?.['title'] ? element[1]['title'] : ''}
-      </label>
+    <div className="check-box-tip">
+      <div className="form-check check-box check-label">
+        <input
+          className="form-check-input"
+          type={type}
+          checked={
+            child === ''
+              ? formData?.[child]?.[textID]
+              : formData[textID]
+              ? formData[textID]
+              : false
+          }
+          id="flexCheckDefault"
+          onChange={(e) => handleInputChange(element[0], e)}
+        />
+        <label className="form-check-label" htmlFor="flexCheckDefault">
+          {element[1]?.['title'] ? element[1]['title'] : ''}
+        </label>
+      </div>{' '}
+      {element[1] && element[1]?.description && (
+        <div className="channel-tip">
+          <p>{searchhref(element[1]?.description)}</p>
+        </div>
+      )}
     </div>
   );
 };

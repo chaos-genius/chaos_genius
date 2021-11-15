@@ -509,13 +509,6 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
               className="form-control"
               required
               onChange={(e) => handleChange(e, 'accounts')}
-              // value={
-              //   element[1]?.['airbyte_secret'] && path[2] === 'edit'
-              //     ? enabled
-              //       ? inputValues
-              //       : editState
-              //     : inputValues
-              // }
               value={
                 selectedDatasource?.selected?.connectionSpecification
                   ?.properties.accounts?.airbyte_secret && path === 'edit'

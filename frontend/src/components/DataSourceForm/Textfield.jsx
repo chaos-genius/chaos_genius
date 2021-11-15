@@ -82,19 +82,20 @@ const Textfield = ({
     setEditState('');
     setEnabled((prev) => !prev);
   };
-
+  const searchhref = (type) => {
+    return (
+      <>
+        <span
+          dangerouslySetInnerHTML={{ __html: type }}
+          className="datasource-svgicon"
+        />
+      </>
+    );
+  };
   return (
     <div className="form-group">
       <label className="help-label">
         {element[1]?.title ? element[1]?.title : element[0]}{' '}
-        {(element[0] === 'replication_method' || element[0] === 'port') && (
-          <Tooltip
-            className="sensitivity-tooltip"
-            direction="right"
-            content={element[1].description}>
-            <img src={Help} alt="Help" />
-          </Tooltip>
-        )}
       </label>
       <div className="editable-field">
         <input
@@ -124,6 +125,7 @@ const Textfield = ({
             onhandleInput(e);
           }}
         />
+
         {element[1]?.['airbyte_secret'] &&
           path[2] === 'edit' &&
           (enabled ? (
@@ -148,6 +150,12 @@ const Textfield = ({
             </>
           ))}
       </div>
+
+      {element[1] && element[1].description && (
+        <div className="channel-tip">
+          <p>{searchhref(element[1].description)} </p>
+        </div>
+      )}
       {error && (
         <div className="connection__fail">
           <p>{error}</p>

@@ -72,7 +72,8 @@ def test_data_source(payload: dict) -> dict:
     is_third_party = SOURCE_WHITELIST_AND_TYPE[payload["sourceDefinitionId"]]
     if is_third_party:
         connector_client = connector.connection
-        payload.pop('connection_type', None)
+        for _property in ["connection_type", "sourceId", "workspaceId", "name", "sourceName"]:
+            payload.pop(_property, None)
         connection_status = connector_client.test_connection(payload)
     else:
         db_status, message = test_connection(payload)
@@ -80,4 +81,24 @@ def test_data_source(payload: dict) -> dict:
             "message": message,
             "status": "succeeded" if db_status is True else "failed"
         }
+    return connection_status
+
+
+def update_third_party(payload):
+    """This will be used for updating the third party data source
+
+    Args:
+        payload (dict): payload containing the source configuration and credentials
+
+    Returns:
+        dict: status of the connection
+    """
+    is_third_party = SOURCE_WHITELIST_AND_TYPE[payload["sourceDefinitionId"]]
+    if is_third_party:
+        connector_client = connector.connection
+        for _property in ["sourceDefinitionId", "workspaceId", "sourceName", "connection_type"]:
+            payload.pop(_property, None)
+        connection_status = connector_client.update_source(payload)
+    else:
+        connection_status = {}
     return connection_status

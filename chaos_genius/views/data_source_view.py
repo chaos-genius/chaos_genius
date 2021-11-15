@@ -34,7 +34,8 @@ from chaos_genius.third_party.integration_utils import get_connection_config
 from chaos_genius.controllers.data_source_controller import (
     get_datasource_data_from_id,
     mask_sensitive_info,
-    test_data_source
+    test_data_source,
+    update_third_party
 )
 
 # from chaos_genius.utils import flash_errors
@@ -345,10 +346,17 @@ def update_data_source_info(datasource_id):
             source_form.get("connectionConfiguration", {})
         )
         connection_config["connection_type"] = ds_obj.connection_type
-        connection_status = test_data_source(connection_config)
+        connection_status = test_data_source(deepcopy(connection_config))
         if connection_status["status"] == "failed":
             raise Exception(connection_status['message'])
-        ds_obj.sourceConfig = connection_config
+
+        updated_config = update_third_party(connection_config)
+        if updated_config:
+            # third party configs update
+            updated_config["connectionConfiguration"] = connection_config["connectionConfiguration"]
+            ds_obj.sourceConfig = updated_config
+        else:
+            ds_obj.sourceConfig = connection_config
         ds_obj.save(commit=True)
         status = "success"
     except Exception as err:

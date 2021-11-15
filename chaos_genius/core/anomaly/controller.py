@@ -7,6 +7,7 @@ import pandas as pd
 from chaos_genius.core.utils.data_loader import DataLoader
 
 from chaos_genius.settings import (
+    MAX_FILTER_SUBGROUPS_ANOMALY,
     MULTIDIM_ANALYSIS_FOR_ANOMALY,
     MAX_SUBDIM_CARDINALITY,
     MIN_DATA_IN_SUBGROUP,
@@ -22,8 +23,6 @@ from chaos_genius.core.anomaly.utils import (
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, db
 
 logger = logging.getLogger(__name__)
-
-FILTER_MAX_SUBGROUPS = 100
 
 DEBUG_MAX_SUBGROUPS = 10
 
@@ -279,7 +278,7 @@ class AnomalyDetectionController(object):
 
         filtered_subgroups.sort(key=lambda x: x[1], reverse=True)
 
-        return [x[0] for x in filtered_subgroups[:FILTER_MAX_SUBGROUPS]]
+        return [x[0] for x in filtered_subgroups[:MAX_FILTER_SUBGROUPS_ANOMALY]]
 
     def _run_anomaly_for_series(
         self, input_data: pd.DataFrame, series: str, subgroup: str = None

@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Tuple, Union
 
 import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
+from pandas.core.dtypes.common import is_string_dtype as is_string
 
 from chaos_genius.core.rca.root_cause_analysis import SUPPORTED_AGGREGATIONS
 from chaos_genius.core.utils.data_loader import DataLoader
@@ -234,17 +235,29 @@ def _validate_date_column_is_parseable(
     :return: returns a tuple with the status as a bool and a status message
     :rtype: Tuple[bool, str]
     """
+    # has to be datetime or string only then proceed else exit
+    if not is_datetime(df[date_column_name]) or not is_string(df[date_column_name]):
+        invalid_type_err_msg = (
+            "The datetime column is of the type"
+            f" {df[date_column_name].dtype}, acceptable types are string and datetime"
+        )
+        return False, invalid_type_err_msg
+
     valid_str = "Accepted!"
     # Exit early if date column is a datetime object.
     if is_datetime(df[date_column_name]):
         return True, valid_str
 
-    generic_err_msg = f'Unable to parse "{date_column_name}" column. ' \
-                      + "Check that your date column is formatted properly " \
-                      + "and consistely."
-    out_of_bounds_msg = f'Timestamps in "{date_column_name}" were out of ' \
-                        + "bounds. Check that your date column is formatted " \
-                        + "properly and consistely."
+    generic_err_msg = (
+        f'Unable to parse "{date_column_name}" column. '
+        + "Check that your date column is formatted properly "
+        + "and consistely."
+    )
+    out_of_bounds_msg = (
+        f'Timestamps in "{date_column_name}" were out of '
+        + "bounds. Check that your date column is formatted "
+        + "properly and consistely."
+    )
 
     if unix_unit:
         # If a unix_unit is specified, it will try to convert with this unit

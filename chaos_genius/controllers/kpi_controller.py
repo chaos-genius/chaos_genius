@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from flask import current_app  # noqa: F401
 
@@ -55,7 +55,9 @@ def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
             end_date = end_date - timedelta(days=1)
             logger.info("Decreasing end date by 1.")
 
-        end_date = end_date.date()
+        if type(end_date) == datetime:
+            end_date = end_date.date()
+
         logger.info(f"End date is {end_date}.")
 
         adc = AnomalyDetectionController(kpi_info, end_date)

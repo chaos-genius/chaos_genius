@@ -438,6 +438,16 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     setFormError([]);
     setStatus('');
   };
+  const searchhref = (type) => {
+    return (
+      <>
+        <span
+          dangerouslySetInnerHTML={{ __html: type }}
+          className="datasource-svgicon"
+        />
+      </>
+    );
+  };
 
   if (metaInfoLoading || datasourceLoading || connectionTypeLoading) {
     return (
@@ -490,6 +500,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             components={{ SingleValue: customSingleValue }}
           />
         </div>
+
         {sourceDefinitionId === '47f25999-dd5e-4636-8c39-e7cea2453331' && (
           <div className="form-group">
             <label>Accounts</label>
@@ -498,7 +509,28 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
               className="form-control"
               required
               onChange={(e) => handleChange(e, 'accounts')}
-            />
+              // value={
+              //   element[1]?.['airbyte_secret'] && path[2] === 'edit'
+              //     ? enabled
+              //       ? inputValues
+              //       : editState
+              //     : inputValues
+              // }
+              value={
+                selectedDatasource?.selected?.connectionSpecification
+                  ?.properties.accounts?.airbyte_secret && path === 'edit'
+                  ? dsFormData['accounts']
+                  : ''
+              }
+            />{' '}
+            <div className="channel-tip">
+              <p>
+                {searchhref(
+                  selectedDatasource?.selected?.connectionSpecification
+                    ?.properties?.accounts?.description
+                )}
+              </p>
+            </div>
             {formError['accounts'] && (
               <div className="connection__fail">
                 <p>{formError['accounts']}</p>

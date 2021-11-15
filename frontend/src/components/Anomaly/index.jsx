@@ -383,6 +383,7 @@ const Anomaly = ({ kpi, anomalystatus }) => {
 
                   {chartData && chartData.length !== 0 && (
                     <HighchartsReact
+                    containerProps={{className: 'chartContainer'}}
                       highcharts={Highcharts}
                       options={chartData}
                     />

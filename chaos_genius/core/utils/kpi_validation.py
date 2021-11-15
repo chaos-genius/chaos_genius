@@ -236,7 +236,7 @@ def _validate_date_column_is_parseable(
     :rtype: Tuple[bool, str]
     """
     # has to be datetime or string only then proceed else exit
-    if not is_datetime(df[date_column_name]) or not is_string(df[date_column_name]):
+    if not is_datetime(df[date_column_name]) and not is_string(df[date_column_name]):
         invalid_type_err_msg = (
             "The datetime column is of the type"
             f" {df[date_column_name].dtype}, acceptable types are string and datetime"

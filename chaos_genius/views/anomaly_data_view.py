@@ -36,12 +36,13 @@ def kpi_anomaly_detection(kpi_id):
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
         period = kpi_info["anomaly_params"]["anomaly_period"]
+        hourly = kpi_info["anomaly_params"]["frequency"] == "H"
 
         end_date = get_end_date(kpi_info)
 
         anom_data = get_overall_data(kpi_id, end_date, period)
 
-        anom_data["x_axis_limits"] = get_anomaly_graph_x_lims(end_date, period)
+        anom_data["x_axis_limits"] = get_anomaly_graph_x_lims(end_date, period, hourly)
 
         data = {
             "chart_data": anom_data,
@@ -79,10 +80,11 @@ def kpi_anomaly_drilldown(kpi_id):
 
         kpi_info = get_kpi_data_from_id(kpi_id)
         period = kpi_info["anomaly_params"]["anomaly_period"]
+        hourly = kpi_info["anomaly_params"]["frequency"] == "H"
 
         end_date = get_end_date(kpi_info)
 
-        graph_xlims = get_anomaly_graph_x_lims(end_date, period)
+        graph_xlims = get_anomaly_graph_x_lims(end_date, period, hourly)
 
         for subdim in subdims:
             anom_data = get_dq_and_subdim_data(
@@ -110,10 +112,11 @@ def kpi_anomaly_data_quality(kpi_id):
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
         period = kpi_info["anomaly_params"]["anomaly_period"]
+        hourly = kpi_info["anomaly_params"]["frequency"] == "H"
 
         end_date = get_end_date(kpi_info)
 
-        graph_xlims = get_anomaly_graph_x_lims(end_date, period)
+        graph_xlims = get_anomaly_graph_x_lims(end_date, period, hourly)
 
         agg = kpi_info["aggregation"]
         dq_list = ["max", "count", "mean"] if agg != "mean" else ["max", "count"]
@@ -411,12 +414,16 @@ def get_end_date(kpi_info: dict) -> date:
                 end_date = end_date + " 00:00:00"
                 end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
 
+    hourly = kpi_info['anomaly_params']['frequency'] == 'H'
+
     # TODO: caused the non viewing of data post 00:00
     if end_date is None:
-        end_date = get_anomaly_end_date(kpi_info["id"])
+        end_date = get_anomaly_end_date(kpi_info["id"], hourly=hourly)
 
     if end_date is None:
-        end_date = datetime.today().date()
+        end_date = datetime.today()
+        if not hourly:
+            end_date = end_date.date()
 
     return end_date
 
@@ -870,7 +877,7 @@ def validate_scheduled_time(time):
     return "", time
 
 
-def get_anomaly_end_date(kpi_id: int):
+def get_anomaly_end_date(kpi_id: int, hourly: bool):
     anomaly_end_date = None
 
     anomaly_end_date_data = AnomalyDataOutput.query.filter(
@@ -879,16 +886,23 @@ def get_anomaly_end_date(kpi_id: int):
     ).order_by(AnomalyDataOutput.data_datetime.desc()).first()
 
     try:
-        anomaly_end_date = anomaly_end_date_data.as_dict['data_datetime'].date()
+        anomaly_end_date = anomaly_end_date_data.as_dict['data_datetime']
+        if not hourly:
+            anomaly_end_date = anomaly_end_date.date()
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")
 
     return anomaly_end_date
 
 
-def get_anomaly_graph_x_lims(end_date: date, period: int) -> List[int]:
+def get_anomaly_graph_x_lims(end_date: date, period: int, hourly: bool) -> List[int]:
     start_date = end_date - timedelta(days=period)
+    start_date = start_date.timetuple()
+    if hourly:
+        end_date = (end_date + timedelta(hours=12)).timetuple()
+    else:
+        end_date = (end_date + timedelta(days=1)).timetuple()
     return [
-        time.mktime((start_date - timedelta(days=1)).timetuple()),
-        time.mktime((end_date + timedelta(days=1)).timetuple())
+        time.mktime(start_date),
+        time.mktime(end_date)
     ]

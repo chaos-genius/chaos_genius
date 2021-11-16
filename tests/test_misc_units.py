@@ -23,10 +23,11 @@ def test_get_end_date():
     # end_date = get_end_date(kpi_info)
     # assert end_date.date() == datetime.today().date()
 
-    kpi_info = {"is_static": True, "static_params": {"end_date": "2021-10-02"}, "id": 1}
+    kpi_info = {"is_static": True, "static_params": {"end_date": "2021-10-02"}, "id": 1, "anomaly_params": {"frequency": "D"}}
     end_date = get_end_date(kpi_info)
     assert end_date.date() == datetime(year=2021, month=10, day=2).date()
 
     kpi_info["static_params"] = {"end_date": "2021-10-02 11:22:33"}
+    kpi_info["anomaly_params"] = {"frequency": "D"}
     end_date = get_end_date(kpi_info)
     assert end_date.date() == datetime(year=2021, month=10, day=2).date()

@@ -15,7 +15,7 @@ import Anomalygraph from '../Anomalygraph';
 import Noresult from '../Noresult';
 import AnomalyEmptyState from '../AnomalyEmptyState';
 
-import { formatDate } from '../../utils/date-helper';
+// import { formatDate } from '../../utils/date-helper';
 
 import './anomaly.scss';
 
@@ -366,7 +366,7 @@ const Anomaly = ({ kpi, anomalystatus }) => {
                       <p>
                         Last updated:{' '}
                         <span>
-                          {formatDate(anomalyDetectionData?.anomaly_end_date) ||
+                          {anomalyDetectionData?.anomaly_end_date ||
                             '-'}
                         </span>
                       </p>

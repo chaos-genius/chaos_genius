@@ -4,7 +4,7 @@ import empty from '../../assets/images/emptyanomalydrilldown.svg';
 
 const EmptyAnomalyDrilldown = () => {
   return (
-    <div className="setup-empty-state">
+    <div className="setup-empty-state anomaly-empty-state">
       <div className="empty-state-image">
         <img src={empty} alt="Anomaly" />
       </div>

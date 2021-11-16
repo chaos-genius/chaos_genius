@@ -1120,21 +1120,12 @@ a:hover {
   align-items: center;
   justify-content: center;
 }
-.anomaly-drilldown-empty {
-  min-height: 350px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 .setup-empty-state {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  .empty-state-image {
-    width: 202px;
-    height: 104px;
-  }
+
   img {
     width: 100%;
     height: 100%;
@@ -1157,6 +1148,36 @@ a:hover {
     letter-spacing: $letter-spacing;
     color: $grey_variation-3;
     margin-top: 11px;
+  }
+}
+.anomaly-drilldown-empty {
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.anomaly-empty-state {
+  .empty-state-image {
+    width: 202px;
+    height: 104px;
+  }
+  h3 {
+    margin-top: 24px;
+    font-weight: $font-weight-600;
+    font-size: $font-size-18;
+    line-height: $line-height-20;
+    text-align: center;
+    letter-spacing: $letter-spacing;
+    color: $black_variation-2;
+  }
+  p {
+    margin-top: 12px;
+    font-weight: $font-weight-normal;
+    font-size: $font-size-14;
+    line-height: $line-height-22;
+    text-align: center;
+    letter-spacing: $letter-spacing;
+    color: $grey_variation-3;
   }
 }
 

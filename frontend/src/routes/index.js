@@ -21,6 +21,7 @@ import AddEventAlert from '../containers/AddEventAlert';
 import Result from '../containers/Result';
 import Login from '../containers/Login';
 import Kpisetting from '../containers/KpiSetting';
+import Dashboardconfigure from '../containers/Dashboardconfigure';
 
 const Routes = () => (
   <Switch>
@@ -40,6 +41,11 @@ const Routes = () => (
       exact
       path="/dashboard/anomaly/:kpi"
       component={(props) => <Dashboard {...props} />}
+    />{' '}
+    <PrivateRouteWithSidebar
+      exact
+      path={'/dashboard'}
+      component={(props) => <Dashboardconfigure {...props} />}
     />
     <PrivateRouteWithSidebar
       exact

@@ -123,6 +123,12 @@ export const anomaly = (state = initialState, action) => {
         anomalyQualityData: []
       };
     }
+    case 'RESET_DRILL': {
+      return {
+        ...state,
+        anomalyDrilldownData: ''
+      };
+    }
 
     default:
       return state;

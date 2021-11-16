@@ -207,7 +207,7 @@ const Anomalygraph = ({ key, drilldown }) => {
   return (
     <>
       {chartdata && (
-        <HighchartsReact highcharts={Highcharts} options={chartdata} />
+        <HighchartsReact containerProps={{className: 'chartContainer'}} highcharts={Highcharts} options={chartdata} />
       )}
     </>
   );

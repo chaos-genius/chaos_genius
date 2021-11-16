@@ -15,6 +15,7 @@ import Anomalygraph from '../Anomalygraph';
 import Noresult from '../Noresult';
 import AnomalyEmptyState from '../AnomalyEmptyState';
 
+import EmptyAnomalyDrilldown from '../EmptyDrillDown';
 import { formatDate } from '../../utils/date-helper';
 
 import './anomaly.scss';
@@ -57,10 +58,13 @@ const Anomaly = ({ kpi, anomalystatus }) => {
 
   const idRef = useRef(0);
 
-  const { anomalyDetectionData, anomalyDrilldownData, anomalyQualityData } =
-    useSelector((state) => {
-      return state.anomaly;
-    });
+  const {
+    anomalyDetectionData,
+    anomalyDrilldownData,
+    anomalyQualityData
+  } = useSelector((state) => {
+    return state.anomaly;
+  });
 
   useEffect(() => {
     store.dispatch(RESET_ACTION);
@@ -126,7 +130,7 @@ const Anomaly = ({ kpi, anomalystatus }) => {
             text: graphData.x_axis_label
           },
           min: graphData.x_axis_limits[0] * 1000,
-          max: graphData.x_axis_limits[1] * 1000,
+          max: graphData.x_axis_limits[1] * 1000
         },
         yAxis: {
           title: {
@@ -183,7 +187,8 @@ const Anomaly = ({ kpi, anomalystatus }) => {
           borderWidth: 1,
           padding: 20,
           title: {
-            text: 'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
+            text:
+              'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
             style: {
               fontStyle: 'italic'
             }
@@ -326,9 +331,10 @@ const Anomaly = ({ kpi, anomalystatus }) => {
       y
     };
   };
-  const handleGraphClick = (event) => {
-    const unixDate = event.point.x;
 
+  const handleGraphClick = (event) => {
+    store.dispatch(RESET_ACTION);
+    const unixDate = event.point.x;
     dispatch(
       anomalyDrilldown(kpi, {
         date: unixDate,
@@ -383,18 +389,18 @@ const Anomaly = ({ kpi, anomalystatus }) => {
 
                   {chartData && chartData.length !== 0 && (
                     <HighchartsReact
-                    containerProps={{className: 'chartContainer'}}
+                      containerProps={{ className: 'chartContainer' }}
                       highcharts={Highcharts}
                       options={chartData}
                     />
                   )}
                 </div>
               </div>
-              {itemList && anomalyDrilldownData.length !== 0 ? (
+              {itemList && anomalyDrilldownData !== '' ? (
                 <div className="dashboard-layout">
                   <div
                     className={
-                      drilldownCollapse && itemList.length !== 0
+                      drilldownCollapse
                         ? 'dashboard-header-wrapper '
                         : 'dashboard-header-wrapper header-wrapper-disable '
                     }>
@@ -403,7 +409,7 @@ const Anomaly = ({ kpi, anomalystatus }) => {
                     </div>
                     <div
                       className={
-                        !drilldownCollapse && itemList.length !== 0
+                        !drilldownCollapse
                           ? 'header-collapse header-disable'
                           : 'header-collapse'
                       }
@@ -411,15 +417,23 @@ const Anomaly = ({ kpi, anomalystatus }) => {
                       <img src={Toparrow} alt="CollapseOpen" />
                     </div>
                   </div>
-                  {drilldownCollapse && itemList.length !== 0 ? (
-                    <div
-                      className={
-                        drilldownCollapse
-                          ? 'dashboard-container'
-                          : 'dashboard-container drilldown-disable'
-                      }>
-                      {itemList}
-                    </div>
+                  {drilldownCollapse ? (
+                    <>
+                      {itemList.length ? (
+                        <div
+                          className={
+                            drilldownCollapse
+                              ? 'dashboard-container'
+                              : 'dashboard-container drilldown-disable'
+                          }>
+                          {itemList}
+                        </div>
+                      ) : (
+                        <div className="anomaly-drilldown-empty">
+                          <EmptyAnomalyDrilldown />
+                        </div>
+                      )}
+                    </>
                   ) : null}
                 </div>
               ) : null}

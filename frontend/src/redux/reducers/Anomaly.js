@@ -21,7 +21,7 @@ const initialState = {
   anomalyQualityDataLoading: true,
   anomalyQualityDataError: false,
   anomalyDrilldownLoading: true,
-  anomalyDrilldownData: [],
+  anomalyDrilldownData: '',
   anomalyDrilldownError: false,
   anomalySettingLoading: true,
   anomalySettingData: '',
@@ -119,7 +119,7 @@ export const anomaly = (state = initialState, action) => {
     case 'RESET': {
       return {
         ...state,
-        anomalyDrilldownData: [],
+        anomalyDrilldownData: '',
         anomalyQualityData: []
       };
     }

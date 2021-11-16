@@ -44,7 +44,8 @@ class RootCauseAnalysisController:
         if end_date is None:
             end_date = datetime.today()
 
-        end_date = end_date.date()
+        if type(end_date) == datetime:
+            end_date = end_date.date()
 
         logger.info(f"RCA Controller end date: {end_date}")
 

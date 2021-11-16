@@ -287,7 +287,7 @@ def kpi_aggregation(kpi_id, timeline="mom"):
 
         if data_point:
             final_data = data_point.data
-            final_data["analysis_date"] = data_point.end_date.strftime("%Y-%m-%d")
+            final_data["analysis_date"] = get_analysis_date(kpi_id, end_date)
         else:
             final_data = {
                 "panel_metrics": [],
@@ -340,7 +340,7 @@ def rca_analysis(kpi_id, timeline="mom", dimension=None):
 
         if data_point:
             final_data = data_point.data
-            final_data["analysis_date"] = data_point.end_date.strftime("%Y-%m-%d")
+            final_data["analysis_date"] = get_analysis_date(kpi_id, end_date)
         else:
             final_data = {
                 "chart": {"chart_data": [], "y_axis_lim": [], "chart_table": []},
@@ -371,7 +371,7 @@ def rca_hierarchical_data(kpi_id, timeline="mom", dimension=None):
 
         if data_point:
             final_data = data_point.data
-            final_data["analysis_date"] = data_point.end_date.strftime("%Y-%m-%d")
+            final_data["analysis_date"] = get_analysis_date(kpi_id, end_date)
         else:
             final_data = {"data_table": [], "analysis_date": ""}
     except Exception as err:
@@ -379,6 +379,7 @@ def rca_hierarchical_data(kpi_id, timeline="mom", dimension=None):
             f"Error in RCA hierarchical table retrieval: {err}", exc_info=1
         )
     return final_data
+
 
 def get_end_date(kpi_id):
     kpi_info = get_kpi_data_from_id(kpi_id)
@@ -391,6 +392,16 @@ def get_end_date(kpi_id):
         return datetime.today().date()
     else:
         return datetime.strptime(end_date, "%Y-%m-%d").date()
+
+
+def get_analysis_date(kpi_id, end_date):
+    data_point = RcaData.query.filter(
+        (RcaData.kpi_id == kpi_id)
+        & (RcaData.data_type == "line")
+        & (RcaData.end_date <= end_date)
+    ).order_by(RcaData.created_at.desc()).first()
+    final_data = data_point.data if data_point else []
+    return final_data[-1]["date"]
 
 
 def find_percentage_change(curr_val, prev_val):

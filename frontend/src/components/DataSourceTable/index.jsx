@@ -122,7 +122,7 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
   };
 
   return (
-    <div class="table-responsive">
+    <>
       <table className="table">
         <thead>
           <tr>
@@ -165,12 +165,7 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
                     </td>
                     <td>
                       {/* dropdown */}
-                      <div
-                        className={
-                          tableData.length !== 2
-                            ? ' more-dropdown dropdown '
-                            : ' more-dropdown '
-                        }>
+                      <div className={' more-dropdown dropdown '}>
                         <div
                           data-bs-toggle="dropdown"
                           aria-expanded="false"
@@ -287,7 +282,7 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
           </div>
         </div>
       </Modal>
-    </div>
+    </>
   );
 };
 export default DataSourceTable;

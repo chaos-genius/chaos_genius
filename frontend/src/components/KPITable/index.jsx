@@ -114,7 +114,7 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
   };
 
   return (
-    <div class="table-responsive">
+    <>
       <table className="table">
         <thead>
           <tr>
@@ -161,12 +161,7 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
                         <td>
                           {/* dropdown */}
 
-                          <div
-                            className={
-                              kpiData.length !== 2
-                                ? ' more-dropdown dropdown'
-                                : ' more-dropdown '
-                            }>
+                          <div className={' more-dropdown dropdown'}>
                             <div
                               data-bs-toggle="dropdown"
                               aria-expanded="false"
@@ -271,7 +266,7 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
           </div>
         </Modal>
       </table>
-    </div>
+    </>
   );
 };
 

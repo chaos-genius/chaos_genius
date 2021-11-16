@@ -59,7 +59,7 @@ const AlertTable = ({ alertData, alertSearch }) => {
   };
 
   return (
-    <div className="table-responsive">
+    <>
       <table className="table">
         <thead>
           <tr>
@@ -121,12 +121,7 @@ const AlertTable = ({ alertData, alertSearch }) => {
                       </div>
                     </td>
                     <td>
-                      <div
-                        className={
-                          alertData.length !== 2
-                            ? ' more-dropdown dropdown '
-                            : ' more-dropdown '
-                        }>
+                      <div className={' more-dropdown dropdown '}>
                         <div
                           data-bs-toggle="dropdown"
                           aria-expanded="false"
@@ -148,7 +143,7 @@ const AlertTable = ({ alertData, alertSearch }) => {
                             title="Actions"
                           />
                         </div>
-                        <ul className="dropdown-menu">
+                        <ul className="dropdown-menu ">
                           <Link
                             to={
                               alert.alert_type === 'KPI Alert'
@@ -218,7 +213,7 @@ const AlertTable = ({ alertData, alertSearch }) => {
           </div>
         </div>
       </Modal> */}
-    </div>
+    </>
   );
 };
 

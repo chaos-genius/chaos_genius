@@ -21,11 +21,13 @@ import AddEventAlert from '../containers/AddEventAlert';
 import Result from '../containers/Result';
 import Login from '../containers/Login';
 import Kpisetting from '../containers/KpiSetting';
+import OrganizationOnboarding from '../containers/Onboarding/OrganizationOnboarding';
 
 const Routes = () => (
   <Switch>
     <Route exact path="/login" component={Login}></Route>
     <Route exact path="/verifylogin" component={Login}></Route>
+    <Route exact  path="/organization-onboarding" component={OrganizationOnboarding}></Route>
     <PrivateRouteWithSidebar
       exact
       path="/"
@@ -122,6 +124,11 @@ const Routes = () => (
     <PrivateRouteWithSidebar
       exact
       component={(props) => <Anomolies {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
+      path="/organization-onboarding"
+      component={(props) => <OrganizationOnboarding {...props} />}
     />
   </Switch>
 );

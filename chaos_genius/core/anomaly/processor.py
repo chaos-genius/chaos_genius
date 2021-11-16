@@ -104,7 +104,8 @@ class ProcessAnomalyDetection:
             "inp_len": len(input_data),
             "slack": self.slack,
             "start_date": input_first_date,
-            "end_date": input_last_date
+            "end_date": input_last_date,
+            "last_date": self.last_date
         })
 
         if self.last_date is None:

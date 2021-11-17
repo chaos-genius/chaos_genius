@@ -66,8 +66,6 @@ const customStyles = {
   option: (styles, { isDisabled }) => {
     return {
       ...styles,
-      backgroundColor: isDisabled ? 'red' : '',
-      color: '#FFF',
       cursor: isDisabled ? 'not-allowed' : 'default'
     };
   }

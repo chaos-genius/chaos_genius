@@ -93,7 +93,7 @@ const Kpihome = () => {
           borderWidth: 0,
           type: 'line',
           margin: [2, 0, 2, 0],
-          width: 200,
+          width: 180,
           height: 50,
           style: {
             overflow: 'visible'

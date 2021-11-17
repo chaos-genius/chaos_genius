@@ -26,3 +26,27 @@
   scrollbar-width: thin !important;
   scrollbar-color: rgba(189, 189, 189, 1) $white !important;
 }
+.filter-layout {
+  .filter-form-dropdown {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .filter-dropdown {
+      background: $grey_variation-2;
+      border: 1px solid $grey_variation-2;
+      box-sizing: border-box;
+      border-radius: 6px;
+      height: 40px;
+      width: 40px;
+      display: flex;
+      align-items: center;
+      margin-left: 8px;
+      .filter-dropdown-image {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
+      }
+    }
+  }
+}

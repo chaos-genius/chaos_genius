@@ -26,7 +26,8 @@ import {
   getDashboardLinechart,
   getAllDashboardDimension,
   getDashboardRcaAnalysis,
-  getAllDashboardHierarchical
+  getAllDashboardHierarchical,
+  getDashboardConfig
 } from '../../redux/actions';
 
 import Highcharts from 'highcharts';
@@ -52,14 +53,25 @@ const data = [
 
 const multidimensional = [
   {
-    value: 'multidimension',
-    label: 'Multidimension'
-  },
-  {
     value: 'singledimension',
     label: 'Singledimension'
+  },
+  {
+    value: 'multidimension',
+    label: 'Multidimension'
   }
 ];
+
+const customStyles = {
+  option: (styles, { isDisabled }) => {
+    return {
+      ...styles,
+      backgroundColor: isDisabled ? 'red' : '',
+      color: '#FFF',
+      cursor: isDisabled ? 'not-allowed' : 'default'
+    };
+  }
+};
 
 const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
   const dispatch = useDispatch();
@@ -92,6 +104,8 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
     (state) => state.dashboard
   );
 
+  const { configData } = useSelector((state) => state.config);
+
   const { dimensionData, dimensionLoading } = useSelector(
     (state) => state.dimension
   );
@@ -106,6 +120,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
 
   useEffect(() => {
     if (kpi !== undefined) {
+      dispatch(getDashboardConfig({ kpi_id: kpi }));
       getAllAggregationData();
       getAllLinechart();
       if (dimension.value === 'singledimension') {
@@ -122,6 +137,12 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dimensionData]);
+
+  useEffect(() => {
+    if (configData) {
+      multidimensional[1]['isDisabled'] = !configData?.multidim_status;
+    }
+  }, [configData]);
 
   const getSingleDimensioData = (value) => {
     dispatch(
@@ -467,6 +488,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                     placeholder="Multidimensional"
                     isSearchable={false}
                     value={dimension}
+                    styles={customStyles}
                     onChange={(e) => {
                       handleDimensionChange(e);
                     }}

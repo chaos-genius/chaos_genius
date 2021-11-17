@@ -12,7 +12,7 @@ import { sidebar } from './Sidebarlist';
 import { anomaly } from './Anomaly';
 import { alert } from './Alert';
 import { setting } from './setting';
-
+import { config } from './Config';
 const rootReducer = combineReducers({
   dataSource: dataSource,
   kpiExplorer: kpiExplorer,
@@ -25,7 +25,8 @@ const rootReducer = combineReducers({
   sidebar: sidebar,
   anomaly: anomaly,
   alert: alert,
-  setting: setting
+  setting: setting,
+  config: config
 });
 
 export default rootReducer;

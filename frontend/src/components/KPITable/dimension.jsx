@@ -4,7 +4,7 @@ import Up from '../../assets/images/tipsup.svg';
 import '../../assets/styles/table.scss';
 
 const Dimension = ({ data }) => {
-  const [show, setShow] = useState(1);
+  const [show, setShow] = useState(2);
   return (
     <ul className="table-tips">
       {data &&
@@ -23,7 +23,7 @@ const Dimension = ({ data }) => {
         </li>
       )}
       {show === data.length && data.length !== 1 && (
-        <li className="additional-tips" onClick={() => setShow(1)}>
+        <li className="additional-tips" onClick={() => setShow(2)}>
           <span>
             <img src={Up} alt="Up" />
           </span>

@@ -19,7 +19,7 @@ import * as am4charts from '@amcharts/amcharts4/charts';
 import HierarchicalTable from '../HierarchicalTable';
 import DeepdrillsEmptyState from '../DeepdrillsEmptyState';
 
-// import { formatDate } from '../../utils/date-helper';
+import { formatDate } from '../../utils/date-helper';
 
 import {
   getDashboardAggregation,
@@ -314,7 +314,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                   <p>
                     Last updated:{' '}
                     <span>
-                      {aggregationData?.analysis_date || '-'}
+                      {formatDate(aggregationData?.analysis_date) || '-'}
                     </span>
                   </p>
                 </div>

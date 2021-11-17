@@ -1,3 +1,6 @@
+import { DateTime } from "luxon";
+
+
 export const formatDate = (date) => {
   if (date !== null && date !== undefined) {
     const month = [
@@ -14,6 +17,8 @@ export const formatDate = (date) => {
       'Nov',
       'Dec'
     ];
+    // console.log(DateTime.local());
+    
     const newDate = new Date(date);
     const dateString =
       newDate.getDate() +

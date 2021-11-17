@@ -22,6 +22,7 @@ import Result from '../containers/Result';
 import Login from '../containers/Login';
 import Kpisetting from '../containers/KpiSetting';
 import OrganizationOnboarding from '../containers/Onboarding/OrganizationOnboarding';
+import OrganizationSettings from '../containers/OrganizationSettings/OrganizationSettings';
 
 const Routes = () => (
   <Switch>
@@ -123,13 +124,14 @@ const Routes = () => (
     />
     <PrivateRouteWithSidebar
       exact
-      component={(props) => <Anomolies {...props} />}
+      path="/organization-settings"
+      component={(props) => <OrganizationSettings {...props} />}
     />
     <PrivateRouteWithSidebar
       exact
-      path="/organization-onboarding"
-      component={(props) => <OrganizationOnboarding {...props} />}
+      component={(props) => <Anomolies {...props} />}
     />
+    
   </Switch>
 );
 

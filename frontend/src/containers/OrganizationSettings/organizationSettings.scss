@@ -1,0 +1,52 @@
+@import '../../assets/styles/variable.scss';
+
+.explore-wrapper{
+    .settings-section{
+        width: 78%;
+        height: fit-content;
+        background-color: $white;
+        border-radius: 10px ;
+        .heading{
+            height: 60px;
+            padding-left: 40px;
+            padding-top: 25px;
+            border-bottom: 1px solid rgba(34, 34, 34, 0.12);
+        }
+
+        strong{
+            font-size: $font-size-16;
+            color: $black_variation-2;
+        }
+
+        p {
+            font-weight: $font-weight-400;
+            font-size: $font-size-12;
+            line-height: $line-height-16;
+            letter-spacing: $letter-spacing;
+            color: $grey_variation-3;
+            text-align: left;
+            display: block;
+            Link, a{
+                color: blue;
+                // text-decoration: underline;
+              }
+          }
+
+        .form-switch {
+            margin-top: 20px;
+            label{
+                font-size: 12px;
+            }
+            .form-check-input {
+              width: 32px;
+              height: 18px;
+              &.form-check-input:checked {
+                background-color: $green;
+                border-color: $green;
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgb(255, 255, 255)'/%3e%3c/svg%3e") !important;
+                border: 1px solid $green;
+              }
+            }
+          }
+    }
+}

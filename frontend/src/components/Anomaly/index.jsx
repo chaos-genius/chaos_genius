@@ -175,7 +175,7 @@ const Anomaly = ({ kpi, anomalystatus }) => {
             cursor: 'pointer',
             point: {
               events: {
-                click: (event) => handleGraphClick(event)
+                click: (event) => handleGraphClick(graphData, event)
                 // click:  function () {
                 //     // alert('title: ' + this);
                 //     console.log("this",this)
@@ -335,15 +335,20 @@ const Anomaly = ({ kpi, anomalystatus }) => {
     };
   };
 
-  const handleGraphClick = (event) => {
+  const handleGraphClick = (graphData, event) => {
     store.dispatch(RESET);
     const unixDate = event.point.x;
-    dispatch(
-      anomalyDrilldown(kpi, {
-        date: unixDate,
-        base_anomaly_id: idRef.current
-      })
+    const severity_score = graphData.severity.find(
+      (row) => row[0] === event.point.x
     );
+    if (severity_score[1] !== 0) {
+      dispatch(
+        anomalyDrilldown(kpi, {
+          date: unixDate,
+          base_anomaly_id: idRef.current
+        })
+      );
+    }
   };
 
   const handleDataQuality = (id) => {

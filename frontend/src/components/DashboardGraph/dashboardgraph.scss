@@ -7,6 +7,12 @@
 
   .dashboard-container {
     padding: 12px 24px;
+    .common-option {
+      .selectcategory--is-disabled,
+      .css-14jk2my-container {
+        width: 160px;
+      }
+    }
     &.drilldown-disable {
       display: none;
     }

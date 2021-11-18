@@ -136,12 +136,6 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dimensionData]);
 
-  useEffect(() => {
-    if (configData) {
-      multidimensional[1]['isDisabled'] = !configData?.multidim_status;
-    }
-  }, [configData]);
-
   const getSingleDimensioData = (value) => {
     dispatch(
       getDashboardRcaAnalysis(kpi, {
@@ -485,6 +479,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                     classNamePrefix="selectcategory"
                     placeholder="Multidimensional"
                     isSearchable={false}
+                    isDisabled={!configData?.multidim_status}
                     value={dimension}
                     styles={customStyles}
                     onChange={(e) => {

@@ -8,11 +8,12 @@ const MetricsSettings = () => {
   return (
     <>
       <div className="heading">
-        <h5>Metrics</h5>
+        <p>Metrics</p>
       </div>
-      <div className="form-container">
-        
-          <strong>Anonymize usage data collection</strong>
+      <div className="settings-form-container">
+      <p className="sub-headings">
+            Anonymize usage data collection
+          </p>
         <p>
           We collect data only for product improvements, see the{' '}
           <a

@@ -43,10 +43,13 @@
       }
     }
     h5{
-    display: flex;
+      display: flex;
+      font-size: $font-size-20;
       justify-content: center;
       align-items: center;
-      padding-bottom: 20px;
+      padding-bottom: 40px;
+      top: 40px;
+      font-weight: $font-weight-600;
     }
     p {
       font-weight: $font-weight-400;
@@ -76,12 +79,12 @@
       background: $white;
       box-shadow: 4px 6px 32px -2px rgba(226, 226, 226, 0.24);
       border-radius: 16px;
-      margin-top: 32px;
+      margin-top: 40px;
       padding: 32px;
       min-width: 456px;
       p {
         font-weight: $font-weight-400;
-        font-size: $font-size-16;
+        font-size: $font-size-12;
         line-height: $line-height-16;
         letter-spacing: $letter-spacing;
         color: $black_variation-2;
@@ -100,14 +103,17 @@
           }
       }
       .sub-headings{
-          font-size: 14px;
-          margin-top: 20px ;
-         
+          font-size: 16px;
+          margin-top: 24px ;
+          margin-bottom: 6px;
+          font-weight: $font-weight-500;
+          color: $black_variation-2;
       }
       .form-group {
         margin-bottom: 12px;
         label {
-          font-weight: $font-weight-500;
+          font-weight: $font-weight-400;
+          font-size: 14px;
         }
         input {
           box-sizing: border-box;
@@ -116,7 +122,7 @@
             font-size: $font-size-14;
             line-height: $line-height-20;
             letter-spacing: $letter-spacing-point1;
-            text-transform: capitalize;
+            text-transform: lowercase;
             color: $grey_variation-1;
           }
         }
@@ -131,7 +137,7 @@
         display: block;
       }
       .btn {
-        margin-top: 40px;
+        margin-top: 32px;
         width: 100%;
         height: 48px;
         span {
@@ -141,12 +147,13 @@
         }
       }
       .form-switch {
-        margin-top: 20px;
+        margin-top: 19px;
         label{
             font-size: 12px;
+            text-transform: none;
         }
         .form-check-input {
-          width: 32px;
+          width: 36px;
           height: 18px;
           &.form-check-input:checked {
             background-color: $green;

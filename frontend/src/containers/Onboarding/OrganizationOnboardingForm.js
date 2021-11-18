@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 const OrganizationOnboardingForm = () => {
   const [emailAddress, setEmailAddress] = useState('');
   const [isAnonimizeData, setIsAnonimizeData] = useState(false);
@@ -14,7 +14,7 @@ const OrganizationOnboardingForm = () => {
     <>
       <div className="og-onboarding-section">
         <div className="og-onboarding-card">
-          <h5>Specify your preference</h5>
+          <h5>Specify your preferences</h5>
           <div className="form-group">
             <label>Your Email (Optional)</label>
             <input
@@ -26,7 +26,7 @@ const OrganizationOnboardingForm = () => {
             />
           </div>
           <p className="sub-headings">
-            <strong>Anonymize usage data collection</strong>
+            Anonymize usage data collection
           </p>
           <p>
             We collect data only for product improvements, see the{' '}
@@ -49,7 +49,7 @@ const OrganizationOnboardingForm = () => {
             <label for="">Anonymize my usage data.</label>
           </div>
           <p className="sub-headings">
-            <strong>News and Feature updates</strong>
+            News and Feature updates
           </p>
           <div className="form-switch">
             <input

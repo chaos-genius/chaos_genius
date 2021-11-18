@@ -1,52 +1,125 @@
 @import '../../assets/styles/variable.scss';
 
-.explore-wrapper{
-    .settings-section{
-        width: 78%;
-        height: fit-content;
-        background-color: $white;
-        border-radius: 10px ;
-        .heading{
-            height: 60px;
-            padding-left: 40px;
-            padding-top: 25px;
-            border-bottom: 1px solid rgba(34, 34, 34, 0.12);
-        }
-
-        strong{
-            font-size: $font-size-16;
-            color: $black_variation-2;
-        }
-
-        p {
-            font-weight: $font-weight-400;
-            font-size: $font-size-12;
-            line-height: $line-height-16;
-            letter-spacing: $letter-spacing;
-            color: $grey_variation-3;
-            text-align: left;
-            display: block;
-            Link, a{
-                color: blue;
-                // text-decoration: underline;
-              }
-          }
-
-        .form-switch {
-            margin-top: 20px;
-            label{
-                font-size: 12px;
-            }
-            .form-check-input {
-              width: 32px;
-              height: 18px;
-              &.form-check-input:checked {
-                background-color: $green;
-                border-color: $green;
-                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgb(255, 255, 255)'/%3e%3c/svg%3e") !important;
-                border: 1px solid $green;
-              }
-            }
-          }
+.setting-sidebar {
+  display: flex;
+  justify-content: space-between;
+  .settings-tab {
+    width: 20%;
+    background-color: $white;
+    height: 100vh;
+    border-radius: 10px;
+  }
+  .settings-section {
+    width: 78%;
+    background-color: $white;
+    background-color: $white;
+    height: fit-content;
+    border-radius: 10px;
+    .heading {
+      p{
+      height: 60px;
+      padding-left: 40px;
+      padding-top: 24px;
+      border-bottom: 1px solid rgba(34, 34, 34, 0.12);
+      font-size: 18px;
+      font-weight: 600;
     }
+    }
+
+    strong {
+      font-size: $font-size-16;
+      color: $black_variation-2;
+    }
+
+    p {
+      font-weight: $font-weight-400;
+      font-size: $font-size-12;
+      line-height: $line-height-16;
+      letter-spacing: $letter-spacing;
+      color: $grey_variation-3;
+      text-align: left;
+      display: block;
+      Link,
+      a {
+        color: blue;
+        // text-decoration: underline;
+      }
+    }
+
+    .settings-form-container{
+      padding-top: 32px;
+      width: 50%;
+      padding-left: 40px;
+      padding-bottom: 72px;
+      .form-group{
+        input{
+          background-color: #F5F5F5;
+          color: $black_variation-2;
+          &::placeholder {
+            font-weight: $font-weight-400;
+            font-size: $font-size-14;
+            line-height: $line-height-20;
+            letter-spacing: $letter-spacing-point1;
+            text-transform: lowercase;
+            color: $grey_variation-1;
+          }
+        }
+      }
+    }
+
+    .sub-headings{
+      font-size: 16px;
+      margin-top: 24px ;
+      margin-bottom: 6px;
+      font-weight: $font-weight-500;
+      color: $black_variation-2;
+  }
+
+    .form-switch {
+      margin-top: 20px;
+      label {
+        font-size: 12px;
+      }
+      .form-check-input {
+        width: 36px;
+        height: 18px;
+        &.form-check-input:checked {
+          background-color: $green;
+          border-color: $green;
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgb(255, 255, 255)'/%3e%3c/svg%3e") !important;
+          border: 1px solid $green;
+        }
+      }
+    }
+  }
+}
+
+.settings-tab {
+  ul {
+    padding-top: 24px;
+    li {
+      display: flex;
+      justify-content: space-between;
+      font-size: $font-size-14;
+      line-height: $line-height-16;
+      letter-spacing: $letter-spacing;
+      text-transform: capitalize;
+      color: $grey_variation-3;
+      margin-bottom: 6px;
+      padding: 20px 24px;
+      border-left: 2px solid transparent;
+      cursor: pointer;
+      &.active {
+        background: $green_variation-2;
+        color: $green;
+        border-left: 2px solid $green;
+        img {
+          display: flex;
+        }
+      }
+      img {
+        display: none;
+      }
+    }
+  }
 }

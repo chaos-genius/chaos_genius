@@ -5,9 +5,9 @@ const AccountSetting = () => {
   return (
     <>
       <div className="heading">
-        <h5>Account</h5>
+        <p>Account</p>
       </div>
-      <div className="form-container">
+      <div className="settings-form-container">
         <div className="form-group">
           <label>Your Email</label>
           <input

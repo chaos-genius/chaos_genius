@@ -16,11 +16,9 @@ const OrganizationSettings = () => {
         </div>
       </div>
 
-      <div className="explore-wrapper">
+      <div className="setting-sidebar">
         {/* filter section */}
-        <div className="filter-section">
-          <div className="common-filter-section">
-            <div className="filter-layout filter-tab">
+            <div className="settings-tab">
               <ul>
                 <li onClick={(e) => setTabSwitch({account:true, metrics:false})} key={uuidv4()} className={tabSwitch.account ? 'active' : ''}>
                   Account
@@ -31,8 +29,6 @@ const OrganizationSettings = () => {
                   <img src={GreenArrow} alt="Arrow" />
                 </li>
               </ul>
-            </div>
-          </div>
         </div>
         <div className="settings-section">
           {tabSwitch.account ? <AccountSetting /> : null} 

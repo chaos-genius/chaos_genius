@@ -18,7 +18,7 @@ const Dashboardconfigure = () => {
           <h3>Dashboard</h3>
         </div>
         <div className="option-button">
-          <Link to="/kpiexplorer/add" className="btn green-variant-button">
+          <Link to="/dashboard" className="btn green-variant-button">
             <img src={Plus} alt="Add" />
             <span>New Dashboard</span>
           </Link>

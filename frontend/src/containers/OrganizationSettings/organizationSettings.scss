@@ -38,7 +38,7 @@
       font-weight: $font-weight-400;
       font-size: $font-size-12;
       line-height: $line-height-16;
-      letter-spacing: $letter-spacing;
+      letter-spacing: $letter-spacing-point1;
       color: $grey_variation-3;
       text-align: left;
       display: block;
@@ -77,7 +77,7 @@
 
     .sub-headings{
         font-size: 16px;
-        margin-top: 24px;
+        margin-top: 8px;
         margin-bottom: 6px;
         font-weight: $font-weight-500;
         color: $black_variation-2;

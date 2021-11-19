@@ -11,6 +11,13 @@
       .selectcategory--is-disabled,
       .css-14jk2my-container {
         width: 160px;
+        .selectcategory__control--is-disabled {
+          .selectcategory__value-container {
+            .selectcategory__single-value {
+              color: #7a7a7a !important;
+            }
+          }
+        }
       }
     }
     &.drilldown-disable {

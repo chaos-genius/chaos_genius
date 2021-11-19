@@ -54,11 +54,11 @@ const data = [
 const multidimensional = [
   {
     value: 'singledimension',
-    label: 'Singledimension'
+    label: 'Single Dimension'
   },
   {
     value: 'multidimension',
-    label: 'Multidimension'
+    label: 'Multi Dimension'
   }
 ];
 

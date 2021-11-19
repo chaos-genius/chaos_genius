@@ -62,15 +62,6 @@ const multidimensional = [
   }
 ];
 
-const customStyles = {
-  option: (styles, { isDisabled }) => {
-    return {
-      ...styles,
-      cursor: isDisabled ? 'not-allowed' : 'default'
-    };
-  }
-};
-
 const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
   const dispatch = useDispatch();
 
@@ -84,7 +75,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
   });
   const [dimension, setDimension] = useState({
     value: 'singledimension',
-    label: 'Singledimension'
+    label: 'Single Dimension'
   });
 
   const { aggregationData, aggregationLoading } = useSelector(
@@ -481,7 +472,6 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                     isSearchable={false}
                     isDisabled={!configData?.multidim_status}
                     value={dimension}
-                    styles={customStyles}
                     onChange={(e) => {
                       handleDimensionChange(e);
                     }}

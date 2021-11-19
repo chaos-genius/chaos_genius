@@ -170,11 +170,11 @@
         height: 48px;
         
         span {
+          font-family: $font-family-inter;
           font-weight: $font-weight-500;
           font-size: $font-size-16;
           line-height: $line-height-20;
           font-family: $font-family-inter;
-          line-height: 20px;
           letter-spacing: 0.1px;
         }
       }

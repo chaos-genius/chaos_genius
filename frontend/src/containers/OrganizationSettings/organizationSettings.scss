@@ -16,17 +16,18 @@
     height: fit-content;
     border-radius: 10px;
     .heading {
-      p{
-      height: 60px;
-      padding-left: 40px;
-      padding-top: 24px;
-      border-bottom: 1px solid rgba(34, 34, 34, 0.12);
-      font-size: 18px;
-      font-weight: 600;
-      letter-spacing: 0.2px;
-      font-family: $font-family-inter;
-      line-height: 24px;
-    }
+      p {
+        height: 60px;
+        padding-left: 40px;
+        padding-top: 24px;
+        border-bottom: 1px solid rgba(34, 34, 34, 0.12);
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+        font-family: $font-family-inter;
+        line-height: 24px;
+        color: $black_variation-2;
+      }
     }
 
     strong {
@@ -34,34 +35,20 @@
       color: $black_variation-2;
     }
 
-    p {
-      font-weight: $font-weight-400;
-      font-size: $font-size-12;
-      line-height: $line-height-16;
-      letter-spacing: $letter-spacing-point1;
-      color: $grey_variation-3;
-      text-align: left;
-      display: block;
-      Link,
-      a {
-        color: #0597f2;
-        // text-decoration: underline;
-      }
-    }
-
-    .settings-form-container{
+    .settings-form-container {
       padding-top: 32px;
       // width: 60%;
       padding-left: 40px;
       padding-bottom: 72px;
-      .form-group{
+      .form-group {
         width: 440px;
         height: 48px;
-        label{
+        label {
           padding-left: 2px;
+          font-weight: normal;
         }
-        input{
-          background-color: #F5F5F5;
+        input {
+          background-color: #f5f5f5;
           color: $black_variation-2;
           &::placeholder {
             font-weight: $font-weight-400;
@@ -73,29 +60,44 @@
           }
         }
       }
-    }
-
-    .sub-headings{
+      p {
+        font-weight: $font-weight-normal;
+        font-size: $font-size-12;
+        line-height: $line-height-16;
+        letter-spacing: $letter-spacing-point1;
+        color: $grey_variation-3;
+        text-align: left;
+        display: block;
+        Link,
+        a {
+          color: #0597f2;
+          // text-decoration: underline;
+        }
+      }
+      .sub-headings {
         font-size: 16px;
         margin-top: 8px;
         margin-bottom: 6px;
         font-weight: $font-weight-500;
         color: $black_variation-2;
         line-height: 22px;
-        font-family: $font-family-inter ;
+        font-family: $font-family-inter;
         letter-spacing: 0.2px;
+      }
+    }
 
-  }
+    
 
     .form-switch {
       margin-top: 20px;
       label {
+        font-weight: $font-weight-normal;
         font-size: 12px;
-          text-transform: none;
-          color: #7a7a7a;
-          letter-spacing: 0.1px;
-          line-height: 16px;
-          font-family: $font-family-inter;
+        text-transform: none;
+        color: #7a7a7a;
+        letter-spacing: 0.1px;
+        line-height: 16px;
+        font-family: $font-family-inter;
       }
       .form-check-input {
         width: 36px;

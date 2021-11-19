@@ -54,8 +54,9 @@
         // padding-bottom: 40px;
         font-weight: $font-weight-600;
         line-height: 26px;
-        font-family: $font-family-inter ;
+        font-family: $font-family-inter;
         letter-spacing: 0.4px;
+        color: $black_variation-2;
       }
     }
 
@@ -80,7 +81,7 @@
       }
       Link,
       a {
-        color: blue;
+        color: #0597f2;
         // text-decoration: underline;
       }
     }
@@ -112,7 +113,7 @@
           margin-left: 8px;
         }
       }
-      #news-and-feature{
+      #news-and-feature {
         margin-top: 24px;
         margin-bottom: 0px;
       }
@@ -123,7 +124,7 @@
         font-weight: $font-weight-500;
         color: $black_variation-2;
         line-height: 22px;
-        font-family: $font-family-inter ;
+        font-family: $font-family-inter;
         letter-spacing: 0.2px;
       }
       .form-group {
@@ -137,7 +138,7 @@
           color: $black_variation-2;
           margin-bottom: 12px;
           margin-left: 2px;
-          font-family: $font-family-inter ;
+          font-family: $font-family-inter;
           text-transform: capitalize;
           width: 141px;
         }
@@ -167,25 +168,31 @@
         margin-top: 32px;
         width: 100%;
         height: 48px;
+        
         span {
           font-weight: $font-weight-500;
           font-size: $font-size-16;
           line-height: $line-height-20;
+          font-family: $font-family-inter;
+          line-height: 20px;
+          letter-spacing: 0.1px;
         }
       }
       .form-switch {
         margin-top: 19px;
         label {
-            font-size: 12px;
-            text-transform: none;
-            color: #7a7a7a;
-            letter-spacing: 0.1px;
-            line-height: 16px;
-            font-family: $font-family-inter;
+          font-size: 12px;
+          text-transform: none;
+          color: #7a7a7a;
+          letter-spacing: 0.1px;
+          line-height: 16px;
+          font-family: $font-family-inter;
         }
         .form-check-input {
           width: 36px;
           height: 18px;
+          outline: 0 !important;
+          box-shadow: none;
           &.form-check-input:checked {
             background-color: $green;
             border-color: $green;

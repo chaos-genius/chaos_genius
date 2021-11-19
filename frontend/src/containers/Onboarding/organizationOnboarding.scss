@@ -42,15 +42,23 @@
         height: 30px;
       }
     }
-    h5{
-      display: flex;
-      font-size: $font-size-20;
-      justify-content: center;
-      align-items: center;
-      padding-bottom: 40px;
-      top: 40px;
-      font-weight: $font-weight-600;
+    .og-form-heading {
+      text-align: center;
+      margin-bottom: 40px;
+      // width: 253px;
+      // height: 26px;
+      h5 {
+        font-size: $font-size-20;
+        justify-content: center;
+        align-items: center;
+        // padding-bottom: 40px;
+        font-weight: $font-weight-600;
+        line-height: 26px;
+        font-family: $font-family-inter ;
+        letter-spacing: 0.4px;
+      }
     }
+
     p {
       font-weight: $font-weight-400;
       font-size: $font-size-16;
@@ -70,7 +78,8 @@
         color: $green;
         margin-left: 8px;
       }
-      Link, a{
+      Link,
+      a {
         color: blue;
         // text-decoration: underline;
       }
@@ -80,8 +89,9 @@
       box-shadow: 4px 6px 32px -2px rgba(226, 226, 226, 0.24);
       border-radius: 16px;
       margin-top: 40px;
-      padding: 32px;
+      padding: 40px 32px 36px 32px;
       min-width: 456px;
+      min-height: 484px;
       p {
         font-weight: $font-weight-400;
         font-size: $font-size-12;
@@ -92,28 +102,44 @@
         align-items: center;
         justify-content: center;
         label {
-            cursor: pointer;
-            font-weight: $font-weight-500;
-            font-size: $font-size-16;
-            line-height: $line-height-16;
-            letter-spacing: $letter-spacing;
-            text-decoration-line: underline;
-            color: $green;
-            margin-left: 8px;
-          }
-      }
-      .sub-headings{
-          font-size: 16px;
-          margin-top: 24px ;
-          margin-bottom: 6px;
+          cursor: pointer;
           font-weight: $font-weight-500;
-          color: $black_variation-2;
+          font-size: $font-size-16;
+          line-height: $line-height-16;
+          letter-spacing: $letter-spacing;
+          text-decoration-line: underline;
+          color: $green;
+          margin-left: 8px;
+        }
+      }
+      #news-and-feature{
+        margin-top: 24px;
+        margin-bottom: 0px;
+      }
+      .sub-headings {
+        font-size: 16px;
+        // margin-top: 24px;
+        margin-bottom: 6px;
+        font-weight: $font-weight-500;
+        color: $black_variation-2;
+        line-height: 22px;
+        font-family: $font-family-inter ;
+        letter-spacing: 0.2px;
       }
       .form-group {
-        margin-bottom: 12px;
+        margin-bottom: 24px;
         label {
           font-weight: $font-weight-400;
           font-size: 14px;
+          line-height: 16px;
+          letter-spacing: 0.1px;
+          text-transform: capitalize;
+          color: $black_variation-2;
+          margin-bottom: 12px;
+          margin-left: 2px;
+          font-family: $font-family-inter ;
+          text-transform: capitalize;
+          width: 141px;
         }
         input {
           box-sizing: border-box;
@@ -129,6 +155,7 @@
       }
       p {
         font-weight: $font-weight-400;
+        font-family: $font-family-inter;
         font-size: $font-size-12;
         line-height: $line-height-16;
         letter-spacing: $letter-spacing;
@@ -148,9 +175,13 @@
       }
       .form-switch {
         margin-top: 19px;
-        label{
+        label {
             font-size: 12px;
             text-transform: none;
+            color: #7a7a7a;
+            letter-spacing: 0.1px;
+            line-height: 16px;
+            font-family: $font-family-inter;
         }
         .form-check-input {
           width: 36px;
@@ -166,4 +197,3 @@
     }
   }
 }
-

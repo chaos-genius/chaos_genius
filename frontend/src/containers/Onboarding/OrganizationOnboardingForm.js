@@ -14,7 +14,9 @@ const OrganizationOnboardingForm = () => {
     <>
       <div className="og-onboarding-section">
         <div className="og-onboarding-card">
+          <div className="og-form-heading">
           <h5>Specify your preferences</h5>
+          </div>
           <div className="form-group">
             <label>Your Email (Optional)</label>
             <input
@@ -48,7 +50,7 @@ const OrganizationOnboardingForm = () => {
             />
             <label for="">Anonymize my usage data.</label>
           </div>
-          <p className="sub-headings">
+          <p id="news-and-feature" className="sub-headings">
             News and Feature updates
           </p>
           <div className="form-switch">

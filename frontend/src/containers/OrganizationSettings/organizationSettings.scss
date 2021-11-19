@@ -23,6 +23,9 @@
       border-bottom: 1px solid rgba(34, 34, 34, 0.12);
       font-size: 18px;
       font-weight: 600;
+      letter-spacing: 0.2px;
+      font-family: $font-family-inter;
+      line-height: 24px;
     }
     }
 
@@ -48,10 +51,15 @@
 
     .settings-form-container{
       padding-top: 32px;
-      width: 50%;
+      // width: 60%;
       padding-left: 40px;
       padding-bottom: 72px;
       .form-group{
+        width: 440px;
+        height: 48px;
+        label{
+          padding-left: 2px;
+        }
         input{
           background-color: #F5F5F5;
           color: $black_variation-2;
@@ -61,25 +69,33 @@
             line-height: $line-height-20;
             letter-spacing: $letter-spacing-point1;
             text-transform: lowercase;
-            color: $grey_variation-1;
+            color: $black_variation-2;
           }
         }
       }
     }
 
     .sub-headings{
-      font-size: 16px;
-      margin-top: 24px ;
-      margin-bottom: 6px;
-      font-weight: $font-weight-500;
-      color: $black_variation-2;
+        font-size: 16px;
+        margin-top: 24px;
+        margin-bottom: 6px;
+        font-weight: $font-weight-500;
+        color: $black_variation-2;
+        line-height: 22px;
+        font-family: $font-family-inter ;
+        letter-spacing: 0.2px;
+
   }
 
     .form-switch {
       margin-top: 20px;
       label {
         font-size: 12px;
-        color: #7A7A7A;
+          text-transform: none;
+          color: #7a7a7a;
+          letter-spacing: 0.1px;
+          line-height: 16px;
+          font-family: $font-family-inter;
       }
       .form-check-input {
         width: 36px;

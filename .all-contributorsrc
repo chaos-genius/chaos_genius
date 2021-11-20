@@ -188,6 +188,15 @@
       "contributions": [
         "plugin"
       ]
+    },
+    {
+      "login": "davidhayter-karhoo",
+      "name": "davidhayter-karhoo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/43238713?v=4",
+      "profile": "https://github.com/davidhayter-karhoo",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

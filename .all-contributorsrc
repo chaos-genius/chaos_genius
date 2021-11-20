@@ -197,6 +197,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "mvaerle",
+      "name": "Marijn van Aerle",
+      "avatar_url": "https://avatars.githubusercontent.com/u/73708?v=4",
+      "profile": "https://www.floryn.com",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

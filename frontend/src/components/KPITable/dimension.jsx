@@ -17,12 +17,12 @@ const Dimension = ({ data }) => {
       {data && data.length !== 0 && data.length > show && (
         <li className="additional-tips" onClick={() => setShow(data.length)}>
           <label>
-            +{data.length - 1}
+            +{data.length - 2}
             <img src={Down} alt="Down" />
           </label>
         </li>
       )}
-      {show === data.length && data.length !== 1 && (
+      {show === data.length && data.length !== 2 && (
         <li className="additional-tips" onClick={() => setShow(2)}>
           <span>
             <img src={Up} alt="Up" />

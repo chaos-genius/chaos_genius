@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """Base views for config settings and onboarding."""
-from hashlib import new
 from flask import Blueprint, current_app, request, jsonify
 from copy import deepcopy
 

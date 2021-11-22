@@ -27,10 +27,17 @@ class Dashboard(PkModel):
         return {
             "id": self.id,
             "name": self.name,
+            "active": self.active,
+            "last_modified": self.last_modified,
+            "created_at": self.created_at
         }
 
     @property
     def as_dict(self):
         return {
             "id": self.id,
+            "name": self.name,
+            "active": self.active,
+            "last_modified": self.last_modified,
+            "created_at": self.created_at
         }

@@ -51,6 +51,7 @@ import {
 } from './Anomaly';
 import { kpiSettingSetup, kpiEditSetup, settingMetaInfo } from './setting';
 import { getGlobalSetting } from './GlobalSetting';
+import {onboardingOrganizationStatus} from './Organization';
 export {
   getAllDataSources,
   getConnectionType,
@@ -96,5 +97,6 @@ export {
   kpiAlertEnable,
   anomalySetting,
   settingMetaInfo,
-  getGlobalSetting
+  getGlobalSetting,
+  onboardingOrganizationStatus
 };

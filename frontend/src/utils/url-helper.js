@@ -42,3 +42,4 @@ export const KPI_ALERT_META_INFO_URL = `${BASE_URL}/api/alert/meta-info`;
 export const GET_KPI_ALERT_BY_ID_URL = `${BASE_URL}/api/alert`;
 export const SETTING_META_INFO_URL = `${BASE_URL}/api/anomaly-data/anomaly-params/meta-info`;
 export const GLOBAL_SETTING_URL = `${BASE_URL}/api/config/global-settings`;
+export const ONBOARDING_ORGANIZATION_URL = `${BASE_URL}`;

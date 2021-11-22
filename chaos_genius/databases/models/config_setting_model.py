@@ -77,6 +77,24 @@ class ConfigSetting(PkModel):
                     "is_editable": True,
                     "is_sensitive": False,
                 }
+            },
+            "organisation_settings": {
+                "account": {
+                    "email": {
+                        "is_editable": True,
+                        "is_sensitive": False
+                    }
+                },
+                "metrics": {
+                    "anonymize_usage_data_collection": {
+                        "is_editable": True,
+                        "is_sensitive": False
+                    },
+                    "news_and_feature_updates": {
+                        "is_editable": True,
+                        "is_sensitive": False
+                    }
+                }
             }
         }
 

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Base views for config settings and onboarding."""
+from hashlib import new
 from flask import Blueprint, current_app, request, jsonify
+from copy import deepcopy
 
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.kpi_model import Kpi
@@ -54,10 +56,19 @@ def get_onboarding_status():
     completion_precentage = int(
         len([step for step in steps if step["step_done"]]) / len(steps) * 100
     )
+
+    organisation_settings = ConfigSetting.query.filter(
+                                ConfigSetting.name == "organisation_settings",
+                                ConfigSetting.active == True   
+                            ).all()
+
+    organisation_settings = True if len(organisation_settings) > 0 else False
+
     return jsonify({
         "data": {
             "steps": steps,
-            "completion_precentage": completion_precentage
+            "completion_precentage": completion_precentage,
+            "organisation_settings": organisation_settings
         }
     })
 
@@ -92,18 +103,30 @@ def set_config():
     if request.is_json:
         data = request.get_json()
         config_name = data.get("config_name")
-        if config_name not in ["email", "slack"]:
+        if config_name not in ["email", "slack", "organisation_settings"]:
             return jsonify({
                 "status": "not_found",
                 "message": "Config doesn't exist"
             })
+
         config_obj = get_config_object(config_name)
         config_settings = data.get("config_settings", {})
-        if config_obj:
-            config_obj.active = False
-            config_obj.save(commit=True)
-            config_settings = config_obj.config_setting
-            config_settings.update(data.get("config_settings", {}))
+
+        if config_name == "organisation_settings":
+            if config_obj:
+                config_obj.active = False
+                config_obj.save(commit=True)
+                
+                new_config_settings = config_obj.get("config_setting", {})
+                for module in config_settings.keys():
+                    new_config_settings[module].update(config_settings["module"])
+                config_settings = new_config_settings
+        else:
+            if config_obj:
+                config_obj.active = False
+                config_obj.save(commit=True)
+                config_settings = config_obj.config_setting
+                config_settings.update(data.get("config_settings", {}))
         new_config = create_config_object(config_name, config_settings)
         new_config.save(commit=True)
         return jsonify({
@@ -211,9 +234,22 @@ def edit_config_setting():
         config_obj = get_config_object(data.get("config_name"))
         meta_info = ConfigSetting.meta_info()
         if config_obj and config_obj.active is True:
-            if chech_editable_field(meta_info, "config_setting"):
-                config_obj.config_setting = data.get("config_setting")
+            if config_obj.name == "organisation_settings":
+                new_config_settings = deepcopy(config_obj.get("config_setting", {}))
+                updated_settings = data.get("config_settings", {})
+
+                for module in updated_settings:
+                    for key in updated_settings[module]:
+
+                        if meta_info["organisation_settings"][module][key]["is_editable"] == True:
+                            new_config_settings["organisation_settings"][module][key] = updated_settings["organisation_settings"][module][key]
+
+                config_obj.config_setting = new_config_settings
                 config_obj.save(commit=True)
+            else:
+                if chech_editable_field(meta_info, "config_setting"):
+                    config_obj.config_setting = data.get("config_setting")
+                    config_obj.save(commit=True)
             status = "success"
         else:
             message = "Config setting not found or disabled"

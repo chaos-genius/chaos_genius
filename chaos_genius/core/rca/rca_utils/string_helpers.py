@@ -9,7 +9,7 @@ import pandas as pd
 
 
 def _parse_single_col_for_query_string(col: str, value: str) -> str:
-    return f"`{col}`==\"{value}\""
+    return f'`{col}`=="{value}"'
 
 
 def convert_df_dims_to_query_strings(inp: pd.DataFrame) -> str:
@@ -24,8 +24,7 @@ def convert_df_dims_to_query_strings(inp: pd.DataFrame) -> str:
     for col in inp.index.sort_values():
         val = inp[col]
         if val is not np.nan:
-            query_string_lists.append(
-                _parse_single_col_for_query_string(col, val))
+            query_string_lists.append(_parse_single_col_for_query_string(col, val))
     return " and ".join(query_string_lists)
 
 
@@ -40,7 +39,7 @@ def convert_query_string_to_user_string(in_str: str) -> str:
     re_strs = [
         r"`(.+)`\s*([=<>]{1,2})\s*[\"]*([^\"]+)[\"]*",
         r"([+-]?\d*\.?\d+)\s([<=]{1,2})\s[`]{0,1}(.*?)[`]{0,1}\s"
-        r"([<=]{1,2})\s([+-]?\d*\.?\d+)"
+        r"([<=]{1,2})\s([+-]?\d*\.?\d+)",
     ]
 
     try:

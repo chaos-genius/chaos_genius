@@ -27,7 +27,7 @@ class NeuralProphetModel(AnomalyModel):
         df: pd.DataFrame,
         sensitivity: str,
         frequency: str,
-        pred_df: pd.DataFrame = None
+        pred_df: pd.DataFrame = None,
     ) -> pd.DataFrame:
         """Predict anomalies on data.
 
@@ -54,29 +54,27 @@ class NeuralProphetModel(AnomalyModel):
 
         if pred_df is None:
             future = self.model.make_future_dataframe(
-                df=df, periods=1, n_historic_predictions=True)
+                df=df, periods=1, n_historic_predictions=True
+            )
         else:
             future = self.model.make_future_dataframe(
-                df=df, periods=0, n_historic_predictions=True)
+                df=df, periods=0, n_historic_predictions=True
+            )
 
         forecast = self.model.predict(future)
-        forecast = forecast[["ds", "y", "yhat1"]].rename(
-            {"yhat1": "yhat"}, axis=1)
+        forecast = forecast[["ds", "y", "yhat1"]].rename({"yhat1": "yhat"}, axis=1)
 
         # adding confidence intervals
         mean = forecast["yhat"].mean()
         std_dev = forecast["yhat"].std()
-        num_dev = self.model_kwargs.get('numDev', 2)
-        num_dev_u = self.model_kwargs.get('numDev_u', num_dev)
-        num_dev_l = self.model_kwargs.get('numDev_l', num_dev)
+        num_dev = self.model_kwargs.get("numDev", 2)
+        num_dev_u = self.model_kwargs.get("numDev_u", num_dev)
+        num_dev_l = self.model_kwargs.get("numDev_l", num_dev)
 
         threshold_u = mean + (num_dev_u * std_dev)
         threshold_l = mean - (num_dev_l * std_dev)
-        forecast['yhat_lower'] = threshold_l
-        forecast['yhat_upper'] = threshold_u
-        forecast = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']]
+        forecast["yhat_lower"] = threshold_l
+        forecast["yhat_upper"] = threshold_u
+        forecast = forecast[["ds", "yhat", "yhat_lower", "yhat_upper"]]
 
-        return forecast.rename(columns={
-            'ds': 'dt',
-            'yhat': 'y'
-        })
+        return forecast.rename(columns={"ds": "dt", "yhat": "y"})

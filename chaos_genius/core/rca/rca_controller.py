@@ -118,9 +118,7 @@ class RootCauseAnalysisController:
         :rtype: dict
         """
         rca_df = DataLoader(
-            self.kpi_info,
-            self.end_date,
-            days_before=TIMELINE_NUM_DAYS_MAP[timeline]
+            self.kpi_info, self.end_date, days_before=TIMELINE_NUM_DAYS_MAP[timeline]
         ).get_data()
         rca_df = (
             rca_df.resample("D", on=self.dt_col)

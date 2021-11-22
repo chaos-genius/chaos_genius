@@ -81,41 +81,6 @@ const DataSourceFilter = ({
           </span>
         </div>
       </div>
-      {/* {kpiList && (
-        <div className="filter-layout">
-          <h3>Dashboard</h3>
-          <div className="form-group icon ">
-            <input
-              type="text"
-              className="form-control h-40"
-              placeholder="Search dashboard"
-            />
-            <span>
-              <img src={Search} alt="Search Icon" />
-            </span>
-          </div>
-          <div className="form-check check-box">
-            <input className="form-check-input" type="checkbox" />
-            <label className="form-check-label">Ecommerce</label>
-          </div>
-          <div className="form-check check-box">
-            <input className="form-check-input" type="checkbox" />
-            <label className="form-check-label">Marketting</label>
-          </div>
-          <div className="form-check check-box">
-            <input className="form-check-input" type="checkbox" />
-            <label className="form-check-label">Finance</label>
-          </div>
-          <div className="form-check check-box">
-            <input className="form-check-input" type="checkbox" />
-            <label className="form-check-label">Healthcare</label>
-          </div>
-          <div className="form-check check-box">
-            <input className="form-check-input" type="checkbox" />
-            <label className="form-check-label">Customer Service</label>
-          </div>
-        </div>
-      )} */}
       <div className="filter-layout">
         <h3>Data Source Type</h3>
         {datasourceType &&

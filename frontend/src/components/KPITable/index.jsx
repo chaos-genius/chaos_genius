@@ -27,7 +27,6 @@ import { useToast } from 'react-toast-wnm';
 
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
 import { connectionContext } from '../context';
-// import Dashboardname from './dashboardname';
 
 const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
   const connectionType = useContext(connectionContext);
@@ -120,7 +119,6 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
         <thead>
           <tr>
             <th>KPI Name</th>
-            {/* <th>Dashboard Name</th> */}
             <th>Dimensions</th>
             <th>Data Source Name</th>
             <th>Created On</th>
@@ -145,13 +143,6 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
                     return (
                       <tr key={uuidv4()}>
                         <td>{kpi.name}</td>
-                        {/* <td>
-                          {kpi.dimensions.length !== 0 ? (
-                            <Dashboardname data={kpi.dimensions} />
-                          ) : (
-                            '-'
-                          )}
-                        </td> */}
                         <td>
                           {kpi.dimensions.length !== 0 ? (
                             <Dimension data={kpi.dimensions}></Dimension>

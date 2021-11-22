@@ -105,6 +105,12 @@
                 letter-spacing: $letter-spacing;
                 text-transform: capitalize;
                 color: $black_variation-2;
+                // &::after {
+                //   content: ',';
+                // }
+                // &:nth-last-child(-n + 1)::after {
+                //   content: '';
+                // }
               }
             }
             .additional-tips-hide {
@@ -126,6 +132,9 @@
                 display: flex;
                 align-items: center;
                 cursor: pointer;
+                // &::after {
+                //   content: '';
+                // }
                 img {
                   margin-left: 4px;
                 }

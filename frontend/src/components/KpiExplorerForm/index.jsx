@@ -5,12 +5,15 @@ import { useHistory, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Select from 'react-select';
+import Modal from 'react-modal';
 
 import Play from '../../assets/images/play-green.png';
 import Success from '../../assets/images/success.svg';
 import Fail from '../../assets/images/fail.svg';
 //import Toast_error from '../../assets/images/toast-error.svg';
 //import Cancel from '../../assets/images/cancel.svg';
+import Close from '../../assets/images/close.svg';
+import Add from '../../assets/images/add.svg';
 
 import '../../assets/styles/addform.scss';
 
@@ -45,7 +48,22 @@ const aggregate = [
   { value: 'count', label: 'Count' },
   { value: 'sum', label: 'Sum' }
 ];
-
+const dashboard = [
+  {
+    value: 'newdashboard',
+    label: (
+      <span className="add-dashboard">
+        <img src={Add} alt="Add" />
+        New Dashboard
+      </span>
+    )
+  },
+  {
+    value: 'Ecommerce',
+    label: 'Ecommerce'
+  },
+  { value: 'Customer Service', label: 'Customer Service' }
+];
 // const operator = [
 //   { value: '=', label: '=' },
 //   { value: '+', label: '+' },
@@ -95,7 +113,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     addfilter: [],
     dimensions: []
   });
-  
 
   const [errorMsg, setErrorMsg] = useState({
     kpiname: false,
@@ -118,6 +135,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   });
 
   const [datasourceid, setDataSourceId] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
 
   const {
     kpiFormLoading,
@@ -142,7 +160,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   //   datetimecolumns: ''
   //   });
   // }
-
 
   useEffect(() => {
     dispatchGetAllKpiExplorerForm();
@@ -435,7 +452,14 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         }
 
         setOption({ ...option, metricOption: optionValueArr });
-        setFormdata({ ...formdata, tablename: valueData, metriccolumns: '', aggregate: '', datetimecolumns: '', dimensions:[]});
+        setFormdata({
+          ...formdata,
+          tablename: valueData,
+          metriccolumns: '',
+          aggregate: '',
+          datetimecolumns: '',
+          dimensions: []
+        });
       }
 
       // setFormdata({ ...formdata, tablename: e.value });
@@ -578,7 +602,16 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       query: formdata.query
     };
     dispatch(getTestQuery(data));
-    setFormdata({ ...formdata, metriccolumns: '', aggregate: '', datetimecolumns: '', dimensions:[]});
+    setFormdata({
+      ...formdata,
+      metriccolumns: '',
+      aggregate: '',
+      datetimecolumns: '',
+      dimensions: []
+    });
+  };
+  const closeModal = () => {
+    setIsOpen(false);
   };
 
   /* This is add filter function code */
@@ -881,6 +914,18 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           </div>
 
           <div className="form-group">
+            <label>Dashboard *</label>
+            <Select
+              closeMenuOnSelect={false}
+              blurInputOnSelect={false}
+              isMulti
+              options={dashboard}
+              classNamePrefix="selectcategory"
+              placeholder="Select Dimensions"
+              menuPlacement="top"
+            />
+          </div>
+          {/* <div className="form-group">
             <label>Dimensions *</label>
             <Select
               closeMenuOnSelect={false}
@@ -927,6 +972,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               </div>
             ) : null}
           </div>
+          */}
           {/* {inputList && inputList.length !== 0 && (
             <div className="form-group">
               <label>Filters</label>
@@ -1009,6 +1055,37 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             </button>
           </div>
         </>
+        <Modal
+          isOpen={isOpen}
+          shouldCloseOnOverlayClick={false}
+          portalClassName="dashboardmodal">
+          <div className="modal-close">
+            <img src={Close} alt="Close" onClick={closeModal} />
+          </div>
+          <div className="modal-head">
+            <h3>Create New Dashboard</h3>
+          </div>
+          <div className="modal-body">
+            <div className="modal-contents">
+              <div className="form-group">
+                <label>Dashboard Name *</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Dashboard Name"
+                />
+              </div>
+              <div className="next-step-navigate">
+                <button className="btn white-button" onClick={closeModal}>
+                  <span>Cancel</span>
+                </button>
+                <button className="btn black-button">
+                  <span>Create</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </Modal>
       </>
     );
   }

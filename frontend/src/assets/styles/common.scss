@@ -312,6 +312,16 @@ a:hover {
       display: none;
     }
   }
+  .add-dashboard {
+    display: flex;
+    align-items: center;
+    color: $green;
+    img {
+      width: 16px;
+      height: 16px;
+      margin-right: 10px;
+    }
+  }
 }
 
 // connection-success

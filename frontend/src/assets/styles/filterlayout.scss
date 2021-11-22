@@ -31,4 +31,8 @@
     background-color: $green;
     border-color: $green;
   }
+  .filter-size {
+    max-height: 175px;
+    overflow: auto;
+  }
 }

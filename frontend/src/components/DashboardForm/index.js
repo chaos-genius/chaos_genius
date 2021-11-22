@@ -3,7 +3,11 @@ import React from 'react';
 import Select from 'react-select';
 // import ModalPopUp from '../Modal';
 
-const DashboardForm = () => {
+const DashboardForm = ({ setModal, setText }) => {
+  // useEffect(() => {
+  //   setModal(true);
+  //   setText('dashboard');
+  // }, []);
   // const [modal, setModal] = useState('false');
   return (
     <>

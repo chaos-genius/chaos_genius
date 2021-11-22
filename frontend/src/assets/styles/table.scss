@@ -90,48 +90,6 @@
           width: 250px;
           flex-wrap: wrap;
           margin-bottom: -8px;
-          &.dashboard-tip {
-            li {
-              margin-right: 8px;
-              margin-bottom: 8px;
-              background: none;
-              border-radius: 0px;
-              display: flex;
-              align-items: center;
-              label {
-                font-weight: $font-weight-normal;
-                font-size: $font-size-14;
-                line-height: $line-height-20;
-                letter-spacing: $letter-spacing;
-                text-transform: capitalize;
-                color: $black_variation-2;
-              }
-            }
-            .additional-tips-hide {
-              display: none;
-            }
-            .additional-tips {
-              background: $white;
-              border: 0.7px solid $grey_variation-1;
-              border-radius: 4px;
-              cursor: pointer;
-              label {
-                font-weight: $font-weight-500;
-                font-size: $font-size-12;
-                line-height: $line-height-14;
-                padding: 5px 8px;
-                font-size: 12px;
-                line-height: 14px;
-                color: $green;
-                display: flex;
-                align-items: center;
-                cursor: pointer;
-                img {
-                  margin-left: 4px;
-                }
-              }
-            }
-          }
           li {
             height: 24px;
             margin-right: 8px;

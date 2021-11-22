@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 const MetricsSettings = () => {
-    const [isAnonimizeData, setIsAnonimizeData] = useState(false);
+    const [isAnonymizeData, setIsAnonymizeData] = useState(false);
     const onChecking = (status) =>{
-        setIsAnonimizeData(status);
+        setIsAnonymizeData(status);
     }
     
   return (
@@ -26,13 +26,14 @@ const MetricsSettings = () => {
         </p>
         <div className="form-switch">
           <input
+          name="is_anonymize"
             className="form-check-input"
             type="checkbox"
             id="removeoverlap"
-            checked={isAnonimizeData}
-            onChange={() => onChecking(!isAnonimizeData)}
+            checked={isAnonymizeData}
+            onChange={() => onChecking(!isAnonymizeData)}
           />
-          <label for="">Anonymize my usage data.</label>
+          <label htmlFor="is_anonymize">Anonymize my usage data.</label>
         </div>
       </div>
     </>

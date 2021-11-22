@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 // import { Link } from 'react-router-dom';
 const OrganizationOnboardingForm = () => {
   const [emailAddress, setEmailAddress] = useState('');
-  const [isAnonimizeData, setIsAnonimizeData] = useState(false);
+  const [isAnonymizeData, setIsAnonymizeData] = useState(false);
   const [isNewsSubscribed, setIsNewsSubscribed] = useState(false);
   const onCheckingAnonimize = (status) => {
-    setIsAnonimizeData(status);
+    setIsAnonymizeData(status);
   };
   const onCheckingNews = (status) => {
     setIsNewsSubscribed(status);
@@ -45,10 +45,10 @@ const OrganizationOnboardingForm = () => {
               className="form-check-input"
               type="checkbox"
               id="removeoverlap"
-              checked={isAnonimizeData}
-              onChange={() => onCheckingAnonimize(!isAnonimizeData)}
+              checked={isAnonymizeData}
+              onChange={() => onCheckingAnonimize(!isAnonymizeData)}
             />
-            <label for="">Anonymize my usage data.</label>
+            <label htmlFor="">Anonymize my usage data.</label>
           </div>
           <p id="news-and-feature" className="sub-headings">
             News and Feature updates
@@ -61,7 +61,7 @@ const OrganizationOnboardingForm = () => {
               checked={isNewsSubscribed}
               onChange={() => onCheckingNews(!isNewsSubscribed)}
             />
-            <label for="">
+            <label htmlFor="">
               Receive feature updates. You can unsubscribe any time
             </label>
           </div>

@@ -45,11 +45,13 @@
         height: 48px;
         label {
           padding-left: 2px;
-          font-weight: normal;
+          font-weight: $font-weight-400;
+          font-family: $font-family-inter;
         }
         input {
           background-color: #f5f5f5;
           color: $black_variation-2;
+          font-family: $font-family-inter;
           &::placeholder {
             font-weight: $font-weight-400;
             font-size: $font-size-14;
@@ -57,6 +59,7 @@
             letter-spacing: $letter-spacing-point1;
             text-transform: lowercase;
             color: $black_variation-2;
+            font-family: $font-family-inter;
           }
         }
       }
@@ -68,6 +71,7 @@
         color: $grey_variation-3;
         text-align: left;
         display: block;
+        font-family: $font-family-inter;
         Link,
         a {
           color: #0597f2;

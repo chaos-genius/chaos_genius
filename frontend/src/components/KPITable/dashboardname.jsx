@@ -14,7 +14,9 @@ const Dashboardname = ({ data }) => {
             <label>
               {data.length - 1 === index
                 ? dimension
-                : dimension.concat('', ',')}
+                : show > 1
+                ? dimension.concat('', ',')
+                : dimension}
               {/* {show !== 1 && ','} */}
             </label>
           </li>

@@ -12,7 +12,8 @@ RESAMPLE_FREQUENCY = {"daily": "D", "hourly": "H", "D": "D", "H": "H"}
 MODEL_NAME_MAPPING = {
     "StandardDeviationModel": "Standard Deviation",
     "ProphetModel": "Prophet",
-    "EWSTDModel": "Exponentially Weighted Std Dev",
+    "EWSTDModel": "Exponentially Weighted Standard Deviation",
+    "EWMAModel": "Exponentially Weighted Moving Average",
     # "NeuralProphetModel": "NeuralProphet",
     # "GreyKiteModel": "Greykite",
     "ETSModel": "ETS",

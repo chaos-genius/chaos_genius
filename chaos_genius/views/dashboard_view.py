@@ -58,7 +58,7 @@ def edit_dashboard():
         for mapper_obj in mapper_list_dict["mapper_add_list"]:
             mapper_obj.save(commit=True)
 
-        dashboard_obj.last_modified = dt.datetime.utcnow
+        dashboard_obj.last_modified = dt.datetime.utcnow()
         dashboard_obj.save(commit=True)
         status = "success"
         message = "All changes successfully saved"

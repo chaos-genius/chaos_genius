@@ -240,7 +240,7 @@ def edit_config_setting():
                 for module in updated_settings.keys():
                     for key in updated_settings.get(module).keys():
                         if meta_info["organisation_settings"][module][key]["is_editable"] == True:
-                            new_config_settings["organisation_settings"][module][key] = updated_settings["organisation_settings"][module][key]
+                            new_config_settings[module][key] = updated_settings[module][key]
 
                 config_obj.config_setting = new_config_settings
                 config_obj.save(commit=True)

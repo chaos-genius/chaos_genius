@@ -12,20 +12,22 @@ def get_dashboard_list():
     dashboard_dict_list = []
     for dashboard in dashboard_list:
         dashboard_dict = dashboard.as_dict
-        dashboard_dict["kpi_count"] = DashboardKpiMapper.filter_by(dashboard=dashboard.id, active=True).count()
+        dashboard_dict["kpi_count"] = DashboardKpiMapper.query.filter_by(dashboard=dashboard.id, active=True).count()
         dashboard_dict_list.append(dashboard_dict)
     return dashboard_dict_list
 
 def kpi_mapper_dict(mapper_list):
     mapper_dict_list = []
     for mapper in mapper_list:
-        mapper_dict=mapper.as_dict
+        mapper_dict=mapper.safe_dict
         del mapper_dict["dashboard"]
         mapper_dict_list.append(mapper_dict)
     return mapper_dict_list
 
 def get_dashboard_dict_by_id(dashboard_id):
     dashboard_obj = Dashboard.query.get(dashboard_id)
+    if dashboard_obj is None:
+        return None
     mapper_obj_list = DashboardKpiMapper.query.filter_by(dashboard=dashboard_obj.id, active=True)
     mapper_dict_list = kpi_mapper_dict(mapper_obj_list)
     dashboard_dict = dashboard_obj.as_dict
@@ -48,4 +50,11 @@ def edit_dashboard_kpis(dashboard_id,kpi_delete_list,kpi_add_list):
 
     return {"mapper_delete_list":mapper_delete_list, "mapper_add_list":mapper_add_list}
 
-
+def check_kpis_in_dashboard(dashboard_id, kpi_ids):
+    kpi_ids = list(set(kpi_ids))
+    mapper_list = DashboardKpiMapper.query.filter(DashboardKpiMapper.dashboard == dashboard_id,
+                                                  DashboardKpiMapper.kpi.in_(kpi_ids)
+                                                 )
+    if len(mapper_list)==len(kpi_ids):
+        return True
+    return False

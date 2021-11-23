@@ -3,6 +3,7 @@
 from flask import Blueprint, current_app, request, jsonify
 import datetime as dt
 from chaos_genius.controllers.dashboard_controller import (
+    check_kpis_in_dashboard,
     create_dashboard,
     get_dashboard_dict_by_id,
     get_dashboard_by_id,
@@ -47,21 +48,30 @@ def edit_dashboard():
         kpi_add_list = body["kpi_add_list"]
 
         dashboard_obj = get_dashboard_by_id(dashboard_id)
-        if dashboard_name != dashboard_obj.name:
-            dashboard_obj.name = dashboard_name
+        if dashboard_obj is not None:
+            if not(check_kpis_in_dashboard(dashboard_id, kpi_delete_list)):
+                status = "failure"
+                message = "Cannot delete KPIs which do not belong to the specified dashboard"
+                return jsonify({"status":status, "message":message})
 
-        mapper_list_dict = edit_dashboard_kpis(dashboard_obj.id,kpi_delete_list,kpi_add_list)
-        for mapper_obj in mapper_list_dict["mapper_delete_list"]:
-            mapper_obj.active = False
-            mapper_obj.save(commit=True)
+            if dashboard_name != dashboard_obj.name:
+                dashboard_obj.name = dashboard_name
 
-        for mapper_obj in mapper_list_dict["mapper_add_list"]:
-            mapper_obj.save(commit=True)
+            mapper_list_dict = edit_dashboard_kpis(dashboard_obj.id,kpi_delete_list,kpi_add_list)
+            for mapper_obj in mapper_list_dict["mapper_delete_list"]:
+                mapper_obj.active = False
+                mapper_obj.save(commit=True)
 
-        dashboard_obj.last_modified = dt.datetime.utcnow()
-        dashboard_obj.save(commit=True)
-        status = "success"
-        message = "All changes successfully saved"
+            for mapper_obj in mapper_list_dict["mapper_add_list"]:
+                mapper_obj.save(commit=True)
+
+            dashboard_obj.last_modified = dt.datetime.utcnow()
+            dashboard_obj.save(commit=True)
+            status = "success"
+            message = "All changes successfully saved"
+        else:
+            status="failure"
+            message="Dashboard with the provided ID does not exist"
     except Exception as e:
         status = "failure"
         message = "Error in editing dashboard: {}".format(e)
@@ -75,7 +85,11 @@ def get_dashboard():
     try:
         dashboard_id = request.args.get("dashboard_id")
         dashboard_dict = get_dashboard_dict_by_id(dashboard_id)
-        status = "success"
+        if dashboard_dict is not None:
+            status = "success"
+        else:
+            status="failure"
+            message="Dashboard with the provided ID does not exist"
     except Exception as e:
         status = "failure"
         message = "Failed to fetch dashboard details :{}".format(e)
@@ -91,10 +105,14 @@ def delete_dashboard():
     try:
         dashboard_id = request.args.get("dashboard_id")
         dashboard = get_dashboard_by_id(dashboard_id)
-        dashboard.active = False
-        dashboard.save(commit=True)
-        status = "success"
-        message = " Dashboard deleted successfully"
+        if dashboard is not None:
+            dashboard.active = False
+            dashboard.save(commit=True)
+            status = "success"
+            message = " Dashboard deleted successfully"
+        else:
+            status="failure"
+            message="Dashboard with the provided ID does not exist"
     except Exception as e:
         status = "failure"
         message = "Failed to delete dashboard :{}".format(e)

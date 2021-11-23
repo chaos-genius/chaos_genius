@@ -46,7 +46,12 @@ def edit_dashboard_kpis(dashboard_id,kpi_delete_list,kpi_add_list):
                                                             )
     mapper_add_list = []
     for kpi_id in kpi_add_list:
-        mapper_add_list.append(DashboardKpiMapper(dashboard=dashboard_id, kpi=kpi_id))
+        mapper_obj = DashboardKpiMapper.query.filter(dashboard=dashboard_id, kpi=kpi_id)
+        if mapper_obj is None:
+            mapper_obj = DashboardKpiMapper(dashboard=dashboard_id, kpi=kpi_id)
+        else:
+            mapper_obj.active = True
+        mapper_add_list.append(mapper_obj)
 
     return {"mapper_delete_list":mapper_delete_list, "mapper_add_list":mapper_add_list}
 

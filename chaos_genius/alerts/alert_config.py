@@ -1,4 +1,3 @@
-import json
 from copy import deepcopy
 
 EMAIL_CONFIGS_EXPOSE = {
@@ -14,10 +13,16 @@ SLACK_CONFIGS_EXPOSE = {
     "channel_name": True
 }
 
+ORGANISATION_SETTINGS_EXPOSE = {
+    "account": True,
+    "metrics": True
+}
+
 
 helper_objects = {
-    'email': EMAIL_CONFIGS_EXPOSE,
-    'slack': SLACK_CONFIGS_EXPOSE
+    "email": EMAIL_CONFIGS_EXPOSE,
+    "slack": SLACK_CONFIGS_EXPOSE,
+    "organisation_settings": ORGANISATION_SETTINGS_EXPOSE
 }
 
 # TODO: Duplicate logic in the alert_cofig model too

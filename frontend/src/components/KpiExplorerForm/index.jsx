@@ -48,6 +48,7 @@ const aggregate = [
   { value: 'count', label: 'Count' },
   { value: 'sum', label: 'Sum' }
 ];
+
 const dashboard = [
   {
     value: 'newdashboard',
@@ -64,6 +65,13 @@ const dashboard = [
   },
   { value: 'Customer Service', label: 'Customer Service' }
 ];
+// const customAddDashboard = ({ data }) => (
+//   <div className="input-select">
+//     <div className="input-select__single-value">
+//       <span>{data.label}</span>
+//     </div>
+//   </div>
+// );
 // const operator = [
 //   { value: '=', label: '=' },
 //   { value: '+', label: '+' },
@@ -96,7 +104,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     datasource: '',
     tableoption: '',
     metricOption: '',
-    datetime_column: ''
+    datetime_column: '',
+    dashboard: ''
   });
 
   //const [inputList, setInputList] = useState([]);
@@ -614,6 +623,18 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     setIsOpen(false);
   };
 
+  //   var IndicatorSeparator = function (_a) {
+  //     var innerProps = _a.innerProps;
+  //     return style;
+  //     {
+  //         indicatorSeparatorStyle;
+  //     }
+  //     {
+  //         innerProps;
+  //     }
+  //     />;;
+  // };
+
   /* This is add filter function code */
 
   // const handleAddClick = () => {
@@ -921,8 +942,22 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               isMulti
               options={dashboard}
               classNamePrefix="selectcategory"
-              placeholder="Select Dimensions"
+              placeholder="Select"
               menuPlacement="top"
+              // components={{ SingleValue: customAddDashboard }}
+              value={option.dashboard !== '' && option.dashboard}
+              onChange={(e) => {
+                const array = [];
+                e &&
+                  e.forEach((data) => {
+                    if (data.value === 'newdashboard') {
+                      setIsOpen(true);
+                    } else if (data.value !== 'newdashboard') {
+                      array.push(data);
+                    }
+                  });
+                setOption({ ...option, dashboard: array });
+              }}
             />
           </div>
           {/* <div className="form-group">

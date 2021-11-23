@@ -81,7 +81,7 @@ const DataSourceFilter = ({
           </span>
         </div>
       </div>{' '}
-      {kpiList && (
+      {kpiList && kpiList.length !== 0 && (
         <div className="filter-layout">
           <h3>Dashboard</h3>{' '}
           <div className="form-group icon ">
@@ -120,7 +120,7 @@ const DataSourceFilter = ({
       )}
       <div className="filter-layout">
         <h3>Data Source Type</h3>{' '}
-        <div className="filter-size">
+        <div className={datasource ? '' : 'filter-size'}>
           {datasourceType &&
           datasourceType[0] !== undefined &&
           datasourceType.length !== 0 ? (

@@ -9,10 +9,12 @@ const Dashboardname = ({ data }) => {
     <ul className="table-tips dashboard-tip">
       {data &&
         data.length !== 0 &&
-        data.slice(0, show).map((dimension) => (
+        data.slice(0, show).map((dimension, index) => (
           <li>
             <label>
-              {dimension}
+              {data.length - 1 === index
+                ? dimension
+                : dimension.concat('', ',')}
               {/* {show !== 1 && ','} */}
             </label>
           </li>

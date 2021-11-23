@@ -67,7 +67,7 @@ def get_onboarding_status():
         "data": {
             "steps": steps,
             "completion_precentage": completion_precentage,
-            "organisation_settings": organisation_settings
+            "onboarding_status": organisation_settings
         }
     })
 

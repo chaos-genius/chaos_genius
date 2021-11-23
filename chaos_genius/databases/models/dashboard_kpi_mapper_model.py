@@ -29,7 +29,6 @@ class DashboardKpiMapper(PkModel):
             "id": self.id,
             "dashboard": self.dashboard,
             "kpi": self.kpi,
-            "active": self.active,
             "created_at": self.created_at
         }
 

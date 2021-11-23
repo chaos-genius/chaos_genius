@@ -90,6 +90,7 @@ def get_dashboard():
         else:
             status="failure"
             message="Dashboard with the provided ID does not exist"
+            dashboard_dict = {}
     except Exception as e:
         status = "failure"
         message = "Failed to fetch dashboard details :{}".format(e)

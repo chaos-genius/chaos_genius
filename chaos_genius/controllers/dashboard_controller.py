@@ -43,10 +43,13 @@ def edit_dashboard_kpis(dashboard_id,kpi_delete_list,kpi_add_list):
     if kpi_delete_list:
         mapper_delete_list = DashboardKpiMapper.query.filter(DashboardKpiMapper.dashboard == dashboard_id,
                                                              DashboardKpiMapper.kpi.in_(kpi_delete_list)
-                                                            )
+                                                            ).all()
     mapper_add_list = []
     for kpi_id in kpi_add_list:
-        mapper_obj = DashboardKpiMapper.query.filter(dashboard=dashboard_id, kpi=kpi_id)
+        mapper_obj = DashboardKpiMapper.query.filter(
+                                                        DashboardKpiMapper.dashboard == dashboard_id, 
+                                                        DashboardKpiMapper.kpi == kpi_id
+                                                    ).first()
         if mapper_obj is None:
             mapper_obj = DashboardKpiMapper(dashboard=dashboard_id, kpi=kpi_id)
         else:
@@ -57,9 +60,15 @@ def edit_dashboard_kpis(dashboard_id,kpi_delete_list,kpi_add_list):
 
 def check_kpis_in_dashboard(dashboard_id, kpi_ids):
     kpi_ids = list(set(kpi_ids))
-    mapper_list = DashboardKpiMapper.query.filter(DashboardKpiMapper.dashboard == dashboard_id,
-                                                  DashboardKpiMapper.kpi.in_(kpi_ids)
-                                                 )
-    if len(mapper_list)==len(kpi_ids):
-        return True
-    return False
+    mapper_list = DashboardKpiMapper.query.filter(
+                                                  DashboardKpiMapper.dashboard == dashboard_id,
+                                                  DashboardKpiMapper.kpi.in_(kpi_ids),
+                                                  DashboardKpiMapper.active == True
+                                                 ).all()
+    
+    temp_list = []
+
+    for val in mapper_list:
+        temp_list.append(val.kpi)
+    
+    return set(kpi_ids).issubset(temp_list)

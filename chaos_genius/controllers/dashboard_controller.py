@@ -19,8 +19,10 @@ def get_dashboard_list():
 def kpi_mapper_dict(mapper_list):
     mapper_dict_list = []
     for mapper in mapper_list:
-        mapper_dict_list.append(mapper.as_dict)
-    return mapper_list
+        mapper_dict=mapper.as_dict
+        del mapper_dict["dashboard"]
+        mapper_dict_list.append(mapper_dict)
+    return mapper_dict_list
 
 def get_dashboard_dict_by_id(dashboard_id):
     dashboard_obj = Dashboard.query.get(dashboard_id)

@@ -73,8 +73,7 @@ def get_dashboard():
     status, message = "", ""
     dashboard_dict = {}
     try:
-        body = request.get_json()
-        dashboard_id = body["dashboard_id"]
+        dashboard_id = request.args.get("dashboard_id")
         dashboard_dict = get_dashboard_dict_by_id(dashboard_id)
         status = "success"
     except Exception as e:
@@ -82,7 +81,7 @@ def get_dashboard():
         message = "Failed to fetch dashboard details :{}".format(e)
 
     return jsonify(
-        {"status": status, "message": message, "dashboard_dict": dashboard_dict}
+        {"status": status, "message": message, "dashboard": dashboard_dict}
     )
 
 
@@ -90,8 +89,7 @@ def get_dashboard():
 def delete_dashboard():
     status, message = "", ""
     try:
-        body = request.get_json
-        dashboard_id = body["dashboard_id"]
+        dashboard_id = request.args.get("dashboard_id")
         dashboard = get_dashboard_by_id(dashboard_id)
         dashboard.active = False
         dashboard.save(commit=True)

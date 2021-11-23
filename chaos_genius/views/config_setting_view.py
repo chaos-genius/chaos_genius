@@ -116,9 +116,9 @@ def set_config():
                 config_obj.active = False
                 config_obj.save(commit=True)
                 
-                new_config_settings = config_obj.get("config_setting", {})
+                new_config_settings = config_obj.config_setting
                 for module in config_settings.keys():
-                    new_config_settings[module].update(config_settings["module"])
+                    new_config_settings[module].update(config_settings[module])
                 config_settings = new_config_settings
         else:
             if config_obj:
@@ -234,12 +234,11 @@ def edit_config_setting():
         meta_info = ConfigSetting.meta_info()
         if config_obj and config_obj.active is True:
             if config_obj.name == "organisation_settings":
-                new_config_settings = deepcopy(config_obj.get("config_setting", {}))
+                new_config_settings = deepcopy(config_obj.config_setting)
                 updated_settings = data.get("config_settings", {})
 
-                for module in updated_settings:
-                    for key in updated_settings[module]:
-
+                for module in updated_settings.keys():
+                    for key in updated_settings.get(module).keys():
                         if meta_info["organisation_settings"][module][key]["is_editable"] == True:
                             new_config_settings["organisation_settings"][module][key] = updated_settings["organisation_settings"][module][key]
 

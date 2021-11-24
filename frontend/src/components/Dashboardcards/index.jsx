@@ -57,7 +57,7 @@ const Dashboardcards = () => {
             <span>No of KPI’s</span>
             <h5>24</h5>
           </div>
-          <div className="body-content">
+          <div className="body-content created-on-content">
             <span>Created On</span>
             <h5>09 Oct, 2021</h5>
           </div>
@@ -109,7 +109,7 @@ const Dashboardcards = () => {
             <span>No of KPI’s</span>
             <h5>32</h5>
           </div>
-          <div className="body-content">
+          <div className="body-content created-on-content">
             <span>Created On</span>
             <h5>09 Oct, 2021</h5>
           </div>
@@ -161,7 +161,7 @@ const Dashboardcards = () => {
             <span>No of KPI’s</span>
             <h5>40</h5>
           </div>
-          <div className="body-content">
+          <div className="body-content created-on-content">
             <span>Created On</span>
             <h5>02 Oct, 2021</h5>
           </div>
@@ -209,7 +209,7 @@ const Dashboardcards = () => {
           </div>
         </div>
         <div className="body-card">
-          <div className="body-content">
+          <div className="body-content created-on-content">
             <span>No of KPI’s</span>
             <h5>19</h5>
           </div>
@@ -261,7 +261,7 @@ const Dashboardcards = () => {
           </div>
         </div>
         <div className="body-card">
-          <div className="body-content">
+          <div className="body-content created-on-content">
             <span>No of KPI’s</span>
             <h5>24</h5>
           </div>
@@ -317,7 +317,7 @@ const Dashboardcards = () => {
             <span>No of KPI’s</span>
             <h5>33</h5>
           </div>
-          <div className="body-content">
+          <div className="body-content created-on-content">
             <span>Created On</span>
             <h5>20 Sep, 2021</h5>
           </div>

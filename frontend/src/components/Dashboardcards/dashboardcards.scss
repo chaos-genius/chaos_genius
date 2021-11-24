@@ -76,6 +76,9 @@
           color: $black_variation-2;
           margin-top: 8px;
         }
+        &.created-on-content {
+          text-align: end;
+        }
       }
     }
   }

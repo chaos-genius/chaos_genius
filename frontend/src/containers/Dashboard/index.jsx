@@ -16,7 +16,6 @@ import Analystics from '../../components/Analystics';
 import { getDashboardSidebar, anomalySetting } from '../../redux/actions';
 
 import store from '../../redux/store';
-import EmptyDashboard from '../../components/EmptyDashboard';
 
 const SETTING_RESET = {
   type: 'SETTING_RESET'
@@ -104,78 +103,72 @@ const Dashboard = () => {
           </div>
         </div>
         {/* explore wrapper */}
-        {sidebarList && sidebarList.length !== 0 ? (
-          <div className="explore-wrapper">
-            {/* filter section */}
-            <div className="filter-section">
-              {sidebarList && kpi && (
-                <FilterWithTab
-                  tabs={tab}
-                  kpi={kpi}
-                  data={sidebarList}
-                  setActive={setActive}
-                  SetKpiAggregate={SetKpiAggregate}
-                />
-              )}
-            </div>
-            {/* Graph Section*/}
-            <div className="graph-section">
-              {/* Dashboard Header */}
-              {location[2] !== 'settings' ? (
-                <div className="dashboard-layout dashboard-header-tab">
-                  <div className="dashboard-subheader">
-                    <div className="common-tab">
-                      <ul>
-                        <li
-                          className={tab === 'deepdrills' ? 'active' : ''}
-                          onClick={() => onTabClick('deepdrills')}>
-                          DeepDrills
-                        </li>
+        <div className="explore-wrapper">
+          {/* filter section */}
+          <div className="filter-section">
+            {sidebarList && kpi && (
+              <FilterWithTab
+                tabs={tab}
+                kpi={kpi}
+                data={sidebarList}
+                setActive={setActive}
+                SetKpiAggregate={SetKpiAggregate}
+              />
+            )}
+          </div>
+          {/* Graph Section*/}
+          <div className="graph-section">
+            {/* Dashboard Header */}
+            {location[2] !== 'settings' ? (
+              <div className="dashboard-layout dashboard-header-tab">
+                <div className="dashboard-subheader">
+                  <div className="common-tab">
+                    <ul>
+                      <li
+                        className={tab === 'deepdrills' ? 'active' : ''}
+                        onClick={() => onTabClick('deepdrills')}>
+                        DeepDrills
+                      </li>
 
-                        <li
-                          className={tab === 'anomaly' ? 'active' : ''}
-                          onClick={() => onTabClick('anomaly')}>
-                          Anomaly
-                        </li>
-                      </ul>
-                    </div>
-                    <Link to={`/kpi/settings/${kpi}`}>
-                      <div className="common-option">
-                        <button className="btn grey-button">
-                          <img src={Setting} alt="Setting" />
-                          <span>Settings</span>
-                        </button>
-                      </div>
-                    </Link>
+                      <li
+                        className={tab === 'anomaly' ? 'active' : ''}
+                        onClick={() => onTabClick('anomaly')}>
+                        Anomaly
+                      </li>
+                    </ul>
                   </div>
+                  <Link to={`/kpi/settings/${kpi}`}>
+                    <div className="common-option">
+                      <button className="btn grey-button">
+                        <img src={Setting} alt="Setting" />
+                        <span>Settings</span>
+                      </button>
+                    </div>
+                  </Link>
                 </div>
-              ) : (
-                ''
-              )}
-              {tab === 'deepdrills' && kpi && active && anomalySettingData && (
-                <Dashboardgraph
-                  kpi={kpi}
-                  kpiName={active}
-                  kpiAggregate={kpiAggregate}
-                  anomalystatus={anomalySettingData}
-                />
-              )}
-              {tab === 'anomaly' && kpi && anomalySettingData && (
-                <Anomaly kpi={kpi} anomalystatus={anomalySettingData} />
-              )}
+              </div>
+            ) : (
+              ''
+            )}
+            {tab === 'deepdrills' && kpi && active && anomalySettingData && (
+              <Dashboardgraph
+                kpi={kpi}
+                kpiName={active}
+                kpiAggregate={kpiAggregate}
+                anomalystatus={anomalySettingData}
+              />
+            )}
+            {tab === 'anomaly' && kpi && anomalySettingData && (
+              <Anomaly kpi={kpi} anomalystatus={anomalySettingData} />
+            )}
 
-              {location[2] === 'settings' && (
-                <div className="table-section setting-section">
-                  <Analystics />
-                </div>
-              )}
-            </div>
+            {location[2] === 'settings' && (
+              <div className="table-section setting-section">
+                <Analystics />
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="empty-container">
-            <EmptyDashboard />
-          </div>
-        )}
+        </div>
       </>
     );
   }

@@ -51,7 +51,7 @@ const DashboardForm = () => {
         />
       </div>
       <div className="form-action">
-        <button className="btn black-button" disabled>
+        <button className="btn black-button">
           <span>Add Dashboard</span>
         </button>
       </div>

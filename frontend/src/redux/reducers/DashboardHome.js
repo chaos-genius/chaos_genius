@@ -1,13 +1,19 @@
 import {
   DASHBOARDFAILURE,
   DASHBOARDREQUEST,
-  DASHBOARDSUCCESS
+  DASHBOARDSUCCESS,
+  DASHBOARDDELETEREQUEST,
+  DASHBOARDDELETERESPONSE,
+  DASHBOARDDELETEFAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
   dashboardList: '',
   dashboardListLoading: false,
-  dashboardListError: false
+  dashboardListError: false,
+  dashboardDelete: '',
+  dashboardDeleteLoading: false,
+  dashboardDeleteError: false
 };
 
 export const DashboardHome = (state = initialState, action) => {
@@ -30,6 +36,27 @@ export const DashboardHome = (state = initialState, action) => {
         ...state,
         dashboardListLoading: false,
         dashboardListError: true
+      };
+    }
+    case DASHBOARDDELETEREQUEST: {
+      return {
+        ...state,
+        dashboardDeleteLoading: true,
+        dashboardDeleteError: false
+      };
+    }
+    case DASHBOARDDELETERESPONSE: {
+      return {
+        ...state,
+        dashboardDelete: action.data,
+        dashboardDeleteLoading: false
+      };
+    }
+    case DASHBOARDDELETEFAILURE: {
+      return {
+        ...state,
+        dashboardDeleteLoading: false,
+        dashboardDeleteError: true
       };
     }
     default:

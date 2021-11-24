@@ -88,10 +88,9 @@ const Dashboardconfigure = () => {
           <div className="dashboard-card-wrapper">
             <Dashboardcards dashboardList={dashboardList} />
           </div>
-          :
         </>
       ) : (
-        <div className="empty-container">
+        <div className="empty-dashboard-container">
           <EmptyDashboard />
         </div>
       )}

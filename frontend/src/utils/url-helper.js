@@ -42,3 +42,4 @@ export const KPI_ALERT_META_INFO_URL = `${BASE_URL}/api/alert/meta-info`;
 export const GET_KPI_ALERT_BY_ID_URL = `${BASE_URL}/api/alert`;
 export const SETTING_META_INFO_URL = `${BASE_URL}/api/anomaly-data/anomaly-params/meta-info`;
 export const DASHBOARD_LIST_URL = `${BASE_URL}/api/dashboard/get_dashboard_list`;
+export const DASHBOARD_DELETE_URL = `${BASE_URL}/api/dashboard/delete_dashboard`;

@@ -50,7 +50,7 @@ import {
   anomalySetting
 } from './Anomaly';
 import { kpiSettingSetup, kpiEditSetup, settingMetaInfo } from './setting';
-import { getDashboard } from './DashboardHome';
+import { getDashboard, getDashboardDelete } from './DashboardHome';
 
 export {
   getAllDataSources,
@@ -97,5 +97,6 @@ export {
   kpiAlertEnable,
   anomalySetting,
   settingMetaInfo,
-  getDashboard
+  getDashboard,
+  getDashboardDelete
 };

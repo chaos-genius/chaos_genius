@@ -43,6 +43,7 @@ def anomaly_single_kpi(kpi_id, end_date=None):
     Must be run as a celery task.
     """
     print(f"Running anomaly for KPI ID: {kpi_id}")
+    # TODO(TaskTable): Anomaly starting - success
 
     status = run_anomaly_for_kpi(kpi_id, end_date)
 

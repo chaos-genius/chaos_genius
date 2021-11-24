@@ -9,7 +9,7 @@ const AddKpiExplorer = () => {
   const history = useHistory();
   const data = history.location.pathname.split('/');
   return (
-    <div>
+    <>
       {/* Page Navigation */}
       <div className="page-navigation">
         {/* Breadcrumb */}
@@ -49,7 +49,7 @@ const AddKpiExplorer = () => {
       <div className="add-form-container">
         <KpiExplorerForm id={data[3]} />
       </div>
-    </div>
+    </>
   );
 };
 

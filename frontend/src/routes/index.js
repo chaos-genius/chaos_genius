@@ -22,6 +22,7 @@ import Result from '../containers/Result';
 import Login from '../containers/Login';
 import Kpisetting from '../containers/KpiSetting';
 import Dashboardconfigure from '../containers/Dashboardconfigure';
+import AddDashboard from '../containers/AddDashboard';
 
 const Routes = () => (
   <Switch>
@@ -124,6 +125,16 @@ const Routes = () => (
       exact
       path="/noresult"
       component={(props) => <Result {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
+      path="/dashboard/add"
+      component={(props) => <AddDashboard {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
+      path="/dashboard/edit/:id"
+      component={(props) => <AddDashboard {...props} />}
     />
     <PrivateRouteWithSidebar
       exact

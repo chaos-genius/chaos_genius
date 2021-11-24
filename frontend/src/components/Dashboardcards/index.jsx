@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import { Link } from 'react-router-dom';
+
 import { useDispatch } from 'react-redux';
 
 import Modal from 'react-modal';
@@ -68,15 +70,21 @@ const Dashboardcards = ({ dashboardList }) => {
                       />
                     </div>
                     <ul className="dropdown-menu">
-                      <li>
-                        <img src={Edit} alt="Edit" className="action-disable" />
-                        <img
-                          src={EditActive}
-                          alt="Edit"
-                          className="action-active"
-                        />
-                        Edit
-                      </li>
+                      <Link to={`/dashboard/edit/${dashboard.id}`}>
+                        <li>
+                          <img
+                            src={Edit}
+                            alt="Edit"
+                            className="action-disable"
+                          />
+                          <img
+                            src={EditActive}
+                            alt="Edit"
+                            className="action-active"
+                          />
+                          Edit
+                        </li>
+                      </Link>
                       <li
                         className="delete-item"
                         onClick={() => {

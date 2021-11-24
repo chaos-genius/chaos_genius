@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { Link } from 'react-router-dom';
 
@@ -10,7 +10,48 @@ import Dashboardcards from '../../components/Dashboardcards';
 
 import './dashboardconfigure.scss';
 
+import { useSelector, useDispatch } from 'react-redux';
+
+import { getDashboard } from '../../redux/actions';
+import EmptyDashboard from '../../components/EmptyDashboard';
+
+const dashboardList = [
+  {
+    active: true,
+    created_at: 'Tue, 23 Nov 2021 05:53:54 GMT',
+    id: 11,
+    kpi_count: 5,
+    last_modified: 'Tue, 23 Nov 2021 08:57:00 GMT',
+    name: 'first_dashboard_modified'
+  },
+  {
+    active: true,
+    created_at: 'Tue, 23 Nov 2021 09:12:40 GMT',
+    id: 12,
+    kpi_count: 5,
+    last_modified: 'Tue, 23 Nov 2021 09:12:40 GMT',
+    name: 'second_dashboard'
+  },
+  {
+    active: true,
+    created_at: 'Tue, 23 Nov 2021 09:13:05 GMT',
+    id: 13,
+    kpi_count: 5,
+    last_modified: 'Tue, 23 Nov 2021 09:13:05 GMT',
+    name: 'third_dashboard'
+  }
+];
+
 const Dashboardconfigure = () => {
+  const dispatch = useDispatch();
+  // const { dashboardLis } = useSelector((state) => {
+  //   return state.DashboardHome;
+  // });
+
+  useEffect(() => {
+    dispatch(getDashboard());
+  }, [dispatch]);
+
   return (
     <>
       <div className="heading-option">
@@ -24,27 +65,36 @@ const Dashboardconfigure = () => {
           </Link>
         </div>
       </div>{' '}
-      <div className="dashboard-options">
-        <div className="form-group icon">
-          <input
-            type="text"
-            className="form-control h-40"
-            placeholder="Search dashboard"
-          />
-          <span>
-            <img src={Search} alt="Search Icon" />
-          </span>
-        </div>{' '}
-        <Select
-          // options={data}
-          classNamePrefix="selectcategory"
-          placeholder="last modified"
-          isSearchable={false}
-        />
-      </div>
-      <div className="dashboard-card-wrapper">
-        <Dashboardcards />
-      </div>
+      {dashboardList && dashboardList.length !== 0 ? (
+        <>
+          <div className="dashboard-options">
+            <div className="form-group icon">
+              <input
+                type="text"
+                className="form-control h-40"
+                placeholder="Search dashboard"
+              />
+              <span>
+                <img src={Search} alt="Search Icon" />
+              </span>
+            </div>{' '}
+            <Select
+              // options={data}
+              classNamePrefix="selectcategory"
+              placeholder="last modified"
+              isSearchable={false}
+            />
+          </div>
+          <div className="dashboard-card-wrapper">
+            <Dashboardcards dashboardList={dashboardList} />
+          </div>
+          :
+        </>
+      ) : (
+        <div className="empty-container">
+          <EmptyDashboard />
+        </div>
+      )}
     </>
   );
 };

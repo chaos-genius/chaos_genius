@@ -101,11 +101,12 @@ export const getCreateDashboardFailure = () => {
   };
 };
 
-export const getCreateDashboard = (id) => {
+export const getCreateDashboard = (dashboard) => {
   return async (dispatch) => {
     dispatch(getCreateDashboardRequest());
     const { data, error, status } = await postRequest({
-      url: DASHBOARD_CREATE_URL
+      url: DASHBOARD_CREATE_URL,
+      data: dashboard
     });
     if (error) {
       dispatch(getCreateDashboardFailure());

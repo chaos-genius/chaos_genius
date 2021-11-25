@@ -10,7 +10,7 @@ import Dashboardcards from '../../components/Dashboardcards';
 
 import './dashboardconfigure.scss';
 
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { getDashboard } from '../../redux/actions';
 import EmptyDashboard from '../../components/EmptyDashboard';

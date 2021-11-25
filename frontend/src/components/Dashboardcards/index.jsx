@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 
 import { Link } from 'react-router-dom';
 
-import { useDispatch } from 'react-redux';
-
 import Modal from 'react-modal';
 
 import More from '../../assets/images/more.svg';
@@ -19,7 +17,7 @@ import './dashboardcards.scss';
 import { formatDate } from '../../utils/date-helper';
 
 const Dashboardcards = ({ dashboardList }) => {
-  // const dispatch = useDispatch();
+  //const dispatch = useDispatch();
 
   const [isOpen, setIsOpen] = useState(false);
   const [data, setData] = useState('');

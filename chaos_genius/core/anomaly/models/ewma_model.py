@@ -1,23 +1,23 @@
-"""Provides the EWSTDModel for anomaly detection."""
+"""Provides the EWMADModel for anomaly detection."""
 
 import pandas as pd
 
 from chaos_genius.core.anomaly.models import AnomalyModel
 from chaos_genius.core.anomaly.utils import get_timedelta
 
-EWSTDSENS = {
+EWMASENS = {
     "high": 0.1,
     "medium": 0.2,
     "low": 0.4,
 }
 
-EWSTDFREQ = {
+EWMAFREQ = {
     "H": 24,
     "D": 4,
 }
 
 
-class EWSTDModel(AnomalyModel):
+class EWMAModel(AnomalyModel):
     """EWSTD model for anomaly detection."""
 
     def __init__(self, *args, model_kwargs={}, **kwargs):
@@ -34,7 +34,7 @@ class EWSTDModel(AnomalyModel):
         df: pd.DataFrame,
         sensitivity: str,
         frequency: str,
-        pred_df: pd.DataFrame = None,
+        pred_df: pd.DataFrame = None
     ) -> pd.DataFrame:
         """Predict anomalies on data.
 
@@ -52,33 +52,29 @@ class EWSTDModel(AnomalyModel):
         columns
         :rtype: pd.DataFrame
         """
-        df = df.rename(columns={"dt": "ds", "y": "y"})
+        df = df.rename(columns={'dt': 'ds', 'y': 'y'})
 
-        num_dev = EWSTDSENS[sensitivity.lower()]
+        num_dev = EWMASENS[sensitivity.lower()]
 
         if pred_df is None:
-            ew_mean = df["y"].ewm(span=EWSTDFREQ[frequency]).mean().iloc[-1]
-            ew_std_dev = df["y"].ewm(span=EWSTDFREQ[frequency]).std().iloc[-1]
-            threshold_u = ew_mean + (num_dev * ew_std_dev)
-            threshold_l = ew_mean - (num_dev * ew_std_dev)
+            ew_mean = df["y"].ewm(span=EWMAFREQ[frequency]).mean().iloc[-1]
+            threshold_u = ew_mean + (num_dev * ew_mean)
+            threshold_l = ew_mean - (num_dev * ew_mean)
             forecast_value = (threshold_l + threshold_u)/2
             forecast_time = df['ds'].iloc[-1] + get_timedelta(frequency, 1)
             df = df.append(
                 {'ds': forecast_time, 'y': forecast_value}, ignore_index=True)
 
-        df['ew_mean'] = df["y"].ewm(span=EWSTDFREQ[frequency]).mean()
-        df['ew_std_dev'] = df["y"].ewm(span=EWSTDFREQ[frequency]).std().fillna(0)
-        df['yhat_lower'] = df['ew_mean'] - (num_dev * df['ew_std_dev'])
-        df['yhat_upper'] = df['ew_mean'] + (num_dev * df['ew_std_dev'])
+        df['ew_mean'] = df["y"].ewm(span=EWMAFREQ[frequency]).mean()
+        df['yhat_lower'] = df['ew_mean'] - (num_dev * df['ew_mean'])
+        df['yhat_upper'] = df['ew_mean'] + (num_dev * df['ew_mean'])
         df['yhat'] = (df['yhat_lower'] + df['yhat_upper'])/2
 
-        df = df[["ds", "yhat", "yhat_lower", "yhat_upper"]]
+        df = df[['ds', 'yhat', 'yhat_lower', 'yhat_upper']]
 
-        return df.rename(
-            columns={
-                "ds": "dt",
-                "yhat": "y",
-                "yhat_lower": "yhat_lower",
-                "yhat_upper": "yhat_upper",
-            }
-        )
+        return df.rename(columns={
+            'ds': 'dt',
+            'yhat': 'y',
+            'yhat_lower': 'yhat_lower',
+            'yhat_upper': 'yhat_upper'
+        })

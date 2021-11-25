@@ -7,7 +7,6 @@ from sqlalchemy import func
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.sql.functions import coalesce
 
-from chaos_genius.controllers.kpi_controller import run_anomaly_for_kpi, run_rca_for_kpi
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.extensions import celery as celery_ext
 
@@ -44,6 +43,9 @@ def anomaly_single_kpi(kpi_id, end_date=None):
 
     Must be run as a celery task.
     """
+    #TODO: fix circular import
+    from chaos_genius.controllers.kpi_controller import run_anomaly_for_kpi, run_rca_for_kpi
+
     print(f"Running anomaly for KPI ID: {kpi_id}")
     checkpoint = checkpoint_initial(kpi_id, "Anomaly", "Anomaly Scheduler - Task initiated")
     task_id = checkpoint.task_id
@@ -71,10 +73,13 @@ def rca_single_kpi(kpi_id: int):
 
     Must be run as a celery task.
     """
+    #TODO: Fix circular imports
+    from chaos_genius.controllers.kpi_controller import run_rca_for_kpi
+
     print(f"Running RCA for KPI ID: {kpi_id}")
     checkpoint = checkpoint_initial(kpi_id, "DeepDrills", "DeepDrills Scheduler - Task initiated")
     task_id = checkpoint.task_id
-
+    
     status = run_rca_for_kpi(kpi_id, task_id=task_id)
 
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))

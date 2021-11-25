@@ -142,7 +142,9 @@ def get_checkpoints(sort_by_task_id=True, kpi_info=True, track_subtasks=True) ->
 
             if track_subtasks:
 
-                if kpi.id not in total_tasks_cache:
+                key = (kpi.id, task.analytics_type)
+
+                if key not in total_tasks_cache:
                     if task.analytics_type == "Anomaly":
                         from chaos_genius.core.anomaly.controller import AnomalyDetectionController
                         total_tasks = AnomalyDetectionController.total_tasks(kpi)
@@ -151,13 +153,13 @@ def get_checkpoints(sort_by_task_id=True, kpi_info=True, track_subtasks=True) ->
                         total_tasks = 10
                     else:
                         raise ValueError(f"Unknown analytics type: {task.analytics_type} for {task}")
-                    total_tasks_cache[kpi.id] = total_tasks
+                    total_tasks_cache[key] = total_tasks
 
                 if task.task_id not in subtasks_cache:
                     subtasks_cache[task.task_id] = [0]
 
                 task.completed_subtasks = subtasks_cache[task.task_id]
                 subtasks_cache[task.task_id][0] += 1
-                task.total_subtasks = total_tasks_cache[kpi.id]
+                task.total_subtasks = total_tasks_cache[key]
 
     return tasks

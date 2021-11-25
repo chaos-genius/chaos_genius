@@ -72,8 +72,10 @@ def rca_single_kpi(kpi_id: int):
     Must be run as a celery task.
     """
     print(f"Running RCA for KPI ID: {kpi_id}")
+    checkpoint = checkpoint_intial(kpi_id, "DeepDrills", "DeepDrills Scheduler - Task initiated")
+    task_id = checkpoint.task_id
 
-    status = run_rca_for_kpi(kpi_id)
+    status = run_rca_for_kpi(kpi_id, task_id=task_id)
 
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
 

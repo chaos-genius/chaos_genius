@@ -90,7 +90,7 @@ def _get_end_date_for_rca_kpi(kpi_info: dict, end_date: date = None) -> date:
     return end_date
 
 
-def run_rca_for_kpi(kpi_id: int, end_date: date = None) -> bool:
+def run_rca_for_kpi(kpi_id: int, end_date: date = None, task_id: Optional[int] = None) -> bool:
     try:
         logger.info(f"Starting RCA for KPI ID: {kpi_id}.")
         kpi_info = get_kpi_data_from_id(kpi_id)
@@ -100,7 +100,7 @@ def run_rca_for_kpi(kpi_id: int, end_date: date = None) -> bool:
         end_date = _get_end_date_for_rca_kpi(kpi_info, end_date)
         logger.info(f"End date is {end_date}.")
 
-        rca_controller = RootCauseAnalysisController(kpi_info, end_date)
+        rca_controller = RootCauseAnalysisController(kpi_info, end_date, task_id=task_id)
         rca_controller.compute()
         logger.info(f"Completed RCA for KPI ID: {kpi_id}.")
 

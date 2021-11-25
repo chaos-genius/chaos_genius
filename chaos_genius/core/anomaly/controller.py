@@ -282,6 +282,8 @@ class AnomalyDetectionController(object):
         :type subgroup: str
         """
 
+        is_overall = series == "overall"
+
         try:
             dt_col = self.kpi_info["datetime_column"]
             metric_col = self.kpi_info["metric"]
@@ -365,21 +367,10 @@ class AnomalyDetectionController(object):
 
             series_data[metric_col] = series_data[metric_col].fillna(0)
         except Exception as e:
-            if self._task_id is not None:
-                checkpoint_failure(
-                    self._task_id,
-                    self.kpi_info["id"],
-                    "Anomaly",
-                    "Overall KPI - Preprocessor",
-                    e,
-                )
-        if self._task_id is not None:
-            checkpoint_success(
-                self._task_id,
-                self.kpi_info["id"],
-                "Anomaly",
-                "Overall KPI - Preprocessor",
-            )
+            self._checkpoint_failure("Overall KPI - Preprocessor", e, is_overall)
+        else:
+            self._checkpoint_success("Overall KPI - Preprocessor", is_overall)
+
         try:
             logger.info(f"Running anomaly detection for {series}-{subgroup}")
             # TODO(TaskTable): Overall - algo run - in-progress
@@ -387,40 +378,17 @@ class AnomalyDetectionController(object):
                 model_name, series_data, last_date, series, subgroup, freq
             )
         except Exception as e:
-            if self._task_id is not None:
-                checkpoint_failure(
-                    self._task_id,
-                    self.kpi_info["id"],
-                    "Anomaly",
-                    "Overall KPI - Anomaly Detector",
-                    e,
-                )
-        if self._task_id is not None:
-            checkpoint_success(
-                self._task_id,
-                self.kpi_info["id"],
-                "Anomaly",
-                "Overall KPI - Anomaly Detector",
-            )
+            self._checkpoint_failure("Overall KPI - Anomaly Detector", e, is_overall)
+        else:
+            self._checkpoint_success("Overall KPI - Anomaly Detector", is_overall)
+
         try:
             logger.info(f"Saving Anomaly output for {series}-{subgroup}")
             self._save_anomaly_output(overall_anomaly_output, series, subgroup)
         except Exception as e:
-            if self._task_id is not None:
-                checkpoint_failure(
-                    self._task_id,
-                    self.kpi_info["id"],
-                    "Anomaly",
-                    "Overall KPI - Result Ingestor",
-                    e,
-                )
-        if self._task_id is not None:
-            checkpoint_success(
-                self._task_id,
-                self.kpi_info["id"],
-                "Anomaly",
-                "Overall KPI - Result Ingestor",
-            )
+            self._checkpoint_failure("Overall KPI - Result Ingestor", e, is_overall)
+        else:
+            self._checkpoint_success("Overall KPI - Result Ingestor", is_overall)
 
     def _detect_subdimensions(self, input_data: pd.DataFrame) -> None:
         """Perform anomaly detection for subdimensions.
@@ -449,21 +417,9 @@ class AnomalyDetectionController(object):
                 filtered_subgroups = filtered_subgroups[:DEBUG_MAX_SUBGROUPS]
 
         except Exception as e:
-            if self._task_id is not None:
-                checkpoint_failure(
-                    self._task_id,
-                    self.kpi_info["id"],
-                    "Anomaly",
-                    "Subdimensions - Subdimension Generator",
-                    e,
-                )
-        if self._task_id is not None:
-            checkpoint_success(
-                self._task_id,
-                self.kpi_info["id"],
-                "Anomaly",
-                "Subdimensions - Subdimension Generator",
-            )
+            self._checkpoint_failure("Subdimensions - Subdimension Generator", e)
+        else:
+            self._checkpoint_success("Subdimensions - Subdimension Generator")
 
         try:
             logger.info("Running anomaly for filtered subgroups.")
@@ -473,21 +429,9 @@ class AnomalyDetectionController(object):
                 except Exception:  # noqa: B902
                     logger.exception(f"Exception occured for: subdim - {subgroup}")
         except Exception as e:
-            if self._task_id is not None:
-                checkpoint_failure(
-                    self._task_id,
-                    self.kpi_info["id"],
-                    "Anomaly",
-                    "Subdimensions - Anomaly Detector",
-                    e,
-                )
-        if self._task_id is not None:
-            checkpoint_success(
-                self._task_id,
-                self.kpi_info["id"],
-                "Anomaly",
-                "Subdimensions - Anomaly Detector",
-            )
+            self._checkpoint_failure("Subdimensions - Anomaly Detector", e)
+        else:
+            self._checkpoint_success("Subdimensions - Anomaly Detector")
 
     def _detect_data_quality(self, input_data: pd.DataFrame) -> None:
         """Perform anomaly detection for data quality metrics
@@ -500,21 +444,10 @@ class AnomalyDetectionController(object):
             agg = self.kpi_info["aggregation"]
             dq_list = ["max", "count", "mean"] if agg != "mean" else ["max", "count"]
         except Exception as e:
-            if self._task_id is not None:
-                checkpoint_failure(
-                    self._task_id,
-                    self.kpi_info["id"],
-                    "Anomaly",
-                    "Data Quality - Preprocessor",
-                    e,
-                )
-        if self._task_id is not None:
-            checkpoint_success(
-                self._task_id,
-                self.kpi_info["id"],
-                "Anomaly",
-                "Data Quality - Preprocessor",
-            )
+            self._checkpoint_failure("Data Quality - Preprocessor", e)
+        else:
+            self._checkpoint_success("Data Quality - Preprocessor")
+
         try:
             logger.info("Running anomaly for data quality subgroups.")
             for dq in dq_list:
@@ -523,20 +456,44 @@ class AnomalyDetectionController(object):
                 except Exception:  # noqa: B902
                     logger.exception(f"Exception occured for: data quality - {dq}")
         except Exception as e:
+            self._checkpoint_failure("Data Quality - Anomaly Detector", e)
+        else:
+            self._checkpoint_success("Data Quality - Anomaly Detector")
+
+    def _checkpoint_success(self, checkpoint: str, flag=True):
+        if flag:
+            if self._task_id is not None:
+                checkpoint_success(
+                    self._task_id,
+                    self.kpi_info["id"],
+                    "Anomaly",
+                    checkpoint
+                )
+            logger.info(
+                "(Task: %s, KPI: %d)"
+                " Anomaly - %s - Success",
+                str(self._task_id),
+                self.kpi_info["id"],
+                checkpoint
+            )
+
+    def _checkpoint_failure(self, checkpoint: str, e: Exception, flag=True):
+        if flag:
             if self._task_id is not None:
                 checkpoint_failure(
                     self._task_id,
                     self.kpi_info["id"],
                     "Anomaly",
-                    "Data Quality - Anomaly Detector",
+                    checkpoint,
                     e,
                 )
-        if self._task_id is not None:
-            checkpoint_success(
-                self._task_id,
+            logger.exception(
+                "(Task: %s, KPI: %d) "
+                "Anomaly - %s - Exception occured.",
+                str(self._task_id),
                 self.kpi_info["id"],
-                "Anomaly",
-                "Data Quality - Anomaly Detector",
+                checkpoint,
+                exc_info=e
             )
 
     def detect(self) -> None:
@@ -553,14 +510,9 @@ class AnomalyDetectionController(object):
         try:
             input_data = self._load_anomaly_data()
         except Exception as e:
-            if self._task_id is not None:
-                checkpoint_failure(
-                    self._task_id, self.kpi_info["id"], "Anomaly", "Data Loader", e
-                )
-        if self._task_id is not None:
-            checkpoint_success(
-                self._task_id, self.kpi_info["id"], "Anomaly", "Data Loader"
-            )
+            self._checkpoint_failure("Data Loader", e)
+        else:
+            self._checkpoint_success("Data Loader")
         logger.info(f"Loaded {len(input_data)} rows of input data.")
 
         run_optional = self.kpi_info.get("run_optional", None)

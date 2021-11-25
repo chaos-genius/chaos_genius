@@ -70,7 +70,15 @@
                                                 {{ task.checkpoint }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ task.status }}
+                                                {% if task.status == "Success" %}
+                                                    <span class="text-green-500">
+                                                {% elif task.status == "Failure" %}
+                                                    <span class="text-red-500">
+                                                {% else %}
+                                                    <span>
+                                                {% endif %}
+                                                    {{ task.status }}
+                                                    </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {{ task.timestamp }}

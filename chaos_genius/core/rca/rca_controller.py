@@ -257,7 +257,15 @@ class RootCauseAnalysisController:
 
         for timeline in TIMELINES:
             logger.info(f"Running RCA for timeline: {timeline}.")
-            rca = self._load_rca_obj(timeline)
+            try:
+                rca = self._load_rca_obj(timeline)
+            except Exception as e:
+                rca = None
+                logger.error(f"Error loading RCA for timeline [{timeline}]: {e}")
+
+            if rca is None:
+                continue
+
             logger.info("RCA object created.")
 
             try:
@@ -288,6 +296,10 @@ class RootCauseAnalysisController:
                         )
                     except:  # noqa E722
                         logger.error(f"Error in htable for {timeline, dim}", exc_info=1)
+
+        # don't store if there is only the line data
+        if len(output) < 2:
+            return None
 
         try:
             logger.info(f"Storing output for KPI {self.kpi_info['id']}")

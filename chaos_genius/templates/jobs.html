@@ -53,30 +53,12 @@
                                     {% if i % 2 == 1 %}
                                         <!-- Odd row -->
                                         <tr class="bg-white">
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                {{ task.kpi_name }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ task.task_id }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ task.analytics_type }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ task.checkpoint }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ task.status }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ task.timestamp }}
-                                            </td>
-                                        </tr>
                                     {% else %}
                                         <!-- Even row -->
                                         <tr class="bg-gray-50">
+                                    {% endif %}
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                {{ task.kpi_name }}
+                                                {{ task.kpi_name + " (" + str(task.kpi_id) + ")" }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {{ task.task_id }}
@@ -94,7 +76,6 @@
                                                 {{ task.timestamp }}
                                             </td>
                                         </tr>
-                                    {% endif %}
                                 {% endfor %}
                             </tbody>
                         </table>

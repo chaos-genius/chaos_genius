@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+
+  <head>
+    <title>{{ title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.css">
+  </head>
+  <body>
+<!--     
+    <div class="container">
+      <h1>{{ title }}</h1>
+      <hr>
+      {% block content %}{% endblock %}.
+    </div>
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.js"></script>
+    {% block scripts %}{% endblock %} -->
+    <script>
+      $(document).ready(function () {
+        $('#data').DataTable();
+      });
+  </script>
+    <table id="data" class="table table-striped">
+      <thead>
+        <tr>
+          <th>KPI ID</th>
+          <th>KPI Name</th>
+          <th>Analytics Type</th>
+          <th>Analytics Subtask</th>
+          <th>Status</th>
+          <th>Job ID</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in status %}
+          <tr>
+            <td>{{ row.kpi_id }}</td>
+            <td>{{ row.kpi_name }}</td>
+            <td>{{ row.analytics_type }}</td>
+            <td>{{ row.analytics_subtask }}</td>
+            <td>{{ row.status }}</td>
+            <td>{{ row.job_id}}</td>
+            <td>{{ row.timestamp }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  
+  
+  </body>
+</html>
+

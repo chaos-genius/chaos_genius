@@ -1,13 +1,65 @@
 import React, { useEffect, useState } from 'react';
+
+import { useHistory, useParams } from 'react-router-dom';
+
 import { useDispatch, useSelector } from 'react-redux';
 
 import Select from 'react-select';
-import { getAllKpiExplorer, getCreateDashboard } from '../../redux/actions';
+import {
+  getAllKpiExplorer
+  // getCreateDashboard,
+  // getEditDashboard
+} from '../../redux/actions';
 // import ModalPopUp from '../Modal';
+
+const editDashboard = {
+  dashboard: {
+    active: true,
+    created_at: 'Tue, 23 Nov 2021 05:53:54 GMT',
+    id: 11,
+    kpis: [
+      {
+        created_at: 'Tue, 23 Nov 2021 05:53:55 GMT',
+        id: 17,
+        kpi: 3
+      },
+      {
+        created_at: 'Tue, 23 Nov 2021 05:53:55 GMT',
+        id: 18,
+        kpi: 4
+      },
+      {
+        created_at: 'Tue, 23 Nov 2021 05:53:55 GMT',
+        id: 19,
+        kpi: 5
+      },
+      {
+        created_at: 'Tue, 23 Nov 2021 08:57:00 GMT',
+        id: 24,
+        kpi: 10
+      },
+      {
+        created_at: 'Tue, 23 Nov 2021 08:57:00 GMT',
+        id: 25,
+        kpi: 11
+      }
+    ],
+    last_modified: 'Tue, 23 Nov 2021 08:57:00 GMT',
+    name: 'first_dashboard_modified'
+  },
+  message: '',
+  status: 'success'
+};
 
 const DashboardForm = () => {
   // const [modal, setModal] = useState('false');
   const dispatch = useDispatch();
+
+  const history = useHistory();
+  const data = history.location.pathname.split('/');
+
+  const dashboardId = useParams().id;
+
   const [kpiOption, setKpiOption] = useState([]);
 
   const [formData, setFormData] = useState({
@@ -22,10 +74,28 @@ const DashboardForm = () => {
   const { isLoading, kpiExplorerList } = useSelector(
     (state) => state.kpiExplorer
   );
+  // const { editDashboar } = useSelector((state) => state.DashboardHome);
 
   useEffect(() => {
     dispatch(getAllKpiExplorer());
   }, [dispatch]);
+
+  // useEffect(() => {
+  //   if (data[2] === 'edit') {
+  //     dispatch(getEditDashboard(dashboardId));
+  //   }
+  // }, []);
+
+  useEffect(() => {
+    if (editDashboard && data[2] === 'edit' && editDashboard.dashboard) {
+      const obj = { ...editDashboard };
+
+      obj['dashboardname'] = editDashboard.dashboard.name || '';
+
+      setFormData(obj);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editDashboard]);
 
   useEffect(() => {
     if (kpiExplorerList && kpiExplorerList.length !== 0) {
@@ -82,6 +152,7 @@ const DashboardForm = () => {
             className="form-control"
             placeholder="Name of the dashboard"
             required
+            value={formData.dashboardname}
             onChange={(e) => {
               setFormData({ ...formData, dashboardname: e.target.value });
               setErrorMsg((prev) => {
@@ -92,6 +163,7 @@ const DashboardForm = () => {
               });
             }}
           />
+
           {errorMsg.dashboardname === true ? (
             <div className="connection__fail">
               <p>Enter Dashboard name</p>

@@ -16,14 +16,13 @@ from chaos_genius.core.anomaly.utils import (
 )
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, db
+from chaos_genius.jobs.task_monitor import checkpoint_failure, checkpoint_success
 from chaos_genius.settings import (
     MAX_FILTER_SUBGROUPS_ANOMALY,
     MAX_SUBDIM_CARDINALITY,
     MIN_DATA_IN_SUBGROUP,
     MULTIDIM_ANALYSIS_FOR_ANOMALY,
 )
-from chaos_genius.jobs.task_monitor import checkpoint_failure, checkpoint_success
-
 
 logger = logging.getLogger(__name__)
 
@@ -364,7 +363,7 @@ class AnomalyDetectionController(object):
             model_name = self.kpi_info["anomaly_params"]["model_name"]
 
             # TODO: fix missing dates/values issue more robustly
-        
+
             series_data[metric_col] = series_data[metric_col].fillna(0)
         except Exception as e:
             if self._task_id is not None:
@@ -395,14 +394,14 @@ class AnomalyDetectionController(object):
                     self.kpi_info["id"],
                     "Anomaly",
                     "Overall KPI - Anomaly Detector",
-                    e
+                    e,
                 )
         if self._task_id is not None:
             checkpoint_success(
                 self._task_id,
                 self.kpi_info["id"],
                 "Anomaly",
-                "Overall KPI - Anomaly Detector"
+                "Overall KPI - Anomaly Detector",
             )
         try:
             logger.info(f"Saving Anomaly output for {series}-{subgroup}")
@@ -414,14 +413,14 @@ class AnomalyDetectionController(object):
                     self.kpi_info["id"],
                     "Anomaly",
                     "Overall KPI - Result Ingestor",
-                    e
+                    e,
                 )
         if self._task_id is not None:
             checkpoint_success(
                 self._task_id,
                 self.kpi_info["id"],
                 "Anomaly",
-                "Overall KPI - Result Ingestor"
+                "Overall KPI - Result Ingestor",
             )
 
     def _detect_subdimensions(self, input_data: pd.DataFrame) -> None:
@@ -441,7 +440,10 @@ class AnomalyDetectionController(object):
 
             logger.info(
                 f"Subgroup filtering complted for KPI ID: {self.kpi_info['id']}",
-                extra={"generated": len(subgroups), "filtered_in": len(filtered_subgroups)},
+                extra={
+                    "generated": len(subgroups),
+                    "filtered_in": len(filtered_subgroups),
+                },
             )
 
             if self.debug:
@@ -454,17 +456,16 @@ class AnomalyDetectionController(object):
                     self.kpi_info["id"],
                     "Anomaly",
                     "Subdimensions - Subdimension Generator",
-                    e
+                    e,
                 )
         if self._task_id is not None:
             checkpoint_success(
                 self._task_id,
                 self.kpi_info["id"],
                 "Anomaly",
-                "Subdimensions - Subdimension Generator"
+                "Subdimensions - Subdimension Generator",
             )
 
-        
         try:
             logger.info("Running anomaly for filtered subgroups.")
             for subgroup in filtered_subgroups:
@@ -479,23 +480,23 @@ class AnomalyDetectionController(object):
                     self.kpi_info["id"],
                     "Anomaly",
                     "Subdimensions - Anomaly Detector",
-                    e
+                    e,
                 )
         if self._task_id is not None:
             checkpoint_success(
                 self._task_id,
                 self.kpi_info["id"],
                 "Anomaly",
-                "Subdimensions - Anomaly Detector"
+                "Subdimensions - Anomaly Detector",
             )
-            
+
     def _detect_data_quality(self, input_data: pd.DataFrame) -> None:
         """Perform anomaly detection for data quality metrics
 
         :param input_data: Dataframe with all of the relevant KPI data
         :type input_data: pd.DataFrame
         """
-        
+
         try:
             agg = self.kpi_info["aggregation"]
             dq_list = ["max", "count", "mean"] if agg != "mean" else ["max", "count"]
@@ -506,14 +507,14 @@ class AnomalyDetectionController(object):
                     self.kpi_info["id"],
                     "Anomaly",
                     "Data Quality - Preprocessor",
-                    e
+                    e,
                 )
         if self._task_id is not None:
             checkpoint_success(
                 self._task_id,
                 self.kpi_info["id"],
                 "Anomaly",
-                "Data Quality - Preprocessor"
+                "Data Quality - Preprocessor",
             )
         try:
             logger.info("Running anomaly for data quality subgroups.")
@@ -529,14 +530,14 @@ class AnomalyDetectionController(object):
                     self.kpi_info["id"],
                     "Anomaly",
                     "Data Quality - Anomaly Detector",
-                    e
+                    e,
                 )
         if self._task_id is not None:
             checkpoint_success(
                 self._task_id,
                 self.kpi_info["id"],
                 "Anomaly",
-                "Data Quality - Anomaly Detector"
+                "Data Quality - Anomaly Detector",
             )
 
     def detect(self) -> None:

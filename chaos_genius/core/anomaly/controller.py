@@ -1,8 +1,9 @@
 """Provides AnomalyDetectionController to compute Anomaly Detection."""
 
+from chaos_genius.databases.models.kpi_model import Kpi
 import logging
 from datetime import date, datetime, timedelta
-from typing import Optional
+from typing import cast, Optional
 
 import pandas as pd
 
@@ -495,6 +496,24 @@ class AnomalyDetectionController(object):
                 exc_info=e
             )
 
+    @staticmethod
+    def _to_run_overall(kpi_info: dict):
+        run_optional = kpi_info.get("run_optional", None)
+
+        return run_optional is None or run_optional["overall"] is True
+
+    @staticmethod
+    def _to_run_subdim(kpi_info: dict):
+        run_optional = kpi_info.get("run_optional", None)
+
+        return run_optional is None or run_optional["subdim"] is True
+
+    @staticmethod
+    def _to_run_data_quality(kpi_info: dict):
+        run_optional = kpi_info.get("run_optional", None)
+
+        return run_optional is None or run_optional["data_quality"] is True
+
     def detect(self) -> None:
         """Perform the anomaly detection for given KPI."""
         kpi_id = self.kpi_info["id"]
@@ -513,16 +532,33 @@ class AnomalyDetectionController(object):
             self._checkpoint_success("Data Loader")
         logger.info(f"Loaded {len(input_data)} rows of input data.")
 
-        run_optional = self.kpi_info.get("run_optional", None)
-
-        if run_optional is None or run_optional["overall"] is True:
+        if self._to_run_overall(self.kpi_info):
             logger.info(f"Running anomaly for overall KPI {kpi_id}")
             self._run_anomaly_for_series(input_data, "overall")
 
-        if run_optional is None or run_optional["subdim"] is True:
+        if self._to_run_subdim(self.kpi_info):
             logger.info(f"Running anomaly for subdims KPI {kpi_id}")
             self._detect_subdimensions(input_data)
 
-        if run_optional is None or run_optional["data_quality"] is True:
+        if self._to_run_data_quality(self.kpi_info):
             logger.info(f"Running anomaly for dq KPI {kpi_id}")
             self._detect_data_quality(input_data)
+
+    @staticmethod
+    def total_tasks(kpi: Kpi):
+        """Return the total number of sub-tasks for given KPI.
+
+        Args:
+            kpi (Kpi): Kpi object to get no. of sub-tasks for.
+        """
+        kpi_info = kpi.as_dict
+
+        num = 2
+        if AnomalyDetectionController._to_run_overall(kpi_info):
+            num += 3
+        if AnomalyDetectionController._to_run_subdim(kpi_info):
+            num += 2
+        if AnomalyDetectionController._to_run_data_quality(kpi_info):
+            num += 2
+
+        return num

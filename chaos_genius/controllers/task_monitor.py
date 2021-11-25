@@ -119,12 +119,13 @@ def checkpoint_failure(
     return _checkpoint(task_id, kpi_id, analytics_type, checkpoint, "Failure", exc_info)
 
 
-def get_checkpoints(sort_by_task_id=True, kpi_info=True) -> List[Task]:
+def get_checkpoints(sort_by_task_id=True, kpi_info=True, track_subtasks=True) -> List[Task]:
     """Get all task checkpoints as a list of Task objects.
 
     Args:
         sort_by_task_id (bool): whether to sort by task_id, descending (default: True)
         kpi_info (bool): whether to include kpi_name in the Tasks (default: True)
+        track_subtasks (bool): whether to include completed_subtasks and total_subtasks in the Tasks (default: True)
     """
     if sort_by_task_id:
         tasks: List[Task] = Task.query.order_by(Task.task_id.desc(), Task.timestamp.desc()).all()
@@ -132,9 +133,31 @@ def get_checkpoints(sort_by_task_id=True, kpi_info=True) -> List[Task]:
         tasks: List[Task] = Task.query.order_by(Task.timestamp.desc()).all()
 
     if kpi_info:
+        subtasks_cache = {}
+        total_tasks_cache = {}
         for task in tasks:
             kpi = cast(Kpi, Kpi.get_by_id(task.kpi_id))
 
             task.kpi_name = kpi.name
+
+            if track_subtasks:
+
+                if kpi.id not in total_tasks_cache:
+                    if task.analytics_type == "Anomaly":
+                        from chaos_genius.core.anomaly.controller import AnomalyDetectionController
+                        total_tasks = AnomalyDetectionController.total_tasks(kpi)
+                    elif task.analytics_type == "DeepDrills":
+                        # TODO: implement this in RCA Controller
+                        total_tasks = 10
+                    else:
+                        raise ValueError(f"Unknown analytics type: {task.analytics_type} for {task}")
+                    total_tasks_cache[kpi.id] = total_tasks
+
+                if task.task_id not in subtasks_cache:
+                    subtasks_cache[task.task_id] = [0]
+
+                task.completed_subtasks = subtasks_cache[task.task_id]
+                subtasks_cache[task.task_id][0] += 1
+                task.total_subtasks = total_tasks_cache[kpi.id]
 
     return tasks

@@ -1,7 +1,7 @@
 """Model for Tasks (anomaly, deepdrills, etc.)."""
 
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 from sqlalchemy.schema import PrimaryKeyConstraint
 
@@ -24,6 +24,8 @@ class Task(Model):
 
     # set by get_checkpoints
     kpi_name: Optional[str] = None
+    completed_subtasks: Optional[List[int]] = None
+    total_subtasks: Optional[int] = None
 
     # set PK to (checkpoint_id, task_id)
     __table_args__ = (
@@ -49,4 +51,8 @@ class Task(Model):
         }
         if self.kpi_name is not None:
             d["kpi_name"] = self.kpi_name
+        if self.completed_subtasks is not None:
+            d["completed_subtasks"] = self.completed_subtasks
+        if self.total_subtasks is not None:
+            d["total_subtasks"] = self.total_subtasks
         return d

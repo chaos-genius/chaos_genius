@@ -373,7 +373,6 @@ class AnomalyDetectionController(object):
 
         try:
             logger.info(f"Running anomaly detection for {series}-{subgroup}")
-            # TODO(TaskTable): Overall - algo run - in-progress
             overall_anomaly_output = self._detect_anomaly(
                 model_name, series_data, last_date, series, subgroup, freq
             )
@@ -498,7 +497,6 @@ class AnomalyDetectionController(object):
 
     def detect(self) -> None:
         """Perform the anomaly detection for given KPI."""
-        # TODO(TaskTable): Overall - Data loading - in-progress
         kpi_id = self.kpi_info["id"]
 
         logger.info(f"Performing anomaly detection for KPI ID: {kpi_id}")
@@ -518,16 +516,13 @@ class AnomalyDetectionController(object):
         run_optional = self.kpi_info.get("run_optional", None)
 
         if run_optional is None or run_optional["overall"] is True:
-            # TODO(TaskTable): add 3 to total number of tasks
             logger.info(f"Running anomaly for overall KPI {kpi_id}")
             self._run_anomaly_for_series(input_data, "overall")
 
         if run_optional is None or run_optional["subdim"] is True:
-            # TODO(TaskTable): add 2 to total number of tasks
             logger.info(f"Running anomaly for subdims KPI {kpi_id}")
             self._detect_subdimensions(input_data)
 
         if run_optional is None or run_optional["data_quality"] is True:
-            # TODO(TaskTable): add 2 to total number of tasks
             logger.info(f"Running anomaly for dq KPI {kpi_id}")
             self._detect_data_quality(input_data)

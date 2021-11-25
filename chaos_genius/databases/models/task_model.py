@@ -1,6 +1,7 @@
 """Model for Tasks (anomaly, deepdrills, etc.)."""
 
 from datetime import datetime
+from typing import Optional
 
 from sqlalchemy.schema import PrimaryKeyConstraint
 
@@ -21,6 +22,9 @@ class Task(Model):
     error = Column(db.Text(), nullable=True)
     timestamp = Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
+    # set by get_checkpoints
+    kpi_name: Optional[str] = None
+
     # set PK to (checkpoint_id, task_id)
     __table_args__ = (
         PrimaryKeyConstraint('task_id', 'checkpoint_id'),
@@ -28,12 +32,12 @@ class Task(Model):
 
     def __repr__(self) -> str:
         """String representation showing only the task ID."""
-        return f"<Task ({self.task_id})>"
+        return f"<Task ({self.task_id} - {self.checkpoint_id})>"
 
     @property
     def as_dict(self):
         """Return a dict representation of the Task checkpoint data."""
-        return {
+        d = {
             "task_id": self.task_id,
             "checkpoint_id": self.checkpoint_id,
             "kpi_id": self.kpi_id,
@@ -43,3 +47,6 @@ class Task(Model):
             "timestamp": self.timestamp,
             "error": self.error,
         }
+        if self.kpi_name is not None:
+            d["kpi_name"] = self.kpi_name
+        return d

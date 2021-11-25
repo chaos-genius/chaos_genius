@@ -1,10 +1,11 @@
 """Utilities for logging and monitoring tasks."""
 
 import traceback
-from typing import Optional
+from typing import List, Optional, cast
 
 from sqlalchemy import func
 
+from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.task_model import Task
 from chaos_genius.extensions import db
 
@@ -116,3 +117,24 @@ def checkpoint_failure(
         exc_info (Optional[Exception]): exception object
     """
     return _checkpoint(task_id, kpi_id, analytics_type, checkpoint, "Failure", exc_info)
+
+
+def get_checkpoints(sort_by_task_id=True, kpi_info=True) -> List[Task]:
+    """Get all task checkpoints as a list of Task objects.
+
+    Args:
+        sort_by_task_id (bool): whether to sort by task_id, descending (default: True)
+        kpi_info (bool): whether to include kpi_name in the Tasks (default: True)
+    """
+    if sort_by_task_id:
+        tasks: List[Task] = Task.query.order_by(Task.task_id.desc(), Task.timestamp.desc()).all()
+    else:
+        tasks: List[Task] = Task.query.order_by(Task.timestamp.desc()).all()
+
+    if kpi_info:
+        for task in tasks:
+            kpi = cast(Kpi, Kpi.get_by_id(task.kpi_id))
+
+            task.kpi_name = kpi.name
+
+    return tasks

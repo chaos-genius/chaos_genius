@@ -16,7 +16,6 @@ from chaos_genius.core.anomaly.utils import (
 )
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, db
-from chaos_genius.jobs.task_monitor import checkpoint_failure, checkpoint_success
 from chaos_genius.settings import (
     MAX_FILTER_SUBGROUPS_ANOMALY,
     MAX_SUBDIM_CARDINALITY,

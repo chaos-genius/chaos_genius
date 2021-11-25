@@ -15,7 +15,8 @@ from chaos_genius.views import (
     public_view,
     anomaly_data_view,
     config_setting_view,
-    alert_view
+    alert_view,
+    task_monitor_view
 )
 from chaos_genius.extensions import (
     bcrypt,
@@ -70,6 +71,7 @@ def register_blueprints(app):
     app.register_blueprint(kpi_view.blueprint, url_prefix='/api/kpi')
     app.register_blueprint(anomaly_data_view.blueprint, url_prefix='/api/anomaly-data')
     app.register_blueprint(alert_view.blueprint, url_prefix='/api/alert')
+    app.register_blueprint(task_monitor_view.blueprint, url_prefix='/api/tasks')
     return None
 
 

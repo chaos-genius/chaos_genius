@@ -62,8 +62,8 @@ def _checkpoint(
         db.session.query(func.max(Task.checkpoint_id))
         .filter(Task.task_id == task_id)
         .first()
-        + 1
     )
+    checkpoint_id = checkpoint_id[0] + 1
 
     error = None
     if exc_info is not None:

@@ -18,7 +18,7 @@ from chaos_genius.core.rca.root_cause_analysis import RootCauseAnalysis
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.core.utils.round import round_series
 from chaos_genius.databases.models.rca_data_model import RcaData, db
-from chaos_genius.jobs.task_monitor import checkpoint_failure, checkpoint_success
+from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
 
 logger = logging.getLogger(__name__)
 

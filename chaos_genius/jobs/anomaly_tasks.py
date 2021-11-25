@@ -11,7 +11,7 @@ from chaos_genius.controllers.kpi_controller import run_anomaly_for_kpi, run_rca
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.extensions import celery as celery_ext
 
-from .task_monitor import checkpoint_intial
+from chaos_genius.controllers.task_monitor import checkpoint_initial
 
 celery = cast(Celery, celery_ext.celery)
 
@@ -45,7 +45,7 @@ def anomaly_single_kpi(kpi_id, end_date=None):
     Must be run as a celery task.
     """
     print(f"Running anomaly for KPI ID: {kpi_id}")
-    checkpoint = checkpoint_intial(kpi_id, "Anomaly", "Anomaly Scheduler - Task initiated")
+    checkpoint = checkpoint_initial(kpi_id, "Anomaly", "Anomaly Scheduler - Task initiated")
     task_id = checkpoint.task_id
 
     status = run_anomaly_for_kpi(kpi_id, end_date, task_id=task_id)
@@ -72,7 +72,7 @@ def rca_single_kpi(kpi_id: int):
     Must be run as a celery task.
     """
     print(f"Running RCA for KPI ID: {kpi_id}")
-    checkpoint = checkpoint_intial(kpi_id, "DeepDrills", "DeepDrills Scheduler - Task initiated")
+    checkpoint = checkpoint_initial(kpi_id, "DeepDrills", "DeepDrills Scheduler - Task initiated")
     task_id = checkpoint.task_id
 
     status = run_rca_for_kpi(kpi_id, task_id=task_id)

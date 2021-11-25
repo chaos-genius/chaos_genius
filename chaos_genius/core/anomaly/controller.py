@@ -1,6 +1,5 @@
 """Provides AnomalyDetectionController to compute Anomaly Detection."""
 
-from chaos_genius.jobs.task_monitor import checkpoint_failure, checkpoint_success
 from datetime import datetime, date, timedelta
 import logging
 from typing import Optional
@@ -23,6 +22,7 @@ from chaos_genius.core.anomaly.utils import (
     get_last_date_in_db,
 )
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, db
+from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
 
 logger = logging.getLogger(__name__)
 

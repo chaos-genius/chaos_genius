@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import cast
 
-from celery import chain, group
+from celery import group
 from celery.app.base import Celery
 from sqlalchemy import func
 from sqlalchemy.orm.attributes import flag_modified
@@ -43,8 +43,8 @@ def anomaly_single_kpi(kpi_id, end_date=None):
 
     Must be run as a celery task.
     """
-    #TODO: fix circular import
-    from chaos_genius.controllers.kpi_controller import run_anomaly_for_kpi, run_rca_for_kpi
+    # TODO: fix circular import
+    from chaos_genius.controllers.kpi_controller import run_anomaly_for_kpi
 
     print(f"Running anomaly for KPI ID: {kpi_id}")
     checkpoint = checkpoint_initial(kpi_id, "Anomaly", "Anomaly Scheduler - Task initiated")

@@ -8,7 +8,7 @@ import Select from 'react-select';
 import {
   getAllKpiExplorer
   // getCreateDashboard,
-  // getEditDashboard
+  //getEditDashboard
 } from '../../redux/actions';
 // import ModalPopUp from '../Modal';
 
@@ -56,7 +56,7 @@ const DashboardForm = () => {
   const dispatch = useDispatch();
 
   const history = useHistory();
-  const data = history.location.pathname.split('/');
+  const path = history.location.pathname.split('/');
 
   const dashboardId = useParams().id;
 
@@ -71,6 +71,7 @@ const DashboardForm = () => {
     dashboardname: false,
     kpi: false
   });
+
   const { isLoading, kpiExplorerList } = useSelector(
     (state) => state.kpiExplorer
   );
@@ -80,14 +81,14 @@ const DashboardForm = () => {
     dispatch(getAllKpiExplorer());
   }, [dispatch]);
 
-  // useEffect(() => {
-  //   if (data[2] === 'edit') {
-  //     dispatch(getEditDashboard(dashboardId));
-  //   }
-  // }, []);
+  useEffect(() => {
+    if (path[2] === 'edit') {
+      //dispatch(getEditDashboard({ dashboard_id: dashboardId }));
+    }
+  }, [path]);
 
   useEffect(() => {
-    if (editDashboard && data[2] === 'edit' && editDashboard.dashboard) {
+    if (editDashboard && path[2] === 'edit' && editDashboard.dashboard) {
       const obj = { ...editDashboard };
 
       obj['dashboardname'] = editDashboard.dashboard.name || '';
@@ -180,11 +181,7 @@ const DashboardForm = () => {
         </div>
         <div className="form-group">
           <label>Select Sub Team (Optional)</label>
-          <Select
-            // options={option.datasource}
-            classNamePrefix="selectcategory"
-            placeholder="Select"
-          />
+          <Select classNamePrefix="selectcategory" placeholder="Select" />
         </div>
         <div className="form-group">
           <label>Avg Order Value</label>
@@ -220,7 +217,7 @@ const DashboardForm = () => {
           />
           {errorMsg.kpi === true ? (
             <div className="connection__fail">
-              <p>Select KPI</p>
+              <p>Enter KPI</p>
             </div>
           ) : null}
         </div>

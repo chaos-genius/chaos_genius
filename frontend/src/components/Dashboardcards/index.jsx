@@ -27,7 +27,7 @@ const Dashboardcards = ({ dashboardList }) => {
   };
 
   const onDelete = (value) => {
-    // dispatch(getDashboardDelete(value.id));
+    // dispatch(getDashboardDelete({dashboard_id:value.id)});
   };
 
   return (

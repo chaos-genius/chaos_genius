@@ -3,7 +3,8 @@ import {
   DASHBOARD_LIST_URL,
   DASHBOARD_DELETE_URL,
   DASHBOARD_CREATE_URL,
-  DASHBOARD_EDIT_URL
+  DASHBOARD_EDIT_URL,
+  attachParams
 } from '../../utils/url-helper';
 import {
   DASHBOARDFAILURE,
@@ -72,11 +73,12 @@ export const getDashboardDeleteFailure = () => {
   };
 };
 
-export const getDashboardDelete = (id) => {
+export const getDashboardDelete = (params) => {
   return async (dispatch) => {
     dispatch(getDashboardDeleteRequest());
+    const URL = attachParams(DASHBOARD_DELETE_URL, params);
     const { data, error, status } = await postRequest({
-      url: `${DASHBOARD_DELETE_URL}?dashboard_id=${id}`
+      url: URL
     });
     if (error) {
       dispatch(getDashboardDeleteFailure());
@@ -139,11 +141,12 @@ export const getEditDashboardFailure = () => {
   };
 };
 
-export const getEditDashboard = (id) => {
+export const getEditDashboard = (params) => {
   return async (dispatch) => {
     dispatch(getEditDashboardRequest());
+    const URL = attachParams(DASHBOARD_EDIT_URL, params);
     const { data, error, status } = await getRequest({
-      url: `${DASHBOARD_EDIT_URL}?dashboard_id=${id}`
+      url: URL
     });
     if (error) {
       dispatch(getEditDashboardFailure());

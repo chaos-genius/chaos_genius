@@ -5,11 +5,7 @@ export const BASE_URL = process.env.REACT_APP_BASE_URL || '';
 export const attachParams = (relativeUrl, params) => {
   let baseUrl = BASE_URL;
   if (baseUrl === '') {
-    if (window.location.hostname === 'localhost') {
-      baseUrl = 'http://localhost:5000';
-    } else {
-      baseUrl = window.location.origin;
-    }
+    baseUrl = window.location.origin;
   }
   const url = new URL(relativeUrl, baseUrl);
   url.search = new URLSearchParams(params).toString();

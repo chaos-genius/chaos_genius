@@ -1,19 +1,12 @@
 """Provides AnomalyDetectionController to compute Anomaly Detection."""
 
-from datetime import datetime, date, timedelta
 import logging
+from datetime import date, datetime, timedelta
 from typing import Optional
 
 import pandas as pd
-from chaos_genius.core.utils.data_loader import DataLoader
 
-from chaos_genius.settings import (
-    MAX_FILTER_SUBGROUPS_ANOMALY,
-    MULTIDIM_ANALYSIS_FOR_ANOMALY,
-    MAX_SUBDIM_CARDINALITY,
-    MIN_DATA_IN_SUBGROUP,
-)
-
+from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
 from chaos_genius.core.anomaly.constants import RESAMPLE_FREQUENCY
 from chaos_genius.core.anomaly.processor import ProcessAnomalyDetection
 from chaos_genius.core.anomaly.utils import (
@@ -21,8 +14,14 @@ from chaos_genius.core.anomaly.utils import (
     get_dq_missing_data,
     get_last_date_in_db,
 )
+from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, db
-from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
+from chaos_genius.settings import (
+    MAX_FILTER_SUBGROUPS_ANOMALY,
+    MAX_SUBDIM_CARDINALITY,
+    MIN_DATA_IN_SUBGROUP,
+    MULTIDIM_ANALYSIS_FOR_ANOMALY,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +37,7 @@ class AnomalyDetectionController(object):
         end_date: date = None,
         save_model: bool = False,
         debug: bool = False,
-        task_id: Optional[int] = None
+        task_id: Optional[int] = None,
     ):
         """Initialize the controller.
 
@@ -455,9 +454,13 @@ class AnomalyDetectionController(object):
             input_data = self._load_anomaly_data()
         except Exception as e:
             if self._task_id is not None:
-                checkpoint_failure(self._task_id, self.kpi_info["id"], "Anomaly", "Data Loader", e)
+                checkpoint_failure(
+                    self._task_id, self.kpi_info["id"], "Anomaly", "Data Loader", e
+                )
         if self._task_id is not None:
-            checkpoint_success(self._task_id, self.kpi_info["id"], "Anomaly", "Data Loader")
+            checkpoint_success(
+                self._task_id, self.kpi_info["id"], "Anomaly", "Data Loader"
+            )
         logger.info(f"Loaded {len(input_data)} rows of input data.")
 
         run_optional = self.kpi_info.get("run_optional", None)

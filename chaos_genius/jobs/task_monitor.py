@@ -13,7 +13,7 @@ def checkpoint_initial(
     kpi_id: int,
     analytics_type: str,
     checkpoint: str,
-    status: str,
+    status: str = "Success",
     exc_info: Optional[Exception] = None,
 ) -> Task:
     """Log a task for the first time. Used to get a task_id.

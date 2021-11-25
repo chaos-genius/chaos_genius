@@ -1,7 +1,9 @@
 """Provides AnomalyDetectionController to compute Anomaly Detection."""
 
+from chaos_genius.jobs.task_monitor import checkpoint_failure, checkpoint_success
 from datetime import datetime, date, timedelta
 import logging
+from typing import Optional
 
 import pandas as pd
 from chaos_genius.core.utils.data_loader import DataLoader
@@ -36,6 +38,7 @@ class AnomalyDetectionController(object):
         end_date: date = None,
         save_model: bool = False,
         debug: bool = False,
+        task_id: Optional[int] = None
     ):
         """Initialize the controller.
 
@@ -46,6 +49,9 @@ class AnomalyDetectionController(object):
         :type end_date: date, optional
         :param save_model: whether to save the model or not, defaults to False
         :type save_model: bool, optional
+        :param task_id: used to log checkpoints. Set to None to disable logging
+        of checkpoints.
+        :type task_id: int, optional
         """
         logger.info(f"Anomaly Controller initializing with KPI:{kpi_info['id']}")
         self.kpi_info = kpi_info
@@ -80,6 +86,8 @@ class AnomalyDetectionController(object):
             period = int(self.kpi_info["anomaly_params"]["anomaly_period"])
             period *= 24
             self.kpi_info["anomaly_params"]["anomaly_period"] = period
+
+        self._task_id = task_id
 
         logger.info(f"Anomaly controller initialized for KPI ID: {kpi_info['id']}")
 
@@ -443,11 +451,14 @@ class AnomalyDetectionController(object):
         logger.debug(f"Anomaly Model is {model_name}")
 
         logger.info(f"Loading Input Data for KPI {kpi_id}")
-        input_data = self._load_anomaly_data()
+        try:
+            input_data = self._load_anomaly_data()
+        except Exception as e:
+            if self._task_id is not None:
+                checkpoint_failure(self._task_id, self.kpi_info["id"], "Anomaly", "Data Loader", e)
+        if self._task_id is not None:
+            checkpoint_success(self._task_id, self.kpi_info["id"], "Anomaly", "Data Loader")
         logger.info(f"Loaded {len(input_data)} rows of input data.")
-
-        # TODO(TaskTable): Overall - Data loading - succeeded
-        # TODO(TaskTable): Overall - Data loading - failed - check for exception
 
         run_optional = self.kpi_info.get("run_optional", None)
 

@@ -1,5 +1,6 @@
 import logging
 from datetime import date, datetime, timedelta
+from typing import Optional
 
 from flask import current_app  # noqa: F401
 
@@ -38,7 +39,7 @@ def get_kpi_data_from_id(n: int) -> dict:
         return kpi_info.as_dict
     raise ValueError(f"KPI ID {n} not found in KPI_DATA")
 
-def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
+def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None, task_id: Optional[int] = None) -> bool:
 
     try:
         logger.info(f"Starting Anomaly Detection for KPI ID: {kpi_id}.")
@@ -60,7 +61,7 @@ def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
 
         logger.info(f"End date is {end_date}.")
 
-        adc = AnomalyDetectionController(kpi_info, end_date)
+        adc = AnomalyDetectionController(kpi_info, end_date, task_id=task_id)
         adc.detect()
         logger.info(f"Anomaly Detection has completed for KPI ID: {kpi_id}.")
 

@@ -2,7 +2,8 @@ import { getRequest, postRequest } from '../../utils/http-helper';
 import {
   DASHBOARD_LIST_URL,
   DASHBOARD_DELETE_URL,
-  DASHBOARD_CREATE_URL
+  DASHBOARD_CREATE_URL,
+  DASHBOARD_EDIT_URL
 } from '../../utils/url-helper';
 import {
   DASHBOARDFAILURE,
@@ -13,7 +14,10 @@ import {
   DASHBOARDDELETEFAILURE,
   DASHBOARDCREATEREQUST,
   DASHBOARDCREATEFAILURE,
-  DASHBOARDCREATESUCCESS
+  DASHBOARDCREATESUCCESS,
+  DASHBOARDEDITREQUEST,
+  DASHBOARDEDITRESPONSE,
+  DASHBOARDEDITFAILURE
 } from './ActionConstants';
 
 export const getDashboardRequested = () => {
@@ -112,6 +116,39 @@ export const getCreateDashboard = (dashboard) => {
       dispatch(getCreateDashboardFailure());
     } else if (data && status === 200) {
       dispatch(getCreateDashboardSuccess(data.data));
+    }
+  };
+};
+
+export const getEditDashboardRequest = () => {
+  return {
+    type: DASHBOARDEDITREQUEST
+  };
+};
+
+export const getEditDashboardSuccess = (response) => {
+  return {
+    type: DASHBOARDEDITRESPONSE,
+    data: response
+  };
+};
+
+export const getEditDashboardFailure = () => {
+  return {
+    type: DASHBOARDEDITFAILURE
+  };
+};
+
+export const getEditDashboard = (id) => {
+  return async (dispatch) => {
+    dispatch(getEditDashboardRequest());
+    const { data, error, status } = await getRequest({
+      url: `${DASHBOARD_EDIT_URL}?dashboard_id=${id}`
+    });
+    if (error) {
+      dispatch(getEditDashboardFailure());
+    } else if (data && status === 200) {
+      dispatch(getEditDashboardSuccess(data.data));
     }
   };
 };

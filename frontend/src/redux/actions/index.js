@@ -53,7 +53,8 @@ import { kpiSettingSetup, kpiEditSetup, settingMetaInfo } from './setting';
 import {
   getDashboard,
   getDashboardDelete,
-  getCreateDashboard
+  getCreateDashboard,
+  getEditDashboard
 } from './DashboardHome';
 
 export {
@@ -103,5 +104,6 @@ export {
   settingMetaInfo,
   getDashboard,
   getDashboardDelete,
-  getCreateDashboard
+  getCreateDashboard,
+  getEditDashboard
 };

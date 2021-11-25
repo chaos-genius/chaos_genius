@@ -7,7 +7,10 @@ import {
   DASHBOARDDELETEFAILURE,
   DASHBOARDCREATEREQUST,
   DASHBOARDCREATESUCCESS,
-  DASHBOARDCREATEFAILURE
+  DASHBOARDCREATEFAILURE,
+  DASHBOARDEDITREQUEST,
+  DASHBOARDEDITRESPONSE,
+  DASHBOARDEDITFAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -19,7 +22,10 @@ const initialState = {
   dashboardDeleteError: false,
   createDashboard: [],
   createDashboardLoading: false,
-  createDashboardError: false
+  createDashboardError: false,
+  editDashboard: '',
+  editDashboardLoading: false,
+  editDashboardError: false
 };
 
 export const DashboardHome = (state = initialState, action) => {
@@ -83,6 +89,28 @@ export const DashboardHome = (state = initialState, action) => {
         ...state,
         createDashboardLoading: false,
         createDashboardError: true
+      };
+    }
+    case DASHBOARDEDITREQUEST: {
+      return {
+        ...state,
+        editDashboardLoading: true,
+        editDashboardError: false
+      };
+    }
+    case DASHBOARDEDITRESPONSE: {
+      return {
+        ...state,
+        editDashboard: action.data,
+        editDashboardLoading: false,
+        editDashboardError: false
+      };
+    }
+    case DASHBOARDEDITFAILURE: {
+      return {
+        ...state,
+        editDashboardLoading: false,
+        editDashboardError: true
       };
     }
     default:

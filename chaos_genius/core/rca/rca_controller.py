@@ -257,26 +257,8 @@ class RootCauseAnalysisController:
         output = []
 
         logger.info("Getting Line Data for KPI.")
-        try:
-            line_data = self._get_line_data()
-            output.append(self._output_to_row("line", line_data))
-        except Exception as e:
-            if self._task_id is not None:
-                checkpoint_failure(
-                    self._task_id,
-                    self.kpi_info["id"],
-                    "DeepDrills",
-                    "Data Loader",
-                    e,
-                )
-            raise e
-        if self._task_id is not None:
-            checkpoint_success(
-                self._task_id,
-                self.kpi_info["id"],
-                "DeepDrills",
-                "Data Loader",
-            )
+        line_data = self._get_line_data()
+        output.append(self._output_to_row("line", line_data))
         logger.info("Line Data for KPI completed.")
 
         for timeline in TIMELINES:

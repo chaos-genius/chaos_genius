@@ -6,7 +6,8 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import Select from 'react-select';
 import {
-  getAllKpiExplorer
+  getAllKpiExplorer,
+  getUpdateDashboard
   // getCreateDashboard,
   //getEditDashboard
 } from '../../redux/actions';
@@ -89,11 +90,7 @@ const DashboardForm = () => {
 
   useEffect(() => {
     if (editDashboard && path[2] === 'edit' && editDashboard.dashboard) {
-      const obj = { ...editDashboard };
-
-      obj['dashboardname'] = editDashboard.dashboard.name || '';
-
-      setFormData(obj);
+      setFormData({ ...formData, dashboardname: editDashboard.dashboard.name });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editDashboard]);
@@ -129,11 +126,19 @@ const DashboardForm = () => {
       });
     }
     if (formData.dashboardname && formData.kpi) {
-      // const dashboardData = {
-      //   dashboard_name: formData.dashboardname,
-      //   kpi_list: formData.kpi
-      // };
-      // dispatch(getCreateDashboard(dashboardData));
+      if (path[2] === 'edit') {
+        const payload = {
+          dashboard_name: formData.dashboardname,
+          kpi_list: formData.kpi
+        };
+        dispatch(getUpdateDashboard(dashboardId, payload));
+      } else {
+        // const dashboardData = {
+        //   dashboard_name: formData.dashboardname,
+        //   kpi_list: formData.kpi
+        // };
+        // dispatch(getCreateDashboard(dashboardData));
+      }
     }
   };
 

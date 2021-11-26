@@ -45,3 +45,4 @@ export const DASHBOARD_LIST_URL = `${BASE_URL}/api/dashboard/get_dashboard_list`
 export const DASHBOARD_CREATE_URL = `${BASE_URL}/api/dashboard/create_dashboard`;
 export const DASHBOARD_DELETE_URL = `/api/dashboard/delete_dashboard`;
 export const DASHBOARD_EDIT_URL = `/api/dashboard/get_dashboard`;
+export const DASHBOARD_UPDATE_URL = `/api/dashboard/edit_dashboard`;

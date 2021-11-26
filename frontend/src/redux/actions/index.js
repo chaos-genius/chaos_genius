@@ -54,7 +54,8 @@ import {
   getDashboard,
   getDashboardDelete,
   getCreateDashboard,
-  getEditDashboard
+  getEditDashboard,
+  getUpdateDashboard
 } from './DashboardHome';
 
 export {
@@ -105,5 +106,6 @@ export {
   getDashboard,
   getDashboardDelete,
   getCreateDashboard,
-  getEditDashboard
+  getEditDashboard,
+  getUpdateDashboard
 };

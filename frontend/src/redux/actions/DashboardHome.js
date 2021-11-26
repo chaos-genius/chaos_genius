@@ -4,6 +4,7 @@ import {
   DASHBOARD_DELETE_URL,
   DASHBOARD_CREATE_URL,
   DASHBOARD_EDIT_URL,
+  DASHBOARD_UPDATE_URL,
   attachParams
 } from '../../utils/url-helper';
 import {
@@ -18,7 +19,10 @@ import {
   DASHBOARDCREATESUCCESS,
   DASHBOARDEDITREQUEST,
   DASHBOARDEDITRESPONSE,
-  DASHBOARDEDITFAILURE
+  DASHBOARDEDITFAILURE,
+  DASHBOARDUPDATEREQUEST,
+  DASHBOARDUPDATESUCCESS,
+  DASHBOARDUPDATEFAILURE
 } from './ActionConstants';
 
 export const getDashboardRequested = () => {
@@ -152,6 +156,45 @@ export const getEditDashboard = (params) => {
       dispatch(getEditDashboardFailure());
     } else if (data && status === 200) {
       dispatch(getEditDashboardSuccess(data.data));
+    }
+  };
+};
+
+export const getUpdateDashboardRequest = () => {
+  return {
+    type: DASHBOARDUPDATEREQUEST
+  };
+};
+
+export const getUpdateDashboardSuccess = (response) => {
+  return {
+    type: DASHBOARDUPDATESUCCESS,
+    data: response
+  };
+};
+
+export const getUpdateDashboardFailure = () => {
+  return {
+    type: DASHBOARDUPDATEFAILURE
+  };
+};
+
+export const getUpdateDashboard = (params, payload) => {
+  return async (dispatch) => {
+    dispatch(getUpdateDashboardRequest());
+    const URL = attachParams(DASHBOARD_UPDATE_URL, params);
+    const { data, error, status } = await postRequest({
+      url: URL,
+      data: JSON.stringify(payload),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      noAuth: true
+    });
+    if (error) {
+      dispatch(getUpdateDashboardFailure());
+    } else if (data && status === 200) {
+      dispatch(getUpdateDashboardSuccess(data.data));
     }
   };
 };

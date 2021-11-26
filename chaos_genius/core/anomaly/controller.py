@@ -505,19 +505,18 @@ class AnomalyDetectionController(object):
 
     @staticmethod
     def _to_run_overall(kpi_info: dict):
-        run_optional = kpi_info.get("run_optional", None)
+        run_optional = kpi_info.get("anomaly_params", {}).get("run_optional", None)
 
         return run_optional is None or run_optional["overall"] is True
 
     @staticmethod
     def _to_run_subdim(kpi_info: dict):
-        run_optional = kpi_info.get("run_optional", None)
-
+        run_optional = kpi_info.get("anomaly_params", {}).get("run_optional", None)
         return run_optional is None or run_optional["subdim"] is True
 
     @staticmethod
     def _to_run_data_quality(kpi_info: dict):
-        run_optional = kpi_info.get("run_optional", None)
+        run_optional = kpi_info.get("anomaly_params", {}).get("run_optional", None)
 
         return run_optional is None or run_optional["data_quality"] is True
 

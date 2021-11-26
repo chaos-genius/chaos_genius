@@ -724,6 +724,10 @@ def validate_partial_anomaly_params(
     return "", anomaly_params
 
 
+def check_dimensions(kpi: Kpi) -> bool:
+    return kpi.dimensions is not None and kpi.dimensions
+
+
 def update_anomaly_params(
     kpi: Kpi,
     new_anomaly_params: Dict[str, Any],
@@ -802,6 +806,14 @@ def update_anomaly_params(
 
         kpi.scheduler_params = scheduler_params
         flag_modified(kpi, "scheduler_params")
+
+    if not check_dimensions(kpi):
+        anomaly_params["run_optional"] = {
+            "data_quality": True,
+            "overall": True,
+            "subdim": False
+        }
+    
 
     flag_modified(kpi, "anomaly_params")
     new_kpi = cast(Kpi, kpi.update(commit=True, anomaly_params=anomaly_params, run_anomaly=run_anomaly))

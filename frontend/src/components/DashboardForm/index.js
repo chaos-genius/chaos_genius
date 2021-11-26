@@ -222,8 +222,28 @@ const DashboardForm = () => {
           ) : null}
         </div>
         <div className="form-action">
-          <button className="btn black-button" onClick={() => handleSubmit()}>
+          {/* <button className="btn black-button" onClick={() => handleSubmit()}>
             <span>Add Dashboard</span>
+          </button> */}
+
+          <button
+            className={'btn black-button'}
+            onClick={() => {
+              handleSubmit();
+            }}>
+            <div className="btn-spinner">
+              <div className="spinner-border" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <span>Loading...</span>
+            </div>
+            <div className="btn-content">
+              {path[2] === 'edit' ? (
+                <span>Save Changes</span>
+              ) : (
+                <span>Add Dashboard</span>
+              )}
+            </div>
           </button>
         </div>
         {/* <ModalPopUp isOpen={modal} /> */}

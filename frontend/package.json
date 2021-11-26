@@ -1,5 +1,5 @@
 {
-  "name": "chaos-genius-static-design",
+  "name": "chaos-genius-frontend-webapp",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -20,7 +20,7 @@
     "js-cookie": "^2.2.1",
     "luxon": "^2.1.1",
     "moment": "^2.29.1",
-    "node-sass": "^4.14.1",
+    "node-sass": "^6.0.1",
     "posthog-js": "^1.15.3",
     "rc-time-picker": "^3.7.3",
     "react": "^17.0.2",

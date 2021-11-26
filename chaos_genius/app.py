@@ -16,7 +16,7 @@ from chaos_genius.views import (
     anomaly_data_view,
     config_setting_view,
     alert_view,
-    task_monitor_view
+    task_monitor_view,
     dashboard_view
 )
 from chaos_genius.extensions import (

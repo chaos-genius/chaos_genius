@@ -68,6 +68,8 @@ services:
       - MIN_DATA_IN_SUBGROUP=${MIN_DATA_IN_SUBGROUP}
       - MAX_ROWS_FOR_DEEPDRILLS=${MAX_ROWS_FOR_DEEPDRILLS}
       - MAX_FILTER_SUBGROUPS_ANOMALY=${MAX_FILTER_SUBGROUPS_ANOMALY}
+    ports:
+      - "5000:5000"
 
   chaosgenius-webapp:
     container_name: chaosgenius-webapp

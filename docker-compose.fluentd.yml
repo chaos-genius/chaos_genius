@@ -93,6 +93,8 @@ services:
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
       - CACHE_DEFAULT_TIMEOUT=${CACHE_DEFAULT_TIMEOUT}
     logging: *default-logging
+    ports:
+      - "5000:5000"
 
   chaosgenius-db:
     container_name: chaosgenius-db

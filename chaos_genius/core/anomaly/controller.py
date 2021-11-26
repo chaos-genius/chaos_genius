@@ -22,6 +22,7 @@ from chaos_genius.settings import (
     MAX_SUBDIM_CARDINALITY,
     MIN_DATA_IN_SUBGROUP,
     MULTIDIM_ANALYSIS_FOR_ANOMALY,
+    MAX_ANOMALY_SLACK_DAYS,
 )
 
 logger = logging.getLogger(__name__)
@@ -80,7 +81,7 @@ class AnomalyDetectionController(object):
             self.debug = True
         if self.debug == "False":
             self.debug = False
-        self.slack = self.kpi_info["anomaly_params"].get("slack", 3)
+        self.slack = MAX_ANOMALY_SLACK_DAYS
 
         if self.kpi_info["anomaly_params"]["frequency"] == "H":
             period = int(self.kpi_info["anomaly_params"]["anomaly_period"])

@@ -1,18 +1,13 @@
 """Provides AnomalyDetectionController to compute Anomaly Detection."""
 
-from datetime import datetime, date, timedelta
+from chaos_genius.databases.models.kpi_model import Kpi
 import logging
+from datetime import date, datetime, timedelta
+from typing import cast, Optional
 
 import pandas as pd
-from chaos_genius.core.utils.data_loader import DataLoader
 
-from chaos_genius.settings import (
-    MAX_FILTER_SUBGROUPS_ANOMALY,
-    MULTIDIM_ANALYSIS_FOR_ANOMALY,
-    MAX_SUBDIM_CARDINALITY,
-    MIN_DATA_IN_SUBGROUP,
-)
-
+from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
 from chaos_genius.core.anomaly.constants import RESAMPLE_FREQUENCY
 from chaos_genius.core.anomaly.processor import ProcessAnomalyDetection
 from chaos_genius.core.anomaly.utils import (
@@ -20,7 +15,14 @@ from chaos_genius.core.anomaly.utils import (
     get_dq_missing_data,
     get_last_date_in_db,
 )
+from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, db
+from chaos_genius.settings import (
+    MAX_FILTER_SUBGROUPS_ANOMALY,
+    MAX_SUBDIM_CARDINALITY,
+    MIN_DATA_IN_SUBGROUP,
+    MULTIDIM_ANALYSIS_FOR_ANOMALY,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +38,7 @@ class AnomalyDetectionController(object):
         end_date: date = None,
         save_model: bool = False,
         debug: bool = False,
+        task_id: Optional[int] = None,
     ):
         """Initialize the controller.
 
@@ -46,6 +49,9 @@ class AnomalyDetectionController(object):
         :type end_date: date, optional
         :param save_model: whether to save the model or not, defaults to False
         :type save_model: bool, optional
+        :param task_id: used to log checkpoints. Set to None to disable logging
+        of checkpoints.
+        :type task_id: int, optional
         """
         logger.info(f"Anomaly Controller initializing with KPI:{kpi_info['id']}")
         self.kpi_info = kpi_info
@@ -80,6 +86,8 @@ class AnomalyDetectionController(object):
             period = int(self.kpi_info["anomaly_params"]["anomaly_period"])
             period *= 24
             self.kpi_info["anomaly_params"]["anomaly_period"] = period
+
+        self._task_id = task_id
 
         logger.info(f"Anomaly controller initialized for KPI ID: {kpi_info['id']}")
 
@@ -274,124 +282,161 @@ class AnomalyDetectionController(object):
         :param subgroup: Subgroup of the KPI
         :type subgroup: str
         """
-        dt_col = self.kpi_info["datetime_column"]
-        metric_col = self.kpi_info["metric"]
-        freq = self.kpi_info["anomaly_params"]["frequency"]
-        agg = self.kpi_info["aggregation"]
-        period = self.kpi_info["anomaly_params"]["anomaly_period"]
 
-        series_data = None
+        is_overall = series == "overall"
 
-        logger.info(f"Getting last date in db for {series}-{subgroup}.")
-        last_date = self._get_last_date_in_db(series, subgroup)
-        logger.info(f"Last date in db for {series}-{subgroup} is {last_date}")
+        try:
+            dt_col = self.kpi_info["datetime_column"]
+            metric_col = self.kpi_info["metric"]
+            freq = self.kpi_info["anomaly_params"]["frequency"]
+            agg = self.kpi_info["aggregation"]
+            period = self.kpi_info["anomaly_params"]["anomaly_period"]
 
-        logger.info(f"Formatting input data for {series}-{subgroup}")
-        if series == "dq":
-            temp_input_data = input_data[[dt_col, metric_col]]
-            temp_input_data = fill_data(
-                temp_input_data,
-                dt_col,
-                metric_col,
-                last_date,
-                period,
-                self.end_date,
-                freq,
-            )
+            series_data = None
 
-            if subgroup == "missing":
-                series_data = get_dq_missing_data(
-                    temp_input_data, dt_col, metric_col, RESAMPLE_FREQUENCY[freq]
+            logger.info(f"Getting last date in db for {series}-{subgroup}.")
+            last_date = self._get_last_date_in_db(series, subgroup)
+            logger.info(f"Last date in db for {series}-{subgroup} is {last_date}")
+
+            logger.info(f"Formatting input data for {series}-{subgroup}")
+            if series == "dq":
+                temp_input_data = input_data[[dt_col, metric_col]]
+                temp_input_data = fill_data(
+                    temp_input_data,
+                    dt_col,
+                    metric_col,
+                    last_date,
+                    period,
+                    self.end_date,
+                    freq,
                 )
 
-            else:
+                if subgroup == "missing":
+                    series_data = get_dq_missing_data(
+                        temp_input_data, dt_col, metric_col, RESAMPLE_FREQUENCY[freq]
+                    )
+
+                else:
+                    series_data = (
+                        temp_input_data.set_index(dt_col)
+                        .resample(RESAMPLE_FREQUENCY[freq])
+                        .agg({metric_col: subgroup})
+                    )
+
+            elif series == "subdim":
+                temp_input_data = input_data.query(subgroup)[[dt_col, metric_col]]
+                temp_input_data = fill_data(
+                    temp_input_data,
+                    dt_col,
+                    metric_col,
+                    last_date,
+                    period,
+                    self.end_date,
+                    freq,
+                )
+
                 series_data = (
                     temp_input_data.set_index(dt_col)
                     .resample(RESAMPLE_FREQUENCY[freq])
-                    .agg({metric_col: subgroup})
+                    .agg({metric_col: agg})
                 )
 
-        elif series == "subdim":
-            temp_input_data = input_data.query(subgroup)[[dt_col, metric_col]]
-            temp_input_data = fill_data(
-                temp_input_data,
-                dt_col,
-                metric_col,
-                last_date,
-                period,
-                self.end_date,
-                freq,
-            )
+            elif series == "overall":
+                temp_input_data = input_data[[dt_col, metric_col]]
+                temp_input_data = fill_data(
+                    temp_input_data,
+                    dt_col,
+                    metric_col,
+                    last_date,
+                    period,
+                    self.end_date,
+                    freq,
+                )
 
-            series_data = (
-                temp_input_data.set_index(dt_col)
-                .resample(RESAMPLE_FREQUENCY[freq])
-                .agg({metric_col: agg})
-            )
+                series_data = (
+                    temp_input_data.set_index(dt_col)
+                    .resample(RESAMPLE_FREQUENCY[freq])
+                    .agg({metric_col: agg})
+                )
 
-        elif series == "overall":
-            temp_input_data = input_data[[dt_col, metric_col]]
-            temp_input_data = fill_data(
-                temp_input_data,
-                dt_col,
-                metric_col,
-                last_date,
-                period,
-                self.end_date,
-                freq,
-            )
+            else:
+                raise ValueError(f"series {series} not in ['dq', 'subdim', 'overall']")
 
-            series_data = (
-                temp_input_data.set_index(dt_col)
-                .resample(RESAMPLE_FREQUENCY[freq])
-                .agg({metric_col: agg})
-            )
+            model_name = self.kpi_info["anomaly_params"]["model_name"]
 
+            # TODO: fix missing dates/values issue more robustly
+
+            series_data[metric_col] = series_data[metric_col].fillna(0)
+        except Exception as e:
+            self._checkpoint_failure("Overall KPI - Preprocessor", e, is_overall)
+            raise e
         else:
-            raise ValueError(f"series {series} not in ['dq', 'subdim', 'overall']")
+            self._checkpoint_success("Overall KPI - Preprocessor", is_overall)
 
-        model_name = self.kpi_info["anomaly_params"]["model_name"]
+        try:
+            logger.info(f"Running anomaly detection for {series}-{subgroup}")
+            overall_anomaly_output = self._detect_anomaly(
+                model_name, series_data, last_date, series, subgroup, freq
+            )
+        except Exception as e:
+            self._checkpoint_failure("Overall KPI - Anomaly Detector", e, is_overall)
+            raise e
+        else:
+            self._checkpoint_success("Overall KPI - Anomaly Detector", is_overall)
 
-        # TODO: fix missing dates/values issue more robustly
-        series_data[metric_col] = series_data[metric_col].fillna(0)
-
-        logger.info(f"Running anomaly detection for {series}-{subgroup}")
-        overall_anomaly_output = self._detect_anomaly(
-            model_name, series_data, last_date, series, subgroup, freq
-        )
-
-        logger.info(f"Saving Anomaly output for {series}-{subgroup}")
-        self._save_anomaly_output(overall_anomaly_output, series, subgroup)
+        try:
+            logger.info(f"Saving Anomaly output for {series}-{subgroup}")
+            self._save_anomaly_output(overall_anomaly_output, series, subgroup)
+        except Exception as e:
+            self._checkpoint_failure("Overall KPI - Result Ingestor", e, is_overall)
+            raise e
+        else:
+            self._checkpoint_success("Overall KPI - Result Ingestor", is_overall)
 
     def _detect_subdimensions(self, input_data: pd.DataFrame) -> None:
-        """Perform anomaly detection for subdimensions
+        """Perform anomaly detection for subdimensions.
 
         :param input_data: Dataframe with all of the relevant KPI data
         :type input_data: pd.DataFrame
         """
-        logger.info("Generating subgroups.")
+        try:
+            logger.info("Generating subgroups.")
+            subgroups = self._get_subgroup_list(input_data)
+            logger.info(f"Generated {len(subgroups)} subgroups.")
 
-        subgroups = self._get_subgroup_list(input_data)
-        logger.info(f"Generated {len(subgroups)} subgroups.")
+            # FIXME: Fix filtering logic
+            filtered_subgroups = self._filter_subgroups(subgroups, input_data)
+            logger.info(f"Filtered {len(filtered_subgroups)} subgroups.")
 
-        # FIXME: Fix filtering logic
-        filtered_subgroups = self._filter_subgroups(subgroups, input_data)
-        logger.info(f"Filtered {len(filtered_subgroups)} subgroups.")
+            logger.info(
+                f"Subgroup filtering complted for KPI ID: {self.kpi_info['id']}",
+                extra={
+                    "generated": len(subgroups),
+                    "filtered_in": len(filtered_subgroups),
+                },
+            )
 
-        logger.info(
-            f"Subgroup filtering complted for KPI ID: {self.kpi_info['id']}",
-            extra={"generated": len(subgroups), "filtered_in": len(filtered_subgroups)},
-        )
+            if self.debug:
+                filtered_subgroups = filtered_subgroups[:DEBUG_MAX_SUBGROUPS]
 
-        if self.debug:
-            filtered_subgroups = filtered_subgroups[:DEBUG_MAX_SUBGROUPS]
+        except Exception as e:
+            self._checkpoint_failure("Subdimensions - Subdimension Generator", e)
+            raise e
+        else:
+            self._checkpoint_success("Subdimensions - Subdimension Generator")
 
-        logger.info("Running anomaly for filtered subgroups.")
-        for subgroup in filtered_subgroups:
-            try:
-                self._run_anomaly_for_series(input_data, "subdim", subgroup)
-            except Exception:  # noqa: B902
-                logger.exception(f"Exception occured for: subdim - {subgroup}")
+        try:
+            logger.info("Running anomaly for filtered subgroups.")
+            for subgroup in filtered_subgroups:
+                try:
+                    self._run_anomaly_for_series(input_data, "subdim", subgroup)
+                except Exception:  # noqa: B902
+                    logger.exception(f"Exception occured for: subdim - {subgroup}")
+        except Exception as e:
+            self._checkpoint_failure("Subdimensions - Anomaly Detector", e)
+            raise e
+        else:
+            self._checkpoint_success("Subdimensions - Anomaly Detector")
 
     def _detect_data_quality(self, input_data: pd.DataFrame) -> None:
         """Perform anomaly detection for data quality metrics
@@ -399,14 +444,82 @@ class AnomalyDetectionController(object):
         :param input_data: Dataframe with all of the relevant KPI data
         :type input_data: pd.DataFrame
         """
-        agg = self.kpi_info["aggregation"]
-        dq_list = ["max", "count", "mean"] if agg != "mean" else ["max", "count"]
-        logger.info("Running anomaly for data quality subgroups.")
-        for dq in dq_list:
-            try:
-                self._run_anomaly_for_series(input_data, "dq", dq)
-            except Exception:  # noqa: B902
-                logger.exception(f"Exception occured for: data quality - {dq}")
+
+        try:
+            agg = self.kpi_info["aggregation"]
+            dq_list = ["max", "count", "mean"] if agg != "mean" else ["max", "count"]
+        except Exception as e:
+            self._checkpoint_failure("Data Quality - Preprocessor", e)
+            raise e
+        else:
+            self._checkpoint_success("Data Quality - Preprocessor")
+
+        try:
+            logger.info("Running anomaly for data quality subgroups.")
+            for dq in dq_list:
+                try:
+                    self._run_anomaly_for_series(input_data, "dq", dq)
+                except Exception:  # noqa: B902
+                    logger.exception(f"Exception occured for: data quality - {dq}")
+        except Exception as e:
+            self._checkpoint_failure("Data Quality - Anomaly Detector", e)
+            raise e
+        else:
+            self._checkpoint_success("Data Quality - Anomaly Detector")
+
+    def _checkpoint_success(self, checkpoint: str, flag=True):
+        if flag:
+            if self._task_id is not None:
+                checkpoint_success(
+                    self._task_id,
+                    self.kpi_info["id"],
+                    "Anomaly",
+                    checkpoint
+                )
+            logger.info(
+                "(Task: %s, KPI: %d)"
+                " Anomaly - %s - Success",
+                str(self._task_id),
+                self.kpi_info["id"],
+                checkpoint
+            )
+
+    def _checkpoint_failure(self, checkpoint: str, e: Exception, flag=True):
+        if flag:
+            if self._task_id is not None:
+                checkpoint_failure(
+                    self._task_id,
+                    self.kpi_info["id"],
+                    "Anomaly",
+                    checkpoint,
+                    e,
+                )
+            logger.exception(
+                "(Task: %s, KPI: %d) "
+                "Anomaly - %s - Exception occured.",
+                str(self._task_id),
+                self.kpi_info["id"],
+                checkpoint,
+                exc_info=e
+            )
+
+    @staticmethod
+    def _to_run_overall(kpi_info: dict):
+        run_optional = kpi_info.get("run_optional", None)
+
+        return run_optional is None or run_optional["overall"] is True
+
+    @staticmethod
+    def _to_run_subdim(kpi_info: dict):
+        run_optional = kpi_info.get("run_optional", None)
+
+        return run_optional is None or run_optional["subdim"] is True
+
+    @staticmethod
+    def _to_run_data_quality(kpi_info: dict):
+        run_optional = kpi_info.get("run_optional", None)
+
+        return run_optional is None or run_optional["data_quality"] is True
 
     def detect(self) -> None:
         """Perform the anomaly detection for given KPI."""
@@ -418,19 +531,42 @@ class AnomalyDetectionController(object):
         logger.debug(f"Anomaly Model is {model_name}")
 
         logger.info(f"Loading Input Data for KPI {kpi_id}")
-        input_data = self._load_anomaly_data()
+        try:
+            input_data = self._load_anomaly_data()
+        except Exception as e:
+            self._checkpoint_failure("Data Loader", e)
+            raise e
+        else:
+            self._checkpoint_success("Data Loader")
         logger.info(f"Loaded {len(input_data)} rows of input data.")
 
-        run_optional = self.kpi_info.get("run_optional", None)
-
-        if run_optional is None or run_optional["overall"] is True:
+        if self._to_run_overall(self.kpi_info):
             logger.info(f"Running anomaly for overall KPI {kpi_id}")
             self._run_anomaly_for_series(input_data, "overall")
 
-        if run_optional is None or run_optional["subdim"] is True:
+        if self._to_run_subdim(self.kpi_info):
             logger.info(f"Running anomaly for subdims KPI {kpi_id}")
             self._detect_subdimensions(input_data)
 
-        if run_optional is None or run_optional["data_quality"] is True:
+        if self._to_run_data_quality(self.kpi_info):
             logger.info(f"Running anomaly for dq KPI {kpi_id}")
             self._detect_data_quality(input_data)
+
+    @staticmethod
+    def total_tasks(kpi: Kpi):
+        """Return the total number of sub-tasks for given KPI.
+
+        Args:
+            kpi (Kpi): Kpi object to get no. of sub-tasks for.
+        """
+        kpi_info = kpi.as_dict
+
+        num = 2
+        if AnomalyDetectionController._to_run_overall(kpi_info):
+            num += 3
+        if AnomalyDetectionController._to_run_subdim(kpi_info):
+            num += 2
+        if AnomalyDetectionController._to_run_data_quality(kpi_info):
+            num += 2
+
+        return num

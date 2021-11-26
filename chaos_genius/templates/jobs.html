@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChaosGenius Task Monitor</title>
+
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/simple-datatables@3.2.0/dist/style.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+    <div class="container mx-auto py-4">
+        <h1 class="text-3xl">ChaosGenius Task Monitor</h1>
+        <!-- This example requires Tailwind CSS v2.0+ -->
+
+        <div class="flex flex-col py-4">
+            <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+                    <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200" id="tasktable">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        KPI Name (ID)
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Job/Task ID
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Analytics Type
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Analytics Subtask
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Timestamp
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for i, task in enumerate(tasks) %}
+                                {% if i % 2 == 1 %}
+                                <!-- Odd row -->
+                                <tr class="bg-white">
+                                    {% else %}
+                                    <!-- Even row -->
+                                <tr class="bg-gray-50">
+                                    {% endif %}
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        {{ task.kpi_name + " (" + str(task.kpi_id) + ")" }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ task.task_id }}
+
+                                        <!-- TODO: place progress bar in a better place -->
+                                        {% if False %}
+                                            <div class="overflow-hidden h-2 my-2 text-xs flex rounded bg-yellow-200">
+                                                <div style="width:{{ (task.completed_subtasks[0] / task.total_subtasks) * 100 }}%"
+                                                    {% if task.completed_subtasks[0] !=task.total_subtasks %}
+                                                    class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500">
+                                                    {% else %}
+                                                    class="shadow-none flex flex-col text-center whitespace-nowrap
+                                                    text-white justify-center bg-green-500">
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ task.analytics_type }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ task.checkpoint }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {% if task.status == "Success" %}
+                                        <span class="text-green-500">
+                                            {% elif task.status == "Failure" %}
+                                            <span class="text-red-500">
+                                                {% else %}
+                                                <span>
+                                                    {% endif %}
+                                                    {{ task.status }}
+                                                </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ task.timestamp }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://unpkg.com/simple-datatables@3.2.0/dist/umd/simple-datatables.js"
+        type="text/javascript"></script>
+    <script>
+        const dataTable = new simpleDatatables.DataTable("#tasktable");
+    </script>
+</body>
+
+</html>

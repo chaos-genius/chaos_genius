@@ -3,7 +3,7 @@
 import json
 from datetime import datetime, date, timedelta
 import logging
-from typing import Tuple
+from typing import Tuple, Optional
 
 import numpy as np
 import pandas as pd
@@ -18,6 +18,7 @@ from chaos_genius.core.rca.root_cause_analysis import RootCauseAnalysis
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.core.utils.round import round_series
 from chaos_genius.databases.models.rca_data_model import RcaData, db
+from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
 
 logger = logging.getLogger(__name__)
 
@@ -25,13 +26,16 @@ logger = logging.getLogger(__name__)
 class RootCauseAnalysisController:
     """RCA Controller class. Used to perform RCA analysis with Celery."""
 
-    def __init__(self, kpi_info: dict, end_date: date = None):
+    def __init__(self, kpi_info: dict, end_date: date = None, task_id: Optional[int] = None):
         """Initialize the controller.
 
         :param kpi_info: KPI information as a dictionary
         :type kpi_info: dict
         :param end_date: end date for analysis, defaults to None
         :type end_date: date, optional
+        :param task_id: used to log checkpoints for task. Set to None to
+            disable checkpoints.
+        :type task_id: int, optional
         """
         logger.info(f"RCA Controller initialized with KPI: {kpi_info['id']}")
         self.kpi_info = kpi_info
@@ -57,6 +61,8 @@ class RootCauseAnalysisController:
         self.agg = kpi_info["aggregation"]
 
         self.num_dim_combs = list(range(1, min(4, len(kpi_info["dimensions"]) + 1)))
+
+        self._task_id = task_id
 
     def _load_data(
         self, timeline: str = "mom"

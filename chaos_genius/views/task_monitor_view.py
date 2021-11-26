@@ -10,5 +10,5 @@ blueprint = Blueprint("monitor", __name__, static_folder="../static")
 @blueprint.route("/", methods=["GET"])
 def task_monitor_view():
     """A view with a basic UI to monitor analytics tasks."""
-    tasks = get_checkpoints()
+    tasks = get_checkpoints(track_subtasks=False)
     return render_template("jobs.html", tasks=tasks, enumerate=enumerate, str=str)

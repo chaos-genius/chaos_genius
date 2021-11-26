@@ -63,16 +63,19 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ task.task_id }}
 
-                                        <div class="overflow-hidden h-2 my-2 text-xs flex rounded bg-yellow-200">
-                                            <div style="width:{{ (task.completed_subtasks[0] / task.total_subtasks) * 100 }}%"
-                                                {% if task.completed_subtasks[0] !=task.total_subtasks %}
-                                                class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500">
-                                                {% else %}
-                                                class="shadow-none flex flex-col text-center whitespace-nowrap
-                                                text-white justify-center bg-green-500">
-                                                {% endif %}
+                                        <!-- TODO: place progress bar in a better place -->
+                                        {% if False %}
+                                            <div class="overflow-hidden h-2 my-2 text-xs flex rounded bg-yellow-200">
+                                                <div style="width:{{ (task.completed_subtasks[0] / task.total_subtasks) * 100 }}%"
+                                                    {% if task.completed_subtasks[0] !=task.total_subtasks %}
+                                                    class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500">
+                                                    {% else %}
+                                                    class="shadow-none flex flex-col text-center whitespace-nowrap
+                                                    text-white justify-center bg-green-500">
+                                                    {% endif %}
+                                                </div>
                                             </div>
-                                        </div>
+                                        {% endif %}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ task.analytics_type }}

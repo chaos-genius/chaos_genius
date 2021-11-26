@@ -16,6 +16,7 @@ from chaos_genius.controllers.config_controller import (
     get_all_configurations,
 )
 from chaos_genius.databases.db_utils import chech_editable_field
+from copy import deepcopy
 
 blueprint = Blueprint("config_settings", __name__)
 
@@ -24,6 +25,7 @@ blueprint = Blueprint("config_settings", __name__)
 def get_onboarding_status():
     """Onboarding status route."""
     data_sources, kpis, analytics = False, False, False
+    organisation_settings = False
     try:
         data_sources = True if DataSource.query.first() is not None else False
         kpis = True if Kpi.query.first() is not None else False
@@ -34,6 +36,12 @@ def get_onboarding_status():
                         ).all()
 
             analytics = True if len(kpi_list) > 0 else False
+
+            organisation_settings = ConfigSetting.query.filter(
+                                        ConfigSetting.name == "organisation_settings",
+                                        ConfigSetting.active == True
+                                    ).all()
+            organisation_settings = True if len(organisation_settings) > 0 else False
     except Exception as err_msg:
         print(err_msg)
     steps = [
@@ -57,7 +65,8 @@ def get_onboarding_status():
     return jsonify({
         "data": {
             "steps": steps,
-            "completion_precentage": completion_precentage
+            "completion_precentage": completion_precentage,
+            "organisation_onboarding": organisation_settings
         }
     })
 
@@ -92,19 +101,23 @@ def set_config():
     if request.is_json:
         data = request.get_json()
         config_name = data.get("config_name")
-        if config_name not in ["email", "slack"]:
+        if config_name not in ["email", "slack", "organisation_settings"]:
             return jsonify({
                 "status": "not_found",
                 "message": "Config doesn't exist"
             })
         config_obj = get_config_object(config_name)
         config_settings = data.get("config_settings", {})
+        updated_config_settings = config_obj.config_setting
         if config_obj:
             config_obj.active = False
             config_obj.save(commit=True)
-            config_settings = config_obj.config_setting
-            config_settings.update(data.get("config_settings", {}))
-        new_config = create_config_object(config_name, config_settings)
+            if config_name == "organisation_settings":
+                for module in config_settings.keys():
+                    updated_config_settings[module].update(config_settings[module])
+            else:
+                updated_config_settings.update(data.get("config_settings", {}))
+        new_config = create_config_object(config_name, updated_config_settings)
         new_config.save(commit=True)
         return jsonify({
             "message": f"{config_name.capitalize()} configuration has been saved successfully.",
@@ -211,9 +224,21 @@ def edit_config_setting():
         config_obj = get_config_object(data.get("config_name"))
         meta_info = ConfigSetting.meta_info()
         if config_obj and config_obj.active is True:
-            if chech_editable_field(meta_info, "config_setting"):
-                config_obj.config_setting = data.get("config_setting")
+            if config_obj.name == "organisation_settings":
+                new_config_settings = deepcopy(config_obj.config_setting)
+                updated_settings = data.get("config_settings", {})
+
+                for module in updated_settings.keys():
+                    for key in updated_settings.get(module).keys():
+                        if meta_info["organisation_settings"][module][key]["is_editable"] == True:
+                            new_config_settings[module][key] = updated_settings[module][key]
+
+                config_obj.config_setting = new_config_settings
                 config_obj.save(commit=True)
+            else:
+                if chech_editable_field(meta_info, "config_setting"):
+                    config_obj.config_setting = data.get("config_setting")
+                    config_obj.save(commit=True)
             status = "success"
         else:
             message = "Config setting not found or disabled"

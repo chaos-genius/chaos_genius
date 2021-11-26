@@ -276,14 +276,14 @@ def fill_graph_data(row, graph_data):
 
 
 def convert_to_graph_json(
-    results, 
-    kpi_id, 
-    anomaly_type="overall", 
-    series_type=None, 
+    results,
+    kpi_id,
+    anomaly_type="overall",
+    series_type=None,
 ):
     kpi_info = get_kpi_data_from_id(kpi_id)
 
-    if anomaly_type == "overall":    
+    if anomaly_type == "overall":
         title = kpi_info["name"]
     elif anomaly_type == "subdim":
         title = convert_query_string_to_user_string(series_type)
@@ -327,10 +327,10 @@ def get_overall_data(kpi_id, end_date: datetime, n=90):
 
 
 def get_dq_and_subdim_data(
-    kpi_id, 
-    end_date, 
-    anomaly_type="dq", 
-    series_type="max", 
+    kpi_id,
+    end_date,
+    anomaly_type="dq",
+    series_type="max",
     n=90
 ):
     start_date = pd.to_datetime(end_date) - timedelta(days=n)
@@ -383,7 +383,7 @@ def get_drilldowns_series_type(kpi_id, drilldown_date):
 
         results = pd.read_sql(query.statement, query.session.bind)
 
-        # Sorting by distance from drilldown data (ascending) and severity of 
+        # Sorting by distance from drilldown data (ascending) and severity of
         # anomaly (descending), created distance for this purpose only
         results['distance'] = abs(results['data_datetime'] - pd.to_datetime(drilldown_date))
         results.sort_values(['distance', 'severity'], ascending = [True, False], inplace = True)

@@ -132,7 +132,7 @@ def get_dashboard_list():
     except Exception as e:
         status = "failure"
         message = "Failed to fetch dashboard list :{}".format(e)
-
+        dashboard_list = []
     return jsonify(
         {"status": status, "message": message, "dashboard_list": dashboard_list}
     )

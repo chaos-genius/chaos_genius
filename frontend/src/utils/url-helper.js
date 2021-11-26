@@ -1,6 +1,7 @@
 // URL CONSTANTS
+import { env } from '../env';
 
-export const BASE_URL = process.env.REACT_APP_BASE_URL || '';
+export const BASE_URL = env.REACT_APP_BASE_URL || '';
 
 export const attachParams = (relativeUrl, params) => {
   let baseUrl = BASE_URL;

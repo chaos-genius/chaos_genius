@@ -269,6 +269,7 @@ class RootCauseAnalysisController:
                     "Data Loader",
                     e,
                 )
+            raise e
         if self._task_id is not None:
             checkpoint_success(
                 self._task_id,

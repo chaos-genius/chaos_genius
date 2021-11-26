@@ -369,6 +369,7 @@ class AnomalyDetectionController(object):
             series_data[metric_col] = series_data[metric_col].fillna(0)
         except Exception as e:
             self._checkpoint_failure("Overall KPI - Preprocessor", e, is_overall)
+            raise e
         else:
             self._checkpoint_success("Overall KPI - Preprocessor", is_overall)
 
@@ -379,6 +380,7 @@ class AnomalyDetectionController(object):
             )
         except Exception as e:
             self._checkpoint_failure("Overall KPI - Anomaly Detector", e, is_overall)
+            raise e
         else:
             self._checkpoint_success("Overall KPI - Anomaly Detector", is_overall)
 
@@ -387,6 +389,7 @@ class AnomalyDetectionController(object):
             self._save_anomaly_output(overall_anomaly_output, series, subgroup)
         except Exception as e:
             self._checkpoint_failure("Overall KPI - Result Ingestor", e, is_overall)
+            raise e
         else:
             self._checkpoint_success("Overall KPI - Result Ingestor", is_overall)
 
@@ -418,6 +421,7 @@ class AnomalyDetectionController(object):
 
         except Exception as e:
             self._checkpoint_failure("Subdimensions - Subdimension Generator", e)
+            raise e
         else:
             self._checkpoint_success("Subdimensions - Subdimension Generator")
 
@@ -430,6 +434,7 @@ class AnomalyDetectionController(object):
                     logger.exception(f"Exception occured for: subdim - {subgroup}")
         except Exception as e:
             self._checkpoint_failure("Subdimensions - Anomaly Detector", e)
+            raise e
         else:
             self._checkpoint_success("Subdimensions - Anomaly Detector")
 
@@ -445,6 +450,7 @@ class AnomalyDetectionController(object):
             dq_list = ["max", "count", "mean"] if agg != "mean" else ["max", "count"]
         except Exception as e:
             self._checkpoint_failure("Data Quality - Preprocessor", e)
+            raise e
         else:
             self._checkpoint_success("Data Quality - Preprocessor")
 
@@ -457,6 +463,7 @@ class AnomalyDetectionController(object):
                     logger.exception(f"Exception occured for: data quality - {dq}")
         except Exception as e:
             self._checkpoint_failure("Data Quality - Anomaly Detector", e)
+            raise e
         else:
             self._checkpoint_success("Data Quality - Anomaly Detector")
 
@@ -528,6 +535,7 @@ class AnomalyDetectionController(object):
             input_data = self._load_anomaly_data()
         except Exception as e:
             self._checkpoint_failure("Data Loader", e)
+            raise e
         else:
             self._checkpoint_success("Data Loader")
         logger.info(f"Loaded {len(input_data)} rows of input data.")

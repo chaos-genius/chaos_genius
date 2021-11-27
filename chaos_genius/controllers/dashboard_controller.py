@@ -2,10 +2,16 @@ from chaos_genius.databases.models.dashboard_model import Dashboard
 from chaos_genius.databases.models.dashboard_kpi_mapper_model import DashboardKpiMapper
 
 def get_dashboard_by_id(dashboard_id):
-    return Dashboard.query.get(dashboard_id)
+    return Dashboard.query.filter(
+                                    Dashboard.id == dashboard_id,
+                                    Dashboard.active == True
+                                ).first()
 
 def get_mapper_obj_by_id(mapper_id):
-    return DashboardKpiMapper.query.get(mapper_id)
+    return DashboardKpiMapper.query.filter(
+                                            DashboardKpiMapper.id == mapper_id,
+                                            DashboardKpiMapper.active == True
+                                        ).first()
 
 def get_dashboard_list():
     dashboard_list = Dashboard.query.filter_by(active=True)
@@ -25,7 +31,10 @@ def kpi_mapper_dict(mapper_list):
     return mapper_dict_list
 
 def get_dashboard_dict_by_id(dashboard_id):
-    dashboard_obj = Dashboard.query.get(dashboard_id)
+    dashboard_obj = Dashboard.query.filter(
+                                            Dashboard.id == dashboard_id,
+                                            Dashboard.active == True
+                                        ).first()
     if dashboard_obj is None:
         return None
     mapper_obj_list = DashboardKpiMapper.query.filter_by(dashboard=dashboard_obj.id, active=True)

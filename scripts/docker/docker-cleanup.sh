@@ -7,7 +7,7 @@ BASE_DIR=${SCRIPT_DIR%"$suffix"}
 echo "###### REMOVING CONTAINERS ###########"
 echo
 echo "Select the .yml that was used to build"
-yml_files=$(ls $BASE_DIR/docker-compose*)
+yml_files=$(ls $BASE_DIR/docker-compose*yml)
 yml_files_list=(${yml_files// / })
 declare -i count=1
 echo
@@ -17,26 +17,9 @@ do
     count=`expr $count + 1`
 done
 echo
-read -p "Your Seclection (1/2/3)? Press Enter if unsure :" temp_sel
+read -p "Your Seclection ? Press Enter if unsure :" temp_sel
 sel=$(echo $temp_sel | xargs)
-
-if [ "$sel" = "1" ];
-then
-    docker-compose -f $BASE_DIR/docker-compose.dev.yml down
-    docker-compose -f $BASE_DIR/docker-compose.dev.yml rm -v -f
-fi
-
-if [ "$sel" = "2" ];
-then
-    docker-compose -f $BASE_DIR/docker-compose.latest.yml down
-    docker-compose -f $BASE_DIR/docker-compose.latest.yml rm -v -f
-fi
-
-if [ "$sel" = "3" ];
-then
-    docker-compose -f $BASE_DIR/docker-compose.yml down
-    docker-compose -f $BASE_DIR/docker-compose.yml rm -v -f
-fi
+sel=`expr $sel`
 
 if [ "$sel" = "" ];
 then
@@ -48,11 +31,13 @@ then
         docker rm $cont
     done
     echo "removed containers successfully"
-
+else
+    declare -i index=`expr $sel - 1`
+    compose_file=${yml_files_list[$index]}
+    docker-compose -f $compose_file down
+    docker-compose -f $compose_file rm -v -f
 fi
 
-# docker-compose -f docker-compose.yml down
-# docker-compose -f docker-compose.yml rm -v -f
 
 echo "#### CLEANING UP LOCAL DIRECTORIES ###############"
 rm -rf $BASE_DIR/docker/airbyte-db

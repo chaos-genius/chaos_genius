@@ -36,6 +36,8 @@ services:
     container_name: chaosgenius-server
     image: chaosgenius/chaosgenius-server:0.1.3
     command: sh setup/run-backend-docker.sh
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - chaosgenius-db
       - server

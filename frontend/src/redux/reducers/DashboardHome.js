@@ -10,14 +10,17 @@ import {
   DASHBOARDCREATEFAILURE,
   DASHBOARDEDITREQUEST,
   DASHBOARDEDITRESPONSE,
-  DASHBOARDEDITFAILURE
+  DASHBOARDEDITFAILURE,
+  DASHBOARDUPDATEREQUEST,
+  DASHBOARDUPDATESUCCESS,
+  DASHBOARDUPDATEFAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
   dashboardList: '',
   dashboardListLoading: false,
   dashboardListError: false,
-  dashboardDelete: '',
+  dashboardDelete: [],
   dashboardDeleteLoading: false,
   dashboardDeleteError: false,
   createDashboard: [],
@@ -25,7 +28,10 @@ const initialState = {
   createDashboardError: false,
   editDashboard: '',
   editDashboardLoading: false,
-  editDashboardError: false
+  editDashboardError: false,
+  updateDashboard: [],
+  updateDashboardLoading: false,
+  updateDashboardError: false
 };
 
 export const DashboardHome = (state = initialState, action) => {
@@ -111,6 +117,32 @@ export const DashboardHome = (state = initialState, action) => {
         ...state,
         editDashboardLoading: false,
         editDashboardError: true
+      };
+    }
+    case DASHBOARDUPDATEREQUEST: {
+      return {
+        ...state,
+        updateDashboardLoading: true
+      };
+    }
+    case DASHBOARDUPDATESUCCESS: {
+      return {
+        ...state,
+        updateDashboard: action.data,
+        updateDashboardLoading: false
+      };
+    }
+    case DASHBOARDUPDATEFAILURE: {
+      return {
+        ...state,
+        updateDashboardLoading: false,
+        updateDashboardError: true
+      };
+    }
+    case 'DASHBOARD_RESET': {
+      return {
+        creatDashboard: [],
+        dashboardDelete: []
       };
     }
     default:

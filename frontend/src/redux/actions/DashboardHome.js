@@ -46,14 +46,14 @@ export const getDashboardFailure = () => {
 
 export const getDashboard = () => {
   return async (dispatch) => {
-    dispatch(getDashboardRequested());
     const { data, error, status } = await getRequest({
       url: DASHBOARD_LIST_URL
     });
+    dispatch(getDashboardRequested());
     if (error) {
       dispatch(getDashboardFailure());
     } else if (data && status === 200) {
-      dispatch(getDashboardSuccess(data.data));
+      dispatch(getDashboardSuccess(data.dashboard_list));
     }
   };
 };
@@ -87,7 +87,7 @@ export const getDashboardDelete = (params) => {
     if (error) {
       dispatch(getDashboardDeleteFailure());
     } else if (data && status === 200) {
-      dispatch(getDashboardDeleteResponse(data.data));
+      dispatch(getDashboardDeleteResponse(data));
     }
   };
 };
@@ -121,7 +121,8 @@ export const getCreateDashboard = (dashboard) => {
     if (error) {
       dispatch(getCreateDashboardFailure());
     } else if (data && status === 200) {
-      dispatch(getCreateDashboardSuccess(data.data));
+      console.log(data);
+      dispatch(getCreateDashboardSuccess(data));
     }
   };
 };
@@ -148,14 +149,15 @@ export const getEditDashboardFailure = () => {
 export const getEditDashboard = (params) => {
   return async (dispatch) => {
     dispatch(getEditDashboardRequest());
-    const URL = attachParams(DASHBOARD_EDIT_URL, params);
+    // const URL = attachParams(DASHBOARD_EDIT_URL, params);
+    const URL = `http://52.66.248.216:8080/api/dashboard/get_dashboard?dashboard_id=${params.dashboard_id}`;
     const { data, error, status } = await getRequest({
       url: URL
     });
     if (error) {
       dispatch(getEditDashboardFailure());
     } else if (data && status === 200) {
-      dispatch(getEditDashboardSuccess(data.data));
+      dispatch(getEditDashboardSuccess(data.dashboard));
     }
   };
 };

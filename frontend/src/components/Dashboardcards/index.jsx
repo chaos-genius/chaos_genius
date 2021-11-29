@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Link } from 'react-router-dom';
 
@@ -11,30 +11,42 @@ import EditActive from '../../assets/images/datasourceedit-active.svg';
 import DeleteActive from '../../assets/images/delete-active.svg';
 import Close from '../../assets/images/close.svg';
 
-// import { getDashboardDelete } from '../../redux/actions';
-
+import { getDashboardDelete } from '../../redux/actions';
+import { useDispatch, useSelector } from 'react-redux';
 import './dashboardcards.scss';
 import { formatDate } from '../../utils/date-helper';
 
-const Dashboardcards = ({ dashboardList }) => {
-  //const dispatch = useDispatch();
+const Dashboardcards = ({ dashboarddata, setChange }) => {
+  const dispatch = useDispatch();
 
   const [isOpen, setIsOpen] = useState(false);
   const [data, setData] = useState('');
+
+  const { dashboardDelete } = useSelector((state) => {
+    return state.DashboardHome;
+  });
 
   const closeModal = () => {
     setIsOpen(false);
   };
 
   const onDelete = (value) => {
-    // dispatch(getDashboardDelete({dashboard_id:value.id)});
+    dispatch(getDashboardDelete({ dashboard_id: value.id }));
   };
+
+  // useEffect(() => {
+  //   if (dashboardDelete) {
+  //     setIsOpen(false);
+  //     setChange((prev) => !prev);
+  //   }
+  // }, [dashboardDelete]);
 
   return (
     <>
       <div className="dashboard-card-container">
-        {dashboardList &&
-          dashboardList.map((dashboard) => {
+        {dashboarddata &&
+          dashboarddata.length !== 0 &&
+          dashboarddata.map((dashboard) => {
             return (
               <div className="dashboardcard">
                 <div className="header-card">

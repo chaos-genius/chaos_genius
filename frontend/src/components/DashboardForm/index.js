@@ -7,50 +7,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import Select from 'react-select';
 import {
   getAllKpiExplorer,
-  getUpdateDashboard
-  // getCreateDashboard,
-  //getEditDashboard
+  getUpdateDashboard,
+  getCreateDashboard,
+  getEditDashboard
 } from '../../redux/actions';
 // import ModalPopUp from '../Modal';
-
-const editDashboard = {
-  dashboard: {
-    active: true,
-    created_at: 'Tue, 23 Nov 2021 05:53:54 GMT',
-    id: 11,
-    kpis: [
-      {
-        created_at: 'Tue, 23 Nov 2021 05:53:55 GMT',
-        id: 17,
-        kpi: 3
-      },
-      {
-        created_at: 'Tue, 23 Nov 2021 05:53:55 GMT',
-        id: 18,
-        kpi: 4
-      },
-      {
-        created_at: 'Tue, 23 Nov 2021 05:53:55 GMT',
-        id: 19,
-        kpi: 5
-      },
-      {
-        created_at: 'Tue, 23 Nov 2021 08:57:00 GMT',
-        id: 24,
-        kpi: 10
-      },
-      {
-        created_at: 'Tue, 23 Nov 2021 08:57:00 GMT',
-        id: 25,
-        kpi: 11
-      }
-    ],
-    last_modified: 'Tue, 23 Nov 2021 08:57:00 GMT',
-    name: 'first_dashboard_modified'
-  },
-  message: '',
-  status: 'success'
-};
 
 const DashboardForm = () => {
   // const [modal, setModal] = useState('false');
@@ -76,21 +37,29 @@ const DashboardForm = () => {
   const { isLoading, kpiExplorerList } = useSelector(
     (state) => state.kpiExplorer
   );
-  // const { editDashboar } = useSelector((state) => state.DashboardHome);
+  const {
+    editDashboard,
+    createDashboardLoading,
+    updateDashboardLoading,
+    createDashboard
+  } = useSelector((state) => state.DashboardHome);
 
   useEffect(() => {
     dispatch(getAllKpiExplorer());
-  }, [dispatch]);
-
-  useEffect(() => {
     if (path[2] === 'edit') {
-      //dispatch(getEditDashboard({ dashboard_id: dashboardId }));
+      dispatch(getEditDashboard({ dashboard_id: dashboardId }));
     }
-  }, [path]);
+  }, []);
 
   useEffect(() => {
-    if (editDashboard && path[2] === 'edit' && editDashboard.dashboard) {
-      setFormData({ ...formData, dashboardname: editDashboard.dashboard.name });
+    if (editDashboard && path[2] === 'edit') {
+      var arr = [];
+      editDashboard.kpis.map((item) => arr.push(item.kpi));
+      setFormData({
+        ...formData,
+        dashboardname: editDashboard?.name,
+        kpi: arr
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editDashboard]);
@@ -107,6 +76,13 @@ const DashboardForm = () => {
       );
     }
   }, [kpiExplorerList]);
+
+  // useEffect(() => {
+  //   if (createDashboard) {
+  //     console.log(createDashboard);
+  //     history.push('/dashboard');
+  //   }
+  // }, [createDashboard]);
 
   const handleSubmit = () => {
     if (formData.dashboardname === '') {
@@ -133,11 +109,11 @@ const DashboardForm = () => {
         };
         dispatch(getUpdateDashboard(dashboardId, payload));
       } else {
-        // const dashboardData = {
-        //   dashboard_name: formData.dashboardname,
-        //   kpi_list: formData.kpi
-        // };
-        // dispatch(getCreateDashboard(dashboardData));
+        const dashboardData = {
+          dashboard_name: formData.dashboardname,
+          kpi_list: formData.kpi
+        };
+        dispatch(getCreateDashboard(dashboardData));
       }
     }
   };
@@ -205,6 +181,17 @@ const DashboardForm = () => {
             classNamePrefix="selectcategory"
             placeholder="Select"
             menuPlacement="top"
+            value={
+              formData.kpi.length !== 0
+                ? formData.kpi.map((el) => {
+                    return {
+                      label: kpiExplorerList.find((list) => list.id === el)
+                        ?.name,
+                      value: el
+                    };
+                  })
+                : []
+            }
             closeMenuOnSelect={false}
             blurInputOnSelect={false}
             onChange={(e) => {
@@ -232,7 +219,11 @@ const DashboardForm = () => {
           </button> */}
 
           <button
-            className={'btn black-button'}
+            className={
+              createDashboardLoading || updateDashboardLoading
+                ? 'btn black-button btn-loading'
+                : 'btn black-button'
+            }
             onClick={() => {
               handleSubmit();
             }}>

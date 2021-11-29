@@ -6,7 +6,7 @@ BASE_DIR=${SCRIPT_DIR%"$suffix"}
 
 echo "###### REMOVING CONTAINERS ###########"
 echo
-echo "Select the .yml that was used to build"
+echo "Select the .yml that was used to start Chaos Genius"
 yml_files=$(ls $BASE_DIR/docker-compose*yml)
 yml_files_list=(${yml_files// / })
 declare -i count=1
@@ -17,7 +17,7 @@ do
     count=`expr $count + 1`
 done
 echo
-read -p "Your Seclection ? Press Enter if unsure :" temp_sel
+read -p "Your Selection ? Press Enter if unsure :" temp_sel
 sel=$(echo $temp_sel | xargs)
 sel=`expr $sel`
 
@@ -46,14 +46,14 @@ rm -rf /tmp/workspace
 rm -rf /tmp/airbyte_local
 echo "Done"
 echo "####### REMOVING ALL RELATED IMAGES ##############"
-declare -a image_names=("chaos_genius_celery-scheduler" "chaos_genius_celery-worker" "chaos_genius_chaosgenius-server" "chaos_genius_chaosgenius-webapp" "airbyte/webapp" "airbyte/server" "airbyte/worker" "airbyte/scheduler" "airbyte/db" "airbyte/init" "airbyte/source-google-ads" "airbyte/source-postgres" "airbyte/source-snowflake" "airbyte/source-mysql" "airbyte/source-bing-ads" "airbyte/source-google-sheets" "airbyte/source-shopify" "airbyte/source-stripe" "airbyte/source-bigquery" "airbyte/source-facebook-marketing" "airbyte/source-googleanalytics-singer" "temporalio/auto-setup" "redis" "node" "postgres" "chaosgenius/chaosgenius-server" "chaosgenius/chaosgenius-webapp" "docker")
+declare -a image_names=("airbyte/webapp" "airbyte/server" "airbyte/worker" "airbyte/scheduler" "airbyte/db" "airbyte/init" "airbyte/source-google-ads" "airbyte/source-postgres" "airbyte/source-snowflake" "airbyte/source-mysql" "airbyte/source-bing-ads" "airbyte/source-google-sheets" "airbyte/source-shopify" "airbyte/source-stripe" "airbyte/source-bigquery" "airbyte/source-facebook-marketing" "airbyte/source-googleanalytics-singer" "temporalio/auto-setup" "redis" "node" "postgres" "chaosgenius/chaosgenius-server" "chaosgenius/chaosgenius-webapp" "docker")
 
 for image in "${image_names[@]}"
 do
   image_id=$(docker images | grep "$image" | awk '{print $3}')
   if [ ! -z "$image_id" ]
   then 
-    echo "Image found. Deleting image........"
+    echo "$image - Image found. Deleting image........"
     docker rmi -f $image_id
   else 
     echo "image not found"

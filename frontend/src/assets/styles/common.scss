@@ -890,6 +890,12 @@ a:hover {
   display: flex;
   align-items: center;
   flex-direction: column;
+  &.server-error-card {
+    .no-data-img {
+      width: 220px;
+      height: 104px;
+    }
+  }
   .no-data-img {
     width: 104px;
     height: 104px;
@@ -899,6 +905,7 @@ a:hover {
       height: 100%;
     }
   }
+
   h3 {
     font-weight: $font-weight-600;
     font-size: $font-size-18;

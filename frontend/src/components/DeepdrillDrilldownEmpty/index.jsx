@@ -1,6 +1,6 @@
 import React from 'react';
 
-import empty from '../../assets/images/deepdrillDrilldownEmpty.svg';
+import empty from '../../assets/images/deepdrill-drilldown-empty.svg';
 
 const DeepdrillDrilldownEmpty = () => {
   return (
@@ -8,8 +8,8 @@ const DeepdrillDrilldownEmpty = () => {
       <div className="empty-state-image">
         <img src={empty} alt="Anomaly" />
       </div>
-      <h3>No Drill Downs</h3>
-      <p>No Drill Downs exist for this Anomaly</p>
+      <h3>No Dimensions defined yet</h3>
+      <p>Looks like you have not defined dimensions for this KPI</p>
     </div>
   );
 };

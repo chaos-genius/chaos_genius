@@ -5,13 +5,14 @@ from typing import Dict, Optional, cast
 from docker.errors import NotFound as ContainerNotFound
 from docker.models.containers import Container
 from flask import Blueprint, render_template
-from chaos_genius.settings import IN_DOCKER
+
 import docker
 from chaos_genius.controllers.task_monitor import get_checkpoints
+from chaos_genius.settings import IN_DOCKER
 
 blueprint = Blueprint("status", __name__, static_folder="../static")
 
-client=None
+client = None
 if IN_DOCKER:
     client = docker.from_env()
 

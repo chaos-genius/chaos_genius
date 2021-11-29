@@ -95,7 +95,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     addfilter: [],
     dimensions: []
   });
-  
 
   const [errorMsg, setErrorMsg] = useState({
     kpiname: false,
@@ -142,7 +141,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   //   datetimecolumns: ''
   //   });
   // }
-
 
   useEffect(() => {
     dispatchGetAllKpiExplorerForm();
@@ -435,7 +433,14 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         }
 
         setOption({ ...option, metricOption: optionValueArr });
-        setFormdata({ ...formdata, tablename: valueData, metriccolumns: '', aggregate: '', datetimecolumns: '', dimensions:[]});
+        setFormdata({
+          ...formdata,
+          tablename: valueData,
+          metriccolumns: '',
+          aggregate: '',
+          datetimecolumns: '',
+          dimensions: []
+        });
       }
 
       // setFormdata({ ...formdata, tablename: e.value });
@@ -521,14 +526,14 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         };
       });
     }
-    if (formdata.dimensions.length === 0) {
-      setErrorMsg((prev) => {
-        return {
-          ...prev,
-          dimension: true
-        };
-      });
-    }
+    // if (formdata.dimensions.length === 0) {
+    //   setErrorMsg((prev) => {
+    //     return {
+    //       ...prev,
+    //       dimension: true
+    //     };
+    //   });
+    // }
     if (formdata.query === '') {
       setErrorMsg((prev) => {
         return {
@@ -543,8 +548,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         formdata.dataset &&
         formdata.metriccolumns &&
         formdata.aggregate &&
-        formdata.datetimecolumns) !== '' &&
-      formdata.dimensions.length !== 0
+        formdata.datetimecolumns) !== ''
+      // formdata.dimensions.length !== 0
     ) {
       const kpiInfo = {
         name: formdata.kpiname,
@@ -578,7 +583,13 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       query: formdata.query
     };
     dispatch(getTestQuery(data));
-    setFormdata({ ...formdata, metriccolumns: '', aggregate: '', datetimecolumns: '', dimensions:[]});
+    setFormdata({
+      ...formdata,
+      metriccolumns: '',
+      aggregate: '',
+      datetimecolumns: '',
+      dimensions: []
+    });
   };
 
   /* This is add filter function code */
@@ -881,7 +892,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           </div>
 
           <div className="form-group">
-            <label>Dimensions *</label>
+            <label>Dimensions </label>
             <Select
               closeMenuOnSelect={false}
               blurInputOnSelect={false}
@@ -921,11 +932,11 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                 });
               }}
             />
-            {errorMsg.dimension === true ? (
+            {/* {errorMsg.dimension === true ? (
               <div className="connection__fail">
                 <p>Select Dimension</p>
               </div>
-            ) : null}
+            ) : null} */}
           </div>
           {/* {inputList && inputList.length !== 0 && (
             <div className="form-group">

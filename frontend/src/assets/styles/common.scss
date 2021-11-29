@@ -1149,6 +1149,31 @@ a:hover {
     margin-top: 11px;
   }
 }
+.deepdrill-drilldown-empty {
+  height: 260px;
+  .empty-state-image {
+    width: 202px;
+    height: 104px;
+  }
+  h3 {
+    margin-top: 24px;
+    font-weight: $font-weight-600;
+    font-size: $font-size-18;
+    line-height: $line-height-20;
+    text-align: center;
+    letter-spacing: $letter-spacing;
+    color: $black_variation-2;
+  }
+  p {
+    margin-top: 12px;
+    font-weight: $font-weight-normal;
+    font-size: $font-size-14;
+    line-height: $line-height-22;
+    text-align: center;
+    letter-spacing: $letter-spacing;
+    color: $grey_variation-3;
+  }
+}
 
 .toaster-popup {
   font-weight: $font-weight-400;

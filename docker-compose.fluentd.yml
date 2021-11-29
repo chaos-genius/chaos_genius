@@ -70,6 +70,7 @@ services:
       - server
       - chaosgenius-fluentd
     environment:
+      - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -92,7 +93,6 @@ services:
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
       - CACHE_DEFAULT_TIMEOUT=${CACHE_DEFAULT_TIMEOUT}
-      - IN_DOCKER=True
     logging: *default-logging
 
   chaosgenius-db:
@@ -131,6 +131,7 @@ services:
     image: chaosgenius/chaosgenius-server:latest
     command: celery -A run.celery beat --loglevel=DEBUG
     environment:
+      - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -152,7 +153,6 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
-      - IN_DOCKER=True
     depends_on:
       - chaosgenius-redis
       - chaosgenius-fluentd
@@ -163,6 +163,7 @@ services:
     image: chaosgenius/chaosgenius-server:latest
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
     environment:
+      - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -184,7 +185,6 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
-      - IN_DOCKER=True
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db
@@ -196,6 +196,7 @@ services:
     image: chaosgenius/chaosgenius-server:latest
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
     environment:
+      - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -217,7 +218,6 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
-      - IN_DOCKER=True
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db

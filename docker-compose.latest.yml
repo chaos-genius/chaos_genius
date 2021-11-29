@@ -40,6 +40,7 @@ services:
       - chaosgenius-db
       - server
     environment:
+      - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -62,7 +63,6 @@ services:
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
       - CACHE_DEFAULT_TIMEOUT=${CACHE_DEFAULT_TIMEOUT}
-      - IN_DOCKER=True
       - MULTIDIM_ANALYSIS_FOR_ANOMALY=${MULTIDIM_ANALYSIS_FOR_ANOMALY}
       - MAX_SUBDIM_CARDINALITY=${MAX_SUBDIM_CARDINALITY}
       - TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN=${TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN}
@@ -112,6 +112,7 @@ services:
     image: chaosgenius/chaosgenius-server:latest
     command: celery -A run.celery beat --loglevel=DEBUG
     environment:
+      - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -133,7 +134,6 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
-      - IN_DOCKER=True
     depends_on:
       - chaosgenius-redis
   
@@ -142,6 +142,7 @@ services:
     image: chaosgenius/chaosgenius-server:latest
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
     environment:
+      - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -163,7 +164,6 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
-      - IN_DOCKER=True
       - MULTIDIM_ANALYSIS_FOR_ANOMALY=${MULTIDIM_ANALYSIS_FOR_ANOMALY}
       - MAX_SUBDIM_CARDINALITY=${MAX_SUBDIM_CARDINALITY}
       - TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN=${TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN}
@@ -179,6 +179,7 @@ services:
     image: chaosgenius/chaosgenius-server:latest
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
     environment:
+      - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -200,7 +201,6 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
-      - IN_DOCKER=True
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db

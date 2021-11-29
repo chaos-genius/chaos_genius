@@ -423,7 +423,7 @@ const Anomaly = ({ kpi, anomalystatus }) => {
                   </div>
                   {drilldownCollapse ? (
                     <>
-                      {false ? (
+                      {itemList.length ? (
                         <div
                           className={
                             drilldownCollapse

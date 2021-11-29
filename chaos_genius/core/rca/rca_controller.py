@@ -295,6 +295,7 @@ class RootCauseAnalysisController:
             line_data = self._get_line_data()
             output.append(self._output_to_row("line", line_data))
         except Exception as e:
+            # TODO: Rename to "Line Data" instead of "Data Loader"
             self._checkpoint_failure("Data Loader", e)
             raise e
         self._checkpoint_success("Data Loader")
@@ -304,9 +305,12 @@ class RootCauseAnalysisController:
             logger.info(f"Running RCA for timeline: {timeline}.")
             try:
                 rca = self._load_rca_obj(timeline)
+                # TODO: Checkpoint success for data loading here
+                # Checkpoints should ideally be timeline specific.
             except Exception as e:
                 rca = None
                 logger.error(f"Error loading RCA for timeline [{timeline}]: {e}")
+                # TODO: Checkpoint failure for data loading here
 
             if rca is None:
                 continue
@@ -317,6 +321,7 @@ class RootCauseAnalysisController:
                 logger.info("Computing aggregations.")
                 agg_data = self._get_aggregation(rca)
                 output.append(self._output_to_row("agg", agg_data, timeline))
+
             except Exception as e:
                 logger.error(
                     f"Error in agg for {timeline}. Skipping timeline.", exc_info=1
@@ -332,8 +337,10 @@ class RootCauseAnalysisController:
                     try:
                         rca_data = self._get_rca(rca, dim, timeline)
                         output.append(self._output_to_row("rca", rca_data, timeline, dim))
+                        # TODO: Checkpoint success for base RCA here.
                     except:  # noqa E722
                         logger.error(f"Error in RCA for {timeline, dim}", exc_info=1)
+                        # TODO: Checkpoint failure for base RCA here.
 
                     if dim is not None:
                         logger.info(f"Computing Hierarchical table for dimension: {dim}")
@@ -342,8 +349,10 @@ class RootCauseAnalysisController:
                             output.append(
                                 self._output_to_row("htable", htable_data, timeline, dim)
                             )
+                            # TODO: Checkpoint success for htable calculation here.
                         except:  # noqa E722
                             logger.error(f"Error in htable for {timeline, dim}", exc_info=1)
+                            # TODO: Checkpoint failure for htable calculation here.
             except Exception as e:
                 self._checkpoint_failure(f"{timeline} computation - DeepDrill", e)
                 raise e
@@ -351,6 +360,7 @@ class RootCauseAnalysisController:
 
         # don't store if there is only the line data
         if len(output) < 2:
+            # TODO: Checpoint failure for RCA since only Line Data was calculated.
             return None
 
         try:

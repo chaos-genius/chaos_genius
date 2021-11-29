@@ -61,3 +61,9 @@ MAX_DEEPDRILLS_SLACK_DAYS = int(os.getenv('MAX_DEEPDRILLS_SLACK_DAYS', default=5
 MAX_ANOMALY_SLACK_DAYS = int(os.getenv('MAX_ANOMALY_SLACK_DAYS', default=5))
 
 SENTRY_DSN = os.getenv('SENTRY_DSN')
+
+IN_DOCKER = os.getenv('IN_DOCKER', default=False)
+if IN_DOCKER == 'True':
+    IN_DOCKER = True
+else:
+    IN_DOCKER = False

@@ -92,6 +92,7 @@ services:
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
       - CACHE_DEFAULT_TIMEOUT=${CACHE_DEFAULT_TIMEOUT}
+      - IN_DOCKER=True
     logging: *default-logging
 
   chaosgenius-db:
@@ -151,6 +152,7 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - IN_DOCKER=True
     depends_on:
       - chaosgenius-redis
       - chaosgenius-fluentd
@@ -182,6 +184,7 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - IN_DOCKER=True
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db
@@ -214,6 +217,7 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - IN_DOCKER=True
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db

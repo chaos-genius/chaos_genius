@@ -5,12 +5,15 @@ from typing import Dict, Optional, cast
 from docker.errors import NotFound as ContainerNotFound
 from docker.models.containers import Container
 from flask import Blueprint, render_template
-
+from chaos_genius.settings import IN_DOCKER
 import docker
 from chaos_genius.controllers.task_monitor import get_checkpoints
 
 blueprint = Blueprint("status", __name__, static_folder="../static")
 
+client=None
+if IN_DOCKER:
+    client = docker.from_env()
 
 CONTAINERS: Dict[str, str] = {
     "chaosgenius-server": "ChaosGenius API Server",
@@ -36,17 +39,18 @@ def container_status() -> Optional[Dict[str, bool]]:
         A dict mapping container names to status (True if up
             and False if down)
     """
-    client = docker.from_env()
+    if IN_DOCKER:
+        status = {}
+        for container_name in CONTAINERS:
+            try:
+                container = cast(Container, client.containers.get(container_name))
+                status[container_name] = container.status == "running"
+            except ContainerNotFound:
+                status[container_name] = False
 
-    status = {}
-    for container_name in CONTAINERS:
-        try:
-            container = cast(Container, client.containers.get(container_name))
-            status[container_name] = container.status == "running"
-        except ContainerNotFound:
-            status[container_name] = False
-
-    return status
+        return status
+    else:
+        return None
 
 
 @blueprint.route("/", methods=["GET"])

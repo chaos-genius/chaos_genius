@@ -1,7 +1,9 @@
 """A basic view for monitoring services and analytics tasks status."""
 
+import logging
 from typing import Dict, Optional, cast
 
+from docker.errors import DockerException
 from docker.errors import NotFound as ContainerNotFound
 from docker.models.containers import Container
 from flask import Blueprint, render_template
@@ -11,10 +13,14 @@ from chaos_genius.controllers.task_monitor import get_checkpoints
 from chaos_genius.settings import IN_DOCKER
 
 blueprint = Blueprint("status", __name__, static_folder="../static")
+logger = logging.getLogger(__name__)
 
 client = None
 if IN_DOCKER:
-    client = docker.from_env()
+    try:
+        client = docker.from_env()
+    except DockerException as e:
+        logger.exception("Could not initialize docker client", exc_info=e)
 
 CONTAINERS: Dict[str, str] = {
     "chaosgenius-server": "ChaosGenius API Server",
@@ -42,6 +48,10 @@ def container_status() -> Optional[Dict[str, bool]]:
     """
     if IN_DOCKER:
         status = {}
+
+        if client is None:
+            raise Exception("Docker client is not initialized")
+
         for container_name in CONTAINERS:
             try:
                 container = cast(Container, client.containers.get(container_name))

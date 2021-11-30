@@ -181,12 +181,12 @@ export const getUpdateDashboardFailure = () => {
   };
 };
 
-export const getUpdateDashboard = (params, payload) => {
+export const getUpdateDashboard = (payload) => {
   return async (dispatch) => {
     dispatch(getUpdateDashboardRequest());
-    const URL = attachParams(DASHBOARD_UPDATE_URL, params);
+    //const URL = attachParams(DASHBOARD_UPDATE_URL, params);
     const { data, error, status } = await postRequest({
-      url: URL,
+      url: DASHBOARD_UPDATE_URL,
       data: JSON.stringify(payload),
       headers: {
         'Content-Type': 'application/json'

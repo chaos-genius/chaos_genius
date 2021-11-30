@@ -104,10 +104,11 @@ const DashboardForm = () => {
     if (formData.dashboardname && formData.kpi) {
       if (path[2] === 'edit') {
         const payload = {
+          dashboard_id: dashboardId,
           dashboard_name: formData.dashboardname,
           kpi_list: formData.kpi
         };
-        dispatch(getUpdateDashboard(dashboardId, payload));
+        dispatch(getUpdateDashboard(payload));
       } else {
         const dashboardData = {
           dashboard_name: formData.dashboardname,
@@ -195,6 +196,7 @@ const DashboardForm = () => {
             closeMenuOnSelect={false}
             blurInputOnSelect={false}
             onChange={(e) => {
+              console.log(e);
               setFormData({
                 ...formData,
                 kpi: e.map((el) => el.value)

@@ -99,6 +99,6 @@ export {
   settingMetaInfo,
   onboardingOrganizationStatus,
   onboardOrganization,
-  onboardOrganizationUpdate
+  onboardOrganizationUpdate,
   getGlobalSetting
 };

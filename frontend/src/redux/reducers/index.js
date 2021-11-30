@@ -27,7 +27,7 @@ const rootReducer = combineReducers({
   anomaly: anomaly,
   alert: alert,
   setting: setting,
-  organization : organization
+  organization : organization,
   GlobalSetting: GlobalSetting
 });
 

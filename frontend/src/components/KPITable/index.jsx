@@ -20,7 +20,7 @@ import '../../assets/styles/table.scss';
 import { v4 as uuidv4 } from 'uuid';
 import Dimension from './dimension';
 
-import { formatDate } from '../../utils/date-helper';
+import { formatDateTime } from '../../utils/date-helper';
 import { kpiDisable } from '../../redux/actions';
 
 import { useToast } from 'react-toast-wnm';
@@ -156,7 +156,7 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
                           </div>
                         </td>
                         <td className="date-column-formated">
-                          {formatDate(kpi.created_at) || '-'}
+                          {formatDateTime(kpi.created_at, true) || '-'}
                         </td>
                         <td>
                           {/* dropdown */}

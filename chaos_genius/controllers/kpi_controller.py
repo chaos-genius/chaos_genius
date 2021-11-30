@@ -1,5 +1,6 @@
 import logging
 from datetime import date, datetime, timedelta
+from typing import Optional
 
 from flask import current_app  # noqa: F401
 
@@ -8,7 +9,9 @@ from chaos_genius.core.rca.rca_controller import RootCauseAnalysisController
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.databases.models.kpi_model import Kpi
 
-RCA_SLACK_DAYS = 5
+from chaos_genius.settings import MAX_DEEPDRILLS_SLACK_DAYS
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -38,7 +41,7 @@ def get_kpi_data_from_id(n: int) -> dict:
         return kpi_info.as_dict
     raise ValueError(f"KPI ID {n} not found in KPI_DATA")
 
-def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
+def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None, task_id: Optional[int] = None) -> bool:
 
     try:
         logger.info(f"Starting Anomaly Detection for KPI ID: {kpi_id}.")
@@ -60,7 +63,7 @@ def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
 
         logger.info(f"End date is {end_date}.")
 
-        adc = AnomalyDetectionController(kpi_info, end_date)
+        adc = AnomalyDetectionController(kpi_info, end_date, task_id=task_id)
         adc.detect()
         logger.info(f"Anomaly Detection has completed for KPI ID: {kpi_id}.")
 
@@ -73,23 +76,23 @@ def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
     return True
 
 
-def _get_end_date_for_rca_kpi(kpi_info: dict, end_date: datetime = None) -> datetime:
+def _get_end_date_for_rca_kpi(kpi_info: dict, end_date: date = None) -> date:
     # by default we always calculate for n-1
     if end_date is None:
-        end_date = datetime.today() - timedelta(days=1)
+        end_date = datetime.today().date() - timedelta(days=1)
 
     count = 0
     while not _is_data_present_for_end_date(kpi_info, end_date):
         logger.info(f"Checking for end date: {end_date}.")
         end_date = end_date - timedelta(days=1)
         count += 1
-        if count > RCA_SLACK_DAYS:
-            raise ValueError(f"KPI has no data for the last {RCA_SLACK_DAYS} days.")
+        if count > MAX_DEEPDRILLS_SLACK_DAYS:
+            raise ValueError(f"KPI has no data for the last {MAX_DEEPDRILLS_SLACK_DAYS} days.")
 
     return end_date
 
 
-def run_rca_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
+def run_rca_for_kpi(kpi_id: int, end_date: date = None, task_id: Optional[int] = None) -> bool:
     try:
         logger.info(f"Starting RCA for KPI ID: {kpi_id}.")
         kpi_info = get_kpi_data_from_id(kpi_id)
@@ -99,7 +102,7 @@ def run_rca_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
         end_date = _get_end_date_for_rca_kpi(kpi_info, end_date)
         logger.info(f"End date is {end_date}.")
 
-        rca_controller = RootCauseAnalysisController(kpi_info, end_date)
+        rca_controller = RootCauseAnalysisController(kpi_info, end_date, task_id=task_id)
         rca_controller.compute()
         logger.info(f"Completed RCA for KPI ID: {kpi_id}.")
 

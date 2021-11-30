@@ -28,7 +28,7 @@ class ExpTSModel(AnomalyModel):
         df: pd.DataFrame,
         sensitivity: str,
         frequency: str,
-        pred_df: pd.DataFrame = None
+        pred_df: pd.DataFrame = None,
     ) -> pd.DataFrame:
         """Predict anomalies on data.
 
@@ -58,8 +58,7 @@ class ExpTSModel(AnomalyModel):
         else:
             forecast = ets_model.get_prediction(end=len(df) - 1)
 
-        forecast_df = forecast.summary_frame(
-            alpha=1 - ETS_SENS[sensitivity.lower()])
+        forecast_df = forecast.summary_frame(alpha=1 - ETS_SENS[sensitivity.lower()])
         forecast_df = forecast_df.reset_index().rename(
             columns={
                 "index": "dt",

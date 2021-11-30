@@ -21,7 +21,7 @@ import '../../assets/styles/table.scss';
 import '../Modal/modal.scss';
 import './datasourcetable.scss';
 
-import { formatDate } from '../../utils/date-helper';
+import { formatDateTime } from '../../utils/date-helper';
 
 import { deleteDatasource } from '../../redux/actions';
 
@@ -158,10 +158,10 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
                     </td>
                     <td>{datasource.kpi_count || '-'}</td>
                     <td className="date-column-formated">
-                      {formatDate(datasource.last_sync)}
+                      {formatDateTime(datasource.last_sync, true)}
                     </td>
                     <td className="date-column-formated">
-                      {formatDate(datasource.created_at)}
+                      {formatDateTime(datasource.created_at, true)}
                     </td>
                     <td>
                       {/* dropdown */}

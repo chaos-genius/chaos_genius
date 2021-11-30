@@ -209,7 +209,7 @@ class RootCauseAnalysisController:
         :param dimension: dimension to compute for, defaults to None
         :type dimension: str, optional
         :param timeline: dimension to compute for, defaults to "mom"
-        :type timeline: str, optionalTODO
+        :type timeline: str, optional
         :return: rca dictionary
         :rtype: dict
         """

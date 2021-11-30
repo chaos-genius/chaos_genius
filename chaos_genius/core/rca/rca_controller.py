@@ -355,11 +355,11 @@ class RootCauseAnalysisController:
                                 self._output_to_row("htable", htable_data, timeline, dim)
                             )
                             # TODO: Checkpoint success for htable calculation here.
-                            self.checkpoint_success("Htable Calculator")
                         except Exception as e:  # noqa E722
                             logger.error(f"Error in htable for {timeline, dim}", exc_info=1)
                             self._checkpoint_failure("Htable Calculator", e)
                             # TODO: Checkpoint failure for htable calculation here.
+                        self._checkpoint_success("Htable Calculator")
             except Exception as e:
                 self._checkpoint_failure(f"{timeline} DeepDrill Computor", e)
                 raise e

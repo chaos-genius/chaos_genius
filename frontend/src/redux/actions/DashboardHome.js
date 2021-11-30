@@ -196,7 +196,7 @@ export const getUpdateDashboard = (payload) => {
     if (error) {
       dispatch(getUpdateDashboardFailure());
     } else if (data && status === 200) {
-      dispatch(getUpdateDashboardSuccess(data.data));
+      dispatch(getUpdateDashboardSuccess(data));
     }
   };
 };

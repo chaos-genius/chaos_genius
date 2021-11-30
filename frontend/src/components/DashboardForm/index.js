@@ -5,6 +5,11 @@ import { useHistory, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Select from 'react-select';
+
+import { useToast } from 'react-toast-wnm';
+
+import { CustomContent, CustomActions } from '../../utils/toast-helper';
+
 import {
   getAllKpiExplorer,
   getUpdateDashboard,
@@ -16,6 +21,8 @@ import {
 const DashboardForm = () => {
   // const [modal, setModal] = useState('false');
   const dispatch = useDispatch();
+
+  const toast = useToast();
 
   const history = useHistory();
   const path = history.location.pathname.split('/');
@@ -41,7 +48,8 @@ const DashboardForm = () => {
     editDashboard,
     createDashboardLoading,
     updateDashboardLoading,
-    createDashboard
+    createDashboard,
+    updateDashboard
   } = useSelector((state) => state.DashboardHome);
 
   useEffect(() => {
@@ -50,6 +58,7 @@ const DashboardForm = () => {
       dispatch(getEditDashboard({ dashboard_id: dashboardId }));
     }
   }, []);
+  // console.log('Update :', updateDashboard);
 
   useEffect(() => {
     if (editDashboard && path[2] === 'edit') {
@@ -77,12 +86,60 @@ const DashboardForm = () => {
     }
   }, [kpiExplorerList]);
 
-  // useEffect(() => {
-  //   if (createDashboard) {
-  //     console.log(createDashboard);
-  //     history.push('/dashboard');
-  //   }
-  // }, [createDashboard]);
+  const customToast = (data) => {
+    const { type, header, description } = data;
+    toast({
+      autoDismiss: true,
+      enableAnimation: true,
+      delay: type === 'success' ? '5000' : '30000',
+      backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
+      borderRadius: '6px',
+      color: '#222222',
+      position: 'bottom-right',
+      minWidth: '240px',
+      width: 'auto',
+      boxShadow: '4px 6px 32px -2px rgba(226, 226, 234, 0.24)',
+      padding: '17px 14px',
+      height: 'auto',
+      border: type === 'success' ? '1px solid #60ca9a' : '1px solid #FEF6F5',
+      type: type,
+      actions: <CustomActions />,
+      content: (
+        <CustomContent
+          header={header}
+          description={description}
+          failed={type === 'success' ? false : true}
+        />
+      )
+    });
+  };
+
+  useEffect(() => {
+    if (
+      createDashboard &&
+      createDashboard.status === 'success' &&
+      path[2] === 'add'
+    ) {
+      history.push('/dashboard');
+      customToast({
+        type: 'success',
+        header: 'Dashboard Created successfully',
+        description: createDashboard.message
+      });
+    } else if (
+      createDashboard &&
+      createDashboard.status === 'failure' &&
+      path[2] === 'add'
+    ) {
+      history.push('/dashboard');
+      customToast({
+        type: 'success',
+        header: 'Failed to create dashboard',
+        description: createDashboard.message
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createDashboard]);
 
   const handleSubmit = () => {
     if (formData.dashboardname === '') {

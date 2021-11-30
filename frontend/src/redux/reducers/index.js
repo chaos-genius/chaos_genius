@@ -12,6 +12,8 @@ import { sidebar } from './Sidebarlist';
 import { anomaly } from './Anomaly';
 import { alert } from './Alert';
 import { setting } from './setting';
+import { organization } from './Organization';
+
 
 const rootReducer = combineReducers({
   dataSource: dataSource,
@@ -25,7 +27,8 @@ const rootReducer = combineReducers({
   sidebar: sidebar,
   anomaly: anomaly,
   alert: alert,
-  setting: setting
+  setting: setting,
+  organization : organization
 });
 
 export default rootReducer;

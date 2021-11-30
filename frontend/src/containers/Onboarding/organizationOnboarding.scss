@@ -129,6 +129,13 @@
       }
       .form-group {
         margin-bottom: 24px;
+        .invalid-email{
+          color: #e96560;
+          display: flex;
+          align-items: center;
+          font-size: 14px;
+          margin-top: 2px;
+        }
         label {
           font-weight: $font-weight-400;
           font-size: 14px;
@@ -153,6 +160,7 @@
             color: $grey_variation-1;
           }
         }
+        
       }
       p {
         font-weight: $font-weight-400;

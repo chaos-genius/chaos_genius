@@ -21,6 +21,8 @@ class AnomalyDataOutput(PkModel):
     series_type = Column(db.String(500))
     index = Column(db.BigInteger, nullable=False)
 
+    # TODO: composite index - kpi_id, anomaly_type, series_type, data_datetime
+
     def __init__(self, **kwargs):
         """Create instance."""
         super().__init__(**kwargs)

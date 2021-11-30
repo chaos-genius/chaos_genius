@@ -18,6 +18,8 @@ class RcaData(PkModel):
     created_at = Column(db.DateTime, nullable=False,
                         default=dt.datetime.utcnow)
 
+    # TODO: composite index - kpi_id, end_date, data_type
+
     def __init__(self, name, **kwargs):
         """Create instance."""
         super().__init__(name=name, **kwargs)

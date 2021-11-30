@@ -58,7 +58,6 @@ const DashboardForm = () => {
       dispatch(getEditDashboard({ dashboard_id: dashboardId }));
     }
   }, []);
-  // console.log('Update :', updateDashboard);
 
   useEffect(() => {
     if (editDashboard && path[2] === 'edit') {
@@ -131,15 +130,31 @@ const DashboardForm = () => {
       createDashboard.status === 'failure' &&
       path[2] === 'add'
     ) {
-      history.push('/dashboard');
       customToast({
-        type: 'success',
+        type: 'failure',
         header: 'Failed to create dashboard',
         description: createDashboard.message
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createDashboard]);
+
+  useEffect(() => {
+    if (updateDashboard && updateDashboard.status === 'success') {
+      customToast({
+        type: 'success',
+        header: 'Successfully dashboard updated',
+        description: updateDashboard.message
+      });
+    } else if (updateDashboard && updateDashboard.status === 'failure') {
+      customToast({
+        type: 'failure',
+        header: 'Failed to update dashboard',
+        description: updateDashboard.message
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [updateDashboard]);
 
   const handleSubmit = () => {
     if (formData.dashboardname === '') {

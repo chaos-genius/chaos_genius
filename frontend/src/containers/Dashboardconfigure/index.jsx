@@ -19,7 +19,7 @@ import Fuse from 'fuse.js';
 
 import store from '../../redux/store';
 
-const RESET = {
+const DASHBOARD_RESET = {
   type: 'DASHBOARD_RESET'
 };
 
@@ -33,7 +33,7 @@ const Dashboardconfigure = () => {
   });
 
   useEffect(() => {
-    store.dispatch(RESET);
+    store.dispatch(DASHBOARD_RESET);
     dispatch(getDashboard());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);

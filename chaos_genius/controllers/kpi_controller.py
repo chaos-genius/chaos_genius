@@ -9,7 +9,9 @@ from chaos_genius.core.rca.rca_controller import RootCauseAnalysisController
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.databases.models.kpi_model import Kpi
 
-RCA_SLACK_DAYS = 5
+from chaos_genius.settings import MAX_DEEPDRILLS_SLACK_DAYS
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -84,8 +86,8 @@ def _get_end_date_for_rca_kpi(kpi_info: dict, end_date: date = None) -> date:
         logger.info(f"Checking for end date: {end_date}.")
         end_date = end_date - timedelta(days=1)
         count += 1
-        if count > RCA_SLACK_DAYS:
-            raise ValueError(f"KPI has no data for the last {RCA_SLACK_DAYS} days.")
+        if count > MAX_DEEPDRILLS_SLACK_DAYS:
+            raise ValueError(f"KPI has no data for the last {MAX_DEEPDRILLS_SLACK_DAYS} days.")
 
     return end_date
 

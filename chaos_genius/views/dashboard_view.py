@@ -15,7 +15,7 @@ from chaos_genius.controllers.dashboard_controller import (
 blueprint = Blueprint("dashboard", __name__)
 
 
-@blueprint.route("/create_dashboard", methods=["POST"])
+@blueprint.route("/create", methods=["POST"])
 def create_new_dashboard():
     status, message = "", ""
     try:
@@ -37,7 +37,7 @@ def create_new_dashboard():
     return jsonify({"status": status, "message": message})
 
 
-@blueprint.route("/edit_dashboard", methods=["POST"])
+@blueprint.route("/edit", methods=["POST"])
 def edit_dashboard():
     status, message = "",""
     try:
@@ -78,7 +78,7 @@ def edit_dashboard():
     return jsonify({"status":status, "message":message})
 
 
-@blueprint.route("/get_dashboard", methods=["GET"])
+@blueprint.route("/get", methods=["GET"])
 def get_dashboard():
     status, message = "", ""
     dashboard_dict = {}
@@ -100,7 +100,7 @@ def get_dashboard():
     )
 
 
-@blueprint.route("/delete_dashboard", methods=["POST"])
+@blueprint.route("/delete", methods=["POST"])
 def delete_dashboard():
     status, message = "", ""
     try:
@@ -121,7 +121,7 @@ def delete_dashboard():
     return jsonify({"status": status, "message": message})
 
 
-@blueprint.route("/get_dashboard_list", methods=["GET"])
+@blueprint.route("/list", methods=["GET"])
 def get_dashboard_list():
     status, message = "", ""
     dashboard_list = []

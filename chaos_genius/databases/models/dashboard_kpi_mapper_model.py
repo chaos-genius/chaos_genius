@@ -26,7 +26,6 @@ class DashboardKpiMapper(PkModel):
     @property
     def safe_dict(self):
         return {
-            "id": self.id,
             "dashboard": self.dashboard,
             "kpi": self.kpi,
             "created_at": self.created_at

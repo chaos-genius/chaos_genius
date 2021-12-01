@@ -4,6 +4,7 @@ from typing import Optional
 
 from flask import current_app  # noqa: F401
 
+from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
 from chaos_genius.core.anomaly.controller import AnomalyDetectionController
 from chaos_genius.core.rca.rca_controller import RootCauseAnalysisController
 from chaos_genius.core.utils.data_loader import DataLoader
@@ -97,17 +98,27 @@ def run_rca_for_kpi(kpi_id: int, end_date: date = None, task_id: Optional[int] =
         logger.info(f"Starting RCA for KPI ID: {kpi_id}.")
         kpi_info = get_kpi_data_from_id(kpi_id)
         logger.info("Retrieved KPI information.")
-
-        logger.info("Selecting end date.")
-        end_date = _get_end_date_for_rca_kpi(kpi_info, end_date)
-        logger.info(f"End date is {end_date}.")
+        try:
+            logger.info("Selecting end date.")
+            end_date = _get_end_date_for_rca_kpi(kpi_info, end_date)
+            logger.info(f"End date is {end_date}.")
+            checkpoint_success(
+                task_id, kpi_id, "DeepDrills", "Data Loader and Validation"
+            )
+        except Exception as e:  # noqa: B902
+            logger.error("Getting end date failed.", exc_info=1)
+            checkpoint_failure(
+                task_id, kpi_id, "DeepDrills", "Data Loader and Validation", e
+            )
+            return False
 
         rca_controller = RootCauseAnalysisController(kpi_info, end_date, task_id=task_id)
         rca_controller.compute()
         logger.info(f"Completed RCA for KPI ID: {kpi_id}.")
 
-    except Exception:  # noqa: B902
+    except Exception as e:  # noqa: B902
         logger.error(f"RCA encountered an error for KPI ID: {kpi_id}", exc_info=1)
+        checkpoint_failure(task_id, kpi_id, "DeepDrills", "DeepDrills", e)
         return False
 
     return True

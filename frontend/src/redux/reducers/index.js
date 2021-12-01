@@ -13,6 +13,7 @@ import { anomaly } from './Anomaly';
 import { alert } from './Alert';
 import { setting } from './setting';
 import { config } from './Config';
+import { GlobalSetting } from './GlobalSetting';
 const rootReducer = combineReducers({
   dataSource: dataSource,
   kpiExplorer: kpiExplorer,
@@ -26,7 +27,8 @@ const rootReducer = combineReducers({
   anomaly: anomaly,
   alert: alert,
   setting: setting,
-  config: config
+  config: config,
+  GlobalSetting: GlobalSetting
 });
 
 export default rootReducer;

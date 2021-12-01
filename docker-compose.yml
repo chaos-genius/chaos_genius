@@ -31,25 +31,11 @@ services:
       - SOURCE_GOOGLE_BIG_QUERY=${SOURCE_GOOGLE_BIG_QUERY}
       - SOURCE_SNOWFLAKE=${SOURCE_SNOWFLAKE}
 
-  chaosgenius-webapp:
-    container_name: chaosgenius-webapp
-    image: chaosgenius/chaosgenius-webapp:0.1.2
-    ports:
-      - "8080:3000"
-    environment:
-      - NODE_ENV=production
-      - HOST=0.0.0.0
-      - PORT=3000
-      - REACT_APP_BASE_URL=${REACT_APP_BASE_URL}
-    stdin_open: true
-    command: npm run start
 
   chaosgenius-server:
     container_name: chaosgenius-server
-    image: chaosgenius/chaosgenius-server:0.1.2
+    image: chaosgenius/chaosgenius-server:0.1.3
     command: sh setup/run-backend-docker.sh
-    ports:
-      - "5000:5000"
     depends_on:
       - chaosgenius-db
       - server
@@ -81,6 +67,19 @@ services:
       - TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN=${TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN}
       - MIN_DATA_IN_SUBGROUP=${MIN_DATA_IN_SUBGROUP}
       - MAX_ROWS_FOR_DEEPDRILLS=${MAX_ROWS_FOR_DEEPDRILLS}
+      - MAX_FILTER_SUBGROUPS_ANOMALY=${MAX_FILTER_SUBGROUPS_ANOMALY}
+
+  chaosgenius-webapp:
+    container_name: chaosgenius-webapp
+    image: chaosgenius/chaosgenius-webapp:0.1.3
+    volumes:
+      - ./frontend/nginx:/etc/nginx/conf.d/
+    ports:
+      - "8080:8080"
+    environment:
+            - REACT_APP_BASE_URL=chaosgenius-server:5000
+    depends_on:
+      - chaosgenius-server
 
   chaosgenius-db:
     container_name: chaosgenius-db
@@ -109,7 +108,7 @@ services:
     
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler
-    image: chaosgenius/chaosgenius-server:0.1.2
+    image: chaosgenius/chaosgenius-server:0.1.3
     command: celery -A run.celery beat --loglevel=DEBUG
     environment:
       - FLASK_APP=${FLASK_APP}
@@ -138,7 +137,7 @@ services:
   
   chaosgenius-worker-analytics:
     container_name: chaosgenius-worker-analytics
-    image: chaosgenius/chaosgenius-server:0.1.2
+    image: chaosgenius/chaosgenius-server:0.1.3
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
     environment:
       - FLASK_APP=${FLASK_APP}
@@ -167,13 +166,14 @@ services:
       - TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN=${TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN}
       - MIN_DATA_IN_SUBGROUP=${MIN_DATA_IN_SUBGROUP}
       - MAX_ROWS_FOR_DEEPDRILLS=${MAX_ROWS_FOR_DEEPDRILLS}
+      - MAX_FILTER_SUBGROUPS_ANOMALY=${MAX_FILTER_SUBGROUPS_ANOMALY}
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db
 
   chaosgenius-worker-alerts:
     container_name: chaosgenius-worker-alerts
-    image: chaosgenius/chaosgenius-server:0.1.2
+    image: chaosgenius/chaosgenius-server:0.1.3
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
     environment:
       - FLASK_APP=${FLASK_APP}

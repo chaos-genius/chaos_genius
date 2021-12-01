@@ -20,7 +20,7 @@ import EditActive from '../../assets/images/datasourceedit-active.svg';
 
 import { useDispatch } from 'react-redux';
 
-import { formatDate } from '../../utils/date-helper';
+import { formatDateTime } from '../../utils/date-helper';
 import { kpiAlertDisable, kpiAlertEnable } from '../../redux/actions';
 
 import store from '../../redux/store';
@@ -85,7 +85,7 @@ const AlertTable = ({ alertData, alertSearch }) => {
                       {alert.alert_type || '-'}
                     </td>
                     <td className="date-column-formated">
-                      {formatDate(alert.created_at) || '-'}
+                      {formatDateTime(alert.created_at, true) || '-'}
                     </td>
                     <td>
                       <div className="alert-status">

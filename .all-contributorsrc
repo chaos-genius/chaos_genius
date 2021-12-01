@@ -188,6 +188,51 @@
       "contributions": [
         "plugin"
       ]
+    },
+    {
+      "login": "davidhayter-karhoo",
+      "name": "davidhayter-karhoo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/43238713?v=4",
+      "profile": "https://github.com/davidhayter-karhoo",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "mvaerle",
+      "name": "Marijn van Aerle",
+      "avatar_url": "https://avatars.githubusercontent.com/u/73708?v=4",
+      "profile": "https://www.floryn.com",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "gxu-kangaroo",
+      "name": "gxu-kangaroo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/84041080?v=4",
+      "profile": "https://github.com/gxu-kangaroo",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "RamneekKaur983",
+      "name": "RamneekKaur983",
+      "avatar_url": "https://avatars.githubusercontent.com/u/51482282?v=4",
+      "profile": "https://github.com/RamneekKaur983",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "arvind-27",
+      "name": "arvind-27",
+      "avatar_url": "https://avatars.githubusercontent.com/u/57091402?v=4",
+      "profile": "https://github.com/arvind-27",
+      "contributions": [
+        "data"
+      ]
     }
   ],
   "contributorsPerLine": 7,

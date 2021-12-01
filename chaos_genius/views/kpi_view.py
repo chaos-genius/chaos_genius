@@ -24,6 +24,7 @@ from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.extensions import cache, db
 from chaos_genius.databases.db_utils import chech_editable_field
 from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
+from chaos_genius.utils.datetime_helper import get_rca_timestamp, get_epoch_timestamp
 
 TIME_DICT = {
     "mom": {"expansion": "month", "time_delta": timedelta(days=30, hours=0, minutes=0)},
@@ -188,9 +189,13 @@ def kpi_get_line_data(kpi_id):
     data = []
     try:
         data = kpi_line_data(kpi_id)
+        for _row in data:
+            date_timstamp = get_rca_timestamp(_row["date"])
+            _row["date"] = get_epoch_timestamp(date_timstamp)
+        formatted_date = data
     except Exception as err:
         logger.info(f"Error Found: {err}")
-    return jsonify({"data": data, "msg": ""})
+    return jsonify({"data": formatted_date, "msg": ""})
 
 
 @blueprint.route("/<int:kpi_id>/rca-analysis", methods=["GET"])
@@ -401,7 +406,10 @@ def get_analysis_date(kpi_id, end_date):
         & (RcaData.end_date <= end_date)
     ).order_by(RcaData.created_at.desc()).first()
     final_data = data_point.data if data_point else []
-    return final_data[-1]["date"]
+    analysis_date = final_data[-1]["date"]
+    analysis_timestamp = get_rca_timestamp(analysis_date)
+    epoch_timestamp = get_epoch_timestamp(analysis_timestamp)
+    return epoch_timestamp
 
 
 def find_percentage_change(curr_val, prev_val):

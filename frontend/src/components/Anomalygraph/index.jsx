@@ -3,8 +3,14 @@ import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import highchartsMore from 'highcharts/highcharts-more';
+import { getTimezone, formatDateTime } from '../../utils/date-helper';
 
 highchartsMore(Highcharts);
+Highcharts.setOptions({
+  time: {
+      timezone: getTimezone()
+  }
+});
 
 const Anomalygraph = ({ key, drilldown }) => {
   const [chartdata, setChartData] = useState([]);
@@ -111,6 +117,9 @@ const Anomalygraph = ({ key, drilldown }) => {
             text: graphData.y_axis_label
           }
         },
+        time: {
+          timezone: getTimezone()
+        },
         tooltip: {
           crosshairs: true,
           shared: true,
@@ -133,7 +142,7 @@ const Anomalygraph = ({ key, drilldown }) => {
             s =
               s +
               '<br>Datetime: <b>' +
-              Highcharts.dateFormat('%H:%M %a %d %b %Y', this.x) +
+              formatDateTime(this.x, true, true, true) +
               '</b>';
             return s;
           }

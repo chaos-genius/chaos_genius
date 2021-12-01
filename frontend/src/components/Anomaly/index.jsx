@@ -15,8 +15,12 @@ import Anomalygraph from '../Anomalygraph';
 import Noresult from '../Noresult';
 import AnomalyEmptyState from '../AnomalyEmptyState';
 
+<<<<<<< HEAD
 import EmptyAnomalyDrilldown from '../EmptyDrillDown';
 import { formatDate } from '../../utils/date-helper';
+=======
+import { formatDateTime, getTimezone } from '../../utils/date-helper';
+>>>>>>> main
 
 import './anomaly.scss';
 
@@ -28,6 +32,11 @@ import {
 import store from '../../redux/store';
 
 highchartsMore(Highcharts);
+Highcharts.setOptions({
+  time: {
+      timezone: getTimezone()
+  }
+});
 
 const RESET_ACTION = {
   type: 'RESET'
@@ -124,6 +133,9 @@ const Anomaly = ({ kpi, anomalystatus }) => {
         title: {
           text: graphData.title
         },
+        time: {
+          timezone: getTimezone()
+        },
         xAxis: {
           type: 'datetime',
           title: {
@@ -159,7 +171,7 @@ const Anomaly = ({ kpi, anomalystatus }) => {
             s =
               s +
               '<br>Datetime: <b>' +
-              Highcharts.dateFormat('%Y %b %d %H:%M', this.x) +
+              formatDateTime(this.x, true, true, true) +
               '</b>';
             return s;
           }
@@ -376,7 +388,7 @@ const Anomaly = ({ kpi, anomalystatus }) => {
                       <p>
                         Last updated:{' '}
                         <span>
-                          {formatDate(anomalyDetectionData?.anomaly_end_date) ||
+                          {formatDateTime(anomalyDetectionData?.anomaly_end_date, true, false, true) ||
                             '-'}
                         </span>
                       </p>

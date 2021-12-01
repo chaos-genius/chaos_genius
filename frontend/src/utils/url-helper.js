@@ -5,11 +5,7 @@ export const BASE_URL = process.env.REACT_APP_BASE_URL || '';
 export const attachParams = (relativeUrl, params) => {
   let baseUrl = BASE_URL;
   if (baseUrl === '') {
-    if (window.location.hostname === 'localhost') {
-      baseUrl = 'http://localhost:5000';
-    } else {
-      baseUrl = window.location.origin;
-    }
+    baseUrl = window.location.origin;
   }
   const url = new URL(relativeUrl, baseUrl);
   url.search = new URLSearchParams(params).toString();
@@ -41,3 +37,4 @@ export const UPDATE_KPI_ALERT_URL = `${BASE_URL}/api/alert`;
 export const KPI_ALERT_META_INFO_URL = `${BASE_URL}/api/alert/meta-info`;
 export const GET_KPI_ALERT_BY_ID_URL = `${BASE_URL}/api/alert`;
 export const SETTING_META_INFO_URL = `${BASE_URL}/api/anomaly-data/anomaly-params/meta-info`;
+export const GLOBAL_SETTING_URL = `${BASE_URL}/api/config/global-settings`;

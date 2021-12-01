@@ -121,11 +121,11 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
                   ? 'Add KPI'
                   : text === 'activateanalytics'
                   ? 'Go to Dashboard'
-                  : 'Activate Analytics '}
+                  : 'Go to Dashboard'}
               </span>
             </button>
           </div>
-          <div className="view-page-navigate" onClick={() => onViewHandler()}>
+          <div onClick={() => onViewHandler()}>
             <label>
               {text === 'kpi'
                 ? "View added KPI's"

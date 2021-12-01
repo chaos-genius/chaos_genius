@@ -37,9 +37,9 @@ const Onboarding = () => {
                 ? 'Add Data Sources'
                 : data[2] === '2'
                 ? 'Add KPI'
-                : data[2] === '4'
-                ? 'Activate Analytics'
                 : data[2] === '3'
+                ? 'Activate Analytics'
+                : data[2] === '4'
                 ? 'Add Dashboard'
                 : null}
             </li>
@@ -54,9 +54,9 @@ const Onboarding = () => {
                 ? 'Add Data Sources'
                 : data[2] === '2'
                 ? 'Add KPI'
-                : data[2] === '4'
-                ? 'Activate Analytics'
                 : data[2] === '3'
+                ? 'Activate Analytics'
+                : data[2] === '4'
                 ? 'Add Dashboard'
                 : null}
             </span>
@@ -77,21 +77,21 @@ const Onboarding = () => {
             }>
             Add KPI
           </li>
+          {/* <li
+            className={
+              data[2] === '4' ? 'active' : data[2] >= '4' ? 'selected' : null
+            }>
+            Create Dashboard
+          </li> */}
           <li
             className={
               data[2] === '3' ? 'active' : data[2] >= '3' ? 'selected' : null
-            }>
-            Create Dashboard
-          </li>
-          <li
-            className={
-              data[2] === '4' ? 'active' : data[2] >= '4' ? 'selected' : null
             }>
             Activate Analytics
           </li>
         </ul>
       </div>
-      {data[2] !== '4' ? (
+      {data[2] !== '3' ? (
         <div className="add-form-container">
           {data[2] === '1' ? (
             <DataSourceForm

@@ -23,6 +23,7 @@ def _is_data_present_for_end_date(
     df_count = DataLoader(kpi_info, end_date=end_date, days_before=1).get_count()
     return df_count != 0
 
+
 def get_kpi_data_from_id(n: int) -> dict:
     """Returns the corresponding KPI data for the given KPI ID
     from KPI_DATA.
@@ -41,6 +42,7 @@ def get_kpi_data_from_id(n: int) -> dict:
     if kpi_info and kpi_info.as_dict:
         return kpi_info.as_dict
     raise ValueError(f"KPI ID {n} not found in KPI_DATA")
+
 
 def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None, task_id: Optional[int] = None) -> bool:
 

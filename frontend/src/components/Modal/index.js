@@ -40,6 +40,9 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
     } else if (text === 'datasource') {
       store.dispatch(RESET_ACTION);
       history.push('/onboarding/2');
+    } else if (text === 'dashboard') {
+      store.dispatch(KPI_RESET);
+      history.push('/onboarding/4');
     } else {
       store.dispatch(SETTING_RESET);
       history.push('/dashboard/deepdrills');
@@ -53,6 +56,9 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
     } else if (text === 'datasource') {
       store.dispatch(RESET_ACTION);
       history.push('/datasource');
+    } else if (text === 'dashboard') {
+      store.dispatch(SETTING_RESET);
+      history.push('/dashboard/deepdrills');
     } else if (text === 'activateanalytics') {
       store.dispatch(SETTING_RESET);
       history.push('/dashboard/deepdrills');
@@ -96,14 +102,14 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
                   ? 'Add KPI'
                   : text === 'activateanalytics'
                   ? 'Go to Dashboard'
-                  : 'Go to Dashboard'}
+                  : 'Activate Analytics '}
               </span>
             </button>
           </div>
-          <div onClick={() => onViewHandler()}>
+          <div className="view-page-navigate" onClick={() => onViewHandler()}>
             <label>
               {text === 'kpi'
-                ? 'View added KPI’s'
+                ? "View added KPI's"
                 : text === 'datasource'
                 ? 'View added data source'
                 : text === 'activateanalytics'

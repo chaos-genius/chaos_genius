@@ -106,7 +106,11 @@ const Onboarding = () => {
               setText={setText}
             />
           ) : data[2] === '3' ? (
-            <DashboardForm setModal={setModal} setText={setText} />
+            <DashboardForm
+              setModal={setModal}
+              setText={setText}
+              onboarding={true}
+            />
           ) : null}
         </div>
       ) : (

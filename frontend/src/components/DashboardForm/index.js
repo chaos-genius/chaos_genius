@@ -18,7 +18,7 @@ import {
 } from '../../redux/actions';
 // import ModalPopUp from '../Modal';
 
-const DashboardForm = () => {
+const DashboardForm = ({ setText, setModal, onboarding }) => {
   // const [modal, setModal] = useState('false');
   const dispatch = useDispatch();
 
@@ -117,7 +117,8 @@ const DashboardForm = () => {
     if (
       createDashboard &&
       createDashboard.status === 'success' &&
-      path[2] === 'add'
+      path[2] === 'add' &&
+      onboarding !== true
     ) {
       history.push('/dashboard');
       customToast({
@@ -128,7 +129,31 @@ const DashboardForm = () => {
     } else if (
       createDashboard &&
       createDashboard.status === 'failure' &&
-      path[2] === 'add'
+      path[2] === 'add' &&
+      onboarding !== true
+    ) {
+      customToast({
+        type: 'failure',
+        header: 'Failed to create dashboard',
+        description: createDashboard.message
+      });
+    }
+    if (
+      createDashboard &&
+      createDashboard.status === 'success' &&
+      onboarding === true
+    ) {
+      setText('dashboard');
+      setModal(true);
+      customToast({
+        type: 'success',
+        header: 'Dashboard Created successfully',
+        description: createDashboard.message
+      });
+    } else if (
+      createDashboard &&
+      createDashboard.status === 'failure' &&
+      onboarding === true
     ) {
       customToast({
         type: 'failure',

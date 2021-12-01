@@ -108,11 +108,18 @@ def run_rca_for_kpi(kpi_id: int, end_date: date = None, task_id: Optional[int] =
                 checkpoint_success(
                     task_id, kpi_id, "DeepDrills", "Data Loader and Validation"
                 )
+            logger.info(
+                f"(Task: {task_id}, KPI: {kpi_id}) DeepDrills - Data Loader and Validation - Success",
+            )
         except Exception as e:  # noqa: B902
             logger.error(f"Getting end date failed for KPI: {kpi_id}.", exc_info=1)
             if task_id is not None:
                 checkpoint_failure(
                     task_id, kpi_id, "DeepDrills", "Data Loader and Validation", e
+                )
+            logger.error(
+                f"(Task: {task_id}, KPI: {kpi_id}) DeepDrills - Data Loader and Validation - Exception occured.",
+                exc_info=1
             )
             return False
 

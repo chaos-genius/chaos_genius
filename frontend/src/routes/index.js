@@ -21,11 +21,13 @@ import AddEventAlert from '../containers/AddEventAlert';
 import Result from '../containers/Result';
 import Login from '../containers/Login';
 import Kpisetting from '../containers/KpiSetting';
+import ServerError from '../containers/ServerError';
 
 const Routes = () => (
   <Switch>
     <Route exact path="/login" component={Login}></Route>
     <Route exact path="/verifylogin" component={Login}></Route>
+    <Route exact path="/servererror" component={ServerError}></Route>
     <PrivateRouteWithSidebar
       exact
       path="/"
@@ -119,6 +121,7 @@ const Routes = () => (
       path="/noresult"
       component={(props) => <Result {...props} />}
     />
+
     <PrivateRouteWithSidebar
       exact
       component={(props) => <Anomolies {...props} />}

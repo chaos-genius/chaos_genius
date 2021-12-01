@@ -19,6 +19,7 @@ PyMySQL==1.0.2
 sqlalchemy-bigquery==1.2.0
 snowflake-sqlalchemy==1.2.4
 sqlalchemy-redshift==0.8.6
+SQLAlchemy-Utils==0.37.9
 
 # Migrations
 Flask-Migrate==2.7.0

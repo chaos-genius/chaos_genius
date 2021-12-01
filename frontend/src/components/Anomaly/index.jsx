@@ -15,12 +15,9 @@ import Anomalygraph from '../Anomalygraph';
 import Noresult from '../Noresult';
 import AnomalyEmptyState from '../AnomalyEmptyState';
 
-<<<<<<< HEAD
 import EmptyAnomalyDrilldown from '../EmptyDrillDown';
-import { formatDate } from '../../utils/date-helper';
-=======
+//import { formatDate } from '../../utils/date-helper';
 import { formatDateTime, getTimezone } from '../../utils/date-helper';
->>>>>>> main
 
 import './anomaly.scss';
 
@@ -34,7 +31,7 @@ import store from '../../redux/store';
 highchartsMore(Highcharts);
 Highcharts.setOptions({
   time: {
-      timezone: getTimezone()
+    timezone: getTimezone()
   }
 });
 
@@ -70,10 +67,13 @@ const Anomaly = ({ kpi, anomalystatus }) => {
 
   const idRef = useRef(0);
 
-  const { anomalyDetectionData, anomalyDrilldownData, anomalyQualityData } =
-    useSelector((state) => {
-      return state.anomaly;
-    });
+  const {
+    anomalyDetectionData,
+    anomalyDrilldownData,
+    anomalyQualityData
+  } = useSelector((state) => {
+    return state.anomaly;
+  });
 
   useEffect(() => {
     store.dispatch(RESET_ACTION);
@@ -199,7 +199,8 @@ const Anomaly = ({ kpi, anomalystatus }) => {
           borderWidth: 1,
           padding: 20,
           title: {
-            text: 'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
+            text:
+              'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
             style: {
               fontStyle: 'italic'
             }
@@ -388,8 +389,12 @@ const Anomaly = ({ kpi, anomalystatus }) => {
                       <p>
                         Last updated:{' '}
                         <span>
-                          {formatDateTime(anomalyDetectionData?.anomaly_end_date, true, false, true) ||
-                            '-'}
+                          {formatDateTime(
+                            anomalyDetectionData?.anomaly_end_date,
+                            true,
+                            false,
+                            true
+                          ) || '-'}
                         </span>
                       </p>
                     </div>

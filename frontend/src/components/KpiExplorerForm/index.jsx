@@ -924,6 +924,12 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                 });
               }}
             />
+            <div className="channel-tip">
+              <p>
+                Select dimensions for enabling sub-dimensional analysis & drill
+                downs
+              </p>
+            </div>
           </div>
           {/* {inputList && inputList.length !== 0 && (
             <div className="form-group">

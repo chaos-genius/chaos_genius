@@ -363,7 +363,7 @@ class RootCauseAnalysisController:
             output.to_sql(
                 RcaData.__tablename__, db.engine, if_exists="append", index=False
             )
-            self._checkpoint_success("DeepDrills Output Storage")
+            self._checkpoint_success("Output Storage")
         except Exception as e:  # noqa E722
             logger.error("Error in storing output.", exc_info=e)
-            self._checkpoint_failure("DeepDrills Output Storage", e)
+            self._checkpoint_failure("Output Storage", e)

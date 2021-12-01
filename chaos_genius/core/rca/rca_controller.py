@@ -367,3 +367,4 @@ class RootCauseAnalysisController:
         except Exception as e:  # noqa E722
             logger.error("Error in storing output.", exc_info=e)
             self._checkpoint_failure("Output Storage", e)
+            raise e

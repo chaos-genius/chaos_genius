@@ -67,3 +67,6 @@ if IN_DOCKER == 'True':
     IN_DOCKER = True
 else:
     IN_DOCKER = False
+
+TASK_CHECKPOINT_LIMIT: int = int(os.getenv("TASK_CHECKPOINT_LIMIT", 1000))
+"""Number of last checkpoints to retrieve in Task Monitor"""

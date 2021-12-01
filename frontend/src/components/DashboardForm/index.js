@@ -293,7 +293,6 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
             closeMenuOnSelect={false}
             blurInputOnSelect={false}
             onChange={(e) => {
-              console.log(e);
               setFormData({
                 ...formData,
                 kpi: e.map((el) => el.value)

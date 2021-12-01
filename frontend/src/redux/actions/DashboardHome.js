@@ -3,7 +3,6 @@ import {
   DASHBOARD_LIST_URL,
   DASHBOARD_DELETE_URL,
   DASHBOARD_CREATE_URL,
-  DASHBOARD_EDIT_URL,
   DASHBOARD_UPDATE_URL,
   attachParams
 } from '../../utils/url-helper';
@@ -121,7 +120,6 @@ export const getCreateDashboard = (dashboard) => {
     if (error) {
       dispatch(getCreateDashboardFailure());
     } else if (data && status === 200) {
-      console.log(data);
       dispatch(getCreateDashboardSuccess(data));
     }
   };

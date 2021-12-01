@@ -23,14 +23,30 @@ const KPI_RESET = {
   type: 'KPI_RESET'
 };
 
+const ONBOARDING_DASHBOARD_RESET = {
+  type: 'ONBOARDING_DASHBOARD_RESET'
+};
+const DASHBOARD_KPILIST_RESET = {
+  type: 'DASHBOARD_KPILIST_RESET'
+};
+
 const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
   const history = useHistory();
 
+  const path = history.location.pathname.split('/');
+
   const closeModal = () => {
     setIsOpen(false);
-    store.dispatch(SETTING_RESET);
-    store.dispatch(RESET_ACTION);
-    store.dispatch(KPI_RESET);
+    if (path[1] === 'onboarding' && path[2] === '3') {
+      store.dispatch(SETTING_RESET);
+      store.dispatch(RESET_ACTION);
+      store.dispatch(ONBOARDING_DASHBOARD_RESET);
+      store.dispatch(DASHBOARD_KPILIST_RESET);
+    } else {
+      store.dispatch(SETTING_RESET);
+      store.dispatch(RESET_ACTION);
+      store.dispatch(KPI_RESET);
+    }
   };
 
   const onNavigate = () => {
@@ -41,7 +57,9 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
       store.dispatch(RESET_ACTION);
       history.push('/onboarding/2');
     } else if (text === 'dashboard') {
-      store.dispatch(KPI_RESET);
+      store.dispatch(DASHBOARD_KPILIST_RESET);
+      store.dispatch(ONBOARDING_DASHBOARD_RESET);
+
       history.push('/onboarding/4');
     } else {
       store.dispatch(SETTING_RESET);
@@ -57,8 +75,10 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
       store.dispatch(RESET_ACTION);
       history.push('/datasource');
     } else if (text === 'dashboard') {
-      store.dispatch(SETTING_RESET);
-      history.push('/dashboard/deepdrills');
+      store.dispatch(ONBOARDING_DASHBOARD_RESET);
+      store.dispatch(DASHBOARD_KPILIST_RESET);
+
+      history.push('/dashboard/deepdrills/');
     } else if (text === 'activateanalytics') {
       store.dispatch(SETTING_RESET);
       history.push('/dashboard/deepdrills');
@@ -97,7 +117,7 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
             <button className="btn black-button" onClick={() => onNavigate()}>
               <span>
                 {text === 'kpi'
-                  ? ' Add Activate Analytics'
+                  ? ' Create Dashboard'
                   : text === 'datasource'
                   ? 'Add KPI'
                   : text === 'activateanalytics'

@@ -146,6 +146,12 @@ export const DashboardHome = (state = initialState, action) => {
         updateDashboard: []
       };
     }
+    case 'ONBOARDING_DASHBOARD_RESET': {
+      return {
+        creatDashboard: [],
+        updateDashboard: []
+      };
+    }
     default:
       return state;
   }

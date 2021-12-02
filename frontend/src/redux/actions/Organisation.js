@@ -35,7 +35,7 @@ export const getOnboardingOrgnaizationUpdateStatusSuccess = (response) => {
   };
 };
 
-export const onboardOrganization = (payload) => {
+export const onboardOrganisation = (payload) => {
   return async (dispatch) => {
     dispatch(getOnboardingOrgnaizationStatusRequested);
     const { data, error, status } = await postRequest({
@@ -52,12 +52,12 @@ export const onboardOrganization = (payload) => {
       dispatch(getOnboardingOrgnaizationStatusFailure);
     } else if (data && status === 200) {
       dispatch(getOnboardingOrgnaizationStatusSuccess(data.data));
-      dispatch(onboardingOrganizationStatus());
+      dispatch(onboardingOrganisationStatus());
     }
   };
 };
 
-export const onboardingOrganizationStatus = () =>{
+export const onboardingOrganisationStatus = () =>{
   const reqObject = {
     config_name: "organisation_settings"
   }
@@ -80,7 +80,7 @@ export const onboardingOrganizationStatus = () =>{
   };
 }
 
-export const onboardOrganizationUpdate = (payload) => {
+export const onboardOrganisationUpdate = (payload) => {
   return async (dispatch) => {
     dispatch(getOnboardingOrgnaizationStatusRequested);
     const { data, error, status } = await putRequest({
@@ -96,7 +96,7 @@ export const onboardOrganizationUpdate = (payload) => {
     if (error) {
       dispatch(getOnboardingOrgnaizationStatusFailure);
     } else if (data && status === 200) {
-      dispatch(onboardingOrganizationStatus());
+      dispatch(onboardingOrganisationStatus());
       
     }
   };

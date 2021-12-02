@@ -21,14 +21,14 @@ import AddEventAlert from '../containers/AddEventAlert';
 import Result from '../containers/Result';
 import Login from '../containers/Login';
 import Kpisetting from '../containers/KpiSetting';
-import OrganizationOnboarding from '../containers/Onboarding/OrganizationOnboarding';
-import OrganizationSettings from '../containers/OrganizationSettings/OrganizationSettings';
+import OrganisationOnboarding from '../containers/Onboarding/OrganisationOnboarding';
+import OrganisationSettings from '../containers/OrganisationSettings/OrganisationSettings';
 
 const Routes = () => (
   <Switch>
     <Route exact path="/login" component={Login}></Route>
     <Route exact path="/verifylogin" component={Login}></Route>
-    <Route exact  path="/organization-onboarding" component={OrganizationOnboarding}></Route>
+    <Route exact  path="/organisation-onboarding" component={OrganisationOnboarding}></Route>
     <PrivateRouteWithSidebar
       exact
       path="/"
@@ -124,8 +124,8 @@ const Routes = () => (
     />
     <PrivateRouteWithSidebar
       exact
-      path="/organization-settings"
-      component={(props) => <OrganizationSettings {...props} />}
+      path="/organisation-settings"
+      component={(props) => <OrganisationSettings {...props} />}
     />
     <PrivateRouteWithSidebar
       exact

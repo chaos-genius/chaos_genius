@@ -1,10 +1,10 @@
     import React from 'react';
-    import OrganizationOnboardingForm from './OrganizationOnboardingForm';
+    import OrganisationOnboardingForm from './OrganisationOnboardingForm';
     import Logo from '../../assets/images/logo.svg';
 
     // import '../../assets/styles/addform.scss';
-    import './organizationOnboarding.scss'
-    const OrganizationOnboarding = () => {
+    import './organisationOnboarding.scss'
+    const OrganisationOnboarding = () => {
 
    return (
         <>
@@ -13,10 +13,10 @@
         <h3>Chaos Genius</h3>
       </div>
       <div className="og-onboarding-container">
-        <OrganizationOnboardingForm/>
+        <OrganisationOnboardingForm/>
       </div>
         </>
         )
     }
 
-    export default OrganizationOnboarding;
+    export default OrganisationOnboarding;

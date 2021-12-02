@@ -5,19 +5,18 @@ import GreenArrow from '../../assets/images/green-arrow.svg';
 import { v4 as uuidv4 } from 'uuid';
 import AccountSetting from './AccountSetting';
 import MetricsSettings from './MetricsSettings';
-import './organizationSettings.scss';
-import { onboardingOrganizationStatus } from '../../redux/actions';
+import './organisationSettings.scss';
+import { onboardingOrganisationStatus } from '../../redux/actions';
 
-const OrganizationSettings = () => {
+const OrganisationSettings = () => {
   const [tabSwitch, setTabSwitch] = useState({ account: true, metrics: false });
-  // const [hasRendered, setHasRendered] = useState(false)
   const { organizationData } = useSelector((state) => state.organization);
   const dispatch = useDispatch();
   useEffect(() => {
-    const getOrganizationOnboardedData = () => {
-      dispatch(onboardingOrganizationStatus());
+    const getOrganisationOnboardedData = () => {
+      dispatch(onboardingOrganisationStatus());
     };
-    getOrganizationOnboardedData();
+    getOrganisationOnboardedData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
 
@@ -65,4 +64,4 @@ const OrganizationSettings = () => {
   );
 };
 
-export default OrganizationSettings;
+export default OrganisationSettings;

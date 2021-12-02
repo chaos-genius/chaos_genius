@@ -3,11 +3,11 @@ import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 // import { useToast } from 'react-toast-wnm';
 import {
-  // onboardingOrganizationStatus,
-  onboardOrganization
+  // onboardingOrganisationStatus,
+  onboardOrganisation
 } from '../../redux/actions';
 
-const OrganizationOnboardingForm = () => {
+const OrganisationOnboardingForm = () => {
   const dispatch = useDispatch();
   // const toast = useToast();
   const history = useHistory();
@@ -44,10 +44,10 @@ const OrganizationOnboardingForm = () => {
       }
     };
     if (emailAddress !== '' && validateEmail(emailAddress)) {
-      dispatch(onboardOrganization(data));
+      dispatch(onboardOrganisation(data));
       history.push('/');
     } else if( emailAddress === '') {
-      dispatch(onboardOrganization(data));
+      dispatch(onboardOrganisation(data));
       history.push('/');
     }else{
       setErrorMessage(true);
@@ -125,4 +125,4 @@ const OrganizationOnboardingForm = () => {
   );
 };
 
-export default OrganizationOnboardingForm;
+export default OrganisationOnboardingForm;

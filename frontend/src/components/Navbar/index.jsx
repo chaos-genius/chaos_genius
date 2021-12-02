@@ -26,7 +26,7 @@ const Navbar = () => {
         </div>
         <ul className="dropdown-menu navbar-dropdown-menu" aria-labelledby="userdetails">
           <li className="">
-            <Link to="/organization-settings" className="dropdown-item">
+            <Link to="/organisation-settings" className="dropdown-item">
             <img src={Setting} alt="Setting" />
               <span>Settings</span>
             </Link>

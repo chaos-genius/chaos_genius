@@ -1,6 +1,6 @@
 import React, { useState,useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { onboardOrganizationUpdate,onboardOrganization } from '../../redux/actions';
+import { onboardOrganisationUpdate,onboardOrganisation } from '../../redux/actions';
 
 const MetricsSettings = (organizationData) => {
   const dispatch = useDispatch();
@@ -45,9 +45,9 @@ const MetricsSettings = (organizationData) => {
   }, []);
 const submitSelection = () =>{
   if (orgData.active) {
-    dispatch(onboardOrganizationUpdate(formData));
+    dispatch(onboardOrganisationUpdate(formData));
   }else{
-    dispatch(onboardOrganization(formData));
+    dispatch(onboardOrganisation(formData));
   }
 }
   const onChecking = (status) => {
@@ -67,7 +67,9 @@ const submitSelection = () =>{
   };
 
   useEffect(() => {
+    if(formData !== null)
     submitSelection();
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData]);
 

@@ -50,7 +50,7 @@ import {
   anomalySetting
 } from './Anomaly';
 import { kpiSettingSetup, kpiEditSetup, settingMetaInfo } from './setting';
-import {onboardingOrganizationStatus,onboardOrganization,onboardOrganizationUpdate} from './Organization';
+import {onboardingOrganisationStatus,onboardOrganisation,onboardOrganisationUpdate} from './Organisation';
 import { getDashboardConfig } from './Config';
 import { getGlobalSetting } from './GlobalSetting';
 export {
@@ -98,9 +98,9 @@ export {
   kpiAlertEnable,
   anomalySetting,
   settingMetaInfo,
-  onboardingOrganizationStatus,
-  onboardOrganization,
-  onboardOrganizationUpdate,
+  onboardingOrganisationStatus,
+  onboardOrganisation,
+  onboardOrganisationUpdate,
   getDashboardConfig,
   getGlobalSetting
 };

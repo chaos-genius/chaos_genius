@@ -12,7 +12,7 @@ import { sidebar } from './Sidebarlist';
 import { anomaly } from './Anomaly';
 import { alert } from './Alert';
 import { setting } from './setting';
-import { organization } from './Organization';
+import { organization } from './Organisation';
 import { config } from './Config';
 import { GlobalSetting } from './GlobalSetting';
 const rootReducer = combineReducers({

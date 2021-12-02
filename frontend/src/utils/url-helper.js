@@ -4,6 +4,7 @@ export const BASE_URL = process.env.REACT_APP_BASE_URL || '';
 
 export const attachParams = (relativeUrl, params) => {
   let baseUrl = BASE_URL;
+
   if (baseUrl === '') {
     if (window.location.hostname === 'localhost') {
       baseUrl = 'http://localhost:5000';
@@ -11,12 +12,13 @@ export const attachParams = (relativeUrl, params) => {
       baseUrl = window.location.origin;
     }
   }
+  console.log(baseUrl);
   const url = new URL(relativeUrl, baseUrl);
   url.search = new URLSearchParams(params).toString();
   return url;
 };
 
-export const DASHBOARD = `http://52.66.248.216:8080`;
+//export const DASHBOARD = `http://52.66.248.216:8080`;
 export const DASHBOARD_URL = `${BASE_URL}/api/dashboard`;
 export const KPI_URL = `${BASE_URL}/api/kpi`;
 export const KPI_RELATIVE_URL = `/api/kpi`;
@@ -43,8 +45,8 @@ export const KPI_ALERT_META_INFO_URL = `${BASE_URL}/api/alert/meta-info`;
 export const GET_KPI_ALERT_BY_ID_URL = `${BASE_URL}/api/alert`;
 export const SETTING_META_INFO_URL = `${BASE_URL}/api/anomaly-data/anomaly-params/meta-info`;
 
-export const DASHBOARD_LIST_URL = `${DASHBOARD}/api/dashboard/get_dashboard_list`;
-export const DASHBOARD_CREATE_URL = `${DASHBOARD}/api/dashboard/create_dashboard`;
-export const DASHBOARD_DELETE_URL = `${DASHBOARD}/api/dashboard/delete_dashboard`;
+export const DASHBOARD_LIST_URL = `${BASE_URL}/api/dashboard/get_dashboard_list`;
+export const DASHBOARD_CREATE_URL = `${BASE_URL}/api/dashboard/create_dashboard`;
+export const DASHBOARD_DELETE_URL = `/api/dashboard/delete_dashboard`;
 export const DASHBOARD_EDIT_URL = `/api/dashboard/get_dashboard`;
-export const DASHBOARD_UPDATE_URL = `${DASHBOARD}/api/dashboard/edit_dashboard`;
+export const DASHBOARD_UPDATE_URL = `${BASE_URL}/api/dashboard/edit_dashboard`;

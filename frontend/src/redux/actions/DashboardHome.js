@@ -4,7 +4,8 @@ import {
   DASHBOARD_DELETE_URL,
   DASHBOARD_CREATE_URL,
   DASHBOARD_UPDATE_URL,
-  attachParams
+  attachParams,
+  DASHBOARD_EDIT_URL
 } from '../../utils/url-helper';
 import {
   DASHBOARDFAILURE,
@@ -147,8 +148,8 @@ export const getEditDashboardFailure = () => {
 export const getEditDashboard = (params) => {
   return async (dispatch) => {
     dispatch(getEditDashboardRequest());
-    // const URL = attachParams(DASHBOARD_EDIT_URL, params);
-    const URL = `http://52.66.248.216:8080/api/dashboard/get_dashboard?dashboard_id=${params.dashboard_id}`;
+    const URL = attachParams(DASHBOARD_EDIT_URL, params);
+    //const URL = `http://52.66.248.216:8080/api/dashboard/get_dashboard?dashboard_id=${params.dashboard_id}`;
     const { data, error, status } = await getRequest({
       url: URL
     });

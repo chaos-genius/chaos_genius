@@ -141,6 +141,7 @@ export const DashboardHome = (state = initialState, action) => {
     }
     case 'DASHBOARD_RESET': {
       return {
+        ...state,
         creatDashboard: [],
         dashboardDelete: [],
         updateDashboard: []

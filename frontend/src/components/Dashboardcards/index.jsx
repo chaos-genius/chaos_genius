@@ -96,77 +96,81 @@ const Dashboardcards = ({ dashboarddata, setChange }) => {
           dashboarddata.length !== 0 &&
           dashboarddata.map((dashboard) => {
             return (
-              <div className="dashboardcard">
-                <div className="header-card">
-                  <div className="header-content">
-                    <h3>{dashboard.name}</h3>
-                    <span>
-                      Last modified: {formatDate(dashboard?.last_modified)}
-                    </span>
-                  </div>
-                  <div className="more-dropdown dropstart">
-                    <div
-                      data-bs-toggle="dropdown"
-                      className="dropdown-image"
-                      aria-expanded="false"
-                      aria-haspopup="true">
-                      <img
-                        src={More}
-                        alt="More"
-                        className="moreoption"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        title="Actions"
-                      />
-                      <img
-                        src={Moreactive}
-                        alt="More"
-                        className="moreoption-active"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        title="Actions"
-                      />
+              <Link
+                to={`/dashboard/${dashboard.id}/deepdrills`}
+                className="dashboardcard">
+                <div>
+                  <div className="header-card">
+                    <div className="header-content">
+                      <h3>{dashboard.name}</h3>
+                      <span>
+                        Last modified: {formatDate(dashboard?.last_modified)}
+                      </span>
                     </div>
-                    <ul className="dropdown-menu">
-                      <Link to={`/dashboard/edit/${dashboard.id}`}>
-                        <li>
-                          <img
-                            src={Edit}
-                            alt="Edit"
-                            className="action-disable"
-                          />
-                          <img
-                            src={EditActive}
-                            alt="Edit"
-                            className="action-active"
-                          />
-                          Edit
+                    <div className="more-dropdown dropstart">
+                      <div
+                        data-bs-toggle="dropdown"
+                        className="dropdown-image"
+                        aria-expanded="false"
+                        aria-haspopup="true">
+                        <img
+                          src={More}
+                          alt="More"
+                          className="moreoption"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="bottom"
+                          title="Actions"
+                        />
+                        <img
+                          src={Moreactive}
+                          alt="More"
+                          className="moreoption-active"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="bottom"
+                          title="Actions"
+                        />
+                      </div>
+                      <ul className="dropdown-menu">
+                        <Link to={`/dashboard/edit/${dashboard.id}`}>
+                          <li>
+                            <img
+                              src={Edit}
+                              alt="Edit"
+                              className="action-disable"
+                            />
+                            <img
+                              src={EditActive}
+                              alt="Edit"
+                              className="action-active"
+                            />
+                            Edit
+                          </li>
+                        </Link>
+                        <li
+                          className="delete-item"
+                          onClick={() => {
+                            setIsOpen(true);
+                            setData(dashboard);
+                          }}>
+                          <img src={DeleteActive} alt="Delete" />
+                          Delete
                         </li>
-                      </Link>
-                      <li
-                        className="delete-item"
-                        onClick={() => {
-                          setIsOpen(true);
-                          setData(dashboard);
-                        }}>
-                        <img src={DeleteActive} alt="Delete" />
-                        Delete
-                      </li>
-                    </ul>
+                      </ul>
+                    </div>
                   </div>
-                </div>
 
-                <div className="body-card">
-                  <div className="body-content">
-                    <span>No of KPI’s</span>
-                    <h5>{dashboard.kpi_count}</h5>
-                  </div>
-                  <div className="body-content created-on-content">
-                    <span>Created On</span>
-                    <h5>{formatDate(dashboard?.created_at)}</h5>
+                  <div className="body-card">
+                    <div className="body-content">
+                      <span>No of KPI’s</span>
+                      <h5>{dashboard.kpi_count}</h5>
+                    </div>
+                    <div className="body-content created-on-content">
+                      <span>Created On</span>
+                      <h5>{formatDate(dashboard?.created_at)}</h5>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             );
           })}
       </div>

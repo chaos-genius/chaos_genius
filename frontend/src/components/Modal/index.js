@@ -77,8 +77,7 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
     } else if (text === 'dashboard') {
       store.dispatch(ONBOARDING_DASHBOARD_RESET);
       store.dispatch(DASHBOARD_KPILIST_RESET);
-
-      history.push('/dashboard/deepdrills/');
+      history.push('/dashboard');
     } else if (text === 'activateanalytics') {
       store.dispatch(SETTING_RESET);
       history.push('/dashboard/deepdrills');

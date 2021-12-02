@@ -13,7 +13,6 @@
 <body>
     <div class="container mx-auto py-4">
         <h1 class="text-3xl">ChaosGenius Task Monitor</h1>
-        <!-- This example requires Tailwind CSS v2.0+ -->
 
         <div class="flex flex-col py-4">
             <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -65,16 +64,16 @@
 
                                         <!-- TODO: place progress bar in a better place -->
                                         {% if False %}
-                                            <div class="overflow-hidden h-2 my-2 text-xs flex rounded bg-yellow-200">
-                                                <div style="width:{{ (task.completed_subtasks[0] / task.total_subtasks) * 100 }}%"
-                                                    {% if task.completed_subtasks[0] !=task.total_subtasks %}
-                                                    class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500">
-                                                    {% else %}
-                                                    class="shadow-none flex flex-col text-center whitespace-nowrap
-                                                    text-white justify-center bg-green-500">
-                                                    {% endif %}
-                                                </div>
+                                        <div class="overflow-hidden h-2 my-2 text-xs flex rounded bg-yellow-200">
+                                            <div style="width:{{ (task.completed_subtasks[0] / task.total_subtasks) * 100 }}%"
+                                                {% if task.completed_subtasks[0] !=task.total_subtasks %}
+                                                class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-yellow-500">
+                                                {% else %}
+                                                class="shadow-none flex flex-col text-center whitespace-nowrap
+                                                text-white justify-center bg-green-500">
+                                                {% endif %}
                                             </div>
+                                        </div>
                                         {% endif %}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -106,7 +105,41 @@
             </div>
         </div>
 
+        <h1 class="text-3xl pt-10 pb-4">ChaosGenius Service Status</h1>
+
+        <div>
+            {% if container_status is none %}
+            Service status is currently only supported on docker-compose installations.
+            {% else %}
+            <ul role="list" class="mt-3 grid grid-cols-1 gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                {% for container, status in container_status.items() %}
+                <li class="col-span-1 flex shadow-sm rounded-md">
+                    {% if status %}
+                    <div
+                        class="flex-shrink-0 flex items-center justify-center w-16 bg-green-500 text-white text-sm font-medium rounded-l-md">
+                        Up
+                    </div>
+                    {% else %}
+                    <div
+                        class="flex-shrink-0 flex items-center justify-center w-16 bg-pink-600 text-white text-sm font-medium rounded-l-md">
+                        Down
+                    </div>
+                    {% endif %}
+                    <div
+                        class="flex-1 flex items-center justify-between border-t border-r border-b border-gray-200 bg-white rounded-r-md truncate">
+                        <div class="flex-1 px-4 py-2 text-sm truncate">
+                            <p class="text-gray-900 font-medium hover:text-gray-600">{{ CONTAINERS[container] }} </p>
+                            <p class="text-gray-500">{{ container }}</p>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+
     </div>
+
 
     <script src="https://unpkg.com/simple-datatables@3.2.0/dist/umd/simple-datatables.js"
         type="text/javascript"></script>

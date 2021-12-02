@@ -2,16 +2,16 @@ import React from 'react';
 
 import empty from '../../assets/images/deepdrill-drilldown-empty.svg';
 
-const DeepdrillDrilldownEmpty = () => {
+const DeepdrillDrilldownsEmpty = () => {
   return (
     <div className="setup-empty-state deepdrill-drilldown-empty">
       <div className="empty-state-image">
         <img src={empty} alt="Anomaly" />
       </div>
-      <h3>No Dimensions defined yet</h3>
-      <p>Looks like you have not defined dimensions for this KPI</p>
+      <h3>The analysis was not completed.</h3>
+      <p>Please check task status from the troubleshooting section here.</p>
     </div>
   );
 };
 
-export default DeepdrillDrilldownEmpty;
+export default DeepdrillDrilldownsEmpty;

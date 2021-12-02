@@ -18,7 +18,8 @@ import * as am4charts from '@amcharts/amcharts4/charts';
 
 import HierarchicalTable from '../HierarchicalTable';
 import DeepdrillsEmptyState from '../DeepdrillsEmptyState';
-import DeepdrillDrilldownEmpty from '../DeepdrillDrilldownEmpty';
+import DeepdrillDimensionEmpty from '../DeepdrillDimensionEmpty';
+// import DeepdrillDrilldownsEmpty from '../DeepdrillDrilldownsEmpty';
 
 import { formatDateTime, getTimezone } from '../../utils/date-helper';
 
@@ -432,7 +433,8 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
               dimensionData &&
               dimensionData.dimensions &&
               dimensionData.dimensions.length === 0 ? (
-                <DeepdrillDrilldownEmpty />
+                // <DeepdrillDrilldownsEmpty />
+                <DeepdrillDimensionEmpty />
               ) : (
                 <div
                   className={

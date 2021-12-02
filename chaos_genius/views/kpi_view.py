@@ -25,6 +25,7 @@ from chaos_genius.extensions import cache, db
 from chaos_genius.databases.db_utils import chech_editable_field
 from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 from chaos_genius.utils.datetime_helper import get_rca_timestamp, get_epoch_timestamp
+from chaos_genius.controllers.kpi_controller import run_rca_for_kpi, run_anomaly_for_kpi
 
 TIME_DICT = {
     "mom": {"expansion": "month", "time_delta": timedelta(days=30, hours=0, minutes=0)},
@@ -47,7 +48,7 @@ def kpi():
 
         data = request.get_json()
         data["dimensions"] = [] if data["dimensions"] is None else data["dimensions"]
-        
+
         new_kpi = Kpi(
             name=data.get("name"),
             is_certified=data.get("is_certified"),
@@ -112,9 +113,11 @@ def get_all_kpis():
 
     status, message = "success", ""
     timeline = request.args.get("timeline", "wow")
-    results = Kpi.query.filter(
-        Kpi.active == True  # noqa: E712
-    ).order_by(Kpi.created_at.desc()).all()
+    results = (
+        Kpi.query.filter(Kpi.active == True)  # noqa: E712
+        .order_by(Kpi.created_at.desc())
+        .all()
+    )
 
     ret = []
     metrics = ["name", "metric", "id"]
@@ -276,6 +279,19 @@ def get_kpi_info(kpi_id):
     return jsonify({"message": message, "status": status, "data": data})
 
 
+@blueprint.route("/<int:kpi_id>/trigger-analytics", methods=["GET"])
+def trigger_analytics(kpi_id):
+    """get Kpi details."""
+    status, message = "", ""
+    try:
+        run_anomaly_for_kpi(kpi_id)
+        run_rca_for_kpi(kpi_id)
+        status = True
+    except Exception as err:
+        status = False
+    return jsonify({"message": message, "status": status})
+
+
 @cache.memoize()
 def kpi_aggregation(kpi_id, timeline="mom"):
     try:
@@ -324,7 +340,7 @@ def kpi_line_data(kpi_id):
 
         final_data = data_point.data if data_point else []
     except Exception as err:
-        logger.error(f'Error in KPI Line data retrieval: {err}', exc_info=1)
+        logger.error(f"Error in KPI Line data retrieval: {err}", exc_info=1)
     return final_data
 
 
@@ -382,9 +398,7 @@ def rca_hierarchical_data(kpi_id, timeline="mom", dimension=None):
         else:
             final_data = {"data_table": [], "analysis_date": ""}
     except Exception as err:
-        logger.error(
-            f"Error in RCA hierarchical table retrieval: {err}", exc_info=1
-        )
+        logger.error(f"Error in RCA hierarchical table retrieval: {err}", exc_info=1)
     return final_data
 
 
@@ -402,11 +416,15 @@ def get_end_date(kpi_id):
 
 
 def get_analysis_date(kpi_id, end_date):
-    data_point = RcaData.query.filter(
-        (RcaData.kpi_id == kpi_id)
-        & (RcaData.data_type == "line")
-        & (RcaData.end_date <= end_date)
-    ).order_by(RcaData.created_at.desc()).first()
+    data_point = (
+        RcaData.query.filter(
+            (RcaData.kpi_id == kpi_id)
+            & (RcaData.data_type == "line")
+            & (RcaData.end_date <= end_date)
+        )
+        .order_by(RcaData.created_at.desc())
+        .first()
+    )
     final_data = data_point.data if data_point else []
     analysis_date = final_data[-1]["date"]
     analysis_timestamp = get_rca_timestamp(analysis_date)

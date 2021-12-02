@@ -19,7 +19,7 @@ import * as am4charts from '@amcharts/amcharts4/charts';
 import HierarchicalTable from '../HierarchicalTable';
 import DeepdrillsEmptyState from '../DeepdrillsEmptyState';
 import DeepdrillDimensionEmpty from '../DeepdrillDimensionEmpty';
-// import DeepdrillDrilldownsEmpty from '../DeepdrillDrilldownsEmpty';
+import DeepdrillDrilldownsEmpty from '../DeepdrillDrilldownsEmpty';
 
 import { formatDateTime, getTimezone } from '../../utils/date-helper';
 
@@ -416,7 +416,6 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
             {dimensionData &&
             dimensionData.dimensions &&
             dimensionData.dimensions.length === 0 ? (
-              // <DeepdrillDrilldownsEmpty />
               <DeepdrillDimensionEmpty />
             ) : (
               <div
@@ -503,52 +502,62 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                     />
                   </div>
                 </div>
-
-                {/*Drill down chart*/}
-                {rcaAnalysisLoading && (
-                  <div className="load waterfallchart-loader">
-                    <div className="preload"></div>
-                  </div>
-                )}
-                <div
-                  className={
-                    'common-drilldown-graph' +
-                    (rcaAnalysisLoading ? ' common-drilldown-graph-none ' : '')
-                  }
-                  id="chartdivWaterfall"></div>
-                {/* Table */}
-                {dimension.value === 'multidimension' ? (
-                  <>
-                    {rcaAnalysisLoading ? (
-                      <div className="load rca-graph-loader">
-                        <div className="preload"></div>
-                      </div>
-                    ) : (
-                      <>
-                        {rcaAnalysisData &&
-                          rcaAnalysisData.data_table.length !== 0 && (
-                            <DashboardTable
-                              rcaAnalysisData={rcaAnalysisData}
-                              dimension={dimension}
-                            />
-                          )}
-                      </>
-                    )}
-                  </>
+                {rcaAnalysisData &&
+                rcaAnalysisData?.chart &&
+                rcaAnalysisData?.chart?.chart_data.length === 0 &&
+                rcaAnalysisData?.data_table.length === 0 ? (
+                  <DeepdrillDrilldownsEmpty />
                 ) : (
                   <>
-                    {hierarchialLoading ? (
-                      <div className="load rca-graph-loader">
+                    {/*Drill down chart*/}
+                    {rcaAnalysisLoading && (
+                      <div className="load waterfallchart-loader">
                         <div className="preload"></div>
                       </div>
+                    )}
+                    <div
+                      className={
+                        'common-drilldown-graph' +
+                        (rcaAnalysisLoading
+                          ? ' common-drilldown-graph-none '
+                          : '')
+                      }
+                      id="chartdivWaterfall"></div>
+                    {/* Table */}
+                    {dimension.value === 'multidimension' ? (
+                      <>
+                        {rcaAnalysisLoading ? (
+                          <div className="load rca-graph-loader">
+                            <div className="preload"></div>
+                          </div>
+                        ) : (
+                          <>
+                            {rcaAnalysisData &&
+                              rcaAnalysisData.data_table.length !== 0 && (
+                                <DashboardTable
+                                  rcaAnalysisData={rcaAnalysisData}
+                                  dimension={dimension}
+                                />
+                              )}
+                          </>
+                        )}
+                      </>
                     ) : (
                       <>
-                        {hierarchicalData &&
-                          hierarchicalData?.data_table.length !== 0 && (
-                            <HierarchicalTable
-                              hierarchicalData={hierarchicalData}
-                            />
-                          )}
+                        {hierarchialLoading ? (
+                          <div className="load rca-graph-loader">
+                            <div className="preload"></div>
+                          </div>
+                        ) : (
+                          <>
+                            {hierarchicalData &&
+                              hierarchicalData?.data_table.length !== 0 && (
+                                <HierarchicalTable
+                                  hierarchicalData={hierarchicalData}
+                                />
+                              )}
+                          </>
+                        )}
                       </>
                     )}
                   </>

@@ -93,7 +93,7 @@ def _validate_kpi_from_df(
     # Preliminary Check that there are no duplicate column names
     status_bool, status_msg = _validate_no_duplicate_column_names(df)
     logger.info("Check #1: Validate no duplicate column names in data")
-    logger.info(", ".join(map(str, [status_bool, status_msg])))
+    logger.info(f"{status_bool}, {status_msg}")
     if not status_bool:
         return status_bool, status_msg
 

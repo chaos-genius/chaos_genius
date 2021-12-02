@@ -1,6 +1,5 @@
 from chaos_genius.databases.models.config_setting_model import ConfigSetting
 from chaos_genius.alerts.alert_config import modified_config_state
-from chaos_genius.settings import SQLALCHEMY_DATABASE_URI
 from chaos_genius.connectors.postgres import PostgresDb
 from chaos_genius.settings import (
     DB_HOST,

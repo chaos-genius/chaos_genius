@@ -10,7 +10,7 @@ import {
 const initialState = {
   onboardingList: [],
   isLoading: true,
-  error: false,
+  error: '',
   homeKpiData: '',
   homeKpiLoading: false,
   homeKpiError: false
@@ -21,23 +21,21 @@ export const onboarding = (state = initialState, action) => {
     case ONBOARDINGREQUEST: {
       return {
         ...state,
-        isLoading: true,
-        error: false
+        isLoading: true
       };
     }
     case ONBOARDINGSUCCESS: {
       return {
         ...state,
         isLoading: false,
-        onboardingList: action.data,
-        error: false
+        onboardingList: action.data
       };
     }
     case ONBOARDINGFAILURE: {
       return {
         ...state,
         isLoading: false,
-        error: true
+        error: action.data
       };
     }
     case HOMEKPIVIEWREQUEST: {

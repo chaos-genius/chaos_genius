@@ -513,6 +513,12 @@ class RootCauseAnalysis:
             metric_impact = d2_metrics[metric] - d1_metrics[metric]
             panel_metrics["impact"][metric] = round_number(metric_impact)
 
+        # Check for None or NaN values in output
+        for overall_key, value_dict in panel_metrics.items():
+            for key, value in value_dict.items():
+                if value is None or pd.isna(value):
+                    raise ValueError(f"{key} in {overall_key} is None or NaN")
+
         return panel_metrics
 
     def get_impact_rows(self, single_dim: str = None) -> List[Dict[str, object]]:
@@ -537,6 +543,10 @@ class RootCauseAnalysis:
         impact_table["string"] = impact_table["string"].apply(
             convert_query_string_to_user_string
         )
+
+        # Check for any nan values in impact values and raise ValueError if found
+        if impact_table.isna().values.any():
+            raise ValueError(f"Impact table for dimension {single_dim} contains NaN values")
 
         return round_df(impact_table).to_dict("records")
 
@@ -595,6 +605,10 @@ class RootCauseAnalysis:
             convert_query_string_to_user_string
         )
 
+        # Check for any nan values in best subgroups and raise ValueError if found
+        if best_subgroups.isna().values.any():
+            raise ValueError(f"Waterfall table for dimension {single_dim} contains NaN values")
+
         return round_df(best_subgroups).to_dict("records")
 
     def get_waterfall_plot_data(
@@ -632,6 +646,10 @@ class RootCauseAnalysis:
         waterfall_df["category"] = waterfall_df["category"].apply(
             convert_query_string_to_user_string
         )
+
+        # Check for any nan values in waterfall df and raise ValueError if found
+        if waterfall_df.isna().values.any():
+            raise ValueError(f"Waterfall chart data for dimension {single_dim} contains NaN values")
 
         return (
             round_df(waterfall_df).to_dict("records"),
@@ -697,5 +715,9 @@ class RootCauseAnalysis:
         output_table["string"] = output_table["string"].apply(
             convert_query_string_to_user_string
         )
+
+        # Check for any nan values in output table and raise ValueError if found
+        if output_table.drop("parentId", axis=1).isna().values.any():
+            raise ValueError(f"Hierarchical table for dimension {single_dim} contains NaN values")
 
         return round_df(output_table).to_dict("records")

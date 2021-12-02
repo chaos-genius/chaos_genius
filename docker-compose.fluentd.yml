@@ -47,11 +47,14 @@ services:
     container_name: chaosgenius-server
     image: chaosgenius/chaosgenius-server:latest
     command: sh setup/run-backend-docker.sh
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - chaosgenius-db
       - server
       - chaosgenius-fluentd
     environment:
+      - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -136,6 +139,7 @@ services:
     image: chaosgenius/chaosgenius-server:latest
     command: celery -A run.celery beat --loglevel=DEBUG
     environment:
+      - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -168,6 +172,7 @@ services:
     image: chaosgenius/chaosgenius-server:latest
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
     environment:
+      - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -207,6 +212,7 @@ services:
     image: chaosgenius/chaosgenius-server:latest
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
     environment:
+      - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}

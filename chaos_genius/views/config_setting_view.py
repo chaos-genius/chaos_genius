@@ -108,8 +108,9 @@ def set_config():
             })
         config_obj = get_config_object(config_name)
         config_settings = data.get("config_settings", {})
-        updated_config_settings = config_obj.config_setting
+        updated_config_settings = {}
         if config_obj:
+            updated_config_settings = config_obj.config_setting
             config_obj.active = False
             config_obj.save(commit=True)
             if config_name == "organisation_settings":
@@ -117,6 +118,8 @@ def set_config():
                     updated_config_settings[module].update(config_settings[module])
             else:
                 updated_config_settings.update(data.get("config_settings", {}))
+        if not updated_config_settings:
+            updated_config_settings = config_settings
         new_config = create_config_object(config_name, updated_config_settings)
         new_config.save(commit=True)
         return jsonify({

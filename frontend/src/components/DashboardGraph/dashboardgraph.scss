@@ -7,6 +7,19 @@
 
   .dashboard-container {
     padding: 12px 24px;
+    .common-option {
+      .selectcategory--is-disabled,
+      .css-2b097c-container {
+        width: 162px !important;
+        .selectcategory__control--is-disabled {
+          .selectcategory__value-container {
+            .selectcategory__single-value {
+              color: #7a7a7a !important;
+            }
+          }
+        }
+      }
+    }
     &.drilldown-disable {
       display: none;
     }

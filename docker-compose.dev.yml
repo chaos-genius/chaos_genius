@@ -36,10 +36,13 @@ services:
     container_name: chaosgenius-server
     build: .
     command: sh setup/run-backend-docker.sh
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - chaosgenius-db
       - server
     environment:
+      - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -117,6 +120,7 @@ services:
     build: .
     command: celery -A run.celery beat --loglevel=DEBUG
     environment:
+      - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -147,6 +151,7 @@ services:
     build: .
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
     environment:
+      - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -184,6 +189,7 @@ services:
     build: .
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
     environment:
+      - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}

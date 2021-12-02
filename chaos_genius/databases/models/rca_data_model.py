@@ -19,7 +19,7 @@ class RcaData(PkModel):
                         default=dt.datetime.utcnow)
 
     __table_args__ = (
-        Index('rca_data_query_idx', kpi_id, end_date, data_type),
+        Index('rca_data_query_idx', kpi_id, data_type, end_date),
     )
 
     def __init__(self, name, **kwargs):

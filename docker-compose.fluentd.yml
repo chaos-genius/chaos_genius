@@ -43,30 +43,12 @@ services:
       - ./setup/fluentd/log.conf:/fluentd/etc/log.conf
       - ./logs:/var/log/fluent
 
-  chaosgenius-webapp:
-    container_name: chaosgenius-webapp
-    image: chaosgenius/chaosgenius-webapp:latest
-    ports:
-      - "8080:3000"
-    environment:
-      - NODE_ENV=production
-      - HOST=0.0.0.0
-      - PORT=3000
-      - REACT_APP_BASE_URL=${REACT_APP_BASE_URL}
-    stdin_open: true
-    command: npm run start
-    logging: *default-logging
-    depends_on:
-      - chaosgenius-fluentd
-
   chaosgenius-server:
     container_name: chaosgenius-server
     image: chaosgenius/chaosgenius-server:latest
     command: sh setup/run-backend-docker.sh
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - "5000:5000"
     depends_on:
       - chaosgenius-db
       - server
@@ -95,6 +77,30 @@ services:
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
       - CACHE_DEFAULT_TIMEOUT=${CACHE_DEFAULT_TIMEOUT}
+      - MULTIDIM_ANALYSIS_FOR_ANOMALY=${MULTIDIM_ANALYSIS_FOR_ANOMALY}
+      - MAX_SUBDIM_CARDINALITY=${MAX_SUBDIM_CARDINALITY}
+      - TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN=${TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN}
+      - MIN_DATA_IN_SUBGROUP=${MIN_DATA_IN_SUBGROUP}
+      - MAX_ROWS_FOR_DEEPDRILLS=${MAX_ROWS_FOR_DEEPDRILLS}
+      - MAX_FILTER_SUBGROUPS_ANOMALY=${MAX_FILTER_SUBGROUPS_ANOMALY}
+      - SENTRY_DSN=${SENTRY_DSN}
+    logging: *default-logging
+    ports:
+      - "5000:5000"
+
+  chaosgenius-webapp:
+    container_name: chaosgenius-webapp
+    image: chaosgenius/chaosgenius-webapp:latest
+    volumes:
+      - ./frontend/nginx:/etc/nginx/conf.d/
+    ports:
+      - "8080:8080"
+    environment:
+      - REACT_APP_BASE_URL=chaosgenius-server:5000
+      - REACT_APP_DISABLE_TELEMETRY=${REACT_APP_DISABLE_TELEMETRY}
+    depends_on:
+      - chaosgenius-server
+      - chaosgenius-fluentd
     logging: *default-logging
 
   chaosgenius-db:
@@ -155,6 +161,7 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - SENTRY_DSN=${SENTRY_DSN}
     depends_on:
       - chaosgenius-redis
       - chaosgenius-fluentd
@@ -187,6 +194,13 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - MULTIDIM_ANALYSIS_FOR_ANOMALY=${MULTIDIM_ANALYSIS_FOR_ANOMALY}
+      - MAX_SUBDIM_CARDINALITY=${MAX_SUBDIM_CARDINALITY}
+      - TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN=${TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN}
+      - MIN_DATA_IN_SUBGROUP=${MIN_DATA_IN_SUBGROUP}
+      - MAX_ROWS_FOR_DEEPDRILLS=${MAX_ROWS_FOR_DEEPDRILLS}
+      - MAX_FILTER_SUBGROUPS_ANOMALY=${MAX_FILTER_SUBGROUPS_ANOMALY}
+      - SENTRY_DSN=${SENTRY_DSN}
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db
@@ -220,6 +234,7 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - SENTRY_DSN=${SENTRY_DSN}
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db

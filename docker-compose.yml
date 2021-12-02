@@ -71,6 +71,8 @@ services:
       - MIN_DATA_IN_SUBGROUP=${MIN_DATA_IN_SUBGROUP}
       - MAX_ROWS_FOR_DEEPDRILLS=${MAX_ROWS_FOR_DEEPDRILLS}
       - MAX_FILTER_SUBGROUPS_ANOMALY=${MAX_FILTER_SUBGROUPS_ANOMALY}
+    ports:
+      - "5000:5000"
 
   chaosgenius-webapp:
     container_name: chaosgenius-webapp
@@ -80,7 +82,8 @@ services:
     ports:
       - "8080:8080"
     environment:
-            - REACT_APP_BASE_URL=chaosgenius-server:5000
+      - REACT_APP_BASE_URL=chaosgenius-server:5000
+      - REACT_APP_DISABLE_TELEMETRY=${REACT_APP_DISABLE_TELEMETRY}
     depends_on:
       - chaosgenius-server
 

@@ -7,13 +7,13 @@ import { ToastContainer, toast } from 'react-toastify';
 
 import { env } from '../env';
 
-// import { Redirect } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 // import { isAuthenticated } from '../utils/user-helper';
 import 'react-toastify/dist/ReactToastify.css';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 
-import { getConnectionType, getGlobalSetting } from '../redux/actions';
+import { getConnectionType, getGlobalSetting,onboardingOrganisationStatus } from '../redux/actions';
 
 import { connectionContext } from '../components/context';
 import { getOnboardingStatus } from '../redux/actions';
@@ -22,38 +22,60 @@ import ServerError from '../containers/ServerError';
 
 const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
   const dispatch = useDispatch();
-  //const history = useHistory();
+  const history = useHistory();
   const [stateValue, setState] = useState();
   const { connectionType } = useSelector((state) => state.dataSource);
   const { globalSettingData } = useSelector((state) => state.GlobalSetting);
-  const { isLoading, error } = useSelector((state) => state.onboarding);
+  const { isLoading, error, onboardingList } = useSelector((state) => state.onboarding);
+  const { organisationData } = useSelector((state) => state.organisation);
 
   useEffect(() => {
     // process.env.NODE_ENV === 'development'
-
-    if (
-      env.REACT_APP_DISABLE_TELEMETRY === 'true' ||
-      env.NODE_ENV === 'development'
-    ) {
+    if ( env.REACT_APP_DISABLE_TELEMETRY === 'true' ||
+    env.NODE_ENV === 'development' ) {
       console.log('disable telemetry');
       // eslint-disable-next-line react-hooks/exhaustive-deps
     } else {
-      posthog.init('phc_KcsaN1oBtVUwKUvd9owb3Cz42MYDpR6No00EJRLAprH', {
-        api_host: 'https://app.posthog.com'
-      });
+      if (organisationData !== undefined && Object.keys(organisationData).length && organisationData.active) {
+        let userEmail = organisationData.config_setting.account.email;
+        let isAnonymized = organisationData.config_setting.metrics.anonymize_usage_data_collection;
+        if(isAnonymized === false){
+          posthog.init('phc_KcsaN1oBtVUwKUvd9owb3Cz42MYDpR6No00EJRLAprH', {
+            api_host: 'https://app.posthog.com',
+            loaded: function(posthog) { posthog.identify(userEmail); }
+          });
+        }else{
+          posthog.init('phc_KcsaN1oBtVUwKUvd9owb3Cz42MYDpR6No00EJRLAprH', {
+            api_host: 'https://app.posthog.com',
+          });
+        }
+      }else{
+        posthog.init('phc_KcsaN1oBtVUwKUvd9owb3Cz42MYDpR6No00EJRLAprH', {
+          api_host: 'https://app.posthog.com',
+        });
+      }
     }
-  }, []);
+  }, [organisationData]);
 
   useEffect(() => {
     dispatchGetConnectionType();
     dispatch(getGlobalSetting());
     dispatch(getOnboardingStatus());
+    dispatch(onboardingOrganisationStatus());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const dispatchGetConnectionType = () => {
     dispatch(getConnectionType());
   };
+
+  useEffect(() => {
+    if(onboardingList.organisation_onboarding !== undefined && onboardingList.organisation_onboarding === false){
+      history.push('/organisation-onboarding');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onboardingList]);
+
 
   useEffect(() => {
     if (globalSettingData) {
@@ -77,6 +99,7 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
   } else if (error === 502 || error === 503 || error === 504) {
     return <ServerError />;
   }
+
   return (
     <Route
       {...rest}

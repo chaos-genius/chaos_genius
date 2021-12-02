@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch} from 'react-redux';
 import { onboardOrganisationUpdate,onboardOrganisation } from '../../redux/actions';
 
-const AccountSetting = (organizationData) => {
-  const orgData = organizationData.organizationData;
+const AccountSetting = (organisationData) => {
+  const orgData = organisationData.organisationData;
   const dispatch = useDispatch();
   const [formData, setFormData] = useState(null);
 

@@ -1,21 +1,17 @@
 import React, { useState} from 'react';
 import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-// import { useToast } from 'react-toast-wnm';
 import {
-  // onboardingOrganisationStatus,
   onboardOrganisation
 } from '../../redux/actions';
 
 const OrganisationOnboardingForm = () => {
   const dispatch = useDispatch();
-  // const toast = useToast();
   const history = useHistory();
   const [emailAddress, setEmailAddress] = useState('');
   const [ErrorMessage, setErrorMessage] = useState(false)
   const [isAnonymizeData, setIsAnonymizeData] = useState(false);
   const [isNewsSubscribed, setIsNewsSubscribed] = useState(false);
-  // const { organizationData } = useSelector((state) => state.organization);
 
   const onCheckingAnonimize = (status) => {
     setIsAnonymizeData(status);

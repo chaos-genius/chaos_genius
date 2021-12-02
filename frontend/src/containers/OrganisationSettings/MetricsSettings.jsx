@@ -2,10 +2,9 @@ import React, { useState,useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { onboardOrganisationUpdate,onboardOrganisation } from '../../redux/actions';
 
-const MetricsSettings = (organizationData) => {
+const MetricsSettings = (organisationData) => {
   const dispatch = useDispatch();
-  const orgData = organizationData.organizationData;
-  // const [dataOrg, setdataOrg] = useState(orgData)
+  const orgData = organisationData.organisationData;
   const [formData, setFormData] = useState(null);
 
   useEffect(() => {

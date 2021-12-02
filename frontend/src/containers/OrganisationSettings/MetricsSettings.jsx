@@ -5,7 +5,6 @@ import { onboardOrganisationUpdate,onboardOrganisation } from '../../redux/actio
 const MetricsSettings = (organisationData) => {
   const dispatch = useDispatch();
   const orgData = organisationData.organisationData;
-  // const [dataOrg, setdataOrg] = useState(orgData)
   const [formData, setFormData] = useState(null);
 
   useEffect(() => {

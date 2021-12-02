@@ -36,14 +36,15 @@ def get_onboarding_status():
                         ).all()
 
             analytics = True if len(kpi_list) > 0 else False
-
-            organisation_settings = ConfigSetting.query.filter(
-                                        ConfigSetting.name == "organisation_settings",
-                                        ConfigSetting.active == True
-                                    ).all()
-            organisation_settings = True if len(organisation_settings) > 0 else False
     except Exception as err_msg:
         print(err_msg)
+
+    organisation_settings_value = ConfigSetting.query.filter(
+                                    ConfigSetting.name == "organisation_settings",
+                                    ConfigSetting.active == True
+                                ).all()
+    organisation_settings = True if len(organisation_settings_value) > 0 else False
+    
     steps = [
         {
             "step_no": 1,

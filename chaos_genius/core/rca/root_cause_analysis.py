@@ -715,7 +715,7 @@ class RootCauseAnalysis:
 
         # Check for any nan values in output table and raise ValueError if found
         self._check_nan(
-            output_table.drop("parentId", axis=1), 
+            output_table.drop("parentId", axis=1),
             f"Hierarchical table for dimension {single_dim}"
         )
 

@@ -11,7 +11,7 @@ from chaos_genius.core.rca.root_cause_analysis import SUPPORTED_AGGREGATIONS
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.settings import MAX_ROWS_FOR_DEEPDRILLS
 
-TAIL_SIZE = 10
+TAIL_SIZE = 1000
 
 logger = logging.getLogger(__name__)
 
@@ -122,7 +122,7 @@ def _validate_kpi_from_df(
         },
         {
             "debug_str": "Check #5: Validate dimensions",
-            "status": _validate_dimensions(kpi_info)
+            "status": _validate_dimensions(kpi_info),
         },
         {
             "debug_str": (

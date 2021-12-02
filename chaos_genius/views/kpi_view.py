@@ -292,26 +292,12 @@ def trigger_analytics(kpi_id):
 
     rca_task = ready_rca_task(kpi_id)
     anomaly_task = ready_anomaly_task(kpi_id)
-    if rca_task is None:
-        print(f"Could not run RCA task since newly added KPI was not found: {kpi_id}")
-        return jsonify(
-            {"error": "Could not run RCA task since newly added KPI was not found"}
-        )
-
-    else:
+    if rca_task is not None and anomaly_task is not None:
         rca_task.apply_async()
-
-    if anomaly_task is None:
-        print(
-            f"Could not run anomaly task since newly added KPI was not found: {kpi_id}"
-        )
-        return jsonify(
-            {"error": "Could not run anomaly task since newly added KPI was not found"}
-        )
-    else:
         anomaly_task.apply_async()
-
-    return jsonify({"message": "Successfully triggered RCA and Anomaly"})
+    else:
+        print(f"Could not analytics since newly added KPI was not found: {kpi_id}")
+    return jsonify({"message": "RCA and Anomaly triggered successfully"})
 
 
 @cache.memoize()

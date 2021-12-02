@@ -123,7 +123,11 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
   }, [kpi, monthWeek.value]);
 
   useEffect(() => {
-    if (dimensionData && dimensionData?.dimensions) {
+    if (
+      dimensionData &&
+      dimensionData?.dimensions &&
+      dimensionData?.dimensions.length !== 0
+    ) {
       setActiveDimension(dimensionData?.dimensions[0]);
       getSingleDimensioData(dimensionData?.dimensions[0]);
     }

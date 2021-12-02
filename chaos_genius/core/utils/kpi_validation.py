@@ -110,8 +110,12 @@ def _validate_kpi_from_df(
             ),
         },
         {
+            "debug_str": "Check #4: Validate dimensions",
+            "status": _validate_dimensions(kpi_info)
+        },
+        {
             "debug_str": (
-                "Check #4: Validate KPI has no more than "
+                "Check #5: Validate KPI has no more than "
                 f"{MAX_ROWS_FOR_DEEPDRILLS} rows"
             ),
             "status": _validate_for_maximum_kpi_size(kpi_info),
@@ -317,3 +321,20 @@ def _validate_for_maximum_kpi_size(
         "for such datasets (coming soon)."
     )
     return False, error_message
+
+
+def _validate_dimensions(kpi_info: dict) -> Tuple[bool, str]:
+    """Validate if dimensions are valid."""
+
+    metric_col = kpi_info.get("metric")
+    date_col = kpi_info.get("datetime_column")
+
+    dimensions = kpi_info.get("dimensions")
+
+    if metric_col in dimensions:
+        return False, "Metric column cannot be in dimensions"
+
+    if date_col in dimensions:
+        return False, "Date column cannot be in dimensions"
+
+    return True, "Accepted!"

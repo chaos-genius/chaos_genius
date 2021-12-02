@@ -517,7 +517,7 @@ class RootCauseAnalysis:
         for overall_key, value_dict in panel_metrics.items():
             for key, value in value_dict.items():
                 if value is None or pd.isna(value):
-                    raise ValueError(f"{key} in {overall_key} is None or NaN")
+                    raise ValueError(f"{key} in {overall_key} is {value} (either None or NaN)")
 
         return panel_metrics
 
@@ -545,8 +545,7 @@ class RootCauseAnalysis:
         )
 
         # Check for any nan values in impact values and raise ValueError if found
-        if impact_table.isna().values.any():
-            raise ValueError(f"Impact table for dimension {single_dim} contains NaN values")
+        self._check_nan(impact_table, f"Impact table for dimension {single_dim}")
 
         return round_df(impact_table).to_dict("records")
 
@@ -606,8 +605,7 @@ class RootCauseAnalysis:
         )
 
         # Check for any nan values in best subgroups and raise ValueError if found
-        if best_subgroups.isna().values.any():
-            raise ValueError(f"Waterfall table for dimension {single_dim} contains NaN values")
+        self._check_nan(best_subgroups, f"Waterfall table for dimension {single_dim}")
 
         return round_df(best_subgroups).to_dict("records")
 
@@ -648,8 +646,7 @@ class RootCauseAnalysis:
         )
 
         # Check for any nan values in waterfall df and raise ValueError if found
-        if waterfall_df.isna().values.any():
-            raise ValueError(f"Waterfall chart data for dimension {single_dim} contains NaN values")
+        self._check_nan(waterfall_df, f"Waterfall chart for dimension {single_dim}")
 
         return (
             round_df(waterfall_df).to_dict("records"),
@@ -717,7 +714,18 @@ class RootCauseAnalysis:
         )
 
         # Check for any nan values in output table and raise ValueError if found
-        if output_table.drop("parentId", axis=1).isna().values.any():
-            raise ValueError(f"Hierarchical table for dimension {single_dim} contains NaN values")
+        self._check_nan(
+            output_table.drop("parentId", axis=1), 
+            f"Hierarchical table for dimension {single_dim}"
+        )
 
         return round_df(output_table).to_dict("records")
+
+    def _check_nan(self, df: pd.DataFrame, message: str) -> None:
+        """Check if NaN values in dataframe."""
+
+        nan_df = df.isna().sum()
+        nan_dict: dict = nan_df[nan_df > 0].to_dict()
+
+        if len(nan_dict) != 0:
+            raise ValueError(f"{message} contains NaN values. {nan_dict}")

@@ -233,7 +233,7 @@ class AnomalyAlertController:
 
         alert.update(commit=True, last_alerted=curr_date_time)
 
-        lower_limit_dt = curr_date_time - FREQUENCY_DICT[self.alert_info['alert_frequency']]
+        lower_limit_dt = curr_date_time - datetime.timedelta(hours=72)
         alert_id = self.alert_info["id"]
 
         # TODO: Add the series type filter

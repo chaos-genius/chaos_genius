@@ -435,6 +435,7 @@ def get_anomaly_count(kpi_id, timeline):
     curr_date = datetime.now()
     lower_time_dt = curr_date - TIME_DICT[timeline]["time_delta"]
 
+    # TODO: Add the series type filter
     anomaly_data = AnomalyDataOutput.query.filter(
         AnomalyDataOutput.kpi_id == kpi_id,
         AnomalyDataOutput.anomaly_type == "overall",

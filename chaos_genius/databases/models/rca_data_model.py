@@ -2,7 +2,7 @@
 """kpi model."""
 import datetime as dt
 
-from chaos_genius.databases.base_model import Column, PkModel, db
+from chaos_genius.databases.base_model import Column, Index, PkModel, db
 
 
 class RcaData(PkModel):
@@ -17,6 +17,10 @@ class RcaData(PkModel):
     data = Column(db.JSON, nullable=True)
     created_at = Column(db.DateTime, nullable=False,
                         default=dt.datetime.utcnow)
+
+    __table_args__ = (
+        Index('rca_data_query_idx', kpi_id, data_type, end_date),
+    )
 
     def __init__(self, name, **kwargs):
         """Create instance."""

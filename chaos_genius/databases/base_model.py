@@ -5,6 +5,7 @@ from chaos_genius.extensions import db
 # Alias common SQLAlchemy names
 Column = db.Column
 relationship = db.relationship
+Index = db.Index
 
 
 class CRUDMixin(object):

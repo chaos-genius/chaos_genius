@@ -7,13 +7,11 @@ import Kpihome from '../../components/Kpihome';
 
 import { getOnboardingStatus } from '../../redux/actions';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 
 import './home.scss';
 
 const Home = () => {
   const dispatch = useDispatch();
-  const history = useHistory();
 
   const { onboardingList } = useSelector((state) => state.onboarding);
 
@@ -25,13 +23,6 @@ const Home = () => {
   const dispatchOnboarding = () => {
     dispatch(getOnboardingStatus());
   };
-
-  useEffect(() => {
-    if(onboardingList.organisation_onboarding !== undefined && onboardingList.organisation_onboarding === false){
-      history.push('/organisation-onboarding');
-    }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onboardingList]);
 
   return (
     <>

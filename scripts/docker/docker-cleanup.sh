@@ -17,7 +17,7 @@ do
     count=`expr $count + 1`
 done
 echo
-read -p "Your Selection ? Press Enter if unsure :" temp_sel
+read -p "Your selection? Press Enter if unsure: " temp_sel
 sel=$(echo $temp_sel | xargs)
 sel=`expr $sel`
 
@@ -53,11 +53,10 @@ do
   image_id=$(docker images | grep "$image" | awk '{print $3}')
   if [ ! -z "$image_id" ]
   then 
-    echo "$image - Image found. Deleting image........"
+    echo "$image - image found. Deleting image........"
     docker rmi -f $image_id
   else 
-    echo "image not found"
+    echo "$image - image not found"
   fi
 done
 echo "##### SUCCESSFULLY REMOVED CHAOSGENIUS #########"
-

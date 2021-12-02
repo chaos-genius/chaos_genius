@@ -223,12 +223,12 @@ class AnomalyAlertController:
 
         alert: Optional[Alert] = Alert.get_by_id(self.alert_info["id"])
         if alert is None:
-            logger.debug(f"Could not find alert by ID: {self.alert_info['id']}")
+            logger.info(f"Could not find alert by ID: {self.alert_info['id']}")
             return False
 
         if alert.last_alerted is not None and \
                 alert.last_alerted > (curr_date_time - check_time):
-            logger.debug(f"Skipping alert with ID {self.alert_info['id']} since it was already run")
+            logger.info(f"Skipping alert with ID {self.alert_info['id']} since it was already run")
             return True
 
         alert.update(commit=True, last_alerted=curr_date_time)
@@ -244,14 +244,14 @@ class AnomalyAlertController:
                                         ).all()
 
         if len(anomaly_data) == 0:
-            logger.debug(f"No anomaly exists (Alert ID - {alert_id})")
+            logger.info(f"No anomaly exists (Alert ID - {alert_id})")
             return True
 
         anomaly_data.sort(key = lambda anomaly: getattr(anomaly, 'severity'), reverse = True)
         anomaly = anomaly_data[0]
         
         if getattr(anomaly, 'severity') < self.alert_info['severity_cutoff_score']:
-            logger.debug(f"The anomaliy's severity score is below the threshold (Alert ID - {alert_id})")
+            logger.info(f"The anomaliy's severity score is below the threshold (Alert ID - {alert_id})")
             return True
 
         logger.info(f"Alert ID {alert_id} is sent to the respective alert channel")
@@ -267,7 +267,7 @@ class AnomalyAlertController:
         alert_channel_conf = self.alert_info["alert_channel_conf"]
 
         if type(alert_channel_conf) != dict:
-            logger.debug(f"The alert channel configuration is incorrect for Alert ID - {self.alert_info['id']}")
+            logger.info(f"The alert channel configuration is incorrect for Alert ID - {self.alert_info['id']}")
             return False
 
         recipient_emails = alert_channel_conf.get("email", [])
@@ -285,7 +285,7 @@ class AnomalyAlertController:
             kpi_obj = Kpi.get_by_id(kpi_id)
             
             if kpi_obj is None:
-                logger.debug(f"No KPI exists for Alert ID - {self.alert_info['id']}")
+                logger.info(f"No KPI exists for Alert ID - {self.alert_info['id']}")
                 return False
 
             kpi_name = getattr(kpi_obj, 'name')
@@ -303,10 +303,10 @@ class AnomalyAlertController:
                                             alert_frequency = self.alert_info['alert_frequency'].capitalize(),
                                             preview_text = "Anomaly Alert"
                                         )
-            logger.debug(f"Status for Alert ID - {self.alert_info['id']} : {test}")
+            logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
             return True
         else:
-            logger.debug(f"No receipent email available (Alert ID - {self.alert_info['id']})")
+            logger.info(f"No receipent email available (Alert ID - {self.alert_info['id']})")
             return False
 
     def send_template_email(self, template, recipient_emails, subject, **kwargs):
@@ -324,7 +324,7 @@ class AnomalyAlertController:
         if test == True:
             logger.info(f"The email for Alert ID - {self.alert_info['id']} was successfully sent")
         else:
-            logger.debug(f"The email for Alert ID - {self.alert_info['id']} has not been sent")
+            logger.info(f"The email for Alert ID - {self.alert_info['id']} has not been sent")
         
         return test
 
@@ -347,7 +347,7 @@ class AnomalyAlertController:
         if test == "ok":
             logger.info(f"The slack alert for Alert ID - {self.alert_info['id']} was successfully sent")
         else:
-            logger.debug(f"The slack alert for Alert ID - {self.alert_info['id']} has not been sent")
+            logger.info(f"The slack alert for Alert ID - {self.alert_info['id']} has not been sent")
         
         message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
         return message

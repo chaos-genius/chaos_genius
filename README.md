@@ -10,7 +10,7 @@ Chaos Genius is an open-source business observability platform. Chaos Genius ena
 
 Chaos Genius can help teams reduce their Mean-Time-To-Detect (MTTD) and Mean-Time-To-Resolve (MTTR) for any issues in their business and system KPIs. 
 
-Standard BI dashboards enable data visualization to track how select metrics are trending. However, diagnosing why a particular metric or KPI has changed, remains a woefully manual process involving slicing & dicing the data, coordination with multiple teams in an organization to identify related events and monitoring externalities. 
+Standard BI dashboards enable data visualization to track how select metrics are trending. However, diagnosing why a particular metric or KPI has changed, remains a woefully manual process involving slicing & dicing the data, coordination with multiple teams in an organisation to identify related events and monitoring externalities. 
 
 With Chaos Genius, we aim to automate the diagnosis and root-cause-analysis for deviations in different business and system KPIs at scale. 
 

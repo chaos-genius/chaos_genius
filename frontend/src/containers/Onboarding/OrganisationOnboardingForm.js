@@ -15,7 +15,7 @@ const OrganisationOnboardingForm = () => {
   const [ErrorMessage, setErrorMessage] = useState(false)
   const [isAnonymizeData, setIsAnonymizeData] = useState(false);
   const [isNewsSubscribed, setIsNewsSubscribed] = useState(false);
-  // const { organizationData } = useSelector((state) => state.organization);
+  // const { organisationData } = useSelector((state) => state.organisation);
 
   const onCheckingAnonimize = (status) => {
     setIsAnonymizeData(status);

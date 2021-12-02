@@ -10,7 +10,7 @@ import { onboardingOrganisationStatus } from '../../redux/actions';
 
 const OrganisationSettings = () => {
   const [tabSwitch, setTabSwitch] = useState({ account: true, metrics: false });
-  const { organizationData } = useSelector((state) => state.organization);
+  const { organisationData } = useSelector((state) => state.organisation);
   const dispatch = useDispatch();
   useEffect(() => {
     const getOrganisationOnboardedData = () => {
@@ -48,13 +48,13 @@ const OrganisationSettings = () => {
           </ul>
         </div>
         <div className="settings-section">
-          {Object.keys(organizationData).length ? ( 
+          {Object.keys(organisationData).length ? ( 
             <>
               {tabSwitch.account ? (
-                <AccountSetting organizationData={organizationData} />
+                <AccountSetting organisationData={organisationData} />
               ) : null}
               {tabSwitch.metrics ? (
-                <MetricsSettings organizationData={organizationData} />
+                <MetricsSettings organisationData={organisationData} />
               ) : null}
             </>
           ) : null}

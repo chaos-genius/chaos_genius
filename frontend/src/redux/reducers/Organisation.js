@@ -7,18 +7,18 @@ import {
 } from '../actions/ActionConstants';
 
 const initialState = {
-  organizationData: [],
+  organisationData: [],
   isLoading: true,
   error: false
 };
 
-export const organization = (state = initialState, action) => {
+export const organisation = (state = initialState, action) => {
   switch (action.type) {
     case ONBOARD_ORGANIZATION_SUCCESS: {
       return {
         ...state,
         isLoading: false,
-        organizationData: action.data,
+        organisationData: action.data,
         error: false
       };
     }
@@ -27,7 +27,7 @@ export const organization = (state = initialState, action) => {
       return {
         ...state,
         isLoading: false,
-        organizationData: action.data,
+        organisationData: action.data,
         error: false
       };
     }

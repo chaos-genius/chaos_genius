@@ -28,7 +28,10 @@ const Routes = () => (
   <Switch>
     <Route exact path="/login" component={Login}></Route>
     <Route exact path="/verifylogin" component={Login}></Route>
-    <Route exact  path="/organisation-onboarding" component={OrganisationOnboarding}></Route>
+    <Route
+      exact
+      path="/organisation-onboarding"
+      component={OrganisationOnboarding}></Route>
     <PrivateRouteWithSidebar
       exact
       path="/"
@@ -122,6 +125,7 @@ const Routes = () => (
       path="/noresult"
       component={(props) => <Result {...props} />}
     />
+
     <PrivateRouteWithSidebar
       exact
       path="/organisation-settings"
@@ -131,7 +135,6 @@ const Routes = () => (
       exact
       component={(props) => <Anomolies {...props} />}
     />
-    
   </Switch>
 );
 

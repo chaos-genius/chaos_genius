@@ -16,13 +16,17 @@ import Sidebar from '../components/Sidebar';
 import { getConnectionType, getGlobalSetting } from '../redux/actions';
 
 import { connectionContext } from '../components/context';
+import { getOnboardingStatus } from '../redux/actions';
 import posthog from 'posthog-js';
+import ServerError from '../containers/ServerError';
 
 const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
   const dispatch = useDispatch();
+  //const history = useHistory();
   const [stateValue, setState] = useState();
   const { connectionType } = useSelector((state) => state.dataSource);
   const { globalSettingData } = useSelector((state) => state.GlobalSetting);
+  const { isLoading, error } = useSelector((state) => state.onboarding);
 
   useEffect(() => {
     // process.env.NODE_ENV === 'development'
@@ -43,6 +47,7 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
   useEffect(() => {
     dispatchGetConnectionType();
     dispatch(getGlobalSetting());
+    dispatch(getOnboardingStatus());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -63,6 +68,15 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectionType]);
 
+  if (isLoading) {
+    return (
+      <div className="load loader-page">
+        <div className="preload"></div>
+      </div>
+    );
+  } else if (error === 502 || error === 503 || error === 504) {
+    return <ServerError />;
+  }
   return (
     <Route
       {...rest}

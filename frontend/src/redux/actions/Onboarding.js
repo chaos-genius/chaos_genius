@@ -28,9 +28,10 @@ export const getOnboardingStatusSuccess = (response) => {
   };
 };
 
-export const getOnboardingStatusFailure = () => {
+export const getOnboardingStatusFailure = (status) => {
   return {
-    type: ONBOARDINGFAILURE
+    type: ONBOARDINGFAILURE,
+    data: status
   };
 };
 
@@ -41,7 +42,7 @@ export const getOnboardingStatus = () => {
       url: ONBOARDING_URL
     });
     if (error) {
-      dispatch(getOnboardingStatusFailure);
+      dispatch(getOnboardingStatusFailure(status));
     } else if (data && status === 200) {
       dispatch(getOnboardingStatusSuccess(data.data));
     }

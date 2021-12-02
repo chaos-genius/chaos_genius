@@ -51,6 +51,7 @@ import {
 } from './Anomaly';
 import { kpiSettingSetup, kpiEditSetup, settingMetaInfo } from './setting';
 import {onboardingOrganizationStatus,onboardOrganization,onboardOrganizationUpdate} from './Organization';
+import { getDashboardConfig } from './Config';
 import { getGlobalSetting } from './GlobalSetting';
 export {
   getAllDataSources,
@@ -100,5 +101,6 @@ export {
   onboardingOrganizationStatus,
   onboardOrganization,
   onboardOrganizationUpdate,
+  getDashboardConfig,
   getGlobalSetting
 };

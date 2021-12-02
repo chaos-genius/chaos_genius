@@ -46,6 +46,8 @@ def kpi():
             return jsonify({"error": "The request payload is not in JSON format"})
 
         data = request.get_json()
+        data["dimensions"] = [] if data["dimensions"] is None else data["dimensions"]
+        
         new_kpi = Kpi(
             name=data.get("name"),
             is_certified=data.get("is_certified"),

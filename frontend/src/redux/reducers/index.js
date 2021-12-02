@@ -13,6 +13,7 @@ import { anomaly } from './Anomaly';
 import { alert } from './Alert';
 import { setting } from './setting';
 import { organization } from './Organization';
+import { config } from './Config';
 import { GlobalSetting } from './GlobalSetting';
 const rootReducer = combineReducers({
   dataSource: dataSource,
@@ -28,6 +29,7 @@ const rootReducer = combineReducers({
   alert: alert,
   setting: setting,
   organization : organization,
+  config: config,
   GlobalSetting: GlobalSetting
 });
 

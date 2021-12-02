@@ -11,7 +11,7 @@ from chaos_genius.core.rca.root_cause_analysis import SUPPORTED_AGGREGATIONS
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.settings import MAX_ROWS_FOR_DEEPDRILLS
 
-TAIL_SIZE = 1000
+KPI_VALIDATION_TAIL_SIZE = 1000
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ def validate_kpi(kpi_info: Dict[str, Any]) -> Tuple[bool, str]:
     :rtype: Tuple[bool, str]
     """
     try:
-        df = DataLoader(kpi_info, tail=TAIL_SIZE, validation=True).get_data()
+        df = DataLoader(kpi_info, tail=KPI_VALIDATION_TAIL_SIZE, validation=True).get_data()
         logger.info(f"Created df with {len(df)} rows for validation")
     except Exception as e:  # noqa: B902
         logger.error("Unable to load data for KPI validation", exc_info=1)

@@ -281,15 +281,32 @@ def get_kpi_info(kpi_id):
 
 @blueprint.route("/<int:kpi_id>/trigger-analytics", methods=["GET"])
 def trigger_analytics(kpi_id):
-    """get Kpi details."""
-    status, message = "", ""
-    try:
-        run_anomaly_for_kpi(kpi_id)
-        run_rca_for_kpi(kpi_id)
-        status = True
-    except Exception as err:
-        status = False
-    return jsonify({"message": message, "status": status})
+
+    # TODO: Fix circular import error
+    from chaos_genius.jobs.anomaly_tasks import ready_rca_task, ready_anomaly_task
+
+    rca_task = ready_rca_task(kpi_id)
+    anomaly_task = ready_anomaly_task(kpi_id)
+    if rca_task is None:
+        print(f"Could not run RCA task since newly added KPI was not found: {kpi_id}")
+        return jsonify(
+            {"error": "Could not run RCA task since newly added KPI was not found"}
+        )
+
+    else:
+        rca_task.apply_async()
+
+    if anomaly_task is None:
+        print(
+            f"Could not run anomaly task since newly added KPI was not found: {kpi_id}"
+        )
+        return jsonify(
+            {"error": "Could not run anomaly task since newly added KPI was not found"}
+        )
+    else:
+        anomaly_task.apply_async()
+
+    return jsonify({"message": "Successfully triggered RCA and Anomaly"})
 
 
 @cache.memoize()

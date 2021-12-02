@@ -2,7 +2,7 @@
 """anomaly data model."""
 import datetime as dt
 
-from chaos_genius.databases.base_model import Column, PkModel, db
+from chaos_genius.databases.base_model import Column, Index, PkModel, db
 
 
 class AnomalyDataOutput(PkModel):
@@ -21,7 +21,9 @@ class AnomalyDataOutput(PkModel):
     series_type = Column(db.String(500))
     index = Column(db.BigInteger, nullable=False)
 
-    # TODO: composite index - kpi_id, anomaly_type, series_type, data_datetime
+    __table_args__ = (
+        Index("anomaly_data_output_query_idx", kpi_id, anomaly_type, series_type, data_datetime),
+    )
 
     def __init__(self, **kwargs):
         """Create instance."""

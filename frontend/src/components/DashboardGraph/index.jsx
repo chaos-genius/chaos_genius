@@ -18,6 +18,8 @@ import * as am4charts from '@amcharts/amcharts4/charts';
 
 import HierarchicalTable from '../HierarchicalTable';
 import DeepdrillsEmptyState from '../DeepdrillsEmptyState';
+import DeepdrillDimensionEmpty from '../DeepdrillDimensionEmpty';
+import DeepdrillDrilldownsEmpty from '../DeepdrillDrilldownsEmpty';
 
 import { formatDateTime, getTimezone } from '../../utils/date-helper';
 
@@ -26,7 +28,8 @@ import {
   getDashboardLinechart,
   getAllDashboardDimension,
   getDashboardRcaAnalysis,
-  getAllDashboardHierarchical
+  getAllDashboardHierarchical,
+  getDashboardConfig
 } from '../../redux/actions';
 
 import Highcharts from 'highcharts';
@@ -36,7 +39,7 @@ import highchartsMore from 'highcharts/highcharts-more';
 highchartsMore(Highcharts);
 Highcharts.setOptions({
   time: {
-      timezone: getTimezone()
+    timezone: getTimezone()
   }
 });
 
@@ -57,12 +60,12 @@ const data = [
 
 const multidimensional = [
   {
-    value: 'multidimension',
-    label: 'Multidimension'
+    value: 'singledimension',
+    label: 'Single Dimension'
   },
   {
-    value: 'singledimension',
-    label: 'Singledimension'
+    value: 'multidimension',
+    label: 'Multi Dimension'
   }
 ];
 
@@ -79,7 +82,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
   });
   const [dimension, setDimension] = useState({
     value: 'singledimension',
-    label: 'Singledimension'
+    label: 'Single Dimension'
   });
 
   const { aggregationData, aggregationLoading } = useSelector(
@@ -97,6 +100,8 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
     (state) => state.dashboard
   );
 
+  const { configData } = useSelector((state) => state.config);
+
   const { dimensionData, dimensionLoading } = useSelector(
     (state) => state.dimension
   );
@@ -111,6 +116,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
 
   useEffect(() => {
     if (kpi !== undefined) {
+      dispatch(getDashboardConfig({ kpi_id: kpi }));
       getAllAggregationData();
       getAllLinechart();
       if (dimension.value === 'singledimension') {
@@ -121,7 +127,11 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
   }, [kpi, monthWeek.value]);
 
   useEffect(() => {
-    if (dimensionData && dimensionData?.dimensions) {
+    if (
+      dimensionData &&
+      dimensionData?.dimensions &&
+      dimensionData?.dimensions.length !== 0
+    ) {
       setActiveDimension(dimensionData?.dimensions[0]);
       getSingleDimensioData(dimensionData?.dimensions[0]);
     }
@@ -322,7 +332,12 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                   <p>
                     Last updated:{' '}
                     <span>
-                      {formatDateTime(aggregationData?.analysis_date, true, false, true) || '-'}
+                      {formatDateTime(
+                        aggregationData?.analysis_date,
+                        true,
+                        false,
+                        true
+                      ) || '-'}
                     </span>
                   </p>
                 </div>
@@ -398,141 +413,157 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                 <img src={Toparrow} alt="CollapseOpen" />
               </div>
             </div>
-
-            <div
-              className={
-                collapse
-                  ? 'dashboard-container'
-                  : 'dashboard-container drilldown-disable'
-              }>
-              <div className="dashboard-subheader">
-                <div
-                  className={
-                    dimension.value !== 'multidimension'
-                      ? ' common-tab common-drilldown-tab'
-                      : 'common-tab common-tab-hide'
-                  }>
-                  <ul>
-                    {dimensionLoading ? (
-                      <div className="load">
-                        <div className="preload"></div>
-                      </div>
-                    ) : (
-                      <>
-                        {singleDimensionData > 2 ? (
-                          <li
-                            className="previous-step"
-                            onClick={() =>
-                              SetSingleDimensionData(singleDimensionData - 3)
-                            }>
-                            <img src={Next} alt="Previous" />
-                          </li>
-                        ) : null}
-                        {dimensionData?.dimensions &&
-                          dimensionData?.dimensions.length !== 0 &&
-                          dimensionData?.dimensions
-                            .slice(
-                              0 + singleDimensionData,
-                              3 + singleDimensionData
-                            )
-                            .map((data) => {
-                              return (
-                                <li
-                                  className={
-                                    activeDimension === data ? 'active' : ''
-                                  }
-                                  onClick={() => {
-                                    onActiveDimensionClick(data);
-                                  }}>
-                                  {data}
-                                </li>
-                              );
-                            })}
-                        {dimensionData?.dimensions &&
-                        dimensionData?.dimensions.length > 3 &&
-                        dimensionData?.dimensions.length !== 0 ? (
-                          <li
-                            className={
-                              singleDimensionData + 1 >=
-                              dimensionData?.dimensions.length
-                                ? 'disable-next'
-                                : ''
-                            }
-                            onClick={() =>
-                              SetSingleDimensionData(singleDimensionData + 3)
-                            }>
-                            <img src={Next} alt="Next" />
-                          </li>
-                        ) : null}
-                      </>
-                    )}
-                  </ul>
-                </div>
-                <div className="common-option">
-                  <Select
-                    options={multidimensional}
-                    classNamePrefix="selectcategory"
-                    placeholder="Multidimensional"
-                    isSearchable={false}
-                    value={dimension}
-                    onChange={(e) => {
-                      handleDimensionChange(e);
-                    }}
-                  />
-                </div>
-              </div>
-              {/*Drill down chart*/}
-
-              {rcaAnalysisLoading && (
-                <div className="load waterfallchart-loader">
-                  <div className="preload"></div>
-                </div>
-              )}
+            {dimensionData &&
+            dimensionData.dimensions &&
+            dimensionData.dimensions.length === 0 ? (
+              <DeepdrillDimensionEmpty />
+            ) : (
               <div
                 className={
-                  'common-drilldown-graph' +
-                  (rcaAnalysisLoading ? ' common-drilldown-graph-none ' : '')
-                }
-                id="chartdivWaterfall"></div>
+                  collapse
+                    ? 'dashboard-container'
+                    : 'dashboard-container drilldown-disable'
+                }>
+                <div className="dashboard-subheader">
+                  <div
+                    className={
+                      dimension.value !== 'multidimension'
+                        ? ' common-tab common-drilldown-tab'
+                        : 'common-tab common-tab-hide'
+                    }>
+                    <ul>
+                      {dimensionLoading ? (
+                        <div className="load">
+                          <div className="preload"></div>
+                        </div>
+                      ) : (
+                        <>
+                          {singleDimensionData > 2 ? (
+                            <li
+                              className="previous-step"
+                              onClick={() =>
+                                SetSingleDimensionData(singleDimensionData - 3)
+                              }>
+                              <img src={Next} alt="Previous" />
+                            </li>
+                          ) : null}
+                          {dimensionData?.dimensions &&
+                            dimensionData?.dimensions.length !== 0 &&
+                            dimensionData?.dimensions
+                              .slice(
+                                0 + singleDimensionData,
+                                3 + singleDimensionData
+                              )
+                              .map((data) => {
+                                return (
+                                  <li
+                                    className={
+                                      activeDimension === data ? 'active' : ''
+                                    }
+                                    onClick={() => {
+                                      onActiveDimensionClick(data);
+                                    }}>
+                                    {data}
+                                  </li>
+                                );
+                              })}
 
-              {/* Table */}
-              {dimension.value === 'multidimension' ? (
-                <>
-                  {rcaAnalysisLoading ? (
-                    <div className="load rca-graph-loader">
-                      <div className="preload"></div>
-                    </div>
-                  ) : (
-                    <>
-                      {rcaAnalysisData &&
-                        rcaAnalysisData.data_table.length !== 0 && (
-                          <DashboardTable
-                            rcaAnalysisData={rcaAnalysisData}
-                            dimension={dimension}
-                          />
+                          {dimensionData?.dimensions &&
+                          dimensionData?.dimensions.length > 3 &&
+                          dimensionData?.dimensions.length !== 0 ? (
+                            <li
+                              className={
+                                singleDimensionData + 1 >=
+                                dimensionData?.dimensions.length
+                                  ? 'disable-next'
+                                  : ''
+                              }
+                              onClick={() =>
+                                SetSingleDimensionData(singleDimensionData + 3)
+                              }>
+                              <img src={Next} alt="Next" />
+                            </li>
+                          ) : null}
+                        </>
+                      )}
+                    </ul>
+                  </div>
+                  <div className="common-option">
+                    <Select
+                      options={multidimensional}
+                      classNamePrefix="selectcategory"
+                      placeholder="Multidimensional"
+                      isSearchable={false}
+                      isDisabled={!configData?.multidim_status}
+                      value={dimension}
+                      onChange={(e) => {
+                        handleDimensionChange(e);
+                      }}
+                    />
+                  </div>
+                </div>
+                {rcaAnalysisData &&
+                rcaAnalysisData?.chart &&
+                rcaAnalysisData?.chart?.chart_data.length === 0 &&
+                rcaAnalysisData?.data_table.length === 0 ? (
+                  <DeepdrillDrilldownsEmpty />
+                ) : (
+                  <>
+                    {/*Drill down chart*/}
+                    {rcaAnalysisLoading && (
+                      <div className="load waterfallchart-loader">
+                        <div className="preload"></div>
+                      </div>
+                    )}
+                    <div
+                      className={
+                        'common-drilldown-graph' +
+                        (rcaAnalysisLoading
+                          ? ' common-drilldown-graph-none '
+                          : '')
+                      }
+                      id="chartdivWaterfall"></div>
+                    {/* Table */}
+                    {dimension.value === 'multidimension' ? (
+                      <>
+                        {rcaAnalysisLoading ? (
+                          <div className="load rca-graph-loader">
+                            <div className="preload"></div>
+                          </div>
+                        ) : (
+                          <>
+                            {rcaAnalysisData &&
+                              rcaAnalysisData.data_table.length !== 0 && (
+                                <DashboardTable
+                                  rcaAnalysisData={rcaAnalysisData}
+                                  dimension={dimension}
+                                />
+                              )}
+                          </>
                         )}
-                    </>
-                  )}
-                </>
-              ) : (
-                <>
-                  {hierarchialLoading ? (
-                    <div className="load rca-graph-loader">
-                      <div className="preload"></div>
-                    </div>
-                  ) : (
-                    <>
-                      {hierarchicalData &&
-                        hierarchicalData?.data_table.length !== 0 && (
-                          <HierarchicalTable
-                            hierarchicalData={hierarchicalData}
-                          />
+                      </>
+                    ) : (
+                      <>
+                        {hierarchialLoading ? (
+                          <div className="load rca-graph-loader">
+                            <div className="preload"></div>
+                          </div>
+                        ) : (
+                          <>
+                            {hierarchicalData &&
+                              hierarchicalData?.data_table.length !== 0 && (
+                                <HierarchicalTable
+                                  hierarchicalData={hierarchicalData}
+                                />
+                              )}
+                          </>
                         )}
-                    </>
-                  )}
-                </>
-              )}
-            </div>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+            )}{' '}
           </div>
         </>
       ) : (

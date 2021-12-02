@@ -5,6 +5,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Route, withRouter } from 'react-router';
 import { ToastContainer, toast } from 'react-toastify';
 
+import { env } from '../env';
+
 // import { Redirect } from 'react-router-dom';
 // import { isAuthenticated } from '../utils/user-helper';
 import 'react-toastify/dist/ReactToastify.css';
@@ -30,8 +32,8 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
     // process.env.NODE_ENV === 'development'
 
     if (
-      process.env.REACT_APP_DISABLE_TELEMETRY === 'true' ||
-      process.env.NODE_ENV === 'development'
+      env.REACT_APP_DISABLE_TELEMETRY === 'true' ||
+      env.NODE_ENV === 'development'
     ) {
       console.log('disable telemetry');
       // eslint-disable-next-line react-hooks/exhaustive-deps

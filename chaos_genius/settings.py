@@ -61,3 +61,12 @@ MAX_DEEPDRILLS_SLACK_DAYS = int(os.getenv('MAX_DEEPDRILLS_SLACK_DAYS', default=5
 MAX_ANOMALY_SLACK_DAYS = int(os.getenv('MAX_ANOMALY_SLACK_DAYS', default=5))
 
 SENTRY_DSN = os.getenv('SENTRY_DSN')
+
+IN_DOCKER = os.getenv('IN_DOCKER', default=False)
+if IN_DOCKER == 'True':
+    IN_DOCKER = True
+else:
+    IN_DOCKER = False
+
+TASK_CHECKPOINT_LIMIT: int = int(os.getenv("TASK_CHECKPOINT_LIMIT", 1000))
+"""Number of last checkpoints to retrieve in Task Monitor"""

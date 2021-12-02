@@ -4,6 +4,7 @@ from typing import Optional
 
 from flask import current_app  # noqa: F401
 
+from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
 from chaos_genius.core.anomaly.controller import AnomalyDetectionController
 from chaos_genius.core.rca.rca_controller import RootCauseAnalysisController
 from chaos_genius.core.utils.data_loader import DataLoader
@@ -21,6 +22,7 @@ def _is_data_present_for_end_date(
 ) -> bool:
     df_count = DataLoader(kpi_info, end_date=end_date, days_before=1).get_count()
     return df_count != 0
+
 
 def get_kpi_data_from_id(n: int) -> dict:
     """Returns the corresponding KPI data for the given KPI ID
@@ -40,6 +42,7 @@ def get_kpi_data_from_id(n: int) -> dict:
     if kpi_info and kpi_info.as_dict:
         return kpi_info.as_dict
     raise ValueError(f"KPI ID {n} not found in KPI_DATA")
+
 
 def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None, task_id: Optional[int] = None) -> bool:
 
@@ -97,17 +100,40 @@ def run_rca_for_kpi(kpi_id: int, end_date: date = None, task_id: Optional[int] =
         logger.info(f"Starting RCA for KPI ID: {kpi_id}.")
         kpi_info = get_kpi_data_from_id(kpi_id)
         logger.info("Retrieved KPI information.")
-
-        logger.info("Selecting end date.")
-        end_date = _get_end_date_for_rca_kpi(kpi_info, end_date)
-        logger.info(f"End date is {end_date}.")
+        try:
+            logger.info("Selecting end date.")
+            end_date = _get_end_date_for_rca_kpi(kpi_info, end_date)
+            logger.info(f"End date is {end_date}.")
+            if task_id is not None:
+                checkpoint_success(
+                    task_id, kpi_id, "DeepDrills", "Data Loader and Validation"
+                )
+            logger.info(
+                f"(Task: {task_id}, KPI: {kpi_id}) DeepDrills - Data Loader and Validation - Success",
+            )
+        except Exception as e:  # noqa: B902
+            logger.error(f"Getting end date failed for KPI: {kpi_id}.", exc_info=e)
+            if task_id is not None:
+                checkpoint_failure(
+                    task_id, kpi_id, "DeepDrills", "Data Loader and Validation", e
+                )
+            logger.error(
+                f"(Task: {task_id}, KPI: {kpi_id}) DeepDrills - Data Loader and Validation - Exception occured.",
+                exc_info=e
+            )
+            return False
 
         rca_controller = RootCauseAnalysisController(kpi_info, end_date, task_id=task_id)
         rca_controller.compute()
         logger.info(f"Completed RCA for KPI ID: {kpi_id}.")
 
-    except Exception:  # noqa: B902
-        logger.error(f"RCA encountered an error for KPI ID: {kpi_id}", exc_info=1)
+    except Exception as e:  # noqa: B902
+        logger.error(f"RCA encountered an error for KPI ID: {kpi_id}", exc_info=e)
+        if task_id is not None:
+            checkpoint_failure(task_id, kpi_id, "DeepDrills", "DeepDrills complete", e)
         return False
+
+    if task_id is not None:
+        checkpoint_success(task_id, kpi_id, "DeepDrills", "DeepDrills complete")
 
     return True

@@ -75,6 +75,10 @@ def _validate_kpi_from_df(
     :return: returns a tuple with the status as a bool and a status message
     :rtype: Tuple[bool, str]
     """
+    # TODO: Move all checks into a single list and execute them one by one
+    # so that there is an order of dependency between them and we don't need to
+    # do prelimiary checks first.
+
     # Preliminary Check that the KPI column exists
     # This check must be done independently
     # Otherwise, the other 3 checks will fail!
@@ -86,22 +90,29 @@ def _validate_kpi_from_df(
     if not status_bool:
         return status_bool, status_msg
 
+    # Preliminary Check that there are no duplicate column names
+    status_bool, status_msg = _validate_no_duplicate_column_names(df)
+    logger.info("Check #1: Validate no duplicate column names in data")
+    logger.info(", ".join(map(str, [status_bool, status_msg])))
+    if not status_bool:
+        return status_bool, status_msg
+
     # Validation check results
     validations = [
         {
-            "debug_str": "Check #1: Validate column fits agg type",
+            "debug_str": "Check #2: Validate column fits agg type",
             "status": _validate_agg_type_fits_column(
                 df, column_name=kpi_column_name, agg_type=agg_type
             ),
         },
         {
-            "debug_str": "Check #2: Validate kpi not datetime",
+            "debug_str": "Check #3: Validate kpi not datetime",
             "status": _validate_kpi_not_datetime(
                 df, kpi_column_name=kpi_column_name, date_column_name=date_column_name
             ),
         },
         {
-            "debug_str": "Check #3: Validate date column is parseable",
+            "debug_str": "Check #4: Validate date column is parseable",
             "status": _validate_date_column_is_parseable(
                 df,
                 date_column_name=date_column_name,
@@ -110,12 +121,12 @@ def _validate_kpi_from_df(
             ),
         },
         {
-            "debug_str": "Check #4: Validate dimensions",
+            "debug_str": "Check #5: Validate dimensions",
             "status": _validate_dimensions(kpi_info)
         },
         {
             "debug_str": (
-                "Check #5: Validate KPI has no more than "
+                "Check #6: Validate KPI has no more than "
                 f"{MAX_ROWS_FOR_DEEPDRILLS} rows"
             ),
             "status": _validate_for_maximum_kpi_size(kpi_info),
@@ -336,5 +347,19 @@ def _validate_dimensions(kpi_info: dict) -> Tuple[bool, str]:
 
     if date_col in dimensions:
         return False, "Date column cannot be in dimensions"
+
+    return True, "Accepted!"
+
+
+def _validate_no_duplicate_column_names(df: pd.DataFrame) -> Tuple[bool, str]:
+    """Validate if there are no duplicate column names.
+
+    :param df: A pandas DataFrame
+    :type df: pd.core.frame.DataFrame
+    :return: returns a tuple with the status as a bool and a status message
+    :rtype: Tuple[bool, str]
+    """
+    if len(df.columns) != len(set(df.columns)):
+        return False, "Duplicate column names found"
 
     return True, "Accepted!"

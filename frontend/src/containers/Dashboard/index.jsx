@@ -31,6 +31,7 @@ const Dashboard = () => {
 
   const location = history.location.pathname.split('/');
   const kpi = useParams().kpi;
+  const dashboard = useParams().dashboard;
 
   const { sidebarLoading, sidebarList } = useSelector((state) => {
     return state.sidebar;
@@ -60,18 +61,43 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (sidebarList && sidebarList.length !== 0 && kpi === undefined) {
+    // if (sidebarList && sidebarList.length !== 0 && kpi === undefined) {
+    // setActive(sidebarList[0]?.name);
+    // //setKpi(sidebarList[0]?.id);
+    // setTabs(location[2]);
+    // SetKpiAggregate(sidebarList[0]?.aggregation);
+    // getAnomalySetting(sidebarList[0]?.id);
+    // history.push(`/dashboard/${location[2]}/${sidebarList[0]?.id}`);
+    // } else if (sidebarList && sidebarList.length !== 0) {
+    // setActive(
+    //   sidebarList.find((item) => item.id.toString() === kpi.toString())?.name
+    // );
+    // setTabs(location[2]);
+    // getAnomalySetting(kpi);
+    // SetKpiAggregate(
+    //   sidebarList.find((item) => item.id.toString() === kpi.toString())
+    //     ?.aggregation
+    // );
+    // }
+    if (
+      sidebarList &&
+      sidebarList.length !== 0 &&
+      dashboard &&
+      kpi === undefined
+    ) {
       setActive(sidebarList[0]?.name);
       //setKpi(sidebarList[0]?.id);
-      setTabs(location[2]);
+      setTabs(location[3]);
       SetKpiAggregate(sidebarList[0]?.aggregation);
       getAnomalySetting(sidebarList[0]?.id);
-      history.push(`/dashboard/${location[2]}/${sidebarList[0]?.id}`);
-    } else if (sidebarList && sidebarList.length !== 0) {
+      history.push(
+        `/dashboard/${dashboard}/${location[3]}/${sidebarList[0]?.id}`
+      );
+    } else if (sidebarList && sidebarList.length !== 0 && dashboard) {
       setActive(
         sidebarList.find((item) => item.id.toString() === kpi.toString())?.name
       );
-      setTabs(location[2]);
+      setTabs(location[3]);
       getAnomalySetting(kpi);
       SetKpiAggregate(
         sidebarList.find((item) => item.id.toString() === kpi.toString())
@@ -84,7 +110,12 @@ const Dashboard = () => {
 
   const onTabClick = (tabs) => {
     setTabs(tabs);
-    window.history.pushState('', '', `/#/dashboard/${tabs}/${kpi}`);
+    // window.history.pushState('', '', `/#/dashboard/${tabs}/${kpi}`);
+    window.history.pushState(
+      '',
+      '',
+      `/#/dashboard/${dashboard}/${tabs}/${kpi}`
+    );
   };
 
   if (sidebarLoading || anomalySettingLoading) {
@@ -110,6 +141,7 @@ const Dashboard = () => {
               <FilterWithTab
                 tabs={tab}
                 kpi={kpi}
+                dashboard={dashboard}
                 data={sidebarList}
                 setActive={setActive}
                 SetKpiAggregate={SetKpiAggregate}
@@ -153,6 +185,7 @@ const Dashboard = () => {
             {tab === 'deepdrills' && kpi && active && anomalySettingData && (
               <Dashboardgraph
                 kpi={kpi}
+                dashboard={dashboard}
                 kpiName={active}
                 kpiAggregate={kpiAggregate}
                 anomalystatus={anomalySettingData}

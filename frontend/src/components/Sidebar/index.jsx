@@ -70,7 +70,7 @@ const Sidebar = () => {
               className="options"
               onClick={() => {
                 if (kpiExplorerList && kpiExplorerList.length !== 0) {
-                  history.push('/dashboard/deepdrills/');
+                  history.push('/dashboard');
                 }
               }}>
               <img

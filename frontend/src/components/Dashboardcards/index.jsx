@@ -97,7 +97,8 @@ const Dashboardcards = ({ dashboarddata, setChange }) => {
           dashboarddata.map((dashboard) => {
             return (
               <Link
-                to={`/dashboard/${dashboard.id}/deepdrills`}
+                // to={`/dashboard/${dashboard.id}/deepdrills/`}
+                to={`/dashboard/${dashboard.id}/deepdrills/`}
                 className="dashboardcard">
                 <div>
                   <div className="header-card">
@@ -146,15 +147,18 @@ const Dashboardcards = ({ dashboarddata, setChange }) => {
                             Edit
                           </li>
                         </Link>
-                        <li
-                          className="delete-item"
-                          onClick={() => {
-                            setIsOpen(true);
-                            setData(dashboard);
-                          }}>
-                          <img src={DeleteActive} alt="Delete" />
-                          Delete
-                        </li>
+
+                        <Link to="/dashboard">
+                          <li
+                            className="delete-item"
+                            onClick={() => {
+                              setIsOpen(true);
+                              setData(dashboard);
+                            }}>
+                            <img src={DeleteActive} alt="Delete" />
+                            Delete
+                          </li>
+                        </Link>
                       </ul>
                     </div>
                   </div>

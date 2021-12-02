@@ -32,10 +32,18 @@ const Routes = () => (
       exact
       path="/"
       component={(props) => <Home {...props} />}
-    />
-    <PrivateRouteWithSidebar
+    />{' '}
+    {/* <PrivateRouteWithSidebar
       exact
       path={['/dashboard/deepdrills/', '/dashboard/deepdrills/:kpi']}
+      component={(props) => <Dashboard {...props} />}
+    />{' '} */}
+    <PrivateRouteWithSidebar
+      exact
+      path={[
+        '/dashboard/:dashboard/deepdrills/',
+        '/dashboard/:dashboard/deepdrills/:kpi'
+      ]}
       component={(props) => <Dashboard {...props} />}
     />
     <PrivateRouteWithSidebar

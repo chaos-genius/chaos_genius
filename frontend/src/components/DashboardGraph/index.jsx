@@ -80,6 +80,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
   const { aggregationData, aggregationLoading } = useSelector(
     (state) => state.aggregation
   );
+
   const { linechartData, linechartLoading } = useSelector(
     (state) => state.lineChart
   );

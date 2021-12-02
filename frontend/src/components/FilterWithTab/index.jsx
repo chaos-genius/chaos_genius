@@ -17,7 +17,14 @@ const RESET = {
   type: 'RESET_DATA'
 };
 
-const DashboardFilter = ({ kpi, data, setActive, tabs, SetKpiAggregate }) => {
+const DashboardFilter = ({
+  kpi,
+  data,
+  setActive,
+  tabs,
+  SetKpiAggregate,
+  dashboard
+}) => {
   const history = useHistory();
   const dispatch = useDispatch();
   const [listData, setListData] = useState(data);
@@ -79,7 +86,8 @@ const DashboardFilter = ({ kpi, data, setActive, tabs, SetKpiAggregate }) => {
                     store.dispatch(RESET);
                     setActive(item.name);
                     SetKpiAggregate(item.aggregation);
-                    history.push(`/dashboard/${tabs}/${item.id}`);
+                    // history.push(`/dashboard/${tabs}/${item.id}`);
+                    history.push(`/dashboard/${dashboard}/${tabs}/${item.id}`);
                   }}>
                   {item.name}
                   <img src={GreenArrow} alt="Arrow" />

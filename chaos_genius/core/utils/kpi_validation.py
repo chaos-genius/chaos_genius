@@ -359,7 +359,9 @@ def _validate_no_duplicate_column_names(df: pd.DataFrame) -> Tuple[bool, str]:
     :return: returns a tuple with the status as a bool and a status message
     :rtype: Tuple[bool, str]
     """
-    if len(df.columns) != len(set(df.columns)):
-        return False, "Duplicate column names found"
+    seen = set()
+    dupes = [col for col in df.columns if col in seen or seen.add(col)]
+    if dupes:
+        return False, f"Duplicate column names found - {', '.join(dupes)}"
 
     return True, "Accepted!"

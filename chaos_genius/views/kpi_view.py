@@ -48,8 +48,8 @@ def kpi():
         data = request.get_json()
         data["dimensions"] = [] if data["dimensions"] is None else data["dimensions"]
 
-        if data.get("kpi_query") is not None:
-            data["kpi_query"] = data["kpi_query"].strip()
+        data["kpi_query"] = data["kpi_query"].strip()
+        if data.get("kpi_query"):
             # remove trailing semicolon
             if data["kpi_query"][-1] == ";":
                 data["kpi_query"] = data["kpi_query"][:-1]

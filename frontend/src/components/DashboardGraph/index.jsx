@@ -28,7 +28,8 @@ import {
   getDashboardLinechart,
   getAllDashboardDimension,
   getDashboardRcaAnalysis,
-  getAllDashboardHierarchical
+  getAllDashboardHierarchical,
+  getDashboardConfig
 } from '../../redux/actions';
 
 import Highcharts from 'highcharts';
@@ -59,12 +60,12 @@ const data = [
 
 const multidimensional = [
   {
-    value: 'multidimension',
-    label: 'Multidimension'
+    value: 'singledimension',
+    label: 'Single Dimension'
   },
   {
-    value: 'singledimension',
-    label: 'Singledimension'
+    value: 'multidimension',
+    label: 'Multi Dimension'
   }
 ];
 
@@ -81,7 +82,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
   });
   const [dimension, setDimension] = useState({
     value: 'singledimension',
-    label: 'Singledimension'
+    label: 'Single Dimension'
   });
 
   const { aggregationData, aggregationLoading } = useSelector(
@@ -99,6 +100,8 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
     (state) => state.dashboard
   );
 
+  const { configData } = useSelector((state) => state.config);
+
   const { dimensionData, dimensionLoading } = useSelector(
     (state) => state.dimension
   );
@@ -113,6 +116,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
 
   useEffect(() => {
     if (kpi !== undefined) {
+      dispatch(getDashboardConfig({ kpi_id: kpi }));
       getAllAggregationData();
       getAllLinechart();
       if (dimension.value === 'singledimension') {
@@ -491,6 +495,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                       classNamePrefix="selectcategory"
                       placeholder="Multidimensional"
                       isSearchable={false}
+                      isDisabled={!configData?.multidim_status}
                       value={dimension}
                       onChange={(e) => {
                         handleDimensionChange(e);

@@ -14,7 +14,6 @@ from chaos_genius.controllers.config_controller import (
     get_config_object,
     create_config_object,
     get_all_configurations,
-    get_meta_db_uri,
     get_meta_db_connection_status
 )
 from chaos_genius.databases.db_utils import chech_editable_field
@@ -24,9 +23,7 @@ blueprint = Blueprint("config_settings", __name__)
 
 @blueprint.route("/meta-db-status", methods = ["GET"])
 def get_meta_db_status():    
-    META_DB_URI = get_meta_db_uri()
-    status = get_meta_db_connection_status(META_DB_URI)
-    message = "Meta database is up and running" if status else "Either the environment variables are faulty or the meta database is down"
+    status, message = get_meta_db_connection_status()
 
     return jsonify({"status": status, "message": message})
     

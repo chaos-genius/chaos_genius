@@ -20,11 +20,11 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 logger = logging.getLogger()
 
 FREQUENCY_DICT = {
-    "weekly": datetime.timedelta(days=7, hours = 0, minutes = 0),
-    "daily": datetime.timedelta(days=1, hours = 0, minutes = 0),
-    "hourly": datetime.timedelta(days = 0, hours = 1, minutes = 0),
-    "every_15_minute": datetime.timedelta(days = 0, hours = 0, minutes = 15),
-    "every_minute": datetime.timedelta(days = 0, hours = 0, minutes = 1)
+    "weekly": datetime.timedelta(days=7, hours=0, minutes=0),
+    "daily": datetime.timedelta(days=1, hours=0, minutes=0),
+    "hourly": datetime.timedelta(days=0, hours=1, minutes=0),
+    "every_15_minute": datetime.timedelta(days=0, hours=0, minutes=15),
+    "every_minute": datetime.timedelta(days=0, hours=0, minutes=1)
 }
 
 
@@ -227,9 +227,12 @@ class AnomalyAlertController:
             logger.info(f"Could not find alert by ID: {self.alert_info['id']}")
             return False
 
+        fuzzy_interval = datetime.timedelta(minutes = 30)
+
         check_time = FREQUENCY_DICT[self.alert_info['alert_frequency']]
         if alert.last_alerted is not None and \
-                alert.last_alerted > (self.now - check_time):
+                alert.last_alerted > (self.now - check_time) and \
+                    (alert.last_alerted + check_time - self.now) > fuzzy_interval:
             logger.info(f"Skipping alert with ID {self.alert_info['id']} since it was already run")
             return True
         alert.update(commit=True, last_alerted=self.now)
@@ -246,7 +249,7 @@ class AnomalyAlertController:
             logger.info(f"No anomaly exists (Alert ID - {alert_id})")
             return True
 
-        anomaly_data.sort(key=lambda anomaly: getattr(anomaly, 'severity'), reverse = True)
+        anomaly_data.sort(key=lambda anomaly: getattr(anomaly, 'severity'), reverse=True)
         anomaly = anomaly_data[0]
 
         if getattr(anomaly, 'severity') < self.alert_info['severity_cutoff_score']:
@@ -402,14 +405,14 @@ def check_and_trigger_alert(alert_id):
     return True
 
 
-def trigger_anomaly_alerts_for_kpi(kpi, end_date):
+def trigger_anomaly_alerts_for_kpi(kpi_obj, end_date):
     success_alerts = []
-    alerts = Alert.query.filter_by(kpi=kpi).all()
+    alerts = Alert.query.filter(Alert.kpi == kpi_obj.id).all()
     for alert in alerts:
         try:
             anomaly_obj = AnomalyAlertController(alert.as_dict, anomaly_end_date=end_date)
             anomaly_obj.check_and_prepare_alert()
             success_alerts.append(alert.id)
         except Exception as e:
-            print(e)
+            logger.error(f"Error running alert for Alert ID: {alert.id}", exc_info=e)
     return success_alerts

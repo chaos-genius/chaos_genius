@@ -23,7 +23,7 @@ def check_event_alerts(alert_frequency):
             if alert.alert_type == "Event Alert":
                 task_group.append(run_single_alert.s(alert.id))
     else:
-        print("Not Alert Found")
+        print("No event alerts found")
         return task_group
 
     if task_group:

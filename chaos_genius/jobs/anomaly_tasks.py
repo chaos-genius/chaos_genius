@@ -1,5 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import cast
+import logging
 
 from celery import group
 from celery.app.base import Celery
@@ -13,6 +14,7 @@ from chaos_genius.extensions import celery as celery_ext
 from chaos_genius.controllers.task_monitor import checkpoint_initial
 
 celery = cast(Celery, celery_ext.celery)
+logger = logging.getLogger()
 
 
 # @celery.task
@@ -57,19 +59,20 @@ def anomaly_single_kpi(kpi_id, end_date=None):
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
 
     if anomaly_end_date:
-        print(f"Completed the anomaly for KPI ID: {kpi_id}.")
+        logger.info(f"Completed the anomaly for KPI ID: {kpi_id}.")
         kpi.scheduler_params = update_scheduler_params("anomaly_status", "completed")
         try:
             # Add the code for alert
-            alert_ids = trigger_anomaly_alerts_for_kpi(kpi_id, anomaly_end_date)
+            updated_time = anomaly_end_date - timedelta(days = 1)
+            alert_ids = trigger_anomaly_alerts_for_kpi(kpi_id, updated_time)
             if alert_ids:
-                print(f"Triggered the alerts for KPI {kpi_id}.")
+                logger.info(f"Triggered the alerts for KPI {kpi_id}.")
             else:
-                print(f"Trigger failed for the KPI ID: {kpi_id}.")
+                logger.info(f"Trigger failed for the KPI ID: {kpi_id}.")
         except Exception as e:
-            print(e)
+            logger.error(e)
     else:
-        print(f"Anomaly failed for the for KPI ID: {kpi_id}.")
+        logger.error(f"Anomaly failed for the for KPI ID: {kpi_id}.")
         kpi.scheduler_params = update_scheduler_params("anomaly_status", "failed")
 
     flag_modified(kpi, "scheduler_params")

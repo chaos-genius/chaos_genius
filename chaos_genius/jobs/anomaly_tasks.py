@@ -9,7 +9,11 @@ from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.sql.functions import coalesce
 
 from chaos_genius.alerts.base_alerts import trigger_anomaly_alerts_for_kpi
-from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_initial, checkpoint_success
+from chaos_genius.controllers.task_monitor import (
+    checkpoint_failure,
+    checkpoint_initial,
+    checkpoint_success,
+)
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.extensions import celery as celery_ext
 
@@ -49,7 +53,9 @@ def anomaly_single_kpi(kpi_id, end_date=None):
     from chaos_genius.controllers.kpi_controller import run_anomaly_for_kpi
 
     logger.info(f"Running anomaly for KPI ID: {kpi_id}")
-    checkpoint = checkpoint_initial(kpi_id, "Anomaly", "Anomaly Scheduler - Task initiated")
+    checkpoint = checkpoint_initial(
+        kpi_id, "Anomaly", "Anomaly Scheduler - Task initiated"
+    )
     task_id = checkpoint.task_id
 
     anomaly_end_date = run_anomaly_for_kpi(kpi_id, end_date, task_id=task_id)
@@ -59,11 +65,7 @@ def anomaly_single_kpi(kpi_id, end_date=None):
     def _checkpoint_success(checkpoint: str):
         checkpoint_success(task_id, kpi.id, "Anomaly", checkpoint)
         logger.info(
-            "(Task: %s, KPI: %d)"
-            " Anomaly - %s - Success",
-            task_id,
-            kpi.id,
-            checkpoint
+            "(Task: %s, KPI: %d)" " Anomaly - %s - Success", task_id, kpi.id, checkpoint
         )
 
     def _checkpoint_failure(checkpoint: str, e: Optional[Exception]):
@@ -75,12 +77,11 @@ def anomaly_single_kpi(kpi_id, end_date=None):
             e,
         )
         logger.exception(
-            "(Task: %s, KPI: %d) "
-            "Anomaly - %s - Exception occured.",
+            "(Task: %s, KPI: %d) " "Anomaly - %s - Exception occured.",
             task_id,
             kpi.id,
             checkpoint,
-            exc_info=e
+            exc_info=e,
         )
 
     if anomaly_end_date:
@@ -116,11 +117,13 @@ def rca_single_kpi(kpi_id: int):
 
     Must be run as a celery task.
     """
-    #TODO: Fix circular imports
+    # TODO: Fix circular imports
     from chaos_genius.controllers.kpi_controller import run_rca_for_kpi
 
     print(f"Running RCA for KPI ID: {kpi_id}")
-    checkpoint = checkpoint_initial(kpi_id, "DeepDrills", "DeepDrills Scheduler - Task initiated")
+    checkpoint = checkpoint_initial(
+        kpi_id, "DeepDrills", "DeepDrills Scheduler - Task initiated"
+    )
     task_id = checkpoint.task_id
 
     status = run_rca_for_kpi(kpi_id, task_id=task_id)

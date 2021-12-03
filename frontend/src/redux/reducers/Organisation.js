@@ -32,11 +32,10 @@ export const organisation = (state = initialState, action) => {
       };
     }
 
-
     case ONBOARD_ORGANIZATION_REQUEST: {
       return {
         ...state,
-        isLoading: false,
+        isLoading: true,
         error: false
       };
     }

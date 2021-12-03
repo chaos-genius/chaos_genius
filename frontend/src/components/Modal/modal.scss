@@ -80,6 +80,11 @@
         margin-left: 0px;
       }
     }
+    .view-page-navigate {
+      label {
+        cursor: pointer;
+      }
+    }
     label {
       font-weight: $font-weight-500;
       font-size: $font-size-14;
@@ -94,6 +99,7 @@
 .ReactModal__Body--open {
   overflow-y: hidden;
 }
+// Delete Modal
 .deletemodal {
   .ReactModal__Content {
     height: 230px;

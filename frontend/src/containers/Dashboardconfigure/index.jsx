@@ -85,7 +85,7 @@ const Dashboardconfigure = () => {
             </Link>
           </div>
         </div>{' '}
-        {dashboardData && dashboardData.length !== 0 ? (
+        {dashboardList && dashboardList.length !== 0 ? (
           <>
             <div className="dashboard-options">
               <div className="form-group icon">
@@ -114,6 +114,7 @@ const Dashboardconfigure = () => {
             </div>
           </>
         ) : (
+          dashboardList &&
           dashboardList !== '' && (
             <div className="empty-dashboard-container">
               <EmptyDashboard />

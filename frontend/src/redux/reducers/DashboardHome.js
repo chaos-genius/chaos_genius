@@ -39,20 +39,23 @@ export const DashboardHome = (state = initialState, action) => {
     case DASHBOARDREQUEST: {
       return {
         ...state,
-        dashboardListLoading: true
+        dashboardListLoading: true,
+        dashboardListError: false
       };
     }
     case DASHBOARDSUCCESS: {
       return {
         ...state,
         dashboardListLoading: false,
-        dashboardList: action.data
+        dashboardList: action.data,
+        dashboardListError: false
       };
     }
     case DASHBOARDFAILURE: {
       return {
         ...state,
         dashboardListLoading: false,
+        dashboardList: [],
         dashboardListError: true
       };
     }

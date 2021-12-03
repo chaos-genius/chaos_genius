@@ -3,9 +3,10 @@ import os
 import io
 import json
 import pickle
-from typing import Optional
+from typing import Optional, List
 import pandas as pd
 import datetime
+from datetime import date
 from chaos_genius.utils.io_helper import is_file_exists
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.alert_model import Alert
@@ -408,20 +409,16 @@ def check_and_trigger_alert(alert_id):
     return True
 
 
-def trigger_anomaly_alerts_for_kpi(kpi_obj, end_date):
-    """Triggers alerts for KPI ID and end date sent by 
-       anomaly_single_kpi function in celery_config file.
+def trigger_anomaly_alerts_for_kpi(kpi_obj: Kpi, end_date: date) -> List[int]:
+    """Triggers anomaly alerts starting from end_date.
 
     Args:
         kpi_obj (Kpi): Object of kpi for which alerts are to be triggered
         end_date (dateimte.datetime): Datetime object containing the upper bound of anomaly date values
-    Raises:
-        Exception: Raise if some issue arise during sending alerts
 
     Returns:
-        bool: List of alert ids for whom emails/slack messages were successfully sent
+        List[int]: List of alert IDs for which alert messages were successfully sent
     """
-
     success_alerts = []
     alerts = Alert.query.filter(Alert.kpi == kpi_obj.id).all()
     for alert in alerts:

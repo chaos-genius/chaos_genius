@@ -1,6 +1,7 @@
 import logging
+import typing
 from datetime import date, datetime, timedelta
-from typing import Optional
+from typing import Optional, Union
 
 from flask import current_app  # noqa: F401
 
@@ -44,7 +45,11 @@ def get_kpi_data_from_id(n: int) -> dict:
     raise ValueError(f"KPI ID {n} not found in KPI_DATA")
 
 
-def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None, task_id: Optional[int] = None) -> bool:
+def run_anomaly_for_kpi(
+    kpi_id: int,
+    end_date: datetime = None,
+    task_id: Optional[int] = None
+) -> Union["typing.Literal[False]", date]:
 
     try:
         logger.info(f"Starting Anomaly Detection for KPI ID: {kpi_id}.")
@@ -72,7 +77,7 @@ def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None, task_id: Optiona
 
     except Exception:  # noqa: B902
         logger.error(
-            f"Anomaly Detection encountered an error for KPI ID: {kpi_id}", exc_info=1
+            f"Anomaly Detection encountered an error for KPI ID: {kpi_id}", exc_info=True
         )
         return False
 

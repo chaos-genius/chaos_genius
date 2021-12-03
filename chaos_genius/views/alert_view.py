@@ -68,7 +68,7 @@ def add_alert():
                     active=True
                 )
                 new_alert.save(commit=True)
-                return jsonify({"message": f"Alert {new_alert.alert_name} has been created successfully.", "status": "success"})
+                return jsonify({"message": f"Alert {new_alert.alert_name} has been created successfully.", "status": "success", "data":{"alert_id": new_alert.id}})
             else:
                 return jsonify({"message": "Alert Name and Alert Type cannot be empty", "status": "failure"})
 

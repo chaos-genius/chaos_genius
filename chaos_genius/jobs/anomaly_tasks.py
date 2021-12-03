@@ -1,9 +1,9 @@
-import logging
 from datetime import datetime, timedelta
 from typing import cast
 
 from celery import group
 from celery.app.base import Celery
+from celery.utils.log import get_task_logger
 from sqlalchemy import func
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.sql.functions import coalesce
@@ -14,7 +14,7 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.extensions import celery as celery_ext
 
 celery = cast(Celery, celery_ext.celery)
-logger = logging.getLogger(__name__)
+logger = get_task_logger(__name__)
 
 
 # @celery.task

@@ -227,12 +227,15 @@ class AnomalyAlertController:
             logger.info(f"Could not find alert by ID: {self.alert_info['id']}")
             return False
 
-        fuzzy_interval = datetime.timedelta(minutes = 30)
-
         check_time = FREQUENCY_DICT[self.alert_info['alert_frequency']]
+        fuzzy_interval = datetime.timedelta(minutes = 30) # this represents the upper bound of the time interval that an alert can fall short of the check_time hours before which it can be sent again 
         if alert.last_alerted is not None and \
                 alert.last_alerted > (self.now - check_time) and \
-                    (alert.last_alerted + check_time - self.now) > fuzzy_interval:
+                    alert.last_alerted > ((self.now + fuzzy_interval) - check_time):
+            #this check works in three steps
+            # 1) Verify if the last alerted value of an alert is not None
+            # 2) Verify if less than check_time hours have elapsed since the last alert was sent
+            # 3) If less than check_time hours have elapsed, check if the additonal time to complete check_time hours is greater than fuzzy_interval
             logger.info(f"Skipping alert with ID {self.alert_info['id']} since it was already run")
             return True
         alert.update(commit=True, last_alerted=self.now)

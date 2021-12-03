@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import cast
+from typing import Optional, cast
 
 from celery import group
 from celery.app.base import Celery
@@ -9,7 +9,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.sql.functions import coalesce
 
 from chaos_genius.alerts.base_alerts import trigger_anomaly_alerts_for_kpi
-from chaos_genius.controllers.task_monitor import checkpoint_initial
+from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_initial, checkpoint_success
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.extensions import celery as celery_ext
 
@@ -56,22 +56,53 @@ def anomaly_single_kpi(kpi_id, end_date=None):
 
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
 
+    def _checkpoint_success(checkpoint: str):
+        checkpoint_success(task_id, kpi.id, "Anomaly", checkpoint)
+        logger.info(
+            "(Task: %s, KPI: %d)"
+            " Anomaly - %s - Success",
+            task_id,
+            kpi.id,
+            checkpoint
+        )
+
+    def _checkpoint_failure(checkpoint: str, e: Optional[Exception]):
+        checkpoint_failure(
+            task_id,
+            kpi.id,
+            "Anomaly",
+            checkpoint,
+            e,
+        )
+        logger.exception(
+            "(Task: %s, KPI: %d) "
+            "Anomaly - %s - Exception occured.",
+            task_id,
+            kpi.id,
+            checkpoint,
+            exc_info=e
+        )
+
     if anomaly_end_date:
         logger.info(f"Completed the anomaly for KPI ID: {kpi_id}.")
         kpi.scheduler_params = update_scheduler_params("anomaly_status", "completed")
+        _checkpoint_success("Anomaly complete")
         try:
-            # Add the code for alert
             updated_time = anomaly_end_date - timedelta(days=1)
             alert_ids = trigger_anomaly_alerts_for_kpi(kpi, updated_time)
             if alert_ids:
                 logger.info(f"Triggered the alerts for KPI {kpi_id}.")
+                _checkpoint_success("Alert trigger")
             else:
                 logger.error(f"Alert trigger failed for the KPI ID: {kpi_id}.")
+                _checkpoint_failure("Alert trigger", None)
         except Exception as e:
             logger.error(f"Alert trigger failed for the KPI ID: {kpi_id}.", exc_info=e)
+            _checkpoint_failure("Alert trigger", e)
     else:
         logger.error(f"Anomaly failed for the for KPI ID: {kpi_id}.")
         kpi.scheduler_params = update_scheduler_params("anomaly_status", "failed")
+        _checkpoint_failure("Anomaly complete", None)
 
     flag_modified(kpi, "scheduler_params")
     kpi.update(commit=True)

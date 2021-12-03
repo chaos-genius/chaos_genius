@@ -561,7 +561,8 @@ class AnomalyDetectionController(object):
         """
         kpi_info = kpi.as_dict
 
-        num = 2
+        # start, end, alert trigger, data loader
+        num = 4
         if AnomalyDetectionController._to_run_overall(kpi_info):
             num += 3
         if AnomalyDetectionController._to_run_subdim(kpi_info):

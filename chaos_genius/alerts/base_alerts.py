@@ -406,6 +406,19 @@ def check_and_trigger_alert(alert_id):
 
 
 def trigger_anomaly_alerts_for_kpi(kpi_obj, end_date):
+    """Triggers alerts for KPI ID and end date sent by 
+       anomaly_single_kpi function in celery_config file.
+
+    Args:
+        kpi_obj (Kpi): Object of kpi for which alerts are to be triggered
+        end_date (dateimte.datetime): Datetime object containing the upper bound of anomaly date values
+    Raises:
+        Exception: Raise if some issue arise during sending alerts
+
+    Returns:
+        bool: List of alert ids for whom emails/slack messages were successfully sent
+    """
+
     success_alerts = []
     alerts = Alert.query.filter(Alert.kpi == kpi_obj.id).all()
     for alert in alerts:

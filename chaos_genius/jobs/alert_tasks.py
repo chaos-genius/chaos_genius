@@ -9,7 +9,7 @@ celery = celery_ext.celery
 
 
 @celery.task
-def check_alerts(alert_frequency):
+def check_event_alerts(alert_frequency):
     """Check the alert on based on the frequenct
 
     Args:
@@ -20,15 +20,18 @@ def check_alerts(alert_frequency):
         # Using every minute for testing
         alerts = get_alert_list(frequency=alert_frequency, as_obj=True)
         for alert in alerts:
-            task_group.append(run_single_alert.s(alert.id))
+            if alert.alert_type == "Event Alert":
+                task_group.append(run_single_alert.s(alert.id))
     else:
         print("Not Alert Found")
         return task_group
 
-
-    alert_group = group(task_group)
-    response = alert_group.apply_async()
-    return response
+    if task_group:
+        alert_group = group(task_group)
+        response = alert_group.apply_async()
+        return response
+    else:
+        return task_group
 
 
 @celery.task

@@ -76,7 +76,7 @@ def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None, task_id: Optiona
         )
         return False
 
-    return True
+    return end_date
 
 
 def _get_end_date_for_rca_kpi(kpi_info: dict, end_date: date = None) -> date:

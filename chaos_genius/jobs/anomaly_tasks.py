@@ -45,18 +45,29 @@ def anomaly_single_kpi(kpi_id, end_date=None):
     """
     # TODO: fix circular import
     from chaos_genius.controllers.kpi_controller import run_anomaly_for_kpi
+    from chaos_genius.alerts.base_alerts import trigger_anomaly_alerts_for_kpi
+
 
     print(f"Running anomaly for KPI ID: {kpi_id}")
     checkpoint = checkpoint_initial(kpi_id, "Anomaly", "Anomaly Scheduler - Task initiated")
     task_id = checkpoint.task_id
 
-    status = run_anomaly_for_kpi(kpi_id, end_date, task_id=task_id)
+    anomaly_end_date = run_anomaly_for_kpi(kpi_id, end_date, task_id=task_id)
 
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
 
-    if status:
+    if anomaly_end_date:
         print(f"Completed the anomaly for KPI ID: {kpi_id}.")
         kpi.scheduler_params = update_scheduler_params("anomaly_status", "completed")
+        try:
+            # Add the code for alert
+            alert_ids = trigger_anomaly_alerts_for_kpi(kpi_id, anomaly_end_date)
+            if alert_ids:
+                print(f"Triggered the alerts for KPI {kpi_id}.")
+            else:
+                print(f"Trigger failed for the KPI ID: {kpi_id}.")
+        except Exception as e:
+            print(e)
     else:
         print(f"Anomaly failed for the for KPI ID: {kpi_id}.")
         kpi.scheduler_params = update_scheduler_params("anomaly_status", "failed")
@@ -64,7 +75,7 @@ def anomaly_single_kpi(kpi_id, end_date=None):
     flag_modified(kpi, "scheduler_params")
     kpi.update(commit=True)
 
-    return status
+    return anomaly_end_date
 
 
 @celery.task

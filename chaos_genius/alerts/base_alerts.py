@@ -20,8 +20,8 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 logger = logging.getLogger()
 
 FREQUENCY_DICT = {
-    "weekly": datetime.timedelta(days = 7, hours = 0, minutes = 0),
-    "daily": datetime.timedelta(days = 1, hours = 0, minutes = 0),
+    "weekly": datetime.timedelta(days=7, hours = 0, minutes = 0),
+    "daily": datetime.timedelta(days=1, hours = 0, minutes = 0),
     "hourly": datetime.timedelta(days = 0, hours = 1, minutes = 0),
     "every_15_minute": datetime.timedelta(days = 0, hours = 0, minutes = 15),
     "every_minute": datetime.timedelta(days = 0, hours = 0, minutes = 1)
@@ -211,46 +211,44 @@ class StaticEventAlertController:
 
 class AnomalyAlertController:
 
-    def __init__(self, alert_info):
+    def __init__(self, alert_info, anomaly_end_date=None):
         self.alert_info = alert_info
+        self.now = datetime.datetime.now()
+        if anomaly_end_date:
+            self.anomaly_end_date = anomaly_end_date
+        else:
+            self.anomaly_end_date = self.now - datetime.timedelta(days=3)
 
     def check_and_prepare_alert(self):
-        
         kpi_id = self.alert_info["kpi"]
-
-        curr_date_time = datetime.datetime.now()
-        check_time = FREQUENCY_DICT[self.alert_info['alert_frequency']]
-
+        alert_id = self.alert_info["id"]
         alert: Optional[Alert] = Alert.get_by_id(self.alert_info["id"])
         if alert is None:
             logger.info(f"Could not find alert by ID: {self.alert_info['id']}")
             return False
 
+        check_time = FREQUENCY_DICT[self.alert_info['alert_frequency']]
         if alert.last_alerted is not None and \
-                alert.last_alerted > (curr_date_time - check_time):
+                alert.last_alerted > (self.now - check_time):
             logger.info(f"Skipping alert with ID {self.alert_info['id']} since it was already run")
             return True
+        alert.update(commit=True, last_alerted=self.now)
 
-        alert.update(commit=True, last_alerted=curr_date_time)
-
-        lower_limit_dt = curr_date_time - datetime.timedelta(hours=72)
-        alert_id = self.alert_info["id"]
-
-        # TODO: Add the series type filter
+        # TODO: Add the series type filter for query optimisation
         anomaly_data = AnomalyDataOutput.query.filter(
                                             AnomalyDataOutput.kpi_id == kpi_id,
                                             AnomalyDataOutput.anomaly_type == 'overall',
                                             AnomalyDataOutput.is_anomaly.in_([1,-1]),
-                                            AnomalyDataOutput.data_datetime > lower_limit_dt
+                                            AnomalyDataOutput.data_datetime >= self.anomaly_end_date
                                         ).all()
 
         if len(anomaly_data) == 0:
             logger.info(f"No anomaly exists (Alert ID - {alert_id})")
             return True
 
-        anomaly_data.sort(key = lambda anomaly: getattr(anomaly, 'severity'), reverse = True)
+        anomaly_data.sort(key=lambda anomaly: getattr(anomaly, 'severity'), reverse = True)
         anomaly = anomaly_data[0]
-        
+
         if getattr(anomaly, 'severity') < self.alert_info['severity_cutoff_score']:
             logger.info(f"The anomaliy's severity score is below the threshold (Alert ID - {alert_id})")
             return True
@@ -261,8 +259,7 @@ class AnomalyAlertController:
             return self.send_alert_email(anomaly)
         elif self.alert_info["alert_channel"] == "slack":
             return self.send_slack_alert(anomaly)
- 
-        
+
     def send_alert_email(self, anomaly):
 
         alert_channel_conf = self.alert_info["alert_channel_conf"]
@@ -403,3 +400,16 @@ def check_and_trigger_alert(alert_id):
         static_kpi_alert = StaticKpiAlertController(alert_info.as_dict)
     
     return True
+
+
+def trigger_anomaly_alerts_for_kpi(kpi, end_date):
+    success_alerts = []
+    alerts = Alert.query.filter_by(kpi=kpi).all()
+    for alert in alerts:
+        try:
+            anomaly_obj = AnomalyAlertController(alert.as_dict, anomaly_end_date=end_date)
+            anomaly_obj.check_and_prepare_alert()
+            success_alerts.append(alert.id)
+        except Exception as e:
+            print(e)
+    return success_alerts

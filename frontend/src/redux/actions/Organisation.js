@@ -9,6 +9,8 @@ import {
 import { EDIT_CHANNEL_URL,ALERT_EMAIL_URL,ORGANIZATION_UPDATE_URL } from '../../utils/url-helper';
 import { postRequest,putRequest} from '../../utils/http-helper';
 
+// import {getOnboardingStatus } from './Onboarding'
+
 export const getOnboardingOrgnaizationStatusRequested = () => {
   return {
     type: ONBOARD_ORGANIZATION_REQUEST
@@ -37,7 +39,7 @@ export const getOnboardingOrgnaizationUpdateStatusSuccess = (response) => {
 
 export const onboardOrganisation = (payload) => {
   return async (dispatch) => {
-    dispatch(getOnboardingOrgnaizationStatusRequested);
+    dispatch(getOnboardingOrgnaizationStatusRequested());
     const { data, error, status } = await postRequest({
       url: ALERT_EMAIL_URL,
       data: JSON.stringify(payload),
@@ -49,9 +51,8 @@ export const onboardOrganisation = (payload) => {
       noAuth: true
     });
     if (error) {
-      dispatch(getOnboardingOrgnaizationStatusFailure);
+      dispatch(getOnboardingOrgnaizationStatusFailure());
     } else if (data && status === 200) {
-      dispatch(getOnboardingOrgnaizationStatusSuccess(data.data));
       dispatch(onboardingOrganisationStatus());
     }
   };
@@ -73,7 +74,7 @@ export const onboardingOrganisationStatus = () =>{
       noAuth: true
     });
     if (error) {
-      dispatch(getOnboardingOrgnaizationStatusFailure);
+      dispatch(getOnboardingOrgnaizationStatusFailure());
     } else if (data && status === 200) {
       dispatch(getOnboardingOrgnaizationStatusSuccess(data.data));
     }
@@ -94,10 +95,9 @@ export const onboardOrganisationUpdate = (payload) => {
       noAuth: true
     });
     if (error) {
-      dispatch(getOnboardingOrgnaizationStatusFailure);
+      dispatch(getOnboardingOrgnaizationStatusFailure());
     } else if (data && status === 200) {
       dispatch(onboardingOrganisationStatus());
-      
     }
   };
 };

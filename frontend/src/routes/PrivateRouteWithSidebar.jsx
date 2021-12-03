@@ -13,7 +13,11 @@ import 'react-toastify/dist/ReactToastify.css';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 
-import { getConnectionType, getGlobalSetting,onboardingOrganisationStatus } from '../redux/actions';
+import {
+  getConnectionType,
+  getGlobalSetting,
+  onboardingOrganisationStatus
+} from '../redux/actions';
 
 import { connectionContext } from '../components/context';
 import { getOnboardingStatus } from '../redux/actions';
@@ -26,35 +30,43 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
   const [stateValue, setState] = useState();
   const { connectionType } = useSelector((state) => state.dataSource);
   const { globalSettingData } = useSelector((state) => state.GlobalSetting);
-  const { isLoading, error, onboardingList } = useSelector((state) => state.onboarding);
+  const { isLoading, error, onboardingList } = useSelector(
+    (state) => state.onboarding
+  );
   const { organisationData } = useSelector((state) => state.organisation);
-
   useEffect(() => {
     // process.env.NODE_ENV === 'development'
-    if ( env.REACT_APP_DISABLE_TELEMETRY === 'true' ||
-    env.NODE_ENV === 'development' ) {
+    // env.REACT_APP_DISABLE_TELEMETRY === 'true' ||
+    // env.NODE_ENV === 'development'
+    
+    if ( env.REACT_APP_DISABLE_TELEMETRY === 'true' || env.NODE_ENV === 'development') {
       console.log('disable telemetry');
       // eslint-disable-next-line react-hooks/exhaustive-deps
     } else {
-      if (organisationData !== undefined && Object.keys(organisationData).length && organisationData.active) {
+      if (
+        organisationData !== undefined &&
+        Object.keys(organisationData).length &&
+        organisationData.active
+      ) {
         let userEmail = organisationData.config_setting.account.email;
-        let isAnonymized = organisationData.config_setting.metrics.anonymize_usage_data_collection;
-        if(isAnonymized === false){
+        let isAnonymized =
+          organisationData.config_setting.metrics
+            .anonymize_usage_data_collection;
+        if (isAnonymized === false) {
           posthog.init('phc_KcsaN1oBtVUwKUvd9owb3Cz42MYDpR6No00EJRLAprH', {
             api_host: 'https://app.posthog.com',
-            loaded: function(posthog) { posthog.identify(userEmail); }
+            loaded: function (posthog) {
+              posthog.identify(userEmail);
+            }
           });
-        }else{
+        } else {
           posthog.init('phc_KcsaN1oBtVUwKUvd9owb3Cz42MYDpR6No00EJRLAprH', {
-            api_host: 'https://app.posthog.com',
+            api_host: 'https://app.posthog.com'
           });
         }
-      }else{
-        posthog.init('phc_KcsaN1oBtVUwKUvd9owb3Cz42MYDpR6No00EJRLAprH', {
-          api_host: 'https://app.posthog.com',
-        });
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organisationData]);
 
   useEffect(() => {
@@ -70,12 +82,15 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
   };
 
   useEffect(() => {
-    if(onboardingList.organisation_onboarding !== undefined && onboardingList.organisation_onboarding === false){
+    if (
+      Object.keys(onboardingList).length !== 0 &&
+      onboardingList.organisation_onboarding !== undefined &&
+      onboardingList.organisation_onboarding === false
+    ) {
       history.push('/organisation-onboarding');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onboardingList]);
-
 
   useEffect(() => {
     if (globalSettingData) {

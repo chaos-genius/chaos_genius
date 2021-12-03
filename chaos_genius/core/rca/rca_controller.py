@@ -330,7 +330,7 @@ class RootCauseAnalysisController:
                 continue
 
             # Do not calculate further if no dimensions are present
-            if len(self.kpi_info["dimensions"]) == 0:
+            if self.kpi_info.get("dimensions") or len(self.kpi_info["dimensions"]) == 0:
                 logger.info(f"No dimensions in KPI ID: {kpi_id}. Skipping DeepDrills.")
                 self._checkpoint_success(f"{timeline} DeepDrills Calculation")
                 continue

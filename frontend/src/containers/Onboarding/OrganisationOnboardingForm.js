@@ -1,6 +1,6 @@
-import React, { useState} from 'react';
+import React, { useState,useEffect} from 'react';
 import { useHistory } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   onboardOrganisation
 } from '../../redux/actions';
@@ -8,6 +8,8 @@ import {
 const OrganisationOnboardingForm = () => {
   const dispatch = useDispatch();
   const history = useHistory();
+
+  const { organisationData } = useSelector((state) => state.organisation);
   const [emailAddress, setEmailAddress] = useState('');
   const [ErrorMessage, setErrorMessage] = useState(false)
   const [isAnonymizeData, setIsAnonymizeData] = useState(false);
@@ -41,14 +43,20 @@ const OrganisationOnboardingForm = () => {
     };
     if (emailAddress !== '' && validateEmail(emailAddress)) {
       dispatch(onboardOrganisation(data));
-      history.push('/');
     } else if( emailAddress === '') {
       dispatch(onboardOrganisation(data));
-      history.push('/');
     }else{
       setErrorMessage(true);
     }
   };
+
+  useEffect(() => {
+    if(organisationData !== undefined &&
+      Object.keys(organisationData).length && organisationData.active){
+      history.push('/');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organisationData])
   
   return (
     <>

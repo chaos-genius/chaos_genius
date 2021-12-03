@@ -908,7 +908,11 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                 data[2] === 'edit' ? editableStatus('dimensions') : false
               }
               classNamePrefix="selectcategory"
-              placeholder="Select Dimensions"
+              placeholder={
+                formdata.dimensions.length === 0 && data[2] === 'edit'
+                  ? ''
+                  : 'Select Dimensions'
+              }
               menuPlacement="top"
               onChange={(e) => {
                 setFormdata({

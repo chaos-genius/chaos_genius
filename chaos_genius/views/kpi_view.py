@@ -90,6 +90,7 @@ def kpi():
 
         return jsonify(
             {
+                "data": {"kpi_id": new_kpi.id},
                 "message": f"KPI {new_kpi.name} has been created successfully.",
                 "status": "success",
             }

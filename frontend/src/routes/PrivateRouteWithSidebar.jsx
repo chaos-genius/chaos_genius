@@ -35,12 +35,8 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
   );
   const { organisationData } = useSelector((state) => state.organisation);
 
-  useEffect(() => {
-    // process.env.NODE_ENV === 'development'
-    if (
-      env.REACT_APP_DISABLE_TELEMETRY === 'true' ||
-      env.NODE_ENV === 'development'
-    ) {
+  useEffect(() => {  
+    if ( env.REACT_APP_DISABLE_TELEMETRY === 'true' || env.NODE_ENV === 'development') {
       console.log('disable telemetry');
       // eslint-disable-next-line react-hooks/exhaustive-deps
     } else {
@@ -49,8 +45,8 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
         Object.keys(organisationData).length &&
         organisationData.active
       ) {
-        let userEmail = organisationData.config_setting.account.email;
-        let isAnonymized =
+        const userEmail = organisationData.config_setting.account.email;
+        const isAnonymized =
           organisationData.config_setting.metrics
             .anonymize_usage_data_collection;
         if (isAnonymized === false) {
@@ -65,14 +61,11 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
             api_host: 'https://app.posthog.com'
           });
         }
-      } else {
-        posthog.init('phc_KcsaN1oBtVUwKUvd9owb3Cz42MYDpR6No00EJRLAprH', {
-          api_host: 'https://app.posthog.com'
-        });
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organisationData]);
-
+  
   useEffect(() => {
     dispatchGetConnectionType();
     dispatch(getGlobalSetting());
@@ -87,6 +80,7 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
 
   useEffect(() => {
     if (
+      Object.keys(onboardingList).length !== 0 &&
       onboardingList.organisation_onboarding !== undefined &&
       onboardingList.organisation_onboarding === false
     ) {

@@ -288,6 +288,7 @@ class RootCauseAnalysisController:
 
     def compute(self):
         """Compute RCA for KPI and store results."""
+        kpi_id = self.kpi_info["id"]
         output = []
 
         logger.info("Getting Line Data for KPI.")
@@ -328,6 +329,12 @@ class RootCauseAnalysisController:
                 self._checkpoint_failure(f"{timeline} Card Metrics", e)
                 continue
 
+            # Do not calculate further if no dimensions are present
+            if len(self.kpi_info["dimensions"]) == 0:
+                logger.info(f"No dimensions in KPI ID: {kpi_id}. Skipping DeepDrills.")
+                self._checkpoint_success(f"{timeline} DeepDrills Calculation")
+                continue
+
             try:
                 dims = [None] + self.dimensions
                 for dim in dims:
@@ -360,7 +367,7 @@ class RootCauseAnalysisController:
             return None
 
         try:
-            logger.info(f"Storing output for KPI {self.kpi_info['id']}")
+            logger.info(f"Storing output for KPI {kpi_id}")
             output = pd.DataFrame(output)
             output["created_at"] = datetime.now()
             output.to_sql(

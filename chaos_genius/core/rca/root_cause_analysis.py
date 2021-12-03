@@ -70,7 +70,7 @@ class RootCauseAnalysis:
             raise ValueError(f"Aggregation {agg} is not supported.")
         self._agg = agg
 
-        if num_dim_combs is None:
+        if num_dim_combs is None or not dims:
             num_dim_combs = list(range(1, len(dims) + 1))
         else:
             if max(num_dim_combs) > len(self._dims) or min(num_dim_combs) < 1:

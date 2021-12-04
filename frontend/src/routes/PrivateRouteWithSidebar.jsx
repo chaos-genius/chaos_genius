@@ -34,7 +34,6 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
     (state) => state.onboarding
   );
   const { organisationData } = useSelector((state) => state.organisation);
-
   useEffect(() => {  
     if ( env.REACT_APP_DISABLE_TELEMETRY === 'true' || env.NODE_ENV === 'development') {
       console.log('disable telemetry');
@@ -79,7 +78,7 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
   };
 
   useEffect(() => {
-    if (
+    if (organisationData === undefined &&
       Object.keys(onboardingList).length !== 0 &&
       onboardingList.organisation_onboarding !== undefined &&
       onboardingList.organisation_onboarding === false

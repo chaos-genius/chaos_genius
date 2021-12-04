@@ -34,11 +34,7 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
     (state) => state.onboarding
   );
   const { organisationData } = useSelector((state) => state.organisation);
-  useEffect(() => {
-    // process.env.NODE_ENV === 'development'
-    // env.REACT_APP_DISABLE_TELEMETRY === 'true' ||
-    // env.NODE_ENV === 'development'
-    
+  useEffect(() => {  
     if ( env.REACT_APP_DISABLE_TELEMETRY === 'true' || env.NODE_ENV === 'development') {
       console.log('disable telemetry');
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -48,8 +44,8 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
         Object.keys(organisationData).length &&
         organisationData.active
       ) {
-        let userEmail = organisationData.config_setting.account.email;
-        let isAnonymized =
+        const userEmail = organisationData.config_setting.account.email;
+        const isAnonymized =
           organisationData.config_setting.metrics
             .anonymize_usage_data_collection;
         if (isAnonymized === false) {
@@ -82,7 +78,7 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
   };
 
   useEffect(() => {
-    if (
+    if (organisationData === undefined &&
       Object.keys(onboardingList).length !== 0 &&
       onboardingList.organisation_onboarding !== undefined &&
       onboardingList.organisation_onboarding === false

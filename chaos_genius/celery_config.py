@@ -17,7 +17,7 @@ CELERYBEAT_SCHEDULE = {
         "args": ()
     },
     'alerts-daily': {
-        'task': 'chaos_genius.jobs.alert_tasks.check_alerts',
+        'task': 'chaos_genius.jobs.alert_tasks.check_event_alerts',
         'schedule': crontab(hour="3", minute="0"), # Daily: at 3am
         'args': ('daily',)
     },
@@ -33,17 +33,17 @@ CELERYBEAT_SCHEDULE = {
     #     "args": ()
     # },
     # 'alerts-weekly': {
-    #     'task': 'chaos_genius.jobs.alert_tasks.check_alerts',
+    #     'task': 'chaos_genius.jobs.alert_tasks.check_event_alerts',
     #     'schedule': crontab(day_of_week="0"), # Weekly: every sunday
     #     'args': ('weekly',)
     # },
     # 'alerts-hourly': {
-    #     'task': 'chaos_genius.jobs.alert_tasks.check_alerts',
+    #     'task': 'chaos_genius.jobs.alert_tasks.check_event_alerts',
     #     'schedule': crontab(hour="*"), # Hourly: at 0th minute
     #     'args': ('hourly',)
     # },
     # 'alerts-every-15-minute': {
-    #     'task': 'chaos_genius.jobs.alert_tasks.check_alerts',
+    #     'task': 'chaos_genius.jobs.alert_tasks.check_event_alerts',
     #     'schedule': crontab(minute="*/15"), # Every 15 minutes
     #     'args': ('every_15_minute',)
     # }

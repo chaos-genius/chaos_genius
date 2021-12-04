@@ -3,9 +3,10 @@ import os
 import io
 import json
 import pickle
-from typing import Optional
+from typing import Optional, List
 import pandas as pd
 import datetime
+from datetime import date
 from chaos_genius.utils.io_helper import is_file_exists
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.alert_model import Alert
@@ -20,11 +21,11 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 logger = logging.getLogger()
 
 FREQUENCY_DICT = {
-    "weekly": datetime.timedelta(days = 7, hours = 0, minutes = 0),
-    "daily": datetime.timedelta(days = 1, hours = 0, minutes = 0),
-    "hourly": datetime.timedelta(days = 0, hours = 1, minutes = 0),
-    "every_15_minute": datetime.timedelta(days = 0, hours = 0, minutes = 15),
-    "every_minute": datetime.timedelta(days = 0, hours = 0, minutes = 1)
+    "weekly": datetime.timedelta(days=7, hours=0, minutes=0),
+    "daily": datetime.timedelta(days=1, hours=0, minutes=0),
+    "hourly": datetime.timedelta(days=0, hours=1, minutes=0),
+    "every_15_minute": datetime.timedelta(days=0, hours=0, minutes=15),
+    "every_minute": datetime.timedelta(days=0, hours=0, minutes=1)
 }
 
 
@@ -211,46 +212,50 @@ class StaticEventAlertController:
 
 class AnomalyAlertController:
 
-    def __init__(self, alert_info):
+    def __init__(self, alert_info, anomaly_end_date=None):
         self.alert_info = alert_info
+        self.now = datetime.datetime.now()
+        if anomaly_end_date:
+            self.anomaly_end_date = anomaly_end_date
+        else:
+            self.anomaly_end_date = self.now - datetime.timedelta(days=3)
 
     def check_and_prepare_alert(self):
-        
         kpi_id = self.alert_info["kpi"]
-
-        curr_date_time = datetime.datetime.now()
-        check_time = FREQUENCY_DICT[self.alert_info['alert_frequency']]
-
+        alert_id = self.alert_info["id"]
         alert: Optional[Alert] = Alert.get_by_id(self.alert_info["id"])
         if alert is None:
             logger.info(f"Could not find alert by ID: {self.alert_info['id']}")
             return False
 
+        check_time = FREQUENCY_DICT[self.alert_info['alert_frequency']]
+        fuzzy_interval = datetime.timedelta(minutes = 30) # this represents the upper bound of the time interval that an alert can fall short of the check_time hours before which it can be sent again 
         if alert.last_alerted is not None and \
-                alert.last_alerted > (curr_date_time - check_time):
+                alert.last_alerted > (self.now - check_time) and \
+                    alert.last_alerted > ((self.now + fuzzy_interval) - check_time):
+            #this check works in three steps
+            # 1) Verify if the last alerted value of an alert is not None
+            # 2) Verify if less than check_time hours have elapsed since the last alert was sent
+            # 3) If less than check_time hours have elapsed, check if the additonal time to complete check_time hours is greater than fuzzy_interval
             logger.info(f"Skipping alert with ID {self.alert_info['id']} since it was already run")
             return True
+        alert.update(commit=True, last_alerted=self.now)
 
-        alert.update(commit=True, last_alerted=curr_date_time)
-
-        lower_limit_dt = curr_date_time - datetime.timedelta(hours=72)
-        alert_id = self.alert_info["id"]
-
-        # TODO: Add the series type filter
+        # TODO: Add the series type filter for query optimisation
         anomaly_data = AnomalyDataOutput.query.filter(
                                             AnomalyDataOutput.kpi_id == kpi_id,
                                             AnomalyDataOutput.anomaly_type == 'overall',
                                             AnomalyDataOutput.is_anomaly.in_([1,-1]),
-                                            AnomalyDataOutput.data_datetime > lower_limit_dt
+                                            AnomalyDataOutput.data_datetime >= self.anomaly_end_date
                                         ).all()
 
         if len(anomaly_data) == 0:
             logger.info(f"No anomaly exists (Alert ID - {alert_id})")
             return True
 
-        anomaly_data.sort(key = lambda anomaly: getattr(anomaly, 'severity'), reverse = True)
+        anomaly_data.sort(key=lambda anomaly: getattr(anomaly, 'severity'), reverse=True)
         anomaly = anomaly_data[0]
-        
+
         if getattr(anomaly, 'severity') < self.alert_info['severity_cutoff_score']:
             logger.info(f"The anomaliy's severity score is below the threshold (Alert ID - {alert_id})")
             return True
@@ -261,8 +266,7 @@ class AnomalyAlertController:
             return self.send_alert_email(anomaly)
         elif self.alert_info["alert_channel"] == "slack":
             return self.send_slack_alert(anomaly)
- 
-        
+
     def send_alert_email(self, anomaly):
 
         alert_channel_conf = self.alert_info["alert_channel_conf"]
@@ -403,3 +407,25 @@ def check_and_trigger_alert(alert_id):
         static_kpi_alert = StaticKpiAlertController(alert_info.as_dict)
     
     return True
+
+
+def trigger_anomaly_alerts_for_kpi(kpi_obj: Kpi, end_date: date) -> List[int]:
+    """Triggers anomaly alerts starting from end_date.
+
+    Args:
+        kpi_obj (Kpi): Object of kpi for which alerts are to be triggered
+        end_date (dateimte.datetime): Datetime object containing the upper bound of anomaly date values
+
+    Returns:
+        List[int]: List of alert IDs for which alert messages were successfully sent
+    """
+    success_alerts = []
+    alerts = Alert.query.filter(Alert.kpi == kpi_obj.id).all()
+    for alert in alerts:
+        try:
+            anomaly_obj = AnomalyAlertController(alert.as_dict, anomaly_end_date=end_date)
+            anomaly_obj.check_and_prepare_alert()
+            success_alerts.append(alert.id)
+        except Exception as e:
+            logger.error(f"Error running alert for Alert ID: {alert.id}", exc_info=e)
+    return success_alerts

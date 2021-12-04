@@ -106,7 +106,7 @@ def checkpoint_failure(
     kpi_id: int,
     analytics_type: str,
     checkpoint: str,
-    exc_info: Exception
+    exc_info: Optional[Exception]
 ) -> Task:
     """Log a failed checkpoint for a task.
 

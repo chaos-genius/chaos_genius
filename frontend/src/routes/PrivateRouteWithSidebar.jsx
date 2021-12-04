@@ -64,7 +64,7 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organisationData]);
-
+  
   useEffect(() => {
     dispatchGetConnectionType();
     dispatch(getGlobalSetting());

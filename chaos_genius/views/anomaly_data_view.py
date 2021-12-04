@@ -329,6 +329,7 @@ def get_overall_data(kpi_id, end_date: datetime, n=90):
     start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
     end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
 
+    # TODO: Add the series type filter
     query = AnomalyDataOutput.query.filter(
         (AnomalyDataOutput.kpi_id == kpi_id)
         & (AnomalyDataOutput.data_datetime <= end_date)
@@ -364,6 +365,7 @@ def get_dq_and_subdim_data(
 def get_drilldowns_series_type(kpi_id, drilldown_date):
     # First we get direction of anomaly
     # Then we get relevant subdims for that anomaly
+    # TODO: Add the series type filter
     is_anomaly = (
         AnomalyDataOutput.query.filter(
             (AnomalyDataOutput.kpi_id == kpi_id)

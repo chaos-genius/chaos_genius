@@ -288,6 +288,7 @@ class RootCauseAnalysisController:
 
     def compute(self):
         """Compute RCA for KPI and store results."""
+        kpi_id = self.kpi_info["id"]
         output = []
 
         logger.info("Getting Line Data for KPI.")
@@ -328,6 +329,12 @@ class RootCauseAnalysisController:
                 self._checkpoint_failure(f"{timeline} Card Metrics", e)
                 continue
 
+            # Do not calculate further if no dimensions are present
+            if not self.kpi_info.get("dimensions"):
+                logger.info(f"No dimensions in KPI ID: {kpi_id}. Skipping DeepDrills.")
+                self._checkpoint_success(f"{timeline} DeepDrills Calculation")
+                continue
+
             try:
                 dims = [None] + self.dimensions
                 for dim in dims:
@@ -337,6 +344,7 @@ class RootCauseAnalysisController:
                         output.append(self._output_to_row("rca", rca_data, timeline, dim))
                     except Exception as e:  # noqa E722
                         logger.error(f"Error in RCA for {timeline, dim}", exc_info=1)
+                        raise e
 
                     if dim is not None:
                         logger.info(f"Computing Hierarchical table for dimension: {dim}")
@@ -347,17 +355,19 @@ class RootCauseAnalysisController:
                             )
                         except Exception as e:  # noqa E722
                             logger.error(f"Error in htable for {timeline, dim}", exc_info=1)
+                            raise e
+
                 self._checkpoint_success(f"{timeline} DeepDrills Calculation")
             except Exception as e:
+                logger.error(f"Error in DeepDrills Calculation for {timeline}", exc_info=1)
                 self._checkpoint_failure(f"{timeline} DeepDrills Calculation", e)
-                raise e
 
         # don't store if there is only the line data
         if len(output) < 2:
             return None
 
         try:
-            logger.info(f"Storing output for KPI {self.kpi_info['id']}")
+            logger.info(f"Storing output for KPI {kpi_id}")
             output = pd.DataFrame(output)
             output["created_at"] = datetime.now()
             output.to_sql(

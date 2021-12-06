@@ -266,6 +266,8 @@ class AnomalyAlertController:
             return self.send_alert_email(anomaly)
         elif self.alert_info["alert_channel"] == "slack":
             return self.send_slack_alert(anomaly)
+        else:
+            return False
 
     def send_alert_email(self, anomaly):
 
@@ -308,8 +310,7 @@ class AnomalyAlertController:
                                             alert_frequency = self.alert_info['alert_frequency'].capitalize(),
                                             preview_text = "Anomaly Alert"
                                         )
-            logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
-            return True
+            return test
         else:
             logger.info(f"No receipent email available (Alert ID - {self.alert_info['id']})")
             return False
@@ -329,8 +330,9 @@ class AnomalyAlertController:
         if test == True:
             logger.info(f"The email for Alert ID - {self.alert_info['id']} was successfully sent")
         else:
-            logger.info(f"The email for Alert ID - {self.alert_info['id']} has not been sent")
+            logger.error(f"The email for Alert ID - {self.alert_info['id']} has not been sent")
         
+        message = f"Status for Alert - {self.alert_info['alert_name']}: {test}"
         return test
 
     def send_slack_alert(self, anomaly):
@@ -352,10 +354,10 @@ class AnomalyAlertController:
         if test == "ok":
             logger.info(f"The slack alert for Alert ID - {self.alert_info['id']} was successfully sent")
         else:
-            logger.info(f"The slack alert for Alert ID - {self.alert_info['id']} has not been sent")
+            logger.error(f"The slack alert for Alert ID - {self.alert_info['id']} has not been sent")
         
-        message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
-        return message
+        message = f"Status for Alert - {self.alert_info['alert_name']}: {test}"
+        return test == "ok"
 
 class StaticKpiAlertController:
     def __init__(self, alert_info):

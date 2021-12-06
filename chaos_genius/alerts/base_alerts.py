@@ -278,7 +278,7 @@ class AnomalyAlertController:
         recipient_emails = alert_channel_conf.get("email", [])
         
         if recipient_emails:
-            subject = f"{self.alert_info['alert_name']} - KPI Alert Notification - Chaos Genius"
+            subject = f"{self.alert_info['alert_name']} - Chaos Genius Alert❗"
             alert_message = self.alert_info["alert_message"]
             time_of_anomaly = str(getattr(anomaly, 'data_datetime'))
             highest_value = round(getattr(anomaly, 'y'), 1)
@@ -306,7 +306,8 @@ class AnomalyAlertController:
                                             severity_value = severity_value,
                                             kpi_name = kpi_name,
                                             alert_frequency = self.alert_info['alert_frequency'].capitalize(),
-                                            preview_text = "Anomaly Alert"
+                                            preview_text = "Anomaly Alert" ,
+                                            alert_name = self.alert_info.get("alert_name")
                                         )
             logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
             return True

@@ -278,7 +278,7 @@ class AnomalyAlertController:
         recipient_emails = alert_channel_conf.get("email", [])
         
         if recipient_emails:
-            subject = f"{self.alert_info['alert_name']} - Chaos Genius Alert ❗ "
+            subject = f"{self.alert_info['alert_name']} - Chaos Genius Alert❗"
             alert_message = self.alert_info["alert_message"]
             time_of_anomaly = str(getattr(anomaly, 'data_datetime'))
             highest_value = round(getattr(anomaly, 'y'), 1)

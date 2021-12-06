@@ -8,28 +8,43 @@
 </b>
 <hr style="width:100%" , size="2" , color=#F6F5F5>
 
-<h2 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">KPI Name: {{
-  kpi_name }} </h2>
+<h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">KPI Name: {{
+  kpi_name }} </h3>
 <h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Alert
   Frequency: {{ alert_frequency }}</h3>
 <br>
-<h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Alert Message
-</h3>
+<h2 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Alert Message
+</h2>
 <h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">{{
   alert_message }}</h3>
 <br>
 
-<h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Anomaly Details
-</h3>
-<h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">KPI Value: {{
-  highest_value }}</h3>
-<h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Time of
-  occurrence: {{ time_of_anomaly }}</h3>
-<h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Expected Range:
-  {{ lower_bound }} - {{upper_bound}}</h3>
-<h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Anomaly
-  Severity Score:{{ severity_value }}</h3>
-
+<h2 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Anomaly Details
+</h2>
+<table style="border-spacing: 15px; color: #F6F5F5;text-align: left;">
+  <tr>
+    <th>Value</th>
+    <th>Time of Occurrence</th>
+  </tr>
+  <tr>
+    <td>{{ highest_value }}</td>
+    <td>{{ time_of_anomaly }}</td>
+  </tr>
+  <tr>
+    <th>Lower Bound of Range</th>
+    <th>Upper Bound of Range</th>
+  </tr>
+  <tr>
+    <td>{{ lower_bound }}</td>
+    <td>{{ upper_bound }}</td>
+  </tr>
+  <tr>
+    <th>Severity Value</th>
+  </tr>
+  <tr>
+    <td>{{ severity_value }}</td>
+  </tr>
+</table>
 
 
 {% endblock %}

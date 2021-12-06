@@ -297,7 +297,7 @@ class AnomalyAlertController:
 
             kpi_name = getattr(kpi_obj, 'name')
 
-            test = self.send_template_email('email_alert.html', 
+            status = self.send_template_email('email_alert.html',
                                             recipient_emails, 
                                             subject, 
                                             alert_message = alert_message,
@@ -310,7 +310,7 @@ class AnomalyAlertController:
                                             alert_frequency = self.alert_info['alert_frequency'].capitalize(),
                                             preview_text = "Anomaly Alert"
                                         )
-            return test
+            return status
         else:
             logger.info(f"No receipent email available (Alert ID - {self.alert_info['id']})")
             return False
@@ -340,7 +340,7 @@ class AnomalyAlertController:
         kpi_name = Kpi.get_by_id(self.alert_info["kpi"]).safe_dict['name']
         data_source_name = DataSource.\
             get_by_id(self.alert_info["data_source"]).safe_dict["name"]
-        test = anomaly_alert_slack_formatted(
+        status = anomaly_alert_slack_formatted(
                 alert_name,
                 kpi_name,
                 data_source_name,
@@ -351,13 +351,13 @@ class AnomalyAlertController:
                 severity_value = round(getattr(anomaly, 'severity'), 2)
             )
 
-        if test == "ok":
+        if status == "ok":
             logger.info(f"The slack alert for Alert ID - {self.alert_info['id']} was successfully sent")
         else:
             logger.error(f"The slack alert for Alert ID - {self.alert_info['id']} has not been sent")
         
-        message = f"Status for Alert - {self.alert_info['alert_name']}: {test}"
-        return test == "ok"
+        message = f"Status for Alert - {self.alert_info['alert_name']}: {status}"
+        return status == "ok"
 
 class StaticKpiAlertController:
     def __init__(self, alert_info):

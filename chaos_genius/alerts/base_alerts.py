@@ -420,7 +420,10 @@ def trigger_anomaly_alerts_for_kpi(kpi_obj: Kpi, end_date: date) -> List[int]:
         List[int]: List of alert IDs for which alert messages were successfully sent
     """
     success_alerts = []
-    alerts = Alert.query.filter(Alert.kpi == kpi_obj.id).all()
+    alerts = Alert.query.filter(
+                            Alert.kpi == kpi_obj.id,
+                            Alert.active == True
+                        ).all()
     for alert in alerts:
         try:
             anomaly_obj = AnomalyAlertController(alert.as_dict, anomaly_end_date=end_date)

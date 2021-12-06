@@ -23,8 +23,8 @@ const KPI_RESET = {
   type: 'KPI_RESET'
 };
 
-const ONBOARDING_DASHBOARD_RESET = {
-  type: 'ONBOARDING_DASHBOARD_RESET'
+const DASHBOARD_RESET = {
+  type: 'DASHBOARD_RESET'
 };
 const DASHBOARD_KPILIST_RESET = {
   type: 'DASHBOARD_KPILIST_RESET'
@@ -40,7 +40,7 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
     if (path[1] === 'onboarding' && path[2] === '3') {
       store.dispatch(SETTING_RESET);
       store.dispatch(RESET_ACTION);
-      store.dispatch(ONBOARDING_DASHBOARD_RESET);
+      store.dispatch(DASHBOARD_RESET);
       store.dispatch(DASHBOARD_KPILIST_RESET);
     } else {
       store.dispatch(SETTING_RESET);
@@ -58,7 +58,7 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
       history.push('/onboarding/2');
     } else if (text === 'dashboard') {
       store.dispatch(DASHBOARD_KPILIST_RESET);
-      store.dispatch(ONBOARDING_DASHBOARD_RESET);
+      store.dispatch(DASHBOARD_RESET);
 
       history.push('/onboarding/4');
     } else {
@@ -75,7 +75,7 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
       store.dispatch(RESET_ACTION);
       history.push('/datasource');
     } else if (text === 'dashboard') {
-      store.dispatch(ONBOARDING_DASHBOARD_RESET);
+      store.dispatch(DASHBOARD_RESET);
       store.dispatch(DASHBOARD_KPILIST_RESET);
       history.push('/dashboard');
     } else if (text === 'activateanalytics') {

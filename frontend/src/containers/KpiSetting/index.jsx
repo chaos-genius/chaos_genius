@@ -80,9 +80,7 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
                 <li
                   className="breadcrumb-item"
                   onClick={() => store.dispatch(SETTING_RESET)}>
-                  <Link to={`/dashboard/deepdrills/${location[3]}`}>
-                    Dashboard
-                  </Link>
+                  <Link to={`/dashboard`}>Dashboard</Link>
                 </li>
                 <li
                   className="breadcrumb-item active"
@@ -96,7 +94,7 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
             <div
               className="backnavigation"
               onClick={() => store.dispatch(SETTING_RESET)}>
-              <Link to={`/dashboard/deepdrills/${location[3]}`}>
+              <Link to={`/dashboard`}>
                 <img src={rightarrow} alt="Back" />
                 <span>Settings</span>
               </Link>

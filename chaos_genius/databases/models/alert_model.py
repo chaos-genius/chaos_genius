@@ -11,6 +11,7 @@ class Alert(PkModel):
 
     alert_name = Column(db.Text(), nullable=False)
     alert_type = Column(db.String(80), nullable=False) # Event Alert, KPI Alert
+    alert_status = Column(db.Boolean(), default=True, nullable=False)
 
     data_source = Column(db.Integer)
     alert_query = Column(db.Text())
@@ -54,7 +55,8 @@ class Alert(PkModel):
             "alert_channel": self.alert_channel,
             "alert_channel_conf": self.alert_channel_conf,
             "active": self.active,
-            "created_at": self.created_at
+            "created_at": self.created_at,
+            "alert_status": self.alert_status
         }
 
 

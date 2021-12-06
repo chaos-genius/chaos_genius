@@ -94,13 +94,19 @@ def anomaly_single_kpi(kpi_id, end_date=None):
             # for last day.
             # TODO: Add this timedelta variable in some constant file in core
             updated_time = anomaly_end_date - timedelta(days=1)
-            alert_ids = trigger_anomaly_alerts_for_kpi(kpi, updated_time)
-            if alert_ids:
+            _, errors = trigger_anomaly_alerts_for_kpi(kpi, updated_time)
+            if not errors:
                 logger.info(f"Triggered the alerts for KPI {kpi_id}.")
                 _checkpoint_success("Alert trigger")
             else:
-                logger.error(f"Alert trigger failed for the KPI ID: {kpi_id}.")
-                _checkpoint_failure("Alert trigger", None)
+                logger.error(
+                    f"Alert trigger failed for the KPI ID: {kpi_id} "
+                    f"for alerts: {', '.join(str(alert_id) for alert_id, _ in errors)}"
+                )
+
+                # TODO: find a way to checkpoint all errors
+                # we're logging just the first error in this checkpoint
+                _checkpoint_failure("Alert trigger", errors[0][1])
         except Exception as e:
             logger.error(f"Alert trigger failed for the KPI ID: {kpi_id}.", exc_info=e)
             _checkpoint_failure("Alert trigger", e)

@@ -3,7 +3,7 @@ import os
 import io
 import json
 import pickle
-from typing import Optional, List
+from typing import Optional, List, Tuple
 import pandas as pd
 import datetime
 from datetime import date
@@ -411,7 +411,10 @@ def check_and_trigger_alert(alert_id):
     return True
 
 
-def trigger_anomaly_alerts_for_kpi(kpi_obj: Kpi, end_date: date) -> List[int]:
+def trigger_anomaly_alerts_for_kpi(
+    kpi_obj: Kpi,
+    end_date: date
+) -> Tuple[List[int], List[Tuple[int, Optional[Exception]]]]:
     """Triggers anomaly alerts starting from end_date.
 
     Args:
@@ -419,15 +422,22 @@ def trigger_anomaly_alerts_for_kpi(kpi_obj: Kpi, end_date: date) -> List[int]:
         end_date (dateimte.datetime): Datetime object containing the upper bound of anomaly date values
 
     Returns:
-        List[int]: List of alert IDs for which alert messages were successfully sent
+        Tuple of:
+            List[int]: List of alert IDs for which alert messages were successfully sent
+            List[Tuple[int, Exception | None]]: list of alert IDs that failed with exceptions
     """
     success_alerts = []
+    errors = []
     alerts = Alert.query.filter(Alert.kpi == kpi_obj.id).all()
     for alert in alerts:
         try:
             anomaly_obj = AnomalyAlertController(alert.as_dict, anomaly_end_date=end_date)
-            anomaly_obj.check_and_prepare_alert()
-            success_alerts.append(alert.id)
+            status = anomaly_obj.check_and_prepare_alert()
+            if status:
+                success_alerts.append(alert.id)
+            else:
+                errors.append((alert.id, None))
         except Exception as e:
             logger.error(f"Error running alert for Alert ID: {alert.id}", exc_info=e)
-    return success_alerts
+            errors.append((alert.id, e))
+    return success_alerts, errors

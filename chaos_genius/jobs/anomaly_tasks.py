@@ -94,8 +94,8 @@ def anomaly_single_kpi(kpi_id, end_date=None):
             # for last day.
             # TODO: Add this timedelta variable in some constant file in core
             updated_time = anomaly_end_date - timedelta(days=1)
-            alert_ids = trigger_anomaly_alerts_for_kpi(kpi, updated_time)
-            if alert_ids:
+            _, errors = trigger_anomaly_alerts_for_kpi(kpi, updated_time)
+            if not errors:
                 logger.info(f"Triggered the alerts for KPI {kpi_id}.")
                 _checkpoint_success("Alert trigger")
             else:

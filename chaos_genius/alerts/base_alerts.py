@@ -3,7 +3,7 @@ import os
 import io
 import json
 import pickle
-from typing import Optional, List
+from typing import Optional, List, Tuple
 import pandas as pd
 import datetime
 from datetime import date
@@ -409,7 +409,7 @@ def check_and_trigger_alert(alert_id):
     return True
 
 
-def trigger_anomaly_alerts_for_kpi(kpi_obj: Kpi, end_date: date) -> List[int]:
+def trigger_anomaly_alerts_for_kpi(kpi_obj: Kpi, end_date: date) -> Tuple[List[int], List[int]]:
     """Triggers anomaly alerts starting from end_date.
 
     Args:
@@ -418,8 +418,10 @@ def trigger_anomaly_alerts_for_kpi(kpi_obj: Kpi, end_date: date) -> List[int]:
 
     Returns:
         List[int]: List of alert IDs for which alert messages were successfully sent
+        List[int]: List of alert IDs for which alert failed
     """
     success_alerts = []
+    errors = []
     alerts = Alert.query.filter(
                             Alert.kpi == kpi_obj.id,
                             Alert.active == True,
@@ -432,4 +434,5 @@ def trigger_anomaly_alerts_for_kpi(kpi_obj: Kpi, end_date: date) -> List[int]:
             success_alerts.append(alert.id)
         except Exception as e:
             logger.error(f"Error running alert for Alert ID: {alert.id}", exc_info=e)
-    return success_alerts
+            errors.append(alert.id)
+    return success_alerts, errors

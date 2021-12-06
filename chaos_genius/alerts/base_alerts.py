@@ -422,7 +422,8 @@ def trigger_anomaly_alerts_for_kpi(kpi_obj: Kpi, end_date: date) -> List[int]:
     success_alerts = []
     alerts = Alert.query.filter(
                             Alert.kpi == kpi_obj.id,
-                            Alert.active == True
+                            Alert.active == True,
+                            Alert.alert_status == True
                         ).all()
     for alert in alerts:
         try:

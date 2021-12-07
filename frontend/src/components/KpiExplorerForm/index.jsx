@@ -192,6 +192,11 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    dispatchGetAllDashboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createDashboard]);
+
   const dispatchGetAllDashboard = () => {
     dispatch(getDashboard());
   };
@@ -436,7 +441,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       metriccolumns: '',
       aggregate: '',
       datetimecolumns: '',
-      dimensions: []
+      dimensions: [],
+      dashboardNameList: []
     });
     setTableAdditional({
       ...tableAdditional,
@@ -514,7 +520,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           metriccolumns: '',
           aggregate: '',
           datetimecolumns: '',
-          dimensions: []
+          dimensions: [],
+          dashboardNameList: []
         });
       }
 
@@ -536,7 +543,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       aggregate: '',
       datetimecolumns: '',
       dimensions: [],
-      tablename: ''
+      tablename: '',
+      dashboardNameList: []
     });
     setTableAdditional({
       ...tableAdditional,

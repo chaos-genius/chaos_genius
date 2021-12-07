@@ -1060,17 +1060,20 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               }
               // components={{ SingleValue: customAddDashboard }}
               onChange={(e) => {
-                e &&
-                  e.forEach((data) => {
-                    if (data.value === 'newdashboard') {
-                      setIsOpen(true);
-                    } else if (data.value !== 'newdashboard') {
-                      setFormdata({
-                        ...formdata,
-                        dashboardNameList: e.map((el) => el.value)
-                      });
-                    }
-                  });
+                var arr = [];
+                e.length !== 0
+                  ? e.forEach((data) => {
+                      if (data.value === 'newdashboard') {
+                        setIsOpen(true);
+                      } else if (data.value !== 'newdashboard') {
+                        arr.push(data);
+                        setFormdata({
+                          ...formdata,
+                          dashboardNameList: arr.map((el) => el.value)
+                        });
+                      }
+                    })
+                  : setFormdata({ ...formdata, dashboardNameList: e });
               }}
             />
           </div>

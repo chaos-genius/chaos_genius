@@ -78,6 +78,12 @@ def kpi():
 
         new_kpi.save(commit=True)
 
+        dashboard_list = data.get("dashboard", [])
+        
+        for dashboard_id in dashboard_list:
+            mapper_obj = DashboardKpiMapper(dashboard=dashboard_id, kpi=getattr(new_kpi, "id"))
+            mapper_obj.save(commit=True)
+
         # TODO: Fix circular import error
         from chaos_genius.jobs.anomaly_tasks import ready_rca_task
 

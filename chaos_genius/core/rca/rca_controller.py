@@ -72,7 +72,7 @@ class RootCauseAnalysisController:
             days_before=num_days*2
         ).get_data()
 
-        mid_date = self.end_date - timedelta(days=num_days)
+        mid_date = pd.to_datetime(self.end_date - timedelta(days=num_days))
         base_df = df[df[self.dt_col] < mid_date]
         rca_df = df[df[self.dt_col] >= mid_date]
 

@@ -141,7 +141,8 @@ def get_all_config():
     """Getting all the setting."""
     try:
         result = get_all_configurations()
-        return jsonify({"data": result, "status": "success"})
+        alert_destination_result = [config for config in result if config["name"] in ("slack", "email")]
+        return jsonify({"data": alert_destination_result, "status": "success"})
     except Exception as err:
         return jsonify({"message": err, "status": "failure"})
 

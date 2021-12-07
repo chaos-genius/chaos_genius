@@ -52,18 +52,34 @@
         }
       }
     }
-    .moreoption {
-      display: block;
-    }
-    .moreoption-active {
-      display: none;
-    }
-    &:hover {
+    // .moreoption {
+    //   display: block;
+    // }
+    // .moreoption-active {
+    //   display: none;
+    // }
+    // &:hover {
+    //   .moreoption {
+    //     display: none;
+    //   }
+    //   .moreoption-active {
+    //     display: block;
+    //   }
+    // }
+    .more-dropdown {
       .moreoption {
-        display: none;
+        display: block;
       }
       .moreoption-active {
-        display: block;
+        display: none;
+      }
+      &:hover {
+        .moreoption {
+          display: none;
+        }
+        .moreoption-active {
+          display: block;
+        }
       }
     }
     .body-card {

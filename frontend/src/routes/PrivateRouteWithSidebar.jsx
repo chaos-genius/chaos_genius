@@ -11,7 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 
-import { getConnectionType } from '../redux/actions';
+import { getConnectionType, getGlobalSetting } from '../redux/actions';
 
 import { connectionContext } from '../components/context';
 import posthog from 'posthog-js';
@@ -20,11 +20,15 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
   const dispatch = useDispatch();
   const [stateValue, setState] = useState();
   const { connectionType } = useSelector((state) => state.dataSource);
+  const { globalSettingData } = useSelector((state) => state.GlobalSetting);
 
   useEffect(() => {
     // process.env.NODE_ENV === 'development'
 
-    if (process.env.REACT_APP_DISABLE_TELEMETRY === 'true') {
+    if (
+      process.env.REACT_APP_DISABLE_TELEMETRY === 'true' ||
+      process.env.NODE_ENV === 'development'
+    ) {
       console.log('disable telemetry');
       // eslint-disable-next-line react-hooks/exhaustive-deps
     } else {
@@ -36,12 +40,19 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
 
   useEffect(() => {
     dispatchGetConnectionType();
+    dispatch(getGlobalSetting());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const dispatchGetConnectionType = () => {
     dispatch(getConnectionType());
   };
+
+  useEffect(() => {
+    if (globalSettingData) {
+      localStorage.setItem('GlobalSetting', JSON.stringify(globalSettingData));
+    }
+  }, [globalSettingData]);
 
   useEffect(() => {
     if (connectionType && connectionType.length !== 0) {

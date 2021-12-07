@@ -58,6 +58,7 @@ import {
   getUpdateDashboard
 } from './DashboardHome';
 
+import { getGlobalSetting } from './GlobalSetting';
 export {
   getAllDataSources,
   getConnectionType,
@@ -107,5 +108,6 @@ export {
   getDashboardDelete,
   getCreateDashboard,
   getEditDashboard,
-  getUpdateDashboard
+  getUpdateDashboard,
+  getGlobalSetting
 };

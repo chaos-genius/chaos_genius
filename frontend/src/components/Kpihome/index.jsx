@@ -20,7 +20,14 @@ import Fuse from 'fuse.js';
 import Noresult from '../Noresult';
 import Homefilter from '../Homefilter';
 
+import { formatDateTime, getTimezone } from '../../utils/date-helper';
+
 highchartsMore(Highcharts);
+Highcharts.setOptions({
+  time: {
+      timezone: getTimezone()
+  }
+});
 
 const data = [
   {
@@ -105,7 +112,7 @@ const Kpihome = () => {
           type: 'datetime',
           gridLineWidth: 0,
 
-          categories: line.map((data) => new Date(data.date)),
+          categories: line.map((data) => formatDateTime(data.date)),
           labels: {
             enabled: false,
             step: 0,

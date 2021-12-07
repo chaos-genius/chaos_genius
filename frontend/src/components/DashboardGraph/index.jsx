@@ -19,7 +19,7 @@ import * as am4charts from '@amcharts/amcharts4/charts';
 import HierarchicalTable from '../HierarchicalTable';
 import DeepdrillsEmptyState from '../DeepdrillsEmptyState';
 
-import { formatDate } from '../../utils/date-helper';
+import { formatDateTime, getTimezone } from '../../utils/date-helper';
 
 import {
   getDashboardAggregation,
@@ -34,6 +34,11 @@ import HighchartsReact from 'highcharts-react-official';
 import highchartsMore from 'highcharts/highcharts-more';
 
 highchartsMore(Highcharts);
+Highcharts.setOptions({
+  time: {
+      timezone: getTimezone()
+  }
+});
 
 const data = [
   {
@@ -269,9 +274,12 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
         title: {
           text: kpiName
         },
+        time: {
+          timezone: getTimezone()
+        },
         xAxis: {
           type: 'datetime',
-          categories: line.map((data) => new Date(data.date)),
+          categories: line.map((data) => formatDateTime(data.date)),
           labels: {
             step: 6,
             formatter: function () {
@@ -315,7 +323,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                   <p>
                     Last updated:{' '}
                     <span>
-                      {formatDate(aggregationData?.analysis_date) || '-'}
+                      {formatDateTime(aggregationData?.analysis_date, true, false, true) || '-'}
                     </span>
                   </p>
                 </div>

@@ -73,10 +73,10 @@ def run_anomaly_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
     return True
 
 
-def _get_end_date_for_rca_kpi(kpi_info: dict, end_date: datetime = None) -> datetime:
+def _get_end_date_for_rca_kpi(kpi_info: dict, end_date: date = None) -> date:
     # by default we always calculate for n-1
     if end_date is None:
-        end_date = datetime.today() - timedelta(days=1)
+        end_date = datetime.today().date() - timedelta(days=1)
 
     count = 0
     while not _is_data_present_for_end_date(kpi_info, end_date):
@@ -89,7 +89,7 @@ def _get_end_date_for_rca_kpi(kpi_info: dict, end_date: datetime = None) -> date
     return end_date
 
 
-def run_rca_for_kpi(kpi_id: int, end_date: datetime = None) -> bool:
+def run_rca_for_kpi(kpi_id: int, end_date: date = None) -> bool:
     try:
         logger.info(f"Starting RCA for KPI ID: {kpi_id}.")
         kpi_info = get_kpi_data_from_id(kpi_id)

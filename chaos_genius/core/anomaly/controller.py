@@ -76,29 +76,11 @@ class AnomalyDetectionController(object):
             self.debug = False
         self.slack = self.kpi_info["anomaly_params"].get("slack", 3)
 
-        # FIXME: temporary fix
-        # if both period and anomaly period are present, precedence is
-        # given to anomaly period
-        if "anomaly_period" in self.kpi_info["anomaly_params"]:
-            self.kpi_info["anomaly_params"]["period"] = self.kpi_info["anomaly_params"][
-                "anomaly_period"
-            ]
-        # if both frequency and ts_frequency are present precedence is
-        # given to frequency
-        if "frequency" in self.kpi_info["anomaly_params"]:
-            self.kpi_info["anomaly_params"]["ts_frequency"] = self.kpi_info[
-                "anomaly_params"
-            ]["frequency"]
+        if self.kpi_info["anomaly_params"]["frequency"] == "H":
+            period = int(self.kpi_info["anomaly_params"]["anomaly_period"])
+            period *= 24
+            self.kpi_info["anomaly_params"]["anomaly_period"] = period
 
-        if self.kpi_info["anomaly_params"]["ts_frequency"].lower() in [
-            "hourly",
-            "h",
-        ]:
-            period = self.kpi_info["anomaly_params"]["period"]
-            period_int = int(period)
-            period_fract = period - period_int
-            period = period_int * 24 + int(period_fract * 24)
-            self.kpi_info["anomaly_params"]["period"] = period
         logger.info(f"Anomaly controller initialized for KPI ID: {kpi_info['id']}")
 
     def _load_anomaly_data(self) -> pd.DataFrame:
@@ -292,7 +274,7 @@ class AnomalyDetectionController(object):
         """
         dt_col = self.kpi_info["datetime_column"]
         metric_col = self.kpi_info["metric"]
-        freq = self.kpi_info["anomaly_params"]["ts_frequency"]
+        freq = self.kpi_info["anomaly_params"]["frequency"]
         agg = self.kpi_info["aggregation"]
         period = self.kpi_info["anomaly_params"]["anomaly_period"]
 

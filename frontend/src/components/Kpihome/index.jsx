@@ -21,11 +21,12 @@ import Noresult from '../Noresult';
 import Homefilter from '../Homefilter';
 
 import { formatDateTime, getTimezone } from '../../utils/date-helper';
+import { getDashboard } from '../../redux/actions';
 
 highchartsMore(Highcharts);
 Highcharts.setOptions({
   time: {
-      timezone: getTimezone()
+    timezone: getTimezone()
   }
 });
 
@@ -52,6 +53,10 @@ const Kpihome = () => {
     (state) => state.onboarding
   );
 
+  const { dashboardListLoading, dashboardList } = useSelector((state) => {
+    return state.DashboardHome;
+  });
+
   const [search, setSearch] = useState('');
   const [kpiHomeData, setKpiHomeData] = useState(homeKpiData);
 
@@ -62,6 +67,7 @@ const Kpihome = () => {
 
   useEffect(() => {
     dispatch(getHomeKpi({ timeline: timeline.value }));
+    dispatch(getDashboard());
   }, [dispatch, timeline]);
 
   useEffect(() => {
@@ -162,7 +168,7 @@ const Kpihome = () => {
     }
   };
 
-  if (homeKpiLoading) {
+  if (homeKpiLoading || dashboardListLoading) {
     return (
       <div className="load loader-page">
         <div className="preload"></div>
@@ -201,7 +207,7 @@ const Kpihome = () => {
           {kpiHomeData && kpiHomeData.length !== 0 ? (
             <div className="explore-wrapper home-explore-wrapper">
               <div className="filter-section">
-                <Homefilter data={kpiHomeData} />
+                <Homefilter data={dashboardList} />
               </div>
               <div className="graph-section">
                 {kpiHomeData.map((item) => {

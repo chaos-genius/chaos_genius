@@ -2,10 +2,32 @@ import React from 'react';
 
 import Search from '../../assets/images/search.svg';
 import Dropdown from '../../assets/images/dropdownlist.svg';
-
+import Fuse from 'fuse.js';
 import './homefilter.scss';
+import { useState } from 'react';
 
 const Homefilter = ({ data }) => {
+  const [filterData, setFilterData] = useState(data);
+
+  const onSearch = (event) => {
+    if (event.target.value === '') {
+      setFilterData(data);
+    } else {
+      const options = {
+        keys: ['name']
+      };
+
+      const fuse = new Fuse(data, options);
+
+      const result = fuse.search(event.target.value);
+      setFilterData(
+        result.map((item) => {
+          return item.item;
+        })
+      );
+    }
+  };
+
   return (
     <div className="common-filter-section">
       <div className="filter-layout">
@@ -16,6 +38,7 @@ const Homefilter = ({ data }) => {
               type="text"
               className="form-control h-40"
               placeholder="Search Dashboard"
+              onChange={(e) => onSearch(e)}
             />
             <span>
               <img src={Search} alt="Search Icon" />
@@ -40,17 +63,11 @@ const Homefilter = ({ data }) => {
 
       <div className="filter-layout filter-tab filter-scrollable">
         <ul>
-          <li className="active">
-            Marketing <span>42</span>
-          </li>
-          <li>
-            Revenue <span>12</span>
-          </li>
-          {data && data.length !== 0 ? (
-            data.map((item) => {
+          {filterData && filterData.length !== 0 ? (
+            filterData.map((item) => {
               return (
                 <li>
-                  {item.name} <span>{item.id}</span>
+                  {item.name} <span>{item.kpi_count}</span>
                 </li>
               );
             })

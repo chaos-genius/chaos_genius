@@ -9,7 +9,6 @@ export const attachParams = (relativeUrl, params) => {
   if (baseUrl === '') {
     baseUrl = window.location.origin;
   }
-  console.log(baseUrl);
   const url = new URL(relativeUrl, baseUrl);
   url.search = new URLSearchParams(params).toString();
   return url;

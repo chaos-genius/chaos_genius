@@ -121,7 +121,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     aggregate: '',
     datetimecolumns: '',
     addfilter: [],
-    dimensions: []
+    dimensions: [],
+    dashboardName: []
   });
 
   const [errorMsg, setErrorMsg] = useState({
@@ -248,11 +249,13 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     }
     setOption({ ...option, metricOption: arr });
   };
+
   useEffect(() => {
     if (dashboardList) {
       dashboardOptionList();
     } // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dashboardList]);
+
   const dashboardOptionList = () => {
     var arr = [
       {
@@ -276,7 +279,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     }
     setOption({ ...option, dashboard: arr });
   };
-  console.log('Option:', option.dashboard);
+
   const datasourceIcon = (type) => {
     let textHtml = '';
     connectionType &&
@@ -410,7 +413,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             id: data.id,
             label: <div className="optionlabel">{datasourceIcon(data)}</div>
           });
-          setOption({ datasource: optionArr });
+          setOption({ ...option, datasource: optionArr });
         });
     }
   };
@@ -963,33 +966,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           </div>
 
           <div className="form-group">
-            <label>Dashboard *</label>
-            <Select
-              closeMenuOnSelect={false}
-              blurInputOnSelect={false}
-              isMulti
-              options={dashboard}
-              classNamePrefix="selectcategory"
-              placeholder="Select"
-              menuPlacement="top"
-              // components={{ SingleValue: customAddDashboard }}
-              value={option.dashboard !== '' && option.dashboard}
-              onChange={(e) => {
-                const array = [];
-                e &&
-                  e.forEach((data) => {
-                    if (data.value === 'newdashboard') {
-                      setIsOpen(true);
-                    } else if (data.value !== 'newdashboard') {
-                      array.push(data);
-                    }
-                  });
-                setOption({ ...option, dashboard: array });
-              }}
-            />
-          </div>
-          {/* <div className="form-group">
-            <label>Dimensions *</label>
             <label>Dimensions </label>
             <Select
               closeMenuOnSelect={false}
@@ -1041,7 +1017,44 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               </p>
             </div>
           </div>
-          */}
+
+          <div className="form-group">
+            <label>Dashboard </label>
+            <Select
+              closeMenuOnSelect={false}
+              blurInputOnSelect={false}
+              isMulti
+              options={option.dashboard}
+              classNamePrefix="selectcategory"
+              placeholder="Select"
+              menuPlacement="top"
+              value={
+                formdata.dimensions.length !== 0
+                  ? formdata.dimensions.map((el) => {
+                      return {
+                        label: el,
+                        value: el
+                      };
+                    })
+                  : []
+              }
+              // components={{ SingleValue: customAddDashboard }}
+              onChange={(e) => {
+                e &&
+                  e.forEach((data) => {
+                    if (data.value === 'newdashboard') {
+                      setIsOpen(true);
+                    } else if (data.value !== 'newdashboard') {
+                      setFormdata({
+                        ...formdata,
+                        dashboardName: e.map((el) => el.value)
+                      });
+                    }
+                  });
+              }}
+            />
+          </div>
+
           {/* {inputList && inputList.length !== 0 && (
             <div className="form-group">
               <label>Filters</label>

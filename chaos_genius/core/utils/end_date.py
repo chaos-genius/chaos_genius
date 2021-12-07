@@ -17,10 +17,11 @@ def load_input_data_end_date(kpi_info: dict, end_date: date = None) -> date:
         return end_date
 
     static_params_end_date = kpi_info.get("static_params", {}).get("end_date")
-    if static_params_end_date:
-        return datetime.strptime(
-            static_params_end_date,
-            "%Y-%m-%d %H:%M:%S"
-        ).date()
-    else:
+    if not static_params_end_date:
         return datetime.today().date()
+
+    try:
+        return datetime.strptime(static_params_end_date, "%Y-%m-%d %H:%M:%S").date()
+    except:  # noqa E722
+        static_params_end_date = static_params_end_date + " 00:00:00"
+        return datetime.strptime(static_params_end_date, "%Y-%m-%d %H:%M:%S").date()

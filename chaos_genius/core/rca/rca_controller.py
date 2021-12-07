@@ -16,6 +16,7 @@ from chaos_genius.core.rca.constants import (
 )
 from chaos_genius.core.rca.root_cause_analysis import RootCauseAnalysis
 from chaos_genius.core.utils.data_loader import DataLoader
+from chaos_genius.core.utils.end_date import load_input_data_end_date
 from chaos_genius.core.utils.round import round_series
 from chaos_genius.databases.models.rca_data_model import RcaData, db
 from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
@@ -40,20 +41,8 @@ class RootCauseAnalysisController:
         logger.info(f"RCA Controller initialized with KPI: {kpi_info['id']}")
         self.kpi_info = kpi_info
 
-        if end_date is None and self.kpi_info["is_static"]:
-            end_date = self.kpi_info["static_params"].get("end_date")
-            if end_date is not None:
-                end_date = datetime.strptime(end_date, STATIC_END_DATA_FORMAT)
-
-        if end_date is None:
-            end_date = datetime.today()
-
-        if type(end_date) == datetime:
-            end_date = end_date.date()
-
-        logger.info(f"RCA Controller end date: {end_date}")
-
-        self.end_date = end_date
+        self.end_date = load_input_data_end_date(kpi_info, end_date)
+        logger.info(f"RCA Controller end date: {self.end_date}")
 
         self.metric = kpi_info["metric"]
         self.dimensions = kpi_info["dimensions"]
@@ -79,11 +68,11 @@ class RootCauseAnalysisController:
 
         df = DataLoader(
             self.kpi_info,
-            end_date=pd.to_datetime(self.end_date),
+            end_date=self.end_date,
             days_before=num_days*2
         ).get_data()
 
-        mid_date = pd.to_datetime(self.end_date - timedelta(days=num_days))
+        mid_date = self.end_date - timedelta(days=num_days)
         base_df = df[df[self.dt_col] < mid_date]
         rca_df = df[df[self.dt_col] >= mid_date]
 

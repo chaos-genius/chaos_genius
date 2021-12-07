@@ -28,7 +28,8 @@ import {
   getTestQuery,
   getEditMetaInfo,
   getKpibyId,
-  getUpdatekpi
+  getUpdatekpi,
+  getDashboard
 } from '../../redux/actions';
 import { connectionContext } from '../context';
 
@@ -160,6 +161,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     kpiUpdateData
   } = useSelector((state) => state.kpiExplorer);
 
+  const { dashboardList } = useSelector((state) => state.DashboardHome);
+
   // const resetFieldsOnchangeDataSetTypeOrTable = () => {
   //   setFormdata({
   //     tablename: '',
@@ -172,12 +175,17 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
 
   useEffect(() => {
     dispatchGetAllKpiExplorerForm();
+    dispatchGetAllDashboard();
     if (data[2] === 'edit') {
       dispatch(getEditMetaInfo());
       dispatch(getKpibyId(kpiId));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const dispatchGetAllDashboard = () => {
+    dispatch(getDashboard());
+  };
 
   useEffect(() => {
     if (kpiFormData && connectionType) {
@@ -240,7 +248,35 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     }
     setOption({ ...option, metricOption: arr });
   };
-
+  useEffect(() => {
+    if (dashboardList) {
+      dashboardOptionList();
+    } // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dashboardList]);
+  const dashboardOptionList = () => {
+    var arr = [
+      {
+        value: 'newdashboard',
+        label: (
+          <span className="add-dashboard">
+            <img src={Add} alt="Add" />
+            New Dashboard
+          </span>
+        )
+      }
+    ];
+    if (dashboardList) {
+      dashboardList &&
+        dashboardList.forEach((item) => {
+          arr.push({
+            label: item.name,
+            value: item.name
+          });
+        });
+    }
+    setOption({ ...option, dashboard: arr });
+  };
+  console.log('Option:', option.dashboard);
   const datasourceIcon = (type) => {
     let textHtml = '';
     connectionType &&

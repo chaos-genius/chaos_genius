@@ -29,7 +29,8 @@ import {
   getEditMetaInfo,
   getKpibyId,
   getUpdatekpi,
-  getDashboard
+  getDashboard,
+  getCreateDashboard
 } from '../../redux/actions';
 import { connectionContext } from '../context';
 
@@ -50,22 +51,23 @@ const aggregate = [
   { value: 'sum', label: 'Sum' }
 ];
 
-const dashboard = [
-  {
-    value: 'newdashboard',
-    label: (
-      <span className="add-dashboard">
-        <img src={Add} alt="Add" />
-        New Dashboard
-      </span>
-    )
-  },
-  {
-    value: 'Ecommerce',
-    label: 'Ecommerce'
-  },
-  { value: 'Customer Service', label: 'Customer Service' }
-];
+// const dashboard = [
+//   {
+//     value: 'newdashboard',
+//     label: (
+//       <span className="add-dashboard">
+//         <img src={Add} alt="Add" />
+//         New Dashboard
+//       </span>
+//     )
+//   },
+//   {
+//     value: 'Ecommerce',
+//     label: 'Ecommerce'
+//   },
+//   { value: 'Customer Service', label: 'Customer Service' }
+// ];
+
 // const customAddDashboard = ({ data }) => (
 //   <div className="input-select">
 //     <div className="input-select__single-value">
@@ -122,7 +124,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     datetimecolumns: '',
     addfilter: [],
     dimensions: [],
-    dashboardName: []
+    dashboardNameList: [],
+    dashboardName: ''
   });
 
   const [errorMsg, setErrorMsg] = useState({
@@ -163,6 +166,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   } = useSelector((state) => state.kpiExplorer);
 
   const { dashboardList } = useSelector((state) => state.DashboardHome);
+
+  const { createDashboardLoading, createDashboard } = useSelector(
+    (state) => state.DashboardHome
+  );
 
   // const resetFieldsOnchangeDataSetTypeOrTable = () => {
   //   setFormdata({
@@ -654,6 +661,19 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     setIsOpen(false);
   };
 
+  const dashboardSubmit = () => {
+    const dashboardData = {
+      dashboard_name: formdata.dashboardName,
+      kpi_list: []
+    };
+    dispatch(getCreateDashboard(dashboardData));
+  };
+  useEffect(() => {
+    if (createDashboard && createDashboard.status === 'success') {
+      setIsOpen(false);
+    }
+  }, [createDashboard]);
+
   //   var IndicatorSeparator = function (_a) {
   //     var innerProps = _a.innerProps;
   //     return style;
@@ -1029,8 +1049,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               placeholder="Select"
               menuPlacement="top"
               value={
-                formdata.dimensions.length !== 0
-                  ? formdata.dimensions.map((el) => {
+                formdata.dashboardNameList.length !== 0
+                  ? formdata.dashboardNameList.map((el) => {
                       return {
                         label: el,
                         value: el
@@ -1047,7 +1067,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                     } else if (data.value !== 'newdashboard') {
                       setFormdata({
                         ...formdata,
-                        dashboardName: e.map((el) => el.value)
+                        dashboardNameList: e.map((el) => el.value)
                       });
                     }
                   });
@@ -1155,14 +1175,31 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                   type="text"
                   className="form-control"
                   placeholder="Dashboard Name"
+                  onChange={(e) =>
+                    setFormdata({ ...formdata, dashboardName: e.target.value })
+                  }
                 />
               </div>
               <div className="next-step-navigate">
                 <button className="btn white-button" onClick={closeModal}>
                   <span>Cancel</span>
                 </button>
-                <button className="btn black-button">
-                  <span>Create</span>
+                <button
+                  className={
+                    createDashboardLoading
+                      ? 'btn black-button btn-loading'
+                      : 'btn black-button'
+                  }
+                  onClick={dashboardSubmit}>
+                  <div className="btn-spinner">
+                    <div className="spinner-border" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <span>Loading...</span>
+                  </div>
+                  <div className="btn-content">
+                    <span>Create</span>
+                  </div>
                 </button>
               </div>
             </div>

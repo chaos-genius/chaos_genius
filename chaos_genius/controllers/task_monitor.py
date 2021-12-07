@@ -8,6 +8,7 @@ from sqlalchemy import func
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.task_model import Task
 from chaos_genius.extensions import db
+from chaos_genius.settings import TASK_CHECKPOINT_LIMIT
 
 
 def checkpoint_initial(
@@ -105,7 +106,7 @@ def checkpoint_failure(
     kpi_id: int,
     analytics_type: str,
     checkpoint: str,
-    exc_info: Exception
+    exc_info: Optional[Exception]
 ) -> Task:
     """Log a failed checkpoint for a task.
 
@@ -128,9 +129,17 @@ def get_checkpoints(sort_by_task_id=True, kpi_info=True, track_subtasks=True) ->
         track_subtasks (bool): whether to include completed_subtasks and total_subtasks in the Tasks (default: True)
     """
     if sort_by_task_id:
-        tasks: List[Task] = Task.query.order_by(Task.task_id.desc(), Task.timestamp.desc()).all()
+        tasks: List[Task] = (
+            Task.query.order_by(Task.task_id.desc(), Task.timestamp.desc())
+            .limit(TASK_CHECKPOINT_LIMIT)
+            .all()
+        )
     else:
-        tasks: List[Task] = Task.query.order_by(Task.timestamp.desc()).all()
+        tasks: List[Task] = (
+            Task.query.order_by(Task.timestamp.desc())
+            .limit(TASK_CHECKPOINT_LIMIT)
+            .all()
+        )
 
     if kpi_info:
         subtasks_cache = {}

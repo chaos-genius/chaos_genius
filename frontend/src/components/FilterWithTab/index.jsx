@@ -17,6 +17,10 @@ const RESET = {
   type: 'RESET_DATA'
 };
 
+const RESET_DATA = {
+  type: 'RESET_CONFIG'
+};
+
 const DashboardFilter = ({ kpi, data, setActive, tabs, SetKpiAggregate }) => {
   const history = useHistory();
   const dispatch = useDispatch();
@@ -77,6 +81,7 @@ const DashboardFilter = ({ kpi, data, setActive, tabs, SetKpiAggregate }) => {
                   onClick={() => {
                     dispatch(anomalySetting(item.id));
                     store.dispatch(RESET);
+                    store.dispatch(RESET_DATA);
                     setActive(item.name);
                     SetKpiAggregate(item.aggregation);
                     history.push(`/dashboard/${tabs}/${item.id}`);

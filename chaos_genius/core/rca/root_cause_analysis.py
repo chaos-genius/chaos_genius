@@ -70,7 +70,7 @@ class RootCauseAnalysis:
             raise ValueError(f"Aggregation {agg} is not supported.")
         self._agg = agg
 
-        if num_dim_combs is None:
+        if num_dim_combs is None or not dims:
             num_dim_combs = list(range(1, len(dims) + 1))
         else:
             if max(num_dim_combs) > len(self._dims) or min(num_dim_combs) < 1:
@@ -513,6 +513,12 @@ class RootCauseAnalysis:
             metric_impact = d2_metrics[metric] - d1_metrics[metric]
             panel_metrics["impact"][metric] = round_number(metric_impact)
 
+        # Check for None or NaN values in output
+        for overall_key, value_dict in panel_metrics.items():
+            for key, value in value_dict.items():
+                if value is None or pd.isna(value):
+                    raise ValueError(f"{key} in {overall_key} is {value} (either None or NaN)")
+
         return panel_metrics
 
     def get_impact_rows(self, single_dim: str = None) -> List[Dict[str, object]]:
@@ -537,6 +543,9 @@ class RootCauseAnalysis:
         impact_table["string"] = impact_table["string"].apply(
             convert_query_string_to_user_string
         )
+
+        # Check for any nan values in impact values and raise ValueError if found
+        self._check_nan(impact_table, f"Impact table for dimension {single_dim}")
 
         return round_df(impact_table).to_dict("records")
 
@@ -595,6 +604,9 @@ class RootCauseAnalysis:
             convert_query_string_to_user_string
         )
 
+        # Check for any nan values in best subgroups and raise ValueError if found
+        self._check_nan(best_subgroups, f"Waterfall table for dimension {single_dim}")
+
         return round_df(best_subgroups).to_dict("records")
 
     def get_waterfall_plot_data(
@@ -632,6 +644,9 @@ class RootCauseAnalysis:
         waterfall_df["category"] = waterfall_df["category"].apply(
             convert_query_string_to_user_string
         )
+
+        # Check for any nan values in waterfall df and raise ValueError if found
+        self._check_nan(waterfall_df, f"Waterfall chart for dimension {single_dim}")
 
         return (
             round_df(waterfall_df).to_dict("records"),
@@ -698,4 +713,19 @@ class RootCauseAnalysis:
             convert_query_string_to_user_string
         )
 
+        # Check for any nan values in output table and raise ValueError if found
+        self._check_nan(
+            output_table.drop("parentId", axis=1),
+            f"Hierarchical table for dimension {single_dim}"
+        )
+
         return round_df(output_table).to_dict("records")
+
+    def _check_nan(self, df: pd.DataFrame, message: str) -> None:
+        """Check if NaN values in dataframe."""
+
+        nan_df = df.isna().sum()
+        nan_dict: dict = nan_df[nan_df > 0].to_dict()
+
+        if len(nan_dict) != 0:
+            raise ValueError(f"{message} contains NaN values. {nan_dict}")

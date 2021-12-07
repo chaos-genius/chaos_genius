@@ -11,6 +11,16 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 
 CELERYBEAT_SCHEDULE = {
+    "anomaly-scheduler": {
+        "task": "chaos_genius.jobs.anomaly_tasks.anomaly_scheduler",
+        "schedule": schedule(timedelta(minutes=10)),
+        "args": ()
+    },
+    'alerts-daily': {
+        'task': 'chaos_genius.jobs.alert_tasks.check_event_alerts',
+        'schedule': crontab(hour="3", minute="0"), # Daily: at 3am
+        'args': ('daily',)
+    },
     # 'anomaly-task-every-minute': {
     #     'task': 'chaos_genius.jobs.anomaly_tasks.add_together',
     #     'schedule': crontab(minute="*"), # Every minutes
@@ -22,36 +32,20 @@ CELERYBEAT_SCHEDULE = {
     #     "schedule": schedule(timedelta(minutes=1)),  # for testing
     #     "args": ()
     # },
-    "anomaly-scheduler": {
-        "task": "chaos_genius.jobs.anomaly_tasks.anomaly_scheduler",
-        "schedule": schedule(timedelta(minutes=10)),
-        # "schedule": schedule(timedelta(seconds=10)),
-        "args": ()
-    },
-    'alerts-weekly': {
-        'task': 'chaos_genius.jobs.alert_tasks.check_alerts',
-        'schedule': crontab(day_of_week="0"), # Weekly: every sunday
-        'args': ('weekly',)
-    },
-    'alerts-daily': {
-        'task': 'chaos_genius.jobs.alert_tasks.check_alerts',
-        'schedule': crontab(hour="3"), # Daily: at 3am
-        'args': ('daily',)
-    },
+    # 'alerts-weekly': {
+    #     'task': 'chaos_genius.jobs.alert_tasks.check_event_alerts',
+    #     'schedule': crontab(day_of_week="0"), # Weekly: every sunday
+    #     'args': ('weekly',)
+    # },
     # 'alerts-hourly': {
-    #     'task': 'chaos_genius.jobs.alert_tasks.check_alerts',
+    #     'task': 'chaos_genius.jobs.alert_tasks.check_event_alerts',
     #     'schedule': crontab(hour="*"), # Hourly: at 0th minute
     #     'args': ('hourly',)
     # },
     # 'alerts-every-15-minute': {
-    #     'task': 'chaos_genius.jobs.alert_tasks.check_alerts',
+    #     'task': 'chaos_genius.jobs.alert_tasks.check_event_alerts',
     #     'schedule': crontab(minute="*/15"), # Every 15 minutes
     #     'args': ('every_15_minute',)
-    # },
-    # 'alerts-every-minute': {
-    #     'task': 'chaos_genius.jobs.alert_tasks.check_alerts',
-    #     'schedule': crontab(minute="*"), # Every minutes
-    #     'args': ('every_minute',)
     # }
 }
 

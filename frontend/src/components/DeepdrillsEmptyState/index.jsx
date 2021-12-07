@@ -1,4 +1,5 @@
 import React from 'react';
+
 import Deepdrill from '../../assets/images/deepdrills-timing.svg';
 
 const DeepdrillsEmptyState = () => {

@@ -5,6 +5,7 @@ x-logging: &default-logging
     max-size: "100m"
     max-file: "5"
   driver: json-file
+
 services:
   chaosgenius-init:
     container_name: chaosgenius-init
@@ -35,10 +36,13 @@ services:
     container_name: chaosgenius-server
     build: .
     command: sh setup/run-backend-docker.sh
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - chaosgenius-db
       - server
     environment:
+      - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -66,6 +70,12 @@ services:
       - TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN=${TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN}
       - MIN_DATA_IN_SUBGROUP=${MIN_DATA_IN_SUBGROUP}
       - MAX_ROWS_FOR_DEEPDRILLS=${MAX_ROWS_FOR_DEEPDRILLS}
+      - MAX_FILTER_SUBGROUPS_ANOMALY=${MAX_FILTER_SUBGROUPS_ANOMALY}
+      - MAX_DEEPDRILLS_SLACK_DAYS=${MAX_DEEPDRILLS_SLACK_DAYS}
+      - MAX_ANOMALY_SLACK_DAYS=${MAX_ANOMALY_SLACK_DAYS}
+      - SENTRY_DSN=${SENTRY_DSN}
+    ports:
+      - "5000:5000"
 
   chaosgenius-webapp:
     container_name: chaosgenius-webapp
@@ -77,7 +87,8 @@ services:
     ports:
       - "8080:8080"
     environment:
-            - REACT_APP_BASE_URL=chaosgenius-server:5000
+      - REACT_APP_BASE_URL=chaosgenius-server:5000
+      - REACT_APP_DISABLE_TELEMETRY=${REACT_APP_DISABLE_TELEMETRY}
     depends_on:
       - chaosgenius-server
 
@@ -111,6 +122,7 @@ services:
     build: .
     command: celery -A run.celery beat --loglevel=DEBUG
     environment:
+      - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -132,6 +144,7 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - SENTRY_DSN=${SENTRY_DSN}
     depends_on:
       - chaosgenius-redis
   
@@ -140,6 +153,7 @@ services:
     build: .
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
     environment:
+      - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -166,6 +180,10 @@ services:
       - TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN=${TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN}
       - MIN_DATA_IN_SUBGROUP=${MIN_DATA_IN_SUBGROUP}
       - MAX_ROWS_FOR_DEEPDRILLS=${MAX_ROWS_FOR_DEEPDRILLS}
+      - MAX_FILTER_SUBGROUPS_ANOMALY=${MAX_FILTER_SUBGROUPS_ANOMALY}
+      - MAX_DEEPDRILLS_SLACK_DAYS=${MAX_DEEPDRILLS_SLACK_DAYS}
+      - MAX_ANOMALY_SLACK_DAYS=${MAX_ANOMALY_SLACK_DAYS}
+      - SENTRY_DSN=${SENTRY_DSN}
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db
@@ -175,6 +193,7 @@ services:
     build: .
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
     environment:
+      - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -196,6 +215,7 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - SENTRY_DSN=${SENTRY_DSN}
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db

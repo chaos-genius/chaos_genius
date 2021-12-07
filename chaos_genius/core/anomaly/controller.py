@@ -22,6 +22,7 @@ from chaos_genius.settings import (
     MAX_SUBDIM_CARDINALITY,
     MIN_DATA_IN_SUBGROUP,
     MULTIDIM_ANALYSIS_FOR_ANOMALY,
+    MAX_ANOMALY_SLACK_DAYS,
 )
 
 logger = logging.getLogger(__name__)
@@ -80,7 +81,7 @@ class AnomalyDetectionController(object):
             self.debug = True
         if self.debug == "False":
             self.debug = False
-        self.slack = self.kpi_info["anomaly_params"].get("slack", 3)
+        self.slack = MAX_ANOMALY_SLACK_DAYS
 
         if self.kpi_info["anomaly_params"]["frequency"] == "H":
             period = int(self.kpi_info["anomaly_params"]["anomaly_period"])
@@ -505,19 +506,18 @@ class AnomalyDetectionController(object):
 
     @staticmethod
     def _to_run_overall(kpi_info: dict):
-        run_optional = kpi_info.get("run_optional", None)
+        run_optional = kpi_info.get("anomaly_params", {}).get("run_optional", None)
 
         return run_optional is None or run_optional["overall"] is True
 
     @staticmethod
     def _to_run_subdim(kpi_info: dict):
-        run_optional = kpi_info.get("run_optional", None)
-
+        run_optional = kpi_info.get("anomaly_params", {}).get("run_optional", None)
         return run_optional is None or run_optional["subdim"] is True
 
     @staticmethod
     def _to_run_data_quality(kpi_info: dict):
-        run_optional = kpi_info.get("run_optional", None)
+        run_optional = kpi_info.get("anomaly_params", {}).get("run_optional", None)
 
         return run_optional is None or run_optional["data_quality"] is True
 
@@ -561,7 +561,8 @@ class AnomalyDetectionController(object):
         """
         kpi_info = kpi.as_dict
 
-        num = 2
+        # start, end, alert trigger, data loader
+        num = 4
         if AnomalyDetectionController._to_run_overall(kpi_info):
             num += 3
         if AnomalyDetectionController._to_run_subdim(kpi_info):

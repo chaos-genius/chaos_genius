@@ -1,18 +1,24 @@
-from datetime import datetime
-from typing import cast
+from datetime import datetime, timedelta
+from typing import Optional, cast
 
 from celery import group
 from celery.app.base import Celery
+from celery.utils.log import get_task_logger
 from sqlalchemy import func
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.sql.functions import coalesce
 
+from chaos_genius.alerts.base_alerts import trigger_anomaly_alerts_for_kpi
+from chaos_genius.controllers.task_monitor import (
+    checkpoint_failure,
+    checkpoint_initial,
+    checkpoint_success,
+)
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.extensions import celery as celery_ext
 
-from chaos_genius.controllers.task_monitor import checkpoint_initial
-
 celery = cast(Celery, celery_ext.celery)
+logger = get_task_logger(__name__)
 
 
 # @celery.task
@@ -46,25 +52,67 @@ def anomaly_single_kpi(kpi_id, end_date=None):
     # TODO: fix circular import
     from chaos_genius.controllers.kpi_controller import run_anomaly_for_kpi
 
-    print(f"Running anomaly for KPI ID: {kpi_id}")
-    checkpoint = checkpoint_initial(kpi_id, "Anomaly", "Anomaly Scheduler - Task initiated")
+    logger.info(f"Running anomaly for KPI ID: {kpi_id}")
+    checkpoint = checkpoint_initial(
+        kpi_id, "Anomaly", "Anomaly Scheduler - Task initiated"
+    )
     task_id = checkpoint.task_id
 
-    status = run_anomaly_for_kpi(kpi_id, end_date, task_id=task_id)
+    anomaly_end_date = run_anomaly_for_kpi(kpi_id, end_date, task_id=task_id)
 
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
 
-    if status:
-        print(f"Completed the anomaly for KPI ID: {kpi_id}.")
+    def _checkpoint_success(checkpoint: str):
+        checkpoint_success(task_id, kpi.id, "Anomaly", checkpoint)
+        logger.info(
+            "(Task: %s, KPI: %d)" " Anomaly - %s - Success", task_id, kpi.id, checkpoint
+        )
+
+    def _checkpoint_failure(checkpoint: str, e: Optional[Exception]):
+        checkpoint_failure(
+            task_id,
+            kpi.id,
+            "Anomaly",
+            checkpoint,
+            e,
+        )
+        logger.exception(
+            "(Task: %s, KPI: %d) " "Anomaly - %s - Exception occured.",
+            task_id,
+            kpi.id,
+            checkpoint,
+            exc_info=e,
+        )
+
+    if anomaly_end_date:
+        logger.info(f"Completed the anomaly for KPI ID: {kpi_id}.")
         kpi.scheduler_params = update_scheduler_params("anomaly_status", "completed")
+        _checkpoint_success("Anomaly complete")
+        try:
+            # Right now, the anomaly use '< end_date' for fetching the data
+            # and inserting in the db, hence we are checking any data point
+            # for last day.
+            # TODO: Add this timedelta variable in some constant file in core
+            updated_time = anomaly_end_date - timedelta(days=1)
+            _, errors = trigger_anomaly_alerts_for_kpi(kpi, updated_time)
+            if not errors:
+                logger.info(f"Triggered the alerts for KPI {kpi_id}.")
+                _checkpoint_success("Alert trigger")
+            else:
+                logger.error(f"Alert trigger failed for the KPI ID: {kpi_id}.")
+                _checkpoint_failure("Alert trigger", None)
+        except Exception as e:
+            logger.error(f"Alert trigger failed for the KPI ID: {kpi_id}.", exc_info=e)
+            _checkpoint_failure("Alert trigger", e)
     else:
-        print(f"Anomaly failed for the for KPI ID: {kpi_id}.")
+        logger.error(f"Anomaly failed for the for KPI ID: {kpi_id}.")
         kpi.scheduler_params = update_scheduler_params("anomaly_status", "failed")
+        _checkpoint_failure("Anomaly complete", None)
 
     flag_modified(kpi, "scheduler_params")
     kpi.update(commit=True)
 
-    return status
+    return anomaly_end_date
 
 
 @celery.task
@@ -73,12 +121,16 @@ def rca_single_kpi(kpi_id: int):
 
     Must be run as a celery task.
     """
-    #TODO: Fix circular imports
+    # TODO: Fix circular imports
     from chaos_genius.controllers.kpi_controller import run_rca_for_kpi
 
     print(f"Running RCA for KPI ID: {kpi_id}")
+    checkpoint = checkpoint_initial(
+        kpi_id, "DeepDrills", "DeepDrills Scheduler - Task initiated"
+    )
+    task_id = checkpoint.task_id
 
-    status = run_rca_for_kpi(kpi_id)
+    status = run_rca_for_kpi(kpi_id, task_id=task_id)
 
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
 

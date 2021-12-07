@@ -2,7 +2,7 @@
 """KPI views for creating and viewing the kpis."""
 import logging
 import traceback  # noqa: F401
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from flask import (  # noqa: F401
     Blueprint,
@@ -304,7 +304,8 @@ def trigger_analytics(kpi_id):
 @cache.memoize()
 def kpi_aggregation(kpi_id, timeline="mom"):
     try:
-        end_date = get_end_date(kpi_id)
+        kpi_info = get_kpi_data_from_id(kpi_id)
+        end_date = get_rca_output_end_date(kpi_info)
 
         data_point = (
             RcaData.query.filter(
@@ -335,7 +336,8 @@ def kpi_aggregation(kpi_id, timeline="mom"):
 @cache.memoize()
 def kpi_line_data(kpi_id):
     try:
-        end_date = get_end_date(kpi_id)
+        kpi_info = get_kpi_data_from_id(kpi_id)
+        end_date = get_rca_output_end_date(kpi_info)
 
         data_point = (
             RcaData.query.filter(
@@ -356,7 +358,8 @@ def kpi_line_data(kpi_id):
 @cache.memoize()
 def rca_analysis(kpi_id, timeline="mom", dimension=None):
     try:
-        end_date = get_end_date(kpi_id)
+        kpi_info = get_kpi_data_from_id(kpi_id)
+        end_date = get_rca_output_end_date(kpi_info)
 
         data_point = (
             RcaData.query.filter(
@@ -387,7 +390,8 @@ def rca_analysis(kpi_id, timeline="mom", dimension=None):
 @cache.memoize()
 def rca_hierarchical_data(kpi_id, timeline="mom", dimension=None):
     try:
-        end_date = get_end_date(kpi_id)
+        kpi_info = get_kpi_data_from_id(kpi_id)
+        end_date = get_rca_output_end_date(kpi_info)
 
         data_point = (
             RcaData.query.filter(
@@ -411,8 +415,7 @@ def rca_hierarchical_data(kpi_id, timeline="mom", dimension=None):
     return final_data
 
 
-def get_end_date(kpi_id):
-    kpi_info = get_kpi_data_from_id(kpi_id)
+def get_rca_output_end_date(kpi_info: dict) -> date:
     end_date = None
 
     if kpi_info["is_static"]:
@@ -424,7 +427,7 @@ def get_end_date(kpi_id):
         return datetime.strptime(end_date, "%Y-%m-%d").date()
 
 
-def get_analysis_date(kpi_id, end_date):
+def get_analysis_date(kpi_id: int, end_date: date) -> int:
     data_point = (
         RcaData.query.filter(
             (RcaData.kpi_id == kpi_id)
@@ -437,8 +440,7 @@ def get_analysis_date(kpi_id, end_date):
     final_data = data_point.data if data_point else []
     analysis_date = final_data[-1]["date"]
     analysis_timestamp = get_rca_timestamp(analysis_date)
-    epoch_timestamp = get_epoch_timestamp(analysis_timestamp)
-    return epoch_timestamp
+    return get_epoch_timestamp(analysis_timestamp)
 
 
 def find_percentage_change(curr_val, prev_val):

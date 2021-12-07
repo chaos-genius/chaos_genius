@@ -40,7 +40,7 @@ def kpi_anomaly_detection(kpi_id):
         period = kpi_info["anomaly_params"]["anomaly_period"]
         hourly = kpi_info["anomaly_params"]["frequency"] == "H"
 
-        end_date = get_end_date(kpi_info)
+        end_date = get_anomaly_output_end_date(kpi_info)
 
         anom_data = get_overall_data(kpi_id, end_date, period)
 
@@ -80,7 +80,7 @@ def kpi_anomaly_drilldown(kpi_id):
         period = kpi_info["anomaly_params"]["anomaly_period"]
         hourly = kpi_info["anomaly_params"]["frequency"] == "H"
 
-        end_date = get_end_date(kpi_info)
+        end_date = get_anomaly_output_end_date(kpi_info)
 
         graph_xlims = get_anomaly_graph_x_lims(end_date, period, hourly)
 
@@ -109,7 +109,7 @@ def kpi_anomaly_data_quality(kpi_id):
         period = kpi_info["anomaly_params"]["anomaly_period"]
         hourly = kpi_info["anomaly_params"]["frequency"] == "H"
 
-        end_date = get_end_date(kpi_info)
+        end_date = get_anomaly_output_end_date(kpi_info)
 
         graph_xlims = get_anomaly_graph_x_lims(end_date, period, hourly)
 
@@ -419,7 +419,7 @@ def get_drilldowns_series_type(kpi_id, drilldown_date):
     return results.series_type
 
 
-def get_end_date(kpi_info: dict) -> date:
+def get_anomaly_output_end_date(kpi_info: dict) -> datetime:
     """Checks if the KPI has a static end date and returns it. Otherwise it tries to get
     end date of overall anomaly detection, and will finally return today's date if that
     is also not found.
@@ -447,10 +447,13 @@ def get_end_date(kpi_info: dict) -> date:
 
     if end_date is None:
         end_date = datetime.today()
-        if not hourly:
-            end_date = end_date.date()
 
-    return end_date
+    if not hourly:
+        end_date = pd.to_datetime(end_date.date())
+    else:
+        end_date = pd.to_datetime(end_date)
+
+    return end_date.to_pydatetime()
 
 
 # --- anomaly params meta information --- #
@@ -927,7 +930,7 @@ def validate_scheduled_time(time):
     return "", time
 
 
-def get_anomaly_end_date(kpi_id: int, hourly: bool):
+def get_anomaly_end_date(kpi_id: int, hourly: bool) -> datetime:
     anomaly_end_date = None
 
     anomaly_end_date_data = (
@@ -941,8 +944,11 @@ def get_anomaly_end_date(kpi_id: int, hourly: bool):
 
     try:
         anomaly_end_date = anomaly_end_date_data.as_dict["data_datetime"]
-        if not hourly:
-            anomaly_end_date = anomaly_end_date.date()
+        if hourly:
+            anomaly_end_date = pd.to_datetime(anomaly_end_date)
+        else:
+            anomaly_end_date = pd.to_datetime(anomaly_end_date.date())
+        anomaly_end_date = anomaly_end_date.to_pydatetime()
     except Exception as err:
         current_app.logger.info(f"Error Found: {err}")
 

@@ -21,6 +21,8 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.rca_data_model import RcaData
+from chaos_genius.databases.models.dashboard_kpi_mapper_model import DashboardKpiMapper
+from chaos_genius.databases.models.dashboard_model import Dashboard
 from chaos_genius.extensions import cache, db
 from chaos_genius.databases.db_utils import chech_editable_field
 from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
@@ -95,11 +97,32 @@ def kpi():
             .order_by(Kpi.created_at.desc())
             .all()
         )
+       
         kpis = []
         for row in results:
             kpi_info = row[0].safe_dict
             data_source_info = row[1].safe_dict
             kpi_info["data_source"] = data_source_info
+            dashboard_kpi_mapper = DashboardKpiMapper.query.filter(
+                DashboardKpiMapper.kpi==kpi_info.get("id") ,
+                DashboardKpiMapper.active==True
+            ).all()
+
+            dashboards = dict()
+            dashboard_id_list=[]
+
+            for dashboard_kpi in dashboard_kpi_mapper:
+                id = getattr(dashboard_kpi,"dashboard") 
+                dashboard_id_list.append(id)
+            dashboard_list=Dashboard.query.filter(
+                Dashboard.id.in_(dashboard_id_list) ,
+                Dashboard.active == True
+            ).all()
+
+            for dashboard in dashboard_list :
+                dashboards[getattr(dashboard , "id")]=getattr(dashboard , "name")
+
+            kpi_info["dashboards"] = dashboards
             kpis.append(kpi_info)
         return jsonify({"count": len(kpis), "data": kpis})
 

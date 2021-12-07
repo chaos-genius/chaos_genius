@@ -1,16 +1,13 @@
 // URL CONSTANTS
+import { env } from '../env';
 
-export const BASE_URL = process.env.REACT_APP_BASE_URL || '';
+export const BASE_URL = env.REACT_APP_BASE_URL || '';
 
 export const attachParams = (relativeUrl, params) => {
   let baseUrl = BASE_URL;
 
   if (baseUrl === '') {
-    if (window.location.hostname === 'localhost') {
-      baseUrl = 'http://localhost:5000';
-    } else {
-      baseUrl = window.location.origin;
-    }
+    baseUrl = window.location.origin;
   }
   console.log(baseUrl);
   const url = new URL(relativeUrl, baseUrl);
@@ -50,4 +47,5 @@ export const DASHBOARD_CREATE_URL = `${BASE_URL}/api/dashboard/create_dashboard`
 export const DASHBOARD_DELETE_URL = `/api/dashboard/delete_dashboard`;
 export const DASHBOARD_EDIT_URL = `/api/dashboard/get_dashboard`;
 export const DASHBOARD_UPDATE_URL = `${BASE_URL}/api/dashboard/edit_dashboard`;
+export const ORGANIZATION_UPDATE_URL = `${BASE_URL}/api/config/update`;
 export const GLOBAL_SETTING_URL = `${BASE_URL}/api/config/global-settings`;

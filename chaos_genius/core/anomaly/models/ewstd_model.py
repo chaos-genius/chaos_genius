@@ -6,9 +6,14 @@ from chaos_genius.core.anomaly.models import AnomalyModel
 from chaos_genius.core.anomaly.utils import get_timedelta
 
 EWSTDSENS = {
-    'high': 0.8,
-    'medium': 0.9,
-    'low': 0.95
+    "high": 0.1,
+    "medium": 0.2,
+    "low": 0.4,
+}
+
+EWSTDFREQ = {
+    "H": 24,
+    "D": 4,
 }
 
 
@@ -29,7 +34,7 @@ class EWSTDModel(AnomalyModel):
         df: pd.DataFrame,
         sensitivity: str,
         frequency: str,
-        pred_df: pd.DataFrame = None
+        pred_df: pd.DataFrame = None,
     ) -> pd.DataFrame:
         """Predict anomalies on data.
 
@@ -47,61 +52,33 @@ class EWSTDModel(AnomalyModel):
         columns
         :rtype: pd.DataFrame
         """
-        df = df.rename(columns={'dt': 'ds', 'y': 'y'})
-
-        # span = window size
-        ew_mean = df["y"].ewm(span=len(df)).mean().iloc[-1]
-        ew_std_dev = df["y"].ewm(span=len(df)).std().iloc[-1]
+        df = df.rename(columns={"dt": "ds", "y": "y"})
 
         num_dev = EWSTDSENS[sensitivity.lower()]
-        num_dev_u = None
-        num_dev_l = None
-
-        if num_dev_u is None:
-            num_dev_u = num_dev
-        if num_dev_l is None:
-            num_dev_l = num_dev
-
-        threshold_u = ew_mean + (num_dev_u * ew_std_dev)
-        threshold_l = ew_mean - (num_dev_l * ew_std_dev)
 
         if pred_df is None:
-            forecast_time = df['ds'].iloc[-1] + get_timedelta(frequency, 1)
+            ew_mean = df["y"].ewm(span=EWSTDFREQ[frequency]).mean().iloc[-1]
+            ew_std_dev = df["y"].ewm(span=EWSTDFREQ[frequency]).std().iloc[-1]
+            threshold_u = ew_mean + (num_dev * ew_std_dev)
+            threshold_l = ew_mean - (num_dev * ew_std_dev)
             forecast_value = (threshold_l + threshold_u)/2
+            forecast_time = df['ds'].iloc[-1] + get_timedelta(frequency, 1)
             df = df.append(
                 {'ds': forecast_time, 'y': forecast_value}, ignore_index=True)
 
-        df['yhat_lower'] = threshold_l
-        df['yhat_upper'] = threshold_u
-        df['yhat'] = (threshold_l + threshold_u)/2
+        df['ew_mean'] = df["y"].ewm(span=EWSTDFREQ[frequency]).mean()
+        df['ew_std_dev'] = df["y"].ewm(span=EWSTDFREQ[frequency]).std().fillna(0)
+        df['yhat_lower'] = df['ew_mean'] - (num_dev * df['ew_std_dev'])
+        df['yhat_upper'] = df['ew_mean'] + (num_dev * df['ew_std_dev'])
+        df['yhat'] = (df['yhat_lower'] + df['yhat_upper'])/2
 
-        df_anomaly = self._detect_anomalies(df)
+        df = df[["ds", "yhat", "yhat_lower", "yhat_upper"]]
 
-        df_anomaly = df_anomaly[['ds', 'yhat', 'yhat_lower', 'yhat_upper']]
-
-        return df_anomaly.rename(columns={
-            'ds': 'dt',
-            'yhat': 'y',
-            'yhat_lower': 'yhat_lower',
-            'yhat_upper': 'yhat_upper'
-        })
-
-    def _detect_anomalies(self, forecast):
-        forecasted = forecast[['ds', 'yhat',
-                               'yhat_lower', 'yhat_upper', 'y']].copy()
-        forecasted['anomaly'] = 0
-        forecasted.loc[forecasted['y'] >
-                       forecasted['yhat_upper'], 'anomaly'] = 1
-        forecasted.loc[forecasted['y'] <
-                       forecasted['yhat_lower'], 'anomaly'] = -1
-
-        # anomaly importances
-
-        forecasted['importance'] = 0
-        forecasted.loc[forecasted['anomaly'] == 1, 'importance'] = \
-            (forecasted['y'] - forecasted['yhat_upper'])/forecast['y']
-
-        forecasted.loc[forecasted['anomaly'] == -1, 'importance'] = \
-            (forecasted['yhat_lower'] - forecasted['y'])/forecast['y']
-
-        return forecasted
+        return df.rename(
+            columns={
+                "ds": "dt",
+                "yhat": "y",
+                "yhat_lower": "yhat_lower",
+                "yhat_upper": "yhat_upper",
+            }
+        )

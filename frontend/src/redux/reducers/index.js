@@ -14,7 +14,10 @@ import { alert } from './Alert';
 import { setting } from './setting';
 import { DashboardHome } from './DashboardHome';
 
+import { organisation } from './Organisation';
+import { config } from './Config';
 import { GlobalSetting } from './GlobalSetting';
+
 const rootReducer = combineReducers({
   dataSource: dataSource,
   kpiExplorer: kpiExplorer,
@@ -29,6 +32,8 @@ const rootReducer = combineReducers({
   alert: alert,
   setting: setting,
   DashboardHome: DashboardHome,
+  organisation: organisation,
+  config: config,
   GlobalSetting: GlobalSetting
 });
 

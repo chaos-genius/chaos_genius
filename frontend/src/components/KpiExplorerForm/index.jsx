@@ -554,14 +554,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         };
       });
     }
-    if (formdata.dimensions.length === 0) {
-      setErrorMsg((prev) => {
-        return {
-          ...prev,
-          dimension: true
-        };
-      });
-    }
+
     if (formdata.query === '') {
       setErrorMsg((prev) => {
         return {
@@ -576,8 +569,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         formdata.dataset &&
         formdata.metriccolumns &&
         formdata.aggregate &&
-        formdata.datetimecolumns) !== '' &&
-      formdata.dimensions.length !== 0
+        formdata.datetimecolumns) !== ''
     ) {
       const kpiInfo = {
         name: formdata.kpiname,
@@ -962,6 +954,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           </div>
           {/* <div className="form-group">
             <label>Dimensions *</label>
+            <label>Dimensions </label>
             <Select
               closeMenuOnSelect={false}
               blurInputOnSelect={false}
@@ -985,7 +978,11 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                 data[2] === 'edit' ? editableStatus('dimensions') : false
               }
               classNamePrefix="selectcategory"
-              placeholder="Select Dimensions"
+              placeholder={
+                formdata.dimensions.length === 0 && data[2] === 'edit'
+                  ? ''
+                  : 'Select Dimensions'
+              }
               menuPlacement="top"
               onChange={(e) => {
                 setFormdata({
@@ -1001,11 +998,12 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                 });
               }}
             />
-            {errorMsg.dimension === true ? (
-              <div className="connection__fail">
-                <p>Select Dimension</p>
-              </div>
-            ) : null}
+            <div className="channel-tip">
+              <p>
+                Select dimensions for enabling sub-dimensional analysis & drill
+                downs
+              </p>
+            </div>
           </div>
           */}
           {/* {inputList && inputList.length !== 0 && (

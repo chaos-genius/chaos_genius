@@ -1,0 +1,40 @@
+@import '../../assets/styles/variable.scss';
+
+.server-error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 83vh;
+  .server-error-card {
+    min-width: 640px;
+    min-height: 388px;
+    background: $white;
+    box-shadow: 4px 6px 32px -2px rgba(226, 226, 226, 0.24);
+    border-radius: 20px;
+    padding: 64px 78px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    .server-error-img {
+      width: 380px;
+      height: 180px;
+      img {
+        width: 100%;
+        height: 100%;
+      }
+    }
+    h5 {
+      font-weight: $font-weight-500;
+      font-size: $font-size-20;
+      line-height: $line-height-30;
+      text-align: center;
+      letter-spacing: $letter-spacing;
+      color: $black_variation-2;
+      margin-top: 24px;
+      &:last-child {
+        margin-top: 0px;
+      }
+    }
+  }
+}

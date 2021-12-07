@@ -14,11 +14,7 @@ def bound_between(min_val, val, max_val):
     return min(max(val, min_val), max_val)
 
 
-def get_last_date_in_db(
-    kpi_id: int,
-    series: str,
-    subgroup: str = None
-) -> Any or None:
+def get_last_date_in_db(kpi_id: int, series: str, subgroup: str = None) -> Any or None:
     """Get last date for which anomaly was computed.
 
     :param kpi_id: kpi id to check for
@@ -102,17 +98,18 @@ def get_timedelta(freq, diff):
 def date_time_checker(input_data, datetime_obj, dt_col, freq):
     if freq in {"D", "daily"}:
         temp_dt = input_data[dt_col].apply(
-            lambda val: datetime(val.year, val.month, val.day))
-        dt_obj = datetime(
-            datetime_obj.year, datetime_obj.month, datetime_obj.day)
+            lambda val: datetime(val.year, val.month, val.day)
+        )
+        dt_obj = datetime(datetime_obj.year, datetime_obj.month, datetime_obj.day)
         return dt_obj not in temp_dt.to_list()
 
     if freq in {"H", "hourly"}:
         temp_dt = input_data[dt_col].apply(
-            lambda val: datetime(val.year, val.month, val.day, val.hour))
+            lambda val: datetime(val.year, val.month, val.day, val.hour)
+        )
         dt_obj = datetime(
-            datetime_obj.year, datetime_obj.month,
-            datetime_obj.day, datetime_obj.hour)
+            datetime_obj.year, datetime_obj.month, datetime_obj.day, datetime_obj.hour
+        )
         return dt_obj not in temp_dt.to_list()
 
 

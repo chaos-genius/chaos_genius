@@ -3,9 +3,10 @@ import os
 import io
 import json
 import pickle
-from typing import Optional
+from typing import Optional, List, Tuple
 import pandas as pd
 import datetime
+from datetime import date
 from chaos_genius.utils.io_helper import is_file_exists
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.alert_model import Alert
@@ -20,11 +21,11 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 logger = logging.getLogger()
 
 FREQUENCY_DICT = {
-    "weekly": datetime.timedelta(days = 7, hours = 0, minutes = 0),
-    "daily": datetime.timedelta(days = 1, hours = 0, minutes = 0),
-    "hourly": datetime.timedelta(days = 0, hours = 1, minutes = 0),
-    "every_15_minute": datetime.timedelta(days = 0, hours = 0, minutes = 15),
-    "every_minute": datetime.timedelta(days = 0, hours = 0, minutes = 1)
+    "weekly": datetime.timedelta(days=7, hours=0, minutes=0),
+    "daily": datetime.timedelta(days=1, hours=0, minutes=0),
+    "hourly": datetime.timedelta(days=0, hours=1, minutes=0),
+    "every_15_minute": datetime.timedelta(days=0, hours=0, minutes=15),
+    "every_minute": datetime.timedelta(days=0, hours=0, minutes=1)
 }
 
 
@@ -211,47 +212,52 @@ class StaticEventAlertController:
 
 class AnomalyAlertController:
 
-    def __init__(self, alert_info):
+    def __init__(self, alert_info, anomaly_end_date=None):
         self.alert_info = alert_info
+        self.now = datetime.datetime.now()
+        if anomaly_end_date:
+            self.anomaly_end_date = anomaly_end_date
+        else:
+            self.anomaly_end_date = self.now - datetime.timedelta(days=3)
 
     def check_and_prepare_alert(self):
-        
         kpi_id = self.alert_info["kpi"]
-
-        curr_date_time = datetime.datetime.now()
-        check_time = FREQUENCY_DICT[self.alert_info['alert_frequency']]
-
+        alert_id = self.alert_info["id"]
         alert: Optional[Alert] = Alert.get_by_id(self.alert_info["id"])
         if alert is None:
-            logger.debug(f"Could not find alert by ID: {self.alert_info['id']}")
+            logger.info(f"Could not find alert by ID: {self.alert_info['id']}")
             return False
 
+        check_time = FREQUENCY_DICT[self.alert_info['alert_frequency']]
+        fuzzy_interval = datetime.timedelta(minutes = 30) # this represents the upper bound of the time interval that an alert can fall short of the check_time hours before which it can be sent again 
         if alert.last_alerted is not None and \
-                alert.last_alerted > (curr_date_time - check_time):
-            logger.debug(f"Skipping alert with ID {self.alert_info['id']} since it was already run")
+                alert.last_alerted > (self.now - check_time) and \
+                    alert.last_alerted > ((self.now + fuzzy_interval) - check_time):
+            #this check works in three steps
+            # 1) Verify if the last alerted value of an alert is not None
+            # 2) Verify if less than check_time hours have elapsed since the last alert was sent
+            # 3) If less than check_time hours have elapsed, check if the additonal time to complete check_time hours is greater than fuzzy_interval
+            logger.info(f"Skipping alert with ID {self.alert_info['id']} since it was already run")
             return True
+        alert.update(commit=True, last_alerted=self.now)
 
-        alert.update(commit=True, last_alerted=curr_date_time)
-
-        lower_limit_dt = curr_date_time - FREQUENCY_DICT[self.alert_info['alert_frequency']]
-        alert_id = self.alert_info["id"]
-
+        # TODO: Add the series type filter for query optimisation
         anomaly_data = AnomalyDataOutput.query.filter(
                                             AnomalyDataOutput.kpi_id == kpi_id,
                                             AnomalyDataOutput.anomaly_type == 'overall',
-                                            AnomalyDataOutput.is_anomaly == 1,
-                                            AnomalyDataOutput.data_datetime > lower_limit_dt
+                                            AnomalyDataOutput.is_anomaly.in_([1,-1]),
+                                            AnomalyDataOutput.data_datetime >= self.anomaly_end_date
                                         ).all()
 
         if len(anomaly_data) == 0:
-            logger.debug(f"No anomaly exists (Alert ID - {alert_id})")
+            logger.info(f"No anomaly exists (Alert ID - {alert_id})")
             return True
 
-        anomaly_data.sort(key = lambda anomaly: getattr(anomaly, 'severity'), reverse = True)
+        anomaly_data.sort(key=lambda anomaly: getattr(anomaly, 'severity'), reverse=True)
         anomaly = anomaly_data[0]
-        
+
         if getattr(anomaly, 'severity') < self.alert_info['severity_cutoff_score']:
-            logger.debug(f"The anomaliy's severity score is below the threshold (Alert ID - {alert_id})")
+            logger.info(f"The anomaliy's severity score is below the threshold (Alert ID - {alert_id})")
             return True
 
         logger.info(f"Alert ID {alert_id} is sent to the respective alert channel")
@@ -260,20 +266,19 @@ class AnomalyAlertController:
             return self.send_alert_email(anomaly)
         elif self.alert_info["alert_channel"] == "slack":
             return self.send_slack_alert(anomaly)
- 
-        
+
     def send_alert_email(self, anomaly):
 
         alert_channel_conf = self.alert_info["alert_channel_conf"]
 
         if type(alert_channel_conf) != dict:
-            logger.debug(f"The alert channel configuration is incorrect for Alert ID - {self.alert_info['id']}")
+            logger.info(f"The alert channel configuration is incorrect for Alert ID - {self.alert_info['id']}")
             return False
 
         recipient_emails = alert_channel_conf.get("email", [])
         
         if recipient_emails:
-            subject = f"KPI Alert Notification: [Alert Name - {self.alert_info['alert_name']}] [Alert ID - {self.alert_info['id']}]"
+            subject = f"{self.alert_info['alert_name']} - Chaos Genius Alert❗"
             alert_message = self.alert_info["alert_message"]
             time_of_anomaly = str(getattr(anomaly, 'data_datetime'))
             highest_value = round(getattr(anomaly, 'y'), 1)
@@ -285,7 +290,7 @@ class AnomalyAlertController:
             kpi_obj = Kpi.get_by_id(kpi_id)
             
             if kpi_obj is None:
-                logger.debug(f"No KPI exists for Alert ID - {self.alert_info['id']}")
+                logger.info(f"No KPI exists for Alert ID - {self.alert_info['id']}")
                 return False
 
             kpi_name = getattr(kpi_obj, 'name')
@@ -301,12 +306,13 @@ class AnomalyAlertController:
                                             severity_value = severity_value,
                                             kpi_name = kpi_name,
                                             alert_frequency = self.alert_info['alert_frequency'].capitalize(),
-                                            preview_text = "Anomaly Alert"
+                                            preview_text = "Anomaly Alert" ,
+                                            alert_name = self.alert_info.get("alert_name")
                                         )
-            logger.debug(f"Status for Alert ID - {self.alert_info['id']} : {test}")
+            logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
             return True
         else:
-            logger.debug(f"No receipent email available (Alert ID - {self.alert_info['id']})")
+            logger.info(f"No receipent email available (Alert ID - {self.alert_info['id']})")
             return False
 
     def send_template_email(self, template, recipient_emails, subject, **kwargs):
@@ -324,7 +330,7 @@ class AnomalyAlertController:
         if test == True:
             logger.info(f"The email for Alert ID - {self.alert_info['id']} was successfully sent")
         else:
-            logger.debug(f"The email for Alert ID - {self.alert_info['id']} has not been sent")
+            logger.info(f"The email for Alert ID - {self.alert_info['id']} has not been sent")
         
         return test
 
@@ -347,7 +353,7 @@ class AnomalyAlertController:
         if test == "ok":
             logger.info(f"The slack alert for Alert ID - {self.alert_info['id']} was successfully sent")
         else:
-            logger.debug(f"The slack alert for Alert ID - {self.alert_info['id']} has not been sent")
+            logger.info(f"The slack alert for Alert ID - {self.alert_info['id']} has not been sent")
         
         message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
         return message
@@ -402,3 +408,32 @@ def check_and_trigger_alert(alert_id):
         static_kpi_alert = StaticKpiAlertController(alert_info.as_dict)
     
     return True
+
+
+def trigger_anomaly_alerts_for_kpi(kpi_obj: Kpi, end_date: date) -> Tuple[List[int], List[int]]:
+    """Triggers anomaly alerts starting from end_date.
+
+    Args:
+        kpi_obj (Kpi): Object of kpi for which alerts are to be triggered
+        end_date (dateimte.datetime): Datetime object containing the upper bound of anomaly date values
+
+    Returns:
+        List[int]: List of alert IDs for which alert messages were successfully sent
+        List[int]: List of alert IDs for which alert failed
+    """
+    success_alerts = []
+    errors = []
+    alerts = Alert.query.filter(
+                            Alert.kpi == kpi_obj.id,
+                            Alert.active == True,
+                            Alert.alert_status == True
+                        ).all()
+    for alert in alerts:
+        try:
+            anomaly_obj = AnomalyAlertController(alert.as_dict, anomaly_end_date=end_date)
+            anomaly_obj.check_and_prepare_alert()
+            success_alerts.append(alert.id)
+        except Exception as e:
+            logger.error(f"Error running alert for Alert ID: {alert.id}", exc_info=e)
+            errors.append(alert.id)
+    return success_alerts, errors

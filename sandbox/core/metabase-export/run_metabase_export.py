@@ -7,7 +7,7 @@ metabase_db_credentials = {
     "pass": "password",
     "host": "localhost",
     "port": "5432",
-    "database": "metabase_imported_data"
+    "database": "metabase_imported_data",
 }
 
 x = MetabaseExport(metabase_db_credentials)

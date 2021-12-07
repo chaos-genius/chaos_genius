@@ -4,7 +4,9 @@ import warnings
 
 import pandas as pd
 from greykite.framework.templates.autogen.forecast_config import (
-    ForecastConfig, MetadataParam)
+    ForecastConfig,
+    MetadataParam,
+)
 from greykite.framework.templates.forecaster import Forecaster
 from greykite.framework.templates.model_templates import ModelTemplateEnum
 
@@ -12,18 +14,9 @@ from chaos_genius.core.anomaly.models import AnomalyModel
 
 warnings.filterwarnings("ignore")
 
-GKSENS = {
-    "high": 0.8,
-    "medium": 0.9,
-    "low": 0.95
-}
+GKSENS = {"high": 0.8, "medium": 0.9, "low": 0.95}
 
-GKFREQ = {
-    'hourly': 'H',
-    'daily': 'D',
-     "d" : "D", 
-     "h" : "H"
-}
+GKFREQ = {"hourly": "H", "daily": "D", "d": "D", "h": "H"}
 
 
 class GreyKiteModel(AnomalyModel):
@@ -43,7 +36,7 @@ class GreyKiteModel(AnomalyModel):
         df: pd.DataFrame,
         sensitivity: str,
         frequency: str,
-        pred_df: pd.DataFrame = None
+        pred_df: pd.DataFrame = None,
     ) -> pd.DataFrame:
         """Predict anomalies on data.
 
@@ -63,9 +56,7 @@ class GreyKiteModel(AnomalyModel):
         """
         df = df.rename(columns={"dt": "ds", "y": "y"})
         metadata = MetadataParam(
-            time_col="ds",
-            value_col="y",
-            freq=GKFREQ[frequency.lower()]
+            time_col="ds", value_col="y", freq=GKFREQ[frequency.lower()]
         )
 
         # Creates forecasts and stores the result
@@ -80,18 +71,21 @@ class GreyKiteModel(AnomalyModel):
                 **self.model_kwargs,
                 coverage=GKSENS[sensitivity.lower()],
                 metadata_param=metadata
-            )
+            ),
         )
 
         forecast_df = result.forecast.df
         forecast_df = forecast_df[
-            ['ds', 'forecast', 'forecast_lower', 'forecast_upper']]
-        forecast_df = forecast_df.rename(columns={
-            'ds': 'dt',
-            'forecast': 'y',
-            'forecast_lower': 'yhat_lower',
-            'forecast_upper': 'yhat_upper'
-        })
+            ["ds", "forecast", "forecast_lower", "forecast_upper"]
+        ]
+        forecast_df = forecast_df.rename(
+            columns={
+                "ds": "dt",
+                "forecast": "y",
+                "forecast_lower": "yhat_lower",
+                "forecast_upper": "yhat_upper",
+            }
+        )
 
         if pred_df is not None:
             return forecast_df.iloc[:-1]

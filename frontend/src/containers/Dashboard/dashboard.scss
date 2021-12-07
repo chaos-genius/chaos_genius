@@ -2,3 +2,9 @@
 .setting-section {
   width: 100% !important;
 }
+.empty-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 74vh;
+}

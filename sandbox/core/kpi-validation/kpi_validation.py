@@ -34,34 +34,53 @@ def validate_kpi(
 
     # Preliminary Check that the KPI column exists
     # This check must be done independently. Otherwise, the other 3 checks will fail!
-    status_bool, status_msg = column_exists(df, column_name=[kpi_column_name, date_column_name])
+    status_bool, status_msg = column_exists(
+        df, column_name=[kpi_column_name, date_column_name]
+    )
     if debug:
-        print('Check #0: KPI column and Datetime column exist in DataFrame')
+        print("Check #0: KPI column and Datetime column exist in DataFrame")
         print(status_bool, status_msg, sep=", ")
     if not status_bool:
         return status_bool, status_msg
-    
+
     # Validation check results
     validations = [
-        {'debug_str': 'Check #1: Validate column fits agg type', 'status': validate_agg_type_fits_column(df, column_name=kpi_column_name, agg_type=agg_type)}, 
-        {'debug_str': 'Check #2: Validate kpi not datetime', 'status': validate_kpi_not_datetime(df, kpi_column_name=kpi_column_name, date_column_name=date_column_name)}, 
-        {'debug_str': 'Check #3: Validate date column is parseable', 'status': validate_date_column_is_parseable(df, date_column_name=date_column_name, date_format=date_format, unix_unit=unix_unit)},
+        {
+            "debug_str": "Check #1: Validate column fits agg type",
+            "status": validate_agg_type_fits_column(
+                df, column_name=kpi_column_name, agg_type=agg_type
+            ),
+        },
+        {
+            "debug_str": "Check #2: Validate kpi not datetime",
+            "status": validate_kpi_not_datetime(
+                df, kpi_column_name=kpi_column_name, date_column_name=date_column_name
+            ),
+        },
+        {
+            "debug_str": "Check #3: Validate date column is parseable",
+            "status": validate_date_column_is_parseable(
+                df,
+                date_column_name=date_column_name,
+                date_format=date_format,
+                unix_unit=unix_unit,
+            ),
+        },
     ]
     for validation in validations:
-        status_bool, status_msg = validation['status']
+        status_bool, status_msg = validation["status"]
         if debug:
-            print(validation['debug_str'])
+            print(validation["debug_str"])
             print(status_bool, status_msg, sep=", ")
         if not status_bool:
             return status_bool, status_msg
 
     # All Validation Checks have passed if code reaches here!
-    return True, 'Accepted!'
+    return True, "Accepted!"
 
 
 def column_exists(
-    df: pd.core.frame.DataFrame,
-    column_name: Union[str, List[str]]
+    df: pd.core.frame.DataFrame, column_name: Union[str, List[str]]
 ) -> Tuple[bool, str]:
     """Validates if a column, or list of columns exists in the input DataFrame
 
@@ -73,9 +92,11 @@ def column_exists(
     :rtype: Tuple[bool, str]
     """
     # Lambda function templates to create string output
-    valid_str = 'Accepted!'
+    valid_str = "Accepted!"
     single_col_str = lambda col: f'"{col}" was not found as a column in the table!'
-    multi_col_str = lambda cols: f'''{", ".join([f'"{col}"' for col in cols])} were not found as columns in the table!'''
+    multi_col_str = (
+        lambda cols: f"""{", ".join([f'"{col}"' for col in cols])} were not found as columns in the table!"""
+    )
 
     # column_name is a string. Single column to check
     if isinstance(column_name, str):
@@ -86,7 +107,7 @@ def column_exists(
     else:
         # Find which cols do not exist in DataFrame
         not_found_cols = [col for col in column_name if col not in df.columns]
-        
+
         if len(not_found_cols) == 1:
             return False, single_col_str(not_found_cols[0])
         if len(not_found_cols) > 1:
@@ -96,9 +117,7 @@ def column_exists(
 
 
 def validate_agg_type_fits_column(
-    df: pd.core.frame.DataFrame, 
-    column_name: str, 
-    agg_type: str 
+    df: pd.core.frame.DataFrame, column_name: str, agg_type: str
 ) -> Tuple[bool, str]:
     """Validates if agggregation type is supported and is valid for the specified column.
 
@@ -114,19 +133,23 @@ def validate_agg_type_fits_column(
     # Check if aggregation type is supported
     SUPPORTED_AGGREGATIONS = ["mean", "sum", "count"]
     if agg_type not in SUPPORTED_AGGREGATIONS:
-        return False, f'"{agg_type}" aggregation is not supported.\nSupported aggregations are {", ".join(SUPPORTED_AGGREGATIONS)}'
+        return (
+            False,
+            f'"{agg_type}" aggregation is not supported.\nSupported aggregations are {", ".join(SUPPORTED_AGGREGATIONS)}',
+        )
 
     # Check if trying to use a numerical aggregation on a categorical column.
-    if str(df[column_name].dtype) == 'object' and agg_type != 'count':
-        return False, f'"{column_name}" column is categorical. Quantitative data is required to perform {agg_type} aggregation.'
+    if str(df[column_name].dtype) == "object" and agg_type != "count":
+        return (
+            False,
+            f'"{column_name}" column is categorical. Quantitative data is required to perform {agg_type} aggregation.',
+        )
 
-    return True, 'Accepted!'
+    return True, "Accepted!"
 
 
 def validate_kpi_not_datetime(
-    df: pd.core.frame.DataFrame,
-    kpi_column_name: str,
-    date_column_name: str
+    df: pd.core.frame.DataFrame, kpi_column_name: str, date_column_name: str
 ) -> Tuple[bool, str]:
     """Validates if kpi column is not the same as the date column.
 
@@ -140,7 +163,9 @@ def validate_kpi_not_datetime(
     :rtype: Tuple[bool, str]
     """
     status = kpi_column_name != date_column_name
-    message = 'Accepted!' if status else 'KPI column cannot be the same as the date column'
+    message = (
+        "Accepted!" if status else "KPI column cannot be the same as the date column"
+    )
     return status, message
 
 
@@ -163,18 +188,20 @@ def validate_date_column_is_parseable(
     :return: returns a tuple with the status as a bool and a status message
     :rtype: Tuple[bool, str]
     """
-    valid_str = 'Accepted!'
+    valid_str = "Accepted!"
     # Exit early if date column is a datetime object.
     if is_datetime(df[date_column_name]):
         return True, valid_str
-    
+
     generic_err_msg = f'Unable to parse "{date_column_name}" column. Check that your date column is formatted properly and consistely.'
     out_of_bounds_msg = f'Timestamps in "{date_column_name}" were out of bounds. Check that your date column is formatted properly and consistely.'
 
     if unix_unit:
         # If a unix_unit is specified, it will try to convert with this unit
         try:
-            pd.to_datetime(df[date_column_name], unit=unix_unit, infer_datetime_format=True)
+            pd.to_datetime(
+                df[date_column_name], unit=unix_unit, infer_datetime_format=True
+            )
         except pd.errors.OutOfBoundsDatetime as ex:
             return False, out_of_bounds_msg
         except Exception as ex:
@@ -182,7 +209,9 @@ def validate_date_column_is_parseable(
     elif date_format:
         # If a date_format is specified, it will try to convert with this format
         try:
-            pd.to_datetime(df[date_column_name], format=date_format, infer_datetime_format=True)
+            pd.to_datetime(
+                df[date_column_name], format=date_format, infer_datetime_format=True
+            )
         except pd.errors.OutOfBoundsDatetime as ex:
             return False, out_of_bounds_msg
         except Exception as ex:
@@ -195,6 +224,6 @@ def validate_date_column_is_parseable(
             return False, out_of_bounds_msg
         except Exception as ex:
             return False, f"{generic_err_msg}"
-    
+
     # datetime column is parseable if code reaches here.
     return True, valid_str

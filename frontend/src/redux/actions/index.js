@@ -58,6 +58,12 @@ import {
   getUpdateDashboard
 } from './DashboardHome';
 
+import {
+  onboardingOrganisationStatus,
+  onboardOrganisation,
+  onboardOrganisationUpdate
+} from './Organisation';
+import { getDashboardConfig } from './Config';
 import { getGlobalSetting } from './GlobalSetting';
 export {
   getAllDataSources,
@@ -109,5 +115,9 @@ export {
   getCreateDashboard,
   getEditDashboard,
   getUpdateDashboard,
+  onboardingOrganisationStatus,
+  onboardOrganisation,
+  onboardOrganisationUpdate,
+  getDashboardConfig,
   getGlobalSetting
 };

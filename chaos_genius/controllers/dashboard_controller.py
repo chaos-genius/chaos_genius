@@ -47,7 +47,19 @@ def create_dashboard(name):
     new_dashboard_obj = Dashboard(name=name)
     return new_dashboard_obj
 
-def edit_dashboard_kpis(dashboard_id,kpi_delete_list,kpi_add_list):
+def edit_dashboard_kpis(dashboard_id,kpi_list):
+    current_mapper_list = DashboardKpiMapper.query.filter(
+                                                        DashboardKpiMapper.dashboard == dashboard_id,
+                                                        DashboardKpiMapper.active == True
+                                                      ).all()
+
+    current_kpi_list = []
+    for mapper in current_mapper_list:
+        current_kpi_list.append(mapper.kpi)
+
+    kpi_delete_list = [kpi for kpi in current_kpi_list if kpi not in kpi_list]
+    kpi_add_list = [kpi for kpi in kpi_list if kpi not in current_kpi_list]
+
     mapper_delete_list = []
     if kpi_delete_list:
         mapper_delete_list = DashboardKpiMapper.query.filter(DashboardKpiMapper.dashboard == dashboard_id,
@@ -74,10 +86,10 @@ def check_kpis_in_dashboard(dashboard_id, kpi_ids):
                                                   DashboardKpiMapper.kpi.in_(kpi_ids),
                                                   DashboardKpiMapper.active == True
                                                  ).all()
-    
+
     temp_list = []
 
     for val in mapper_list:
         temp_list.append(val.kpi)
-    
+
     return set(kpi_ids).issubset(temp_list)

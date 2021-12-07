@@ -3,7 +3,6 @@
 from flask import Blueprint, current_app, request, jsonify
 import datetime as dt
 from chaos_genius.controllers.dashboard_controller import (
-    check_kpis_in_dashboard,
     create_dashboard,
     get_dashboard_dict_by_id,
     get_dashboard_by_id,
@@ -24,7 +23,7 @@ def create_new_dashboard():
         kpi_list = body["kpi_list"]
         new_dashboard = create_dashboard(dashboard_name)
         new_dashboard.save(commit=True)
-        mapper_list_dict = edit_dashboard_kpis(new_dashboard.id,[],kpi_list)
+        mapper_list_dict = edit_dashboard_kpis(new_dashboard.id,kpi_list)
         mapper_list = mapper_list_dict["mapper_add_list"]
         for mapper in mapper_list:
             mapper.save(commit=True)
@@ -44,20 +43,14 @@ def edit_dashboard():
         body = request.get_json()
         dashboard_id = body["dashboard_id"]
         dashboard_name = body["dashboard_name"]
-        kpi_delete_list = body["kpi_delete_list"]
-        kpi_add_list = body["kpi_add_list"]
+        kpi_list = body["kpi_list"]
 
         dashboard_obj = get_dashboard_by_id(dashboard_id)
         if dashboard_obj is not None:
-            if not(check_kpis_in_dashboard(dashboard_id, kpi_delete_list)):
-                status = "failure"
-                message = "Cannot delete KPIs which do not belong to the specified dashboard"
-                return jsonify({"status":status, "message":message})
-
             if dashboard_name != dashboard_obj.name:
                 dashboard_obj.name = dashboard_name
 
-            mapper_list_dict = edit_dashboard_kpis(dashboard_obj.id,kpi_delete_list,kpi_add_list)
+            mapper_list_dict = edit_dashboard_kpis(dashboard_obj.id,kpi_list)
             for mapper_obj in mapper_list_dict["mapper_delete_list"]:
                 mapper_obj.active = False
                 mapper_obj.save(commit=True)
@@ -68,7 +61,7 @@ def edit_dashboard():
             dashboard_obj.last_modified = dt.datetime.utcnow()
             dashboard_obj.save(commit=True)
             status = "success"
-            message = "All changes successfully saved"
+            message = "All changes saved successfully"
         else:
             status="failure"
             message="Dashboard with the provided ID does not exist"

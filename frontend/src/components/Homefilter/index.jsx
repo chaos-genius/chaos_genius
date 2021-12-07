@@ -5,6 +5,7 @@ import Dropdown from '../../assets/images/dropdownlist.svg';
 import Fuse from 'fuse.js';
 import './homefilter.scss';
 import { useState } from 'react';
+import { formatDateTime } from '../../utils/date-helper';
 
 const Homefilter = ({ data }) => {
   const [filterData, setFilterData] = useState(data);
@@ -29,14 +30,22 @@ const Homefilter = ({ data }) => {
     }
   };
 
-  // const onSort = (type) => {
-  //   if (type) {
-  //     let value = data.sort(function (a, b) {
-  //       return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
-  //     });
-  //     setFilterData(value);
-  //   }
-  // };
+  const onSort = (type) => {
+    let value = data.sort(function (a, b) {
+      if (type === 'alpha') {
+        return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+      } else if (type === 'recent') {
+        return formatDateTime(b.created_at) - formatDateTime(a.created_at);
+      } else if (type === 'kpi') {
+        return a.kpi_count < b.kpi_count
+          ? -1
+          : a.kpi_count > b.kpi_count
+          ? 1
+          : 0;
+      }
+    });
+    setFilterData([...value]);
+  };
 
   return (
     <div className="common-filter-section">
@@ -63,9 +72,9 @@ const Homefilter = ({ data }) => {
               <img src={Dropdown} alt="List" />
             </div>{' '}
             <ul className="dropdown-menu">
-              {/* <li onClick={() => onSort('alpha')}>Alphabetical</li>
+              <li onClick={() => onSort('alpha')}>Alphabetical</li>
               <li onClick={() => onSort('recent')}>Recently added</li>
-              <li onClick={() => onSort('kpi')}>No of KPI’s</li> */}
+              <li onClick={() => onSort('kpi')}>No of KPI’s</li>
             </ul>
           </div>
         </div>

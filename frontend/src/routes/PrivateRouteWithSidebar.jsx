@@ -5,45 +5,88 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Route, withRouter } from 'react-router';
 import { ToastContainer, toast } from 'react-toastify';
 
-// import { Redirect } from 'react-router-dom';
+import { env } from '../env';
+
+import { useHistory } from 'react-router-dom';
 // import { isAuthenticated } from '../utils/user-helper';
 import 'react-toastify/dist/ReactToastify.css';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 
-import { getConnectionType, getGlobalSetting } from '../redux/actions';
+import {
+  getConnectionType,
+  getGlobalSetting,
+  onboardingOrganisationStatus
+} from '../redux/actions';
 
 import { connectionContext } from '../components/context';
+import { getOnboardingStatus } from '../redux/actions';
 import posthog from 'posthog-js';
+import ServerError from '../containers/ServerError';
 
 const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
   const dispatch = useDispatch();
+  const history = useHistory();
   const [stateValue, setState] = useState();
   const { connectionType } = useSelector((state) => state.dataSource);
   const { globalSettingData } = useSelector((state) => state.GlobalSetting);
-
-  useEffect(() => {
-    // process.env.NODE_ENV === 'development'
-
-    if (process.env.REACT_APP_DISABLE_TELEMETRY === 'true' || process.env.NODE_ENV === 'development') {
+  const { isLoading, error, onboardingList } = useSelector(
+    (state) => state.onboarding
+  );
+  const { organisationData } = useSelector((state) => state.organisation);
+  useEffect(() => {  
+    if ( env.REACT_APP_DISABLE_TELEMETRY === 'true' || env.NODE_ENV === 'development') {
       console.log('disable telemetry');
       // eslint-disable-next-line react-hooks/exhaustive-deps
     } else {
-      posthog.init('phc_KcsaN1oBtVUwKUvd9owb3Cz42MYDpR6No00EJRLAprH', {
-        api_host: 'https://app.posthog.com'
-      });
+      if (
+        organisationData !== undefined &&
+        Object.keys(organisationData).length &&
+        organisationData.active
+      ) {
+        const userEmail = organisationData.config_setting.account.email;
+        const isAnonymized =
+          organisationData.config_setting.metrics
+            .anonymize_usage_data_collection;
+        if (isAnonymized === false) {
+          posthog.init('phc_KcsaN1oBtVUwKUvd9owb3Cz42MYDpR6No00EJRLAprH', {
+            api_host: 'https://app.posthog.com',
+            loaded: function (posthog) {
+              posthog.identify(userEmail);
+            }
+          });
+        } else {
+          posthog.init('phc_KcsaN1oBtVUwKUvd9owb3Cz42MYDpR6No00EJRLAprH', {
+            api_host: 'https://app.posthog.com'
+          });
+        }
+      }
     }
-  }, []);
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organisationData]);
+  
   useEffect(() => {
     dispatchGetConnectionType();
     dispatch(getGlobalSetting());
+    dispatch(getOnboardingStatus());
+    dispatch(onboardingOrganisationStatus());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const dispatchGetConnectionType = () => {
     dispatch(getConnectionType());
   };
+
+  useEffect(() => {
+    if (organisationData === undefined &&
+      Object.keys(onboardingList).length !== 0 &&
+      onboardingList.organisation_onboarding !== undefined &&
+      onboardingList.organisation_onboarding === false
+    ) {
+      history.push('/organisation-onboarding');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onboardingList]);
 
   useEffect(() => {
     if (globalSettingData) {
@@ -57,6 +100,16 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectionType]);
+
+  if (isLoading) {
+    return (
+      <div className="load loader-page">
+        <div className="preload"></div>
+      </div>
+    );
+  } else if (error === 502 || error === 503 || error === 504) {
+    return <ServerError />;
+  }
 
   return (
     <Route

@@ -48,6 +48,14 @@ def kpi():
             return jsonify({"error": "The request payload is not in JSON format"})
 
         data = request.get_json()
+        data["dimensions"] = [] if data["dimensions"] is None else data["dimensions"]
+
+        if data.get("kpi_query", "").strip():
+            data["kpi_query"] = data["kpi_query"].strip()
+            # remove trailing semicolon
+            if data["kpi_query"][-1] == ";":
+                data["kpi_query"] = data["kpi_query"][:-1]
+
         new_kpi = Kpi(
             name=data.get("name"),
             is_certified=data.get("is_certified"),
@@ -84,6 +92,7 @@ def kpi():
 
         return jsonify(
             {
+                "data": {"kpi_id": new_kpi.id},
                 "message": f"KPI {new_kpi.name} has been created successfully.",
                 "status": "success",
             }
@@ -133,9 +142,11 @@ def get_all_kpis():
 
     status, message = "success", ""
     timeline = request.args.get("timeline", "wow")
-    results = Kpi.query.filter(
-        Kpi.active == True  # noqa: E712
-    ).order_by(Kpi.created_at.desc()).all()
+    results = (
+        Kpi.query.filter(Kpi.active == True)  # noqa: E712
+        .order_by(Kpi.created_at.desc())
+        .all()
+    )
 
     ret = []
     metrics = ["name", "metric", "id"]
@@ -297,6 +308,22 @@ def get_kpi_info(kpi_id):
     return jsonify({"message": message, "status": status, "data": data})
 
 
+@blueprint.route("/<int:kpi_id>/trigger-analytics", methods=["GET"])
+def trigger_analytics(kpi_id):
+
+    # TODO: Fix circular import error
+    from chaos_genius.jobs.anomaly_tasks import ready_rca_task, ready_anomaly_task
+
+    rca_task = ready_rca_task(kpi_id)
+    anomaly_task = ready_anomaly_task(kpi_id)
+    if rca_task is not None and anomaly_task is not None:
+        rca_task.apply_async()
+        anomaly_task.apply_async()
+    else:
+        print(f"Could not analytics since newly added KPI was not found: {kpi_id}")
+    return jsonify({"message": "RCA and Anomaly triggered successfully"})
+
+
 @cache.memoize()
 def kpi_aggregation(kpi_id, timeline="mom"):
     try:
@@ -345,7 +372,7 @@ def kpi_line_data(kpi_id):
 
         final_data = data_point.data if data_point else []
     except Exception as err:
-        logger.error(f'Error in KPI Line data retrieval: {err}', exc_info=1)
+        logger.error(f"Error in KPI Line data retrieval: {err}", exc_info=1)
     return final_data
 
 
@@ -403,9 +430,7 @@ def rca_hierarchical_data(kpi_id, timeline="mom", dimension=None):
         else:
             final_data = {"data_table": [], "analysis_date": ""}
     except Exception as err:
-        logger.error(
-            f"Error in RCA hierarchical table retrieval: {err}", exc_info=1
-        )
+        logger.error(f"Error in RCA hierarchical table retrieval: {err}", exc_info=1)
     return final_data
 
 
@@ -423,11 +448,15 @@ def get_end_date(kpi_id):
 
 
 def get_analysis_date(kpi_id, end_date):
-    data_point = RcaData.query.filter(
-        (RcaData.kpi_id == kpi_id)
-        & (RcaData.data_type == "line")
-        & (RcaData.end_date <= end_date)
-    ).order_by(RcaData.created_at.desc()).first()
+    data_point = (
+        RcaData.query.filter(
+            (RcaData.kpi_id == kpi_id)
+            & (RcaData.data_type == "line")
+            & (RcaData.end_date <= end_date)
+        )
+        .order_by(RcaData.created_at.desc())
+        .first()
+    )
     final_data = data_point.data if data_point else []
     analysis_date = final_data[-1]["date"]
     analysis_timestamp = get_rca_timestamp(analysis_date)
@@ -450,6 +479,7 @@ def get_anomaly_count(kpi_id, timeline):
     curr_date = datetime.now()
     lower_time_dt = curr_date - TIME_DICT[timeline]["time_delta"]
 
+    # TODO: Add the series type filter
     anomaly_data = AnomalyDataOutput.query.filter(
         AnomalyDataOutput.kpi_id == kpi_id,
         AnomalyDataOutput.anomaly_type == "overall",

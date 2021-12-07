@@ -12,6 +12,8 @@ import { sidebar } from './Sidebarlist';
 import { anomaly } from './Anomaly';
 import { alert } from './Alert';
 import { setting } from './setting';
+import { organisation } from './Organisation';
+import { config } from './Config';
 import { GlobalSetting } from './GlobalSetting';
 const rootReducer = combineReducers({
   dataSource: dataSource,
@@ -26,6 +28,8 @@ const rootReducer = combineReducers({
   anomaly: anomaly,
   alert: alert,
   setting: setting,
+  organisation : organisation,
+  config: config,
   GlobalSetting: GlobalSetting
 });
 

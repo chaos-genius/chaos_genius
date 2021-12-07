@@ -65,3 +65,6 @@ python-dotenv==0.18.0
 python-json-logger==2.0.2
 sentry-sdk==1.4.3
 blinker==1.4
+
+# Docker API to check status
+docker~=5.0.3

@@ -36,14 +36,15 @@ def get_onboarding_status():
                         ).all()
 
             analytics = True if len(kpi_list) > 0 else False
-
-            organisation_settings = ConfigSetting.query.filter(
-                                        ConfigSetting.name == "organisation_settings",
-                                        ConfigSetting.active == True
-                                    ).all()
-            organisation_settings = True if len(organisation_settings) > 0 else False
+        
+        organisation_settings_value = ConfigSetting.query.filter(
+                                    ConfigSetting.name == "organisation_settings",
+                                    ConfigSetting.active == True
+                                ).all()
+        organisation_settings = True if len(organisation_settings_value) > 0 else False
     except Exception as err_msg:
         print(err_msg)
+    
     steps = [
         {
             "step_no": 1,
@@ -140,7 +141,8 @@ def get_all_config():
     """Getting all the setting."""
     try:
         result = get_all_configurations()
-        return jsonify({"data": result, "status": "success"})
+        alert_destination_result = [config for config in result if config["name"] in ("slack", "email")]
+        return jsonify({"data": alert_destination_result, "status": "success"})
     except Exception as err:
         return jsonify({"message": err, "status": "failure"})
 

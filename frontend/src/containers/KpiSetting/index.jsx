@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { Link, useHistory, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 import rightarrow from '../../assets/images/rightarrow.svg';
 
@@ -19,9 +19,6 @@ const SETTING_RESET = {
 
 const Kpisetting = ({ onboarding, setModal, setText }) => {
   const dispatch = useDispatch();
-  const history = useHistory();
-
-  const location = history.location.pathname.split('/');
 
   const { sidebarLoading, sidebarList } = useSelector((state) => {
     return state.sidebar;

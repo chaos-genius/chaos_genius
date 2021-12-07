@@ -8,6 +8,7 @@ import { useState } from 'react';
 
 const Homefilter = ({ data }) => {
   const [filterData, setFilterData] = useState(data);
+  const [active, setActive] = useState('');
 
   const onSearch = (event) => {
     if (event.target.value === '') {
@@ -27,6 +28,15 @@ const Homefilter = ({ data }) => {
       );
     }
   };
+
+  // const onSort = (type) => {
+  //   if (type) {
+  //     let value = data.sort(function (a, b) {
+  //       return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+  //     });
+  //     setFilterData(value);
+  //   }
+  // };
 
   return (
     <div className="common-filter-section">
@@ -53,9 +63,9 @@ const Homefilter = ({ data }) => {
               <img src={Dropdown} alt="List" />
             </div>{' '}
             <ul className="dropdown-menu">
-              <li>Alphabetical</li>
-              <li>Recently added</li>
-              <li>No of KPI’s</li>
+              {/* <li onClick={() => onSort('alpha')}>Alphabetical</li>
+              <li onClick={() => onSort('recent')}>Recently added</li>
+              <li onClick={() => onSort('kpi')}>No of KPI’s</li> */}
             </ul>
           </div>
         </div>
@@ -66,7 +76,9 @@ const Homefilter = ({ data }) => {
           {filterData && filterData.length !== 0 ? (
             filterData.map((item) => {
               return (
-                <li>
+                <li
+                  className={active === item.name ? 'active' : ''}
+                  onClick={() => setActive(item.name)}>
                   {item.name} <span>{item.kpi_count}</span>
                 </li>
               );

@@ -267,6 +267,18 @@
           text-align: left;
         }
       }
+      .connection__fail {
+        p {
+          color: $red_variation_1;
+          display: flex;
+          align-items: center;
+          font-size: 14px;
+          margin-top: 2px;
+          img {
+            margin-right: 5px;
+          }
+        }
+      }
       .next-step-navigate {
         display: flex;
         justify-content: flex-end;

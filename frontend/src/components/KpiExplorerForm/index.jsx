@@ -138,7 +138,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     metriccolumns: false,
     aggregate: false,
     datetimecolumns: false,
-    dimension: false
+    dimension: false,
+    dashboardName: false
   });
 
   const [dataset, setDataset] = useState({ value: 'Table', label: 'Table' });
@@ -662,11 +663,21 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   };
 
   const dashboardSubmit = () => {
-    const dashboardData = {
-      dashboard_name: formdata.dashboardName,
-      kpi_list: []
-    };
-    dispatch(getCreateDashboard(dashboardData));
+    if (formdata.dashboardName === '') {
+      setErrorMsg((prev) => {
+        return {
+          ...prev,
+          dashboardName: true
+        };
+      });
+    }
+    if (formdata.dashboardName) {
+      const dashboardData = {
+        dashboard_name: formdata.dashboardName,
+        kpi_list: []
+      };
+      dispatch(getCreateDashboard(dashboardData));
+    }
   };
   useEffect(() => {
     if (createDashboard && createDashboard.status === 'success') {
@@ -1178,10 +1189,16 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                   type="text"
                   className="form-control"
                   placeholder="Dashboard Name"
-                  onChange={(e) =>
-                    setFormdata({ ...formdata, dashboardName: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setErrorMsg({ ...errorMsg, dashboardName: false });
+                    setFormdata({ ...formdata, dashboardName: e.target.value });
+                  }}
                 />
+                {errorMsg.dashboardName === true ? (
+                  <div className="connection__fail">
+                    <p>Enter Dashboard Name</p>
+                  </div>
+                ) : null}
               </div>
               <div className="next-step-navigate">
                 <button className="btn white-button" onClick={closeModal}>

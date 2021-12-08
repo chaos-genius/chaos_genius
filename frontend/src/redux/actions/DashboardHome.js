@@ -53,7 +53,7 @@ export const getDashboard = () => {
     if (error) {
       dispatch(getDashboardFailure());
     } else if (data && status === 200) {
-      dispatch(getDashboardSuccess(data.dashboard_list));
+      dispatch(getDashboardSuccess(data.data));
     }
   };
 };

@@ -149,7 +149,6 @@ export const getEditDashboard = (params) => {
   return async (dispatch) => {
     dispatch(getEditDashboardRequest());
     const URL = attachParams(DASHBOARD_EDIT_URL, params);
-    //const URL = `http://52.66.248.216:8080/api/dashboard/get_dashboard?dashboard_id=${params.dashboard_id}`;
     const { data, error, status } = await getRequest({
       url: URL
     });

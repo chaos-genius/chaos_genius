@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { Link, useHistory } from 'react-router-dom';
 
@@ -15,23 +15,12 @@ import datasource from '../../assets/images/sidebar/datasource.svg';
 import datasourceactive from '../../assets/images/sidebar/datasource-active.svg';
 import alerts from '../../assets/images/sidebar/alerts.svg';
 import alertsactive from '../../assets/images/sidebar/alerts-active.svg';
-import { useDispatch, useSelector } from 'react-redux';
-import { getAllKpiExplorer } from '../../redux/actions';
+
 import './sidebar.scss';
 
 const Sidebar = () => {
   const history = useHistory();
-  const dispatch = useDispatch();
   const location = history.location.pathname.split('/');
-
-  const { kpiExplorerList } = useSelector((state) => state.kpiExplorer);
-
-  useEffect(() => {
-    if (location[1] !== 'kpiexplorer') {
-      dispatch(getAllKpiExplorer());
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
 
   return (
     <div className="sidebar-menu">
@@ -58,27 +47,18 @@ const Sidebar = () => {
               <span>Home</span>
             </Link>
           </li>
-          <li
-            className={
-              kpiExplorerList && kpiExplorerList.length === 0
-                ? 'option-disabled'
-                : location[1] === 'dashboard'
-                ? 'active'
-                : ''
-            }>
-            <div
-              className="options"
-              onClick={() => {
-                if (kpiExplorerList && kpiExplorerList.length !== 0) {
-                  history.push('/dashboard');
-                }
-              }}>
-              <img
-                src={location[1] === 'dashboard' ? dashboardactive : dashboard}
-                alt="Dashboard"
-              />
-              <span>Dashboard</span>
-            </div>
+          <li className={location[1] === 'dashboard' ? 'active' : ''}>
+            <Link to="/dashboard">
+              <div className="options">
+                <img
+                  src={
+                    location[1] === 'dashboard' ? dashboardactive : dashboard
+                  }
+                  alt="Dashboard"
+                />
+                <span>Dashboard</span>
+              </div>
+            </Link>
           </li>
           <li className={location[1] === 'kpiexplorer' ? 'active' : ''}>
             <Link to="/kpiexplorer">

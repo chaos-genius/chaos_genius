@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Base views for config settings and onboarding."""
-from flask import Blueprint, current_app, request, jsonify
+from flask import Blueprint, request, jsonify
 import datetime as dt
 from chaos_genius.controllers.dashboard_controller import (
     create_dashboard,
@@ -17,58 +17,75 @@ blueprint = Blueprint("dashboard", __name__)
 @blueprint.route("/create", methods=["POST"])
 def create_new_dashboard():
     status, message = "", ""
+    mapper_list_dict = []
     try:
-        body = request.get_json()
-        dashboard_name = body["dashboard_name"]
-        kpi_list = body["kpi_list"]
+        payload = request.get_json()
+        dashboard_name = payload.get("dashboard_name")
+        if not dashboard_name:
+            return jsonify({
+                "status": "failure",
+                "message": "Dashboard name is required"
+            })
+        kpi_list = payload.get("kpi_list", [])
         new_dashboard = create_dashboard(dashboard_name)
         new_dashboard.save(commit=True)
-        mapper_list_dict = edit_dashboard_kpis(new_dashboard.id,kpi_list)
-        mapper_list = mapper_list_dict["mapper_add_list"]
-        for mapper in mapper_list:
-            mapper.save(commit=True)
+        if kpi_list:
+            mapper_list_dict = edit_dashboard_kpis(new_dashboard.id, kpi_list)
         status = "success"
         message = "Dashboard has been created successfully"
     except Exception as e:
         status = "failure"
         message = "Failed to create dashboard :{}".format(e)
 
-    return jsonify({"status": status, "message": message})
+    return jsonify({
+        "status": status,
+        "message": message,
+        "data": {
+            "id": new_dashboard.id,
+            "kpi_changes": mapper_list_dict
+        }
+    })
 
 
 @blueprint.route("/edit", methods=["POST"])
 def edit_dashboard():
-    status, message = "",""
-    try:
-        body = request.get_json()
-        dashboard_id = body["dashboard_id"]
-        dashboard_name = body["dashboard_name"]
-        kpi_list = body["kpi_list"]
+    status, message = "", ""
+    mapper_list_dict = []
+    payload = request.get_json()
+    dashboard_id = payload.get("dashboard_id")
+    if not dashboard_id:
+        return jsonify({
+            "status": "failure",
+            "message": "Dashboard id is required"
+        })
+    dashboard_name = payload.get("dashboard_name")
+    kpi_list = payload.get("kpi_list", [])
 
+    try:
         dashboard_obj = get_dashboard_by_id(dashboard_id)
         if dashboard_obj is not None:
             if dashboard_name != dashboard_obj.name:
                 dashboard_obj.name = dashboard_name
 
-            mapper_list_dict = edit_dashboard_kpis(dashboard_obj.id,kpi_list)
-            for mapper_obj in mapper_list_dict["mapper_delete_list"]:
-                mapper_obj.active = False
-                mapper_obj.save(commit=True)
-
-            for mapper_obj in mapper_list_dict["mapper_add_list"]:
-                mapper_obj.save(commit=True)
-
+            mapper_list_dict = edit_dashboard_kpis(dashboard_obj.id, kpi_list)
             dashboard_obj.last_modified = dt.datetime.utcnow()
             dashboard_obj.save(commit=True)
             status = "success"
             message = "All changes saved successfully"
         else:
-            status="failure"
-            message="Dashboard with the provided ID does not exist"
+            status = "failure"
+            message = "Dashboard with the provided ID does not exist"
     except Exception as e:
         status = "failure"
         message = "Error in editing dashboard: {}".format(e)
-    return jsonify({"status":status, "message":message})
+    return jsonify({
+        "status": status,
+        "message": message,
+        "data": {
+            "id": dashboard_id,
+            "kpi_changes": mapper_list_dict
+        }
+    })
 
 
 @blueprint.route("/get", methods=["GET"])
@@ -81,16 +98,14 @@ def get_dashboard():
         if dashboard_dict is not None:
             status = "success"
         else:
-            status="failure"
-            message="Dashboard with the provided ID does not exist"
+            status = "failure"
+            message = "Dashboard with the provided ID does not exist"
             dashboard_dict = {}
     except Exception as e:
         status = "failure"
         message = "Failed to fetch dashboard details :{}".format(e)
 
-    return jsonify(
-        {"status": status, "message": message, "dashboard": dashboard_dict}
-    )
+    return jsonify({"status": status, "message": message, "dashboard": dashboard_dict})
 
 
 @blueprint.route("/delete", methods=["POST"])
@@ -102,11 +117,12 @@ def delete_dashboard():
         if dashboard is not None:
             dashboard.active = False
             dashboard.save(commit=True)
+            mapper_list_dict = edit_dashboard_kpis(dashboard_id, [])
             status = "success"
             message = " Dashboard deleted successfully"
         else:
-            status="failure"
-            message="Dashboard with the provided ID does not exist"
+            status = "failure"
+            message = "Dashboard with the provided ID does not exist"
     except Exception as e:
         status = "failure"
         message = "Failed to delete dashboard :{}".format(e)
@@ -127,5 +143,5 @@ def get_dashboard_list():
         message = "Failed to fetch dashboard list :{}".format(e)
         dashboard_list = []
     return jsonify(
-        {"status": status, "message": message, "dashboard_list": dashboard_list}
+        {"status": status, "message": message, "data": dashboard_list}
     )

@@ -94,11 +94,13 @@ const KpiExplorer = () => {
         dashboardFilter &&
           dashboardFilter.forEach((data) => {
             kpiExplorerList.forEach((list) => {
-              for (const [key, value] of Object.entries(list.dashboards)) {
-                if (data === value) {
+              list.dashboards.forEach((value) => {
+                if (data === value.name) {
                   arr.push(list);
                 }
-              }
+              });
+              // for (const [key, value] of Object.entries(list.dashboards)) {
+              // }
             });
           });
         setKpiExplorerData(arr);
@@ -114,13 +116,18 @@ const KpiExplorer = () => {
                   ) {
                     arr.push(list);
                   } else {
-                    for (const [key, value] of Object.entries(
-                      list.dashboards
-                    )) {
-                      if (value === dashboard) {
+                    list.dashboards.forEach((value) => {
+                      if (value.name === dashboard) {
                         arr.push(list);
                       }
-                    }
+                    });
+                    // for (const [key, value] of Object.entries(
+                    //   list.dashboards
+                    // )) {
+                    //   if (value === dashboard) {
+                    //     arr.push(list);
+                    //   }
+                    // }
                   }
                 });
               });

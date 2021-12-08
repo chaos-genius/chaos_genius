@@ -50,7 +50,7 @@ const DataSourceFilter = ({
       ]);
       var unique = [];
       kpiList.map((item) =>
-        Object.entries(item.dashboards).forEach((key) => unique.push(key[1]))
+        item.dashboards.map((key) => unique.push(key.name))
       );
       setDashboard([...new Set(unique)]);
     }
@@ -128,13 +128,13 @@ const DataSourceFilter = ({
                   <div className="form-check check-box">
                     <input
                       className="form-check-input"
-                      name={item.name}
-                      id={item.name}
+                      name={item}
+                      id={item}
                       type="checkbox"
                       onChange={(e) => onDashboardFilter(e)}
                     />
                     <label className="form-check-label" htmlFor={item.name}>
-                      {item.name}
+                      {item}
                     </label>
                   </div>
                 );

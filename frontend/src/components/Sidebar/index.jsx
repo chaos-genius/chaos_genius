@@ -49,15 +49,13 @@ const Sidebar = () => {
           </li>
           <li className={location[1] === 'dashboard' ? 'active' : ''}>
             <Link to="/dashboard">
-              <div className="options">
-                <img
-                  src={
-                    location[1] === 'dashboard' ? dashboardactive : dashboard
-                  }
-                  alt="Dashboard"
-                />
-                <span>Dashboard</span>
-              </div>
+              {/* <div className="options"> */}
+              <img
+                src={location[1] === 'dashboard' ? dashboardactive : dashboard}
+                alt="Dashboard"
+              />
+              <span>Dashboard</span>
+              {/* </div> */}
             </Link>
           </li>
           <li className={location[1] === 'kpiexplorer' ? 'active' : ''}>

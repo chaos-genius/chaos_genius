@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import Search from '../../assets/images/search.svg';
 import Dropdown from '../../assets/images/dropdownlist.svg';
@@ -7,7 +7,7 @@ import './homefilter.scss';
 import { useState } from 'react';
 import { formatDateTime } from '../../utils/date-helper';
 
-const Homefilter = ({ data }) => {
+const Homefilter = ({ data, setDashboard }) => {
   const [filterData, setFilterData] = useState(data);
   const [active, setActive] = useState(data[0]?.id);
 
@@ -49,6 +49,11 @@ const Homefilter = ({ data }) => {
     setFilterData([...value]);
   };
 
+  useEffect(() => {
+    setDashboard(active);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
+
   return (
     <div className="common-filter-section">
       <div className="filter-layout">
@@ -89,7 +94,9 @@ const Homefilter = ({ data }) => {
               return (
                 <li
                   className={active === item.id ? 'active' : ''}
-                  onClick={() => setActive(item.id)}>
+                  onClick={() => {
+                    setActive(item.id);
+                  }}>
                   {item.name} <span>{item.kpi_count}</span>
                 </li>
               );

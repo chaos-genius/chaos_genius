@@ -128,13 +128,13 @@ const DataSourceFilter = ({
                   <div className="form-check check-box">
                     <input
                       className="form-check-input"
-                      name={item}
-                      id={item}
+                      name={item.name}
+                      id={item.name}
                       type="checkbox"
                       onChange={(e) => onDashboardFilter(e)}
                     />
-                    <label className="form-check-label" htmlFor={item}>
-                      {item}
+                    <label className="form-check-label" htmlFor={item.name}>
+                      {item.name}
                     </label>
                   </div>
                 );

@@ -30,6 +30,7 @@ const KpiExplorer = () => {
   const [kpiSearch, setKpiSearch] = useState('');
   const [data, setData] = useState(false);
   const [kpiFilter, setKpiFilter] = useState([]);
+  const [dashboardFilter, setDashboardFilter] = useState([]);
 
   const { isLoading, kpiExplorerList } = useSelector(
     (state) => state.kpiExplorer
@@ -73,10 +74,10 @@ const KpiExplorer = () => {
 
   useEffect(() => {
     const fetchFilter = () => {
-      if (kpiFilter.length === 0) {
+      var arr = [];
+      if (kpiFilter.length === 0 && dashboardFilter.length === 0) {
         setKpiExplorerData(kpiExplorerList);
-      } else {
-        var arr = [];
+      } else if (kpiFilter.length !== 0 && dashboardFilter.length === 0) {
         kpiFilter &&
           kpiFilter.forEach((data) => {
             kpiExplorerList.forEach((list) => {
@@ -89,11 +90,47 @@ const KpiExplorer = () => {
             });
           });
         setKpiExplorerData(arr);
+      } else if (dashboardFilter.length !== 0 && kpiFilter.length === 0) {
+        dashboardFilter &&
+          dashboardFilter.forEach((data) => {
+            kpiExplorerList.forEach((list) => {
+              for (const [key, value] of Object.entries(list.dashboards)) {
+                if (data === value) {
+                  arr.push(list);
+                }
+              }
+            });
+          });
+        setKpiExplorerData(arr);
+      } else if (dashboardFilter.length !== 0 && kpiFilter.length !== 0) {
+        dashboardFilter &&
+          dashboardFilter.forEach((dashboard) => {
+            kpiFilter &&
+              kpiFilter.forEach((kpi) => {
+                kpiExplorerList.forEach((list) => {
+                  if (
+                    list.data_source.connection_type.toLowerCase() ===
+                    kpi.toLowerCase()
+                  ) {
+                    arr.push(list);
+                  } else {
+                    for (const [key, value] of Object.entries(
+                      list.dashboards
+                    )) {
+                      if (value === dashboard) {
+                        arr.push(list);
+                      }
+                    }
+                  }
+                });
+              });
+          });
+        setKpiExplorerData(arr);
       }
     };
     fetchFilter();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpiFilter]);
+  }, [kpiFilter, dashboardFilter]);
 
   if (isLoading) {
     return (
@@ -125,6 +162,7 @@ const KpiExplorer = () => {
               setKpiSearch={setKpiSearch}
               setKpiFilter={setKpiFilter}
               kpiList={kpiExplorerList}
+              setDashboardFilter={setDashboardFilter}
             />
           </div>
           {/* table section */}

@@ -9,11 +9,13 @@ const DataSourceFilter = ({
   setKpiFilter,
   setDataSourceFilter,
   datasourceList,
-  kpiList
+  kpiList,
+  setDashboardFilter
 }) => {
   const [checked, setChecked] = useState([]);
   const [datasourceType, setDatasourceType] = useState([]);
   const [dashboard, setDashboard] = useState([]);
+  const [dashboardFilterList, setDashboardFilterList] = useState([]);
 
   const onSearch = (e) => {
     if (datasource) {
@@ -30,6 +32,11 @@ const DataSourceFilter = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checked]);
+
+  useEffect(() => {
+    setDashboardFilter(dashboardFilterList);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dashboardFilterList]);
 
   useEffect(() => {
     if (datasourceList) {
@@ -70,6 +77,19 @@ const DataSourceFilter = ({
       }
     }
   };
+  const onDashboardFilter = (e) => {
+    if (e.target.checked === true) {
+      let selected = dashboardFilterList.concat(e.target.name);
+
+      setDashboardFilterList(selected);
+    } else if (e.target.checked === false) {
+      let selected = dashboardFilterList.filter(
+        (data) => data !== e.target.name
+      );
+
+      setDashboardFilterList(selected);
+    }
+  };
 
   return (
     <div className="common-filter-section">
@@ -106,8 +126,16 @@ const DataSourceFilter = ({
               dashboard.map((item) => {
                 return (
                   <div className="form-check check-box">
-                    <input className="form-check-input" type="checkbox" />
-                    <label className="form-check-label">{item}</label>
+                    <input
+                      className="form-check-input"
+                      name={item}
+                      id={item}
+                      type="checkbox"
+                      onChange={(e) => onDashboardFilter(e)}
+                    />
+                    <label className="form-check-label" htmlFor={item}>
+                      {item}
+                    </label>
                   </div>
                 );
               })}

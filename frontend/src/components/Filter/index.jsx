@@ -133,7 +133,7 @@ const DataSourceFilter = ({
                       type="checkbox"
                       onChange={(e) => onDashboardFilter(e)}
                     />
-                    <label className="form-check-label" htmlFor={item.name}>
+                    <label className="form-check-label" htmlFor={item}>
                       {item}
                     </label>
                   </div>

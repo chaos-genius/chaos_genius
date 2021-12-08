@@ -34,7 +34,9 @@ const DataSourceFilter = ({
   }, [checked]);
 
   useEffect(() => {
-    setDashboardFilter(dashboardFilterList);
+    if (kpiList) {
+      setDashboardFilter(dashboardFilterList);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dashboardFilterList]);
 

@@ -139,7 +139,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     aggregate: false,
     datetimecolumns: false,
     dimension: false,
-    dashboardName: false
+    dashboardName: false,
+    dashboardNameList: false
   });
 
   const [dataset, setDataset] = useState({ value: 'Table', label: 'Table' });
@@ -610,6 +611,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       });
     }
 
+    if (formdata.dashboardNameList.length === 0) {
+      setErrorMsg({ ...errorMsg, dashboardNameList: true });
+    }
+
     if (formdata.query === '') {
       setErrorMsg((prev) => {
         return {
@@ -687,6 +692,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       dispatch(getCreateDashboard(dashboardData));
     }
   };
+
   useEffect(() => {
     if (createDashboard && createDashboard.status === 'success') {
       setIsOpen(false);
@@ -1058,7 +1064,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           </div>
 
           <div className="form-group">
-            <label>Dashboard </label>
+            <label>Dashboard *</label>
             <Select
               closeMenuOnSelect={false}
               blurInputOnSelect={false}
@@ -1095,6 +1101,11 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                   : setFormdata({ ...formdata, dashboardNameList: e });
               }}
             />
+            {errorMsg.dashboardNameList === true ? (
+              <div className="connection__fail">
+                <p>Select Dashboard</p>
+              </div>
+            ) : null}
           </div>
 
           {/* {inputList && inputList.length !== 0 && (

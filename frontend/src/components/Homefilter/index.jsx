@@ -42,6 +42,8 @@ const Homefilter = ({ data }) => {
           : a.kpi_count > b.kpi_count
           ? 1
           : 0;
+      } else {
+        return [];
       }
     });
     setFilterData([...value]);

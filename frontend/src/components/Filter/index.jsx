@@ -13,6 +13,7 @@ const DataSourceFilter = ({
 }) => {
   const [checked, setChecked] = useState([]);
   const [datasourceType, setDatasourceType] = useState([]);
+  const [dashboard, setDashboard] = useState([]);
 
   const onSearch = (e) => {
     if (datasource) {
@@ -40,6 +41,11 @@ const DataSourceFilter = ({
       setDatasourceType([
         ...new Set(kpiList.map((item) => item.data_source.connection_type))
       ]);
+      var unique = [];
+      kpiList.map((item) =>
+        Object.entries(item.dashboards).forEach((key) => unique.push(key[1]))
+      );
+      setDashboard([...new Set(unique)]);
     }
   }, [datasourceList, kpiList]);
 
@@ -95,26 +101,16 @@ const DataSourceFilter = ({
             </span>
           </div>{' '}
           <div className="filter-size">
-            <div className="form-check check-box">
-              <input className="form-check-input" type="checkbox" />
-              <label className="form-check-label">Ecommerce</label>
-            </div>
-            <div className="form-check check-box">
-              <input className="form-check-input" type="checkbox" />
-              <label className="form-check-label">Marketting</label>
-            </div>
-            <div className="form-check check-box">
-              <input className="form-check-input" type="checkbox" />
-              <label className="form-check-label">Finance</label>
-            </div>
-            <div className="form-check check-box">
-              <input className="form-check-input" type="checkbox" />
-              <label className="form-check-label">Healthcare</label>
-            </div>
-            <div className="form-check check-box">
-              <input className="form-check-input" type="checkbox" />
-              <label className="form-check-label">Customer Service</label>
-            </div>
+            {dashboard &&
+              dashboard.length !== 0 &&
+              dashboard.map((item) => {
+                return (
+                  <div className="form-check check-box">
+                    <input className="form-check-input" type="checkbox" />
+                    <label className="form-check-label">{item}</label>
+                  </div>
+                );
+              })}
           </div>
         </div>
       )}

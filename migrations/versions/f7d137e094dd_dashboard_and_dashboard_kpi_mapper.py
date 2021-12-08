@@ -1,7 +1,7 @@
 """dashboard and dashboard_kpi_mapper
 
 Revision ID: f7d137e094dd
-Revises: f5f55452fa58
+Revises: 7c504acbf3c4
 Create Date: 2021-11-23 08:40:55.497857
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'f7d137e094dd'
-down_revision = 'f5f55452fa58'
+down_revision = '7c504acbf3c4'
 branch_labels = None
 depends_on = None
 
@@ -31,6 +31,7 @@ def upgrade():
     sa.Column('dashboard', sa.Integer(), nullable=False),
     sa.Column('kpi', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('active', sa.Boolean(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_dashboard_kpi_mapper_dashboard'), 'dashboard_kpi_mapper', ['dashboard'], unique=False)

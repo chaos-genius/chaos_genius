@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """KPI views for creating and viewing the kpis."""
+from collections import defaultdict
 import logging
 import traceback  # noqa: F401
 from datetime import datetime, timedelta
@@ -26,6 +27,12 @@ from chaos_genius.databases.models.dashboard_model import Dashboard
 from chaos_genius.extensions import cache, db
 from chaos_genius.databases.db_utils import chech_editable_field
 from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
+from chaos_genius.controllers.dashboard_controller import (
+    create_dashboard_kpi_mapper,
+    get_mapper_obj_by_dashboard_ids,
+    get_mapper_obj_by_kpi_ids,
+    get_dashboard_list_by_ids
+)
 from chaos_genius.utils.datetime_helper import get_rca_timestamp, get_epoch_timestamp
 
 TIME_DICT = {
@@ -41,7 +48,6 @@ logger = logging.getLogger(__name__)
 @blueprint.route("/", methods=["GET", "POST"])
 def kpi():
     """kpi list view."""
-    logger.info("kpi list")
     # Handle logging in
     if request.method == "POST":
         if not request.is_json:
@@ -79,10 +85,7 @@ def kpi():
         new_kpi.save(commit=True)
 
         dashboard_list = data.get("dashboard", [])
-        
-        for dashboard_id in dashboard_list:
-            mapper_obj = DashboardKpiMapper(dashboard=dashboard_id, kpi=getattr(new_kpi, "id"))
-            mapper_obj.save(commit=True)
+        mapper_obj_list = create_dashboard_kpi_mapper(dashboard_list, [new_kpi.id])
 
         # TODO: Fix circular import error
         from chaos_genius.jobs.anomaly_tasks import ready_rca_task
@@ -105,38 +108,43 @@ def kpi():
         )
 
     elif request.method == "GET":
-        results = (
-            db.session.query(Kpi, DataSource)
-            .join(DataSource, Kpi.data_source == DataSource.id)
-            .filter(Kpi.active == True)  # noqa: E712
-            .order_by(Kpi.created_at.desc())
-            .all()
-        )
-       
+        dashboard_id = request.args.get("dashboard_id")
+        kpi_result_list, kpi_dashboard_mapper = [], []
+        if dashboard_id:
+            kpi_dashboard_mapper = get_mapper_obj_by_dashboard_ids([dashboard_id])
+            kpi_list = [mapper.kpi for mapper in kpi_dashboard_mapper]
+            kpi_result_list = (
+                db.session.query(Kpi, DataSource)
+                .join(DataSource, Kpi.data_source == DataSource.id)
+                .filter(Kpi.active == True, Kpi.id.in_(kpi_list))  # noqa: E712
+                .order_by(Kpi.created_at.desc())
+                .all()
+            )
+        else:
+            kpi_result_list = (
+                db.session.query(Kpi, DataSource)
+                .join(DataSource, Kpi.data_source == DataSource.id)
+                .filter(Kpi.active == True)  # noqa: E712
+                .order_by(Kpi.created_at.desc())
+                .all()
+            )
+
+        kpi_dashboard_mapper = get_mapper_obj_by_kpi_ids([kpi.id for kpi, _ in kpi_result_list])
+        kpi_dashboard_dict = defaultdict(list)
+        for mapper in kpi_dashboard_mapper:
+            kpi_dashboard_dict[mapper.kpi].append(mapper.dashboard)
+        dashboard_list = [mapper.dashboard for mapper in kpi_dashboard_mapper]
+        dashboard_result_list = get_dashboard_list_by_ids(dashboard_list)
+        dashboard_dict = {dashboard.id: dashboard.as_dict for dashboard in dashboard_result_list}
+
         kpis = []
-        for row in results:
+        for row in kpi_result_list:
             kpi_info = row[0].safe_dict
             data_source_info = row[1].safe_dict
             kpi_info["data_source"] = data_source_info
-            dashboard_kpi_mapper = DashboardKpiMapper.query.filter(
-                DashboardKpiMapper.kpi==kpi_info.get("id") ,
-                DashboardKpiMapper.active==True
-            ).all()
-
-            dashboards = dict()
-            dashboard_id_list=[]
-
-            for dashboard_kpi in dashboard_kpi_mapper:
-                id = getattr(dashboard_kpi,"dashboard") 
-                dashboard_id_list.append(id)
-            dashboard_list=Dashboard.query.filter(
-                Dashboard.id.in_(dashboard_id_list) ,
-                Dashboard.active == True
-            ).all()
-
-            for dashboard in dashboard_list :
-                dashboards[getattr(dashboard , "id")]=getattr(dashboard , "name")
-
+            dashboards = []
+            for dashboard_id in kpi_dashboard_dict[kpi_info["id"]]:
+                dashboards.append(dashboard_dict[dashboard_id])
             kpi_info["dashboards"] = dashboards
             kpis.append(kpi_info)
         return jsonify({"count": len(kpis), "data": kpis})

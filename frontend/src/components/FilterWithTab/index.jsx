@@ -79,31 +79,26 @@ const DashboardFilter = ({
         <ul>
           {listData && listData.length !== 0 ? (
             listData.map((item) => {
-              for (const [key] of Object.entries(item.dashboards)) {
-                if (dashboard && key && key === dashboard) {
-                  return (
-                    <li
-                      key={uuidv4()}
-                      className={
-                        kpi.toString() === item.id.toString() ? 'active' : ''
-                      }
-                      onClick={() => {
-                        dispatch(anomalySetting(item.id));
-                        store.dispatch(RESET);
-                        store.dispatch(RESET_DATA);
-                        setActive(item.name);
-                        SetKpiAggregate(item.aggregation);
-                        // history.push(`/dashboard/${tabs}/${item.id}`);
-                        history.push(
-                          `/dashboard/${dashboard}/${tabs}/${item.id}`
-                        );
-                      }}>
-                      {item.name}
-                      <img src={GreenArrow} alt="Arrow" />
-                    </li>
-                  );
-                }
-              }
+              return (
+                <li
+                  key={uuidv4()}
+                  className={
+                    kpi.toString() === item.id.toString() ? 'active' : ''
+                  }
+                  onClick={() => {
+                    dispatch(anomalySetting(item.id));
+                    store.dispatch(RESET);
+                    store.dispatch(RESET_DATA);
+                    setActive(item.name);
+                    SetKpiAggregate(item.aggregation);
+                    // history.push(`/dashboard/${tabs}/${item.id}`);
+                    history.push(`/dashboard/${dashboard}/${tabs}/${item.id}`);
+                  }}>
+                  {item.name}
+                  <img src={GreenArrow} alt="Arrow" />
+                </li>
+              );
+
               // return (
               // <li
               //   key={uuidv4()}

@@ -287,7 +287,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         dashboardList.forEach((item) => {
           arr.push({
             label: item.name,
-            value: item.name
+            value: item.id
           });
         });
     }
@@ -629,7 +629,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         formdata.dataset &&
         formdata.metriccolumns &&
         formdata.aggregate &&
-        formdata.datetimecolumns) !== ''
+        formdata.datetimecolumns &&
+        formdata.dashboardNameList.length !== 0) !== ''
     ) {
       const kpiInfo = {
         name: formdata.kpiname,
@@ -642,7 +643,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         aggregation: formdata.aggregate,
         datetime_column: formdata.datetimecolumns,
         dimensions: formdata.dimensions,
-        filters: formdata.addfilter
+        filters: formdata.addfilter,
+        dashboard: formdata.dashboardNameList.map((el) => el.value)
       };
       if (data[2] === 'edit') {
         dispatch(getUpdatekpi(kpiId, { name: formdata.kpiname }));
@@ -1075,12 +1077,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               menuPlacement="top"
               value={
                 formdata.dashboardNameList.length !== 0
-                  ? formdata.dashboardNameList.map((el) => {
-                      return {
-                        label: el,
-                        value: el
-                      };
-                    })
+                  ? formdata.dashboardNameList
                   : []
               }
               // components={{ SingleValue: customAddDashboard }}
@@ -1094,7 +1091,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                         arr.push(data);
                         setFormdata({
                           ...formdata,
-                          dashboardNameList: arr.map((el) => el.value)
+                          dashboardNameList: arr
                         });
                       }
                     })

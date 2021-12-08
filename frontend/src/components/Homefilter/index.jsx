@@ -9,7 +9,7 @@ import { formatDateTime } from '../../utils/date-helper';
 
 const Homefilter = ({ data }) => {
   const [filterData, setFilterData] = useState(data);
-  const [active, setActive] = useState('');
+  const [active, setActive] = useState(data[0]?.id);
 
   const onSearch = (event) => {
     if (event.target.value === '') {
@@ -88,8 +88,8 @@ const Homefilter = ({ data }) => {
             filterData.map((item) => {
               return (
                 <li
-                  className={active === item.name ? 'active' : ''}
-                  onClick={() => setActive(item.name)}>
+                  className={active === item.id ? 'active' : ''}
+                  onClick={() => setActive(item.id)}>
                   {item.name} <span>{item.kpi_count}</span>
                 </li>
               );

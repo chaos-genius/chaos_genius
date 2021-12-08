@@ -156,8 +156,16 @@ def get_all_kpis():
 
     status, message = "success", ""
     timeline = request.args.get("timeline", "wow")
+    dashboard_id = request.args.get("dashboard_id")
+
+    filters = [Kpi.active == True]
+    if dashboard_id:
+        kpi_dashboard_mapper = get_mapper_obj_by_dashboard_ids([dashboard_id])
+        kpi_list = [mapper.kpi for mapper in kpi_dashboard_mapper]
+        filters.append(Kpi.id.in_(kpi_list))
+
     results = (
-        Kpi.query.filter(Kpi.active == True)  # noqa: E712
+        Kpi.query.filter(*filters)  # noqa: E712
         .order_by(Kpi.created_at.desc())
         .all()
     )

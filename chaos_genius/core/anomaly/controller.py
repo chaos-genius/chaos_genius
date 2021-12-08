@@ -23,6 +23,7 @@ from chaos_genius.settings import (
     MIN_DATA_IN_SUBGROUP,
     MULTIDIM_ANALYSIS_FOR_ANOMALY,
     MAX_ANOMALY_SLACK_DAYS,
+    ITERATIVE_DAYS_ON_INITIAL_BATCH_TRAINING,
 )
 
 logger = logging.getLogger(__name__)
@@ -89,6 +90,7 @@ class AnomalyDetectionController(object):
             self.kpi_info["anomaly_params"]["anomaly_period"] = period
 
         self._task_id = task_id
+        self.iterative_days_on_initial_batch_training = ITERATIVE_DAYS_ON_INITIAL_BATCH_TRAINING
 
         logger.info(f"Anomaly controller initialized for KPI ID: {kpi_info['id']}")
 
@@ -163,6 +165,7 @@ class AnomalyDetectionController(object):
             self.slack,
             series,
             subgroup,
+            self.iterative_days_on_initial_batch_training,
             self.kpi_info.get("model_kwargs", {}),
         ).predict()
 

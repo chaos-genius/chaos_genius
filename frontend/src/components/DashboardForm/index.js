@@ -62,7 +62,7 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
   useEffect(() => {
     if (editDashboard && path[2] === 'edit') {
       var arr = [];
-      editDashboard.kpis.map((item) => arr.push(item.kpi));
+      editDashboard.kpis.map((item) => arr.push(item));
       setFormData({
         ...formData,
         dashboardname: editDashboard?.name,

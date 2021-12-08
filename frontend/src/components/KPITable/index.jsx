@@ -147,7 +147,7 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
                       <tr key={uuidv4()}>
                         <td>{kpi.name}</td>
                         <td>
-                          {Object.entries(kpi?.dashboards).length !== 0 ? (
+                          {kpi?.dashboards.length !== 0 ? (
                             <Dashboardname data={kpi?.dashboards} />
                           ) : (
                             '-'

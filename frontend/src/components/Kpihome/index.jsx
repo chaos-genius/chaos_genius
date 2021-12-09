@@ -195,7 +195,7 @@ const Kpihome = () => {
   } else {
     return (
       <>
-        <div className="heading-option">
+        <div className="heading-option kpihome-heading">
           <div className="heading-title">
             <h3>My KPIs</h3>
           </div>

@@ -250,7 +250,7 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
             </div>
           ) : null}
         </div>
-        <div className="form-group">
+        {/* <div className="form-group">
           <label>Select Team *</label>
           <Select
             // options={option.datasource}
@@ -270,7 +270,7 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
             placeholder="Enter Avg Order Value"
             required
           />
-        </div>
+        </div> */}
         <div className="form-group">
           <label>KPI *</label>
           <Select

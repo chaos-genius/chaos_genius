@@ -222,15 +222,15 @@ const Kpihome = () => {
           </div>
         </div>
         <div className="homepage-setup-card-wrapper">
-          {kpiHomeData && kpiHomeData.length !== 0 ? (
-            <div className="explore-wrapper home-explore-wrapper">
-              <div className="filter-section">
-                <Homefilter
-                  data={dashboardList}
-                  setDashboard={setDashboard}
-                  dashboard={dashboard}
-                />
-              </div>
+          <div className="explore-wrapper home-explore-wrapper">
+            <div className="filter-section">
+              <Homefilter
+                data={dashboardList}
+                setDashboard={setDashboard}
+                dashboard={dashboard}
+              />
+            </div>
+            {kpiHomeData && kpiHomeData.length !== 0 ? (
               <div className="graph-section">
                 {kpiHomeData.map((item) => {
                   return (
@@ -299,14 +299,16 @@ const Kpihome = () => {
                   );
                 })}
               </div>
-            </div>
-          ) : (
-            kpiHomeData !== '' && (
-              <div className="no-data-kpihome">
-                <Noresult text={search} title={'KPI'} />
-              </div>
-            )
-          )}{' '}
+            ) : (
+              kpiHomeData !== '' && (
+                <div className="home-card-section">
+                  <div className="no-data-kpihome">
+                    <Noresult text={search} title={'KPI'} />
+                  </div>
+                </div>
+              )
+            )}{' '}
+          </div>
         </div>
       </>
     );

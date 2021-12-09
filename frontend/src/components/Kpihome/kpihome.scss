@@ -134,16 +134,20 @@
     }
   }
 }
-.no-data-kpihome {
-  min-height: 65vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-}
+
 .home-explore-wrapper {
   width: 100%;
 }
+.home-card-section {
+  width: 78%;
+}
+.no-data-kpihome {
+  min-height: 485px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .heading-option {
   .homepage-search-dropdown {
     display: flex;

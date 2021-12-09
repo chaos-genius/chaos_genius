@@ -580,7 +580,12 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     }
 
     if (formdata.dashboardNameList.length === 0) {
-      setErrorMsg({ ...errorMsg, dashboardNameList: true });
+      setErrorMsg((prev) => {
+        return {
+          ...prev,
+          dashboardNameList: true
+        };
+      });
     }
 
     if (formdata.query === '') {

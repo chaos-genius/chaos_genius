@@ -59,7 +59,6 @@ const Kpihome = () => {
 
   const [search, setSearch] = useState('');
   const [kpiHomeData, setKpiHomeData] = useState(homeKpiData);
-  const [dashboard, setDashboard] = useState('');
 
   const [timeline, setTimeLine] = useState({
     value: 'mom',
@@ -208,7 +207,7 @@ const Kpihome = () => {
           {kpiHomeData && kpiHomeData.length !== 0 ? (
             <div className="explore-wrapper home-explore-wrapper">
               <div className="filter-section">
-                <Homefilter data={dashboardList} setDashboard={setDashboard} />
+                <Homefilter data={dashboardList} />
               </div>
               <div className="graph-section">
                 {kpiHomeData.map((item) => {

@@ -10,7 +10,8 @@ const DataSourceFilter = ({
   setDataSourceFilter,
   datasourceList,
   kpiList,
-  setDashboardFilter
+  setDashboardFilter,
+  setDashboardNameSearch
 }) => {
   const [checked, setChecked] = useState([]);
   const [datasourceType, setDatasourceType] = useState([]);
@@ -117,6 +118,9 @@ const DataSourceFilter = ({
               type="text"
               className="form-control h-40"
               placeholder="Search dashboard"
+              onChange={(e) => {
+                setDashboardNameSearch(e.target.value);
+              }}
             />
             <span>
               <img src={Search} alt="Search Icon" />

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import Search from '../../assets/images/search.svg';
 import Dropdown from '../../assets/images/dropdownlist.svg';
@@ -7,7 +7,7 @@ import './homefilter.scss';
 import { useState } from 'react';
 import { formatDateTime } from '../../utils/date-helper';
 
-const Homefilter = ({ data, setDashboard }) => {
+const Homefilter = ({ data }) => {
   const [filterData, setFilterData] = useState(data);
   const [active, setActive] = useState(data[0]?.id);
 
@@ -48,11 +48,6 @@ const Homefilter = ({ data, setDashboard }) => {
     });
     setFilterData([...value]);
   };
-
-  useEffect(() => {
-    setDashboard(active);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active]);
 
   return (
     <div className="common-filter-section">

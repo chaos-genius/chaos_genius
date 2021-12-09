@@ -59,6 +59,19 @@ docker-compose up
 
 Visit[  http://127.0.0.1:8080](http://localhost:8080/)
 
+### Upgrade from earlier versions
+
+To update the install first make sure the docker containers are down with docker-compose down
+
+Then update the repo & docker builds by following commands:
+
+git pull
+docker-compose pull
+
+And then bring back the containers with docker-compose up
+
+### Quick start & support
+
 Follow this [Quick Start guide](https://docs.chaosgenius.io/docs/Quick_Start/Install-Chaos-Genius) showing you how to connect a data source, define your first KPI, configure Anomaly Detector on your local machine. 
 
 If you want to schedule office hours with our team to help you get set up, please select [some time directly here.](https://calendly.com/pshrimal/30min)

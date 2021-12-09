@@ -1,4 +1,4 @@
-import { DASHBOARD_SIDEBAR_URL } from '../../utils/url-helper';
+import { attachParams, DASHBOARD_SIDEBAR_URL } from '../../utils/url-helper';
 import {
   DASHBOARDSIDEBARREQUEST,
   DASHBOARDSIDEBARSUCCESS,
@@ -25,11 +25,12 @@ export const dashboardSidebarFailure = () => {
   };
 };
 
-export const getDashboardSidebar = () => {
+export const getDashboardSidebar = (params) => {
   return async (dispatch) => {
     dispatch(dashboardSidebarRequested());
+    const url = attachParams(DASHBOARD_SIDEBAR_URL, params);
     const { data, error, status } = await getRequest({
-      url: DASHBOARD_SIDEBAR_URL
+      url: url
     });
     if (error) {
       dispatch(dashboardSidebarFailure());

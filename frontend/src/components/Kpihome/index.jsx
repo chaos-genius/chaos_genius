@@ -18,13 +18,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getHomeKpi } from '../../redux/actions';
 import Fuse from 'fuse.js';
 import Noresult from '../Noresult';
+import Homefilter from '../Homefilter';
 
 import { formatDateTime, getTimezone } from '../../utils/date-helper';
+import { getDashboard } from '../../redux/actions';
 
 highchartsMore(Highcharts);
 Highcharts.setOptions({
   time: {
-      timezone: getTimezone()
+    timezone: getTimezone()
   }
 });
 
@@ -51,8 +53,13 @@ const Kpihome = () => {
     (state) => state.onboarding
   );
 
+  const { dashboardListLoading, dashboardList } = useSelector((state) => {
+    return state.DashboardHome;
+  });
+
   const [search, setSearch] = useState('');
   const [kpiHomeData, setKpiHomeData] = useState(homeKpiData);
+  const [dashboard, setDashboard] = useState(dashboardList[0]?.id);
 
   const [timeline, setTimeLine] = useState({
     value: 'mom',
@@ -60,8 +67,26 @@ const Kpihome = () => {
   });
 
   useEffect(() => {
-    dispatch(getHomeKpi({ timeline: timeline.value }));
-  }, [dispatch, timeline]);
+    dispatch(getDashboard());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (dashboardList && dashboardList.length !== 0) {
+      setDashboard(dashboardList[0]?.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dashboardList]);
+
+  useEffect(() => {
+    if (dashboard) {
+      getHomeList();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dashboard, timeline]);
+
+  const getHomeList = () => {
+    dispatch(getHomeKpi({ timeline: timeline.value, dashboard_id: dashboard }));
+  };
 
   useEffect(() => {
     if (search !== '') {
@@ -99,7 +124,7 @@ const Kpihome = () => {
           borderWidth: 0,
           type: 'line',
           margin: [2, 0, 2, 0],
-          width: 200,
+          width: 180,
           height: 50,
           style: {
             overflow: 'visible'
@@ -161,7 +186,7 @@ const Kpihome = () => {
     }
   };
 
-  if (homeKpiLoading) {
+  if (homeKpiLoading || dashboardListLoading) {
     return (
       <div className="load loader-page">
         <div className="preload"></div>
@@ -174,109 +199,116 @@ const Kpihome = () => {
           <div className="heading-title">
             <h3>My KPIs</h3>
           </div>
+          <div className="homepage-search-dropdown">
+            <div className="form-group icon search-filter">
+              <input
+                type="text"
+                className="form-control h-40"
+                placeholder="Search KPI"
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              <span>
+                <img src={Search} alt="Search Icon" />
+              </span>
+            </div>
+            <Select
+              options={data}
+              classNamePrefix="selectcategory"
+              placeholder="Current week on last week"
+              value={timeline}
+              onChange={(e) => setTimeLine(e)}
+              isSearchable={false}
+            />
+          </div>
         </div>
         <div className="homepage-setup-card-wrapper">
-          <div className="homepage-options">
-            <div></div>
-            <div className="homepage-search-dropdown">
-              <div className="form-group icon search-filter">
-                <input
-                  type="text"
-                  className="form-control h-40"
-                  placeholder="Search KPI"
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-                <span>
-                  <img src={Search} alt="Search Icon" />
-                </span>
-              </div>
-              <Select
-                options={data}
-                classNamePrefix="selectcategory"
-                placeholder="Current week on last week"
-                value={timeline}
-                onChange={(e) => setTimeLine(e)}
-                isSearchable={false}
+          <div className="explore-wrapper home-explore-wrapper">
+            <div className="filter-section">
+              <Homefilter
+                data={dashboardList}
+                setDashboard={setDashboard}
+                dashboard={dashboard}
               />
             </div>
-          </div>
-
-          {kpiHomeData && kpiHomeData.length !== 0 ? (
-            <>
-              {kpiHomeData.map((item) => {
-                return (
-                  <div className="kpi-card" key={item.id}>
-                    <div className="kpi-content kpi-content-label">
-                      <h3>{item.name}</h3>
-                    </div>
-                    <div className="kpi-content">
-                      <label>
-                        {timeline.value === 'wow'
-                          ? 'This Week'
-                          : timeline.value === 'mom'
-                          ? 'This Month'
-                          : 'This Day'}
-                      </label>
-                      <span>{item.current}</span>
-                    </div>
-                    <div className="kpi-content">
-                      <label>
-                        {timeline.value === 'wow'
-                          ? 'Previous Week'
-                          : timeline.value === 'mom'
-                          ? 'Previous Month'
-                          : 'Previous Day'}
-                      </label>
-                      <span>{item.prev}</span>
-                    </div>
-                    <div className="kpi-content">
-                      <label>Change</label>
-                      <span>
-                        {item.change}
-                        <label
-                          className={
-                            item.percentage_change > 0
-                              ? 'high-change'
-                              : 'low-change'
-                          }>
-                          {item.percentage_change > 0 ? (
-                            <img src={Up} alt="High" />
-                          ) : (
-                            <img src={Down} alt="Low" />
-                          )}
-                          {item.percentage_change}
-                          {item.percentage_change !== '--' ? '%' : ''}
+            {kpiHomeData && kpiHomeData.length !== 0 ? (
+              <div className="graph-section">
+                {kpiHomeData.map((item) => {
+                  return (
+                    <div className="kpi-card" key={item.id}>
+                      <div className="kpi-content kpi-content-label">
+                        <h3>{item.name}</h3>
+                      </div>
+                      <div className="kpi-content">
+                        <label>
+                          {timeline.value === 'wow'
+                            ? 'This Week'
+                            : timeline.value === 'mom'
+                            ? 'This Month'
+                            : 'This Day'}
                         </label>
-                      </span>
-                    </div>
+                        <span>{item.current}</span>
+                      </div>
+                      <div className="kpi-content">
+                        <label>
+                          {timeline.value === 'wow'
+                            ? 'Previous Week'
+                            : timeline.value === 'mom'
+                            ? 'Previous Month'
+                            : 'Previous Day'}
+                        </label>
+                        <span>{item.prev}</span>
+                      </div>
+                      <div className="kpi-content">
+                        <label>Change</label>
+                        <span>
+                          {item.change}
+                          <label
+                            className={
+                              item.percentage_change > 0
+                                ? 'high-change'
+                                : 'low-change'
+                            }>
+                            {item.percentage_change > 0 ? (
+                              <img src={Up} alt="High" />
+                            ) : (
+                              <img src={Down} alt="Low" />
+                            )}
+                            {item.percentage_change}
+                            {item.percentage_change !== '--' ? '%' : ''}
+                          </label>
+                        </span>
+                      </div>
 
-                    <div className=" kpi-content kpi-graph ">
-                      {item.graph_data && item.graph_data.length !== 0 && (
-                        <HighchartsReact
-                          className="sparkline-graph"
-                          highcharts={Highcharts}
-                          options={lineChart(item.graph_data)}
-                        />
-                      )}
+                      <div className=" kpi-content kpi-graph ">
+                        {item.graph_data && item.graph_data.length !== 0 && (
+                          <HighchartsReact
+                            className="sparkline-graph"
+                            highcharts={Highcharts}
+                            options={lineChart(item.graph_data)}
+                          />
+                        )}
+                      </div>
+                      <div
+                        className="kpi-content kpi-details"
+                        onClick={() =>
+                          history.push(`/dashboard/deepdrills/${item.id}`)
+                        }>
+                        Details
+                      </div>
                     </div>
-                    <div
-                      className="kpi-content kpi-details"
-                      onClick={() =>
-                        history.push(`/dashboard/deepdrills/${item.id}`)
-                      }>
-                      Details
-                    </div>
-                  </div>
-                );
-              })}
-            </>
-          ) : (
-            kpiHomeData !== '' && (
-              <div className="no-data-kpihome">
-                <Noresult text={search} title={'KPI'} />
+                  );
+                })}
               </div>
-            )
-          )}
+            ) : (
+              kpiHomeData !== '' && (
+                <div className="home-card-section">
+                  <div className="no-data-kpihome">
+                    <Noresult text={search} title={'KPI'} />
+                  </div>
+                </div>
+              )
+            )}{' '}
+          </div>
         </div>
       </>
     );

@@ -6,7 +6,7 @@ import rightarrow from '../../assets/images/rightarrow.svg';
 
 import DataSourceForm from '../../components/DataSourceForm';
 import KpiExplorerForm from '../../components/KpiExplorerForm';
-//import DashboardForm from '../../components/DashboardForm';
+import DashboardForm from '../../components/DashboardForm';
 // import FilterAnalystics from '../../components/FilterAnalystics';
 // import Analystics from '../../components/Analystics';
 import Kpisetting from '../KpiSetting';
@@ -105,10 +105,13 @@ const Onboarding = () => {
               setModal={setModal}
               setText={setText}
             />
-          ) : // data[2] === '3' ? (
-          //   <DashboardForm />
-          // ) :
-          null}
+          ) : data[2] === '3' ? (
+            <DashboardForm
+              setModal={setModal}
+              setText={setText}
+              onboarding={true}
+            />
+          ) : null}
         </div>
       ) : (
         // <div className="explore-wrapper">

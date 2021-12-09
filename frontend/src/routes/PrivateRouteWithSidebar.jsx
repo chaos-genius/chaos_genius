@@ -34,8 +34,11 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
     (state) => state.onboarding
   );
   const { organisationData } = useSelector((state) => state.organisation);
-  useEffect(() => {  
-    if ( env.REACT_APP_DISABLE_TELEMETRY === 'true' || env.NODE_ENV === 'development') {
+  useEffect(() => {
+    if (
+      env.REACT_APP_DISABLE_TELEMETRY === 'true' ||
+      env.NODE_ENV === 'development'
+    ) {
       console.log('disable telemetry');
       // eslint-disable-next-line react-hooks/exhaustive-deps
     } else {
@@ -64,7 +67,7 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organisationData]);
-  
+
   useEffect(() => {
     dispatchGetConnectionType();
     dispatch(getGlobalSetting());
@@ -78,7 +81,8 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
   };
 
   useEffect(() => {
-    if (organisationData === undefined &&
+    if (
+      organisationData === undefined &&
       Object.keys(onboardingList).length !== 0 &&
       onboardingList.organisation_onboarding !== undefined &&
       onboardingList.organisation_onboarding === false

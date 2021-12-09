@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { Link, useHistory, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 import rightarrow from '../../assets/images/rightarrow.svg';
 
@@ -19,9 +19,6 @@ const SETTING_RESET = {
 
 const Kpisetting = ({ onboarding, setModal, setText }) => {
   const dispatch = useDispatch();
-  const history = useHistory();
-
-  const location = history.location.pathname.split('/');
 
   const { sidebarLoading, sidebarList } = useSelector((state) => {
     return state.sidebar;
@@ -80,9 +77,7 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
                 <li
                   className="breadcrumb-item"
                   onClick={() => store.dispatch(SETTING_RESET)}>
-                  <Link to={`/dashboard/deepdrills/${location[3]}`}>
-                    Dashboard
-                  </Link>
+                  <Link to={`/dashboard`}>Dashboard</Link>
                 </li>
                 <li
                   className="breadcrumb-item active"
@@ -96,7 +91,7 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
             <div
               className="backnavigation"
               onClick={() => store.dispatch(SETTING_RESET)}>
-              <Link to={`/dashboard/deepdrills/${location[3]}`}>
+              <Link to={`/dashboard`}>
                 <img src={rightarrow} alt="Back" />
                 <span>Settings</span>
               </Link>

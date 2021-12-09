@@ -34,6 +34,12 @@ export const sidebar = (state = initialState, action) => {
         sidebarError: true
       };
     }
+    case 'SIDEBAR_RESET': {
+      return {
+        ...state,
+        sidebarList: []
+      };
+    }
     default:
       return state;
   }

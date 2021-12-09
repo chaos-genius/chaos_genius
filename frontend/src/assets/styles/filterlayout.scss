@@ -31,4 +31,29 @@
     background-color: $green;
     border-color: $green;
   }
+  .filter-size {
+    max-height: 175px;
+    overflow: auto;
+
+    // Chrome,Edge & Opera
+    &::-webkit-scrollbar {
+      width: 3px;
+      height: 3px;
+      &-track {
+        // background-color: rgba(245, 245, 245, 1) !important;
+        background-color: $white !important;
+      }
+
+      &-thumb {
+        background-color: rgba(189, 189, 189, 1) !important;
+      }
+      &-track,
+      &-thumb {
+        border-radius: 3px;
+      }
+    }
+    // FireFox
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(189, 189, 189, 1) $white !important;
+  }
 }

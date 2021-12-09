@@ -97,7 +97,7 @@ const Dashboardcards = ({ dashboarddata, setChange }) => {
           dashboarddata.map((dashboard) => {
             return (
               <Link
-                to={`/dashboard/${dashboard.id}/deepdrills/${dashboard?.kpis[0]}`}
+                to={`/dashboard/${dashboard.id}/deepdrills/`}
                 className="dashboardcard">
                 <div>
                   <div className="header-card">

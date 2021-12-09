@@ -86,14 +86,14 @@ const Dashboard = () => {
       kpi === undefined
     ) {
       setActive(sidebarList[0]?.name);
-      // setKpi(sidebarList[0]?.id);
+      //setKpi(sidebarList[0]?.id);
       setTabs(location[3]);
       SetKpiAggregate(sidebarList[0]?.aggregation);
       getAnomalySetting(sidebarList[0]?.id);
       history.push(
         `/dashboard/${dashboard}/${location[3]}/${sidebarList[0].id}`
       );
-    } else if (sidebarList && sidebarList.length !== 0 && dashboard) {
+    } else if (sidebarList && sidebarList.length !== 0 && kpi && dashboard) {
       setActive(
         sidebarList.find((item) => item.id.toString() === kpi.toString())?.name
       );

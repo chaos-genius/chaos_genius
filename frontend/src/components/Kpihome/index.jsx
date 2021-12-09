@@ -67,9 +67,8 @@ const Kpihome = () => {
   });
 
   useEffect(() => {
-    dispatch(getHomeKpi({ timeline: timeline.value, dashboard_id: dashboard }));
     dispatch(getDashboard());
-  }, [dispatch, timeline, dashboard]);
+  }, [dispatch]);
 
   useEffect(() => {
     if (dashboardList && dashboardList.length !== 0) {
@@ -77,6 +76,17 @@ const Kpihome = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dashboardList]);
+
+  useEffect(() => {
+    if (dashboard) {
+      getHomeList();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dashboard, timeline]);
+
+  const getHomeList = () => {
+    dispatch(getHomeKpi({ timeline: timeline.value, dashboard_id: dashboard }));
+  };
 
   useEffect(() => {
     if (search !== '') {

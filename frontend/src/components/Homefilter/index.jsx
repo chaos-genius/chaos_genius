@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import Search from '../../assets/images/search.svg';
 import Dropdown from '../../assets/images/dropdownlist.svg';
@@ -9,7 +9,6 @@ import { formatDateTime } from '../../utils/date-helper';
 
 const Homefilter = ({ data, setDashboard, dashboard }) => {
   const [filterData, setFilterData] = useState(data);
-  const [active, setActive] = useState(data[0]?.id);
 
   const onSearch = (event) => {
     if (event.target.value === '') {
@@ -37,9 +36,9 @@ const Homefilter = ({ data, setDashboard, dashboard }) => {
       } else if (type === 'recent') {
         return formatDateTime(b.created_at) - formatDateTime(a.created_at);
       } else if (type === 'kpi') {
-        return a.kpi_count < b.kpi_count
+        return a.kpis.length < b.kpis.length
           ? -1
-          : a.kpi_count > b.kpi_count
+          : a.kpis.length > b.kpis.length
           ? 1
           : 0;
       } else {
@@ -48,12 +47,6 @@ const Homefilter = ({ data, setDashboard, dashboard }) => {
     });
     setFilterData([...value]);
   };
-
-  // useEffect(() => {
-  //   if (active) {
-  //     setDashboard(active);
-  //   }
-  // }, [active]);
 
   return (
     <div className="common-filter-section">
@@ -99,7 +92,7 @@ const Homefilter = ({ data, setDashboard, dashboard }) => {
                     setDashboard(item.id);
                     // setActive(item.id);
                   }}>
-                  {item.name} <span>{item.kpi_count}</span>
+                  {item.name} <span>{item?.kpis.length}</span>
                 </li>
               );
             })

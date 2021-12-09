@@ -233,6 +233,15 @@
       "contributions": [
         "data"
       ]
+    },
+    {
+      "login": "joshuataylor",
+      "name": "Josh Taylor",
+      "avatar_url": "https://avatars.githubusercontent.com/u/225131?v=4",
+      "profile": "https://joshtaylor.id.au",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -41,7 +41,8 @@ import {
   getKpiAlertById,
   updateKpiAlert,
   kpiAlertDisable,
-  kpiAlertEnable
+  kpiAlertEnable,
+  kpiAlertDeleteById
 } from './Alert';
 import {
   anomalyDetection,
@@ -102,5 +103,6 @@ export {
   onboardOrganisation,
   onboardOrganisationUpdate,
   getDashboardConfig,
-  getGlobalSetting
+  getGlobalSetting,
+  kpiAlertDeleteById
 };

@@ -16,18 +16,23 @@ import More from '../../assets/images/more.svg';
 import Moreactive from '../../assets/images/more-active.svg';
 import Edit from '../../assets/images/edit.svg';
 import EditActive from '../../assets/images/datasourceedit-active.svg';
+import DeleteActive from '../../assets/images/delete-active.svg';
 // import DeleteActive from '../../assets/images/delete-active.svg';
 
 import { useDispatch } from 'react-redux';
 
 import { formatDateTime } from '../../utils/date-helper';
-import { kpiAlertDisable, kpiAlertEnable } from '../../redux/actions';
+import { kpiAlertDisable, kpiAlertEnable, kpiAlertDeleteById } from '../../redux/actions';
 
 import store from '../../redux/store';
 
 const RESET_ENABLE_DISABLE_DATA = {
   type: 'RESET_ENABLE_DISABLE_DATA'
 };
+
+const RESET_DELETE_DATA = {
+  type: 'RESET_DELETE_DATA'
+}
 
 const AlertTable = ({ alertData, alertSearch }) => {
   const dispatch = useDispatch();
@@ -38,10 +43,10 @@ const AlertTable = ({ alertData, alertSearch }) => {
   // const closeModal = () => {
   //   setIsOpen(false);
   // };
-
-  // const onDelete = (id) => {
-  //   dispatch(kpiAlertDisable(id));
-  // };
+  const onDelete = (id) => {
+    store.dispatch(RESET_DELETE_DATA);
+    dispatch(kpiAlertDeleteById(id));
+  };
 
   const onChecking = (alert) => {
     store.dispatch(RESET_ENABLE_DISABLE_DATA);
@@ -163,16 +168,14 @@ const AlertTable = ({ alertData, alertSearch }) => {
                               />
                               Edit
                             </li>
+                            
                           </Link>
-                          {/* <li
+                          <li
                             className="delete-item"
-                            onClick={() => {
-                              setIsOpen(true);
-                              setData(alert);
-                            }}>
+                            onClick={() => onDelete(alert.id)}>
                             <img src={DeleteActive} alt="Delete" />
                             Delete
-                          </li> */}
+                          </li>
                         </ul>
                       </div>
                     </td>

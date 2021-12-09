@@ -34,6 +34,7 @@ const Dashboardconfigure = () => {
 
   useEffect(() => {
     store.dispatch(DASHBOARD_RESET);
+    store.dispatch({ type: 'SIDEBAR_RESET' });
     dispatch(getDashboard());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);

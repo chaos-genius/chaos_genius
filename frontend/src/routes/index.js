@@ -21,6 +21,8 @@ import AddEventAlert from '../containers/AddEventAlert';
 import Result from '../containers/Result';
 import Login from '../containers/Login';
 import Kpisetting from '../containers/KpiSetting';
+import Dashboardconfigure from '../containers/Dashboardconfigure';
+import AddDashboard from '../containers/AddDashboard';
 import OrganisationOnboarding from '../containers/Onboarding/OrganisationOnboarding';
 import OrganisationSettings from '../containers/OrganisationSettings/OrganisationSettings';
 
@@ -36,16 +38,29 @@ const Routes = () => (
       exact
       path="/"
       component={(props) => <Home {...props} />}
-    />
-    <PrivateRouteWithSidebar
+    />{' '}
+    {/* <PrivateRouteWithSidebar
       exact
       path={['/dashboard/deepdrills/', '/dashboard/deepdrills/:kpi']}
       component={(props) => <Dashboard {...props} />}
+    />{' '} */}
+    <PrivateRouteWithSidebar
+      exact
+      path={[
+        '/dashboard/:dashboard/deepdrills/',
+        '/dashboard/:dashboard/deepdrills/:kpi'
+      ]}
+      component={(props) => <Dashboard {...props} />}
     />
     <PrivateRouteWithSidebar
       exact
-      path="/dashboard/anomaly/:kpi"
+      path="/dashboard/:dashboard/anomaly/:kpi"
       component={(props) => <Dashboard {...props} />}
+    />{' '}
+    <PrivateRouteWithSidebar
+      exact
+      path={'/dashboard'}
+      component={(props) => <Dashboardconfigure {...props} />}
     />
     <PrivateRouteWithSidebar
       exact
@@ -125,11 +140,20 @@ const Routes = () => (
       path="/noresult"
       component={(props) => <Result {...props} />}
     />
-
     <PrivateRouteWithSidebar
       exact
       path="/organisation-settings"
       component={(props) => <OrganisationSettings {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
+      path="/dashboard/add"
+      component={(props) => <AddDashboard {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
+      path="/dashboard/edit/:id"
+      component={(props) => <AddDashboard {...props} />}
     />
     <PrivateRouteWithSidebar
       exact

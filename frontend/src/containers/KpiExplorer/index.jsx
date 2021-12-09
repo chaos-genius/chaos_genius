@@ -30,7 +30,8 @@ const KpiExplorer = () => {
   const [kpiSearch, setKpiSearch] = useState('');
   const [data, setData] = useState(false);
   const [kpiFilter, setKpiFilter] = useState([]);
-
+  const [dashboardFilter, setDashboardFilter] = useState([]);
+  const [dashboardSearch, setDashboardSearch] = useState('');
   const { isLoading, kpiExplorerList } = useSelector(
     (state) => state.kpiExplorer
   );
@@ -56,6 +57,30 @@ const KpiExplorer = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSearch, kpiExplorerList]);
 
+  useEffect(() => {
+    if (dashboardSearch !== '') {
+      searchDashboardName();
+    } else if (kpiExplorerList) {
+      setKpiExplorerData(kpiExplorerList);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dashboardSearch]);
+
+  const searchDashboardName = () => {
+    const options = {
+      keys: ['dashboards.name']
+    };
+
+    const fuse = new Fuse(kpiExplorerList, options);
+
+    const result = fuse.search(dashboardSearch);
+    setKpiExplorerData(
+      result.map((item) => {
+        return item.item;
+      })
+    );
+  };
+
   const searchDataSource = () => {
     const options = {
       keys: ['name', 'connection_type']
@@ -73,10 +98,10 @@ const KpiExplorer = () => {
 
   useEffect(() => {
     const fetchFilter = () => {
-      if (kpiFilter.length === 0) {
+      var arr = [];
+      if (kpiFilter.length === 0 && dashboardFilter.length === 0) {
         setKpiExplorerData(kpiExplorerList);
-      } else {
-        var arr = [];
+      } else if (kpiFilter.length !== 0 && dashboardFilter.length === 0) {
         kpiFilter &&
           kpiFilter.forEach((data) => {
             kpiExplorerList.forEach((list) => {
@@ -89,11 +114,45 @@ const KpiExplorer = () => {
             });
           });
         setKpiExplorerData(arr);
+      } else if (dashboardFilter.length !== 0 && kpiFilter.length === 0) {
+        dashboardFilter &&
+          dashboardFilter.forEach((data) => {
+            kpiExplorerList.forEach((list) => {
+              list.dashboards.forEach((value) => {
+                if (data === value.name) {
+                  arr.push(list);
+                }
+              });
+            });
+          });
+        setKpiExplorerData(arr);
+      } else if (dashboardFilter.length !== 0 && kpiFilter.length !== 0) {
+        dashboardFilter &&
+          dashboardFilter.forEach((dashboard) => {
+            kpiFilter &&
+              kpiFilter.forEach((kpi) => {
+                kpiExplorerList.forEach((list) => {
+                  if (
+                    list.data_source.connection_type.toLowerCase() ===
+                    kpi.toLowerCase()
+                  ) {
+                    arr.push(list);
+                  } else {
+                    list.dashboards.forEach((value) => {
+                      if (value.name === dashboard) {
+                        arr.push(list);
+                      }
+                    });
+                  }
+                });
+              });
+          });
+        setKpiExplorerData(arr);
       }
     };
     fetchFilter();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpiFilter]);
+  }, [kpiFilter, dashboardFilter]);
 
   if (isLoading) {
     return (
@@ -125,6 +184,8 @@ const KpiExplorer = () => {
               setKpiSearch={setKpiSearch}
               setKpiFilter={setKpiFilter}
               kpiList={kpiExplorerList}
+              setDashboardFilter={setDashboardFilter}
+              setDashboardNameSearch={setDashboardSearch}
             />
           </div>
           {/* table section */}

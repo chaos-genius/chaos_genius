@@ -98,7 +98,7 @@
   .kpi-content {
     display: flex;
     flex-direction: column;
-    width: 15%;
+    width: 17%;
     &.kpi-content-label {
       // width: 180px;
       label {
@@ -109,7 +109,14 @@
     //   display: none;
     // }
     .highcharts-container {
-      width: 80px !important;
+      width: 70px !important;
+    }
+    .highcharts-root {
+      width: 180px !important;
+      height: 50px !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   }
   .kpi-graph {
@@ -127,10 +134,29 @@
     }
   }
 }
+
+.home-explore-wrapper {
+  width: 100%;
+}
+.home-card-section {
+  width: 78%;
+}
 .no-data-kpihome {
-  min-height: 65vh;
+  min-height: 485px;
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
+}
+
+.heading-option {
+  .homepage-search-dropdown {
+    display: flex;
+    .form-group {
+      margin-right: 24px;
+      margin-bottom: 0px;
+    }
+    .css-2b097c-container {
+      width: 250px;
+    }
+  }
 }

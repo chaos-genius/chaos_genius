@@ -1,10 +1,14 @@
 import React from 'react';
-import { Link, useHistory } from 'react-router-dom';
-import rightarrow from '../../assets/images/rightarrow.svg';
-import DataSourceForm from '../../components/DataSourceForm';
 
-const AddDataSource = () => {
+import { Link, useHistory } from 'react-router-dom';
+
+import rightarrow from '../../assets/images/rightarrow.svg';
+
+import DashboardForm from '../../components/DashboardForm';
+
+const AddDashboard = () => {
   const history = useHistory();
+
   const data = history.location.pathname.split('/');
 
   return (
@@ -15,31 +19,31 @@ const AddDataSource = () => {
         <nav aria-label="breadcrumb">
           <ol className="breadcrumb">
             <li className="breadcrumb-item">
-              <Link to="/datasource">Data Source </Link>
+              <Link to="/dashboard">Dashboard </Link>
             </li>
             <li className="breadcrumb-item active" aria-current="page">
-              {data[2] === 'edit' ? 'Edit Data Source' : 'Add Data Source'}
+              {data[2] === 'edit' ? 'Edit Dashboard' : 'Add Dashboard'}
             </li>
           </ol>
         </nav>
         {/* Back */}
         <div className="backnavigation">
-          <Link to="/datasource">
+          <Link to="/dashboard">
             <img src={rightarrow} alt="Back" />
             {data[2] === 'edit' ? (
-              <span>Edit Data Sources</span>
+              <span>Edit Dashboard</span>
             ) : (
-              <span>Add Data Sources</span>
+              <span>Add Dashboard</span>
             )}
           </Link>
         </div>
       </div>
       {/* add DataSource form */}
       <div className="add-form-container">
-        <DataSourceForm />
+        <DashboardForm />
       </div>
     </>
   );
 };
 
-export default AddDataSource;
+export default AddDashboard;

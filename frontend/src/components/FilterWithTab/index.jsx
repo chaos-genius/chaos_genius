@@ -98,26 +98,6 @@ const DashboardFilter = ({
                   <img src={GreenArrow} alt="Arrow" />
                 </li>
               );
-
-              // return (
-              // <li
-              //   key={uuidv4()}
-              //   className={
-              //     kpi.toString() === item.id.toString() ? 'active' : ''
-              //   }
-              //   onClick={() => {
-              //     dispatch(anomalySetting(item.id));
-              //     store.dispatch(RESET);
-              //     store.dispatch(RESET_DATA);
-              //     setActive(item.name);
-              //     SetKpiAggregate(item.aggregation);
-              //     // history.push(`/dashboard/${tabs}/${item.id}`);
-              //     history.push(`/dashboard/${dashboard}/${tabs}/${item.id}`);
-              //   }}>
-              //   {item.name}
-              //   <img src={GreenArrow} alt="Arrow" />
-              // </li>
-              // );
             })
           ) : (
             <div className="empty-content">No Data Found</div>

@@ -51,38 +51,6 @@ const aggregate = [
   { value: 'sum', label: 'Sum' }
 ];
 
-// const dashboard = [
-//   {
-//     value: 'newdashboard',
-//     label: (
-//       <span className="add-dashboard">
-//         <img src={Add} alt="Add" />
-//         New Dashboard
-//       </span>
-//     )
-//   },
-//   {
-//     value: 'Ecommerce',
-//     label: 'Ecommerce'
-//   },
-//   { value: 'Customer Service', label: 'Customer Service' }
-// ];
-
-// const customAddDashboard = ({ data }) => (
-//   <div className="input-select">
-//     <div className="input-select__single-value">
-//       <span>{data.label}</span>
-//     </div>
-//   </div>
-// );
-// const operator = [
-//   { value: '=', label: '=' },
-//   { value: '+', label: '+' },
-//   { value: '-', label: '-' },
-//   { value: '/', label: '/' },
-//   { value: '>', label: '>' },
-//   { value: '<', label: '<' }
-// ];
 const customSingleValue = ({ data }) => (
   <div className="input-select">
     <div className="input-select__single-value">
@@ -700,18 +668,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       setIsOpen(false);
     }
   }, [createDashboard]);
-
-  //   var IndicatorSeparator = function (_a) {
-  //     var innerProps = _a.innerProps;
-  //     return style;
-  //     {
-  //         indicatorSeparatorStyle;
-  //     }
-  //     {
-  //         innerProps;
-  //     }
-  //     />;;
-  // };
 
   /* This is add filter function code */
 

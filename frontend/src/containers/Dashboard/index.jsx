@@ -61,24 +61,6 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    // if (sidebarList && sidebarList.length !== 0 && kpi === undefined) {
-    // setActive(sidebarList[0]?.name);
-    // //setKpi(sidebarList[0]?.id);
-    // setTabs(location[2]);
-    // SetKpiAggregate(sidebarList[0]?.aggregation);
-    // getAnomalySetting(sidebarList[0]?.id);
-    // history.push(`/dashboard/${location[2]}/${sidebarList[0]?.id}`);
-    // } else if (sidebarList && sidebarList.length !== 0) {
-    // setActive(
-    //   sidebarList.find((item) => item.id.toString() === kpi.toString())?.name
-    // );
-    // setTabs(location[2]);
-    // getAnomalySetting(kpi);
-    // SetKpiAggregate(
-    //   sidebarList.find((item) => item.id.toString() === kpi.toString())
-    //     ?.aggregation
-    // );
-    // }
     if (
       sidebarList &&
       sidebarList.length !== 0 &&

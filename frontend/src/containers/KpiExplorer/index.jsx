@@ -123,8 +123,6 @@ const KpiExplorer = () => {
                   arr.push(list);
                 }
               });
-              // for (const [key, value] of Object.entries(list.dashboards)) {
-              // }
             });
           });
         setKpiExplorerData(arr);
@@ -145,13 +143,6 @@ const KpiExplorer = () => {
                         arr.push(list);
                       }
                     });
-                    // for (const [key, value] of Object.entries(
-                    //   list.dashboards
-                    // )) {
-                    //   if (value === dashboard) {
-                    //     arr.push(list);
-                    //   }
-                    // }
                   }
                 });
               });

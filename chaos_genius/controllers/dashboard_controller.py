@@ -128,3 +128,11 @@ def check_kpis_in_dashboard(dashboard_id, kpi_ids):
         temp_list.append(val.kpi)
 
     return set(kpi_ids).issubset(temp_list)
+
+
+def disable_mapper_for_kpi_ids(kpi_list):
+    mapper_obj = get_mapper_obj_by_kpi_ids(kpi_list)
+    for mapper in mapper_obj:
+        mapper.active = False
+        mapper.save(commit=True)
+    return True

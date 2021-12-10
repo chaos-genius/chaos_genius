@@ -15,7 +15,7 @@ from chaos_genius.databases.models.kpi_model import Kpi
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.alerts.email import send_static_alert_email
-from chaos_genius.alerts.slack import anomaly_alert_slack_formatted
+from chaos_genius.alerts.slack import anomaly_alert_slack_formatted , event_alert_slack
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 logger = logging.getLogger()
@@ -108,7 +108,7 @@ class StaticEventAlertController:
             if self.alert_info["alert_channel"] == "email":
                 self.prepare_email(change_df)
             elif self.alert_info["alert_channel"] == "slack":
-                pass
+                self.send_slack_event_alert(change_df)
 
         self.pickle_df()
 
@@ -165,7 +165,7 @@ class StaticEventAlertController:
         recipient_emails = alert_channel_conf.get("email", [])
 
         if recipient_emails:
-            subject = f"Event Alert Notification: [ID - {self.alert_info['id']}] [Type - {self.alert_info['alert_settings']}]"
+            subject = f"{self.alert_info['alert_name']} - Chaos Genius Event Alert❗"
             message = self.alert_info["alert_message"]
             files = []
             if not change_df.empty:
@@ -208,6 +208,20 @@ class StaticEventAlertController:
             logger.debug(f"The email for Alert ID - {self.alert_info['id']} was not sent")
         
         return test
+        
+    def send_slack_event_alert(self ,change_df):
+        alert_name = self.alert_info["alert_name"]
+        alert_frequency= self.alert_info["alert_frequency"]
+        alert_message=  self.alert_info["alert_message"]
+        test = event_alert_slack(alert_name , alert_frequency , alert_message)
+
+        if test == "ok":
+            logger.info(f"The slack alert for Alert ID - {self.alert_info['id']} was successfully sent")
+        else:
+            logger.info(f"The slack alert for Alert ID - {self.alert_info['id']} has not been sent")
+        
+        message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
+        return message
 
 
 class AnomalyAlertController:
@@ -357,6 +371,8 @@ class AnomalyAlertController:
         
         message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
         return message
+    
+
 
 class StaticKpiAlertController:
     def __init__(self, alert_info):

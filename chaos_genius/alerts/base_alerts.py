@@ -213,7 +213,18 @@ class StaticEventAlertController:
         alert_name = self.alert_info["alert_name"]
         alert_frequency= self.alert_info["alert_frequency"]
         alert_message=  self.alert_info["alert_message"]
-        test = event_alert_slack(alert_name , alert_frequency , alert_message)
+        alert_overview= ""
+        if self.alert_info["alert_settings"] == "new_entry_alert":
+            alert_overview= f"Number of rows added: {change_df.shape[0]}"
+        elif self.alert_info["alert_settings"] == "change_alert":
+            added_rows= change_df[change_df.change == 'added'].shape[0]
+            deleted_rows=change_df[change_df.change == 'deleted'].shape[0]   
+            alert_overview=f"Number of rows added: {added_rows} and Number of rows deleted: {deleted_rows}"                 
+        elif self.alert_info["alert_settings"] == "always_alert":
+            alert_overview= f"Number of rows present: {change_df.shape[0]}"
+            
+
+        test = event_alert_slack(alert_name , alert_frequency , alert_message , alert_overview)
 
         if test == "ok":
             logger.info(f"The slack alert for Alert ID - {self.alert_info['id']} was successfully sent")

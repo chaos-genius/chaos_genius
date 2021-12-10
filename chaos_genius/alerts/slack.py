@@ -40,7 +40,7 @@ def anomaly_alert_slack(alert_name, kpi_name, data_source_name, alert_body):
     return response.body
 
 
-def event_alert_slack(alert_name, alert_frequency, alert_message):
+def event_alert_slack(alert_name, alert_frequency, alert_message , alert_overview):
     client = get_webhook_client()
     if not client:
         raise Exception("Slack not configured properly.")
@@ -59,6 +59,13 @@ def event_alert_slack(alert_name, alert_frequency, alert_message):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
+                    "text": f"Alert Frequency : {alert_frequency}",
+                },
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
                     "text": f"Alert Message : {alert_message}",
                 },
             },
@@ -66,7 +73,7 @@ def event_alert_slack(alert_name, alert_frequency, alert_message):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Alert Frequency : {alert_frequency}",
+                    "text": f"Alert Overview : {alert_overview}",
                 },
             }
             

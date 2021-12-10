@@ -394,10 +394,10 @@ def check_and_trigger_alert(alert_id):
         curr_date_time = datetime.datetime.now()
         check_time = FREQUENCY_DICT[alert_info.alert_frequency]
 
-        if alert_info.last_alerted is not None and \
-                alert_info.last_alerted > (curr_date_time - check_time):
-            logger.debug(f"Skipping alert with ID {alert_info.id}")
-            return True
+        # if alert_info.last_alerted is not None and \
+        #         alert_info.last_alerted > (curr_date_time - check_time):
+        #     logger.debug(f"Skipping alert with ID {alert_info.id}")
+        #     return True
 
         static_alert_obj = StaticEventAlertController(alert_info.as_dict, data_source_obj.as_dict)
         static_alert_obj.check_and_prepare_alert()

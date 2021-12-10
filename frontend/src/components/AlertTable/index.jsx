@@ -1,12 +1,10 @@
-import React from 'react';
-
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-
-// import Modal from 'react-modal';
+import Modal from 'react-modal';
+import { useDispatch } from 'react-redux';
 
 import '../../assets/styles/table.scss';
 import './alerttable.scss';
-
 import Slack from '../../assets/images/table/slack.svg';
 import Asana from '../../assets/images/table/asana.svg';
 import Datadog from '../../assets/images/table/datadog.svg';
@@ -17,14 +15,15 @@ import Moreactive from '../../assets/images/more-active.svg';
 import Edit from '../../assets/images/edit.svg';
 import EditActive from '../../assets/images/datasourceedit-active.svg';
 import DeleteActive from '../../assets/images/delete-active.svg';
-// import DeleteActive from '../../assets/images/delete-active.svg';
-
-import { useDispatch } from 'react-redux';
-
+import Close from '../../assets/images/close.svg';
 import { formatDateTime } from '../../utils/date-helper';
-import { kpiAlertDisable, kpiAlertEnable, kpiAlertDeleteById } from '../../redux/actions';
 
 import store from '../../redux/store';
+import {
+  kpiAlertDisable,
+  kpiAlertEnable,
+  kpiAlertDeleteById
+} from '../../redux/actions';
 
 const RESET_ENABLE_DISABLE_DATA = {
   type: 'RESET_ENABLE_DISABLE_DATA'
@@ -32,20 +31,27 @@ const RESET_ENABLE_DISABLE_DATA = {
 
 const RESET_DELETE_DATA = {
   type: 'RESET_DELETE_DATA'
-}
+};
 
 const AlertTable = ({ alertData, alertSearch }) => {
   const dispatch = useDispatch();
 
-  // const [isOpen, setIsOpen] = useState(false);
-  // const [data, setData] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [data, setData] = useState({});
 
-  // const closeModal = () => {
-  //   setIsOpen(false);
-  // };
-  const onDelete = (id) => {
+  const closeModal = () => {
+    setIsOpen(false);
+  };
+
+  const onDelete = (data) => {
+    setData(data);
+    setIsOpen(true);
+  };
+
+  const onDeleteConfirmation = (id) => {
     store.dispatch(RESET_DELETE_DATA);
     dispatch(kpiAlertDeleteById(id));
+    setIsOpen(false);
   };
 
   const onChecking = (alert) => {
@@ -56,9 +62,11 @@ const AlertTable = ({ alertData, alertSearch }) => {
       onEnable(alert.id);
     }
   };
+
   const onDisable = (id) => {
     dispatch(kpiAlertDisable(id));
   };
+
   const onEnable = (id) => {
     dispatch(kpiAlertEnable(id));
   };
@@ -168,11 +176,10 @@ const AlertTable = ({ alertData, alertSearch }) => {
                               />
                               Edit
                             </li>
-                            
                           </Link>
                           <li
                             className="delete-item"
-                            onClick={() => onDelete(alert.id)}>
+                            onClick={() => onDelete(alert)}>
                             <img src={DeleteActive} alt="Delete" />
                             Delete
                           </li>
@@ -191,7 +198,7 @@ const AlertTable = ({ alertData, alertSearch }) => {
               )}
         </tbody>
       </table>
-      {/* <Modal
+      <Modal
         portalClassName="deletemodal"
         isOpen={isOpen}
         shouldCloseOnOverlayClick={false}
@@ -209,13 +216,13 @@ const AlertTable = ({ alertData, alertSearch }) => {
               </button>
               <button
                 className="btn black-button"
-                onClick={() => onDelete(data.id)}>
+                onClick={() => onDeleteConfirmation(data.id)}>
                 <span>Delete</span>
               </button>
             </div>
           </div>
         </div>
-      </Modal> */}
+      </Modal>
     </>
   );
 };

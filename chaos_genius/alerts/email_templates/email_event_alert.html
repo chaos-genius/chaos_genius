@@ -7,7 +7,40 @@
           <h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Alert Frequency: {{ alert_frequency }}</h3>
           <h2 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Alert Message</h2>
           <h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">{{ alert_message }}</h3>
-
+            
+           
+            <table style="border-spacing: 15px; color: #F6F5F5;text-align: left;">
+                <tr>
+                    {% for column in column_names %}
+                    <th>{{column}}</th>
+                    {% endfor %}
+                </tr>
+                {% for item in normal_df %}
+                    <tr >
+                        {% for column in column_names %}
+                        <td style="color: #F6F5F5;">{{item[column]}}</td>
+                        
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+                {% for item in add_df %}
+                    <tr >
+                        {% for column in column_names %}
+                        <td style="color: #86efac">{{item[column]}}</td>
+                        
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+                {% for item in del_df %}
+                    <tr >
+                        {% for column in column_names %}
+                        <td style="color: #dc2626">{{item[column]}}</td>
+                        
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+                
+            </table>
 {% endblock %}
 
                         

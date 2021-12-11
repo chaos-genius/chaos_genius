@@ -175,15 +175,35 @@ class StaticEventAlertController:
                     change_df.to_csv(buffer)
                     file_detail["fdata"] = buffer.getvalue()
                 files = [file_detail]
+            column_names = list(change_df.columns)[:4]
+            add_df = None
+            del_df = None
+            normal_df = None
+        
+            if self.alert_info["alert_settings"] == "new_entry_alert":
+                add_df=list(change_df.head().T.to_dict().values())
+            elif self.alert_info["alert_settings"] == "change_alert":
+                del_df=list(change_df[change_df["change"] == "deleted"].head().T.to_dict().values())
+                add_df=list(change_df[change_df["change"] == "added"].head().T.to_dict().values())
+            elif self.alert_info["alert_settings"] == "always_alert":
+                normal_df=list(change_df.head().T.to_dict().values())
             
+            add_df = [] if add_df is None else add_df
+            del_df = [] if del_df is None else del_df
+            normal_df = [] if normal_df is None else normal_df
+
             test = self.send_template_email('email_event_alert.html', 
                                             recipient_emails, 
                                             subject, 
                                             files,
+                                            add_df=add_df,
+                                            del_df=del_df,
+                                            normal_df=normal_df,
+                                            column_names=column_names,
                                             alert_message = message,
                                             alert_frequency = self.alert_info['alert_frequency'].capitalize(),
                                             alert_name = self.alert_info['alert_name'],
-                                            preview_text = "Static Event Alert"
+                                            preview_text = "Static Event Alert"   
                                         )
             return test
         else:

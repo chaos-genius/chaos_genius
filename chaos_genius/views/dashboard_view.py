@@ -135,7 +135,8 @@ def get_dashboard_list():
     status, message = "", ""
     dashboard_list = []
     try:
-        dashboard_list = get_active_dashboard_list()
+        dashboards = get_active_dashboard_list()
+        dashboard_list = sorted(dashboards, key=lambda x: len(x.get('kpis', [])), reverse=True)
         status = "success"
 
     except Exception as e:

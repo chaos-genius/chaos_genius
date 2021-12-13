@@ -117,7 +117,7 @@ const Dashboard = () => {
       <>
         {/* common heading and options */}
         <div className="heading-option">
-          <div className="page-navigation">
+          <div className="page-navigation dashboard-page-navigate">
             {/* Breadcrumb */}
             <nav aria-label="breadcrumb">
               <ol className="breadcrumb">

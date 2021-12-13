@@ -159,44 +159,44 @@ def get_all_kpis():
     timeline = request.args.get("timeline", "wow")
     dashboard_id = request.args.get("dashboard_id")
 
-    filters = [Kpi.active == True]
-    if dashboard_id:
-        kpi_dashboard_mapper = get_mapper_obj_by_dashboard_ids([dashboard_id])
-        kpi_list = [mapper.kpi for mapper in kpi_dashboard_mapper]
-        filters.append(Kpi.id.in_(kpi_list))
+    try:
+        filters = [Kpi.active == True]
+        if dashboard_id:
+            kpi_dashboard_mapper = get_mapper_obj_by_dashboard_ids([dashboard_id])
+            kpi_list = [mapper.kpi for mapper in kpi_dashboard_mapper]
+            filters.append(Kpi.id.in_(kpi_list))
 
-    results = (
-        Kpi.query.filter(*filters)  # noqa: E712
-        .order_by(Kpi.created_at.desc())
-        .all()
-    )
+        results = (
+            Kpi.query.filter(*filters)  # noqa: E712
+            .order_by(Kpi.created_at.desc())
+            .all()
+        )
 
-    ret = []
-    metrics = ["name", "metric", "id"]
-    for kpi in results:
-        info = {key: getattr(kpi, key) for key in metrics}
-        try:
+        ret = []
+        metrics = ["name", "metric", "id"]
+        for kpi in results:
+            info = {key: getattr(kpi, key) for key in metrics}
             aggregation_type = kpi.aggregation
             aggregate_data = kpi_aggregation(kpi.id, timeline)
             info["prev"] = round_number(
-                aggregate_data["panel_metrics"]["grp1_metrics"][aggregation_type]
+                aggregate_data.get("panel_metrics", {}).get("grp1_metrics", {}).get(aggregation_type, 0)
             )
             info["current"] = round_number(
-                aggregate_data["panel_metrics"]["grp2_metrics"][aggregation_type]
+                aggregate_data.get("panel_metrics", {}).get("grp2_metrics", {}).get(aggregation_type, 0)
             )
             info["change"] = round_number(info["current"] - info["prev"])
-        except Exception:
-            info["prev"] = 0
-            info["current"] = 0
-            info["change"] = 0
 
-        info["timeline"] = TIME_DICT[timeline]["expansion"]
-        info["anomaly_count"] = get_anomaly_count(kpi.id, timeline)
-        info["graph_data"] = kpi_line_data(kpi.id)
-        info["percentage_change"] = find_percentage_change(
-            info["current"], info["prev"]
-        )
-        ret.append(info)
+            info["timeline"] = TIME_DICT[timeline]["expansion"]
+            info["anomaly_count"] = get_anomaly_count(kpi.id, timeline)
+            info["graph_data"] = kpi_line_data(kpi.id)
+            info["percentage_change"] = find_percentage_change(
+                info["current"], info["prev"]
+            )
+            ret.append(info)
+    except Exception as e:
+        status = "failure"
+        message = str(e)
+        logger.error(message)
 
     return jsonify({"data": ret, "message": message, "status": status})
 

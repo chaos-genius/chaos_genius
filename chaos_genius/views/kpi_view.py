@@ -31,7 +31,8 @@ from chaos_genius.controllers.dashboard_controller import (
     create_dashboard_kpi_mapper,
     get_mapper_obj_by_dashboard_ids,
     get_mapper_obj_by_kpi_ids,
-    get_dashboard_list_by_ids
+    get_dashboard_list_by_ids,
+    disable_mapper_for_kpi_ids,
 )
 from chaos_genius.utils.datetime_helper import get_rca_timestamp, get_epoch_timestamp
 
@@ -208,6 +209,7 @@ def disable_kpi(kpi_id):
         if kpi_obj:
             kpi_obj.active = False
             kpi_obj.save(commit=True)
+            disable = disable_mapper_for_kpi_ids([kpi_id])
             status = "success"
         else:
             message = "KPI not found"

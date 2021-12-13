@@ -194,7 +194,8 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
                               />
                             </div>
                             <ul className="dropdown-menu ">
-                              <Link to={`/kpi/settings/${kpi.id}`}>
+                              <Link
+                                to={`/dashboard/${kpi?.dashboards[0]?.id}/settings/${kpi.id}`}>
                                 <li>
                                   <img
                                     src={Setting}

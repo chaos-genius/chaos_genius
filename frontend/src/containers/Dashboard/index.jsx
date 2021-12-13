@@ -7,7 +7,7 @@ import { Link, useHistory, useParams } from 'react-router-dom';
 import './dashboard.scss';
 
 import Setting from '../../assets/images/setting.svg';
-
+import rightarrow from '../../assets/images/rightarrow.svg';
 import Dashboardgraph from '../../components/DashboardGraph';
 import FilterWithTab from '../../components/FilterWithTab';
 import Anomaly from '../../components/Anomaly';
@@ -44,6 +44,7 @@ const Dashboard = () => {
   const [active, setActive] = useState('');
   const [kpiAggregate, SetKpiAggregate] = useState('');
   const [tab, setTabs] = useState('deepdrills');
+  const [breadCrumbs, setBreadCrumbs] = useState('');
 
   useEffect(() => {
     getAllDashboardSidebar();
@@ -79,6 +80,11 @@ const Dashboard = () => {
       setActive(
         sidebarList.find((item) => item.id.toString() === kpi.toString())?.name
       );
+      setBreadCrumbs(
+        sidebarList[0]?.dashboards.find(
+          (item) => item.id.toString() === dashboard.toString()
+        )?.name
+      );
       setTabs(location[3]);
       getAnomalySetting(kpi);
       SetKpiAggregate(
@@ -110,11 +116,30 @@ const Dashboard = () => {
     return (
       <>
         {/* common heading and options */}
-        <div className="heading-option">
-          <div className="heading-title">
-            <h3>Dashboard</h3>
+        {/* <div className="heading-option"> */}
+        {/* <div className="heading-title"> */}
+        <div className="page-navigation">
+          {/* Breadcrumb */}
+          <nav aria-label="breadcrumb">
+            <ol className="breadcrumb">
+              <li className="breadcrumb-item">
+                <Link to="/dashboard">Dashboard </Link>
+              </li>
+              <li className="breadcrumb-item active" aria-current="page">
+                {breadCrumbs}
+              </li>
+            </ol>
+          </nav>
+          {/* Back */}
+          <div className="backnavigation">
+            <Link to="/dashboard">
+              <img src={rightarrow} alt="Back" />
+              <span>{breadCrumbs}</span>
+            </Link>
           </div>
         </div>
+        {/* </div> */}
+        {/* </div> */}
         {/* explore wrapper */}
         <div className="explore-wrapper">
           {/* filter section */}
@@ -151,7 +176,7 @@ const Dashboard = () => {
                       </li>
                     </ul>
                   </div>
-                  <Link to={`/kpi/settings/${kpi}`}>
+                  <Link to={`/dashboard/${dashboard}/settings/${kpi}`}>
                     <div className="common-option">
                       <button className="btn grey-button">
                         <img src={Setting} alt="Setting" />

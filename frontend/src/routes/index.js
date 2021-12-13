@@ -64,7 +64,7 @@ const Routes = () => (
     />
     <PrivateRouteWithSidebar
       exact
-      path="/kpi/settings/:id"
+      path="/dashboard/:dashboard/settings/:id"
       component={(props) => <Kpisetting {...props} />}
     />
     <PrivateRouteWithSidebar

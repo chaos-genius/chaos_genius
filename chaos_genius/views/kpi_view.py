@@ -369,7 +369,7 @@ def kpi_aggregation(kpi_id, timeline="mom"):
             final_data["analysis_date"] = get_analysis_date(kpi_id, end_date)
         else:
             final_data = {
-                "panel_metrics": [],
+                "panel_metrics": {},
                 "line_chart_data": [],
                 "insights": [],
                 "analysis_date": "",

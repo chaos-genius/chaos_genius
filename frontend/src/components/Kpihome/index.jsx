@@ -261,21 +261,28 @@ const Kpihome = () => {
                       <div className="kpi-content">
                         <label>Change</label>
                         <span>
-                          {item.change}
-                          <label
-                            className={
-                              item.percentage_change > 0
-                                ? 'high-change'
-                                : 'low-change'
-                            }>
-                            {item.percentage_change > 0 ? (
-                              <img src={Up} alt="High" />
-                            ) : (
-                              <img src={Down} alt="Low" />
-                            )}
-                            {item.percentage_change}
-                            {item.percentage_change !== '--' ? '%' : ''}
-                          </label>
+                          {item.percentage_change !== '--' && (
+                            <>
+                            {item.change}
+                            <label
+                              className={
+                                item.percentage_change > 0
+                                  ? 'high-change'
+                                  : 'low-change'
+                              }>
+                              {item.percentage_change > 0 ? (
+                                <img src={Up} alt="High" />
+                              ) : (
+                                <img src={Down} alt="Low" />
+                              )}
+                              {item.percentage_change}
+                              {item.percentage_change !== '--' ? '%' : ''}
+                            </label>
+                            </>
+                          )}
+                          {item.percentage_change === '--' && (
+                            <>-</>
+                          )}
                         </span>
                       </div>
 

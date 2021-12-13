@@ -116,30 +116,28 @@ const Dashboard = () => {
     return (
       <>
         {/* common heading and options */}
-        {/* <div className="heading-option"> */}
-        {/* <div className="heading-title"> */}
-        <div className="page-navigation">
-          {/* Breadcrumb */}
-          <nav aria-label="breadcrumb">
-            <ol className="breadcrumb">
-              <li className="breadcrumb-item">
-                <Link to="/dashboard">Dashboard </Link>
-              </li>
-              <li className="breadcrumb-item active" aria-current="page">
-                {breadCrumbs}
-              </li>
-            </ol>
-          </nav>
-          {/* Back */}
-          <div className="backnavigation">
-            <Link to="/dashboard">
-              <img src={rightarrow} alt="Back" />
-              <span>{breadCrumbs}</span>
-            </Link>
+        <div className="heading-option">
+          <div className="page-navigation">
+            {/* Breadcrumb */}
+            <nav aria-label="breadcrumb">
+              <ol className="breadcrumb">
+                <li className="breadcrumb-item">
+                  <Link to="/dashboard">Dashboard </Link>
+                </li>
+                <li className="breadcrumb-item active" aria-current="page">
+                  {breadCrumbs}
+                </li>
+              </ol>
+            </nav>
+            {/* Back */}
+            <div className="backnavigation">
+              <Link to="/dashboard">
+                <img src={rightarrow} alt="Back" />
+                <span>{breadCrumbs}</span>
+              </Link>
+            </div>
           </div>
         </div>
-        {/* </div> */}
-        {/* </div> */}
         {/* explore wrapper */}
         <div className="explore-wrapper">
           {/* filter section */}

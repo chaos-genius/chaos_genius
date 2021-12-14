@@ -69,7 +69,8 @@ def _checkpoint(
 
     error = None
     if exc_info is not None:
-        error = "".join(traceback.format_tb(exc_info.__traceback__))
+        exc_main_info = f"{type(exc_info).__name__}: {exc_info}"
+        error = exc_main_info + "\n" + "".join(traceback.format_exception(exc_info.__class__, exc_info, exc_info.__traceback__))
     new_checkpoint = Task(
         task_id=task_id,
         kpi_id=kpi_id,

@@ -75,6 +75,8 @@ def task_monitor_view():
         tasks=tasks,
         enumerate=enumerate,
         str=str,
+        repr=repr,
+        list=list,
         container_status=containers,
         CONTAINERS=CONTAINERS,
     )

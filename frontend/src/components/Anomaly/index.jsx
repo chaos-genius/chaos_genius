@@ -67,13 +67,10 @@ const Anomaly = ({ kpi, anomalystatus }) => {
 
   const idRef = useRef(0);
 
-  const {
-    anomalyDetectionData,
-    anomalyDrilldownData,
-    anomalyQualityData
-  } = useSelector((state) => {
-    return state.anomaly;
-  });
+  const { anomalyDetectionData, anomalyDrilldownData, anomalyQualityData } =
+    useSelector((state) => {
+      return state.anomaly;
+    });
 
   useEffect(() => {
     store.dispatch(RESET_ACTION);
@@ -199,8 +196,7 @@ const Anomaly = ({ kpi, anomalystatus }) => {
           borderWidth: 1,
           padding: 20,
           title: {
-            text:
-              'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
+            text: 'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
             style: {
               fontStyle: 'italic'
             }
@@ -397,6 +393,10 @@ const Anomaly = ({ kpi, anomalystatus }) => {
                           ) || '-'}
                         </span>
                       </p>
+                    </div>
+                    <div className="option-selections">
+                      <span className="active">Overall KPI</span>
+                      <span>Sub dimensions</span>
                     </div>
                     {/* <Select
                       value={category}

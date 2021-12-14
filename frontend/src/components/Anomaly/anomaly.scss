@@ -5,8 +5,32 @@
   .css-2b097c-container {
     width: 170px !important;
   }
+  .option-selections {
+    background: $white;
+    border: 1px solid rgba(34, 34, 34, 0.12);
+    box-sizing: border-box;
+    border-radius: 6px;
+    margin: 4px;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    span {
+      padding: 8px;
+      font-weight: $font-weight-400;
+      font-size: $font-size-14;
+      line-height: $line-height-16;
+      color: $grey_variation-3;
+      &.active {
+        color: $green;
+        font-weight: $font-weight-500;
+        background: $green_variation-2;
+        border-radius: 6px;
+      }
+    }
+  }
 }
 
-.chartContainer{
+.chartContainer {
   max-height: 400px;
 }

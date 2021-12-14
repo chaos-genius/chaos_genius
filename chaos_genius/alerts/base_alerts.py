@@ -15,7 +15,7 @@ from chaos_genius.databases.models.kpi_model import Kpi
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.alerts.email import send_static_alert_email
-from chaos_genius.alerts.slack import anomaly_alert_slack_formatted , event_alert_slack
+from chaos_genius.alerts.slack import anomaly_alert_slack_formatted, event_alert_slack
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 logger = logging.getLogger()
@@ -175,6 +175,7 @@ class StaticEventAlertController:
                     change_df.to_csv(buffer)
                     file_detail["fdata"] = buffer.getvalue()
                 files = [file_detail]
+
             column_names = list(change_df.columns)[:4]
             add_df = []
             del_df = []
@@ -199,7 +200,7 @@ class StaticEventAlertController:
                                             alert_message = message,
                                             alert_frequency = self.alert_info['alert_frequency'].capitalize(),
                                             alert_name = self.alert_info['alert_name'],
-                                            preview_text = "Static Event Alert"   
+                                            preview_text = "Static Event Alert"
                                         )
             return test
         else:
@@ -226,10 +227,13 @@ class StaticEventAlertController:
         return test
         
     def send_slack_event_alert(self ,change_df):
+        """Sends a slack alert"""
+
         alert_name = self.alert_info["alert_name"]
         alert_frequency= self.alert_info["alert_frequency"]
         alert_message=  self.alert_info["alert_message"]
         alert_overview= ""
+
         if self.alert_info["alert_settings"] == "new_entry_alert":
             alert_overview= f"Number of rows added: {change_df.shape[0]}"
         elif self.alert_info["alert_settings"] == "change_alert":
@@ -239,7 +243,6 @@ class StaticEventAlertController:
         elif self.alert_info["alert_settings"] == "always_alert":
             alert_overview= f"Number of rows present: {change_df.shape[0]}"
             
-
         test = event_alert_slack(alert_name , alert_frequency , alert_message , alert_overview)
 
         if test == "ok":
@@ -433,14 +436,6 @@ def check_and_trigger_alert(alert_id):
 
         data_source_id = alert_info.data_source
         data_source_obj = DataSource.get_by_id(data_source_id)
-        
-        curr_date_time = datetime.datetime.now()
-        check_time = FREQUENCY_DICT[alert_info.alert_frequency]
-
-        # if alert_info.last_alerted is not None and \
-        #         alert_info.last_alerted > (curr_date_time - check_time):
-        #     logger.debug(f"Skipping alert with ID {alert_info.id}")
-        #     return True
 
         static_alert_obj = StaticEventAlertController(alert_info.as_dict, data_source_obj.as_dict)
         static_alert_obj.check_and_prepare_alert()

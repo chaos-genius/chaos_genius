@@ -50,7 +50,10 @@ import {
   KPIALERTDISABLESUCCESS,
   KPIALERTENABLERESPONSE,
   KPIALERTENABLEFAILURE,
-  KPIALERTENABLEREQUEST
+  KPIALERTENABLEREQUEST,
+  KPIALERTDELETEREQUEST,
+  KPIALERTDELETERESPONSE,
+  KPIALERTDELETEFAILURE
 } from './ActionConstants';
 
 export const getAlertEmailRequest = () => {
@@ -435,6 +438,7 @@ export const kpiAlertDisable = (id) => {
     }
   };
 };
+
 export const kpiAlertEnableRequest = () => {
   return {
     type: KPIALERTENABLEREQUEST
@@ -467,3 +471,36 @@ export const kpiAlertEnable = (id) => {
     }
   };
 };
+
+export const kpiAlertDeleteRequest = () =>{
+  return {
+    type: KPIALERTDELETEREQUEST
+  }
+}
+
+export const kpiAlertDeleteFailure = () =>{
+  return {
+    type: KPIALERTDELETEFAILURE
+  }
+}
+
+export const kpiAlertDeleteSuccess = (response) =>{
+  return {
+    type: KPIALERTDELETERESPONSE,
+    data: response
+  }
+}
+
+export const kpiAlertDeleteById = (id) => {
+  return async (dispatch) => {
+    dispatch(kpiAlertDeleteRequest());
+    const { data, error, status } = await getRequest({
+      url: `${BASE_URL}/api/alert/${id}/disable`
+    });
+    if (error) {
+      dispatch(kpiAlertDeleteFailure());
+    } else if (data && status === 200) {
+      dispatch(kpiAlertDeleteSuccess(data));
+    }
+  };
+}

@@ -420,7 +420,7 @@ def get_schema_tables(datasource_id, schema_name):
         status = "success"
         message = "List of tables obtained"
         table_names = table_list
-    except Exception as err :
+    except Exception as err:
         status = "failure"
         message = "List of tables not obtained"
     
@@ -453,3 +453,25 @@ def check_materialize_views_available(datasource_id):
         message = str(err)
     
     return jsonify({"message":message , "available":available})
+
+@blueprint.route("/<int:datasource_id>/<schema_name>/list-views", methods=["GET"])
+def get_schema_views(datasource_id, schema_name):
+
+    status = ""
+    message = ""
+    view_names = []
+    try:
+        datasource_info = DataSource.query.get(datasource_id)
+        datasource_uri = datasource_info.db_uri
+        engine = create_engine(datasource_uri)
+        insp = inspect(engine)
+        view_list = insp.get_view_names(schema=schema_name)
+        status = "success"
+        message = "List of views obtained"
+        view_names = view_list
+    except Exception as err :
+        status = "failure"
+        message = str(err)
+    
+    return jsonify({"message":message, "status":status, "view_names":view_names})
+

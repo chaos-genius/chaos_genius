@@ -25,7 +25,10 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
   });
   const [kpi, setKpi] = useState('');
   const [analystics, setAnalystics] = useState(false);
+  const [breadCrumbs, setBreadCrumbs] = useState('');
   const kpiId = useParams().id;
+  const dashboardId = useParams().dashboard;
+
   useEffect(() => {
     getAllDashboardSidebar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -39,12 +42,18 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
   }, [analystics]);
 
   const getAllDashboardSidebar = () => {
-    dispatch(getDashboardSidebar());
+    dispatch(getDashboardSidebar({ dashboard_id: dashboardId }));
   };
 
   useEffect(() => {
     if (sidebarList && sidebarList.length !== 0 && onboarding) {
       setKpi(sidebarList[0]?.id);
+      console.log(
+        sidebarList[0]?.dashboards.find(
+          (item) => item.id.toString() === dashboardId.toString()
+        )?.name
+      );
+
       // if (!onboarding) {
       //   window.history.pushState(
       //     '',
@@ -53,6 +62,11 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
       //   );
       // }
     } else if (sidebarList && sidebarList.length !== 0) {
+      setBreadCrumbs(
+        sidebarList[0]?.dashboards.find(
+          (item) => item.id.toString() === dashboardId.toString()
+        )?.name
+      );
       setKpi(kpiId);
     }
 
@@ -80,10 +94,18 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
                   <Link to={`/dashboard`}>Dashboard</Link>
                 </li>
                 <li
+                  className="breadcrumb-item"
+                  onClick={() => store.dispatch(SETTING_RESET)}>
+                  <Link to={`/dashboard/${dashboardId}/deepdrills/`}>
+                    {breadCrumbs}
+                  </Link>
+                </li>
+
+                <li
                   className="breadcrumb-item active"
                   aria-current="page"
                   onClick={() => store.dispatch(SETTING_RESET)}>
-                  Settings
+                  / Settings
                 </li>
               </ol>
             </nav>
@@ -91,7 +113,7 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
             <div
               className="backnavigation"
               onClick={() => store.dispatch(SETTING_RESET)}>
-              <Link to={`/dashboard`}>
+              <Link to={`/dashboard/${dashboardId}/deepdrills`}>
                 <img src={rightarrow} alt="Back" />
                 <span>Settings</span>
               </Link>

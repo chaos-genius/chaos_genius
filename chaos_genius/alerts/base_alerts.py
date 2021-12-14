@@ -176,9 +176,9 @@ class StaticEventAlertController:
                     file_detail["fdata"] = buffer.getvalue()
                 files = [file_detail]
             column_names = list(change_df.columns)[:4]
-            add_df = None
-            del_df = None
-            normal_df = None
+            add_df = []
+            del_df = []
+            normal_df = []
         
             if self.alert_info["alert_settings"] == "new_entry_alert":
                 add_df=list(change_df.head().T.to_dict().values())
@@ -188,10 +188,6 @@ class StaticEventAlertController:
             elif self.alert_info["alert_settings"] == "always_alert":
                 normal_df=list(change_df.head().T.to_dict().values())
             
-            add_df = [] if add_df is None else add_df
-            del_df = [] if del_df is None else del_df
-            normal_df = [] if normal_df is None else normal_df
-
             test = self.send_template_email('email_event_alert.html', 
                                             recipient_emails, 
                                             subject, 

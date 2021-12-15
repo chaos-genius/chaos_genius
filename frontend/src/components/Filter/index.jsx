@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+import Tooltip from 'react-tooltip-lite';
+
 import Search from '../../assets/images/search.svg';
 
 const DataSourceFilter = ({
@@ -139,9 +141,16 @@ const DataSourceFilter = ({
                       type="checkbox"
                       onChange={(e) => onDashboardFilter(e)}
                     />
-                    <label className="form-check-label" htmlFor={item}>
-                      {item}
-                    </label>
+                    <Tooltip
+                      className="tooltip-name"
+                      direction="right"
+                      content={<span> {item}</span>}>
+                      <label
+                        className="form-check-label name-tooltip"
+                        htmlFor={item}>
+                        {item}
+                      </label>
+                    </Tooltip>
                   </div>
                 );
               })}

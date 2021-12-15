@@ -27,7 +27,7 @@ from chaos_genius.third_party.integration_server_config import (
     DATA_SOURCE_ABBREVIATION
 )
 from chaos_genius.databases.db_utils import create_sqlalchemy_uri
-from chaos_genius.connectors import get_metadata
+from chaos_genius.connectors import get_metadata, get_sqla_db_conn
 from chaos_genius.third_party.integration_utils import get_connection_config
 from chaos_genius.utils.metadata_api_config import (
     SCHEMAS_AVAILABLE,
@@ -478,9 +478,12 @@ def get_table_info():
         table_name = data["table_name"]
         data_source_obj = DataSource.get_by_id(datasource_id)
         if data_source_obj:
-            table_info["columns"] = data_source_obj.get_columns(table_name, schema)
-            table_info["primary_key"] = data_source_obj.get_primary_key(table_name, schema)
-            status = "success"
+            ds_data = data_source_obj.as_dict
+            datasource_conn = get_sqla_db_conn(data_source_info=ds_data)
+            if datasource_conn is not None:
+                table_info["columns"] = datasource_conn.get_columns(table_name, schema)
+                table_info["primary_key"] = datasource_conn.get_primary_key(table_name, schema)
+                status = "success"
         else:
             status = "failure"
             message = "Unable fetch datasource matching the provided id"

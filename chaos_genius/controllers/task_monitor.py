@@ -131,10 +131,10 @@ class _CustomErrorStyle(Style):
     background_color = "#F1F5F9"
 
     styles = {
-        Generic.Error: "bold #FF0000",
-        Generic.Traceback: "#04D",
-        Number: "bold #1E40AF",
-        Name.Builtin: "#008000",
+        Generic.Error: "bold #ef4444",
+        Generic.Traceback: "#3730a3",
+        Number: "#1d4ed8",
+        Name.Builtin: "#059669",
     }
 
 

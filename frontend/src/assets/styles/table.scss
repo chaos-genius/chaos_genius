@@ -64,7 +64,13 @@
           height: 56px;
           vertical-align: middle;
           padding: 16px;
-
+          &.name-tooltip {
+            max-width: 200px;
+            height: 20px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
           &.child-rotate {
             img {
               transform: rotate(90deg);

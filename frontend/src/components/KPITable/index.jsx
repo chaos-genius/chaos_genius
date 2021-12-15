@@ -145,7 +145,13 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
                 ? kpiData.map((kpi) => {
                     return (
                       <tr key={uuidv4()}>
-                        <td>{kpi.name}</td>
+                        <td
+                          className="name-tooltip"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="bottom"
+                          title={kpi.name}>
+                          <span>{kpi.name}</span>
+                        </td>
                         <td>
                           {kpi?.dashboards.length !== 0 ? (
                             <Dashboardname data={kpi?.dashboards} />

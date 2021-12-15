@@ -105,7 +105,7 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
                   className="breadcrumb-item active"
                   aria-current="page"
                   onClick={() => store.dispatch(SETTING_RESET)}>
-                  / Settings
+                  Settings
                 </li>
               </ol>
             </nav>

@@ -27,7 +27,7 @@ from chaos_genius.third_party.integration_server_config import (
     DATA_SOURCE_ABBREVIATION
 )
 from chaos_genius.databases.db_utils import create_sqlalchemy_uri
-from chaos_genius.connectors import get_metadata
+from chaos_genius.connectors import get_metadata, get_sqla_db_conn
 from chaos_genius.third_party.integration_utils import get_connection_config
 from chaos_genius.utils.metadata_api_config import (
     SCHEMAS_AVAILABLE,
@@ -466,3 +466,29 @@ def get_schema_views(datasource_id, schema_name):
     
     return jsonify({"message":message, "status":status, "view_names":view_names})
 
+@blueprint.route("/table-info",methods=["GET"])
+def get_table_info():
+    status = ""
+    message = ""
+    table_info = {}
+    try:
+        data = request.get_json()
+        datasource_id = data["datasource_id"]
+        schema = data["schema"]
+        table_name = data["table_name"]
+        data_source_obj = DataSource.get_by_id(datasource_id)
+        if data_source_obj:
+            ds_data = data_source_obj.as_dict
+            datasource_conn = get_sqla_db_conn(data_source_info=ds_data)
+            if datasource_conn is not None:
+                table_info["columns"] = datasource_conn.get_columns(table_name, schema)
+                table_info["primary_key"] = datasource_conn.get_primary_key(table_name, schema)
+                status = "success"
+        else:
+            status = "failure"
+            message = "Unable fetch datasource matching the provided id"
+    except Exception as e:
+        status = "failure"
+        message = "Error in fetching table info: {}".format(e)
+        table_info = {}
+    return jsonify({"table_info":table_info, "status":status, "message":message})

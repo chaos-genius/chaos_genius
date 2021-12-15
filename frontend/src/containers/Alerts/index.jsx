@@ -27,12 +27,16 @@ const RESET_ENABLE_DISABLE_DATA = {
   type: 'RESET_ENABLE_DISABLE_DATA'
 };
 
+const RESET_DELETE_DATA ={
+  type:'RESET_DELETE_DATA'
+}
+
 const Alerts = () => {
   const dispatch = useDispatch();
 
   const toast = useToast();
 
-  const { alertLoading, alertList, kpiAlertEnableData, kpiAlertDisableData } =
+  const { alertLoading, alertList, kpiAlertEnableData, kpiAlertDisableData,kpiAlertDeleteData } =
     useSelector((state) => state.alert);
 
   const [alertData, setAlertData] = useState(alertList);
@@ -44,6 +48,7 @@ const Alerts = () => {
   useEffect(() => {
     store.dispatch(RESET_ACTION);
     store.dispatch(RESET_ENABLE_DISABLE_DATA);
+    store.dispatch(RESET_DELETE_DATA);
     dispatch(getAllAlerts());
   }, [dispatch, data]);
 
@@ -65,7 +70,7 @@ const Alerts = () => {
         type: 'success',
         header: 'Successfully Disabled'
       });
-    } else if (kpiAlertDisableData && kpiAlertDisableData === 'failure') {
+    } else if (kpiAlertDisableData && kpiAlertDisableData.status === 'failure') {
       customToast({
         type: 'error',
         header: 'Failed to disable selected alert',
@@ -84,9 +89,21 @@ const Alerts = () => {
         header: 'Failed to enable selected alert',
         description: kpiAlertEnableData.message
       });
+    } else if(kpiAlertDeleteData && kpiAlertDeleteData.status === 'success') {
+      setData((prev) => !prev);
+      customToast({
+        type: 'success',
+        header: 'Successfully Deleted'
+      });
+    }else if(kpiAlertDeleteData && kpiAlertDeleteData.status === 'failure'){
+      customToast({
+        type: 'error',
+        header: 'Failed to delete selected alert',
+        description: kpiAlertDeleteData.message
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpiAlertDisableData, kpiAlertEnableData]);
+  }, [kpiAlertDisableData, kpiAlertEnableData, kpiAlertDeleteData]);
 
   const customToast = (data) => {
     const { type, header, description } = data;

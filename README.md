@@ -3,7 +3,7 @@
 
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-22-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-23-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 Chaos Genius is an open-source business observability platform. Chaos Genius enables businesses to monitor thousands of KPIs, across multiple data sources, and perform automated root cause analysis for any deviation in the KPIs. 
@@ -58,6 +58,19 @@ docker-compose up
 ```
 
 Visit[  http://127.0.0.1:8080](http://localhost:8080/)
+
+### Upgrade from earlier versions
+
+To update the install first make sure the docker containers are down with docker-compose down
+
+Then update the repo & docker builds by following commands:
+
+git pull
+docker-compose pull
+
+And then bring back the containers with docker-compose up
+
+### Quick start & support
 
 Follow this [Quick Start guide](https://docs.chaosgenius.io/docs/Quick_Start/Install-Chaos-Genius) showing you how to connect a data source, define your first KPI, configure Anomaly Detector on your local machine. 
 
@@ -137,11 +150,12 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/Mansi-Chauhan27"><img src="https://avatars.githubusercontent.com/u/86592223?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mansi-Chauhan27</b></sub></a><br /><a href="#plugin-Mansi-Chauhan27" title="Plugin/utility libraries">🔌</a></td>
     <td align="center"><a href="https://github.com/davidhayter-karhoo"><img src="https://avatars.githubusercontent.com/u/43238713?v=4?s=100" width="100px;" alt=""/><br /><sub><b>davidhayter-karhoo</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/issues?q=author%3Adavidhayter-karhoo" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://www.floryn.com"><img src="https://avatars.githubusercontent.com/u/73708?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Marijn van Aerle</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/issues?q=author%3Amvaerle" title="Bug reports">🐛</a></td>
-    <td align="center"><a href="https://github.com/gxu-kangaroo"><img src="https://avatars.githubusercontent.com/u/84041080?v=4?s=100" width="100px;" alt=""/><br /><sub><b>gxu-kangaroo</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/issues/320" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/gxu-kangaroo"><img src="https://avatars.githubusercontent.com/u/84041080?v=4?s=100" width="100px;" alt=""/><br /><sub><b>gxu-kangaroo</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/issues?q=author%3Agxu-kangaroo" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/RamneekKaur983"><img src="https://avatars.githubusercontent.com/u/51482282?v=4?s=100" width="100px;" alt=""/><br /><sub><b>RamneekKaur983</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=RamneekKaur983" title="Code">💻</a></td>
   </tr>
   <tr>
     <td align="center"><a href="https://github.com/arvind-27"><img src="https://avatars.githubusercontent.com/u/57091402?v=4?s=100" width="100px;" alt=""/><br /><sub><b>arvind-27</b></sub></a><br /><a href="#data-arvind-27" title="Data">🔣</a></td>
+    <td align="center"><a href="https://joshtaylor.id.au"><img src="https://avatars.githubusercontent.com/u/225131?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Josh Taylor</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/issues?q=author%3Ajoshuataylor" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

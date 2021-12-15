@@ -360,6 +360,8 @@ class RootCauseAnalysis:
 
         d1_agg = self._grp1_df[self._metric].agg(self._agg)
         d2_agg = self._grp2_df[self._metric].agg(self._agg)
+        d1_agg = 0 if pd.isna(d1_agg) else d1_agg
+        d2_agg = 0 if pd.isna(d2_agg) else d2_agg
         impact = d2_agg - d1_agg
         non_overlap_impact = df_subgroups["impact_non_overlap"].sum()
 

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import Select from 'react-select';
-
+import Tooltip from 'react-tooltip-lite';
 import Search from '../../assets/images/search.svg';
 import Up from '../../assets/images/up.svg';
 import Down from '../../assets/images/down.svg';
@@ -236,7 +236,14 @@ const Kpihome = () => {
                   return (
                     <div className="kpi-card" key={item.id}>
                       <div className="kpi-content kpi-content-label">
-                        <h3>{item.name}</h3>
+                        <h3 className="name-tooltip">
+                          <Tooltip
+                            className="tooltip-name"
+                            direction="right"
+                            content={<span> {item.name}</span>}>
+                            {item.name}
+                          </Tooltip>
+                        </h3>
                       </div>
                       <div className="kpi-content">
                         <label>
@@ -263,26 +270,24 @@ const Kpihome = () => {
                         <span>
                           {item.percentage_change !== '--' && (
                             <>
-                            {item.change}
-                            <label
-                              className={
-                                item.percentage_change > 0
-                                  ? 'high-change'
-                                  : 'low-change'
-                              }>
-                              {item.percentage_change > 0 ? (
-                                <img src={Up} alt="High" />
-                              ) : (
-                                <img src={Down} alt="Low" />
-                              )}
-                              {item.percentage_change}
-                              {item.percentage_change !== '--' ? '%' : ''}
-                            </label>
+                              {item.change}
+                              <label
+                                className={
+                                  item.percentage_change > 0
+                                    ? 'high-change'
+                                    : 'low-change'
+                                }>
+                                {item.percentage_change > 0 ? (
+                                  <img src={Up} alt="High" />
+                                ) : (
+                                  <img src={Down} alt="Low" />
+                                )}
+                                {item.percentage_change}
+                                {item.percentage_change !== '--' ? '%' : ''}
+                              </label>
                             </>
                           )}
-                          {item.percentage_change === '--' && (
-                            <>-</>
-                          )}
+                          {item.percentage_change === '--' && <>-</>}
                         </span>
                       </div>
 

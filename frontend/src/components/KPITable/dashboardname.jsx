@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Down from '../../assets/images/tipsdown.svg';
 import Up from '../../assets/images/tipsup.svg';
 import '../../assets/styles/table.scss';
+import Tooltip from 'react-tooltip-lite';
 
 const Dashboardname = ({ data }) => {
   const [show, setShow] = useState(1);
@@ -12,12 +13,17 @@ const Dashboardname = ({ data }) => {
         data.length !== 0 &&
         data.slice(0, show).map((dashboard, index) => (
           <li>
-            <label>
-              {data.length - 1 === index
-                ? dashboard?.name
-                : show > 1
-                ? dashboard?.name.concat('', ',')
-                : dashboard?.name}
+            <label className="name-tooltip">
+              <Tooltip
+                className="tooltip-name"
+                direction="right"
+                content={<span>{dashboard?.name}</span>}>
+                {data.length - 1 === index
+                  ? dashboard?.name
+                  : show > 1
+                  ? dashboard?.name.concat('', ',')
+                  : dashboard?.name}
+              </Tooltip>
               {/* {show !== 1 && ','} */}
             </label>
           </li>

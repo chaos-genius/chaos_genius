@@ -481,6 +481,7 @@ def get_table_info():
             ds_data = data_source_obj.as_dict
             datasource_conn = get_sqla_db_conn(data_source_info=ds_data)
             if datasource_conn is not None:
+                datasource_conn.init_inspector()
                 table_info["columns"] = datasource_conn.get_columns(table_name, schema)
                 table_info["primary_key"] = datasource_conn.get_primary_key(table_name, schema)
                 status = "success"

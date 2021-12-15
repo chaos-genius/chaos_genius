@@ -456,6 +456,9 @@ def check_materialize_views_available(datasource_id):
 
 @blueprint.route("/<int:datasource_id>/<schema_name>/list-views", methods=["GET"])
 def get_schema_views(datasource_id, schema_name):
+    """
+    Returns a list of both views and materialized views
+    """
 
     status = ""
     message = ""

@@ -15,7 +15,7 @@ from chaos_genius.databases.models.kpi_model import Kpi
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.alerts.email import send_static_alert_email
-from chaos_genius.alerts.slack import anomaly_alert_slack_formatted
+from chaos_genius.alerts.slack import anomaly_alert_slack_formatted, event_alert_slack
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 logger = logging.getLogger()
@@ -108,7 +108,7 @@ class StaticEventAlertController:
             if self.alert_info["alert_channel"] == "email":
                 self.prepare_email(change_df)
             elif self.alert_info["alert_channel"] == "slack":
-                pass
+                self.send_slack_event_alert(change_df)
 
         self.pickle_df()
 
@@ -165,7 +165,7 @@ class StaticEventAlertController:
         recipient_emails = alert_channel_conf.get("email", [])
 
         if recipient_emails:
-            subject = f"Event Alert Notification: [ID - {self.alert_info['id']}] [Type - {self.alert_info['alert_settings']}]"
+            subject = f"{self.alert_info['alert_name']} - Chaos Genius Event Alert❗"
             message = self.alert_info["alert_message"]
             files = []
             if not change_df.empty:
@@ -175,11 +175,28 @@ class StaticEventAlertController:
                     change_df.to_csv(buffer)
                     file_detail["fdata"] = buffer.getvalue()
                 files = [file_detail]
+
+            column_names = list(change_df.columns)[:4]
+            add_df = []
+            del_df = []
+            normal_df = []
+        
+            if self.alert_info["alert_settings"] == "new_entry_alert":
+                add_df=list(change_df.head().T.to_dict().values())
+            elif self.alert_info["alert_settings"] == "change_alert":
+                del_df=list(change_df[change_df["change"] == "deleted"].head().T.to_dict().values())
+                add_df=list(change_df[change_df["change"] == "added"].head().T.to_dict().values())
+            elif self.alert_info["alert_settings"] == "always_alert":
+                normal_df=list(change_df.head().T.to_dict().values())
             
             test = self.send_template_email('email_event_alert.html', 
                                             recipient_emails, 
                                             subject, 
                                             files,
+                                            add_df=add_df,
+                                            del_df=del_df,
+                                            normal_df=normal_df,
+                                            column_names=column_names,
                                             alert_message = message,
                                             alert_frequency = self.alert_info['alert_frequency'].capitalize(),
                                             alert_name = self.alert_info['alert_name'],
@@ -208,6 +225,33 @@ class StaticEventAlertController:
             logger.debug(f"The email for Alert ID - {self.alert_info['id']} was not sent")
         
         return test
+        
+    def send_slack_event_alert(self ,change_df):
+        """Sends a slack alert"""
+
+        alert_name = self.alert_info["alert_name"]
+        alert_frequency= self.alert_info["alert_frequency"]
+        alert_message=  self.alert_info["alert_message"]
+        alert_overview= ""
+
+        if self.alert_info["alert_settings"] == "new_entry_alert":
+            alert_overview= f"Number of rows added: {change_df.shape[0]}"
+        elif self.alert_info["alert_settings"] == "change_alert":
+            added_rows= change_df[change_df.change == 'added'].shape[0]
+            deleted_rows=change_df[change_df.change == 'deleted'].shape[0]   
+            alert_overview=f"Number of rows added: {added_rows} and Number of rows deleted: {deleted_rows}"                 
+        elif self.alert_info["alert_settings"] == "always_alert":
+            alert_overview= f"Number of rows present: {change_df.shape[0]}"
+            
+        test = event_alert_slack(alert_name , alert_frequency , alert_message , alert_overview)
+
+        if test == "ok":
+            logger.info(f"The slack alert for Alert ID - {self.alert_info['id']} was successfully sent")
+        else:
+            logger.info(f"The slack alert for Alert ID - {self.alert_info['id']} has not been sent")
+        
+        message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
+        return message
 
 
 class AnomalyAlertController:
@@ -357,6 +401,8 @@ class AnomalyAlertController:
         
         message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
         return message
+    
+
 
 class StaticKpiAlertController:
     def __init__(self, alert_info):
@@ -390,14 +436,6 @@ def check_and_trigger_alert(alert_id):
 
         data_source_id = alert_info.data_source
         data_source_obj = DataSource.get_by_id(data_source_id)
-        
-        curr_date_time = datetime.datetime.now()
-        check_time = FREQUENCY_DICT[alert_info.alert_frequency]
-
-        if alert_info.last_alerted is not None and \
-                alert_info.last_alerted > (curr_date_time - check_time):
-            logger.debug(f"Skipping alert with ID {alert_info.id}")
-            return True
 
         static_alert_obj = StaticEventAlertController(alert_info.as_dict, data_source_obj.as_dict)
         static_alert_obj.check_and_prepare_alert()

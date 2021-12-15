@@ -19,9 +19,26 @@ import Fuse from 'fuse.js';
 
 import store from '../../redux/store';
 
+import { formatDateTime } from '../../utils/date-helper';
+
 const DASHBOARD_RESET = {
   type: 'DASHBOARD_RESET'
 };
+
+const sort = [
+  {
+    label: 'Alphabetical',
+    value: 'alpha'
+  },
+  {
+    label: 'Recently Modified',
+    value: 'recent'
+  },
+  {
+    label: 'No. of KPIs',
+    value: 'kpi'
+  }
+];
 
 const Dashboardconfigure = () => {
   const dispatch = useDispatch();
@@ -66,6 +83,27 @@ const Dashboardconfigure = () => {
     }
   };
 
+  const onSort = (type) => {
+    let value = dashboardList.sort(function (a, b) {
+      if (type.value === 'alpha') {
+        return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+      } else if (type.value === 'recent') {
+        return (
+          formatDateTime(b.last_modified) - formatDateTime(a.last_modified)
+        );
+      } else if (type.value === 'kpi') {
+        return a.kpis.length < b.kpis.length
+          ? -1
+          : a.kpis.length > b.kpis.length
+          ? 1
+          : 0;
+      } else {
+        return [];
+      }
+    });
+    setDashboardData([...value]);
+  };
+
   if (dashboardListLoading) {
     return (
       <div className="load loader-page">
@@ -103,8 +141,10 @@ const Dashboardconfigure = () => {
               <Select
                 // options={data}
                 classNamePrefix="selectcategory"
-                placeholder="last modified"
+                options={sort}
+                placeholder="Sort by"
                 isSearchable={false}
+                onChange={(e) => onSort(e)}
               />
             </div>
             <div className="dashboard-card-wrapper">

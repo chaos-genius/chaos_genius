@@ -239,7 +239,7 @@ const Kpihome = () => {
                         <h3 className="name-tooltip">
                           <Tooltip
                             className="tooltip-name"
-                            direction="right"
+                            direction="left"
                             content={<span> {item.name}</span>}>
                             {item.name}
                           </Tooltip>

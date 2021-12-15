@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import Modal from 'react-modal';
-
+import Tooltip from 'react-tooltip-lite';
 import More from '../../assets/images/more.svg';
 import Moreactive from '../../assets/images/more-active.svg';
 import Edit from '../../assets/images/edit.svg';
@@ -102,7 +102,14 @@ const Dashboardcards = ({ dashboarddata, setChange }) => {
                 <div>
                   <div className="header-card">
                     <div className="header-content">
-                      <h3>{dashboard.name}</h3>
+                      <h3 className="name-tooltip">
+                        <Tooltip
+                          className="tooltip-name"
+                          direction="right"
+                          content={<span> {dashboard.name}</span>}>
+                          {dashboard.name}
+                        </Tooltip>
+                      </h3>
                     </div>
                     <div className="more-dropdown dropstart">
                       <div

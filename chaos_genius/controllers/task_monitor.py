@@ -3,6 +3,11 @@
 import traceback
 from typing import List, Optional, cast
 
+from pygments import highlight
+from pygments.formatters import HtmlFormatter
+from pygments.lexers import PythonTracebackLexer
+from pygments.style import Style
+from pygments.token import Generic, Name, Number
 from sqlalchemy import func
 
 from chaos_genius.databases.models.kpi_model import Kpi
@@ -121,13 +126,31 @@ def checkpoint_failure(
     return _checkpoint(task_id, kpi_id, analytics_type, checkpoint, "Failure", exc_info)
 
 
-def get_checkpoints(sort_by_task_id=True, kpi_info=True, track_subtasks=True) -> List[Task]:
+class _CustomErrorStyle(Style):
+    default_style = ""
+    background_color = "#F1F5F9"
+
+    styles = {
+        Generic.Error: "bold #FF0000",
+        Generic.Traceback: "#04D",
+        Number: "bold #1E40AF",
+        Name.Builtin: "#008000",
+    }
+
+
+def get_checkpoints(
+    sort_by_task_id=True,
+    kpi_info=True,
+    track_subtasks=True,
+    highlight_error=True
+) -> List[Task]:
     """Get all task checkpoints as a list of Task objects.
 
     Args:
         sort_by_task_id (bool): whether to sort by task_id, descending (default: True)
         kpi_info (bool): whether to include kpi_name in the Tasks (default: True)
         track_subtasks (bool): whether to include completed_subtasks and total_subtasks in the Tasks (default: True)
+        highlight_error (bool): whether to highlight error using Pygments and make the error field an HTML string (default: True)
     """
     if sort_by_task_id:
         tasks: List[Task] = (
@@ -149,6 +172,18 @@ def get_checkpoints(sort_by_task_id=True, kpi_info=True, track_subtasks=True) ->
             kpi = cast(Kpi, Kpi.get_by_id(task.kpi_id))
 
             task.kpi_name = kpi.name
+            if highlight_error and task.error:
+                # TODO: use a single CSS file if there are too many errors
+                error_header, error_body = task.error.split("\n", maxsplit=1)
+                task.error = error_header + "\n" + highlight(
+                        error_body,
+                        PythonTracebackLexer(),
+                        HtmlFormatter(
+                            noclasses=True,
+                            cssstyles="overflow-x: auto; padding: 0.5rem;",
+                            style=_CustomErrorStyle
+                        )
+                )
 
             if track_subtasks:
 

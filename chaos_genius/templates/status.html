@@ -153,7 +153,7 @@
                                     <p class="text-sm text-gray-500" id="error-modal-message">
                                         Traceback for the error:
                                     </p>
-                                    <pre style="max-height: 50vh;" class="overflow-x-auto bg-red-100 text-red-700 rounded-md p-2 font-light" id="error-modal-traceback"></pre>
+                                    <div style="max-height: 50vh;" class="overflow-x-auto rounded-md p-2 font-light" id="error-modal-traceback"></div>
                                 </div>
                             </div>
                         </div>
@@ -209,15 +209,6 @@
             {% endfor %}
         };
 
-        function escapeHtml(unsafe) {
-            return unsafe
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
-
         function showerror(id) {
             let error = taskErrorMapping[id];
 
@@ -232,7 +223,7 @@
             document.getElementById("error-modal").classList.remove("hidden");
 
             document.getElementById("error-modal-title").innerHTML = header;
-            document.getElementById("error-modal-traceback").innerHTML = escapeHtml(traceback);
+            document.getElementById("error-modal-traceback").innerHTML = traceback;
         }
 
         function closeerrormodal() {

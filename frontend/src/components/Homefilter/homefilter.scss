@@ -4,7 +4,20 @@
   height: 100vh;
   overflow: auto;
   width: 100%;
-
+  ul {
+    li {
+      label {
+        cursor: pointer;
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        white-space: initial;
+      }
+    }
+  }
   // Chrome,Edge & Opera
   &::-webkit-scrollbar {
     width: 3px;

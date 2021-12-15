@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import Tooltip from 'react-tooltip-lite';
+
 import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import Search from '../../assets/images/search.svg';
@@ -94,7 +96,12 @@ const DashboardFilter = ({
                     // history.push(`/dashboard/${tabs}/${item.id}`);
                     history.push(`/dashboard/${dashboard}/${tabs}/${item.id}`);
                   }}>
-                  {item.name}
+                  <Tooltip
+                    className="tooltip-name"
+                    direction="right"
+                    content={<span> {item.name}</span>}>
+                    <label className="name-tooltip">{item.name}</label>{' '}
+                  </Tooltip>
                   <img src={GreenArrow} alt="Arrow" />
                 </li>
               );

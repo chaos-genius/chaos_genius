@@ -1,8 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-
 import { useSelector, useDispatch } from 'react-redux';
-// import Select from 'react-select';
-
 import { useHistory } from 'react-router-dom';
 
 import Highcharts from 'highcharts';
@@ -10,15 +7,11 @@ import HighchartsReact from 'highcharts-react-official';
 import highchartsMore from 'highcharts/highcharts-more';
 
 import Toparrow from '../../assets/images/toparrow.svg';
-
 import Anomalygraph from '../Anomalygraph';
 import Noresult from '../Noresult';
 import AnomalyEmptyState from '../AnomalyEmptyState';
-
 import EmptyAnomalyDrilldown from '../EmptyDrillDown';
-//import { formatDate } from '../../utils/date-helper';
 import { formatDateTime, getTimezone } from '../../utils/date-helper';
-
 import './anomaly.scss';
 
 import {
@@ -42,54 +35,64 @@ const RESET_ACTION = {
 const RESET = {
   type: 'RESET_DRILL'
 };
-// const data = [
-//   {
-//     value: 'dataquality',
-//     label: 'Data Quality'
-//   },
-//   {
-//     value: 'multidimensional',
-//     label: 'Multi Dimensional'
-//   }
-// ];
 
 const Anomaly = ({ kpi, anomalystatus }) => {
   const dispatch = useDispatch();
   const history = useHistory();
-  // const [graphData, setGraphData] = useState([]);
   const [chartData, setChartData] = useState([]);
+  const [subDimList, setSubDimList] = useState([]);
   const [drilldownCollapse, setDrilldownCollapse] = useState(false);
   const [dataQualityCollapse, setDataQualityCollapse] = useState(false);
-  // const [category, setCategory] = useState({
-  //   value: 'dataquality',
-  //   label: 'Data Quality'
-  // });
+  const [kpiTab, setKPITab] = useState('Overall KPI');
 
   const idRef = useRef(0);
+  const isFirstRun = useRef(true);
 
-  const {
-    anomalyDetectionData,
-    anomalyDrilldownData,
-    anomalyQualityData
-  } = useSelector((state) => {
-    return state.anomaly;
-  });
+  const KPITabs = [{ name: 'Overall KPI' }, { name: 'Sub-dimensions' }];
+
+  const { anomalyDetectionData, anomalyDrilldownData, anomalyQualityData } =
+    useSelector((state) => {
+      return state.anomaly;
+    });
 
   useEffect(() => {
     store.dispatch(RESET_ACTION);
-    getAnomaly();
+    getAnomaly(kpiTab);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpi]);
 
-  const getAnomaly = () => {
-    dispatch(anomalyDetection(kpi));
-  };
-
   useEffect(() => {
-    if (anomalyDetectionData) {
-      idRef.current = anomalyDetectionData?.data?.base_anomaly_id;
-      renderChart(anomalyDetectionData?.data?.chart_data);
-      handleDataQuality(anomalyDetectionData?.data?.base_anomaly_id);
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
+    store.dispatch(RESET_ACTION);
+    getAnomaly(kpiTab);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kpiTab]);
+
+  const getAnomaly = (tab) => {
+    dispatch(anomalyDetection(kpi, tab));
+  };
+  useEffect(() => {
+    let subDimesionList = [];
+    if (kpiTab === 'Overall KPI') {
+      if (anomalyDetectionData) {
+        idRef.current = anomalyDetectionData?.data?.base_anomaly_id;
+        renderChart(anomalyDetectionData?.data?.chart_data);
+        handleDataQuality(anomalyDetectionData?.data?.base_anomaly_id);
+      }
+    } else if (kpiTab === 'Sub-dimensions') {
+      if (anomalyDetectionData && anomalyDetectionData?.data?.length) {
+        subDimesionList = anomalyDetectionData.data.map((anomaly) => {
+          let subArr = [];
+          subArr.push(
+            <Anomalygraph key={`dl-${anomaly.title}`} drilldown={anomaly} />
+          );
+          return subArr;
+        });
+        setSubDimList(subDimesionList);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anomalyDetectionData]);
@@ -185,11 +188,6 @@ const Anomaly = ({ kpi, anomalystatus }) => {
             point: {
               events: {
                 click: (event) => handleGraphClick(graphData, event)
-                // click:  function () {
-                //     // alert('title: ' + this);
-                //     console.log("this",this)
-                // //    this.handleGraphClick(this.x)
-                // }
               }
             }
           }
@@ -199,8 +197,7 @@ const Anomaly = ({ kpi, anomalystatus }) => {
           borderWidth: 1,
           padding: 20,
           title: {
-            text:
-              'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
+            text: 'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
             style: {
               fontStyle: 'italic'
             }
@@ -264,9 +261,6 @@ const Anomaly = ({ kpi, anomalystatus }) => {
       };
 
       setChartData(demoChart);
-      // this.setState({
-      //   chartData: demoChart
-      // });
     } else {
       setChartData([]);
     }
@@ -398,26 +392,39 @@ const Anomaly = ({ kpi, anomalystatus }) => {
                         </span>
                       </p>
                     </div>
-                    {/* <Select
-                      value={category}
-                      options={data}
-                      classNamePrefix="selectcategory"
-                      placeholder="select"
-                      isSearchable={false}
-                      onChange={(e) => setCategory(e)}
-                    /> */}
+                    <div className="option-selections">
+                      {KPITabs?.length &&
+                        KPITabs.map(function (tab, i) {
+                          return (
+                            <span
+                              onClick={() => setKPITab(tab.name)}
+                              className={
+                                tab.name === kpiTab ? 'active' : 'inactive'
+                              }
+                              key={i}>
+                              {tab.name}
+                            </span>
+                          );
+                        })}
+                    </div>
                   </div>
 
-                  {chartData && chartData.length !== 0 && (
+                  {kpiTab === 'Overall KPI' &&
+                  chartData &&
+                  chartData.length !== 0 ? (
                     <HighchartsReact
                       containerProps={{ className: 'chartContainer' }}
                       highcharts={Highcharts}
                       options={chartData}
                     />
-                  )}
+                  ) : subDimList ? (
+                    subDimList
+                  ) : null}
                 </div>
               </div>
-              {itemList && anomalyDrilldownData !== '' ? (
+              {itemList &&
+              anomalyDrilldownData !== '' &&
+              kpiTab === 'Overall KPI' ? (
                 <div className="dashboard-layout">
                   <div
                     className={
@@ -458,39 +465,42 @@ const Anomaly = ({ kpi, anomalystatus }) => {
                   ) : null}
                 </div>
               ) : null}
-              <div className="dashboard-layout">
-                <div
-                  className={
-                    !dataQualityCollapse
-                      ? 'dashboard-header-wrapper header-wrapper-disable'
-                      : 'dashboard-header-wrapper'
-                  }>
-                  <div className="dashboard-header">
-                    <h3>Data Quality</h3>
-                  </div>
+
+              {kpiTab === 'Overall KPI' ? (
+                <div className="dashboard-layout">
                   <div
                     className={
                       !dataQualityCollapse
-                        ? 'header-collapse header-disable'
-                        : 'header-collapse'
-                    }
-                    onClick={() =>
-                      setDataQualityCollapse(!dataQualityCollapse)
+                        ? 'dashboard-header-wrapper header-wrapper-disable'
+                        : 'dashboard-header-wrapper'
                     }>
-                    <img src={Toparrow} alt="CollapseOpen" />
+                    <div className="dashboard-header">
+                      <h3>Data Quality</h3>
+                    </div>
+                    <div
+                      className={
+                        !dataQualityCollapse
+                          ? 'header-collapse header-disable'
+                          : 'header-collapse'
+                      }
+                      onClick={() =>
+                        setDataQualityCollapse(!dataQualityCollapse)
+                      }>
+                      <img src={Toparrow} alt="CollapseOpen" />
+                    </div>
                   </div>
+                  {dataQualityCollapse ? (
+                    <div
+                      className={
+                        dataQualityCollapse
+                          ? 'dashboard-container'
+                          : 'dashboard-container drilldown-disable'
+                      }>
+                      {dataQualityList}
+                    </div>
+                  ) : null}
                 </div>
-                {dataQualityCollapse ? (
-                  <div
-                    className={
-                      dataQualityCollapse
-                        ? 'dashboard-container'
-                        : 'dashboard-container drilldown-disable'
-                    }>
-                    {dataQualityList}
-                  </div>
-                ) : null}
-              </div>
+              ) : null}
             </>
           ) : (
             anomalyDetectionData !== '' && <Noresult title="Anomaly" />

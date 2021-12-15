@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import { useHistory } from 'react-router-dom';
-
 import Select from 'react-select';
 
 import Search from '../../assets/images/search.svg';
@@ -13,6 +12,7 @@ import './kpihome.scss';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import highchartsMore from 'highcharts/highcharts-more';
+import HumanReadableNumbers from '../HumanReadableNumbers';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { getHomeKpi } from '../../redux/actions';
@@ -24,7 +24,7 @@ import { formatDateTime, getTimezone } from '../../utils/date-helper';
 highchartsMore(Highcharts);
 Highcharts.setOptions({
   time: {
-      timezone: getTimezone()
+    timezone: getTimezone()
   }
 });
 
@@ -217,7 +217,14 @@ const Kpihome = () => {
                           ? 'This Month'
                           : 'This Day'}
                       </label>
-                      <span>{item.current}</span>
+                      <HumanReadableNumbers number={item.current}/>
+
+                      {/* <Tooltip
+                        className="tooltip-original-numbers"
+                        direction="left"
+                        content={<span>{item.current}</span>}>
+                        <span>{parseFloat(item.current) > 999 ? HRNumbers.toHumanString(item.current) : item.current}</span>
+                      </Tooltip> */}
                     </div>
                     <div className="kpi-content">
                       <label>
@@ -227,12 +234,12 @@ const Kpihome = () => {
                           ? 'Previous Month'
                           : 'Previous Day'}
                       </label>
-                      <span>{item.prev}</span>
+                      <HumanReadableNumbers number={item.prev}/>
                     </div>
                     <div className="kpi-content">
                       <label>Change</label>
                       <span>
-                        {item.change}
+                      <HumanReadableNumbers number={item.change}/>
                         <label
                           className={
                             item.percentage_change > 0

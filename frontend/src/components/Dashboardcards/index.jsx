@@ -103,9 +103,6 @@ const Dashboardcards = ({ dashboarddata, setChange }) => {
                   <div className="header-card">
                     <div className="header-content">
                       <h3>{dashboard.name}</h3>
-                      <span>
-                        Last modified: {formatDate(dashboard?.last_modified)}
-                      </span>
                     </div>
                     <div className="more-dropdown dropstart">
                       <div
@@ -168,8 +165,8 @@ const Dashboardcards = ({ dashboarddata, setChange }) => {
                       <h5>{dashboard?.kpis?.length}</h5>
                     </div>
                     <div className="body-content created-on-content">
-                      <span>Created On</span>
-                      <h5>{formatDate(dashboard?.created_at)}</h5>
+                      <span>Last modified</span>
+                      <h5>{formatDate(dashboard?.last_modified)}</h5>
                     </div>
                   </div>
                 </div>

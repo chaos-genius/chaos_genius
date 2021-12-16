@@ -468,6 +468,9 @@ def get_schema_views(datasource_id, schema_name):
 
 @blueprint.route("/table-info",methods=["GET"])
 def get_table_info():
+    """
+    Returns Columns and primary key of a given table/view in a Dict
+    """
     status = ""
     message = ""
     table_info = {}

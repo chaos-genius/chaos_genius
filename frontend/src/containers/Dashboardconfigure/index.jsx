@@ -152,7 +152,6 @@ const Dashboardconfigure = () => {
               <div className="text">
                 <span>Sort By</span>
                 <Select
-                  // options={data}
                   classNamePrefix="selectcategory"
                   options={sort}
                   value={sortValue}

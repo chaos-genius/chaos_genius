@@ -94,12 +94,14 @@ const Homefilter = ({ data, setDashboard, dashboard }) => {
                     setDashboard(item.id);
                     // setActive(item.id);
                   }}>
-                  <Tooltip
-                    className="tooltip-name"
-                    direction="right"
-                    content={<span> {item.name}</span>}>
-                    <label className="name-tooltip">{item.name}</label>
-                  </Tooltip>
+                  <div className="filter-tooltipcontent">
+                    <Tooltip
+                      className="tooltip-name"
+                      direction="right"
+                      content={<span> {item.name}</span>}>
+                      <label className="name-tooltip">{item.name}</label>
+                    </Tooltip>
+                  </div>
                   <span>{item?.kpis.length}</span>
                 </li>
               );

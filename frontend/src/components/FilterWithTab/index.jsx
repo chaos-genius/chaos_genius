@@ -96,12 +96,14 @@ const DashboardFilter = ({
                     // history.push(`/dashboard/${tabs}/${item.id}`);
                     history.push(`/dashboard/${dashboard}/${tabs}/${item.id}`);
                   }}>
-                  <Tooltip
-                    className="tooltip-name"
-                    direction="right"
-                    content={<span> {item.name}</span>}>
-                    <label className="name-tooltip">{item.name}</label>{' '}
-                  </Tooltip>
+                  <div className="filter-tooltipcontents">
+                    <Tooltip
+                      className="tooltip-name"
+                      direction="right"
+                      content={<span> {item.name}</span>}>
+                      <label className="name-tooltip">{item.name}</label>{' '}
+                    </Tooltip>
+                  </div>
                   <img src={GreenArrow} alt="Arrow" />
                 </li>
               );

@@ -40,7 +40,7 @@
     color: $black_variation-2;
     // margin-bottom: 8px;
     &.name-tooltip {
-      max-width: 120px;
+      max-width: 85%;
       overflow: hidden;
       text-overflow: ellipsis;
       display: -webkit-box;
@@ -108,7 +108,7 @@
     display: flex;
     flex-direction: column;
     // width: 17%;
-    width: 20%;
+    width: 23%;
     &.kpi-content-label {
       // width: 180px;
       label {

@@ -96,7 +96,7 @@ const DashboardFilter = ({
                     // history.push(`/dashboard/${tabs}/${item.id}`);
                     history.push(`/dashboard/${dashboard}/${tabs}/${item.id}`);
                   }}>
-                  <div className="filter-tooltipcontents">
+                  <div className="filter-tooltipcontent">
                     <Tooltip
                       className="tooltip-name"
                       direction="right"

@@ -462,8 +462,11 @@ a:hover {
       img {
         display: none;
       }
+      .filter-tooltipcontent {
+        width: 85%;
+      }
       .name-tooltip {
-        max-width: 135px;
+        // width: 85%;
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;

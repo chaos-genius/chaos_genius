@@ -26,6 +26,7 @@ class Task(Model):
     kpi_name: Optional[str] = None
     completed_subtasks: Optional[List[int]] = None
     total_subtasks: Optional[int] = None
+    github_issue_link: Optional[str] = None
 
     # set PK to (checkpoint_id, task_id)
     __table_args__ = (

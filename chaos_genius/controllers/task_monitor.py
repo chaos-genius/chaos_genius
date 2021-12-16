@@ -10,6 +10,7 @@ from pygments.style import Style
 from pygments.token import Generic, Name, Number
 from sqlalchemy import func
 
+from chaos_genius.controllers.github_issue_generator import generate_github_issue_link
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.task_model import Task
 from chaos_genius.extensions import db
@@ -142,7 +143,8 @@ def get_checkpoints(
     sort_by_task_id=True,
     kpi_info=True,
     track_subtasks=True,
-    highlight_error=True
+    highlight_error=True,
+    include_github_issue_link=False,
 ) -> List[Task]:
     """Get all task checkpoints as a list of Task objects.
 
@@ -151,6 +153,7 @@ def get_checkpoints(
         kpi_info (bool): whether to include kpi_name in the Tasks (default: True)
         track_subtasks (bool): whether to include completed_subtasks and total_subtasks in the Tasks (default: True)
         highlight_error (bool): whether to highlight error using Pygments and make the error field an HTML string (default: True)
+        include_github_issue_link (bool): whether to generate a new GitHub issue link for tasks which have error (default: False)
     """
     if sort_by_task_id:
         tasks: List[Task] = (
@@ -172,6 +175,10 @@ def get_checkpoints(
             kpi = cast(Kpi, Kpi.get_by_id(task.kpi_id))
 
             task.kpi_name = kpi.name
+
+            if include_github_issue_link and task.error:
+                task.github_issue_link = generate_github_issue_link(task)
+
             if highlight_error and task.error:
                 # TODO: use a single CSS file if there are too many errors
                 error_header, error_body = task.error.split("\n", maxsplit=1)

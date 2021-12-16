@@ -131,7 +131,7 @@
                 To: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             -->
                 <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-                    <div class="bg-white px-4 pt-5 pb-8 sm:p-6 sm:pb-8">
+                    <div class="bg-white px-4 pt-5 pb-3 sm:p-6 sm:pb-3">
                         <div class="sm:flex sm:items-start">
                             <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
                                 <!-- Heroicon name: outline/exclamation -->
@@ -153,10 +153,20 @@
                                     <p class="text-sm text-gray-500" id="error-modal-message">
                                         Traceback for the error:
                                     </p>
-                                    <div style="max-height: 50vh;" class="overflow-x-auto rounded-md p-2 font-light" id="error-modal-traceback"></div>
+                                    <div style="max-height: 50vh;" class="overflow-x-auto rounded-md font-light" id="error-modal-traceback"></div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 pb-4 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <a href="#" target="_blank" rel="noopener noreferrer" id="error-github-link">
+                            <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                Open Issue
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                            </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -204,7 +214,7 @@
         var taskErrorMapping = {
             {% for i, task in enumerate(tasks) %}
                 {% if task.error %}
-                {{i}}: {{ list(task.error.split("\n", maxsplit = 1)) | tojson }},
+                {{i}}: {{ (list(task.error.split("\n", maxsplit = 1)) + [task.github_issue_link]) | tojson }},
                 {% endif %}
             {% endfor %}
         };
@@ -217,13 +227,16 @@
                 return;
             }
 
-            header = error[0];
-            traceback = error[1];
+            let header = error[0];
+            let traceback = error[1];
+            let githubIssueLink = error[2];
 
             document.getElementById("error-modal").classList.remove("hidden");
 
             document.getElementById("error-modal-title").innerHTML = header;
             document.getElementById("error-modal-traceback").innerHTML = traceback;
+
+            document.getElementById("error-github-link").href = githubIssueLink;
         }
 
         function closeerrormodal() {

@@ -217,14 +217,7 @@ const Kpihome = () => {
                           ? 'This Month'
                           : 'This Day'}
                       </label>
-                      <HumanReadableNumbers number={item.current}/>
-
-                      {/* <Tooltip
-                        className="tooltip-original-numbers"
-                        direction="left"
-                        content={<span>{item.current}</span>}>
-                        <span>{parseFloat(item.current) > 999 ? HRNumbers.toHumanString(item.current) : item.current}</span>
-                      </Tooltip> */}
+                      <HumanReadableNumbers number={item.current} />
                     </div>
                     <div className="kpi-content">
                       <label>
@@ -234,12 +227,12 @@ const Kpihome = () => {
                           ? 'Previous Month'
                           : 'Previous Day'}
                       </label>
-                      <HumanReadableNumbers number={item.prev}/>
+                      <HumanReadableNumbers number={item.prev} />
                     </div>
                     <div className="kpi-content">
                       <label>Change</label>
                       <span>
-                      <HumanReadableNumbers number={item.change}/>
+                        <HumanReadableNumbers number={item.change} />
                         <label
                           className={
                             item.percentage_change > 0

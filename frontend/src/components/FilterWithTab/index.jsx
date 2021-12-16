@@ -93,7 +93,6 @@ const DashboardFilter = ({
                     store.dispatch(RESET_DATA);
                     setActive(item.name);
                     SetKpiAggregate(item.aggregation);
-                    // history.push(`/dashboard/${tabs}/${item.id}`);
                     history.push(`/dashboard/${dashboard}/${tabs}/${item.id}`);
                   }}>
                   <div className="filter-tooltipcontent">

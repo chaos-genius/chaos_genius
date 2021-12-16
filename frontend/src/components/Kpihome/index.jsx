@@ -47,7 +47,6 @@ const data = [
 
 const Kpihome = () => {
   const dispatch = useDispatch();
-  // const history = useHistory();
 
   const { homeKpiData, homeKpiLoading } = useSelector(
     (state) => state.onboarding

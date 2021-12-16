@@ -71,7 +71,7 @@ const FilterAnalystics = ({ kpi, setKpi, data, onboarding }) => {
                   onClick={() => {
                     handleClick(item);
                   }}>
-                  <div className="filter-tooltipcontents">
+                  <div className="filter-tooltipcontent">
                     <Tooltip
                       className="tooltip-name"
                       direction="right"

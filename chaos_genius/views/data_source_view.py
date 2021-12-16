@@ -373,18 +373,36 @@ def data_source_meta_info():
     current_app.logger.info("data source meta info")
     return jsonify({"data": DataSource.meta_info()})
 
-@blueprint.route("/<int:datasource_id>/get_schema_availability", methods=["GET"])
-def check_schema_avaialbility(datasource_id):
-    status = ""
+@blueprint.route("/get-availability", methods = ["POST"])
+def check_views_availability():
+
+    views = False
+    materialize_views = False
     schema_exist = False
+    message = ""
+    status = False
+    
     try:
-        datasource_name = get_datasource_data_from_id(datasource_id)["connection_type"]
-        schema_exist = SCHEMAS_AVAILABLE.get(datasource_name , False)
-        status = "success"
+        data = request.get_json()
+        datasource_id = data.get("datasource_id", None)
+
+        if datasource_id is None:
+            message = "Datasource ID needs to provided"
+        else:
+            datasource_info = DataSource.query.get(datasource_id)
+
+            if datasource_info is None:
+                message = "The datasource id provided is invalid"
+            else:
+                datasource_name = get_datasource_data_from_id(datasource_id)["connection_type"]
+                schema_exist = SCHEMAS_AVAILABLE.get(datasource_name , False)
+                views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["views"]
+                materialize_views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["materialized_views"]
+                status = True
     except Exception as err:
-        status = "failure"
-        
-    return jsonify({"status":status, "schema_exist":schema_exist})
+        message = str(err)
+    
+    return jsonify({"message":message, "status": status, "available": {"schema": schema_exist, "views": views, "materialize_views": materialize_views}})
 
 @blueprint.route("/<int:datasource_id>/list_schemas", methods=["GET"])
 def get_list_schemas(datasource_id):
@@ -425,22 +443,6 @@ def get_schema_tables(datasource_id, schema_name):
         message = "List of tables not obtained"
     
     return jsonify({"message":message, "status":status, "table_names":table_names})
-
-@blueprint.route("/<int:datasource_id>/views-available", methods = ["GET"])
-def check_views_availability(datasource_id):
-
-    views = False
-    materialize_views = False
-    message = ""
-    
-    try:
-        datasource_name = get_datasource_data_from_id(datasource_id)["connection_type"]
-        views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["views"]
-        materialize_views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["materialized_views"]
-    except Exception as err:
-        message = str(err)
-    
-    return jsonify({"message":message, "available":{"views": views, "materialize_views": materialize_views}})
 
 @blueprint.route("/<int:datasource_id>/<schema_name>/list-views", methods=["GET"])
 def get_schema_views(datasource_id, schema_name):
@@ -496,3 +498,4 @@ def get_table_info():
         message = "Error in fetching table info: {}".format(e)
         table_info = {}
     return jsonify({"table_info":table_info, "status":status, "message":message})
+

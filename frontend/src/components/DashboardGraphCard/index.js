@@ -40,6 +40,7 @@ const Dashboardgraphcard = ({
                 {aggregationData &&
                 aggregationData.panel_metrics?.grp1_metrics?.sum ? (
                   <HumanReadableNumbers
+                    is_bold
                     number={aggregationData.panel_metrics.grp1_metrics.sum}
                   />
                 ) : (
@@ -51,6 +52,7 @@ const Dashboardgraphcard = ({
                 {aggregationData &&
                 aggregationData.panel_metrics?.grp1_metrics?.sum ? (
                   <HumanReadableNumbers
+                    is_bold
                     number={aggregationData.panel_metrics.grp1_metrics.sum}
                   />
                 ) : (
@@ -210,6 +212,7 @@ const Dashboardgraphcard = ({
                 {aggregationData &&
                 aggregationData.panel_metrics?.grp2_metrics?.sum ? (
                   <HumanReadableNumbers
+                    is_bold
                     number={aggregationData.panel_metrics?.grp2_metrics?.sum}
                   />
                 ) : (
@@ -221,6 +224,7 @@ const Dashboardgraphcard = ({
                 {aggregationData &&
                 aggregationData.panel_metrics?.grp2_metrics?.sum ? (
                   <HumanReadableNumbers
+                    is_bold
                     number={aggregationData.panel_metrics?.grp2_metrics?.sum}
                   />
                 ) : (
@@ -378,6 +382,7 @@ const Dashboardgraphcard = ({
                   <div className="difference-high-heading">
                     <h5>
                       <HumanReadableNumbers
+                        is_bold
                         number={aggregationData.panel_metrics?.impact?.sum}
                       />
                       <img src={Up} alt="Up" />
@@ -389,6 +394,7 @@ const Dashboardgraphcard = ({
                   <div className="difference-low-heading">
                     <h5>
                       <HumanReadableNumbers
+                        is_bold
                         number={aggregationData.panel_metrics?.impact?.sum}
                       />
                       <img src={Down} alt="Down" />

@@ -71,12 +71,14 @@ const FilterAnalystics = ({ kpi, setKpi, data, onboarding }) => {
                   onClick={() => {
                     handleClick(item);
                   }}>
-                  <Tooltip
-                    className="tooltip-name"
-                    direction="right"
-                    content={<span> {item.name}</span>}>
-                    <label className="name-tooltip">{item.name}</label>
-                  </Tooltip>
+                  <div className="filter-tooltipcontents">
+                    <Tooltip
+                      className="tooltip-name"
+                      direction="right"
+                      content={<span> {item.name}</span>}>
+                      <label className="name-tooltip">{item.name}</label>
+                    </Tooltip>
+                  </div>
                   <img src={GreenArrow} alt="Arrow" />
                 </li>
               );

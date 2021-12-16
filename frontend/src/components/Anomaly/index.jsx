@@ -84,13 +84,10 @@ const Anomaly = ({ kpi, anomalystatus }) => {
       }
     } else if (kpiTab === 'Sub-dimensions') {
       if (anomalyDetectionData && anomalyDetectionData?.data?.length) {
-        subDimesionList = anomalyDetectionData.data.map((anomaly) => {
-          let subArr = [];
-          subArr.push(
-            <Anomalygraph key={`dl-${anomaly.title}`} drilldown={anomaly} />
-          );
-          return subArr;
-        });
+        subDimesionList = anomalyDetectionData.data.map((anomaly) => (
+          <Anomalygraph key={`dl-${anomaly.title}`} drilldown={anomaly} />
+        ));
+        console.log(subDimesionList);
         setSubDimList(subDimesionList);
       }
     }

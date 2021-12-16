@@ -107,19 +107,14 @@
   .kpi-content {
     display: flex;
     flex-direction: column;
-    // width: 17%;
     width: 23%;
     &.kpi-content-label {
-      // width: 180px;
       label {
         margin-bottom: 0px;
       }
     }
-    // .highcharts-title {
-    //   display: none;
-    // }
+
     .highcharts-container {
-      // width: 70px !important;
       width: 100% !important;
     }
     .highcharts-root {
@@ -131,14 +126,12 @@
     }
   }
   .kpi-graph {
-    // width: 234px;
     height: 56px;
     display: flex;
     align-items: center;
     justify-content: center;
     div {
       overflow: visible !important;
-      // width: 120px !important;
       .highcharts-container {
         margin-bottom: 0px !important;
       }

@@ -92,7 +92,6 @@ const Homefilter = ({ data, setDashboard, dashboard }) => {
                   className={dashboard === item.id ? 'active' : ''}
                   onClick={() => {
                     setDashboard(item.id);
-                    // setActive(item.id);
                   }}>
                   <div className="filter-tooltipcontent">
                     <Tooltip

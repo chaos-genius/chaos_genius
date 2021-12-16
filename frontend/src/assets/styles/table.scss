@@ -66,10 +66,6 @@
           padding: 16px;
           &.name-tooltip {
             max-width: 200px;
-            // height: 20px;
-            // overflow: hidden;
-            // text-overflow: ellipsis;
-            // white-space: nowrap;
             span {
               overflow: hidden;
               text-overflow: ellipsis;
@@ -121,11 +117,6 @@
                 color: $black_variation-2;
                 &.name-tooltip {
                   max-width: 200px;
-                  // height: 20px;
-                  // overflow: hidden;
-                  // text-overflow: ellipsis;
-                  // white-space: nowrap;
-
                   overflow: hidden;
                   text-overflow: ellipsis;
                   display: -webkit-box;
@@ -133,12 +124,6 @@
                   -webkit-box-orient: vertical;
                   white-space: initial;
                 }
-                // &::after {
-                //   content: ',';
-                // }
-                // &:nth-last-child(-n + 1)::after {
-                //   content: '';
-                // }
               }
             }
             .additional-tips-hide {
@@ -160,9 +145,6 @@
                 display: flex;
                 align-items: center;
                 cursor: pointer;
-                // &::after {
-                //   content: '';
-                // }
                 img {
                   margin-left: 4px;
                 }

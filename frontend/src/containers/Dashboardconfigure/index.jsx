@@ -44,7 +44,10 @@ const Dashboardconfigure = () => {
   const dispatch = useDispatch();
   const [dashboardData, setDashboardData] = useState([]);
   const [data, setData] = useState(false);
-
+  const [sortValue, setSortValue] = useState({
+    label: 'No. of KPIs',
+    value: 'kpi'
+  });
   const { dashboardListLoading, dashboardList } = useSelector((state) => {
     return state.DashboardHome;
   });
@@ -58,7 +61,15 @@ const Dashboardconfigure = () => {
 
   useEffect(() => {
     if (dashboardList) {
-      setDashboardData(dashboardList);
+      setDashboardData(
+        dashboardList.sort(function (a, b) {
+          return a.kpis.length < b.kpis.length
+            ? -1
+            : a.kpis.length > b.kpis.length
+            ? 1
+            : 0;
+        })
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dashboardList]);
@@ -138,14 +149,20 @@ const Dashboardconfigure = () => {
                   <img src={Search} alt="Search Icon" />
                 </span>
               </div>{' '}
-              <Select
-                // options={data}
-                classNamePrefix="selectcategory"
-                options={sort}
-                placeholder="Sort by"
-                isSearchable={false}
-                onChange={(e) => onSort(e)}
-              />
+              <div className="text">
+                <span>Sort By</span>
+                <Select
+                  // options={data}
+                  classNamePrefix="selectcategory"
+                  options={sort}
+                  value={sortValue}
+                  isSearchable={false}
+                  onChange={(e) => {
+                    onSort(e);
+                    setSortValue(e);
+                  }}
+                />
+              </div>
             </div>
             <div className="dashboard-card-wrapper">
               <Dashboardcards

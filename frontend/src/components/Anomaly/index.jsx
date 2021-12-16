@@ -20,6 +20,7 @@ import {
   getAnomalyQualityData
 } from '../../redux/actions';
 import store from '../../redux/store';
+import SubdimensionEmpty from '../SubdimensionEmpty';
 
 highchartsMore(Highcharts);
 Highcharts.setOptions({
@@ -413,9 +414,13 @@ const Anomaly = ({ kpi, anomalystatus }) => {
                       highcharts={Highcharts}
                       options={chartData}
                     />
-                  ) : subDimList ? (
+                  ) : subDimList && subDimList.length ? (
                     subDimList
-                  ) : null}
+                  ) : (
+                    <div className="dashboard-layout setup-layout-empty">
+                      <SubdimensionEmpty />
+                    </div>
+                  )}
                 </div>
               </div>
               {itemList &&

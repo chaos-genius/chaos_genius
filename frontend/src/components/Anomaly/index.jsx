@@ -87,7 +87,6 @@ const Anomaly = ({ kpi, anomalystatus }) => {
         subDimesionList = anomalyDetectionData.data.map((anomaly) => (
           <Anomalygraph key={`dl-${anomaly.title}`} drilldown={anomaly} />
         ));
-        console.log(subDimesionList);
         setSubDimList(subDimesionList);
       }
     }

@@ -1,9 +1,10 @@
 import HRNumbers from 'human-readable-numbers';
 
 export const convertNumberToHRN = (number) => {
-  return typeof Number(number) === 'number' && isFinite(number)
-    ? parseFloat(number) > 999 || parseFloat(number) < -999
-      ? HRNumbers.toHumanString(number)
-      : number
+  const num = Number(number);
+  return typeof num === 'number' && isFinite(num)
+    ? parseFloat(num) > 999 || parseFloat(num) < -999
+      ? HRNumbers.toHumanString(num)
+      : num
     : '-';
 };

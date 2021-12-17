@@ -52,7 +52,6 @@ const Dashboardgraphcard = ({
                 {aggregationData &&
                 aggregationData.panel_metrics?.grp1_metrics?.sum ? (
                   <HumanReadableNumbers
-                    is_bold
                     number={aggregationData.panel_metrics.grp1_metrics.sum}
                   />
                 ) : (
@@ -65,6 +64,7 @@ const Dashboardgraphcard = ({
                 {aggregationData &&
                 aggregationData.panel_metrics?.grp1_metrics?.mean ? (
                   <HumanReadableNumbers
+                    is_bold
                     number={parseFloat(
                       aggregationData.panel_metrics?.grp1_metrics?.mean
                     ).toFixed(2)}
@@ -92,6 +92,7 @@ const Dashboardgraphcard = ({
                 {aggregationData &&
                 aggregationData.panel_metrics?.grp1_metrics?.count ? (
                   <HumanReadableNumbers
+                    is_bold
                     number={parseFloat(
                       aggregationData.panel_metrics?.grp1_metrics?.count
                     ).toFixed(2)}
@@ -119,6 +120,7 @@ const Dashboardgraphcard = ({
                 {aggregationData &&
                 aggregationData.panel_metrics?.grp1_metrics?.median ? (
                   <HumanReadableNumbers
+                    is_bold
                     number={parseFloat(
                       aggregationData.panel_metrics?.grp1_metrics?.median
                     ).toFixed(2)}
@@ -146,6 +148,7 @@ const Dashboardgraphcard = ({
                 {aggregationData &&
                 aggregationData.panel_metrics?.grp1_metrics?.max ? (
                   <HumanReadableNumbers
+                    is_bold
                     number={parseFloat(
                       aggregationData.panel_metrics?.grp1_metrics?.max
                     ).toFixed(2)}
@@ -173,6 +176,7 @@ const Dashboardgraphcard = ({
                 {aggregationData &&
                 aggregationData?.panel_metrics?.grp1_metrics?.min ? (
                   <HumanReadableNumbers
+                    is_bold
                     number={parseFloat(
                       aggregationData.panel_metrics?.grp1_metrics?.min
                     ).toFixed(2)}
@@ -224,7 +228,6 @@ const Dashboardgraphcard = ({
                 {aggregationData &&
                 aggregationData.panel_metrics?.grp2_metrics?.sum ? (
                   <HumanReadableNumbers
-                    is_bold
                     number={aggregationData.panel_metrics?.grp2_metrics?.sum}
                   />
                 ) : (
@@ -237,6 +240,7 @@ const Dashboardgraphcard = ({
                 {aggregationData &&
                 aggregationData.panel_metrics?.grp2_metrics?.mean ? (
                   <HumanReadableNumbers
+                    is_bold
                     number={parseFloat(
                       aggregationData.panel_metrics?.grp2_metrics?.mean
                     ).toFixed(2)}
@@ -264,6 +268,7 @@ const Dashboardgraphcard = ({
                 {aggregationData &&
                 aggregationData.panel_metrics?.grp2_metrics?.count ? (
                   <HumanReadableNumbers
+                    is_bold
                     number={parseFloat(
                       aggregationData.panel_metrics?.grp2_metrics?.count
                     ).toFixed(2)}
@@ -291,6 +296,7 @@ const Dashboardgraphcard = ({
                 {aggregationData &&
                 aggregationData.panel_metrics?.grp2_metrics?.median ? (
                   <HumanReadableNumbers
+                    is_bold
                     number={parseFloat(
                       aggregationData.panel_metrics?.grp2_metrics?.median
                     ).toFixed(2)}
@@ -318,6 +324,7 @@ const Dashboardgraphcard = ({
                 {aggregationData &&
                 aggregationData.panel_metrics?.grp2_metrics?.max ? (
                   <HumanReadableNumbers
+                    is_bold
                     number={parseFloat(
                       aggregationData.panel_metrics?.grp2_metrics?.max
                     ).toFixed(2)}
@@ -346,6 +353,7 @@ const Dashboardgraphcard = ({
                 {aggregationData &&
                 aggregationData.panel_metrics?.grp2_metrics?.min ? (
                   <HumanReadableNumbers
+                    is_bold
                     number={parseFloat(
                       aggregationData.panel_metrics?.grp2_metrics?.min
                     ).toFixed(2)}
@@ -412,7 +420,6 @@ const Dashboardgraphcard = ({
                   <div className="difference-high-heading">
                     <span>
                       <HumanReadableNumbers
-                        is_bold
                         number={aggregationData.panel_metrics?.impact?.sum}
                       />
 
@@ -425,7 +432,6 @@ const Dashboardgraphcard = ({
                   <div className="difference-low-heading">
                     <span>
                       <HumanReadableNumbers
-                        is_bold
                         number={aggregationData.panel_metrics?.impact?.sum}
                       />
                       <img src={Down} alt="Down" />
@@ -444,6 +450,7 @@ const Dashboardgraphcard = ({
                   <div className="difference-high-heading">
                     <h5>
                       <HumanReadableNumbers
+                        is_bold
                         number={parseFloat(
                           aggregationData.panel_metrics?.impact?.mean
                         ).toFixed(2)}
@@ -457,6 +464,7 @@ const Dashboardgraphcard = ({
                   <div className="difference-low-heading">
                     <h5>
                       <HumanReadableNumbers
+                        is_bold
                         number={parseFloat(
                           aggregationData.panel_metrics?.impact?.mean
                         ).toFixed(2)}
@@ -509,6 +517,7 @@ const Dashboardgraphcard = ({
                   <div className="difference-high-heading">
                     <h5>
                       <HumanReadableNumbers
+                        is_bold
                         number={parseFloat(
                           aggregationData.panel_metrics?.impact?.count
                         ).toFixed(2)}
@@ -523,6 +532,7 @@ const Dashboardgraphcard = ({
                   <div className="difference-low-heading">
                     <h5>
                       <HumanReadableNumbers
+                        is_bold
                         number={parseFloat(
                           aggregationData.panel_metrics?.impact?.count
                         ).toFixed(2)}
@@ -575,6 +585,7 @@ const Dashboardgraphcard = ({
                   <div className="difference-high-heading">
                     <h5>
                       <HumanReadableNumbers
+                        is_bold
                         number={parseFloat(
                           aggregationData.panel_metrics?.impact?.median
                         ).toFixed(2)}
@@ -589,6 +600,7 @@ const Dashboardgraphcard = ({
                   <div className="difference-low-heading">
                     <h5>
                       <HumanReadableNumbers
+                        is_bold
                         number={parseFloat(
                           aggregationData.panel_metrics?.impact?.median
                         ).toFixed(2)}
@@ -641,6 +653,7 @@ const Dashboardgraphcard = ({
                   <div className="difference-high-heading">
                     <h5>
                       <HumanReadableNumbers
+                        is_bold
                         number={parseFloat(
                           aggregationData.panel_metrics?.impact?.max
                         ).toFixed(2)}
@@ -655,6 +668,7 @@ const Dashboardgraphcard = ({
                   <div className="difference-low-heading">
                     <h5>
                       <HumanReadableNumbers
+                        is_bold
                         number={parseFloat(
                           aggregationData.panel_metrics?.impact?.max
                         ).toFixed(2)}
@@ -707,6 +721,7 @@ const Dashboardgraphcard = ({
                   <div className="difference-high-heading">
                     <h5>
                       <HumanReadableNumbers
+                        is_bold
                         number={parseFloat(
                           aggregationData.panel_metrics?.impact?.min
                         ).toFixed(2)}
@@ -721,6 +736,7 @@ const Dashboardgraphcard = ({
                   <div className="difference-low-heading">
                     <h5>
                       <HumanReadableNumbers
+                        is_bold
                         number={parseFloat(
                           aggregationData.panel_metrics?.impact?.min
                         ).toFixed(2)}

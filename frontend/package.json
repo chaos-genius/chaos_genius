@@ -16,7 +16,6 @@
     "fuse.js": "^6.4.6",
     "highcharts": "^9.2.1",
     "highcharts-react-official": "^3.0.0",
-    "human-readable-numbers": "^0.9.5",
     "jquery": "^3.6.0",
     "js-cookie": "^2.2.1",
     "luxon": "^2.1.1",

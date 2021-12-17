@@ -1,4 +1,4 @@
-import HRNumbers from 'human-readable-numbers';
+import { HRNumbers } from './humanReadableNumberFormatter';
 
 export const convertNumberToHRN = (number) => {
   const num = Number(number);

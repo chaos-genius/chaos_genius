@@ -2,7 +2,7 @@ import React from 'react';
 import Tooltip from 'react-tooltip-lite';
 
 import './humanReadableNumbers.scss';
-import { convertNumberToHRN } from '../../utils/numberFormat';
+import { convertNumberToHRN } from '../../utils/Formatting/Numbers/numberFormat';
 
 const HumanReadableNumbers = ({ number, is_bold }) => {
   const spanClass = is_bold ? 'bold-text' : 'normal';

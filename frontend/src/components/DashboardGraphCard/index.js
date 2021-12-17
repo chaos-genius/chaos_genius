@@ -412,6 +412,7 @@ const Dashboardgraphcard = ({
                   <div className="difference-high-heading">
                     <span>
                       <HumanReadableNumbers
+                        is_bold
                         number={aggregationData.panel_metrics?.impact?.sum}
                       />
 
@@ -424,6 +425,7 @@ const Dashboardgraphcard = ({
                   <div className="difference-low-heading">
                     <span>
                       <HumanReadableNumbers
+                        is_bold
                         number={aggregationData.panel_metrics?.impact?.sum}
                       />
                       <img src={Down} alt="Down" />

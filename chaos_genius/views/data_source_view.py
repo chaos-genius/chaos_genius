@@ -27,7 +27,11 @@ from chaos_genius.third_party.integration_server_config import (
     DATA_SOURCE_ABBREVIATION
 )
 from chaos_genius.databases.db_utils import create_sqlalchemy_uri
-from chaos_genius.connectors import get_metadata, get_sqla_db_conn
+from chaos_genius.connectors import (
+        get_metadata,
+        get_sqla_db_conn,
+        get_table_info as get_table_metadata
+)
 from chaos_genius.third_party.integration_utils import get_connection_config
 from chaos_genius.utils.metadata_api_config import (
     SCHEMAS_AVAILABLE,
@@ -478,17 +482,24 @@ def get_table_info():
     table_info = {}
     try:
         data = request.get_json()
+        params_list = ["datasource_id", "schema", "table_name"]
+        if not set(params_list).issubset(list(data.keys())):
+            status = "failure"
+            message = "Missing required parameters. Please follow request format"
+            return jsonify({"status":status, "message":message, "table_info":table_info})
+
         datasource_id = data["datasource_id"]
         schema = data["schema"]
         table_name = data["table_name"]
         data_source_obj = DataSource.get_by_id(datasource_id)
         if data_source_obj:
             ds_data = data_source_obj.as_dict
-            datasource_conn = get_sqla_db_conn(data_source_info=ds_data)
-            if datasource_conn is not None:
-                datasource_conn.init_inspector()
-                table_info["columns"] = datasource_conn.get_columns(table_name, schema)
-                table_info["primary_key"] = datasource_conn.get_primary_key(table_name, schema)
+            table_info = get_table_metadata(ds_data,schema,table_name)
+            if table_info is not None:
+                status = "failure"
+                message = "error Establishing DB Connection"
+                table_info = {}
+            else:
                 status = "success"
         else:
             status = "failure"

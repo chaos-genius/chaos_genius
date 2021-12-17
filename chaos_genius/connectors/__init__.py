@@ -64,6 +64,17 @@ def get_metadata(data_source_info, from_query=False, query=''):
         metadata = all_schema
     return metadata, err_msg
 
+def get_table_info(data_source_info, schema, table_name):
+    db_connection = get_sqla_db_conn(data_source_info=data_source_info)
+    table_info = {}
+    if db_connection is None:
+        return None
+
+    db_connection.init_inspector()
+    table_info["columns"] = db_connection.get_columns(table_name, schema)
+    table_info["primary_key"] = db_connection.get_primary_key(table_name, schema)
+    return table_info
+
 
 def test_connection(data_source_info):
     db_connection = get_sqla_db_conn(connection_config=data_source_info)

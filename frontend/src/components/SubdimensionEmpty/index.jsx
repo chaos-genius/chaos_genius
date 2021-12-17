@@ -1,6 +1,6 @@
 import React from 'react';
 
-import empty from '../../assets/images/deepdrill-dimension-empty.svg';
+import empty from '../../assets/images/emptyanomalydrilldown.svg';
 
 const SubdimensionEmpty = () => {
   return (
@@ -8,8 +8,11 @@ const SubdimensionEmpty = () => {
       <div className="empty-state-image">
         <img src={empty} alt="Anomaly" />
       </div>
-      <h3>No Sub-dimensions defined yet.</h3>
-      <p>Looks like you have not defined sub-dimensions for this KPI.</p>
+      <h3>No Sub-dimensional Anomaly found.</h3>
+      <p>
+        We have not detected any statistically significant anomaly at a
+        sub-dimensional level.
+      </p>
     </div>
   );
 };

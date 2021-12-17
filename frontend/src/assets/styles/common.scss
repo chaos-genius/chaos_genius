@@ -462,6 +462,18 @@ a:hover {
       img {
         display: none;
       }
+      .filter-tooltipcontent {
+        width: 85%;
+      }
+      .name-tooltip {
+        width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        white-space: initial;
+      }
     }
   }
 }

@@ -64,7 +64,17 @@
           height: 56px;
           vertical-align: middle;
           padding: 16px;
-
+          &.name-tooltip {
+            max-width: 200px;
+            span {
+              overflow: hidden;
+              text-overflow: ellipsis;
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              white-space: initial;
+            }
+          }
           &.child-rotate {
             img {
               transform: rotate(90deg);
@@ -105,12 +115,15 @@
                 letter-spacing: $letter-spacing;
                 text-transform: capitalize;
                 color: $black_variation-2;
-                // &::after {
-                //   content: ',';
-                // }
-                // &:nth-last-child(-n + 1)::after {
-                //   content: '';
-                // }
+                &.name-tooltip {
+                  max-width: 200px;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  display: -webkit-box;
+                  -webkit-line-clamp: 2;
+                  -webkit-box-orient: vertical;
+                  white-space: initial;
+                }
               }
             }
             .additional-tips-hide {
@@ -132,9 +145,6 @@
                 display: flex;
                 align-items: center;
                 cursor: pointer;
-                // &::after {
-                //   content: '';
-                // }
                 img {
                   margin-left: 4px;
                 }

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import Modal from 'react-modal';
-
+import Tooltip from 'react-tooltip-lite';
 import More from '../../assets/images/more.svg';
 import Moreactive from '../../assets/images/more-active.svg';
 import Edit from '../../assets/images/edit.svg';
@@ -102,10 +102,14 @@ const Dashboardcards = ({ dashboarddata, setChange }) => {
                 <div>
                   <div className="header-card">
                     <div className="header-content">
-                      <h3>{dashboard.name}</h3>
-                      <span>
-                        Last modified: {formatDate(dashboard?.last_modified)}
-                      </span>
+                      <h3 className="name-tooltip">
+                        <Tooltip
+                          className="tooltip-name"
+                          direction="right"
+                          content={<span> {dashboard.name}</span>}>
+                          {dashboard.name}
+                        </Tooltip>
+                      </h3>
                     </div>
                     <div className="more-dropdown dropstart">
                       <div
@@ -168,8 +172,8 @@ const Dashboardcards = ({ dashboarddata, setChange }) => {
                       <h5>{dashboard?.kpis?.length}</h5>
                     </div>
                     <div className="body-content created-on-content">
-                      <span>Created On</span>
-                      <h5>{formatDate(dashboard?.created_at)}</h5>
+                      <span>Last modified</span>
+                      <h5>{formatDate(dashboard?.last_modified)}</h5>
                     </div>
                   </div>
                 </div>

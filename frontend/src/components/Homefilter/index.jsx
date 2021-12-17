@@ -1,5 +1,7 @@
 import React from 'react';
 
+import Tooltip from 'react-tooltip-lite';
+
 import Search from '../../assets/images/search.svg';
 import Dropdown from '../../assets/images/dropdownlist.svg';
 import Fuse from 'fuse.js';
@@ -90,9 +92,16 @@ const Homefilter = ({ data, setDashboard, dashboard }) => {
                   className={dashboard === item.id ? 'active' : ''}
                   onClick={() => {
                     setDashboard(item.id);
-                    // setActive(item.id);
                   }}>
-                  {item.name} <span>{item?.kpis.length}</span>
+                  <div className="filter-tooltipcontent">
+                    <Tooltip
+                      className="tooltip-name"
+                      direction="right"
+                      content={<span> {item.name}</span>}>
+                      <label className="name-tooltip">{item.name}</label>
+                    </Tooltip>
+                  </div>
+                  <span>{item?.kpis.length}</span>
                 </li>
               );
             })

@@ -175,3 +175,35 @@
     }
   }
 }
+.tooltip-name {
+  .react-tooltip-lite {
+    min-width: 180px !important;
+    max-width: none !important;
+    padding: 6px !important;
+
+    background: $green_variation-2;
+    border-radius: 6px;
+    color: $white;
+    border: 1px solid $green;
+    box-shadow: 4px 6px 32px -2px rgba(226, 226, 234, 0.24);
+    span {
+      font-weight: $font-weight-400;
+      font-size: $font-size-12;
+      line-height: $line-height-18;
+      letter-spacing: $letter-spacing;
+      color: $black_variation-2;
+    }
+  }
+  .react-tooltip-lite-arrow {
+    border-color: $green;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right-width: 10px;
+  }
+  .react-tooltip-lite-right-arrow {
+    border-color: $green;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right-width: 10px;
+  }
+}

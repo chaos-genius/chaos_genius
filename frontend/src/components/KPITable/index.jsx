@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 
 import { Link } from 'react-router-dom';
+import Tooltip from 'react-tooltip-lite';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -145,7 +146,14 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
                 ? kpiData.map((kpi) => {
                     return (
                       <tr key={uuidv4()}>
-                        <td>{kpi.name}</td>
+                        <td className="name-tooltip">
+                          <Tooltip
+                            className="tooltip-name"
+                            direction="right"
+                            content={<span>{kpi.name}</span>}>
+                            <span>{kpi.name}</span>
+                          </Tooltip>
+                        </td>
                         <td>
                           {kpi?.dashboards.length !== 0 ? (
                             <Dashboardname data={kpi?.dashboards} />

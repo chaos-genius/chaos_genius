@@ -2,7 +2,6 @@ import React from 'react';
 import './navbar.scss';
 import { Link } from 'react-router-dom';
 import Setting from '../../assets/images/setting.svg';
-import TaskManager from '../../assets/images/task-1.svg';
 import Profiledown from '../../assets/images/profile-down.svg';
 
 const Navbar = () => {
@@ -16,8 +15,8 @@ const Navbar = () => {
     {
       text: 'Task Manager',
       link: '/task-manager',
-      img: TaskManager,
-      alt_img: 'Manager'
+      img: Setting,
+      alt_img: 'Setting'
     }
   ];
 

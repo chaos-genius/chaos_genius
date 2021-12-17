@@ -67,7 +67,7 @@ def container_status() -> Optional[Dict[str, bool]]:
 @blueprint.route("/", methods=["GET"])
 def task_monitor_view():
     """A view with a basic UI to monitor analytics tasks."""
-    tasks = get_checkpoints(track_subtasks=False)
+    tasks = get_checkpoints(track_subtasks=False, include_github_issue_link=True)
     containers = container_status()
 
     return render_template(
@@ -75,6 +75,8 @@ def task_monitor_view():
         tasks=tasks,
         enumerate=enumerate,
         str=str,
+        repr=repr,
+        list=list,
         container_status=containers,
         CONTAINERS=CONTAINERS,
     )

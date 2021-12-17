@@ -3,8 +3,14 @@
 import traceback
 from typing import List, Optional, cast
 
+from pygments import highlight
+from pygments.formatters import HtmlFormatter
+from pygments.lexers import PythonTracebackLexer
+from pygments.style import Style
+from pygments.token import Generic, Name, Number
 from sqlalchemy import func
 
+from chaos_genius.controllers.github_issue_generator import generate_github_issue_link
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.task_model import Task
 from chaos_genius.extensions import db
@@ -69,7 +75,8 @@ def _checkpoint(
 
     error = None
     if exc_info is not None:
-        error = "".join(traceback.format_tb(exc_info.__traceback__))
+        exc_main_info = f"{type(exc_info).__name__}: {exc_info}"
+        error = exc_main_info + "\n" + "".join(traceback.format_exception(exc_info.__class__, exc_info, exc_info.__traceback__))
     new_checkpoint = Task(
         task_id=task_id,
         kpi_id=kpi_id,
@@ -120,13 +127,33 @@ def checkpoint_failure(
     return _checkpoint(task_id, kpi_id, analytics_type, checkpoint, "Failure", exc_info)
 
 
-def get_checkpoints(sort_by_task_id=True, kpi_info=True, track_subtasks=True) -> List[Task]:
+class _CustomErrorStyle(Style):
+    default_style = ""
+    background_color = "#F1F5F9"
+
+    styles = {
+        Generic.Error: "bold #ef4444",
+        Generic.Traceback: "#3730a3",
+        Number: "#1d4ed8",
+        Name.Builtin: "#059669",
+    }
+
+
+def get_checkpoints(
+    sort_by_task_id=True,
+    kpi_info=True,
+    track_subtasks=True,
+    highlight_error=True,
+    include_github_issue_link=False,
+) -> List[Task]:
     """Get all task checkpoints as a list of Task objects.
 
     Args:
         sort_by_task_id (bool): whether to sort by task_id, descending (default: True)
         kpi_info (bool): whether to include kpi_name in the Tasks (default: True)
         track_subtasks (bool): whether to include completed_subtasks and total_subtasks in the Tasks (default: True)
+        highlight_error (bool): whether to highlight error using Pygments and make the error field an HTML string (default: True)
+        include_github_issue_link (bool): whether to generate a new GitHub issue link for tasks which have error (default: False)
     """
     if sort_by_task_id:
         tasks: List[Task] = (
@@ -148,6 +175,22 @@ def get_checkpoints(sort_by_task_id=True, kpi_info=True, track_subtasks=True) ->
             kpi = cast(Kpi, Kpi.get_by_id(task.kpi_id))
 
             task.kpi_name = kpi.name
+
+            if include_github_issue_link and task.error:
+                task.github_issue_link = generate_github_issue_link(task)
+
+            if highlight_error and task.error:
+                # TODO: use a single CSS file if there are too many errors
+                error_header, error_body = task.error.split("\n", maxsplit=1)
+                task.error = error_header + "\n" + highlight(
+                        error_body,
+                        PythonTracebackLexer(),
+                        HtmlFormatter(
+                            noclasses=True,
+                            cssstyles="overflow-x: auto; padding: 0.5rem;",
+                            style=_CustomErrorStyle
+                        )
+                )
 
             if track_subtasks:
 

@@ -518,7 +518,7 @@ def get_schema_views():
     
     return jsonify({"message":message, "status":status, "view_names":view_names})
 
-@blueprint.route("/table-info",methods=["GET"])
+@blueprint.route("/table-info",methods=["POST"])
 def get_table_info():
     """
     Returns Columns and primary key of a given table/view in a Dict

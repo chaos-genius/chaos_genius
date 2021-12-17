@@ -384,7 +384,7 @@ def check_views_availability():
     materialize_views = False
     schema_exist = False
     message = ""
-    status = False
+    status = "failure"
     
     try:
         data = request.get_json()
@@ -393,8 +393,10 @@ def check_views_availability():
         if datasource_id is None:
             message = "Datasource ID needs to provided"
         else:
-            datasource_info = DataSource.query.get(datasource_id)
-
+            datasource_info = DataSource.query.filter(
+                                            DataSource.id == datasource_id,
+                                            DataSource.active == True
+                                        ).first()
             if datasource_info is None:
                 message = "The datasource id provided is invalid"
             else:
@@ -402,7 +404,7 @@ def check_views_availability():
                 schema_exist = SCHEMAS_AVAILABLE.get(datasource_name , False)
                 views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["views"]
                 materialize_views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["materialized_views"]
-                status = True
+                status = "success"
     except Exception as err:
         message = str(err)
     

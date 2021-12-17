@@ -541,6 +541,9 @@ def get_table_info():
                                                     DataSource.id == datasource_id,
                                                     DataSource.active == True
                                                 ).first()
+        if data_source_obj.connection_type == "BigQuery":
+            schema = None
+
         if data_source_obj:
             ds_data = data_source_obj.as_dict
             table_info = get_table_metadata(ds_data,schema,table_name)

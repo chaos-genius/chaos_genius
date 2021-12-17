@@ -149,7 +149,10 @@ def kpi_subdim_anomaly(kpi_id):
             # Use a 24 hour window to find peak severity per subdim and rank in descending order
             start_date = end_date-timedelta(hours=23)
             query = (
-                db.session.query(AnomalyDataOutput.series_type, func.max(AnomalyDataOutput.severity)).filter(
+                db.session.query(
+                    AnomalyDataOutput.series_type,
+                    func.max(AnomalyDataOutput.severity)
+                ).filter(
                     (AnomalyDataOutput.kpi_id == kpi_id)
                     & (AnomalyDataOutput.data_datetime >= start_date)
                     & (AnomalyDataOutput.data_datetime <= end_date)

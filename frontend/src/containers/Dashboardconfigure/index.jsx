@@ -19,15 +19,35 @@ import Fuse from 'fuse.js';
 
 import store from '../../redux/store';
 
+import { formatDateTime } from '../../utils/date-helper';
+
 const DASHBOARD_RESET = {
   type: 'DASHBOARD_RESET'
 };
+
+const sort = [
+  {
+    label: 'Alphabetical',
+    value: 'alpha'
+  },
+  {
+    label: 'Recently Modified',
+    value: 'recent'
+  },
+  {
+    label: 'No. of KPIs',
+    value: 'kpi'
+  }
+];
 
 const Dashboardconfigure = () => {
   const dispatch = useDispatch();
   const [dashboardData, setDashboardData] = useState([]);
   const [data, setData] = useState(false);
-
+  const [sortValue, setSortValue] = useState({
+    label: 'No. of KPIs',
+    value: 'kpi'
+  });
   const { dashboardListLoading, dashboardList } = useSelector((state) => {
     return state.DashboardHome;
   });
@@ -41,7 +61,15 @@ const Dashboardconfigure = () => {
 
   useEffect(() => {
     if (dashboardList) {
-      setDashboardData(dashboardList);
+      setDashboardData(
+        dashboardList.sort(function (a, b) {
+          return a.kpis.length < b.kpis.length
+            ? -1
+            : a.kpis.length > b.kpis.length
+            ? 1
+            : 0;
+        })
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dashboardList]);
@@ -64,6 +92,27 @@ const Dashboardconfigure = () => {
     } else {
       setDashboardData(dashboardList);
     }
+  };
+
+  const onSort = (type) => {
+    let value = dashboardList.sort(function (a, b) {
+      if (type.value === 'alpha') {
+        return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+      } else if (type.value === 'recent') {
+        return (
+          formatDateTime(b.last_modified) - formatDateTime(a.last_modified)
+        );
+      } else if (type.value === 'kpi') {
+        return a.kpis.length < b.kpis.length
+          ? -1
+          : a.kpis.length > b.kpis.length
+          ? 1
+          : 0;
+      } else {
+        return [];
+      }
+    });
+    setDashboardData([...value]);
   };
 
   if (dashboardListLoading) {
@@ -100,12 +149,19 @@ const Dashboardconfigure = () => {
                   <img src={Search} alt="Search Icon" />
                 </span>
               </div>{' '}
-              <Select
-                // options={data}
-                classNamePrefix="selectcategory"
-                placeholder="last modified"
-                isSearchable={false}
-              />
+              <div className="text">
+                <span>Sort By</span>
+                <Select
+                  classNamePrefix="selectcategory"
+                  options={sort}
+                  value={sortValue}
+                  isSearchable={false}
+                  onChange={(e) => {
+                    onSort(e);
+                    setSortValue(e);
+                  }}
+                />
+              </div>
             </div>
             <div className="dashboard-card-wrapper">
               <Dashboardcards

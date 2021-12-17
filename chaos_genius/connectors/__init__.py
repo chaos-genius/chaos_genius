@@ -75,6 +75,29 @@ def get_table_info(data_source_info, schema, table_name):
     table_info["primary_key"] = db_connection.get_primary_key(table_name, schema)
     return table_info
 
+def get_schema_names(data_source_info):
+    db_connection = get_sqla_db_conn(data_source_info=data_source_info)
+    if db_connection is None:
+        return None
+
+    db_connection.init_inspector()
+    return db_connection.get_schema_names_list()
+
+def get_table_list(data_source_info, schema):
+    db_connection = get_sqla_db_conn(data_source_info=data_source_info)
+    if db_connection is None:
+        return None
+
+    db_connection.init_inspector()
+    return db_connection.get_tables(schema)
+
+def get_view_list(data_source_info, schema):
+    db_connection = get_sqla_db_conn(data_source_info=data_source_info)
+    if db_connection is None:
+        return None
+
+    db_connection.init_inspector()
+    return db_connection.get_view_names_list(schema)
 
 def test_connection(data_source_info):
     db_connection = get_sqla_db_conn(connection_config=data_source_info)

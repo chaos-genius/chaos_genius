@@ -9,11 +9,7 @@ from flask import (
     request,
     jsonify
 )
-from sqlalchemy import (
-    func,
-    create_engine, 
-    inspect
-)
+from sqlalchemy import func
 from chaos_genius.extensions import cache, db
 from chaos_genius.third_party.integration_client import get_localhost_host
 from chaos_genius.databases.models.kpi_model import Kpi
@@ -30,7 +26,10 @@ from chaos_genius.databases.db_utils import create_sqlalchemy_uri
 from chaos_genius.connectors import (
         get_metadata,
         get_sqla_db_conn,
-        get_table_info as get_table_metadata
+        get_table_info as get_table_metadata,
+        get_schema_names,
+        get_table_list,
+        get_view_list
 )
 from chaos_genius.third_party.integration_utils import get_connection_config
 from chaos_genius.utils.metadata_api_config import (
@@ -391,7 +390,7 @@ def check_views_availability():
         datasource_id = data.get("datasource_id", None)
 
         if datasource_id is None:
-            message = "Datasource ID needs to provided"
+            message = "Datasource ID needs to be provided"
         else:
             datasource_info = DataSource.query.filter(
                                             DataSource.id == datasource_id,
@@ -406,72 +405,117 @@ def check_views_availability():
                 materialize_views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["materialized_views"]
                 status = "success"
     except Exception as err:
-        message = str(err)
+        message = "Error in fetching table info: {}".format(err)
     
     return jsonify({"message":message, "status": status, "available": {"schema": schema_exist, "views": views, "materialize_views": materialize_views}})
 
-@blueprint.route("/<int:datasource_id>/list_schemas", methods=["GET"])
-def get_list_schemas(datasource_id):
-    status = ""
+@blueprint.route("/list-schema", methods=["POST"])
+def get_schema_list():
+    status = "failure"
     message = ""
     data = []
+
     try:
-        datasource_info = DataSource.query.get(datasource_id)
-        datasource_uri = datasource_info.db_uri
-        engine = create_engine(datasource_uri)
-        insp = inspect(engine)
-        db_list = insp.get_schema_names()
-        status = "success"
-        message = "List of schemas obtained"
-        data = db_list
-    except Exception as err :
-        status = "failure"
-        message = "List of schemas not obtained"
+        data = request.get_json()
+        datasource_id = data.get("datasource_id", None)
+
+        if datasource_id is None:
+            message = "Datasource ID needs to be provided"
+        else:
+            datasource_obj = DataSource.query.filter(
+                                            DataSource.id == datasource_id,
+                                            DataSource.active == True
+                                        ).first()
+            if datasource_obj is None:
+                message = "The datasource id provided is invalid"
+            else:
+                ds_data = datasource_obj.as_dict
+                data = get_schema_names(ds_data)
+                if data is None:
+                    message = "error Establishing DB Connection"
+                    data = []
+                else:
+                    status = "success"
+    except Exception as err:
+        message = "Error in fetching table info: {}".format(err)
 
     return jsonify({"message":message, "status":status, "data":data})
 
-@blueprint.route("/<int:datasource_id>/<schema_name>/list_tables", methods=["GET"])
-def get_schema_tables(datasource_id, schema_name):
-    status = ""
+@blueprint.route("/get-table-list", methods=["POST"])
+def get_schema_tables():
+    status = "failure"
     message = ""
     table_names = []
+
     try:
-        datasource_info = DataSource.query.get(datasource_id)
-        datasource_uri = datasource_info.db_uri
-        engine = create_engine(datasource_uri)
-        insp = inspect(engine)
-        table_list = insp.get_table_names(schema=schema_name)
-        status = "success"
-        message = "List of tables obtained"
-        table_names = table_list
+        data = request.get_json()
+        datasource_id = data.get("datasource_id", None)
+        schema = data.get("schema", None)
+
+        if datasource_id is None:
+            message = "Datasource ID needs to be provided"
+        else:
+            datasource_obj = DataSource.query.filter(
+                                            DataSource.id == datasource_id,
+                                            DataSource.active == True
+                                        ).first()
+
+            if datasource_obj is None:
+                message = "The datasource id provided is invalid"
+            else:
+                ds_data = datasource_obj.as_dict
+                ds_name = datasource_obj.connection_type
+                schema = None if ds_name == "BigQuery" else schema
+
+                table_names = get_table_list(ds_data, schema)
+                if table_names is None:
+                    message = "error Establishing DB Connection"
+                    table_names = []
+                else:
+                    status = "success"
     except Exception as err:
-        status = "failure"
-        message = "List of tables not obtained"
-    
+        message = "Error in fetching table info: {}".format(err)
+
     return jsonify({"message":message, "status":status, "table_names":table_names})
 
-@blueprint.route("/<int:datasource_id>/<schema_name>/list-views", methods=["GET"])
-def get_schema_views(datasource_id, schema_name):
+@blueprint.route("/get-view-list", methods=["POST"])
+def get_schema_views():
     """
     Returns a list of names of both views and materialized views
     """
 
-    status = ""
+    status = "failure"
     message = ""
     view_names = []
     try:
-        datasource_info = DataSource.query.get(datasource_id)
-        datasource_uri = datasource_info.db_uri
-        engine = create_engine(datasource_uri)
-        insp = inspect(engine)
-        view_list = insp.get_view_names(schema=schema_name)
-        status = "success"
-        message = "List of views obtained"
-        view_names = view_list
-    except Exception as err :
-        status = "failure"
-        message = str(err)
+        data = request.get_json()
+        datasource_id = data.get("datasource_id", None)
+        schema = data.get("schema", None)
 
+        if datasource_id is None:
+            message = "Datasource ID needs to be provided"
+        else:
+            datasource_obj = DataSource.query.filter(
+                                            DataSource.id == datasource_id,
+                                            DataSource.active == True
+                                        ).first()
+
+            if datasource_obj is None:
+                message = "The datasource id provided is invalid"
+            else:
+                ds_data = datasource_obj.as_dict
+                ds_name = datasource_obj.connection_type
+                schema = None if ds_name == "BigQuery" else schema
+
+                view_names = get_view_list(ds_data, schema)
+                if view_names is None:
+                    message = "error Establishing DB Connection"
+                    view_names = []
+                else:
+                    status = "success"
+    except Exception as err:
+        message = "Error in fetching table info: {}".format(err)
+    
     return jsonify({"message":message, "status":status, "view_names":view_names})
 
 @blueprint.route("/table-info",methods=["GET"])

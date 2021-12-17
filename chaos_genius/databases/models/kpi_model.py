@@ -17,6 +17,7 @@ class Kpi(PkModel):
 
     kpi_type = Column(db.String(80), nullable=False)
     kpi_query = Column(db.Text(), nullable=False)
+    schema_name = Column(db.Text(), nullable=True, default=None)
     table_name = Column(db.Text(), nullable=False)
     metric = Column(db.Text(), nullable=False)
     aggregation = Column(db.String(80), nullable=False)

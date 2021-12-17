@@ -5,17 +5,12 @@ import time
 from typing import Any, Dict, List, Optional, Tuple, cast
 
 from flask import Blueprint, current_app, jsonify, request
-from sqlalchemy import func
 import pandas as pd
 from sqlalchemy.orm.attributes import flag_modified
 from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
 from chaos_genius.core.utils.round import round_number
-from chaos_genius.settings import (
-    TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN,
-    TOP_SUBDIMENSIONS_FOR_ANOMALY,
-)
+from chaos_genius.settings import TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN
 
-from chaos_genius.extensions import db
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.databases.models.kpi_model import Kpi
@@ -131,66 +126,6 @@ def kpi_anomaly_data_quality(kpi_id):
         current_app.logger.error("Error in Anomaly DQ Retrieval: {err}", exc_info=1)
 
     return jsonify({"data": data, "msg": "", "anomaly_end_date": end_date})
-
-
-@blueprint.route("/<int:kpi_id>/subdim-anomaly", methods=["GET"])
-def kpi_subdim_anomaly(kpi_id):
-    current_app.logger.info(f"Subdimension Anomaly Started for KPI ID: {kpi_id}")
-    subdim_graphs = []
-    end_date = None
-    try:
-        kpi_info = get_kpi_data_from_id(kpi_id)
-        period = kpi_info["anomaly_params"]["anomaly_period"]
-        hourly = kpi_info["anomaly_params"]["frequency"] == "H"
-
-        end_date = get_end_date(kpi_info)
-        graph_xlims = get_anomaly_graph_x_lims(end_date, period, hourly)
-        if hourly:
-            # Use a 24 hour window to find peak severity per subdim and rank in descending order
-            start_date = end_date-timedelta(hours=23)
-            query = (
-                db.session.query(
-                    AnomalyDataOutput.series_type,
-                    func.max(AnomalyDataOutput.severity)
-                ).filter(
-                    (AnomalyDataOutput.kpi_id == kpi_id)
-                    & (AnomalyDataOutput.data_datetime >= start_date)
-                    & (AnomalyDataOutput.data_datetime <= end_date)
-                    & (AnomalyDataOutput.anomaly_type == "subdim")
-                    & (AnomalyDataOutput.is_anomaly != 0)
-                )
-                .group_by(AnomalyDataOutput.series_type)
-                .order_by(func.max(AnomalyDataOutput.severity).desc())
-                .limit(TOP_SUBDIMENSIONS_FOR_ANOMALY)
-            )
-
-        else:
-            query = (
-                AnomalyDataOutput.query.filter(
-                    (AnomalyDataOutput.kpi_id == kpi_id)
-                    & (AnomalyDataOutput.data_datetime == end_date)
-                    & (AnomalyDataOutput.anomaly_type == "subdim")
-                    & (AnomalyDataOutput.is_anomaly != 0)
-                )
-                .order_by(AnomalyDataOutput.severity.desc())
-                .limit(TOP_SUBDIMENSIONS_FOR_ANOMALY)
-            )
-        results = pd.read_sql(query.statement, query.session.bind)
-        if len(results) == 0:
-            current_app.logger.error("No Subdimension Anomaly Found", exc_info=1)
-        subdims = results.series_type
-        for subdim in subdims:
-            anom_data = get_dq_and_subdim_data(
-                kpi_id, end_date, "subdim", subdim, period
-            )
-            anom_data["x_axis_limits"] = graph_xlims
-            subdim_graphs.append(anom_data)
-        current_app.logger.info(f"Subdimension Anomaly Retrieval Completed for KPI ID: {kpi_id}")
-
-    except:  # noqa: E722
-        current_app.logger.error("Error in Subdimension Anomaly Retrieval", exc_info=1)
-
-    return jsonify({"data": subdim_graphs, "msg": "", "anomaly_end_date": end_date})
 
 
 @blueprint.route("/anomaly-params/meta-info", methods=["GET"])

@@ -337,24 +337,15 @@ class AnomalyAlertController:
             
             anomaly_data = [anomaly_point.as_dict for anomaly_point in anomaly_data]
             anomaly_data = [{key: value for key, value in anomaly_point.items() if key not in IGNORE_COLUMNS_ANOMALY_TABLE} for anomaly_point in anomaly_data]
+
+            for anomaly_point in anomaly_data:
+                anomaly_point["series_type"] = "Overall KPI" if anomaly_point.get("anomaly_type") == "overall" else anomaly_point["series_type"]
+                for key, value in anomaly_point.items():
+                    if key in ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS:
+                        anomaly_point[key] = round(value, 2)
+
             overall_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "overall"]
             subdim_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "subdim"]
-
-            #Performing some preprocessing on anomaly data
-
-            for anomaly_point in overall_data:
-                anomaly_point["series_type"] = "Overall KPI"
-
-            for anomaly_point in overall_data:
-                for key, value in anomaly_point.items():
-                    if key in ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS:
-                        anomaly_point[key] = round(value, 2)
-            
-            for anomaly_point in subdim_data:
-                for key, value in anomaly_point.items():
-                    if key in ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS:
-                        anomaly_point[key] = round(value, 2)
-
             overall_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
             subdim_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
 

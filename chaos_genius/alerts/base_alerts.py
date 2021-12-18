@@ -327,7 +327,7 @@ class AnomalyAlertController:
                 return False
             
             anomaly_data = [anomaly_point.as_dict for anomaly_point in anomaly_data]
-            anomaly_data = [{key: value for key, value in anomaly_point.items() if key not in ["id", "index", "kpi_id"]} for anomaly_point in anomaly_data]
+            anomaly_data = [{key: value for key, value in anomaly_point.items() if key not in ["id", "index", "kpi_id", "is_anomaly"]} for anomaly_point in anomaly_data]
             overall_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "overall"]
             subdim_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "subdim"]
 
@@ -348,11 +348,30 @@ class AnomalyAlertController:
                     if key in ["y", "yhat_upper", "yhat_lower", "severity"]:
                         anomaly_point[key] = round(value, 2)
 
+            for anomaly_point in overall_data_email_body:
+                lower = anomaly_point.get("yhat_lower")
+                upper = anomaly_point.get("yhat_upper")
+                anomaly_point["range"] = f"{lower} -- {upper}"
+                anomaly_point.pop("yhat_lower")
+                anomaly_point.pop("yhat_upper")
+
+            for anomaly_point in subdim_data_email_body:
+                lower = anomaly_point.get("yhat_lower")
+                upper = anomaly_point.get("yhat_upper")
+                anomaly_point["range"] = f"{lower} -- {upper}"
+                anomaly_point.pop("yhat_lower")
+                anomaly_point.pop("yhat_upper")
+
+            overall_data_email_body.pop("series_type")
+
+            subdim_column_names = list(subdim_data_email_body.keys())
+            overall_column_names = [heading for heading in subdim_column_names]
+            overall_column_names.remove("series_type")
+
             overall_data.extend(subdim_data)
             anomaly_data = overall_data
             anomaly_data = pd.DataFrame(anomaly_data)
 
-            column_names = list(anomaly_data.columns)
             kpi_name = getattr(kpi_obj, 'name')
 
             files = []
@@ -368,7 +387,8 @@ class AnomalyAlertController:
                                             recipient_emails, 
                                             subject,
                                             files,
-                                            column_names=column_names,
+                                            overall_column_names=overall_column_names,
+                                            subdim_column_names=subdim_column_names,
                                             overall_data=overall_data_email_body,
                                             subdim_data=subdim_data_email_body,
                                             alert_message=alert_message,

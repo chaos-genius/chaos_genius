@@ -288,30 +288,24 @@ class AnomalyAlertController:
         # TODO: Add the series type filter for query optimisation
         anomaly_data = AnomalyDataOutput.query.filter(
                                             AnomalyDataOutput.kpi_id == kpi_id,
-                                            AnomalyDataOutput.anomaly_type == 'overall',
+                                            AnomalyDataOutput.anomaly_type.in_(["overall", "subdim"]),
                                             AnomalyDataOutput.is_anomaly.in_([1,-1]),
-                                            AnomalyDataOutput.data_datetime >= self.anomaly_end_date
+                                            AnomalyDataOutput.data_datetime >= self.anomaly_end_date,
+                                            AnomalyDataOutput.severity >= self.alert_info["severity_cutoff_score"]
                                         ).all()
 
         if len(anomaly_data) == 0:
             logger.info(f"No anomaly exists (Alert ID - {alert_id})")
             return True
 
-        anomaly_data.sort(key=lambda anomaly: getattr(anomaly, 'severity'), reverse=True)
-        anomaly = anomaly_data[0]
-
-        if getattr(anomaly, 'severity') < self.alert_info['severity_cutoff_score']:
-            logger.info(f"The anomaliy's severity score is below the threshold (Alert ID - {alert_id})")
-            return True
-
         logger.info(f"Alert ID {alert_id} is sent to the respective alert channel")
 
         if self.alert_info["alert_channel"] == "email":
-            return self.send_alert_email(anomaly)
+            return self.send_alert_email(anomaly_data)
         elif self.alert_info["alert_channel"] == "slack":
-            return self.send_slack_alert(anomaly)
+            return self.send_slack_alert(anomaly_data)
 
-    def send_alert_email(self, anomaly):
+    def send_alert_email(self, anomaly_data):
 
         alert_channel_conf = self.alert_info["alert_channel_conf"]
 
@@ -324,34 +318,53 @@ class AnomalyAlertController:
         if recipient_emails:
             subject = f"{self.alert_info['alert_name']} - Chaos Genius Alert❗"
             alert_message = self.alert_info["alert_message"]
-            time_of_anomaly = str(getattr(anomaly, 'data_datetime'))
-            highest_value = round(getattr(anomaly, 'y'), 1)
-            lower_bound = round(getattr(anomaly, 'yhat_lower'), 2)
-            upper_bound = round(getattr(anomaly, 'yhat_upper'), 2)
-            severity_value = round(getattr(anomaly, 'severity'), 2)
 
             kpi_id = self.alert_info["kpi"]
-            kpi_obj = Kpi.get_by_id(kpi_id)
+            kpi_obj = Kpi.query.filter(Kpi.active == True, Kpi.id == kpi_id).first()
             
             if kpi_obj is None:
                 logger.info(f"No KPI exists for Alert ID - {self.alert_info['id']}")
                 return False
 
+            anomaly_data = [{key: value for key, value in anomaly_point.iteritems() if key not in ["id", "index", "kpi_id"]} for anomaly_point in anomaly_data]
+            overall_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "overall"]
+            subdim_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "subdim"]
+
+            overall_data.sort(key=lambda anomaly: getattr(anomaly, "severity"), reverse=True)
+            subdim_data.sort(key=lambda anomaly: getattr(anomaly, "severity"), reverse=True)
+
+            overall_data_email_body = overall_data[0] if len(overall_data) > 0 else []
+            len_subdim = min(5, len(subdim_data))
+            subdim_data_email_body = subdim_data[0:len_subdim] if len(subdim_data) > 0 else []
+
+            overall_data.extend(subdim_data)
+            anomaly_data = overall_data
+            anomaly_data = pd.DataFrame(anomaly_data)
+
+            column_names = list(anomaly_data.columns)
             kpi_name = getattr(kpi_obj, 'name')
+
+            files = []
+            if not anomaly_data.empty:
+                file_detail = {}
+                file_detail["fname"] = "data.csv"
+                with io.StringIO() as buffer:
+                    anomaly_data.to_csv(buffer)
+                    file_detail["fdata"] = buffer.getvalue()
+                files = [file_detail]
 
             test = self.send_template_email('email_alert.html', 
                                             recipient_emails, 
-                                            subject, 
-                                            alert_message = alert_message,
-                                            time_of_anomaly = time_of_anomaly,
-                                            highest_value = highest_value,
-                                            lower_bound = lower_bound, 
-                                            upper_bound = upper_bound,
-                                            severity_value = severity_value,
+                                            subject,
+                                            files,
+                                            column_names=column_names,
+                                            overall_data=overall_data_email_body,
+                                            subdim_data=subdim_data_email_body,
+                                            alert_message=alert_message,
                                             kpi_name = kpi_name,
-                                            alert_frequency = self.alert_info['alert_frequency'].capitalize(),
-                                            preview_text = "Anomaly Alert" ,
-                                            alert_name = self.alert_info.get("alert_name")
+                                            alert_frequency=self.alert_info['alert_frequency'].capitalize(),
+                                            preview_text="Anomaly Alert",
+                                            alert_name=self.alert_info.get("alert_name")
                                         )
             logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
             return True
@@ -359,7 +372,7 @@ class AnomalyAlertController:
             logger.info(f"No receipent email available (Alert ID - {self.alert_info['id']})")
             return False
 
-    def send_template_email(self, template, recipient_emails, subject, **kwargs):
+    def send_template_email(self, template, recipient_emails, subject, files, **kwargs):
         """Sends an email using a template."""
 
         path = os.path.join(os.path.dirname(__file__), 'email_templates')
@@ -369,7 +382,7 @@ class AnomalyAlertController:
         )
 
         template = env.get_template(template)
-        test = send_static_alert_email(recipient_emails, subject, template.render(**kwargs), self.alert_info)
+        test = send_static_alert_email(recipient_emails, subject, template.render(**kwargs), self.alert_info, files)
 
         if test == True:
             logger.info(f"The email for Alert ID - {self.alert_info['id']} was successfully sent")

@@ -368,9 +368,6 @@ class AnomalyAlertController:
                 lower = anomaly_point.get("yhat_lower")
                 upper = anomaly_point.get("yhat_upper")
                 anomaly_point["Expected Value"] = f"{lower} -- {upper}"
-                anomaly_point.pop("yhat_lower")
-                anomaly_point.pop("yhat_upper")
-                anomaly_point.pop("anomaly_type")
                 for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
                     anomaly_point[value] = anomaly_point[key]
                     anomaly_point.pop(key)

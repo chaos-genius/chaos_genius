@@ -325,15 +325,16 @@ class AnomalyAlertController:
             if kpi_obj is None:
                 logger.info(f"No KPI exists for Alert ID - {self.alert_info['id']}")
                 return False
-
-            anomaly_data = [{key: value for key, value in anomaly_point.iteritems() if key not in ["id", "index", "kpi_id"]} for anomaly_point in anomaly_data]
+            
+            anomaly_data = [anomaly_point.as_dict for anomaly_point in anomaly_data]
+            anomaly_data = [{key: value for key, value in anomaly_point.items() if key not in ["id", "index", "kpi_id"]} for anomaly_point in anomaly_data]
             overall_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "overall"]
             subdim_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "subdim"]
 
-            overall_data.sort(key=lambda anomaly: getattr(anomaly, "severity"), reverse=True)
-            subdim_data.sort(key=lambda anomaly: getattr(anomaly, "severity"), reverse=True)
+            overall_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
+            subdim_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
 
-            overall_data_email_body = overall_data[0] if len(overall_data) > 0 else []
+            overall_data_email_body = [overall_data[0]] if len(overall_data) > 0 else []
             len_subdim = min(5, len(subdim_data))
             subdim_data_email_body = subdim_data[0:len_subdim] if len(subdim_data) > 0 else []
 

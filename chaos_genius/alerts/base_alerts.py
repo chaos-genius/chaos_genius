@@ -389,7 +389,6 @@ class AnomalyAlertController:
 
             anomaly_data = pd.DataFrame(overall_data)
             column_names = ANOMALY_ALERT_EMAIL_COLUMN_NAMES
-            
             files = []
             if not anomaly_data.empty:
                 file_detail = {}

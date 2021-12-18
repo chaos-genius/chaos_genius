@@ -1,6 +1,6 @@
 ANOMALY_TABLE_COLUMN_NAMES_MAPPER = {
     "series_type": "Dimension",
-    "data_datetime": "Time of Occurence",
+    "data_datetime": "Time of Occurrence",
     "y": "Value",
     "severity": "Severity Score"
 }
@@ -14,7 +14,7 @@ IGNORE_COLUMNS_ANOMALY_TABLE = [
 
 ANOMALY_ALERT_EMAIL_COLUMN_NAMES = [
     "Dimension",
-    "Time of Occurence",
+    "Time of Occurrence",
     "Value",
     "Expected Value",
     "Severity Score"

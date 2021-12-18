@@ -5,6 +5,9 @@ x-logging: &default-logging
     max-size: "100m"
     max-file: "5"
   driver: json-file
+x-version:
+  &chaosgenius-version
+  CHAOSGENIUS_VERSION_POSTFIX=stable-compose
 
 services:
   chaosgenius-init:
@@ -42,6 +45,7 @@ services:
       - chaosgenius-db
       - server
     environment:
+      - *chaosgenius-version
       - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}

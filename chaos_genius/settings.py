@@ -7,7 +7,10 @@ For local development, use a .env file to set
 environment variables.
 """
 import os
+
 from dotenv import load_dotenv
+
+from chaos_genius.utils.utils import latest_git_commit_hash
 
 load_dotenv(".env")  # loads environment variables from .env
 
@@ -70,3 +73,15 @@ else:
 
 TASK_CHECKPOINT_LIMIT: int = int(os.getenv("TASK_CHECKPOINT_LIMIT", 1000))
 """Number of last checkpoints to retrieve in Task Monitor"""
+
+CHAOSGENIUS_VERSION_MAIN = os.getenv("CHAOSGENIUS_VERSION_MAIN", "0.2.0")
+"""ChaosGenius version - semver part only"""
+CHAOSGENIUS_VERSION_POSTFIX = os.getenv("CHAOSGENIUS_VERSION_POSTFIX", "git")
+"""ChaosGenius version - postfix to identify deployment"""
+
+# append latest git commit hash if running from main
+if CHAOSGENIUS_VERSION_POSTFIX == "git":
+    CHAOSGENIUS_VERSION_POSTFIX += "-" + (latest_git_commit_hash() or "unknown")
+
+CHAOSGENIUS_VERSION = CHAOSGENIUS_VERSION_MAIN + "-" + CHAOSGENIUS_VERSION_POSTFIX
+"""ChaosGenius full version string"""

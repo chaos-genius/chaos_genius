@@ -351,7 +351,7 @@ class AnomalyAlertController:
             for anomaly_point in overall_data_email_body:
                 lower = anomaly_point.get("yhat_lower")
                 upper = anomaly_point.get("yhat_upper")
-                anomaly_point["range"] = f"{lower} -- {upper}"
+                anomaly_point["range_of_values"] = f"{lower} -- {upper}"
                 anomaly_point.pop("yhat_lower")
                 anomaly_point.pop("yhat_upper")
                 anomaly_point.pop("series_type")
@@ -359,11 +359,11 @@ class AnomalyAlertController:
             for anomaly_point in subdim_data_email_body:
                 lower = anomaly_point.get("yhat_lower")
                 upper = anomaly_point.get("yhat_upper")
-                anomaly_point["range"] = f"{lower} -- {upper}"
+                anomaly_point["range_of_values"] = f"{lower} -- {upper}"
                 anomaly_point.pop("yhat_lower")
                 anomaly_point.pop("yhat_upper")
 
-            subdim_column_names = list(subdim_data_email_body.keys())
+            subdim_column_names = list(subdim_data_email_body[0].keys())
             overall_column_names = [heading for heading in subdim_column_names]
             overall_column_names.remove("series_type")
 

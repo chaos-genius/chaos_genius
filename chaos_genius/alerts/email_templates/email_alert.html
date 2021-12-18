@@ -25,13 +25,13 @@
 <h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Anomaly Type: Overall</h3>
     <table style="border-collapse: collapse;border-spacing: 15px; color: #F6F5F5;text-align: left; padding: 10px;">
       <tr style="border:1px solid #8A8A8A ; border-color: #8A8A8A;">
-          {% for column in column_names %}
+          {% for column in overall_column_names %}
           <th style="border: 1px solid #8A8A8A ; padding: 10px;">{{column}}</th>
           {% endfor %}
       </tr>
       {% for item in overall_data %}
           <tr style="border:1px solid #8A8A8A">
-              {% for column in column_names %}
+              {% for column in overall_column_names %}
               <td style="color: #F6F5F5;border: 1px solid #8A8A8A ; padding: 10px;">{{item[column]}}</td>
               
               {% endfor %}
@@ -44,13 +44,13 @@
 <h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Anomaly Type: Subdimensional</h3>
     <table style="border-collapse: collapse;border-spacing: 15px; color: #F6F5F5;text-align: left; padding: 10px;">
       <tr style="border:1px solid #8A8A8A ; border-color: #8A8A8A;">
-          {% for column in column_names %}
+          {% for column in subdim_column_names %}
           <th style="border: 1px solid #8A8A8A ; padding: 10px;">{{column}}</th>
           {% endfor %}
       </tr>
       {% for item in subdim_data %}
           <tr style="border:1px solid #8A8A8A">
-              {% for column in column_names %}
+              {% for column in subdim_column_names %}
               <td style="color: #F6F5F5;border: 1px solid #8A8A8A ; padding: 10px;">{{item[column]}}</td>
               
               {% endfor %}

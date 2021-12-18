@@ -338,13 +338,15 @@ class AnomalyAlertController:
             len_subdim = min(5, len(subdim_data))
             subdim_data_email_body = subdim_data[0:len_subdim] if len(subdim_data) > 0 else []
 
-            for key, value in overall_data_email_body.items():
-                if key in ["y", "yhat_upper", "yhat_lower", "severity"]:
-                    overall_data_email_body[key] = round(value, 2)
+            for anomaly_point in overall_data_email_body:
+                for key, value in anomaly_point.items():
+                    if key in ["y", "yhat_upper", "yhat_lower", "severity"]:
+                        anomaly_point[key] = round(value, 2)
             
-            for key, value in subdim_data_email_body.items():
-                if key in ["y", "yhat_upper", "yhat_lower", "severity"]:
-                    subdim_data_email_body[key] = round(value, 2)
+            for anomaly_point in subdim_data_email_body:
+                for key, value in anomaly_point.items():
+                    if key in ["y", "yhat_upper", "yhat_lower", "severity"]:
+                        anomaly_point[key] = round(value, 2)
 
             overall_data.extend(subdim_data)
             anomaly_data = overall_data

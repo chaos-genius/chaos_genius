@@ -7,6 +7,7 @@ from typing import Optional, List, Tuple
 import pandas as pd
 import datetime
 from datetime import date
+from copy import deepcopy
 from chaos_genius.utils.io_helper import is_file_exists
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.alert_model import Alert
@@ -16,6 +17,12 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import anomaly_alert_slack_formatted, event_alert_slack
+from chaos_genius.alerts.email_alert_config import (
+    ANOMALY_TABLE_COLUMN_NAMES_MAPPER,
+    IGNORE_COLUMNS_ANOMALY_TABLE,
+    ANOMALY_ALERT_EMAIL_COLUMN_NAMES,
+    ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS
+)
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 logger = logging.getLogger()
@@ -325,54 +332,64 @@ class AnomalyAlertController:
             if kpi_obj is None:
                 logger.info(f"No KPI exists for Alert ID - {self.alert_info['id']}")
                 return False
+
+            kpi_name = getattr(kpi_obj, 'name')
             
             anomaly_data = [anomaly_point.as_dict for anomaly_point in anomaly_data]
-            anomaly_data = [{key: value for key, value in anomaly_point.items() if key not in ["id", "index", "kpi_id", "is_anomaly"]} for anomaly_point in anomaly_data]
+            anomaly_data = [{key: value for key, value in anomaly_point.items() if key not in IGNORE_COLUMNS_ANOMALY_TABLE} for anomaly_point in anomaly_data]
             overall_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "overall"]
             subdim_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "subdim"]
+
+            #Performing some preprocessing on anomaly data
+
+            for anomaly_point in overall_data:
+                anomaly_point["series_type"] = "Overall KPI"
+
+            for anomaly_point in overall_data:
+                for key, value in anomaly_point.items():
+                    if key in ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS:
+                        anomaly_point[key] = round(value, 2)
+            
+            for anomaly_point in subdim_data:
+                for key, value in anomaly_point.items():
+                    if key in ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS:
+                        anomaly_point[key] = round(value, 2)
 
             overall_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
             subdim_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
 
-            overall_data_email_body = [overall_data[0]] if len(overall_data) > 0 else []
-            len_subdim = min(5, len(subdim_data))
-            subdim_data_email_body = subdim_data[0:len_subdim] if len(subdim_data) > 0 else []
-
-            for anomaly_point in overall_data_email_body:
-                for key, value in anomaly_point.items():
-                    if key in ["y", "yhat_upper", "yhat_lower", "severity"]:
-                        anomaly_point[key] = round(value, 2)
-            
-            for anomaly_point in subdim_data_email_body:
-                for key, value in anomaly_point.items():
-                    if key in ["y", "yhat_upper", "yhat_lower", "severity"]:
-                        anomaly_point[key] = round(value, 2)
-
-            for anomaly_point in overall_data_email_body:
-                lower = anomaly_point.get("yhat_lower")
-                upper = anomaly_point.get("yhat_upper")
-                anomaly_point["range"] = f"{lower} -- {upper}"
-                anomaly_point.pop("yhat_lower")
-                anomaly_point.pop("yhat_upper")
-                anomaly_point.pop("series_type")
-
-            for anomaly_point in subdim_data_email_body:
-                lower = anomaly_point.get("yhat_lower")
-                upper = anomaly_point.get("yhat_upper")
-                anomaly_point["range"] = f"{lower} -- {upper}"
-                anomaly_point.pop("yhat_lower")
-                anomaly_point.pop("yhat_upper")
-
-            subdim_column_names = list(subdim_data_email_body.keys())
-            overall_column_names = [heading for heading in subdim_column_names]
-            overall_column_names.remove("series_type")
+            overall_data_email_body = deepcopy([overall_data[0]]) if len(overall_data) > 0 else []
+            len_subdim = min(10, len(subdim_data))
+            subdim_data_email_body = deepcopy(subdim_data[0:len_subdim]) if len(subdim_data) > 0 else []
 
             overall_data.extend(subdim_data)
-            anomaly_data = overall_data
-            anomaly_data = pd.DataFrame(anomaly_data)
+            overall_data_email_body.extend(subdim_data_email_body)
 
-            kpi_name = getattr(kpi_obj, 'name')
+            for anomaly_point in overall_data_email_body:
+                lower = anomaly_point.get("yhat_lower")
+                upper = anomaly_point.get("yhat_upper")
+                anomaly_point["Expected Value"] = f"{lower} -- {upper}"
+                anomaly_point.pop("yhat_lower")
+                anomaly_point.pop("yhat_upper")
+                anomaly_point.pop("anomaly_type")
+                for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
+                    anomaly_point[value] = anomaly_point[key]
+                    anomaly_point.pop(key)
 
+            for anomaly_point in overall_data:
+                lower = anomaly_point.get("yhat_lower")
+                upper = anomaly_point.get("yhat_upper")
+                anomaly_point["Expected Value"] = f"{lower} -- {upper}"
+                anomaly_point.pop("yhat_lower")
+                anomaly_point.pop("yhat_upper")
+                anomaly_point.pop("anomaly_type")
+                for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
+                    anomaly_point[value] = anomaly_point[key]
+                    anomaly_point.pop(key)
+
+            anomaly_data = pd.DataFrame(overall_data)
+            column_names = ANOMALY_ALERT_EMAIL_COLUMN_NAMES
+            
             files = []
             if not anomaly_data.empty:
                 file_detail = {}
@@ -386,10 +403,8 @@ class AnomalyAlertController:
                                             recipient_emails, 
                                             subject,
                                             files,
-                                            overall_column_names=overall_column_names,
-                                            subdim_column_names=subdim_column_names,
-                                            overall_data=overall_data_email_body,
-                                            subdim_data=subdim_data_email_body,
+                                            column_names=column_names,
+                                            data=overall_data_email_body,
                                             alert_message=alert_message,
                                             kpi_name = kpi_name,
                                             alert_frequency=self.alert_info['alert_frequency'].capitalize(),

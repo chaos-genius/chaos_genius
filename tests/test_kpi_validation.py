@@ -1,14 +1,31 @@
 """Tests for KPI Validation."""
 import pandas as pd
+import pytest
 from pytest_bdd import given, parsers, scenario, then, when
-from sqlalchemy.sql.operators import endswith_op
 
+from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.core.utils.kpi_validation import _validate_kpi_from_df
 from chaos_genius.databases.models.kpi_model import Kpi
 
 
+@pytest.fixture
+def mock_dataloader(monkeypatch):
+    """Mocks DataLoader to not hardcode init and get_count."""
+
+    def mock_dataloader_init(_, *args, **kwargs):
+        pass
+
+    def mock_dataloader_get_count(_):
+        # TODO: use marker to pass this data
+        #       see: https://docs.pytest.org/en/6.2.x/fixture.html#using-markers-to-pass-data-to-fixtures
+        return 100
+
+    monkeypatch.setattr(DataLoader, "__init__", mock_dataloader_init)
+    monkeypatch.setattr(DataLoader, "get_count", mock_dataloader_get_count)
+
+
 @given("a newly added KPI and its DataFrame", target_fixture="new_kpi_df")
-def new_kpi_df():  # noqa: D103
+def new_kpi_df(mock_dataloader):  # noqa: D103
     kpi = Kpi(
         name="test_validation_kpi",
         data_source=0,
@@ -23,13 +40,14 @@ def new_kpi_df():  # noqa: D103
     )
     df = pd.DataFrame(
         [
-            ["2021-12-21", "2021-12-22", "2021-12-23", "2021-12-24"],
-            [1, 2, 3, 4],
-            ["a", "b", "c", "d"],
-            ["q", "w", "e", "r"],
+            ["2021-12-21", 1, "a", "q"],
+            ["2021-12-22", 2, "b", "w"],
+            ["2021-12-23", 3, "c", "e"],
+            ["2021-12-24", 4, "d", "r"],
         ],
         columns=["date_col", "metric_col", "dim1", "dim2"],
     )
+
     return kpi, df
 
 
@@ -88,6 +106,16 @@ def test_datetime_column_not_exist():  # noqa: D103
     pass
 
 
+@scenario("features/kpi_validation.feature", "duplicate column names in obtained data")
+def test_duplicate_cols():  # noqa: D103
+    pass
+
+
+@scenario("features/kpi_validation.feature", "invalid or unsupported aggregation")
+def test_invalid_agg():  # noqa: D103
+    pass
+
+
 # TODO: add remaining scenarios
 
 
@@ -109,5 +137,28 @@ def incorrect_datetime_col(new_kpi_df, monkeypatch):  # noqa: D103
     kpi, df = new_kpi_df
 
     monkeypatch.setattr(kpi, "datetime_column", "some_column_that_does_not_exist")
+
+    return kpi, df
+
+
+@when("a column name is repeated", target_fixture="new_kpi_df")
+def duplicate_col_name(new_kpi_df):  # noqa: D103
+    kpi: Kpi
+    df: pd.DataFrame
+    kpi, df = new_kpi_df
+
+    # add a column to DF
+    df = pd.concat([df, pd.DataFrame(df["dim1"])], axis=1)
+
+    return kpi, df
+
+
+@when(parsers.parse('aggregation given for metric is invalid - say "{agg_name}"'))
+def invalid_agg(new_kpi_df, agg_name, monkeypatch):  # noqa: D103
+    kpi: Kpi
+    df: pd.DataFrame
+    kpi, df = new_kpi_df
+
+    monkeypatch.setattr(kpi, "aggregation", agg_name)
 
     return kpi, df

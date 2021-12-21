@@ -3,6 +3,10 @@ Feature: KPI Validation
     Loader returns a correct DataFrame from the source. So these tests use
     a DataFrame directly (to eliminate dependency on DB).
 
+    Scenario: KPI is valid without modifications
+        Given a newly added KPI and its DataFrame
+        Then validation should pass
+
     Scenario: metric column does not exist or invalid
         Given a newly added KPI and its DataFrame
         When metric column name is incorrect
@@ -25,7 +29,7 @@ Feature: KPI Validation
         Given a newly added KPI and its DataFrame
         When aggregation given for metric is invalid - say "abcd"
         Then validation should fail
-        And error message should be "abcd aggregation is not supported. Supported aggregations are mean, sum, count"
+        And error message should be ""abcd" aggregation is not supported. Supported aggregations are mean, sum, count"
 
     Scenario: numerical aggregation on categorical column
         Given a newly added KPI and its DataFrame

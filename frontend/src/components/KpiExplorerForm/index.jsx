@@ -62,7 +62,7 @@ const customSingleValue = ({ data }) => (
 
 const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   const dispatch = useDispatch();
-
+  const limited = JSON.parse(localStorage.getItem('GlobalSetting'));
   const toast = useToast();
 
   const history = useHistory();
@@ -239,8 +239,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   }, [dashboardList]);
 
   const dashboardOptionList = () => {
-    var arr = [
-      {
+    var arr = [];
+    if (limited?.is_ee) {
+      arr.push({
         value: 'newdashboard',
         label: (
           <span className="add-dashboard">
@@ -248,8 +249,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             New Dashboard
           </span>
         )
-      }
-    ];
+      });
+    }
     if (dashboardList) {
       dashboardList &&
         dashboardList.forEach((item) => {

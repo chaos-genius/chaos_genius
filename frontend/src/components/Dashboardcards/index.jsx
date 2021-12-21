@@ -24,7 +24,7 @@ import { CustomContent, CustomActions } from '../../utils/toast-helper';
 
 const Dashboardcards = ({ dashboarddata, setChange }) => {
   const dispatch = useDispatch();
-
+  const limited = JSON.parse(localStorage.getItem('GlobalSetting'));
   const toast = useToast();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -151,17 +151,19 @@ const Dashboardcards = ({ dashboarddata, setChange }) => {
                           </li>
                         </Link>
 
-                        <Link to="/dashboard">
-                          <li
-                            className="delete-item"
-                            onClick={() => {
-                              setIsOpen(true);
-                              setData(dashboard);
-                            }}>
-                            <img src={DeleteActive} alt="Delete" />
-                            Delete
-                          </li>
-                        </Link>
+                        {limited?.is_ee && (
+                          <Link to="/dashboard">
+                            <li
+                              className="delete-item"
+                              onClick={() => {
+                                setIsOpen(true);
+                                setData(dashboard);
+                              }}>
+                              <img src={DeleteActive} alt="Delete" />
+                              Delete
+                            </li>
+                          </Link>
+                        )}
                       </ul>
                     </div>
                   </div>

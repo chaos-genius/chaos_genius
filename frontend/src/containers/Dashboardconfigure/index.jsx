@@ -42,6 +42,7 @@ const sort = [
 
 const Dashboardconfigure = () => {
   const dispatch = useDispatch();
+  const limited = JSON.parse(localStorage.getItem('GlobalSetting'));
   const [dashboardData, setDashboardData] = useState([]);
   const [data, setData] = useState(false);
   const [sortValue, setSortValue] = useState({
@@ -128,12 +129,14 @@ const Dashboardconfigure = () => {
           <div className="heading-title">
             <h3>Dashboard</h3>
           </div>
-          <div className="option-button">
-            <Link to="/dashboard/add" className="btn green-variant-button">
-              <img src={Plus} alt="Add" />
-              <span>New Dashboard</span>
-            </Link>
-          </div>
+          {limited?.is_ee && (
+            <div className="option-button">
+              <Link to="/dashboard/add" className="btn green-variant-button">
+                <img src={Plus} alt="Add" />
+                <span>New Dashboard</span>
+              </Link>
+            </div>
+          )}
         </div>{' '}
         {dashboardList && dashboardList.length !== 0 ? (
           <>

@@ -13,6 +13,10 @@ import {
   getAllKpiExplorer,
   getAllKpiExplorerForm,
   getAllKpiExplorerField,
+  getSchemaAvailability,
+  getSchemaNamelist,
+  getTableListOnSchema,
+  getTableinfoData,
   getAllKpiExplorerSubmit,
   getTestQuery,
   kpiDisable,
@@ -51,7 +55,11 @@ import {
   anomalySetting
 } from './Anomaly';
 import { kpiSettingSetup, kpiEditSetup, settingMetaInfo } from './setting';
-import {onboardingOrganisationStatus,onboardOrganisation,onboardOrganisationUpdate} from './Organisation';
+import {
+  onboardingOrganisationStatus,
+  onboardOrganisation,
+  onboardOrganisationUpdate
+} from './Organisation';
 import { getDashboardConfig } from './Config';
 import { getGlobalSetting } from './GlobalSetting';
 export {
@@ -63,6 +71,10 @@ export {
   getAllKpiExplorer,
   getAllKpiExplorerForm,
   getAllKpiExplorerField,
+  getSchemaAvailability,
+  getSchemaNamelist,
+  getTableinfoData,
+  getTableListOnSchema,
   getAllKpiExplorerSubmit,
   getDashboardSidebar,
   getDashboardAggregation,

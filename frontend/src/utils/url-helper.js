@@ -2,6 +2,7 @@
 import { env } from '../env';
 
 export const BASE_URL = env.REACT_APP_BASE_URL || '';
+export const ADD_KPI_BASE_URL = 'http://52.66.248.216:8080';
 
 export const attachParams = (relativeUrl, params) => {
   let baseUrl = BASE_URL;
@@ -21,6 +22,10 @@ export const CONNECTION_TYPE = `${BASE_URL}/api/connection/types`;
 export const CREATE_DATASOURCE = `${BASE_URL}/api/connection/create`;
 export const TEST_CONNECTION = `${BASE_URL}/api/connection/test`;
 export const KPI_FORM_OPTION_URL = `${BASE_URL}/api/connection/metadata`;
+export const ADD_KPI_GET_AVAILABILITY = `${ADD_KPI_BASE_URL}/api/connection/get-availability`;
+export const KPI_LIST_SCHEMA = `${ADD_KPI_BASE_URL}/api/connection/list-schema`;
+export const KPI_TABLE_LIST_ON_SCHEMA = `${ADD_KPI_BASE_URL}/api/connection/get-table-list`;
+export const KPI_TABLE_INFO_DATA = `${ADD_KPI_BASE_URL}/api/connection/table-info`;
 export const DELETE_DATASOURCE = `${BASE_URL}/api/connection/delete`;
 export const DASHBOARD_SIDEBAR_URL = `${BASE_URL}/api/kpi`;
 //export const DASHBOARD_DIMENSION = `${BASE_URL}/api/kpi//get-dimensions`;

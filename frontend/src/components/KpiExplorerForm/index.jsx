@@ -1,27 +1,20 @@
 import React, { useState, useEffect, useContext } from 'react';
-
 import { useHistory, useParams } from 'react-router-dom';
-
+import { useToast } from 'react-toast-wnm';
 import { useDispatch, useSelector } from 'react-redux';
-
 import Select from 'react-select';
 
 import Play from '../../assets/images/play-green.png';
 import Success from '../../assets/images/success.svg';
 import Fail from '../../assets/images/fail.svg';
-//import Toast_error from '../../assets/images/toast-error.svg';
-//import Cancel from '../../assets/images/cancel.svg';
-
 import '../../assets/styles/addform.scss';
-
-import { useToast } from 'react-toast-wnm';
-
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
-
 import {
   getAllKpiExplorerForm,
-  getAllKpiExplorerField,
   getAllKpiExplorerSubmit,
+  getSchemaAvailability,
+  getTableListOnSchema,
+  getTableinfoData,
   getTestQuery,
   getEditMetaInfo,
   getKpibyId,
@@ -46,14 +39,6 @@ const aggregate = [
   { value: 'sum', label: 'Sum' }
 ];
 
-// const operator = [
-//   { value: '=', label: '=' },
-//   { value: '+', label: '+' },
-//   { value: '-', label: '-' },
-//   { value: '/', label: '/' },
-//   { value: '>', label: '>' },
-//   { value: '<', label: '<' }
-// ];
 const customSingleValue = ({ data }) => (
   <div className="input-select">
     <div className="input-select__single-value">
@@ -78,16 +63,17 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     datasource: '',
     tableoption: '',
     metricOption: '',
+    schemaOption: '',
     datetime_column: ''
   });
 
-  //const [inputList, setInputList] = useState([]);
   const [formdata, setFormdata] = useState({
     kpiname: '',
     datasource: '',
     selectDatasource: '',
     dataset: 'table',
     tablename: '',
+    schemaName: '',
     query: '',
     metriccolumns: '',
     aggregate: '',
@@ -102,6 +88,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     selectDatasource: false,
     dataset: false,
     tablename: false,
+    schemaName: false,
     query: false,
     metriccolumns: false,
     aggregate: false,
@@ -122,8 +109,13 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     kpiFormLoading,
     kpiFormData,
     kpiFieldLoading,
+    dataSourceHasSchema,
+    tableListOnSchema,
+    schemaNamesList,
+    schemaListLoading,
     kpiField,
     testQueryData,
+    tableInfoData,
     kpiSubmitLoading,
     kpiSubmit,
     kpiMetaInfoData,
@@ -131,16 +123,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     kpiUpdateLoading,
     kpiUpdateData
   } = useSelector((state) => state.kpiExplorer);
-
-  // const resetFieldsOnchangeDataSetTypeOrTable = () => {
-  //   setFormdata({
-  //     tablename: '',
-  //   query: '',
-  //   metriccolumns: '',
-  //   aggregate: '',
-  //   datetimecolumns: ''
-  //   });
-  // }
 
   useEffect(() => {
     dispatchGetAllKpiExplorerForm();
@@ -159,15 +141,13 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   }, [kpiFormData, connectionType]);
 
   useEffect(() => {
-    // if (kpiFormData) {
-    //   fieldData();
-    // }
     if (kpiEditData && data[2] === 'edit') {
       const obj = { ...formdata };
       obj['kpiname'] = kpiEditData?.name || '';
       obj['datasource'] = kpiEditData?.data_source;
       obj['dataset'] = kpiEditData?.kpi_type || '';
       obj['tablename'] = kpiEditData?.table_name || '';
+      obj['schemaName'] = kpiEditData?.schema_name || '';
       obj['query'] = kpiEditData?.kpi_query || '';
       obj['metriccolumns'] = kpiEditData?.metric || '';
       obj['aggregate'] = kpiEditData?.aggregation || '';
@@ -357,6 +337,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       ...formdata,
       datasource: e.id,
       tablename: '',
+      schemaName: '',
       query: '',
       metriccolumns: '',
       aggregate: '',
@@ -382,7 +363,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         from_query: false,
         query: ''
       };
-      dispatchGetAllExplorerFiled(data);
+      dispatchGetAvailability(data);
     };
     if (datasourceid !== '') {
       fetchData();
@@ -390,8 +371,43 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datasourceid]);
 
-  const dispatchGetAllExplorerFiled = (data) => {
-    dispatch(getAllKpiExplorerField(data));
+  useEffect(() => {
+    if (
+      datasourceid &&
+      dataSourceHasSchema &&
+      tableListOnSchema &&
+      tableListOnSchema.table_names
+    ) {
+      var optionArr = [];
+      for (const [key, value] of Object.entries(
+        tableListOnSchema.table_names
+      )) {
+        optionArr.push({
+          index: key,
+          value: value,
+          label: value
+        });
+      }
+      setOption({
+        ...option,
+        tableoption: optionArr
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tableListOnSchema]);
+
+  useEffect(() => {
+    if (dataSourceHasSchema && schemaNamesList && schemaListLoading === false) {
+      schemaNameOption();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schemaNamesList]);
+
+  const dispatchGetAvailability = (data) => {
+    dispatch(getSchemaAvailability(data));
+  };
+  const dispatchGetTableListOnSchema = (data) => {
+    dispatch(getTableListOnSchema(data));
   };
 
   useEffect(() => {
@@ -399,7 +415,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       tableOption();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpiField, formdata.tablename]);
+  }, [kpiField]);
 
   const tableOption = () => {
     if (kpiField && kpiFieldLoading === false && kpiField?.tables) {
@@ -417,9 +433,47 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     }
   };
 
+  const schemaNameOption = () => {
+    if (schemaNamesList && schemaNamesList.data) {
+      var optionArr = [];
+      for (const [key, value] of Object.entries(schemaNamesList.data)) {
+        optionArr.push({
+          index: key,
+          label: value,
+          value: value
+        });
+      }
+      setOption({
+        ...option,
+        tableoption: [],
+        schemaOption: optionArr
+      });
+    }
+  };
+
+  const schemaName = (e) => {
+    setErrorMsg({ schemaName: false });
+    if (e.value && datasourceid !== '') {
+      dispatchGetTableListOnSchema({
+        datasource_id: datasourceid,
+        //datasource_id: 1,
+        schema: e.value
+      });
+      setFormdata({
+        ...formdata,
+        schemaName: e.value,
+        tablename: '',
+        metriccolumns: '',
+        aggregate: '',
+        datetimecolumns: '',
+        dimensions: []
+      });
+    }
+  };
+
   const tableName = (e) => {
-    if (kpiField && kpiField?.tables) {
-      setErrorMsg({ tablename: false });
+    setErrorMsg({ tablename: false });
+    if (!dataSourceHasSchema && kpiField && kpiField?.tables) {
       var optionValueArr = [];
       for (const [key, value] of Object.entries(kpiField.tables)) {
         const valueData = e.value;
@@ -442,9 +496,49 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           dimensions: []
         });
       }
-
-      // setFormdata({ ...formdata, tablename: e.value });
+    } else if (dataSourceHasSchema) {
+      const valueData = e.value;
+      setFormdata({
+        ...formdata,
+        tablename: valueData,
+        metriccolumns: '',
+        aggregate: '',
+        datetimecolumns: '',
+        dimensions: []
+      });
+      dispatchGetTableInfoData(valueData);
     }
+  };
+
+  useEffect(() => {
+    if (
+      tableInfoData &&
+      tableInfoData.table_info &&
+      tableInfoData.table_info.columns
+    ) {
+      let optionArr = [];
+      for (const [key, value] of Object.entries(
+        tableInfoData.table_info.columns
+      )) {
+        optionArr.push({
+          index: key,
+          label: value.name,
+          value: value.name
+        });
+      }
+      setOption({ ...option, metricOption: optionArr });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tableInfoData]);
+
+  const dispatchGetTableInfoData = (table) => {
+    const obj = {
+      datasource_id: datasourceid,
+      //datasource_id: 1,
+      schema: formdata.schemaName,
+      table_name: table
+    };
+    dispatch(getTableinfoData(obj));
   };
 
   const handleDataset = (e) => {
@@ -452,7 +546,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     setOption({
       ...option,
       dataset: e.value,
-      metricOption: []
+      metricOption: [],
+      tableoption: dataSourceHasSchema ? [] : option.tableoption
     });
     setFormdata({
       ...formdata,
@@ -461,7 +556,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       aggregate: '',
       datetimecolumns: '',
       dimensions: [],
-      tablename: ''
+      tablename: '',
+      schemaName: ''
     });
     setTableAdditional({
       ...tableAdditional,
@@ -485,6 +581,16 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           datasource: true
         };
       });
+    }
+    if (dataSourceHasSchema) {
+      if (formdata.schemaName === '') {
+        setErrorMsg((prev) => {
+          return {
+            ...prev,
+            schemaName: true
+          };
+        });
+      }
     }
     if (formdata.dataset === '') {
       setErrorMsg((prev) => {
@@ -549,6 +655,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         data_source: formdata.datasource,
         dataset_type: formdata.dataset,
         table_name: formdata.tablename,
+        schema_name: formdata.schemaName,
         kpi_query: formdata.query,
         metric: formdata.metriccolumns,
         aggregation: formdata.aggregate,
@@ -583,31 +690,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       dimensions: []
     });
   };
-
-  /* This is add filter function code */
-
-  // const handleAddClick = () => {
-  //   setInputList([...inputList, { country: '', operator: '', value: '' }]);
-  // };
-
-  // const handleRemoveClick = (index) => {
-  //   const list = [...inputList];
-  //   list.splice(index, 1);
-  //   setInputList(list);
-  // };
-
-  // const handleInputChange = (e, index, name) => {
-  //   if (name === 'value') {
-  //     const { value } = e.target;
-  //     const list = [...inputList];
-  //     list[index][name] = value;
-  //     setInputList(list);
-  //   } else {
-  //     const list = [...inputList];
-  //     list[index][name] = e.value;
-  //     setInputList(list);
-  //   }
-  // };
 
   const editableStatus = (type) => {
     var status = false;
@@ -753,30 +835,59 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             </div>
           </> // end of for query
         ) : (
-          <div className="form-group">
-            <label>Table Name *</label>
-            <Select
-              options={option.tableoption}
-              value={
-                formdata.tablename !== '' && {
-                  label: formdata.tablename,
-                  value: formdata.tablename
-                }
-              }
-              isDisabled={
-                data[2] === 'edit' ? editableStatus('table_name') : false
-              }
-              classNamePrefix="selectcategory"
-              placeholder="Select Table"
-              onChange={(e) => tableName(e)}
-            />
+          <>
+            {dataSourceHasSchema && (
+              <div className="form-group">
+                <label>Schema Name *</label>
+                <Select
+                  options={option.schemaOption}
+                  value={
+                    formdata.schemaName !== '' && {
+                      label: formdata.schemaName,
+                      value: formdata.schemaName
+                    }
+                  }
+                  isDisabled={
+                    data[2] === 'edit' ? editableStatus('schema_name') : false
+                  }
+                  classNamePrefix="selectcategory"
+                  placeholder="Select Schema Name"
+                  onChange={(e) => schemaName(e)}
+                />
 
-            {errorMsg.tablename === true ? (
-              <div className="connection__fail">
-                <p>Select Table Name</p>
+                {errorMsg.tablename === true ? (
+                  <div className="connection__fail">
+                    <p>Select Schema Name</p>
+                  </div>
+                ) : null}
               </div>
-            ) : null}
-          </div>
+            )}
+
+            <div className="form-group">
+              <label>Table Name *</label>
+              <Select
+                options={option.tableoption}
+                value={
+                  formdata.tablename !== '' && {
+                    label: formdata.tablename,
+                    value: formdata.tablename
+                  }
+                }
+                isDisabled={
+                  data[2] === 'edit' ? editableStatus('table_name') : false
+                }
+                classNamePrefix="selectcategory"
+                placeholder="Select Table"
+                onChange={(e) => tableName(e)}
+              />
+
+              {errorMsg.tablename === true ? (
+                <div className="connection__fail">
+                  <p>Select Table Name</p>
+                </div>
+              ) : null}
+            </div>
+          </>
         )}
         <>
           <div className="form-group">
@@ -934,61 +1045,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                 downs
               </p>
             </div>
-          </div>
-          {/* {inputList && inputList.length !== 0 && (
-            <div className="form-group">
-              <label>Filters</label>
-              {inputList.map((item, index) => {
-                return (
-                  <div className="multi-filter-selection">
-                    <Select
-                      options={option.metricOption}
-                      classNamePrefix="selectcategory"
-                      isSearchable={false}
-                      closeMenuOnSelect="true"
-                      placeholder="Country"
-                      onChange={(e) => handleInputChange(e, index, 'country')}
-                    />
-                    <Select
-                      options={operator}
-                      classNamePrefix="selectcategory"
-                      isSearchable={false}
-                      closeMenuOnSelect="true"
-                      placeholder="="
-                      name="operator"
-                      onChange={(e) => handleInputChange(e, index, 'operator')}
-                    />
-                    <input
-                      className="form-control"
-                      placeholder="France"
-                      name="value"
-                      onChange={(e) => handleInputChange(e, index, 'value')}
-                    />
-                    <img
-                      src={Cancel}
-                      alt="Cancel"
-                      onClick={() => handleRemoveClick(index)}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          )} */}
-
-          {/* add option form */}
-          <div className="add-options-wrapper">
-            {/*Add filter code*/}
-            {/* <div
-              className="add-options"
-              onClick={() =>
-                // setTableAdditional({
-                // ...tableAdditional,
-                // tablefilter: true
-                // })
-                handleAddClick()
-              }>
-              <label>+ Add Filters</label>
-            </div> */}
           </div>
 
           <div className="form-action">

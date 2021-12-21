@@ -391,11 +391,11 @@ def check_views_availability():
         if datasource_id is None:
             message = "Datasource ID needs to be provided"
         else:
-            ds_data = get_datasource_data_from_id(datasource_id)
-            if not ds_data["active"]:
+            ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
+            if not ds_data or not getattr(ds_data, "active"):
                 raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
 
-            datasource_name = ds_data["connection_type"]
+            datasource_name = getattr(ds_data, "connection_type")
             schema_exist = SCHEMAS_AVAILABLE.get(datasource_name , False)
             views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["views"]
             materialize_views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["materialized_views"]
@@ -418,11 +418,11 @@ def get_schema_list():
         if datasource_id is None:
             message = "Datasource ID needs to be provided"
         else:
-            ds_data = get_datasource_data_from_id(datasource_id)
-            if not ds_data["active"]:
+            ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
+            if not ds_data or not getattr(ds_data, "active"):
                 raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
 
-            data = get_schema_names(ds_data)
+            data = get_schema_names(ds_data.as_dict)
             if data is None:
                 message = "Error occurred while establishing DB Connection"
                 data = []
@@ -447,14 +447,14 @@ def get_schema_tables():
         if datasource_id is None:
             message = "Datasource ID needs to be provided"
         else:
-            ds_data = get_datasource_data_from_id(datasource_id)
-            if not ds_data["active"]:
+            ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
+            if not ds_data or not getattr(ds_data, "active"):
                 raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
 
-            ds_name = ds_data["connection_type"]
+            ds_name = getattr(ds_data, "connection_type")
             schema = None if ds_name == "BigQuery" else schema
 
-            table_names = get_table_list(ds_data, schema)
+            table_names = get_table_list(ds_data.as_dict, schema)
             if table_names is None:
                 message = "Error occurred while establishing DB Connection"
                 table_names = []
@@ -482,14 +482,14 @@ def get_schema_views():
         if datasource_id is None:
             message = "Datasource ID needs to be provided"
         else:
-            ds_data = get_datasource_data_from_id(datasource_id)
-            if not ds_data["active"]:
+            ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
+            if not ds_data or not getattr(ds_data, "active"):
                 raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
 
-            ds_name = ds_data["connection_type"]
+            ds_name = getattr(ds_data, "connection_type")
             schema = None if ds_name == "BigQuery" else schema
 
-            view_names = get_view_list(ds_data, schema)
+            view_names = get_view_list(ds_data.as_dict, schema)
             if view_names is None:
                 message = "Error occurred while establishing DB Connection"
                 view_names = []
@@ -519,14 +519,16 @@ def get_table_info():
         datasource_id = data["datasource_id"]
         schema = data["schema"]
         table_name = data["table_name"]
-        ds_data = get_datasource_data_from_id(datasource_id)
-        if not ds_data["active"]:
+        ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
+        if not ds_data or not getattr(ds_data, "active"):
             raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
 
-        if ds_data["connection_type"] == "BigQuery":
+        ds_name = getattr(ds_data, "connection_type")
+
+        if ds_name == "BigQuery":
             schema = None
 
-        table_info = get_table_metadata(ds_data,schema,table_name)
+        table_info = get_table_metadata(ds_data.as_dict, schema, table_name)
         if table_info is None:
             raise Exception("Unable to fetch table info for the requested table")
         else:
@@ -536,4 +538,4 @@ def get_table_info():
         message = "Error in fetching table info: {}".format(e)
         table_info = {}
     return jsonify({"table_info":table_info, "status":status, "message":message})
-
+    

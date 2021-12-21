@@ -88,7 +88,10 @@ class DataLoader:
 
     def _get_table_name(self):
         if self.kpi_info["kpi_type"] == "table":
-            return self.kpi_info["table_name"]
+            schema_name = self.kpi_info['schema_name']
+            if schema_name:
+                return f"{schema_name}.{self.kpi_info['table_name']}"
+            return {self.kpi_info['table_name']}
         else:
             return f"({self.kpi_info['kpi_query']}) as " + self._get_id_string(
                 _randomword(10)

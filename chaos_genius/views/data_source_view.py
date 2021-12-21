@@ -392,21 +392,18 @@ def check_views_availability():
         if datasource_id is None:
             message = "Datasource ID needs to be provided"
         else:
-            datasource_info = DataSource.query.filter(
-                                            DataSource.id == datasource_id,
-                                            DataSource.active == True
-                                        ).first()
-            if datasource_info is None:
-                message = "The datasource id provided is invalid"
-            else:
-                datasource_name = get_datasource_data_from_id(datasource_id)["connection_type"]
-                schema_exist = SCHEMAS_AVAILABLE.get(datasource_name , False)
-                views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["views"]
-                materialize_views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["materialized_views"]
-                status = "success"
+            ds_data = get_datasource_data_from_id(datasource_id)
+            if not ds_data["active"]:
+                raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
+
+            datasource_name = ds_data["connection_type"]
+            schema_exist = SCHEMAS_AVAILABLE.get(datasource_name , False)
+            views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["views"]
+            materialize_views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["materialized_views"]
+            status = "success"
     except Exception as err:
         message = "Error in fetching table info: {}".format(err)
-    
+
     return jsonify({"message":message, "status": status, "available": {"schema": schema_exist, "views": views, "materialize_views": materialize_views}})
 
 @blueprint.route("/list-schema", methods=["POST"])
@@ -422,20 +419,16 @@ def get_schema_list():
         if datasource_id is None:
             message = "Datasource ID needs to be provided"
         else:
-            datasource_obj = DataSource.query.filter(
-                                            DataSource.id == datasource_id,
-                                            DataSource.active == True
-                                        ).first()
-            if datasource_obj is None:
-                message = "The datasource id provided is invalid"
+            ds_data = get_datasource_data_from_id(datasource_id)
+            if not ds_data["active"]:
+                raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
+
+            data = get_schema_names(ds_data)
+            if data is None:
+                message = "error Establishing DB Connection"
+                data = []
             else:
-                ds_data = datasource_obj.as_dict
-                data = get_schema_names(ds_data)
-                if data is None:
-                    message = "error Establishing DB Connection"
-                    data = []
-                else:
-                    status = "success"
+                status = "success"
     except Exception as err:
         message = "Error in fetching table info: {}".format(err)
 
@@ -455,24 +448,19 @@ def get_schema_tables():
         if datasource_id is None:
             message = "Datasource ID needs to be provided"
         else:
-            datasource_obj = DataSource.query.filter(
-                                            DataSource.id == datasource_id,
-                                            DataSource.active == True
-                                        ).first()
+            ds_data = get_datasource_data_from_id(datasource_id)
+            if not ds_data["active"]:
+                raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
 
-            if datasource_obj is None:
-                message = "The datasource id provided is invalid"
+            ds_name = ds_data["connection_type"]
+            schema = None if ds_name == "BigQuery" else schema
+
+            table_names = get_table_list(ds_data, schema)
+            if table_names is None:
+                message = "error Establishing DB Connection"
+                table_names = []
             else:
-                ds_data = datasource_obj.as_dict
-                ds_name = datasource_obj.connection_type
-                schema = None if ds_name == "BigQuery" else schema
-
-                table_names = get_table_list(ds_data, schema)
-                if table_names is None:
-                    message = "error Establishing DB Connection"
-                    table_names = []
-                else:
-                    status = "success"
+                status = "success"
     except Exception as err:
         message = "Error in fetching table info: {}".format(err)
 
@@ -495,27 +483,22 @@ def get_schema_views():
         if datasource_id is None:
             message = "Datasource ID needs to be provided"
         else:
-            datasource_obj = DataSource.query.filter(
-                                            DataSource.id == datasource_id,
-                                            DataSource.active == True
-                                        ).first()
+            ds_data = get_datasource_data_from_id(datasource_id)
+            if not ds_data["active"]:
+                raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
 
-            if datasource_obj is None:
-                message = "The datasource id provided is invalid"
+            ds_name = ds_data["connection_type"]
+            schema = None if ds_name == "BigQuery" else schema
+
+            view_names = get_view_list(ds_data, schema)
+            if view_names is None:
+                message = "error Establishing DB Connection"
+                view_names = []
             else:
-                ds_data = datasource_obj.as_dict
-                ds_name = datasource_obj.connection_type
-                schema = None if ds_name == "BigQuery" else schema
-
-                view_names = get_view_list(ds_data, schema)
-                if view_names is None:
-                    message = "error Establishing DB Connection"
-                    view_names = []
-                else:
-                    status = "success"
+                status = "success"
     except Exception as err:
         message = "Error in fetching table info: {}".format(err)
-    
+
     return jsonify({"message":message, "status":status, "view_names":view_names})
 
 @blueprint.route("/table-info",methods=["POST"])
@@ -537,25 +520,18 @@ def get_table_info():
         datasource_id = data["datasource_id"]
         schema = data["schema"]
         table_name = data["table_name"]
-        data_source_obj = DataSource.query.filter(
-                                                    DataSource.id == datasource_id,
-                                                    DataSource.active == True
-                                                ).first()
-        if data_source_obj.connection_type == "BigQuery":
+        ds_data = get_datasource_data_from_id(datasource_id)
+        if not ds_data["active"]:
+            raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
+
+        if ds_data["connection_type"] == "BigQuery":
             schema = None
 
-        if data_source_obj:
-            ds_data = data_source_obj.as_dict
-            table_info = get_table_metadata(ds_data,schema,table_name)
-            if table_info is None:
-                status = "failure"
-                message = "error Establishing DB Connection"
-                table_info = {}
-            else:
-                status = "success"
+        table_info = get_table_metadata(ds_data,schema,table_name)
+        if table_info is None:
+            raise Exception("Unable to fetch table info for the requested table")
         else:
-            status = "failure"
-            message = "Unable fetch datasource matching the provided id"
+            status = "success"
     except Exception as e:
         status = "failure"
         message = "Error in fetching table info: {}".format(e)

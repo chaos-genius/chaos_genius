@@ -25,7 +25,6 @@ from chaos_genius.third_party.integration_server_config import (
 from chaos_genius.databases.db_utils import create_sqlalchemy_uri
 from chaos_genius.connectors import (
         get_metadata,
-        get_sqla_db_conn,
         get_table_info as get_table_metadata,
         get_schema_names,
         get_table_list,

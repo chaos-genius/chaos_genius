@@ -425,7 +425,7 @@ def get_schema_list():
 
             data = get_schema_names(ds_data)
             if data is None:
-                message = "error Establishing DB Connection"
+                message = "Error occurred while establishing DB Connection"
                 data = []
             else:
                 status = "success"
@@ -457,7 +457,7 @@ def get_schema_tables():
 
             table_names = get_table_list(ds_data, schema)
             if table_names is None:
-                message = "error Establishing DB Connection"
+                message = "Error occurred while establishing DB Connection"
                 table_names = []
             else:
                 status = "success"
@@ -492,7 +492,7 @@ def get_schema_views():
 
             view_names = get_view_list(ds_data, schema)
             if view_names is None:
-                message = "error Establishing DB Connection"
+                message = "Error occurred while establishing DB Connection"
                 view_names = []
             else:
                 status = "success"

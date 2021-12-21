@@ -65,7 +65,8 @@ class Kpi(PkModel):
             "is_static": self.is_static,
             "static_params": self.static_params,
             "active": self.active,
-            "created_at": self.created_at
+            "created_at": self.created_at,
+            "schema_name": self.schema_name
         }
 
     @property
@@ -90,7 +91,8 @@ class Kpi(PkModel):
             "is_static": self.is_static,
             "static_params": self.static_params,
             "active": self.active,
-            "created_at": self.created_at
+            "created_at": self.created_at,
+            "schema_name": self.schema_name
         }
 
     @classmethod

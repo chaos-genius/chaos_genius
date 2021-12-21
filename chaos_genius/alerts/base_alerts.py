@@ -359,18 +359,16 @@ class AnomalyAlertController:
             for anomaly_point in overall_data_email_body:
                 lower = anomaly_point.get("yhat_lower")
                 upper = anomaly_point.get("yhat_upper")
-                anomaly_point["Expected Value"] = f"{lower} -- {upper}"
+                anomaly_point["Expected Value"] = f"{lower} — {upper}"
                 for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
                     anomaly_point[value] = anomaly_point[key]
-                    anomaly_point.pop(key)
 
             for anomaly_point in overall_data:
                 lower = anomaly_point.get("yhat_lower")
                 upper = anomaly_point.get("yhat_upper")
-                anomaly_point["Expected Value"] = f"{lower} -- {upper}"
+                anomaly_point["Expected Value"] = f"{lower} — {upper}"
                 for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
                     anomaly_point[value] = anomaly_point[key]
-                    anomaly_point.pop(key)
 
             column_names = ANOMALY_ALERT_EMAIL_COLUMN_NAMES
             anomaly_data = pd.DataFrame(overall_data, columns=column_names)

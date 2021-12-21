@@ -23,6 +23,7 @@ import Login from '../containers/Login';
 import Kpisetting from '../containers/KpiSetting';
 import OrganisationOnboarding from '../containers/Onboarding/OrganisationOnboarding';
 import OrganisationSettings from '../containers/OrganisationSettings/OrganisationSettings';
+import TaskManager from '../containers/TaskManagement/TaskManager';
 
 const Routes = () => (
   <Switch>
@@ -130,6 +131,11 @@ const Routes = () => (
       exact
       path="/organisation-settings"
       component={(props) => <OrganisationSettings {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
+      path="/task-manager"
+      component={(props) => <TaskManager {...props} />}
     />
     <PrivateRouteWithSidebar
       exact

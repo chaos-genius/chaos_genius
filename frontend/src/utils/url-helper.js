@@ -5,6 +5,7 @@ export const BASE_URL = env.REACT_APP_BASE_URL || '';
 
 export const attachParams = (relativeUrl, params) => {
   let baseUrl = BASE_URL;
+
   if (baseUrl === '') {
     baseUrl = window.location.origin;
   }
@@ -42,6 +43,12 @@ export const UPDATE_KPI_ALERT_URL = `${BASE_URL}/api/alert`;
 export const KPI_ALERT_META_INFO_URL = `${BASE_URL}/api/alert/meta-info`;
 export const GET_KPI_ALERT_BY_ID_URL = `${BASE_URL}/api/alert`;
 export const SETTING_META_INFO_URL = `${BASE_URL}/api/anomaly-data/anomaly-params/meta-info`;
+
+export const DASHBOARD_LIST_URL = `${BASE_URL}/api/dashboard/list`;
+export const DASHBOARD_CREATE_URL = `${BASE_URL}/api/dashboard/create`;
+export const DASHBOARD_DELETE_URL = `/api/dashboard/delete`;
+export const DASHBOARD_EDIT_URL = `/api/dashboard/get`;
+export const DASHBOARD_UPDATE_URL = `${BASE_URL}/api/dashboard/edit`;
 export const ORGANIZATION_UPDATE_URL = `${BASE_URL}/api/config/update`;
-export const GLOBAL_SETTING_URL = `${BASE_URL}/api/config/global-settings`;
+export const GLOBAL_SETTING_URL = `${BASE_URL}/api/config/global-config`;
 export const TASK_MANAGER_API_STATUS_URL = `${BASE_URL}/api/status`;

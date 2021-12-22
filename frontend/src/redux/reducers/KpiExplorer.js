@@ -280,6 +280,13 @@ export const kpiExplorer = (state = initialState, action) => {
         kpiUpdateData: []
       };
     }
+    case 'DASHBOARD_KPILIST_RESET': {
+      return {
+        ...state,
+        kpiSubmit: [],
+        kpiUpdateData: []
+      };
+    }
     default:
       return state;
   }

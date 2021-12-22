@@ -7,10 +7,6 @@ import rightarrow from '../../assets/images/rightarrow.svg';
 import DataSourceForm from '../../components/DataSourceForm';
 import KpiExplorerForm from '../../components/KpiExplorerForm';
 
-//import DashboardForm from '../../components/DashboardForm';
-// import FilterAnalystics from '../../components/FilterAnalystics';
-// import Analystics from '../../components/Analystics';
-
 import Kpisetting from '../KpiSetting';
 
 import './onboarding.scss';
@@ -41,8 +37,6 @@ const Onboarding = () => {
                 ? 'Add KPI'
                 : data[2] === '3'
                 ? 'Activate Analytics'
-                : data[2] === '4'
-                ? 'Add Dashboard'
                 : null}
             </li>
           </ol>
@@ -58,8 +52,6 @@ const Onboarding = () => {
                 ? 'Add KPI'
                 : data[2] === '3'
                 ? 'Activate Analytics'
-                : data[2] === '4'
-                ? 'Add Dashboard'
                 : null}
             </span>
           </Link>
@@ -79,12 +71,6 @@ const Onboarding = () => {
             }>
             Add KPI
           </li>
-          {/* <li
-            className={
-              data[2] === '3' ? 'active' : data[2] >= '3' ? 'selected' : null
-            }>
-            Create Dashboard
-          </li> */}
           <li
             className={
               data[2] === '3' ? 'active' : data[2] >= '3' ? 'selected' : null
@@ -110,16 +96,7 @@ const Onboarding = () => {
               setText={setText}
             />
           </div>
-        ) : // data[2] === '3' ? (
-        //   <div className="add-form-container">
-        //     <DashboardForm
-        //       setModal={setModal}
-        //       setText={setText}
-        //       onboarding={true}
-        //     />
-        //   </div>
-        // )
-        data[2] === '3' ? (
+        ) : data[2] === '3' ? (
           <Kpisetting onboarding={true} setModal={setModal} setText={setText} />
         ) : null}
       </>

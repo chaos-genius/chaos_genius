@@ -60,6 +60,7 @@ def kpi():
             data_source=data.get("data_source"),
             kpi_type=data.get("dataset_type"),
             kpi_query=data.get("kpi_query"),
+            schema_name=data.get("schema_name"),
             table_name=data.get("table_name"),
             metric=data.get("metric"),
             aggregation=data.get("aggregation"),

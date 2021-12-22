@@ -70,12 +70,11 @@ def test_data_loader(monkeypatch: MonkeyPatch):
         end_date=end_date,
         days_before=days_before
     )
-    output_query = f"""select * from cloud_cost where "date" >= '{start_date.strftime("%Y-%m-%d %H:%M:%S")}' and "date" < '{end_date.strftime("%Y-%m-%d")}'"""
-    # FIXME: start date should be formatted as %Y-%m-%d instead of %Y-%m-%d %H:%M:%S
+    output_query = f"""select * from cloud_cost where "date" >= '{start_date.strftime("%Y-%m-%d")}' and "date" < '{end_date.strftime("%Y-%m-%d")}'"""
     assert output_query == dl._build_query().strip()
 
     # table, end_date, days_before, count
-    output_query = f"""select count (*) from cloud_cost where "date" >= '{start_date.strftime("%Y-%m-%d %H:%M:%S")}' and "date" < '{end_date.strftime("%Y-%m-%d")}'"""
+    output_query = f"""select count (*) from cloud_cost where "date" >= '{start_date.strftime("%Y-%m-%d")}' and "date" < '{end_date.strftime("%Y-%m-%d")}'"""
     assert output_query == dl._build_query(count=True).strip()
 
     # table, end_date, days_before, tail
@@ -85,7 +84,7 @@ def test_data_loader(monkeypatch: MonkeyPatch):
         days_before=days_before,
         tail=10
     )
-    output_query = f"""select * from cloud_cost where "date" >= '{start_date.strftime("%Y-%m-%d %H:%M:%S")}' and "date" < '{end_date.strftime("%Y-%m-%d")}' limit 10"""
+    output_query = f"""select * from cloud_cost where "date" >= '{start_date.strftime("%Y-%m-%d")}' and "date" < '{end_date.strftime("%Y-%m-%d")}' limit 10"""
     assert output_query == dl._build_query().strip()
 
     kpi_info = {
@@ -138,12 +137,12 @@ def test_data_loader(monkeypatch: MonkeyPatch):
         days_before=days_before
     )
     output_query = r"select \* from \(select \* from cloud_cost\) as \"[a-z]{10}\""\
-        + f""" where "date" >= '{start_date.strftime("%Y-%m-%d %H:%M:%S")}' and "date" < '{end_date.strftime("%Y-%m-%d")}'"""
+        + f""" where "date" >= '{start_date.strftime("%Y-%m-%d")}' and "date" < '{end_date.strftime("%Y-%m-%d")}'"""
     assert re.match(output_query, dl._build_query().strip())
 
     # query, end_date, days_before, count
     output_query = r"select count \(\*\) from \(select \* from cloud_cost\) as \"[a-z]{10}\""\
-        + f""" where "date" >= '{start_date.strftime("%Y-%m-%d %H:%M:%S")}' and "date" < '{end_date.strftime("%Y-%m-%d")}'"""
+        + f""" where "date" >= '{start_date.strftime("%Y-%m-%d")}' and "date" < '{end_date.strftime("%Y-%m-%d")}'"""
     assert re.match(output_query, dl._build_query(count=True).strip())
 
     # query, end_date, days_before, tail
@@ -154,5 +153,5 @@ def test_data_loader(monkeypatch: MonkeyPatch):
         tail=10
     )
     output_query = r"select \* from \(select \* from cloud_cost\) as \"[a-z]{10}\""\
-        + f""" where "date" >= '{start_date.strftime("%Y-%m-%d %H:%M:%S")}' and "date" < '{end_date.strftime("%Y-%m-%d")}' limit 10"""
+        + f""" where "date" >= '{start_date.strftime("%Y-%m-%d")}' and "date" < '{end_date.strftime("%Y-%m-%d")}' limit 10"""
     assert re.match(output_query, dl._build_query().strip())

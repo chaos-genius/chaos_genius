@@ -47,4 +47,4 @@ export const DASHBOARD_DELETE_URL = `/api/dashboard/delete`;
 export const DASHBOARD_EDIT_URL = `/api/dashboard/get`;
 export const DASHBOARD_UPDATE_URL = `${BASE_URL}/api/dashboard/edit`;
 export const ORGANIZATION_UPDATE_URL = `${BASE_URL}/api/config/update`;
-export const GLOBAL_SETTING_URL = `${BASE_URL}/api/config/global-settings`;
+export const GLOBAL_SETTING_URL = `${BASE_URL}/api/config/global-config`;

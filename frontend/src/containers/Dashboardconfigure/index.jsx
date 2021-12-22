@@ -20,6 +20,7 @@ import Fuse from 'fuse.js';
 import store from '../../redux/store';
 
 import { formatDateTime } from '../../utils/date-helper';
+import { getLocalStorage } from '../../utils/storage-helper';
 
 const DASHBOARD_RESET = {
   type: 'DASHBOARD_RESET'
@@ -42,6 +43,7 @@ const sort = [
 
 const Dashboardconfigure = () => {
   const dispatch = useDispatch();
+  const limited = getLocalStorage('GlobalSetting');
   const [dashboardData, setDashboardData] = useState([]);
   const [data, setData] = useState(false);
   const [sortValue, setSortValue] = useState({
@@ -128,12 +130,14 @@ const Dashboardconfigure = () => {
           <div className="heading-title">
             <h3>Dashboard</h3>
           </div>
-          <div className="option-button">
-            <Link to="/dashboard/add" className="btn green-variant-button">
-              <img src={Plus} alt="Add" />
-              <span>New Dashboard</span>
-            </Link>
-          </div>
+          {limited?.is_ee && (
+            <div className="option-button">
+              <Link to="/dashboard/add" className="btn green-variant-button">
+                <img src={Plus} alt="Add" />
+                <span>New Dashboard</span>
+              </Link>
+            </div>
+          )}
         </div>{' '}
         {dashboardList && dashboardList.length !== 0 ? (
           <>

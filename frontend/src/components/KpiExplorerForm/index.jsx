@@ -239,7 +239,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   }, [dashboardList]);
 
   const dashboardOptionList = () => {
-    var arr = [];
+    let arr = [];
     if (limited?.is_ee) {
       arr.push({
         value: 'newdashboard',

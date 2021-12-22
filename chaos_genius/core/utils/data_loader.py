@@ -96,7 +96,7 @@ class DataLoader:
 
     def _get_filters_for_query(self):
         query = ""
-        kpi_filters = self.kpi_info["filters"]
+        kpi_filters = self.kpi_info.get("filters")
         if kpi_filters:
             kpi_filters_query = " "
             for key, values in kpi_filters.items():
@@ -109,26 +109,26 @@ class DataLoader:
                     )
             kpi_filters_query += " "
             query += kpi_filters_query
-        return query
+        return query.strip()
 
     def _build_query(self, count=False):
         table_name = self._get_table_name()
 
-        date_filter = self._build_date_filter() if self.start_date is not None else ""
+        date_filter = self._build_date_filter().strip() if self.start_date is not None else ""
 
         if count:
-            query = f"select count (*) from {table_name} {date_filter} "
+            query = f"select count (*) from {table_name} {date_filter}"
         else:
-            query = f"select * from {table_name} {date_filter} "
+            query = f"select * from {table_name} {date_filter}"
 
         filters_for_query = self._get_filters_for_query()
-        if date_filter.strip() == "" and filters_for_query.strip() != "":
+        if date_filter == "" and filters_for_query != "":
             query += " where "
 
         query += filters_for_query
 
         if self.tail is not None:
-            query += f" limit {self.tail} "
+            query += f" limit {self.tail}"
 
         return query
 

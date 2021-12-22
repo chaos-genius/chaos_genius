@@ -23,6 +23,7 @@ import { connectionContext } from '../components/context';
 import { getOnboardingStatus } from '../redux/actions';
 import posthog from 'posthog-js';
 import ServerError from '../containers/ServerError';
+import { saveLocalStorage } from '../utils/storage-helper';
 
 const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
   const dispatch = useDispatch();
@@ -94,7 +95,7 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
 
   useEffect(() => {
     if (globalSettingData) {
-      localStorage.setItem('GlobalSetting', JSON.stringify(globalSettingData));
+      saveLocalStorage('GlobalSetting', JSON.stringify(globalSettingData));
     }
   }, [globalSettingData]);
 

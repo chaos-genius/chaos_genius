@@ -21,10 +21,11 @@ import { formatDate } from '../../utils/date-helper';
 import { useToast } from 'react-toast-wnm';
 
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
+import { getLocalStorage } from '../../utils/storage-helper';
 
 const Dashboardcards = ({ dashboarddata, setChange }) => {
   const dispatch = useDispatch();
-  const limited = JSON.parse(localStorage.getItem('GlobalSetting'));
+  const limited = getLocalStorage('GlobalSetting');
   const toast = useToast();
 
   const [isOpen, setIsOpen] = useState(false);

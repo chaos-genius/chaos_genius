@@ -20,6 +20,7 @@ import Fuse from 'fuse.js';
 import store from '../../redux/store';
 
 import { formatDateTime } from '../../utils/date-helper';
+import { getLocalStorage } from '../../utils/storage-helper';
 
 const DASHBOARD_RESET = {
   type: 'DASHBOARD_RESET'
@@ -42,7 +43,7 @@ const sort = [
 
 const Dashboardconfigure = () => {
   const dispatch = useDispatch();
-  const limited = JSON.parse(localStorage.getItem('GlobalSetting'));
+  const limited = getLocalStorage('GlobalSetting');
   const [dashboardData, setDashboardData] = useState([]);
   const [data, setData] = useState(false);
   const [sortValue, setSortValue] = useState({

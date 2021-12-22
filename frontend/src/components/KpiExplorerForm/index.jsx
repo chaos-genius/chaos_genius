@@ -33,6 +33,7 @@ import {
   getCreateDashboard
 } from '../../redux/actions';
 import { connectionContext } from '../context';
+import { getLocalStorage } from '../../utils/storage-helper';
 
 const datasettype = [
   {
@@ -62,7 +63,7 @@ const customSingleValue = ({ data }) => (
 
 const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   const dispatch = useDispatch();
-  const limited = JSON.parse(localStorage.getItem('GlobalSetting'));
+  const limited = getLocalStorage('GlobalSetting');
   const toast = useToast();
 
   const history = useHistory();

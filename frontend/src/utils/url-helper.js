@@ -14,7 +14,6 @@ export const attachParams = (relativeUrl, params) => {
   return url;
 };
 
-//export const DASHBOARD = `http://52.66.248.216:8080`;
 export const DASHBOARD_URL = `${BASE_URL}/api/dashboard`;
 export const KPI_URL = `${BASE_URL}/api/kpi`;
 export const KPI_RELATIVE_URL = `/api/kpi`;
@@ -48,3 +47,4 @@ export const DASHBOARD_EDIT_URL = `/api/dashboard/get`;
 export const DASHBOARD_UPDATE_URL = `${BASE_URL}/api/dashboard/edit`;
 export const ORGANIZATION_UPDATE_URL = `${BASE_URL}/api/config/update`;
 export const GLOBAL_SETTING_URL = `${BASE_URL}/api/config/global-config`;
+export const TASK_MANAGER_API_STATUS_URL = `${BASE_URL}/api/status`;

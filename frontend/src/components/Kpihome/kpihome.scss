@@ -124,7 +124,10 @@
       align-items: center;
       justify-content: center;
     }
+
+    
   }
+
   .kpi-graph {
     height: 56px;
     display: flex;
@@ -150,6 +153,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
 }
 
 .heading-option {

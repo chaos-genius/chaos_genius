@@ -25,6 +25,7 @@ import Dashboardconfigure from '../containers/Dashboardconfigure';
 import AddDashboard from '../containers/AddDashboard';
 import OrganisationOnboarding from '../containers/Onboarding/OrganisationOnboarding';
 import OrganisationSettings from '../containers/OrganisationSettings/OrganisationSettings';
+import TaskManager from '../containers/TaskManagement/TaskManager';
 
 const Routes = () => (
   <Switch>
@@ -154,6 +155,11 @@ const Routes = () => (
       exact
       path="/dashboard/edit/:id"
       component={(props) => <AddDashboard {...props} />}
+    />
+    <PrivateRouteWithSidebar
+      exact
+      path="/task-manager"
+      component={(props) => <TaskManager {...props} />}
     />
     <PrivateRouteWithSidebar
       exact

@@ -1,0 +1,26 @@
+@import '../../assets/styles/variable.scss';
+
+.tooltip-original-numbers {
+  .react-tooltip-lite {
+    padding: 8px 12px !important;
+    background: $black_variation-2;
+    border-radius: 6px;
+    color: $white;
+    span {
+      font-weight: $font-weight-400;
+      font-size: $font-size-12;
+      line-height: $line-height-18;
+      letter-spacing: $letter-spacing;
+      color: $white;
+    }
+  }
+}
+.normal {
+  font-weight: $font-weight-400;
+  font-size: $font-size-12;
+}
+.bold-text {
+  font-weight: $font-weight-600 !important;
+  line-height: 22px;
+  font-size: initial !important;
+}

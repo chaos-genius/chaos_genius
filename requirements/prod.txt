@@ -68,3 +68,7 @@ blinker==1.4
 
 # Docker API to check status
 docker~=5.0.3
+
+# Pygments for syntax higlighting errors
+Pygments~=2.10.0
+

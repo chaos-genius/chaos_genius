@@ -458,6 +458,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       schemaOption: [],
       tableoption: []
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataSourceHasSchema]);
 
   const schemaName = (e) => {

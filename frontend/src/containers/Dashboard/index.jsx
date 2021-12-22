@@ -7,7 +7,7 @@ import { Link, useHistory, useParams } from 'react-router-dom';
 import './dashboard.scss';
 
 import Setting from '../../assets/images/setting.svg';
-
+import rightarrow from '../../assets/images/rightarrow.svg';
 import Dashboardgraph from '../../components/DashboardGraph';
 import FilterWithTab from '../../components/FilterWithTab';
 import Anomaly from '../../components/Anomaly';
@@ -31,6 +31,7 @@ const Dashboard = () => {
 
   const location = history.location.pathname.split('/');
   const kpi = useParams().kpi;
+  const dashboard = useParams().dashboard;
 
   const { sidebarLoading, sidebarList } = useSelector((state) => {
     return state.sidebar;
@@ -43,6 +44,7 @@ const Dashboard = () => {
   const [active, setActive] = useState('');
   const [kpiAggregate, SetKpiAggregate] = useState('');
   const [tab, setTabs] = useState('deepdrills');
+  const [breadCrumbs, setBreadCrumbs] = useState('');
 
   useEffect(() => {
     getAllDashboardSidebar();
@@ -52,7 +54,7 @@ const Dashboard = () => {
   }, []);
 
   const getAllDashboardSidebar = () => {
-    dispatch(getDashboardSidebar());
+    dispatch(getDashboardSidebar({ dashboard_id: dashboard }));
   };
 
   const getAnomalySetting = (id) => {
@@ -60,18 +62,30 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (sidebarList && sidebarList.length !== 0 && kpi === undefined) {
+    if (
+      sidebarList &&
+      sidebarList.length !== 0 &&
+      dashboard &&
+      kpi === undefined
+    ) {
       setActive(sidebarList[0]?.name);
       //setKpi(sidebarList[0]?.id);
-      setTabs(location[2]);
+      setTabs(location[3]);
       SetKpiAggregate(sidebarList[0]?.aggregation);
       getAnomalySetting(sidebarList[0]?.id);
-      history.push(`/dashboard/${location[2]}/${sidebarList[0]?.id}`);
-    } else if (sidebarList && sidebarList.length !== 0) {
+      history.push(
+        `/dashboard/${dashboard}/${location[3]}/${sidebarList[0].id}`
+      );
+    } else if (sidebarList && sidebarList.length !== 0 && kpi && dashboard) {
       setActive(
         sidebarList.find((item) => item.id.toString() === kpi.toString())?.name
       );
-      setTabs(location[2]);
+      setBreadCrumbs(
+        sidebarList[0]?.dashboards.find(
+          (item) => item.id.toString() === dashboard.toString()
+        )?.name
+      );
+      setTabs(location[3]);
       getAnomalySetting(kpi);
       SetKpiAggregate(
         sidebarList.find((item) => item.id.toString() === kpi.toString())
@@ -84,7 +98,12 @@ const Dashboard = () => {
 
   const onTabClick = (tabs) => {
     setTabs(tabs);
-    window.history.pushState('', '', `/#/dashboard/${tabs}/${kpi}`);
+    // window.history.pushState('', '', `/#/dashboard/${tabs}/${kpi}`);
+    window.history.pushState(
+      '',
+      '',
+      `/#/dashboard/${dashboard}/${tabs}/${kpi}`
+    );
   };
 
   if (sidebarLoading || anomalySettingLoading) {
@@ -98,8 +117,25 @@ const Dashboard = () => {
       <>
         {/* common heading and options */}
         <div className="heading-option">
-          <div className="heading-title">
-            <h3>Dashboard</h3>
+          <div className="page-navigation dashboard-page-navigate">
+            {/* Breadcrumb */}
+            <nav aria-label="breadcrumb">
+              <ol className="breadcrumb">
+                <li className="breadcrumb-item">
+                  <Link to="/dashboard">Dashboard </Link>
+                </li>
+                <li className="breadcrumb-item active" aria-current="page">
+                  {breadCrumbs}
+                </li>
+              </ol>
+            </nav>
+            {/* Back */}
+            <div className="backnavigation">
+              <Link to="/dashboard">
+                <img src={rightarrow} alt="Back" />
+                <span>{breadCrumbs}</span>
+              </Link>
+            </div>
           </div>
         </div>
         {/* explore wrapper */}
@@ -110,6 +146,7 @@ const Dashboard = () => {
               <FilterWithTab
                 tabs={tab}
                 kpi={kpi}
+                dashboard={dashboard}
                 data={sidebarList}
                 setActive={setActive}
                 SetKpiAggregate={SetKpiAggregate}
@@ -137,7 +174,7 @@ const Dashboard = () => {
                       </li>
                     </ul>
                   </div>
-                  <Link to={`/kpi/settings/${kpi}`}>
+                  <Link to={`/dashboard/${dashboard}/settings/${kpi}`}>
                     <div className="common-option">
                       <button className="btn grey-button">
                         <img src={Setting} alt="Setting" />
@@ -154,6 +191,7 @@ const Dashboard = () => {
             {tab === 'deepdrills' && kpi && active && anomalySettingData && (
               <Dashboardgraph
                 kpi={kpi}
+                dashboard={dashboard}
                 kpiName={active}
                 kpiAggregate={kpiAggregate}
                 anomalystatus={anomalySettingData}

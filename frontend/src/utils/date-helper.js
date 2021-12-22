@@ -1,5 +1,5 @@
-import { DateTime } from "luxon";
-
+import { DateTime } from 'luxon';
+import { getLocalStorage } from './storage-helper';
 
 export const formatDate = (date) => {
   if (date !== null && date !== undefined) {
@@ -17,7 +17,7 @@ export const formatDate = (date) => {
       'Nov',
       'Dec'
     ];
-    
+
     const newDate = new Date(date);
     const dateString =
       newDate.getDate() +
@@ -30,13 +30,20 @@ export const formatDate = (date) => {
   return '-';
 };
 
-export const formatDateTime = (date, asString=false, includeTime=false, includeTimezone=false) => {
+export const formatDateTime = (
+  date,
+  asString = false,
+  includeTime = false,
+  includeTimezone = false
+) => {
   if (date !== null && date !== undefined) {
     const timezone = getTimezone();
     const jsDate = new Date(date);
-    const timezonedDate = DateTime.fromJSDate(jsDate, {zone: timezone});
+    const timezonedDate = DateTime.fromJSDate(jsDate, { zone: timezone });
     if (asString === true) {
-      const datetimeFormat = `dd LLL yyyy${includeTime===true ? ' HH:mm': ''}${includeTimezone===true ? ' ZZZZ': ''}`;
+      const datetimeFormat = `dd LLL yyyy${
+        includeTime === true ? ' HH:mm' : ''
+      }${includeTimezone === true ? ' ZZZZ' : ''}`;
       return timezonedDate.toFormat(datetimeFormat);
     } else {
       return timezonedDate;
@@ -46,8 +53,8 @@ export const formatDateTime = (date, asString=false, includeTime=false, includeT
 };
 
 export const getTimezone = () => {
-  const globalSetting = JSON.parse(localStorage.getItem('GlobalSetting'));
-  if (globalSetting && globalSetting.timezone) {
+  const globalSetting = getLocalStorage('GlobalSetting');
+  if (globalSetting && globalSetting?.timezone) {
     return globalSetting.timezone;
   } else {
     return 'UTC';

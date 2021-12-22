@@ -80,6 +80,11 @@
         margin-left: 0px;
       }
     }
+    .view-page-navigate {
+      label {
+        cursor: pointer;
+      }
+    }
     label {
       font-weight: $font-weight-500;
       font-size: $font-size-14;
@@ -94,6 +99,7 @@
 .ReactModal__Body--open {
   overflow-y: hidden;
 }
+// Delete Modal
 .deletemodal {
   .ReactModal__Content {
     height: 230px;
@@ -200,5 +206,87 @@
   }
   .modal-body {
     margin-top: 0px;
+  }
+}
+// KPI Explorer Create Dashboard
+.dashboardmodal {
+  .ReactModal__Content {
+    min-width: 470px;
+    height: 280px;
+    position: inherit !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    border-radius: 10px !important;
+    background-color: $white;
+    padding: 32px !important;
+  }
+  .ReactModal__Overlay {
+    background: rgba(0, 0, 0, 0.5) !important;
+    z-index: 100;
+  }
+  .modal-close {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    cursor: pointer;
+  }
+  .modal-head {
+    width: 100%;
+    h3 {
+      font-weight: 600;
+      font-size: 18px;
+      line-height: 20px;
+      letter-spacing: 0.2px;
+      color: #222222;
+      text-align: left;
+    }
+  }
+  .modal-body {
+    padding: 0px !important;
+    width: 100%;
+    margin-top: 32px;
+    .modal-contents {
+      width: 100%;
+      .form-group {
+        label {
+          font-weight: normal;
+          font-size: 14px;
+          line-height: 16px;
+          letter-spacing: 0.2px;
+          text-transform: capitalize;
+          color: #222222;
+          margin-top: 0px;
+          text-decoration: none;
+          width: 100%;
+          text-align: left;
+        }
+      }
+      .connection__fail {
+        p {
+          color: $red_variation_1;
+          display: flex;
+          align-items: center;
+          font-size: 14px;
+          margin-top: 2px;
+          img {
+            margin-right: 5px;
+          }
+        }
+      }
+      .next-step-navigate {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 24px;
+        .btn {
+          margin-left: 16px;
+        }
+      }
+    }
   }
 }

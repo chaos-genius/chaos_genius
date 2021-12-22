@@ -1,0 +1,115 @@
+@import '../../assets/styles/variable.scss';
+
+.dashboard-card-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap;
+  .dashboardcard {
+    width: 31.8%;
+    background: $white;
+    border-radius: 10px;
+    margin-right: 24px;
+    margin-bottom: 24px;
+    padding: 24px;
+    cursor: pointer;
+    &:last-child {
+      margin-right: 0px;
+    }
+    &:nth-child(3n + 3) {
+      margin-right: 0px;
+    }
+    span {
+      font-weight: $font-weight-normal;
+      font-size: $font-size-14;
+      line-height: $line-height-16;
+      letter-spacing: $letter-spacing;
+      color: $grey_variation-3;
+    }
+    .header-card {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 40px;
+      h3 {
+        font-weight: $font-weight-500;
+        font-size: $font-size-20;
+        line-height: $line-height-24;
+        letter-spacing: $letter-spacing;
+        text-transform: capitalize;
+        color: $black_variation-2;
+        margin-bottom: 4px;
+        &.name-tooltip {
+          max-width: 225px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+          white-space: initial;
+        }
+      }
+      .more-dropdown {
+        .dropdown-image {
+          padding-left: 5px;
+          padding-right: 10px;
+        }
+        .dropdown-menu {
+          min-width: 104px;
+          .delete-item {
+            border-top: none;
+          }
+        }
+      }
+    }
+    // .moreoption {
+    //   display: block;
+    // }
+    // .moreoption-active {
+    //   display: none;
+    // }
+    // &:hover {
+    //   .moreoption {
+    //     display: none;
+    //   }
+    //   .moreoption-active {
+    //     display: block;
+    //   }
+    // }
+    .more-dropdown {
+      .moreoption {
+        display: block;
+      }
+      .moreoption-active {
+        display: none;
+      }
+      &:hover {
+        .moreoption {
+          display: none;
+        }
+        .moreoption-active {
+          display: block;
+        }
+      }
+    }
+    .body-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      .body-content {
+        h5 {
+          font-weight: $font-weight-500;
+          font-size: $font-size-16;
+          line-height: $line-height-22;
+          letter-spacing: $letter-spacing;
+          text-transform: capitalize;
+          color: $black_variation-2;
+          margin-top: 8px;
+        }
+        &.created-on-content {
+          text-align: end;
+        }
+      }
+    }
+  }
+}

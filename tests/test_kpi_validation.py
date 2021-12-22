@@ -117,6 +117,24 @@ def test_invalid_agg():  # noqa: D103
 
 
 # TODO: add remaining scenarios
+@scenario("features/kpi_validation.feature", "data size too large")
+def test_large_data():
+    pass
+
+
+@scenario("features/kpi_validation.feature", "date column in dimension")
+def test_date_in_dim():
+    pass
+
+
+@scenario("features/kpi_validation.feature", "metric column in dimension")
+def test_metric_in_dim():
+    pass
+
+
+@scenario("features/kpi_validation.feature", "unsupported date/time format")
+def test_invalid_date_format():
+    pass
 
 
 @when("metric column name is incorrect", target_fixture="new_kpi_df")

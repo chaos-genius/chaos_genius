@@ -21,6 +21,7 @@ import {
   getUpdatekpi
 } from '../../redux/actions';
 import { connectionContext } from '../context';
+import './kpiexplorerform.scss';
 
 const datasettype = [
   {
@@ -34,9 +35,9 @@ const datasettype = [
 ];
 
 const aggregate = [
-  { value: 'mean', label: 'Mean' },
-  { value: 'count', label: 'Count' },
-  { value: 'sum', label: 'Sum' }
+  { value: 'cean', label: 'mean' },
+  { value: 'count', label: 'count' },
+  { value: 'sum', label: 'sum' }
 ];
 
 const customSingleValue = ({ data }) => (
@@ -451,12 +452,19 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     }
   };
 
+  useEffect(() => {
+    setOption({
+      ...option,
+      schemaOption: [],
+      tableoption: []
+    });
+  }, [dataSourceHasSchema]);
+
   const schemaName = (e) => {
     setErrorMsg({ schemaName: false });
     if (e.value && datasourceid !== '') {
       dispatchGetTableListOnSchema({
         datasource_id: datasourceid,
-        //datasource_id: 1,
         schema: e.value
       });
       setFormdata({
@@ -534,7 +542,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   const dispatchGetTableInfoData = (table) => {
     const obj = {
       datasource_id: datasourceid,
-      //datasource_id: 1,
       schema: formdata.schemaName,
       table_name: table
     };

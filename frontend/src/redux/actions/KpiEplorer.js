@@ -192,7 +192,6 @@ export const getSchemaAvailability = (option) => {
     const { data, error, status } = await postRequest({
       url: ADD_KPI_GET_AVAILABILITY,
       data: { datasource_id: option.data_source_id }
-      //data: { datasource_id: 1 }
     });
 
     if (error) {
@@ -202,6 +201,7 @@ export const getSchemaAvailability = (option) => {
         dispatch(getAllSchemaAvailabilitySuccess(data));
         dispatch(getSchemaNamelist(option));
       } else {
+        dispatch(getAllSchemaAvailabilitySuccess(data));
         dispatch(getAllKpiExplorerField(option));
       }
     }
@@ -213,7 +213,6 @@ export const getSchemaNamelist = (option) => {
     const { data, error, status } = await postRequest({
       url: KPI_LIST_SCHEMA,
       data: { datasource_id: option.data_source_id }
-      //data: { datasource_id: 1 }
     });
     if (error) {
       dispatch(getAllSchemaListFailure());

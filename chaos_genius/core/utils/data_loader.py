@@ -1,6 +1,6 @@
 """Provides utilties for loading data from KPIs."""
 
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 import logging
 import random
 import string
@@ -28,8 +28,8 @@ class DataLoader:
     def __init__(
         self,
         kpi_info: dict,
-        end_date: str = None,
-        start_date: str = None,
+        end_date: date = None,
+        start_date: date = None,
         days_before: int = None,
         tail: int = None,
         validation: bool = False,
@@ -60,11 +60,10 @@ class DataLoader:
         self.validation = validation
 
         if end_date is None:
-            end_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            end_date = datetime.today().date()
 
         if start_date is None and days_before is not None:
-            start_date = pd.to_datetime(end_date) - timedelta(days=days_before)
-            start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
+            start_date = end_date - timedelta(days=days_before)
 
         self.start_date = start_date
         self.end_date = end_date
@@ -81,8 +80,10 @@ class DataLoader:
     def _build_date_filter(self):
         dt_col_str = self._get_id_string(self.dt_col)
 
-        start_query = f"{dt_col_str} >= '{self.start_date}'"
-        end_query = f"{dt_col_str} < '{self.end_date}'"
+        start_date_str = self.start_date.strftime("%Y-%m-%d")
+        end_date_str = self.end_date.strftime("%Y-%m-%d")
+        start_query = f"{dt_col_str} >= '{start_date_str}'"
+        end_query = f"{dt_col_str} < '{end_date_str}'"
 
         return f" where {start_query} and {end_query} "
 

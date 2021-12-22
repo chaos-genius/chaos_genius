@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 def _is_data_present_for_end_date(
     kpi_info: dict,
-    end_date: datetime = None
+    end_date: date = None
 ) -> bool:
     df_count = DataLoader(kpi_info, end_date=end_date, days_before=1).get_count()
     return df_count != 0
@@ -47,7 +47,7 @@ def get_kpi_data_from_id(n: int) -> dict:
 
 def run_anomaly_for_kpi(
     kpi_id: int,
-    end_date: datetime = None,
+    end_date: date = None,
     task_id: Optional[int] = None
 ) -> Union["typing.Literal[False]", date]:
 
@@ -65,9 +65,6 @@ def run_anomaly_for_kpi(
         if not _is_data_present_for_end_date(kpi_info, end_date):
             end_date = end_date - timedelta(days=1)
             logger.info("Decreasing end date by 1.")
-
-        if type(end_date) == datetime:
-            end_date = end_date.date()
 
         logger.info(f"End date is {end_date}.")
 

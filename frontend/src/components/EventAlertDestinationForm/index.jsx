@@ -21,8 +21,13 @@ import {
 
 import store from '../../redux/store';
 
-import ReactTagInput from '@pathofdev/react-tag-input';
-import '@pathofdev/react-tag-input/build/index.css';
+// import ReactTagInput from '@pathofdev/react-tag-input';
+// import '@pathofdev/react-tag-input/build/index.css';
+
+import TagsInput from 'react-tagsinput';
+
+import 'react-tagsinput/react-tagsinput.css';
+
 import { useDispatch, useSelector } from 'react-redux';
 
 const RESET_ACTION = {
@@ -60,6 +65,7 @@ const EventAlertDestinationForm = ({
   const dispatch = useDispatch();
   const kpiId = useParams().id;
   const toast = useToast();
+  const isValidEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
 
   const path = history.location.pathname.split('/');
 
@@ -205,10 +211,10 @@ const EventAlertDestinationForm = ({
     }
   };
 
-  const validateEmail = (email) => {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
-    return re.test(String(email).toLowerCase());
-  };
+  // const validateEmail = (email) => {
+  //   const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+  //   return re.test(String(email).toLowerCase());
+  // };
 
   const onSubmit = () => {
     var obj = { ...error };
@@ -351,7 +357,23 @@ const EventAlertDestinationForm = ({
         <div className="form-group">
           <label>Add Recepients </label>
           <div className="editable-field">
-            <ReactTagInput
+            <TagsInput
+              value={resp}
+              inputProps={{
+                className: 'react-tagsinput-input',
+                placeholder: 'Add Recepients'
+              }}
+              onChange={(e) => handleChange(e, 'email')}
+              validationRegex={isValidEmail}
+              onValidationReject={() =>
+                customToast({
+                  type: 'error',
+                  header: 'Invalid Email',
+                  description: 'Please enter a valid email ID'
+                })
+              }
+            />
+            {/* <ReactTagInput
               tags={resp}
               placeholder="Add Recepients"
               onChange={(newTags) => handleChange(newTags, 'email')}
@@ -362,7 +384,7 @@ const EventAlertDestinationForm = ({
                 // Return boolean to indicate validity
                 return isEmail;
               }}
-            />
+            /> */}
           </div>
         </div>
       ) : field === 'slack' ? (

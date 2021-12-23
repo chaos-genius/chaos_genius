@@ -16,8 +16,12 @@ import { useToast } from 'react-toast-wnm';
 
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
 
-import ReactTagInput from '@pathofdev/react-tag-input';
-import '@pathofdev/react-tag-input/build/index.css';
+// import ReactTagInput from '@pathofdev/react-tag-input';
+// import '@pathofdev/react-tag-input/build/index.css';
+
+import TagsInput from 'react-tagsinput';
+
+import 'react-tagsinput/react-tagsinput.css';
 
 import { getChannelStatus } from '../../redux/actions';
 import store from '../../redux/store';
@@ -55,7 +59,7 @@ const KpiAlertDestinationForm = ({
   const dispatch = useDispatch();
 
   const toast = useToast();
-
+  const isValidEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
   const [resp, setresp] = useState([]);
   const history = useHistory();
   const kpiId = useParams().id;
@@ -260,11 +264,10 @@ const KpiAlertDestinationForm = ({
     });
   };
 
-  const validateEmail = (email) => {
-    const re =
-      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
-    return re.test(String(email).toLowerCase());
-  };
+  // const validateEmail = (email) => {
+  //   const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
+  //   return re.test(String(email).toLowerCase());
+  // };
 
   const onKpiAlertSubmit = () => {
     var obj = { ...error };
@@ -396,12 +399,23 @@ const KpiAlertDestinationForm = ({
           <label>Add Recepients </label>
           {/* <Select isMulti classNamePrefix="selectcategory" placeholder="Select" /> */}
           <div className="editable-field">
-            {/* <TagsInput
-            value={resp}
-            onChange={(e) => handleChange(e)}
-            placeholder="Add Recepients"
-          /> */}
-            <ReactTagInput
+            <TagsInput
+              value={resp}
+              inputProps={{
+                className: 'react-tagsinput-input',
+                placeholder: 'Add Recepients'
+              }}
+              onChange={(e) => handleChange(e, 'email')}
+              validationRegex={isValidEmail}
+              onValidationReject={() =>
+                customToast({
+                  type: 'error',
+                  header: 'Invalid Email',
+                  description: 'Please enter a valid email ID'
+                })
+              }
+            />
+            {/* <ReactTagInput
               tags={resp}
               placeholder="Add Recepients"
               onChange={(newTags) => handleChange(newTags, 'email')}
@@ -417,7 +431,7 @@ const KpiAlertDestinationForm = ({
                 // Return boolean to indicate validity
                 return isEmail;
               }}
-            />
+            /> */}
             {path[2] === 'edit' &&
               editableStatus('alert_channnel') === 'sensitive' &&
               editAndSaveButton('alert_channel')}

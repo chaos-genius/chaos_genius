@@ -21,9 +21,6 @@ import {
 
 import store from '../../redux/store';
 
-// import ReactTagInput from '@pathofdev/react-tag-input';
-// import '@pathofdev/react-tag-input/build/index.css';
-
 import TagsInput from 'react-tagsinput';
 
 import 'react-tagsinput/react-tagsinput.css';

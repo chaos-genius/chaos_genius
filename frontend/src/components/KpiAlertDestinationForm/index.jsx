@@ -11,13 +11,11 @@ import Email from '../../assets/images/alerts/email.svg';
 import Edit from '../../assets/images/disable-edit.svg';
 
 import './kpialertdestinationform.scss';
+
 import { createKpiAlert, updateKpiAlert } from '../../redux/actions';
 import { useToast } from 'react-toast-wnm';
 
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
-
-// import ReactTagInput from '@pathofdev/react-tag-input';
-// import '@pathofdev/react-tag-input/build/index.css';
 
 import TagsInput from 'react-tagsinput';
 
@@ -66,10 +64,6 @@ const KpiAlertDestinationForm = ({
   const path = history.location.pathname.split('/');
   const [option, setOption] = useState([]);
   const [channelName, setChannelName] = useState('');
-  /* add another channel state*/
-
-  // const [anotherChannel, setAnotherChannel] = useState(false);
-  // const [anotherChannelTag, setAnotherChannelTag] = useState([]);
 
   const {
     createKpiAlertLoading,
@@ -350,7 +344,6 @@ const KpiAlertDestinationForm = ({
       {field === 'email' ? (
         <div className="form-group">
           <label>Add Recepients </label>
-          {/* <Select isMulti classNamePrefix="selectcategory" placeholder="Select" /> */}
           <div className="editable-field">
             <TagsInput
               value={resp}

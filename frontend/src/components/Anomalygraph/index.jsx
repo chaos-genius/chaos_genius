@@ -8,11 +8,11 @@ import { getTimezone, formatDateTime } from '../../utils/date-helper';
 highchartsMore(Highcharts);
 Highcharts.setOptions({
   time: {
-      timezone: getTimezone()
+    timezone: getTimezone()
   }
 });
 
-const Anomalygraph = ({ key, drilldown }) => {
+const Anomalygraph = ({ drilldown }) => {
   const [chartdata, setChartData] = useState([]);
 
   useEffect(() => {
@@ -110,7 +110,7 @@ const Anomalygraph = ({ key, drilldown }) => {
             text: graphData.x_axis_label
           },
           min: graphData.x_axis_limits[0] * 1000,
-          max: graphData.x_axis_limits[1] * 1000,
+          max: graphData.x_axis_limits[1] * 1000
         },
         yAxis: {
           title: {
@@ -216,7 +216,11 @@ const Anomalygraph = ({ key, drilldown }) => {
   return (
     <>
       {chartdata && (
-        <HighchartsReact containerProps={{className: 'chartContainer'}} highcharts={Highcharts} options={chartdata} />
+        <HighchartsReact
+          containerProps={{ className: 'chartContainer' }}
+          highcharts={Highcharts}
+          options={chartdata}
+        />
       )}
     </>
   );

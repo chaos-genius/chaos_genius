@@ -281,16 +281,16 @@ class AnomalyAlertController:
 
         check_time = FREQUENCY_DICT[self.alert_info['alert_frequency']]
         fuzzy_interval = datetime.timedelta(minutes = 30) # this represents the upper bound of the time interval that an alert can fall short of the check_time hours before which it can be sent again 
-        # if alert.last_alerted is not None and \
-        #         alert.last_alerted > (self.now - check_time) and \
-        #             alert.last_alerted > ((self.now + fuzzy_interval) - check_time):
-        #     #this check works in three steps
-        #     # 1) Verify if the last alerted value of an alert is not None
-        #     # 2) Verify if less than check_time hours have elapsed since the last alert was sent
-        #     # 3) If less than check_time hours have elapsed, check if the additonal time to complete check_time hours is greater than fuzzy_interval
-        #     logger.info(f"Skipping alert with ID {self.alert_info['id']} since it was already run")
-        #     return True
-        # alert.update(commit=True, last_alerted=self.now)
+        if alert.last_alerted is not None and \
+                alert.last_alerted > (self.now - check_time) and \
+                    alert.last_alerted > ((self.now + fuzzy_interval) - check_time):
+            #this check works in three steps
+            # 1) Verify if the last alerted value of an alert is not None
+            # 2) Verify if less than check_time hours have elapsed since the last alert was sent
+            # 3) If less than check_time hours have elapsed, check if the additonal time to complete check_time hours is greater than fuzzy_interval
+            logger.info(f"Skipping alert with ID {self.alert_info['id']} since it was already run")
+            return True
+        alert.update(commit=True, last_alerted=self.now)
 
         # TODO: Add the series type filter for query optimisation
         anomaly_data = AnomalyDataOutput.query.filter(
@@ -464,20 +464,14 @@ class AnomalyAlertController:
                 anomaly_point[value] = anomaly_point[key]
 
         column_names = ANOMALY_ALERT_EMAIL_COLUMN_NAMES
-        anomaly_data = pd.DataFrame(overall_data, columns=column_names)
-        saved_table=tabulate(anomaly_data,tablefmt="fancy_grid",headers="keys")
-        print(anomaly_data)
-        print(saved_table)
-
+        anomaly_data = pd.DataFrame(overall_data_email_body, columns=column_names)
+        saved_table = tabulate(anomaly_data, tablefmt="fancy_grid", headers="keys")
+        saved_table = "```" + saved_table + "```"
         test = anomaly_alert_slack_formatted(
                 alert_name,
                 kpi_name,
                 data_source_name,
-                highest_value = 1,
-                time_of_anomaly = 2,
-                lower_bound = 3,
-                upper_bound = 4,
-                severity_value = 5
+                saved_table
             )
 
         if test == "ok":

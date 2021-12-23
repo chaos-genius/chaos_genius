@@ -24,7 +24,7 @@ from chaos_genius.alerts.email_alert_config import (
     ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS
 )
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-
+from tabulate import tabulate
 logger = logging.getLogger()
 
 FREQUENCY_DICT = {
@@ -281,16 +281,16 @@ class AnomalyAlertController:
 
         check_time = FREQUENCY_DICT[self.alert_info['alert_frequency']]
         fuzzy_interval = datetime.timedelta(minutes = 30) # this represents the upper bound of the time interval that an alert can fall short of the check_time hours before which it can be sent again 
-        if alert.last_alerted is not None and \
-                alert.last_alerted > (self.now - check_time) and \
-                    alert.last_alerted > ((self.now + fuzzy_interval) - check_time):
-            #this check works in three steps
-            # 1) Verify if the last alerted value of an alert is not None
-            # 2) Verify if less than check_time hours have elapsed since the last alert was sent
-            # 3) If less than check_time hours have elapsed, check if the additonal time to complete check_time hours is greater than fuzzy_interval
-            logger.info(f"Skipping alert with ID {self.alert_info['id']} since it was already run")
-            return True
-        alert.update(commit=True, last_alerted=self.now)
+        # if alert.last_alerted is not None and \
+        #         alert.last_alerted > (self.now - check_time) and \
+        #             alert.last_alerted > ((self.now + fuzzy_interval) - check_time):
+        #     #this check works in three steps
+        #     # 1) Verify if the last alerted value of an alert is not None
+        #     # 2) Verify if less than check_time hours have elapsed since the last alert was sent
+        #     # 3) If less than check_time hours have elapsed, check if the additonal time to complete check_time hours is greater than fuzzy_interval
+        #     logger.info(f"Skipping alert with ID {self.alert_info['id']} since it was already run")
+        #     return True
+        # alert.update(commit=True, last_alerted=self.now)
 
         # TODO: Add the series type filter for query optimisation
         anomaly_data = AnomalyDataOutput.query.filter(
@@ -300,16 +300,17 @@ class AnomalyAlertController:
                                             AnomalyDataOutput.data_datetime >= self.anomaly_end_date,
                                             AnomalyDataOutput.severity >= self.alert_info["severity_cutoff_score"]
                                         ).all()
-
+      
         if len(anomaly_data) == 0:
             logger.info(f"No anomaly exists (Alert ID - {alert_id})")
             return True
 
         logger.info(f"Alert ID {alert_id} is sent to the respective alert channel")
-
         if self.alert_info["alert_channel"] == "email":
+           
             return self.send_alert_email(anomaly_data)
         elif self.alert_info["alert_channel"] == "slack":
+          
             return self.send_slack_alert(anomaly_data)
 
     def send_alert_email(self, anomaly_data):
@@ -419,19 +420,64 @@ class AnomalyAlertController:
         return test
 
     def send_slack_alert(self, anomaly):
+        anomaly_data=anomaly
+        anomaly_copy= anomaly
         alert_name = self.alert_info["alert_name"]
         kpi_name = Kpi.get_by_id(self.alert_info["kpi"]).safe_dict['name']
         data_source_name = DataSource.\
             get_by_id(self.alert_info["data_source"]).safe_dict["name"]
+        
+
+        anomaly_data = [anomaly_point.as_dict for anomaly_point in anomaly_data]
+        anomaly_data = [{key: value for key, value in anomaly_point.items() if key not in IGNORE_COLUMNS_ANOMALY_TABLE} for anomaly_point in anomaly_data]
+
+        for anomaly_point in anomaly_data:
+            anomaly_point["series_type"] = "Overall KPI" if anomaly_point.get("anomaly_type") == "overall" else anomaly_point["series_type"]
+            for key, value in anomaly_point.items():
+                if key in ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS:
+                    anomaly_point[key] = round(value, 2)
+
+        overall_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "overall"]
+        subdim_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "subdim"]
+        overall_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
+        subdim_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
+
+        overall_data_email_body = deepcopy([overall_data[0]]) if len(overall_data) > 0 else []
+        len_subdim = min(10, len(subdim_data))
+        subdim_data_email_body = deepcopy(subdim_data[0:len_subdim]) if len(subdim_data) > 0 else []
+
+        overall_data.extend(subdim_data)
+        overall_data_email_body.extend(subdim_data_email_body)
+
+        for anomaly_point in overall_data_email_body:
+            lower = anomaly_point.get("yhat_lower")
+            upper = anomaly_point.get("yhat_upper")
+            anomaly_point["Expected Value"] = f"{lower} — {upper}"
+            for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
+                anomaly_point[value] = anomaly_point[key]
+
+        for anomaly_point in overall_data:
+            lower = anomaly_point.get("yhat_lower")
+            upper = anomaly_point.get("yhat_upper")
+            anomaly_point["Expected Value"] = f"{lower} — {upper}"
+            for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
+                anomaly_point[value] = anomaly_point[key]
+
+        column_names = ANOMALY_ALERT_EMAIL_COLUMN_NAMES
+        anomaly_data = pd.DataFrame(overall_data, columns=column_names)
+        saved_table=tabulate(anomaly_data,tablefmt="fancy_grid",headers="keys")
+        print(anomaly_data)
+        print(saved_table)
+
         test = anomaly_alert_slack_formatted(
                 alert_name,
                 kpi_name,
                 data_source_name,
-                highest_value = round(getattr(anomaly, 'y'), 1),
-                time_of_anomaly = str(getattr(anomaly, 'data_datetime')),
-                lower_bound = round(getattr(anomaly, 'yhat_lower'), 2),
-                upper_bound = round(getattr(anomaly, 'yhat_upper'), 2),
-                severity_value = round(getattr(anomaly, 'severity'), 2)
+                highest_value = 1,
+                time_of_anomaly = 2,
+                lower_bound = 3,
+                upper_bound = 4,
+                severity_value = 5
             )
 
         if test == "ok":
@@ -506,6 +552,7 @@ def trigger_anomaly_alerts_for_kpi(kpi_obj: Kpi, end_date: date) -> Tuple[List[i
                             Alert.active == True,
                             Alert.alert_status == True
                         ).all()
+   
     for alert in alerts:
         try:
             anomaly_obj = AnomalyAlertController(alert.as_dict, anomaly_end_date=end_date)

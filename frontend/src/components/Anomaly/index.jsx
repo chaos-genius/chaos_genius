@@ -288,8 +288,9 @@ const Anomaly = ({ kpi, anomalystatus }) => {
       }
 
       // Push prev zone if colors should be different
+      // and there is some slope between prev and current
       // Update prev zone
-      if (prev !== null && prev.color !== zone.color) {
+      if (prev !== null && prev.color !== zone.color && prev.value !== value[0]) {
         const interIdx = anomalyType === 1 ? 2 : 1;
         let { m: m1, b: b1 } = findSlopeAndYIntercept(
           [intervals[i - 1][0], intervals[i - 1][interIdx]],
@@ -297,8 +298,7 @@ const Anomaly = ({ kpi, anomalystatus }) => {
         );
         let { m: m2, b: b2 } = findSlopeAndYIntercept(values[i - 1], value);
         let { x } = findIntersection(m1, b1, m2, b2);
-
-        prev.value = x;
+        prev.value = parseInt(x);
         zones.push(prev);
       }
       prev = zone;

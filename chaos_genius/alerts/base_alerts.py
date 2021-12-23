@@ -297,7 +297,7 @@ class AnomalyAlertController:
         if len(anomaly_data) == 0:
             logger.info(f"No anomaly exists (Alert ID - {alert_id})")
             return True
-        
+
         anomaly_data.sort(key=lambda anomaly: getattr(anomaly, 'severity'), reverse=True)
         anomaly = anomaly_data[0]
 
@@ -411,13 +411,13 @@ class AnomalyAlertController:
         overall_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
         subdim_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
 
-        overall_data_email_body = deepcopy([overall_data[0]]) if len(overall_data) > 0 else []
+        overall_data_alert_body = deepcopy([overall_data[0]]) if len(overall_data) > 0 else []
         len_subdim = min(10, len(subdim_data))
-        subdim_data_email_body = deepcopy(subdim_data[0:len_subdim]) if len(subdim_data) > 0 else []
+        subdim_data_alert_body = deepcopy(subdim_data[0:len_subdim]) if len(subdim_data) > 0 else []
 
-        overall_data_email_body.extend(subdim_data_email_body)
+        overall_data_alert_body.extend(subdim_data_alert_body)
 
-        for anomaly_point in overall_data_email_body:
+        for anomaly_point in overall_data_alert_body:
             lower = anomaly_point.get("yhat_lower")
             upper = anomaly_point.get("yhat_upper")
             anomaly_point["Expected Value"] = f"{lower} — {upper}"
@@ -425,7 +425,7 @@ class AnomalyAlertController:
                 anomaly_point[value] = anomaly_point[key]
 
         column_names = ANOMALY_ALERT_EMAIL_COLUMN_NAMES
-        anomaly_data = pd.DataFrame(overall_data_email_body, columns=column_names)
+        anomaly_data = pd.DataFrame(overall_data_alert_body, columns=column_names)
         saved_table = tabulate(anomaly_data, tablefmt="fancy_grid", headers="keys")
         saved_table = "```" + saved_table + "```"
         test = anomaly_alert_slack_formatted(

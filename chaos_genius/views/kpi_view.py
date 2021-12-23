@@ -219,6 +219,23 @@ def disable_kpi(kpi_id):
         logger.info(f"Error in disabling the KPI: {err}")
     return jsonify({"message": message, "status": status})
 
+@blueprint.route("/<int:kpi_id>/enable", methods=["GET"])
+def enable_kpi(kpi_id):
+    status, message = "", ""
+    try:
+        kpi_obj = Kpi.get_by_id(kpi_id)
+        if kpi_obj:
+            kpi_obj.active = True
+            kpi_obj.save(commit=True)
+            status = "success"
+        else:
+            message = "KPI not found"
+            status = "failure"
+    except Exception as err:
+        status = "failure"
+        logger.info(f"Error in enabling the KPI: {err}")
+    return jsonify({"message": message, "status": status})
+
 
 @blueprint.route("/<int:kpi_id>/get-dimensions", methods=["GET"])
 def kpi_get_dimensions(kpi_id):

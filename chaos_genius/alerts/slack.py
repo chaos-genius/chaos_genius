@@ -106,11 +106,17 @@ def anomaly_alert_slack_formatted(alert_name, kpi_name, data_source_name, saved_
             }
         ]
     )
-    alert_table_sender(client, saved_table)
-    return response.body
+    
+    subsequent_response = "failed"
+    if response.body == "ok":
+        subsequent_response = alert_table_sender(client, saved_table)
+    
+    if response.body == "ok" and subsequent_response == "ok":
+        return "ok"
+    return subsequent_response
 
 def alert_table_sender(client, table_data):
-    response=client.send(
+    response = client.send(
         text=table_data
     )
     return response.body

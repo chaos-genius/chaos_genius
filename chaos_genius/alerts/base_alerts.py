@@ -19,6 +19,8 @@ from chaos_genius.alerts.slack import anomaly_alert_slack_formatted, event_alert
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from tabulate import tabulate
 
+logger = logging.getLogger()
+
 FREQUENCY_DICT = {
     "weekly": datetime.timedelta(days=7, hours=0, minutes=0),
     "daily": datetime.timedelta(days=1, hours=0, minutes=0),
@@ -293,17 +295,15 @@ class AnomalyAlertController:
                                         ).all()
 
         if len(anomaly_data) == 0:
-           
+            logger.info(f"No anomaly exists (Alert ID - {alert_id})")
             return True
-
+        
         anomaly_data.sort(key=lambda anomaly: getattr(anomaly, 'severity'), reverse=True)
         anomaly = anomaly_data[0]
 
         if getattr(anomaly, 'severity') < self.alert_info['severity_cutoff_score']:
-            
+            logger.info(f"The anomaliy's severity score is below the threshold (Alert ID - {alert_id})")
             return True
-
-       
 
         if self.alert_info["alert_channel"] == "email":
             return self.send_alert_email(anomaly)
@@ -377,13 +377,25 @@ class AnomalyAlertController:
         
         return test
 
-    def send_slack_alert(self, anomaly):
-        anomaly_data=anomaly
-        alert_name = self.alert_info["alert_name"]
-        kpi_name = Kpi.get_by_id(self.alert_info["kpi"]).safe_dict['name']
-        data_source_name = DataSource.\
-            get_by_id(self.alert_info["data_source"]).safe_dict["name"]
+    def send_slack_alert(self, anomaly_data):
+        kpi_id = self.alert_info["kpi"]
+        kpi_obj = Kpi.query.filter(Kpi.active == True, Kpi.id == kpi_id).first()
+
+        if kpi_obj is None:
+            logger.info(f"No KPI exists for Alert ID - {self.alert_info['id']}")
+            return False
+
+        data_source_obj = DataSource.query.filter(
+                                            DataSource.id == self.alert_info["data_source"],
+                                            DataSource.active == True
+                                        ).first()
         
+        if data_source_obj is None:
+            logger.info(f"The data source provided for Alert ID - {self.alert_info['id']} does not exist")
+
+        kpi_name = getattr(kpi_obj, "name")
+        data_source_name = getattr(data_source_obj, "name")
+        alert_name = self.alert_info.get("alert_name")
 
         anomaly_data = [anomaly_point.as_dict for anomaly_point in anomaly_data]
         anomaly_data = [{key: value for key, value in anomaly_point.items() if key not in IGNORE_COLUMNS_ANOMALY_TABLE} for anomaly_point in anomaly_data]
@@ -403,17 +415,9 @@ class AnomalyAlertController:
         len_subdim = min(10, len(subdim_data))
         subdim_data_email_body = deepcopy(subdim_data[0:len_subdim]) if len(subdim_data) > 0 else []
 
-        overall_data.extend(subdim_data)
         overall_data_email_body.extend(subdim_data_email_body)
 
         for anomaly_point in overall_data_email_body:
-            lower = anomaly_point.get("yhat_lower")
-            upper = anomaly_point.get("yhat_upper")
-            anomaly_point["Expected Value"] = f"{lower} — {upper}"
-            for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
-                anomaly_point[value] = anomaly_point[key]
-
-        for anomaly_point in overall_data:
             lower = anomaly_point.get("yhat_lower")
             upper = anomaly_point.get("yhat_upper")
             anomaly_point["Expected Value"] = f"{lower} — {upper}"
@@ -424,7 +428,6 @@ class AnomalyAlertController:
         anomaly_data = pd.DataFrame(overall_data_email_body, columns=column_names)
         saved_table = tabulate(anomaly_data, tablefmt="fancy_grid", headers="keys")
         saved_table = "```" + saved_table + "```"
-        print(saved_table)
         test = anomaly_alert_slack_formatted(
                 alert_name,
                 kpi_name,
@@ -439,10 +442,6 @@ class AnomalyAlertController:
         
         message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
         return message
-    
-
-    
-
 
 class StaticKpiAlertController:
     def __init__(self, alert_info):

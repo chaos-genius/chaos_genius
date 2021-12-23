@@ -82,7 +82,7 @@ def event_alert_slack(alert_name, alert_frequency, alert_message , alert_overvie
     return response.body    
 
 
-def anomaly_alert_slack_formatted(alert_name, kpi_name, data_source_name, **kwargs):
+def anomaly_alert_slack_formatted(alert_name, kpi_name, data_source_name, table_data):
     client = get_webhook_client()
     if not client:
         raise Exception("Slack not configured properly.")
@@ -103,41 +103,21 @@ def anomaly_alert_slack_formatted(alert_name, kpi_name, data_source_name, **kwar
                     "type": "mrkdwn",
                     "text": f"This is the alert generated from KPI *{kpi_name}* and Data Source *{data_source_name}*.",
                 },
-            },
-            {"type": "divider"},
-            {
-                "type": "section",
-                "fields": [
-                    {"type": "mrkdwn", "text": f"*Value:*\n{kwargs['highest_value']}"},
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*Time of Occurrence:*\n{kwargs['time_of_anomaly']}",
-                    },
-                ],
-            },
-            {
-                "type": "section",
-                "fields": [
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*Lower Bound of Range:*\n{kwargs['lower_bound']}",
-                    },
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*Upper Bound of Range:*\n{kwargs['upper_bound']}",
-                    },
-                ],
-            },
-            {
-                "type": "section",
-                "fields": [
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*Severity Value:*\n{kwargs['severity_value']}",
-                    }
-                ],
-            },
-        ],
+            }
+        ]
+    )
+    
+    subsequent_response = "failed"
+    if response.body == "ok":
+        subsequent_response = alert_table_sender(client, table_data)
+    
+    if response.body == "ok" and subsequent_response == "ok":
+        return "ok"
+    return subsequent_response
+
+def alert_table_sender(client, table_data):
+    response = client.send(
+        text=table_data
     )
     return response.body
 

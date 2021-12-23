@@ -426,13 +426,13 @@ class AnomalyAlertController:
 
         column_names = ANOMALY_ALERT_EMAIL_COLUMN_NAMES
         anomaly_data = pd.DataFrame(overall_data_alert_body, columns=column_names)
-        saved_table = tabulate(anomaly_data, tablefmt="fancy_grid", headers="keys")
-        saved_table = "```" + saved_table + "```"
+        table_data = tabulate(anomaly_data, tablefmt="fancy_grid", headers="keys")
+        table_data = "```" + table_data + "```"
         test = anomaly_alert_slack_formatted(
                 alert_name,
                 kpi_name,
                 data_source_name,
-                saved_table
+                table_data
             )
 
         if test == "ok":

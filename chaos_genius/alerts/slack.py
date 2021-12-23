@@ -82,7 +82,7 @@ def event_alert_slack(alert_name, alert_frequency, alert_message , alert_overvie
     return response.body    
 
 
-def anomaly_alert_slack_formatted(alert_name, kpi_name, data_source_name, saved_table):
+def anomaly_alert_slack_formatted(alert_name, kpi_name, data_source_name, table_data):
     client = get_webhook_client()
     if not client:
         raise Exception("Slack not configured properly.")
@@ -109,7 +109,7 @@ def anomaly_alert_slack_formatted(alert_name, kpi_name, data_source_name, saved_
     
     subsequent_response = "failed"
     if response.body == "ok":
-        subsequent_response = alert_table_sender(client, saved_table)
+        subsequent_response = alert_table_sender(client, table_data)
     
     if response.body == "ok" and subsequent_response == "ok":
         return "ok"

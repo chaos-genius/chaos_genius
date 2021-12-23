@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <b>
+        <h2 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">
+            {{ alert_name }}
+        </h2>
+    </b>
+    <hr style="width:100%", size="2", color= #F6F5F5>
+    <h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">
+        Alert Frequency: {{ alert_frequency }}
+    </h3>
+    <h2 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">
+        Alert Message
+    </h2>
+    <h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">
+        {{ alert_message }}
+    </h3>
+{% endblock %}

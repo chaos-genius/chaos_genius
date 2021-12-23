@@ -143,7 +143,7 @@ def kpi_subdim_anomaly(kpi_id):
         period = kpi_info["anomaly_params"]["anomaly_period"]
         hourly = kpi_info["anomaly_params"]["frequency"] == "H"
 
-        end_date = get_end_date(kpi_info)
+        end_date = get_anomaly_output_end_date(kpi_info)
         graph_xlims = get_anomaly_graph_x_lims(end_date, period, hourly)
         if hourly:
             # Use a 24 hour window to find peak severity per subdim and rank in descending order

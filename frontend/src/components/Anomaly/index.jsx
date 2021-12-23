@@ -263,6 +263,7 @@ const Anomaly = ({ kpi, anomalystatus }) => {
     }
   };
 
+  //TODO: Create Single component to use this method instead of duplicating it.
   const findAnomalyZones = (intervals, values) => {
     let validColor = '#60CA9A',
       anomalyColor = '#EB5756';
@@ -290,7 +291,11 @@ const Anomaly = ({ kpi, anomalystatus }) => {
       // Push prev zone if colors should be different
       // and there is some slope between prev and current
       // Update prev zone
-      if (prev !== null && prev.color !== zone.color && prev.value !== value[0]) {
+      if (
+        prev !== null &&
+        prev.color !== zone.color &&
+        prev.value !== value[0]
+      ) {
         const interIdx = anomalyType === 1 ? 2 : 1;
         let { m: m1, b: b1 } = findSlopeAndYIntercept(
           [intervals[i - 1][0], intervals[i - 1][interIdx]],

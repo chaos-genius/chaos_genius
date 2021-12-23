@@ -11,7 +11,10 @@ from chaos_genius.core.rca.rca_controller import RootCauseAnalysisController
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.databases.models.kpi_model import Kpi
 
-from chaos_genius.settings import MAX_DEEPDRILLS_SLACK_DAYS
+from chaos_genius.settings import (
+    MAX_DEEPDRILLS_SLACK_DAYS,
+    DAYS_OFFSET_FOR_ANALTYICS,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -59,7 +62,7 @@ def run_anomaly_for_kpi(
         logger.info("Selecting end date.")
         # by default we always calculate for n-1
         if end_date is None:
-            end_date = datetime.today().date() - timedelta(days=1)
+            end_date = datetime.today().date() - timedelta(days=(DAYS_OFFSET_FOR_ANALTYICS - 1))
 
         # Check if n-1 data is available or not then try for n-2
         if not _is_data_present_for_end_date(kpi_info, end_date):
@@ -84,7 +87,7 @@ def run_anomaly_for_kpi(
 def _get_end_date_for_rca_kpi(kpi_info: dict, end_date: date = None) -> date:
     # by default we always calculate for n-1
     if end_date is None:
-        end_date = datetime.today().date() - timedelta(days=1)
+        end_date = datetime.today().date() - timedelta(days=(DAYS_OFFSET_FOR_ANALTYICS - 1))
 
     count = 0
     while not _is_data_present_for_end_date(kpi_info, end_date):

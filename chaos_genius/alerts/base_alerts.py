@@ -23,6 +23,7 @@ from chaos_genius.alerts.email_alert_config import (
     ANOMALY_ALERT_EMAIL_COLUMN_NAMES,
     ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS
 )
+from chaos_genius.core.rca.rca_utils.string_helpers import convert_query_string_to_user_string
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 logger = logging.getLogger()
@@ -343,6 +344,7 @@ class AnomalyAlertController:
                 for key, value in anomaly_point.items():
                     if key in ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS:
                         anomaly_point[key] = round(value, 2)
+                anomaly_point["series_type"] = convert_query_string_to_user_string(anomaly_point["series_type"])
 
             overall_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "overall"]
             subdim_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "subdim"]
@@ -359,14 +361,14 @@ class AnomalyAlertController:
             for anomaly_point in overall_data_email_body:
                 lower = anomaly_point.get("yhat_lower")
                 upper = anomaly_point.get("yhat_upper")
-                anomaly_point["Expected Value"] = f"{lower} — {upper}"
+                anomaly_point["Expected Value"] = f"{lower} - {upper}"
                 for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
                     anomaly_point[value] = anomaly_point[key]
 
             for anomaly_point in overall_data:
                 lower = anomaly_point.get("yhat_lower")
                 upper = anomaly_point.get("yhat_upper")
-                anomaly_point["Expected Value"] = f"{lower} — {upper}"
+                anomaly_point["Expected Value"] = f"{lower} - {upper}"
                 for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
                     anomaly_point[value] = anomaly_point[key]
 
@@ -377,7 +379,7 @@ class AnomalyAlertController:
                 file_detail = {}
                 file_detail["fname"] = "data.csv"
                 with io.StringIO() as buffer:
-                    anomaly_data.to_csv(buffer)
+                    anomaly_data.to_csv(buffer, encoding="utf-8")
                     file_detail["fdata"] = buffer.getvalue()
                 files = [file_detail]
 

@@ -12,7 +12,7 @@ import './eventalertdestinationform.scss';
 
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
 import { useToast } from 'react-toast-wnm';
-
+import { EMAIL_REGEX } from '../../utils/regex-helper';
 import {
   getChannelStatus,
   createKpiAlert,
@@ -65,7 +65,6 @@ const EventAlertDestinationForm = ({
   const dispatch = useDispatch();
   const kpiId = useParams().id;
   const toast = useToast();
-  const isValidEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
 
   const path = history.location.pathname.split('/');
 
@@ -210,11 +209,6 @@ const EventAlertDestinationForm = ({
       });
     }
   };
-
-  // const validateEmail = (email) => {
-  //   const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
-  //   return re.test(String(email).toLowerCase());
-  // };
 
   const onSubmit = () => {
     var obj = { ...error };
@@ -364,7 +358,7 @@ const EventAlertDestinationForm = ({
                 placeholder: 'Add Recepients'
               }}
               onChange={(e) => handleChange(e, 'email')}
-              validationRegex={isValidEmail}
+              validationRegex={EMAIL_REGEX}
               onValidationReject={() =>
                 customToast({
                   type: 'error',
@@ -373,18 +367,6 @@ const EventAlertDestinationForm = ({
                 })
               }
             />
-            {/* <ReactTagInput
-              tags={resp}
-              placeholder="Add Recepients"
-              onChange={(newTags) => handleChange(newTags, 'email')}
-              validator={(value) => {
-                const isEmail = validateEmail(value);
-                if (!isEmail) {
-                }
-                // Return boolean to indicate validity
-                return isEmail;
-              }}
-            /> */}
           </div>
         </div>
       ) : field === 'slack' ? (

@@ -25,6 +25,7 @@ import 'react-tagsinput/react-tagsinput.css';
 
 import { getChannelStatus } from '../../redux/actions';
 import store from '../../redux/store';
+import { EMAIL_REGEX } from '../../utils/regex-helper';
 
 const customSingleValue = ({ data }) => (
   <div className="input-select">
@@ -59,7 +60,6 @@ const KpiAlertDestinationForm = ({
   const dispatch = useDispatch();
 
   const toast = useToast();
-  const isValidEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
   const [resp, setresp] = useState([]);
   const history = useHistory();
   const kpiId = useParams().id;
@@ -264,11 +264,6 @@ const KpiAlertDestinationForm = ({
     });
   };
 
-  // const validateEmail = (email) => {
-  //   const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
-  //   return re.test(String(email).toLowerCase());
-  // };
-
   const onKpiAlertSubmit = () => {
     var obj = { ...error };
     if (alertFormData.alert_channel === '') {
@@ -283,48 +278,6 @@ const KpiAlertDestinationForm = ({
       }
     }
   };
-
-  /*add anonter channel function*/
-
-  // const addChannel = () => {
-  //   return (
-  //     <>
-  //       <div className="form-group">
-  //         <label>Select Channel *</label>
-  //         <div className="editable-field">
-  //           <Select
-  //             options={option}
-  //             classNamePrefix="selectcategory"
-  //             placeholder="Select"
-  //             components={{ SingleValue: customSingleValue }}
-  //           />
-  //         </div>
-  //       </div>
-
-  //       <div className="form-group">
-  //         <label>Add Recepients </label>
-  //         <div className="editable-field">
-  //           <ReactTagInput
-  //             tags={anotherChannelTag}
-  //             placeholder="Add Recepients"
-  //             onChange={(e) => setAnotherChannelTag(e)}
-  //             validator={(value) => {
-  //               const isEmail = validateEmail(value);
-  //               if (!isEmail) {
-  //                 toastMessage({
-  //                   type: 'error',
-  //                   message: 'Please enter an valid email address'
-  //                 });
-  //               }
-  //               // Return boolean to indicate validity
-  //               return isEmail;
-  //             }}
-  //           />
-  //         </div>
-  //       </div>
-  //     </>
-  //   );
-  // };
 
   return (
     <>
@@ -406,7 +359,7 @@ const KpiAlertDestinationForm = ({
                 placeholder: 'Add Recepients'
               }}
               onChange={(e) => handleChange(e, 'email')}
-              validationRegex={isValidEmail}
+              validationRegex={EMAIL_REGEX}
               onValidationReject={() =>
                 customToast({
                   type: 'error',
@@ -415,23 +368,7 @@ const KpiAlertDestinationForm = ({
                 })
               }
             />
-            {/* <ReactTagInput
-              tags={resp}
-              placeholder="Add Recepients"
-              onChange={(newTags) => handleChange(newTags, 'email')}
-              validator={(value) => {
-                const isEmail = validateEmail(value);
-                if (!isEmail) {
-                  customToast({
-                    type: 'error',
-                    header: 'Invalid Email',
-                    description: 'Please enter a valid email ID'
-                  });
-                }
-                // Return boolean to indicate validity
-                return isEmail;
-              }}
-            /> */}
+
             {path[2] === 'edit' &&
               editableStatus('alert_channnel') === 'sensitive' &&
               editAndSaveButton('alert_channel')}

@@ -314,6 +314,33 @@ class AnomalyAlertController:
         elif self.alert_info["alert_channel"] == "slack":
             return self.send_slack_alert(anomaly_data)
 
+    def get_overall_subdim_data(self, anomaly_data):
+
+        anomaly_data = [anomaly_point.as_dict for anomaly_point in anomaly_data]
+        anomaly_data = [{key: value for key, value in anomaly_point.items() if key not in IGNORE_COLUMNS_ANOMALY_TABLE} for anomaly_point in anomaly_data]
+
+        for anomaly_point in anomaly_data:
+            anomaly_point["series_type"] = "Overall KPI" if anomaly_point.get("anomaly_type") == "overall" else anomaly_point["series_type"]
+            for key, value in anomaly_point.items():
+                if key in ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS:
+                    anomaly_point[key] = round(value, 2)
+            anomaly_point["series_type"] = convert_query_string_to_user_string(anomaly_point["series_type"])
+
+        overall_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "overall"]
+        subdim_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "subdim"]
+        overall_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
+        subdim_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
+
+        return overall_data, subdim_data
+
+    def format_alert_data(self, data):
+        for anomaly_point in data:
+            lower = anomaly_point.get("yhat_lower")
+            upper = anomaly_point.get("yhat_upper")
+            anomaly_point["Expected Value"] = f"{lower} - {upper}"
+            for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
+                anomaly_point[value] = anomaly_point[key]
+
     def send_alert_email(self, anomaly_data):
 
         alert_channel_conf = self.alert_info["alert_channel_conf"]
@@ -337,20 +364,7 @@ class AnomalyAlertController:
 
             kpi_name = getattr(kpi_obj, 'name')
             
-            anomaly_data = [anomaly_point.as_dict for anomaly_point in anomaly_data]
-            anomaly_data = [{key: value for key, value in anomaly_point.items() if key not in IGNORE_COLUMNS_ANOMALY_TABLE} for anomaly_point in anomaly_data]
-
-            for anomaly_point in anomaly_data:
-                anomaly_point["series_type"] = "Overall KPI" if anomaly_point.get("anomaly_type") == "overall" else anomaly_point["series_type"]
-                for key, value in anomaly_point.items():
-                    if key in ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS:
-                        anomaly_point[key] = round(value, 2)
-                anomaly_point["series_type"] = convert_query_string_to_user_string(anomaly_point["series_type"])
-
-            overall_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "overall"]
-            subdim_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "subdim"]
-            overall_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
-            subdim_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
+            overall_data, subdim_data = self.get_overall_subdim_data(anomaly_data)
 
             overall_data_email_body = deepcopy([overall_data[0]]) if len(overall_data) > 0 else []
             len_subdim = min(10, len(subdim_data))
@@ -359,19 +373,8 @@ class AnomalyAlertController:
             overall_data.extend(subdim_data)
             overall_data_email_body.extend(subdim_data_email_body)
 
-            for anomaly_point in overall_data_email_body:
-                lower = anomaly_point.get("yhat_lower")
-                upper = anomaly_point.get("yhat_upper")
-                anomaly_point["Expected Value"] = f"{lower} - {upper}"
-                for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
-                    anomaly_point[value] = anomaly_point[key]
-
-            for anomaly_point in overall_data:
-                lower = anomaly_point.get("yhat_lower")
-                upper = anomaly_point.get("yhat_upper")
-                anomaly_point["Expected Value"] = f"{lower} - {upper}"
-                for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
-                    anomaly_point[value] = anomaly_point[key]
+            self.format_alert_data(overall_data)
+            self.format_alert_data(overall_data_email_body)
 
             column_names = ANOMALY_ALERT_EMAIL_COLUMN_NAMES
             anomaly_data = pd.DataFrame(overall_data, columns=column_names)
@@ -441,19 +444,7 @@ class AnomalyAlertController:
         data_source_name = getattr(data_source_obj, "name")
         alert_name = self.alert_info.get("alert_name")
 
-        anomaly_data = [anomaly_point.as_dict for anomaly_point in anomaly_data]
-        anomaly_data = [{key: value for key, value in anomaly_point.items() if key not in IGNORE_COLUMNS_ANOMALY_TABLE} for anomaly_point in anomaly_data]
-
-        for anomaly_point in anomaly_data:
-            anomaly_point["series_type"] = "Overall KPI" if anomaly_point.get("anomaly_type") == "overall" else anomaly_point["series_type"]
-            for key, value in anomaly_point.items():
-                if key in ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS:
-                    anomaly_point[key] = round(value, 2)
-
-        overall_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "overall"]
-        subdim_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "subdim"]
-        overall_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
-        subdim_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
+        overall_data, subdim_data = self.get_overall_subdim_data(anomaly_data)
 
         overall_data_alert_body = deepcopy([overall_data[0]]) if len(overall_data) > 0 else []
         len_subdim = min(10, len(subdim_data))
@@ -461,12 +452,7 @@ class AnomalyAlertController:
 
         overall_data_alert_body.extend(subdim_data_alert_body)
 
-        for anomaly_point in overall_data_alert_body:
-            lower = anomaly_point.get("yhat_lower")
-            upper = anomaly_point.get("yhat_upper")
-            anomaly_point["Expected Value"] = f"{lower} — {upper}"
-            for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
-                anomaly_point[value] = anomaly_point[key]
+        self.format_alert_data(overall_data_alert_body)
 
         column_names = ANOMALY_ALERT_EMAIL_COLUMN_NAMES
         anomaly_data = pd.DataFrame(overall_data_alert_body, columns=column_names)

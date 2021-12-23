@@ -12,7 +12,7 @@ IGNORE_COLUMNS_ANOMALY_TABLE = [
     "is_anomaly"
 ]
 
-ANOMALY_ALERT_EMAIL_COLUMN_NAMES = [
+ANOMALY_ALERT_COLUMN_NAMES = [
     "Dimension",
     "Time of Occurrence",
     "Value",

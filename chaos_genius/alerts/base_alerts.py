@@ -17,10 +17,10 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import anomaly_alert_slack_formatted, event_alert_slack
-from chaos_genius.alerts.email_alert_config import (
+from chaos_genius.alerts.anomaly_alert_config import (
     ANOMALY_TABLE_COLUMN_NAMES_MAPPER,
     IGNORE_COLUMNS_ANOMALY_TABLE,
-    ANOMALY_ALERT_EMAIL_COLUMN_NAMES,
+    ANOMALY_ALERT_COLUMN_NAMES,
     ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS
 )
 from chaos_genius.core.rca.rca_utils.string_helpers import convert_query_string_to_user_string
@@ -376,7 +376,7 @@ class AnomalyAlertController:
             self.format_alert_data(overall_data)
             self.format_alert_data(overall_data_email_body)
 
-            column_names = ANOMALY_ALERT_EMAIL_COLUMN_NAMES
+            column_names = ANOMALY_ALERT_COLUMN_NAMES
             anomaly_data = pd.DataFrame(overall_data, columns=column_names)
             files = []
             if not anomaly_data.empty:
@@ -439,6 +439,7 @@ class AnomalyAlertController:
         
         if data_source_obj is None:
             logger.info(f"The data source provided for Alert ID - {self.alert_info['id']} does not exist")
+            return False
 
         kpi_name = getattr(kpi_obj, "name")
         data_source_name = getattr(data_source_obj, "name")
@@ -454,7 +455,7 @@ class AnomalyAlertController:
 
         self.format_alert_data(overall_data_alert_body)
 
-        column_names = ANOMALY_ALERT_EMAIL_COLUMN_NAMES
+        column_names = ANOMALY_ALERT_COLUMN_NAMES
         anomaly_data = pd.DataFrame(overall_data_alert_body, columns=column_names)
         table_data = tabulate(anomaly_data, tablefmt="fancy_grid", headers="keys")
         table_data = "```" + table_data + "```"

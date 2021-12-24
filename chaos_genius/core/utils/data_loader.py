@@ -120,7 +120,7 @@ class DataLoader:
         date_filter = self._build_date_filter() if self.start_date is not None else ""
 
         if count:
-            query = f"select count (*) from {table_name} {date_filter} "
+            query = f"select count(*) from {table_name} {date_filter} "
         else:
             query = f"select * from {table_name} {date_filter} "
 

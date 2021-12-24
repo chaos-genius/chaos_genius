@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 import Select from 'react-select';
 import Tooltip from 'react-tooltip-lite';
@@ -48,6 +48,8 @@ const data = [
 
 const Kpihome = () => {
   const dispatch = useDispatch();
+
+  const history = useHistory();
 
   const { homeKpiData, homeKpiLoading } = useSelector(
     (state) => state.onboarding
@@ -301,15 +303,15 @@ const Kpihome = () => {
                             />
                           )}
                         </div>
-                        {/* <div
-                        className="kpi-content kpi-details"
-                        onClick={() =>
-                          history.push(
-                            `/dashboard/${dashboard}/deepdrills/${item.id}`
-                          )
-                        }>
-                        Details
-                      </div> */}
+                        <div
+                          className="kpi-content kpi-details"
+                          onClick={() =>
+                            history.push(
+                              `/dashboard/${dashboard}/deepdrills/${item.id}`
+                            )
+                          }>
+                          Details
+                        </div>
                       </div>
                     </Link>
                   );

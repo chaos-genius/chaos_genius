@@ -44,7 +44,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       display: -webkit-box;
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       white-space: initial;
     }
@@ -107,7 +107,7 @@
   .kpi-content {
     display: flex;
     flex-direction: column;
-    width: 23%;
+    width: 17%;
     &.kpi-content-label {
       label {
         margin-bottom: 0px;
@@ -115,7 +115,7 @@
     }
 
     .highcharts-container {
-      width: 100% !important;
+      width: 90px !important;
     }
     .highcharts-root {
       width: 180px !important;
@@ -124,8 +124,6 @@
       align-items: center;
       justify-content: center;
     }
-
-    
   }
 
   .kpi-graph {

@@ -51,10 +51,13 @@ const Anomaly = ({ kpi, anomalystatus }) => {
 
   const KPITabs = [{ name: 'Overall KPI' }, { name: 'Sub-dimensions' }];
 
-  const { anomalyDetectionData, anomalyDrilldownData, anomalyQualityData } =
-    useSelector((state) => {
-      return state.anomaly;
-    });
+  const {
+    anomalyDetectionData,
+    anomalyDrilldownData,
+    anomalyQualityData
+  } = useSelector((state) => {
+    return state.anomaly;
+  });
 
   useEffect(() => {
     store.dispatch(RESET_ACTION);
@@ -194,7 +197,8 @@ const Anomaly = ({ kpi, anomalystatus }) => {
           borderWidth: 1,
           padding: 20,
           title: {
-            text: 'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
+            text:
+              'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
             style: {
               fontStyle: 'italic'
             }
@@ -437,7 +441,8 @@ const Anomaly = ({ kpi, anomalystatus }) => {
                       drilldownCollapse
                         ? 'dashboard-header-wrapper '
                         : 'dashboard-header-wrapper header-wrapper-disable '
-                    }>
+                    }
+                    onClick={() => setDrilldownCollapse(!drilldownCollapse)}>
                     <div className="dashboard-header">
                       <h3>Drill Downs</h3>
                     </div>
@@ -446,8 +451,7 @@ const Anomaly = ({ kpi, anomalystatus }) => {
                         !drilldownCollapse
                           ? 'header-collapse header-disable'
                           : 'header-collapse'
-                      }
-                      onClick={() => setDrilldownCollapse(!drilldownCollapse)}>
+                      }>
                       <img src={Toparrow} alt="CollapseOpen" />
                     </div>
                   </div>
@@ -479,6 +483,9 @@ const Anomaly = ({ kpi, anomalystatus }) => {
                       !dataQualityCollapse
                         ? 'dashboard-header-wrapper header-wrapper-disable'
                         : 'dashboard-header-wrapper'
+                    }
+                    onClick={() =>
+                      setDataQualityCollapse(!dataQualityCollapse)
                     }>
                     <div className="dashboard-header">
                       <h3>Data Quality</h3>
@@ -488,9 +495,6 @@ const Anomaly = ({ kpi, anomalystatus }) => {
                         !dataQualityCollapse
                           ? 'header-collapse header-disable'
                           : 'header-collapse'
-                      }
-                      onClick={() =>
-                        setDataQualityCollapse(!dataQualityCollapse)
                       }>
                       <img src={Toparrow} alt="CollapseOpen" />
                     </div>

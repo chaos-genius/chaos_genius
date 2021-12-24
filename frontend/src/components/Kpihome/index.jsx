@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import Select from 'react-select';
 import Tooltip from 'react-tooltip-lite';
@@ -236,84 +236,82 @@ const Kpihome = () => {
               <div className="graph-section">
                 {kpiHomeData.map((item) => {
                   return (
-                    <Link to={`/dashboard/${dashboard}/deepdrills/${item.id}`}>
-                      <div className="kpi-card" key={item.id}>
-                        <div className="kpi-content kpi-content-label">
-                          <h3 className="name-tooltip">
-                            <Tooltip
-                              className="tooltip-name"
-                              direction="left"
-                              content={<span> {item.name}</span>}>
-                              {item.name}
-                            </Tooltip>
-                          </h3>
-                        </div>
-                        <div className="kpi-content">
-                          <label>
-                            {timeline.value === 'wow'
-                              ? 'This Week'
-                              : timeline.value === 'mom'
-                              ? 'This Month'
-                              : 'This Day'}
-                          </label>
-                          <HumanReadableNumbers number={item.current} />
-                        </div>
-                        <div className="kpi-content">
-                          <label>
-                            {timeline.value === 'wow'
-                              ? 'Previous Week'
-                              : timeline.value === 'mom'
-                              ? 'Previous Month'
-                              : 'Previous Day'}
-                          </label>
-                          <HumanReadableNumbers number={item.prev} />
-                        </div>
-                        <div className="kpi-content">
-                          <label>Change</label>
-                          <span>
-                            {item.percentage_change !== '--' && (
-                              <>
-                                <HumanReadableNumbers number={item.change} />
-                                <label
-                                  className={
-                                    item.percentage_change > 0
-                                      ? 'high-change'
-                                      : 'low-change'
-                                  }>
-                                  {item.percentage_change > 0 ? (
-                                    <img src={Up} alt="High" />
-                                  ) : (
-                                    <img src={Down} alt="Low" />
-                                  )}
-                                  {item.percentage_change}
-                                  {item.percentage_change !== '--' ? '%' : ''}
-                                </label>
-                              </>
-                            )}
-                            {item.percentage_change === '--' && <>-</>}
-                          </span>
-                        </div>
-
-                        <div className=" kpi-content kpi-graph ">
-                          {item.graph_data && item.graph_data.length !== 0 && (
-                            <HighchartsReact
-                              className="sparkline-graph"
-                              highcharts={Highcharts}
-                              options={lineChart(item.graph_data)}
-                            />
-                          )}
-                        </div>
-                        <div
-                          className="kpi-content kpi-details"
-                          onClick={() =>
-                            history.push(
-                              `/dashboard/${dashboard}/deepdrills/${item.id}`
-                            )
-                          }>
-                          Details
-                        </div>
+                    <div className="kpi-card" key={item.id}>
+                      <div className="kpi-content kpi-content-label">
+                        <h3 className="name-tooltip">
+                          <Tooltip
+                            className="tooltip-name"
+                            direction="left"
+                            content={<span> {item.name}</span>}>
+                            {item.name}
+                          </Tooltip>
+                        </h3>
                       </div>
-                    </Link>
+                      <div className="kpi-content">
+                        <label>
+                          {timeline.value === 'wow'
+                            ? 'This Week'
+                            : timeline.value === 'mom'
+                            ? 'This Month'
+                            : 'This Day'}
+                        </label>
+                        <HumanReadableNumbers number={item.current} />
+                      </div>
+                      <div className="kpi-content">
+                        <label>
+                          {timeline.value === 'wow'
+                            ? 'Previous Week'
+                            : timeline.value === 'mom'
+                            ? 'Previous Month'
+                            : 'Previous Day'}
+                        </label>
+                        <HumanReadableNumbers number={item.prev} />
+                      </div>
+                      <div className="kpi-content">
+                        <label>Change</label>
+                        <span>
+                          {item.percentage_change !== '--' && (
+                            <>
+                              <HumanReadableNumbers number={item.change} />
+                              <label
+                                className={
+                                  item.percentage_change > 0
+                                    ? 'high-change'
+                                    : 'low-change'
+                                }>
+                                {item.percentage_change > 0 ? (
+                                  <img src={Up} alt="High" />
+                                ) : (
+                                  <img src={Down} alt="Low" />
+                                )}
+                                {item.percentage_change}
+                                {item.percentage_change !== '--' ? '%' : ''}
+                              </label>
+                            </>
+                          )}
+                          {item.percentage_change === '--' && <>-</>}
+                        </span>
+                      </div>
+
+                      <div className=" kpi-content kpi-graph ">
+                        {item.graph_data && item.graph_data.length !== 0 && (
+                          <HighchartsReact
+                            className="sparkline-graph"
+                            highcharts={Highcharts}
+                            options={lineChart(item.graph_data)}
+                          />
+                        )}
+                      </div>
+                      <div
+                        className="kpi-content kpi-details"
+                        onClick={() =>
+                          history.push(
+                            `/dashboard/${dashboard}/deepdrills/${item.id}`
+                          )
+                        }>
+                        Details
+                      </div>
+                    </div>
                   );
                 })}
               </div>

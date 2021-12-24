@@ -107,7 +107,7 @@
   .kpi-content {
     display: flex;
     flex-direction: column;
-    width: 23%;
+    width: 17%;
     &.kpi-content-label {
       label {
         margin-bottom: 0px;
@@ -115,7 +115,7 @@
     }
 
     .highcharts-container {
-      width: 100% !important;
+      width: 90px !important;
     }
     .highcharts-root {
       width: 180px !important;

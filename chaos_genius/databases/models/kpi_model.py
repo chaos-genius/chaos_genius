@@ -17,6 +17,7 @@ class Kpi(PkModel):
 
     kpi_type = Column(db.String(80), nullable=False)
     kpi_query = Column(db.Text(), nullable=False)
+    schema_name = Column(db.Text(), nullable=True, default=None)
     table_name = Column(db.Text(), nullable=False)
     metric = Column(db.Text(), nullable=False)
     aggregation = Column(db.String(80), nullable=False)
@@ -52,6 +53,7 @@ class Kpi(PkModel):
             "data_source": self.data_source,
             "kpi_type": self.kpi_type,
             "kpi_query": self.kpi_query,
+            "schema_name": self.schema_name,
             "table_name": self.table_name,
             "metric": self.metric,
             "aggregation": self.aggregation,
@@ -76,6 +78,7 @@ class Kpi(PkModel):
             "data_source": self.data_source,
             "kpi_type": self.kpi_type,
             "kpi_query": self.kpi_query,
+            "schema_name": self.schema_name,
             "table_name": self.table_name,
             "metric": self.metric,
             "aggregation": self.aggregation,

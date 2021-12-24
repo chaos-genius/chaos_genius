@@ -89,6 +89,9 @@ class DataLoader:
 
     def _get_table_name(self):
         if self.kpi_info["kpi_type"] == "table":
+            schema_name = self.kpi_info.get("schema_name", None)
+            if schema_name:
+                return f"{schema_name}.{self.kpi_info['table_name']}"
             return self.kpi_info["table_name"]
         else:
             return f"({self.kpi_info['kpi_query']}) as " + self._get_id_string(
@@ -118,7 +121,7 @@ class DataLoader:
         date_filter = self._build_date_filter().strip() if self.start_date is not None else ""
 
         if count:
-            query = f"select count (*) from {table_name} {date_filter}"
+            query = f"select count(*) from {table_name} {date_filter}"
         else:
             query = f"select * from {table_name} {date_filter}"
 

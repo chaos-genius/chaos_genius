@@ -1,7 +1,7 @@
 """added schema column in kpi table
 
 Revision ID: 289afabc70d3
-Revises: 7c504acbf3c4
+Revises: f7d137e094dd
 Create Date: 2021-12-17 13:15:18.388447
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '289afabc70d3'
-down_revision = '7c504acbf3c4'
+down_revision = 'f7d137e094dd'
 branch_labels = None
 depends_on = None
 

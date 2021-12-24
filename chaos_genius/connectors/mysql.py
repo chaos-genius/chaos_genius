@@ -58,8 +58,6 @@ class MysqlDb(BaseDb):
     def get_schema(self):
         self.schema = self.ds_info.get('database')
         return self.schema
-    
+
     def get_schema_names_list(self):
-        data = self.inspector.get_schema_names()
-        return data
-    
+        return None

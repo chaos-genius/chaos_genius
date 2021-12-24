@@ -1,6 +1,6 @@
 SCHEMAS_AVAILABLE = {
     "Postgres": True,
-    "MySQL": True,
+    "MySQL": False,
     "Redshift": True,
     "BigQuery": False,
     "Snowflake": True   

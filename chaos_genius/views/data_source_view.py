@@ -452,7 +452,7 @@ def get_schema_tables():
                 raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
 
             ds_name = getattr(ds_data, "connection_type")
-            schema = None if ds_name == "BigQuery" else schema
+            schema = None if SCHEMAS_AVAILABLE[ds_name] == False else schema
 
             table_names = get_table_list(ds_data.as_dict, schema)
             if table_names is None:
@@ -487,7 +487,7 @@ def get_schema_views():
                 raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
 
             ds_name = getattr(ds_data, "connection_type")
-            schema = None if ds_name == "BigQuery" else schema
+            schema = None if SCHEMAS_AVAILABLE[ds_name] == False else schema
 
             view_names = get_view_list(ds_data.as_dict, schema)
             if view_names is None:
@@ -525,8 +525,7 @@ def get_table_info():
 
         ds_name = getattr(ds_data, "connection_type")
 
-        if ds_name == "BigQuery":
-            schema = None
+        schema = None if SCHEMAS_AVAILABLE[ds_name] == False else schema
 
         table_info = get_table_metadata(ds_data.as_dict, schema, table_name)
         if table_info is None:

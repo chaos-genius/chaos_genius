@@ -140,7 +140,7 @@ class StaticEventAlertController:
         change = new_df.merge(old_df, how="outer", indicator=True).loc[
             lambda x: x["_merge"] == "left_only"
         ]
-        return change
+        return change.drop(columns=["_merge"])
 
     @staticmethod
     def test_change_entry(new_df, old_df):
@@ -191,7 +191,7 @@ class StaticEventAlertController:
                 file_detail = {}
                 file_detail["fname"] = "data.csv"
                 with io.StringIO() as buffer:
-                    change_df.to_csv(buffer)
+                    change_df.to_csv(buffer, index=False)
                     file_detail["fdata"] = buffer.getvalue()
                 files = [file_detail]
 
@@ -201,7 +201,7 @@ class StaticEventAlertController:
             normal_df = []
 
             if self.alert_info["alert_settings"] == "new_entry_alert":
-                add_df = list(change_df.head().T.to_dict().values())
+                normal_df = list(change_df.head().T.to_dict().values())
             elif self.alert_info["alert_settings"] == "change_alert":
                 del_df = list(
                     change_df[change_df["change"] == "deleted"]

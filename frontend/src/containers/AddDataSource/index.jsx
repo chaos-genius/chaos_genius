@@ -8,7 +8,7 @@ const AddDataSource = () => {
   const data = history.location.pathname.split('/');
 
   return (
-    <div>
+    <>
       {/* Page Navigation */}
       <div className="page-navigation">
         {/* Breadcrumb */}
@@ -38,7 +38,7 @@ const AddDataSource = () => {
       <div className="add-form-container">
         <DataSourceForm />
       </div>
-    </div>
+    </>
   );
 };
 

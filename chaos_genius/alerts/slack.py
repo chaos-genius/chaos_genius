@@ -44,42 +44,43 @@ def event_alert_slack(alert_name, alert_frequency, alert_message , alert_overvie
     client = get_webhook_client()
     if not client:
         raise Exception("Slack not configured properly.")
+    blocks = [
+        {
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": f"Alert: {alert_name}",
+                "emoji": True,
+            },
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"Alert Frequency : {alert_frequency}",
+            },
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"Alert Message : {alert_message}",
+            },
+        }
+    ]
+    if alert_overview:
+        blocks.append({
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"Alert Overview : {alert_overview}",
+            }
+        })
     response = client.send(
         text=f"Event Alert: {alert_name}",
-        blocks=[
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": f"Alert: {alert_name}",
-                    "emoji": True,
-                },
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"Alert Frequency : {alert_frequency}",
-                },
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"Alert Message : {alert_message}",
-                },
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"Alert Overview : {alert_overview}",
-                },
-            }
-            
-        ],
+        blocks=blocks
     )
-    return response.body    
+    return response.body
 
 
 def anomaly_alert_slack_formatted(alert_name, kpi_name, data_source_name, table_data):

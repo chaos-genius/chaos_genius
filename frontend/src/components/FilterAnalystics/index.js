@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
+import Tooltip from 'react-tooltip-lite';
 import Search from '../../assets/images/search.svg';
 import GreenArrow from '../../assets/images/green-arrow.svg';
 
@@ -70,7 +71,14 @@ const FilterAnalystics = ({ kpi, setKpi, data, onboarding }) => {
                   onClick={() => {
                     handleClick(item);
                   }}>
-                  {item.name}
+                  <div className="filter-tooltipcontent">
+                    <Tooltip
+                      className="tooltip-name"
+                      direction="right"
+                      content={<span> {item.name}</span>}>
+                      <label className="name-tooltip">{item.name}</label>
+                    </Tooltip>
+                  </div>
                   <img src={GreenArrow} alt="Arrow" />
                 </li>
               );

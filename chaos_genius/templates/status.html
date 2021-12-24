@@ -10,33 +10,33 @@
     <link href="https://unpkg.com/simple-datatables@3.2.0/dist/style.css" rel="stylesheet" type="text/css">
 </head>
 
-<body>
+<body class="bg-white">
     <div class="container mx-auto py-4">
         <h1 class="text-3xl">ChaosGenius Task Monitor</h1>
 
         <div class="flex flex-col py-4">
             <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                 <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                    <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+                    <div class="shadow overflow-hidden border-b border-gray-200 bg-gray-100 sm:rounded-2xl">
                         <table class="min-w-full divide-y divide-gray-200" id="tasktable">
-                            <thead class="bg-gray-50">
+                            <thead class="bg-gray-900">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
                                         KPI Name (ID)
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
                                         Job/Task ID
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
                                         Analytics Type
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
                                         Analytics Subtask
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
                                         Status
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
                                         Timestamp
                                     </th>
                                 </tr>
@@ -115,7 +115,7 @@
                 From: "opacity-100"
                 To: "opacity-0"
             -->
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-25 transition-opacity" aria-hidden="true"></div>
 
                 <!-- This element is to trick the browser into centering the modal contents. -->
                 <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
@@ -205,6 +205,11 @@
     </div>
 
 
+    <style>
+        .dataTable-table > thead > tr > th {
+            vertical-align: middle;
+        }
+    </style>
     <script src="https://unpkg.com/simple-datatables@3.2.0/dist/umd/simple-datatables.js" type="text/javascript"></script>
     <script>
         const dataTable = new simpleDatatables.DataTable("#tasktable");

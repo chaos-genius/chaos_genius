@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { Link, useHistory, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 import rightarrow from '../../assets/images/rightarrow.svg';
 
@@ -19,16 +19,16 @@ const SETTING_RESET = {
 
 const Kpisetting = ({ onboarding, setModal, setText }) => {
   const dispatch = useDispatch();
-  const history = useHistory();
-
-  const location = history.location.pathname.split('/');
 
   const { sidebarLoading, sidebarList } = useSelector((state) => {
     return state.sidebar;
   });
   const [kpi, setKpi] = useState('');
   const [analystics, setAnalystics] = useState(false);
+  const [breadCrumbs, setBreadCrumbs] = useState('');
   const kpiId = useParams().id;
+  const dashboardId = useParams().dashboard;
+
   useEffect(() => {
     getAllDashboardSidebar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -42,12 +42,17 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
   }, [analystics]);
 
   const getAllDashboardSidebar = () => {
-    dispatch(getDashboardSidebar());
+    if (dashboardId) {
+      dispatch(getDashboardSidebar({ dashboard_id: dashboardId }));
+    } else {
+      dispatch(getDashboardSidebar({ dashboard_id: 1 }));
+    }
   };
 
   useEffect(() => {
     if (sidebarList && sidebarList.length !== 0 && onboarding) {
       setKpi(sidebarList[0]?.id);
+
       // if (!onboarding) {
       //   window.history.pushState(
       //     '',
@@ -56,6 +61,11 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
       //   );
       // }
     } else if (sidebarList && sidebarList.length !== 0) {
+      setBreadCrumbs(
+        sidebarList[0]?.dashboards.find(
+          (item) => item.id.toString() === dashboardId.toString()
+        )?.name
+      );
       setKpi(kpiId);
     }
 
@@ -80,10 +90,16 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
                 <li
                   className="breadcrumb-item"
                   onClick={() => store.dispatch(SETTING_RESET)}>
-                  <Link to={`/dashboard/deepdrills/${location[3]}`}>
-                    Dashboard
+                  <Link to={`/dashboard`}>Dashboard</Link>
+                </li>
+                <li
+                  className="breadcrumb-item"
+                  onClick={() => store.dispatch(SETTING_RESET)}>
+                  <Link to={`/dashboard/${dashboardId}/deepdrills/`}>
+                    {breadCrumbs}
                   </Link>
                 </li>
+
                 <li
                   className="breadcrumb-item active"
                   aria-current="page"
@@ -96,7 +112,7 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
             <div
               className="backnavigation"
               onClick={() => store.dispatch(SETTING_RESET)}>
-              <Link to={`/dashboard/deepdrills/${location[3]}`}>
+              <Link to={`/dashboard/${dashboardId}/deepdrills`}>
                 <img src={rightarrow} alt="Back" />
                 <span>Settings</span>
               </Link>

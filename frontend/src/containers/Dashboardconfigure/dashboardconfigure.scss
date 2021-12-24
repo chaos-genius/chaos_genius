@@ -1,0 +1,35 @@
+@import '../../assets/styles/variable.scss';
+
+.dashboard-options {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 24px;
+  .form-group {
+    margin-right: 24px;
+    margin-bottom: 0px;
+    .form-control {
+      width: 400px !important;
+    }
+  }
+  .text {
+    display: flex;
+    align-items: center;
+    span {
+      margin-right: 10px;
+    }
+  }
+  .css-2b097c-container {
+    width: 220px;
+    .css-1hwfws3 {
+      padding: 2px 8px !important;
+    }
+  }
+}
+
+.empty-dashboard-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 74vh;
+}

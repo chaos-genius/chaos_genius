@@ -6,8 +6,12 @@ import {
   ONBOARD_ORGANIZATION_UPDATE_SUCCESS
 } from './ActionConstants';
 
-import { EDIT_CHANNEL_URL,ALERT_EMAIL_URL,ORGANIZATION_UPDATE_URL } from '../../utils/url-helper';
-import { postRequest,putRequest} from '../../utils/http-helper';
+import {
+  EDIT_CHANNEL_URL,
+  ALERT_EMAIL_URL,
+  ORGANIZATION_UPDATE_URL
+} from '../../utils/url-helper';
+import { postRequest, putRequest } from '../../utils/http-helper';
 
 // import {getOnboardingStatus } from './Onboarding'
 
@@ -58,14 +62,14 @@ export const onboardOrganisation = (payload) => {
   };
 };
 
-export const onboardingOrganisationStatus = () =>{
+export const onboardingOrganisationStatus = () => {
   const reqObject = {
-    config_name: "organisation_settings"
-  }
+    config_name: 'organisation_settings'
+  };
   return async (dispatch) => {
     const { data, error, status } = await postRequest({
       url: EDIT_CHANNEL_URL,
-      data:reqObject,
+      data: reqObject,
       headers: {
         'Content-Type': 'application/json;charset=UTF-8',
         'Access-Control-Allow-Origin': '*',
@@ -79,7 +83,7 @@ export const onboardingOrganisationStatus = () =>{
       dispatch(getOnboardingOrgnaizationStatusSuccess(data.data));
     }
   };
-}
+};
 
 export const onboardOrganisationUpdate = (payload) => {
   return async (dispatch) => {

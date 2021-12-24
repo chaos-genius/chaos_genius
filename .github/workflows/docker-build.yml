@@ -1,4 +1,4 @@
-name: CI to Docker hub
+name: CI to Docker hub [Prod-deploy to tag]
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: naikaayush/chaosgenius-webapp
+          images: chaosgenius/chaosgenius-webapp
           tags: type=semver,pattern={{version}}
 
       - name: Set up Docker Buildx
@@ -45,7 +45,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: naikaayush/chaosgenius-server
+          images: chaosgenius/chaosgenius-server
           tags: type=semver,pattern={{version}}
 
       - name: Set up Docker Buildx

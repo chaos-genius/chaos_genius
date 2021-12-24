@@ -42,9 +42,9 @@ const datasettype = [
 ];
 
 const aggregate = [
-  { value: 'cean', label: 'mean' },
-  { value: 'count', label: 'count' },
-  { value: 'sum', label: 'sum' }
+  { value: 'mean', label: 'Mean' },
+  { value: 'count', label: 'Count' },
+  { value: 'sum', label: 'Sum' }
 ];
 
 const customSingleValue = ({ data }) => (

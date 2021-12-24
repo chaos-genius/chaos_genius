@@ -25,6 +25,7 @@ Flask-Migrate==2.7.0
 
 # Alert
 slack-sdk==3.8.0
+tabulate==0.8.9
 
 # Data Analysis
 matplotlib==3.4.2
@@ -68,3 +69,7 @@ blinker==1.4
 
 # Docker API to check status
 docker~=5.0.3
+
+# Pygments for syntax higlighting errors
+Pygments~=2.10.0
+

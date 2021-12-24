@@ -88,6 +88,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
   const { aggregationData, aggregationLoading } = useSelector(
     (state) => state.aggregation
   );
+
   const { linechartData, linechartLoading } = useSelector(
     (state) => state.lineChart
   );
@@ -399,7 +400,8 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                 !collapse
                   ? 'dashboard-header-wrapper header-wrapper-disable'
                   : 'dashboard-header-wrapper'
-              }>
+              }
+              onClick={() => setCollapse(!collapse)}>
               <div className="dashboard-header">
                 <h3>Drill Downs</h3>
               </div>
@@ -408,8 +410,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                   collapse
                     ? 'header-collapse '
                     : 'header-collapse header-disable'
-                }
-                onClick={() => setCollapse(!collapse)}>
+                }>
                 <img src={Toparrow} alt="CollapseOpen" />
               </div>
             </div>

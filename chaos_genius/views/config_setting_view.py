@@ -6,6 +6,7 @@ from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.alerts.slack import trigger_overall_kpi_stats
 from chaos_genius.utils.datetime_helper import get_server_timezone
+from chaos_genius.utils.modules_utils import is_enterprise_edition
 from chaos_genius.views.kpi_view import kpi_aggregation
 from chaos_genius.databases.models.config_setting_model import ConfigSetting
 from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
@@ -261,6 +262,21 @@ def global_settings():
     data = {}
     try:
         data["timezone"] = get_server_timezone()
+        status = "success"
+    except Exception as err:
+        status = "failure"
+        current_app.logger.info(f"Error in fetching Global Config Data: {err}")
+        message = str(err)
+    return jsonify({"data": data, "msg": message, "status": status})
+
+
+@blueprint.route("/global-config", methods=["GET"])
+def global_config():
+    status, message = "", ""
+    data = {}
+    try:
+        data["timezone"] = get_server_timezone()
+        data["is_ee"] = is_enterprise_edition()
         status = "success"
     except Exception as err:
         status = "failure"

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """KPI views for creating and viewing the kpis."""
+from collections import defaultdict
 import logging
 import traceback  # noqa: F401
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from flask import (  # noqa: F401
     Blueprint,
@@ -21,9 +22,18 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.rca_data_model import RcaData
+from chaos_genius.databases.models.dashboard_kpi_mapper_model import DashboardKpiMapper
+from chaos_genius.databases.models.dashboard_model import Dashboard
 from chaos_genius.extensions import cache, db
 from chaos_genius.databases.db_utils import chech_editable_field
 from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
+from chaos_genius.controllers.dashboard_controller import (
+    create_dashboard_kpi_mapper,
+    get_mapper_obj_by_dashboard_ids,
+    get_mapper_obj_by_kpi_ids,
+    get_dashboard_list_by_ids,
+    disable_mapper_for_kpi_ids,
+)
 from chaos_genius.utils.datetime_helper import get_rca_timestamp, get_epoch_timestamp
 
 TIME_DICT = {
@@ -39,7 +49,6 @@ logger = logging.getLogger(__name__)
 @blueprint.route("/", methods=["GET", "POST"])
 def kpi():
     """kpi list view."""
-    logger.info("kpi list")
     # Handle logging in
     if request.method == "POST":
         if not request.is_json:
@@ -77,6 +86,9 @@ def kpi():
 
         new_kpi.save(commit=True)
 
+        dashboard_list = data.get("dashboard", [])
+        mapper_obj_list = create_dashboard_kpi_mapper(dashboard_list, [new_kpi.id])
+
         # TODO: Fix circular import error
         from chaos_genius.jobs.anomaly_tasks import ready_rca_task
 
@@ -98,18 +110,44 @@ def kpi():
         )
 
     elif request.method == "GET":
-        results = (
-            db.session.query(Kpi, DataSource)
-            .join(DataSource, Kpi.data_source == DataSource.id)
-            .filter(Kpi.active == True)  # noqa: E712
-            .order_by(Kpi.created_at.desc())
-            .all()
-        )
+        dashboard_id = request.args.get("dashboard_id")
+        kpi_result_list, kpi_dashboard_mapper = [], []
+        if dashboard_id:
+            kpi_dashboard_mapper = get_mapper_obj_by_dashboard_ids([dashboard_id])
+            kpi_list = [mapper.kpi for mapper in kpi_dashboard_mapper]
+            kpi_result_list = (
+                db.session.query(Kpi, DataSource)
+                .join(DataSource, Kpi.data_source == DataSource.id)
+                .filter(Kpi.active == True, Kpi.id.in_(kpi_list))  # noqa: E712
+                .order_by(Kpi.created_at.desc())
+                .all()
+            )
+        else:
+            kpi_result_list = (
+                db.session.query(Kpi, DataSource)
+                .join(DataSource, Kpi.data_source == DataSource.id)
+                .filter(Kpi.active == True)  # noqa: E712
+                .order_by(Kpi.created_at.desc())
+                .all()
+            )
+
+        kpi_dashboard_mapper = get_mapper_obj_by_kpi_ids([kpi.id for kpi, _ in kpi_result_list])
+        kpi_dashboard_dict = defaultdict(list)
+        for mapper in kpi_dashboard_mapper:
+            kpi_dashboard_dict[mapper.kpi].append(mapper.dashboard)
+        dashboard_list = [mapper.dashboard for mapper in kpi_dashboard_mapper]
+        dashboard_result_list = get_dashboard_list_by_ids(dashboard_list)
+        dashboard_dict = {dashboard.id: dashboard.as_dict for dashboard in dashboard_result_list}
+
         kpis = []
-        for row in results:
+        for row in kpi_result_list:
             kpi_info = row[0].safe_dict
             data_source_info = row[1].safe_dict
             kpi_info["data_source"] = data_source_info
+            dashboards = []
+            for dashboard_id in kpi_dashboard_dict[kpi_info["id"]]:
+                dashboards.append(dashboard_dict[dashboard_id])
+            kpi_info["dashboards"] = dashboards
             kpis.append(kpi_info)
         return jsonify({"count": len(kpis), "data": kpis})
 
@@ -120,38 +158,46 @@ def get_all_kpis():
 
     status, message = "success", ""
     timeline = request.args.get("timeline", "wow")
-    results = (
-        Kpi.query.filter(Kpi.active == True)  # noqa: E712
-        .order_by(Kpi.created_at.desc())
-        .all()
-    )
+    dashboard_id = request.args.get("dashboard_id")
 
-    ret = []
-    metrics = ["name", "metric", "id"]
-    for kpi in results:
-        info = {key: getattr(kpi, key) for key in metrics}
-        try:
+    try:
+        filters = [Kpi.active == True]
+        if dashboard_id:
+            kpi_dashboard_mapper = get_mapper_obj_by_dashboard_ids([dashboard_id])
+            kpi_list = [mapper.kpi for mapper in kpi_dashboard_mapper]
+            filters.append(Kpi.id.in_(kpi_list))
+
+        results = (
+            Kpi.query.filter(*filters)  # noqa: E712
+            .order_by(Kpi.created_at.desc())
+            .all()
+        )
+
+        ret = []
+        metrics = ["name", "metric", "id"]
+        for kpi in results:
+            info = {key: getattr(kpi, key) for key in metrics}
             aggregation_type = kpi.aggregation
             aggregate_data = kpi_aggregation(kpi.id, timeline)
             info["prev"] = round_number(
-                aggregate_data["panel_metrics"]["grp1_metrics"][aggregation_type]
+                aggregate_data.get("panel_metrics", {}).get("grp1_metrics", {}).get(aggregation_type, 0)
             )
             info["current"] = round_number(
-                aggregate_data["panel_metrics"]["grp2_metrics"][aggregation_type]
+                aggregate_data.get("panel_metrics", {}).get("grp2_metrics", {}).get(aggregation_type, 0)
             )
             info["change"] = round_number(info["current"] - info["prev"])
-        except Exception:
-            info["prev"] = 0
-            info["current"] = 0
-            info["change"] = 0
 
-        info["timeline"] = TIME_DICT[timeline]["expansion"]
-        info["anomaly_count"] = get_anomaly_count(kpi.id, timeline)
-        info["graph_data"] = kpi_line_data(kpi.id)
-        info["percentage_change"] = find_percentage_change(
-            info["current"], info["prev"]
-        )
-        ret.append(info)
+            info["timeline"] = TIME_DICT[timeline]["expansion"]
+            info["anomaly_count"] = get_anomaly_count(kpi.id, timeline)
+            info["graph_data"] = kpi_line_data(kpi.id)
+            info["percentage_change"] = find_percentage_change(
+                info["current"], info["prev"]
+            )
+            ret.append(info)
+    except Exception as e:
+        status = "failure"
+        message = str(e)
+        logger.error(message)
 
     return jsonify({"data": ret, "message": message, "status": status})
 
@@ -164,6 +210,7 @@ def disable_kpi(kpi_id):
         if kpi_obj:
             kpi_obj.active = False
             kpi_obj.save(commit=True)
+            disable = disable_mapper_for_kpi_ids([kpi_id])
             status = "success"
         else:
             message = "KPI not found"
@@ -171,6 +218,23 @@ def disable_kpi(kpi_id):
     except Exception as err:
         status = "failure"
         logger.info(f"Error in disabling the KPI: {err}")
+    return jsonify({"message": message, "status": status})
+
+@blueprint.route("/<int:kpi_id>/enable", methods=["GET"])
+def enable_kpi(kpi_id):
+    status, message = "", ""
+    try:
+        kpi_obj = Kpi.get_by_id(kpi_id)
+        if kpi_obj:
+            kpi_obj.active = True
+            kpi_obj.save(commit=True)
+            status = "success"
+        else:
+            message = "KPI not found"
+            status = "failure"
+    except Exception as err:
+        status = "failure"
+        logger.info(f"Error in enabling the KPI: {err}")
     return jsonify({"message": message, "status": status})
 
 
@@ -305,7 +369,8 @@ def trigger_analytics(kpi_id):
 @cache.memoize()
 def kpi_aggregation(kpi_id, timeline="mom"):
     try:
-        end_date = get_end_date(kpi_id)
+        kpi_info = get_kpi_data_from_id(kpi_id)
+        end_date = get_rca_output_end_date(kpi_info)
 
         data_point = (
             RcaData.query.filter(
@@ -323,7 +388,7 @@ def kpi_aggregation(kpi_id, timeline="mom"):
             final_data["analysis_date"] = get_analysis_date(kpi_id, end_date)
         else:
             final_data = {
-                "panel_metrics": [],
+                "panel_metrics": {},
                 "line_chart_data": [],
                 "insights": [],
                 "analysis_date": "",
@@ -336,7 +401,8 @@ def kpi_aggregation(kpi_id, timeline="mom"):
 @cache.memoize()
 def kpi_line_data(kpi_id):
     try:
-        end_date = get_end_date(kpi_id)
+        kpi_info = get_kpi_data_from_id(kpi_id)
+        end_date = get_rca_output_end_date(kpi_info)
 
         data_point = (
             RcaData.query.filter(
@@ -357,7 +423,8 @@ def kpi_line_data(kpi_id):
 @cache.memoize()
 def rca_analysis(kpi_id, timeline="mom", dimension=None):
     try:
-        end_date = get_end_date(kpi_id)
+        kpi_info = get_kpi_data_from_id(kpi_id)
+        end_date = get_rca_output_end_date(kpi_info)
 
         data_point = (
             RcaData.query.filter(
@@ -388,7 +455,8 @@ def rca_analysis(kpi_id, timeline="mom", dimension=None):
 @cache.memoize()
 def rca_hierarchical_data(kpi_id, timeline="mom", dimension=None):
     try:
-        end_date = get_end_date(kpi_id)
+        kpi_info = get_kpi_data_from_id(kpi_id)
+        end_date = get_rca_output_end_date(kpi_info)
 
         data_point = (
             RcaData.query.filter(
@@ -412,8 +480,7 @@ def rca_hierarchical_data(kpi_id, timeline="mom", dimension=None):
     return final_data
 
 
-def get_end_date(kpi_id):
-    kpi_info = get_kpi_data_from_id(kpi_id)
+def get_rca_output_end_date(kpi_info: dict) -> date:
     end_date = None
 
     if kpi_info["is_static"]:
@@ -425,7 +492,7 @@ def get_end_date(kpi_id):
         return datetime.strptime(end_date, "%Y-%m-%d").date()
 
 
-def get_analysis_date(kpi_id, end_date):
+def get_analysis_date(kpi_id: int, end_date: date) -> int:
     data_point = (
         RcaData.query.filter(
             (RcaData.kpi_id == kpi_id)
@@ -438,8 +505,7 @@ def get_analysis_date(kpi_id, end_date):
     final_data = data_point.data if data_point else []
     analysis_date = final_data[-1]["date"]
     analysis_timestamp = get_rca_timestamp(analysis_date)
-    epoch_timestamp = get_epoch_timestamp(analysis_timestamp)
-    return epoch_timestamp
+    return get_epoch_timestamp(analysis_timestamp)
 
 
 def find_percentage_change(curr_val, prev_val):

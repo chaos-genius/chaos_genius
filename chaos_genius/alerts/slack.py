@@ -40,7 +40,50 @@ def anomaly_alert_slack(alert_name, kpi_name, data_source_name, alert_body):
     return response.body
 
 
-def anomaly_alert_slack_formatted(alert_name, kpi_name, data_source_name, **kwargs):
+def event_alert_slack(alert_name, alert_frequency, alert_message , alert_overview):
+    client = get_webhook_client()
+    if not client:
+        raise Exception("Slack not configured properly.")
+    blocks = [
+        {
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": f"Alert: {alert_name}",
+                "emoji": True,
+            },
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"Alert Frequency : {alert_frequency}",
+            },
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"Alert Message : {alert_message}",
+            },
+        }
+    ]
+    if alert_overview:
+        blocks.append({
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"Alert Overview : {alert_overview}",
+            }
+        })
+    response = client.send(
+        text=f"Event Alert: {alert_name}",
+        blocks=blocks
+    )
+    return response.body
+
+
+def anomaly_alert_slack_formatted(alert_name, kpi_name, data_source_name, table_data):
     client = get_webhook_client()
     if not client:
         raise Exception("Slack not configured properly.")
@@ -61,41 +104,21 @@ def anomaly_alert_slack_formatted(alert_name, kpi_name, data_source_name, **kwar
                     "type": "mrkdwn",
                     "text": f"This is the alert generated from KPI *{kpi_name}* and Data Source *{data_source_name}*.",
                 },
-            },
-            {"type": "divider"},
-            {
-                "type": "section",
-                "fields": [
-                    {"type": "mrkdwn", "text": f"*Value:*\n{kwargs['highest_value']}"},
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*Time of Occurrence:*\n{kwargs['time_of_anomaly']}",
-                    },
-                ],
-            },
-            {
-                "type": "section",
-                "fields": [
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*Lower Bound of Range:*\n{kwargs['lower_bound']}",
-                    },
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*Upper Bound of Range:*\n{kwargs['upper_bound']}",
-                    },
-                ],
-            },
-            {
-                "type": "section",
-                "fields": [
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*Severity Value:*\n{kwargs['severity_value']}",
-                    }
-                ],
-            },
-        ],
+            }
+        ]
+    )
+    
+    subsequent_response = "failed"
+    if response.body == "ok":
+        subsequent_response = alert_table_sender(client, table_data)
+    
+    if response.body == "ok" and subsequent_response == "ok":
+        return "ok"
+    return subsequent_response
+
+def alert_table_sender(client, table_data):
+    response = client.send(
+        text=table_data
     )
     return response.body
 

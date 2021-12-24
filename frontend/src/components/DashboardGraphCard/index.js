@@ -2,7 +2,7 @@ import React from 'react';
 
 import Up from '../../assets/images/up.svg';
 import Down from '../../assets/images/down.svg';
-
+import HumanReadableNumbers from '../HumanReadableNumbers';
 import './dashboardgraphcard.scss';
 
 const Dashboardgraphcard = ({
@@ -38,111 +38,165 @@ const Dashboardgraphcard = ({
             {kpiAggregate === 'sum' ? (
               <h5>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp1_metrics?.sum
-                  ? aggregationData.panel_metrics.grp1_metrics.sum
-                  : '-'}
+                aggregationData.panel_metrics?.grp1_metrics?.sum ? (
+                  <HumanReadableNumbers
+                    is_bold
+                    number={aggregationData.panel_metrics.grp1_metrics.sum}
+                  />
+                ) : (
+                  '-'
+                )}
               </h5>
             ) : (
               <span>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp1_metrics?.sum
-                  ? aggregationData.panel_metrics.grp1_metrics.sum
-                  : '-'}
+                aggregationData.panel_metrics?.grp1_metrics?.sum ? (
+                  <HumanReadableNumbers
+                    number={aggregationData.panel_metrics.grp1_metrics.sum}
+                  />
+                ) : (
+                  '-'
+                )}
               </span>
             )}
             {kpiAggregate === 'mean' ? (
               <h5>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp1_metrics?.mean
-                  ? parseFloat(
+                aggregationData.panel_metrics?.grp1_metrics?.mean ? (
+                  <HumanReadableNumbers
+                    is_bold
+                    number={parseFloat(
                       aggregationData.panel_metrics?.grp1_metrics?.mean
-                    ).toFixed(2)
-                  : '-'}
+                    ).toFixed(2)}
+                  />
+                ) : (
+                  '-'
+                )}
               </h5>
             ) : (
               <span>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp1_metrics?.mean
-                  ? parseFloat(
+                aggregationData.panel_metrics?.grp1_metrics?.mean ? (
+                  <HumanReadableNumbers
+                    number={parseFloat(
                       aggregationData.panel_metrics?.grp1_metrics?.mean
-                    ).toFixed(2)
-                  : '-'}
+                    ).toFixed(2)}
+                  />
+                ) : (
+                  '-'
+                )}
               </span>
             )}
             {kpiAggregate === 'count' ? (
               <h5>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp1_metrics?.count
-                  ? parseFloat(
+                aggregationData.panel_metrics?.grp1_metrics?.count ? (
+                  <HumanReadableNumbers
+                    is_bold
+                    number={parseFloat(
                       aggregationData.panel_metrics?.grp1_metrics?.count
-                    ).toFixed(2)
-                  : '-'}
+                    ).toFixed(2)}
+                  />
+                ) : (
+                  '-'
+                )}
               </h5>
             ) : (
               <span>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp1_metrics?.count
-                  ? parseFloat(
+                aggregationData.panel_metrics?.grp1_metrics?.count ? (
+                  <HumanReadableNumbers
+                    number={parseFloat(
                       aggregationData.panel_metrics?.grp1_metrics?.count
-                    ).toFixed(2)
-                  : '-'}
+                    ).toFixed(2)}
+                  />
+                ) : (
+                  '-'
+                )}
               </span>
             )}
             {kpiAggregate === 'median' ? (
               <h5>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp1_metrics?.median
-                  ? parseFloat(
+                aggregationData.panel_metrics?.grp1_metrics?.median ? (
+                  <HumanReadableNumbers
+                    is_bold
+                    number={parseFloat(
                       aggregationData.panel_metrics?.grp1_metrics?.median
-                    ).toFixed(2)
-                  : '-'}
+                    ).toFixed(2)}
+                  />
+                ) : (
+                  '-'
+                )}
               </h5>
             ) : (
               <span>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp1_metrics?.median
-                  ? parseFloat(
+                aggregationData.panel_metrics?.grp1_metrics?.median ? (
+                  <HumanReadableNumbers
+                    number={parseFloat(
                       aggregationData.panel_metrics?.grp1_metrics?.median
-                    ).toFixed(2)
-                  : '-'}
+                    ).toFixed(2)}
+                  />
+                ) : (
+                  '-'
+                )}
               </span>
             )}
             {kpiAggregate === 'max' ? (
               <h5>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp1_metrics?.max
-                  ? parseFloat(
+                aggregationData.panel_metrics?.grp1_metrics?.max ? (
+                  <HumanReadableNumbers
+                    is_bold
+                    number={parseFloat(
                       aggregationData.panel_metrics?.grp1_metrics?.max
-                    ).toFixed(2)
-                  : '-'}
+                    ).toFixed(2)}
+                  />
+                ) : (
+                  '-'
+                )}
               </h5>
             ) : (
               <span>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp1_metrics?.max
-                  ? parseFloat(
+                aggregationData.panel_metrics?.grp1_metrics?.max ? (
+                  <HumanReadableNumbers
+                    number={parseFloat(
                       aggregationData.panel_metrics?.grp1_metrics?.max
-                    ).toFixed(2)
-                  : '-'}
+                    ).toFixed(2)}
+                  />
+                ) : (
+                  '-'
+                )}
               </span>
             )}
             {kpiAggregate === 'min' ? (
               <h5>
                 {aggregationData &&
-                aggregationData?.panel_metrics?.grp1_metrics?.min
-                  ? parseFloat(
+                aggregationData?.panel_metrics?.grp1_metrics?.min ? (
+                  <HumanReadableNumbers
+                    is_bold
+                    number={parseFloat(
                       aggregationData.panel_metrics?.grp1_metrics?.min
-                    ).toFixed(2)
-                  : '-'}
+                    ).toFixed(2)}
+                  />
+                ) : (
+                  '-'
+                )}
               </h5>
             ) : (
               <span>
                 {aggregationData &&
-                aggregationData?.panel_metrics?.grp1_metrics?.min
-                  ? parseFloat(
+                aggregationData?.panel_metrics?.grp1_metrics?.min ? (
+                  <HumanReadableNumbers
+                    number={parseFloat(
                       aggregationData.panel_metrics?.grp1_metrics?.min
-                    ).toFixed(2)
-                  : '-'}
+                    ).toFixed(2)}
+                  />
+                ) : (
+                  '-'
+                )}
               </span>
             )}
           </div>
@@ -160,112 +214,166 @@ const Dashboardgraphcard = ({
             {kpiAggregate === 'sum' ? (
               <h5>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp2_metrics?.sum
-                  ? aggregationData.panel_metrics?.grp2_metrics?.sum
-                  : '-'}
+                aggregationData.panel_metrics?.grp2_metrics?.sum ? (
+                  <HumanReadableNumbers
+                    is_bold
+                    number={aggregationData.panel_metrics?.grp2_metrics?.sum}
+                  />
+                ) : (
+                  '-'
+                )}
               </h5>
             ) : (
               <span>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp2_metrics?.sum
-                  ? aggregationData.panel_metrics?.grp2_metrics?.sum
-                  : '-'}
+                aggregationData.panel_metrics?.grp2_metrics?.sum ? (
+                  <HumanReadableNumbers
+                    number={aggregationData.panel_metrics?.grp2_metrics?.sum}
+                  />
+                ) : (
+                  '-'
+                )}
               </span>
             )}
             {kpiAggregate === 'mean' ? (
               <h5>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp2_metrics?.mean
-                  ? parseFloat(
+                aggregationData.panel_metrics?.grp2_metrics?.mean ? (
+                  <HumanReadableNumbers
+                    is_bold
+                    number={parseFloat(
                       aggregationData.panel_metrics?.grp2_metrics?.mean
-                    ).toFixed(2)
-                  : '-'}
+                    ).toFixed(2)}
+                  />
+                ) : (
+                  '-'
+                )}
               </h5>
             ) : (
               <span>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp2_metrics?.mean
-                  ? parseFloat(
+                aggregationData.panel_metrics?.grp2_metrics?.mean ? (
+                  <HumanReadableNumbers
+                    number={parseFloat(
                       aggregationData.panel_metrics?.grp2_metrics?.mean
-                    ).toFixed(2)
-                  : '-'}
+                    ).toFixed(2)}
+                  />
+                ) : (
+                  '-'
+                )}
               </span>
             )}
             {kpiAggregate === 'count' ? (
               <h5>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp2_metrics?.count
-                  ? parseFloat(
+                aggregationData.panel_metrics?.grp2_metrics?.count ? (
+                  <HumanReadableNumbers
+                    is_bold
+                    number={parseFloat(
                       aggregationData.panel_metrics?.grp2_metrics?.count
-                    ).toFixed(2)
-                  : '-'}
+                    ).toFixed(2)}
+                  />
+                ) : (
+                  '-'
+                )}
               </h5>
             ) : (
               <span>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp2_metrics?.count
-                  ? parseFloat(
+                aggregationData.panel_metrics?.grp2_metrics?.count ? (
+                  <HumanReadableNumbers
+                    number={parseFloat(
                       aggregationData.panel_metrics?.grp2_metrics?.count
-                    ).toFixed(2)
-                  : '-'}
+                    ).toFixed(2)}
+                  />
+                ) : (
+                  '-'
+                )}
               </span>
             )}
             {kpiAggregate === 'median' ? (
               <h5>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp2_metrics?.median
-                  ? parseFloat(
+                aggregationData.panel_metrics?.grp2_metrics?.median ? (
+                  <HumanReadableNumbers
+                    is_bold
+                    number={parseFloat(
                       aggregationData.panel_metrics?.grp2_metrics?.median
-                    ).toFixed(2)
-                  : '-'}
+                    ).toFixed(2)}
+                  />
+                ) : (
+                  '-'
+                )}
               </h5>
             ) : (
               <span>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp2_metrics?.median
-                  ? parseFloat(
+                aggregationData.panel_metrics?.grp2_metrics?.median ? (
+                  <HumanReadableNumbers
+                    number={parseFloat(
                       aggregationData.panel_metrics?.grp2_metrics?.median
-                    ).toFixed(2)
-                  : '-'}
+                    ).toFixed(2)}
+                  />
+                ) : (
+                  '-'
+                )}
               </span>
             )}
             {kpiAggregate === 'max' ? (
               <h5>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp2_metrics?.max
-                  ? parseFloat(
+                aggregationData.panel_metrics?.grp2_metrics?.max ? (
+                  <HumanReadableNumbers
+                    is_bold
+                    number={parseFloat(
                       aggregationData.panel_metrics?.grp2_metrics?.max
-                    ).toFixed(2)
-                  : '-'}
+                    ).toFixed(2)}
+                  />
+                ) : (
+                  '-'
+                )}
               </h5>
             ) : (
               <span>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp2_metrics?.max
-                  ? parseFloat(
+                aggregationData.panel_metrics?.grp2_metrics?.max ? (
+                  <HumanReadableNumbers
+                    number={parseFloat(
                       aggregationData.panel_metrics?.grp2_metrics?.max
-                    ).toFixed(2)
-                  : '-'}
+                    ).toFixed(2)}
+                  />
+                ) : (
+                  '-'
+                )}
               </span>
             )}
 
             {kpiAggregate === 'min' ? (
               <h5>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp2_metrics?.min
-                  ? parseFloat(
+                aggregationData.panel_metrics?.grp2_metrics?.min ? (
+                  <HumanReadableNumbers
+                    is_bold
+                    number={parseFloat(
                       aggregationData.panel_metrics?.grp2_metrics?.min
-                    ).toFixed(2)
-                  : '-'}
+                    ).toFixed(2)}
+                  />
+                ) : (
+                  '-'
+                )}
               </h5>
             ) : (
               <span>
                 {aggregationData &&
-                aggregationData.panel_metrics?.grp2_metrics?.min
-                  ? parseFloat(
+                aggregationData.panel_metrics?.grp2_metrics?.min ? (
+                  <HumanReadableNumbers
+                    number={parseFloat(
                       aggregationData.panel_metrics?.grp2_metrics?.min
-                    ).toFixed(2)
-                  : '-'}
+                    ).toFixed(2)}
+                  />
+                ) : (
+                  '-'
+                )}
               </span>
             )}
           </div>
@@ -281,7 +389,10 @@ const Dashboardgraphcard = ({
                 aggregationData.panel_metrics?.impact?.sum > 0 ? (
                   <div className="difference-high-heading">
                     <h5>
-                      {aggregationData.panel_metrics?.impact?.sum}
+                      <HumanReadableNumbers
+                        is_bold
+                        number={aggregationData.panel_metrics?.impact?.sum}
+                      />
                       <img src={Up} alt="Up" />
                     </h5>
                   </div>
@@ -290,7 +401,10 @@ const Dashboardgraphcard = ({
                   aggregationData.panel_metrics?.impact?.sum < 0 ? (
                   <div className="difference-low-heading">
                     <h5>
-                      {aggregationData.panel_metrics?.impact?.sum}
+                      <HumanReadableNumbers
+                        is_bold
+                        number={aggregationData.panel_metrics?.impact?.sum}
+                      />
                       <img src={Down} alt="Down" />
                     </h5>
                   </div>
@@ -305,7 +419,10 @@ const Dashboardgraphcard = ({
                 aggregationData.panel_metrics?.impact?.sum > 0 ? (
                   <div className="difference-high-heading">
                     <span>
-                      {aggregationData.panel_metrics?.impact?.sum}
+                      <HumanReadableNumbers
+                        number={aggregationData.panel_metrics?.impact?.sum}
+                      />
+
                       <img src={Up} alt="Up" />
                     </span>
                   </div>
@@ -314,7 +431,9 @@ const Dashboardgraphcard = ({
                   aggregationData.panel_metrics?.impact?.sum < 0 ? (
                   <div className="difference-low-heading">
                     <span>
-                      {aggregationData.panel_metrics?.impact?.sum}
+                      <HumanReadableNumbers
+                        number={aggregationData.panel_metrics?.impact?.sum}
+                      />
                       <img src={Down} alt="Down" />
                     </span>
                   </div>
@@ -330,9 +449,12 @@ const Dashboardgraphcard = ({
                 aggregationData.panel_metrics?.impact?.mean > 0 ? (
                   <div className="difference-high-heading">
                     <h5>
-                      {parseFloat(
-                        aggregationData.panel_metrics?.impact?.mean
-                      ).toFixed(2)}
+                      <HumanReadableNumbers
+                        is_bold
+                        number={parseFloat(
+                          aggregationData.panel_metrics?.impact?.mean
+                        ).toFixed(2)}
+                      />
                       <img src={Up} alt="Up" />
                     </h5>
                   </div>
@@ -341,9 +463,12 @@ const Dashboardgraphcard = ({
                   aggregationData.panel_metrics.impact.mean < 0 ? (
                   <div className="difference-low-heading">
                     <h5>
-                      {parseFloat(
-                        aggregationData.panel_metrics?.impact?.mean
-                      ).toFixed(2)}
+                      <HumanReadableNumbers
+                        is_bold
+                        number={parseFloat(
+                          aggregationData.panel_metrics?.impact?.mean
+                        ).toFixed(2)}
+                      />
                       <img src={Down} alt="Down" />
                     </h5>
                   </div>
@@ -358,9 +483,11 @@ const Dashboardgraphcard = ({
                 aggregationData.panel_metrics?.impact?.mean > 0 ? (
                   <div className="difference-high-heading">
                     <span>
-                      {parseFloat(
-                        aggregationData.panel_metrics?.impact?.mean
-                      ).toFixed(2)}
+                      <HumanReadableNumbers
+                        number={parseFloat(
+                          aggregationData.panel_metrics?.impact?.mean
+                        ).toFixed(2)}
+                      />
                       <img src={Up} alt="Up" />
                     </span>
                   </div>
@@ -369,9 +496,11 @@ const Dashboardgraphcard = ({
                   aggregationData.panel_metrics.impact.mean < 0 ? (
                   <div className="difference-low-heading">
                     <span>
-                      {parseFloat(
-                        aggregationData.panel_metrics?.impact?.mean
-                      ).toFixed(2)}
+                      <HumanReadableNumbers
+                        number={parseFloat(
+                          aggregationData.panel_metrics?.impact?.mean
+                        ).toFixed(2)}
+                      />
                       <img src={Down} alt="Down" />
                     </span>
                   </div>
@@ -387,9 +516,13 @@ const Dashboardgraphcard = ({
                 aggregationData.panel_metrics?.impact?.count > 0 ? (
                   <div className="difference-high-heading">
                     <h5>
-                      {parseFloat(
-                        aggregationData.panel_metrics?.impact?.count
-                      ).toFixed(2)}
+                      <HumanReadableNumbers
+                        is_bold
+                        number={parseFloat(
+                          aggregationData.panel_metrics?.impact?.count
+                        ).toFixed(2)}
+                      />
+
                       <img src={Up} alt="Up" />
                     </h5>
                   </div>
@@ -398,9 +531,12 @@ const Dashboardgraphcard = ({
                   aggregationData.panel_metrics.impact.count < 0 ? (
                   <div className="difference-low-heading">
                     <h5>
-                      {parseFloat(
-                        aggregationData.panel_metrics?.impact?.count
-                      ).toFixed(2)}
+                      <HumanReadableNumbers
+                        is_bold
+                        number={parseFloat(
+                          aggregationData.panel_metrics?.impact?.count
+                        ).toFixed(2)}
+                      />
                       <img src={Down} alt="Down" />
                     </h5>
                   </div>
@@ -415,9 +551,11 @@ const Dashboardgraphcard = ({
                 aggregationData.panel_metrics?.impact?.count > 0 ? (
                   <div className="difference-high-heading">
                     <span>
-                      {parseFloat(
-                        aggregationData.panel_metrics?.impact?.count
-                      ).toFixed(2)}
+                      <HumanReadableNumbers
+                        number={parseFloat(
+                          aggregationData.panel_metrics?.impact?.count
+                        ).toFixed(2)}
+                      />
                       <img src={Up} alt="Up" />
                     </span>
                   </div>
@@ -426,9 +564,11 @@ const Dashboardgraphcard = ({
                   aggregationData.panel_metrics.impact.count < 0 ? (
                   <div className="difference-low-heading">
                     <span>
-                      {parseFloat(
-                        aggregationData.panel_metrics?.impact?.count
-                      ).toFixed(2)}
+                      <HumanReadableNumbers
+                        number={parseFloat(
+                          aggregationData.panel_metrics?.impact?.count
+                        ).toFixed(2)}
+                      />
                       <img src={Down} alt="Down" />
                     </span>
                   </div>
@@ -444,9 +584,13 @@ const Dashboardgraphcard = ({
                 aggregationData.panel_metrics?.impact?.median > 0 ? (
                   <div className="difference-high-heading">
                     <h5>
-                      {parseFloat(
-                        aggregationData.panel_metrics?.impact?.median
-                      ).toFixed(2)}
+                      <HumanReadableNumbers
+                        is_bold
+                        number={parseFloat(
+                          aggregationData.panel_metrics?.impact?.median
+                        ).toFixed(2)}
+                      />
+
                       <img src={Up} alt="Up" />
                     </h5>
                   </div>
@@ -455,9 +599,12 @@ const Dashboardgraphcard = ({
                   aggregationData.panel_metrics?.impact?.median < 0 ? (
                   <div className="difference-low-heading">
                     <h5>
-                      {parseFloat(
-                        aggregationData.panel_metrics?.impact?.median
-                      ).toFixed(2)}
+                      <HumanReadableNumbers
+                        is_bold
+                        number={parseFloat(
+                          aggregationData.panel_metrics?.impact?.median
+                        ).toFixed(2)}
+                      />
                       <img src={Down} alt="Down" />
                     </h5>
                   </div>
@@ -472,9 +619,11 @@ const Dashboardgraphcard = ({
                 aggregationData.panel_metrics?.impact?.median > 0 ? (
                   <div className="difference-high-heading">
                     <span>
-                      {parseFloat(
-                        aggregationData.panel_metrics?.impact?.median
-                      ).toFixed(2)}
+                      <HumanReadableNumbers
+                        number={parseFloat(
+                          aggregationData.panel_metrics?.impact?.median
+                        ).toFixed(2)}
+                      />
                       <img src={Up} alt="Up" />
                     </span>
                   </div>
@@ -483,9 +632,11 @@ const Dashboardgraphcard = ({
                   aggregationData.panel_metrics?.impact?.median < 0 ? (
                   <div className="difference-low-heading">
                     <span>
-                      {parseFloat(
-                        aggregationData.panel_metrics?.impact?.median
-                      ).toFixed(2)}
+                      <HumanReadableNumbers
+                        number={parseFloat(
+                          aggregationData.panel_metrics?.impact?.median
+                        ).toFixed(2)}
+                      />
                       <img src={Down} alt="Down" />
                     </span>
                   </div>
@@ -501,9 +652,13 @@ const Dashboardgraphcard = ({
                 aggregationData.panel_metrics?.impact?.max > 0 ? (
                   <div className="difference-high-heading">
                     <h5>
-                      {parseFloat(
-                        aggregationData.panel_metrics?.impact?.max
-                      ).toFixed(2)}
+                      <HumanReadableNumbers
+                        is_bold
+                        number={parseFloat(
+                          aggregationData.panel_metrics?.impact?.max
+                        ).toFixed(2)}
+                      />
+
                       <img src={Up} alt="Up" />
                     </h5>
                   </div>
@@ -512,9 +667,12 @@ const Dashboardgraphcard = ({
                   aggregationData.panel_metrics?.impact?.max < 0 ? (
                   <div className="difference-low-heading">
                     <h5>
-                      {parseFloat(
-                        aggregationData.panel_metrics?.impact?.max
-                      ).toFixed(2)}
+                      <HumanReadableNumbers
+                        is_bold
+                        number={parseFloat(
+                          aggregationData.panel_metrics?.impact?.max
+                        ).toFixed(2)}
+                      />
                       <img src={Down} alt="Down" />
                     </h5>
                   </div>
@@ -529,9 +687,11 @@ const Dashboardgraphcard = ({
                 aggregationData.panel_metrics?.impact?.max > 0 ? (
                   <div className="difference-high-heading">
                     <span>
-                      {parseFloat(
-                        aggregationData.panel_metrics?.impact?.max
-                      ).toFixed(2)}
+                      <HumanReadableNumbers
+                        number={parseFloat(
+                          aggregationData.panel_metrics?.impact?.max
+                        ).toFixed(2)}
+                      />
                       <img src={Up} alt="Up" />
                     </span>
                   </div>
@@ -540,9 +700,11 @@ const Dashboardgraphcard = ({
                   aggregationData.panel_metrics?.impact?.max < 0 ? (
                   <div className="difference-low-heading">
                     <span>
-                      {parseFloat(
-                        aggregationData.panel_metrics?.impact?.max
-                      ).toFixed(2)}
+                      <HumanReadableNumbers
+                        number={parseFloat(
+                          aggregationData.panel_metrics?.impact?.max
+                        ).toFixed(2)}
+                      />
                       <img src={Down} alt="Down" />
                     </span>
                   </div>
@@ -558,9 +720,13 @@ const Dashboardgraphcard = ({
                 aggregationData.panel_metrics.impact.min > 0 ? (
                   <div className="difference-high-heading">
                     <h5>
-                      {parseFloat(
-                        aggregationData.panel_metrics?.impact?.min
-                      ).toFixed(2)}
+                      <HumanReadableNumbers
+                        is_bold
+                        number={parseFloat(
+                          aggregationData.panel_metrics?.impact?.min
+                        ).toFixed(2)}
+                      />
+
                       <img src={Up} alt="Up" />
                     </h5>
                   </div>
@@ -569,9 +735,12 @@ const Dashboardgraphcard = ({
                   aggregationData.panel_metrics?.impact?.min < 0 ? (
                   <div className="difference-low-heading">
                     <h5>
-                      {parseFloat(
-                        aggregationData.panel_metrics?.impact?.min
-                      ).toFixed(2)}
+                      <HumanReadableNumbers
+                        is_bold
+                        number={parseFloat(
+                          aggregationData.panel_metrics?.impact?.min
+                        ).toFixed(2)}
+                      />
                       <img src={Down} alt="Down" />
                     </h5>
                   </div>
@@ -586,9 +755,11 @@ const Dashboardgraphcard = ({
                 aggregationData.panel_metrics.impact.min > 0 ? (
                   <div className="difference-high-heading">
                     <span>
-                      {parseFloat(
-                        aggregationData.panel_metrics?.impact?.min
-                      ).toFixed(2)}
+                      <HumanReadableNumbers
+                        number={parseFloat(
+                          aggregationData.panel_metrics?.impact?.min
+                        ).toFixed(2)}
+                      />
                       <img src={Up} alt="Up" />
                     </span>
                   </div>
@@ -597,9 +768,11 @@ const Dashboardgraphcard = ({
                   aggregationData.panel_metrics?.impact?.min < 0 ? (
                   <div className="difference-low-heading">
                     <span>
-                      {parseFloat(
-                        aggregationData.panel_metrics?.impact?.min
-                      ).toFixed(2)}
+                      <HumanReadableNumbers
+                        number={parseFloat(
+                          aggregationData.panel_metrics?.impact?.min
+                        ).toFixed(2)}
+                      />
                       <img src={Down} alt="Down" />
                     </span>
                   </div>

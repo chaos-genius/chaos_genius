@@ -1,0 +1,31 @@
+@import '../../assets/styles/variable.scss';
+
+.tooltip-original-numbers {
+  .react-tooltip-lite {
+    width: auto !important;
+    max-width: none !important;
+    padding: 6px !important;
+    text-align: left;
+    background: $black_variation-2;
+    border-radius: 6px;
+    color: $white;
+    border: 1px solid $black_variation-2;
+    box-shadow: 4px 6px 32px -2px rgba(226, 226, 234, 0.24);
+    span {
+      font-weight: $font-weight-400;
+      font-size: $font-size-12;
+      line-height: $line-height-18;
+      letter-spacing: $letter-spacing;
+      color: $white;
+    }
+  }
+}
+.normal {
+  font-weight: $font-weight-400;
+  font-size: $font-size-12;
+}
+.bold-text {
+  font-weight: $font-weight-600 !important;
+  line-height: 22px;
+  font-size: initial !important;
+}

@@ -5,12 +5,15 @@ import { useHistory, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Select from 'react-select';
+import Modal from 'react-modal';
 
 import Play from '../../assets/images/play-green.png';
 import Success from '../../assets/images/success.svg';
 import Fail from '../../assets/images/fail.svg';
 //import Toast_error from '../../assets/images/toast-error.svg';
 //import Cancel from '../../assets/images/cancel.svg';
+import Close from '../../assets/images/close.svg';
+import Add from '../../assets/images/add.svg';
 
 import '../../assets/styles/addform.scss';
 
@@ -25,9 +28,12 @@ import {
   getTestQuery,
   getEditMetaInfo,
   getKpibyId,
-  getUpdatekpi
+  getUpdatekpi,
+  getDashboard,
+  getCreateDashboard
 } from '../../redux/actions';
 import { connectionContext } from '../context';
+import { getLocalStorage } from '../../utils/storage-helper';
 
 const datasettype = [
   {
@@ -46,14 +52,6 @@ const aggregate = [
   { value: 'sum', label: 'Sum' }
 ];
 
-// const operator = [
-//   { value: '=', label: '=' },
-//   { value: '+', label: '+' },
-//   { value: '-', label: '-' },
-//   { value: '/', label: '/' },
-//   { value: '>', label: '>' },
-//   { value: '<', label: '<' }
-// ];
 const customSingleValue = ({ data }) => (
   <div className="input-select">
     <div className="input-select__single-value">
@@ -65,7 +63,7 @@ const customSingleValue = ({ data }) => (
 
 const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   const dispatch = useDispatch();
-
+  const limited = getLocalStorage('GlobalSetting');
   const toast = useToast();
 
   const history = useHistory();
@@ -78,7 +76,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     datasource: '',
     tableoption: '',
     metricOption: '',
-    datetime_column: ''
+    datetime_column: '',
+    dashboard: ''
   });
 
   //const [inputList, setInputList] = useState([]);
@@ -93,7 +92,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     aggregate: '',
     datetimecolumns: '',
     addfilter: [],
-    dimensions: []
+    dimensions: [],
+    dashboardNameList: [],
+    dashboardName: ''
   });
 
   const [errorMsg, setErrorMsg] = useState({
@@ -106,7 +107,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     metriccolumns: false,
     aggregate: false,
     datetimecolumns: false,
-    dimension: false
+    dimension: false,
+    dashboardName: false,
+    dashboardNameList: false
   });
 
   const [dataset, setDataset] = useState({ value: 'Table', label: 'Table' });
@@ -117,6 +120,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   });
 
   const [datasourceid, setDataSourceId] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
 
   const {
     kpiFormLoading,
@@ -132,6 +136,12 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     kpiUpdateData
   } = useSelector((state) => state.kpiExplorer);
 
+  const { dashboardList } = useSelector((state) => state.DashboardHome);
+
+  const { createDashboardLoading, createDashboard } = useSelector(
+    (state) => state.DashboardHome
+  );
+
   // const resetFieldsOnchangeDataSetTypeOrTable = () => {
   //   setFormdata({
   //     tablename: '',
@@ -144,12 +154,22 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
 
   useEffect(() => {
     dispatchGetAllKpiExplorerForm();
+    dispatchGetAllDashboard();
     if (data[2] === 'edit') {
       dispatch(getEditMetaInfo());
       dispatch(getKpibyId(kpiId));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    dispatchGetAllDashboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createDashboard]);
+
+  const dispatchGetAllDashboard = () => {
+    dispatch(getDashboard());
+  };
 
   useEffect(() => {
     if (kpiFormData && connectionType) {
@@ -211,6 +231,37 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       arr = [];
     }
     setOption({ ...option, metricOption: arr });
+  };
+
+  useEffect(() => {
+    if (dashboardList) {
+      dashboardOptionList();
+    } // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dashboardList]);
+
+  const dashboardOptionList = () => {
+    let arr = [];
+    if (limited?.is_ee) {
+      arr.push({
+        value: 'newdashboard',
+        label: (
+          <span className="add-dashboard">
+            <img src={Add} alt="Add" />
+            New Dashboard
+          </span>
+        )
+      });
+    }
+    if (dashboardList) {
+      dashboardList &&
+        dashboardList.forEach((item) => {
+          arr.push({
+            label: item.name,
+            value: item.id
+          });
+        });
+    }
+    setOption({ ...option, dashboard: arr });
   };
 
   const datasourceIcon = (type) => {
@@ -346,7 +397,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             id: data.id,
             label: <div className="optionlabel">{datasourceIcon(data)}</div>
           });
-          setOption({ datasource: optionArr });
+          setOption({ ...option, datasource: optionArr });
         });
     }
   };
@@ -361,7 +412,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       metriccolumns: '',
       aggregate: '',
       datetimecolumns: '',
-      dimensions: []
+      dimensions: [],
+      dashboardNameList: []
     });
     setTableAdditional({
       ...tableAdditional,
@@ -439,7 +491,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           metriccolumns: '',
           aggregate: '',
           datetimecolumns: '',
-          dimensions: []
+          dimensions: [],
+          dashboardNameList: []
         });
       }
 
@@ -461,7 +514,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       aggregate: '',
       datetimecolumns: '',
       dimensions: [],
-      tablename: ''
+      tablename: '',
+      dashboardNameList: []
     });
     setTableAdditional({
       ...tableAdditional,
@@ -527,6 +581,15 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       });
     }
 
+    if (formdata.dashboardNameList.length === 0) {
+      setErrorMsg((prev) => {
+        return {
+          ...prev,
+          dashboardNameList: true
+        };
+      });
+    }
+
     if (formdata.query === '') {
       setErrorMsg((prev) => {
         return {
@@ -541,7 +604,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         formdata.dataset &&
         formdata.metriccolumns &&
         formdata.aggregate &&
-        formdata.datetimecolumns) !== ''
+        formdata.datetimecolumns &&
+        formdata.dashboardNameList.length !== 0) !== ''
     ) {
       const kpiInfo = {
         name: formdata.kpiname,
@@ -554,7 +618,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         aggregation: formdata.aggregate,
         datetime_column: formdata.datetimecolumns,
         dimensions: formdata.dimensions,
-        filters: formdata.addfilter
+        filters: formdata.addfilter,
+        dashboard: formdata.dashboardNameList.map((el) => el.value)
       };
       if (data[2] === 'edit') {
         dispatch(getUpdatekpi(kpiId, { name: formdata.kpiname }));
@@ -583,6 +648,33 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       dimensions: []
     });
   };
+  const closeModal = () => {
+    setIsOpen(false);
+  };
+
+  const dashboardSubmit = () => {
+    if (formdata.dashboardName === '') {
+      setErrorMsg((prev) => {
+        return {
+          ...prev,
+          dashboardName: true
+        };
+      });
+    }
+    if (formdata.dashboardName) {
+      const dashboardData = {
+        dashboard_name: formdata.dashboardName,
+        kpi_list: []
+      };
+      dispatch(getCreateDashboard(dashboardData));
+    }
+  };
+
+  useEffect(() => {
+    if (createDashboard && createDashboard.status === 'success') {
+      setIsOpen(false);
+    }
+  }, [createDashboard]);
 
   /* This is add filter function code */
 
@@ -935,6 +1027,47 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               </p>
             </div>
           </div>
+
+          <div className="form-group">
+            <label>Dashboard *</label>
+            <Select
+              closeMenuOnSelect={false}
+              blurInputOnSelect={false}
+              isMulti
+              options={option.dashboard}
+              classNamePrefix="selectcategory"
+              placeholder="Select"
+              menuPlacement="top"
+              value={
+                formdata.dashboardNameList.length !== 0
+                  ? formdata.dashboardNameList
+                  : []
+              }
+              // components={{ SingleValue: customAddDashboard }}
+              onChange={(e) => {
+                var arr = [];
+                e.length !== 0
+                  ? e.forEach((data) => {
+                      if (data.value === 'newdashboard') {
+                        setIsOpen(true);
+                      } else if (data.value !== 'newdashboard') {
+                        arr.push(data);
+                        setFormdata({
+                          ...formdata,
+                          dashboardNameList: arr
+                        });
+                      }
+                    })
+                  : setFormdata({ ...formdata, dashboardNameList: e });
+              }}
+            />
+            {errorMsg.dashboardNameList === true ? (
+              <div className="connection__fail">
+                <p>Select Dashboard</p>
+              </div>
+            ) : null}
+          </div>
+
           {/* {inputList && inputList.length !== 0 && (
             <div className="form-group">
               <label>Filters</label>
@@ -1017,6 +1150,60 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             </button>
           </div>
         </>
+        <Modal
+          isOpen={isOpen}
+          shouldCloseOnOverlayClick={false}
+          portalClassName="dashboardmodal">
+          <div className="modal-close">
+            <img src={Close} alt="Close" onClick={closeModal} />
+          </div>
+          <div className="modal-head">
+            <h3>Create New Dashboard</h3>
+          </div>
+          <div className="modal-body">
+            <div className="modal-contents">
+              <div className="form-group">
+                <label>Dashboard Name *</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Dashboard Name"
+                  onChange={(e) => {
+                    setErrorMsg({ ...errorMsg, dashboardName: false });
+                    setFormdata({ ...formdata, dashboardName: e.target.value });
+                  }}
+                />
+                {errorMsg.dashboardName === true ? (
+                  <div className="connection__fail">
+                    <p>Enter Dashboard Name</p>
+                  </div>
+                ) : null}
+              </div>
+              <div className="next-step-navigate">
+                <button className="btn white-button" onClick={closeModal}>
+                  <span>Cancel</span>
+                </button>
+                <button
+                  className={
+                    createDashboardLoading
+                      ? 'btn black-button btn-loading'
+                      : 'btn black-button'
+                  }
+                  onClick={dashboardSubmit}>
+                  <div className="btn-spinner">
+                    <div className="spinner-border" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <span>Loading...</span>
+                  </div>
+                  <div className="btn-content">
+                    <span>Create</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </Modal>
       </>
     );
   }

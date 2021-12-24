@@ -575,6 +575,41 @@ const EventAlertForm = ({
                   Always Send
                 </label>
               </div>
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  id="missingDataAlert"
+                  name="alert"
+                  disabled={
+                    path[2] === 'edit'
+                      ? editableStatus('alert_settings') === 'editable'
+                        ? false
+                        : editableStatus('alert_settings') === 'sensitive'
+                        ? enabled.alert_settings
+                        : true
+                      : false
+                  }
+                  checked={alertFormData.alert_settings === 'missing_data_alert'}
+                  onChange={(e) => {
+                    setError({ ...error, alert_settings: '' });
+                    setAlertFormData({
+                      ...alertFormData,
+                      alert_settings: 'missing_data_alert'
+                    });
+                  }}
+                />
+                <label
+                  className={
+                    alertFormData.alert_settings === 'missing_data_alert'
+                      ? 'form-check-label active'
+                      : 'form-check-label'
+                  }
+                  for="missingDataAlert">
+                  Missing Data
+                </label>
+              </div>
+
             </div>
             {path[2] === 'edit' &&
               editableStatus('alert_settings') === 'sensitive' &&

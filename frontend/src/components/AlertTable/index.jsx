@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Tooltip from 'react-tooltip-lite';
 import Modal from 'react-modal';
 import { useDispatch } from 'react-redux';
 
@@ -93,7 +94,15 @@ const AlertTable = ({ alertData, alertSearch }) => {
             ? alertData.map((alert) => {
                 return (
                   <tr>
-                    <td>{alert.alert_name || '-'}</td>
+                    <td className="name-tooltip">
+                      <Tooltip
+                        className="tooltip-name"
+                        direction="right"
+                        content={<span>{alert.alert_name || '-'}</span>}>
+                        <span>{alert.alert_name || '-'}</span>
+                      </Tooltip>
+                    </td>
+
                     <td className="date-column-formated">
                       {alert.alert_type || '-'}
                     </td>

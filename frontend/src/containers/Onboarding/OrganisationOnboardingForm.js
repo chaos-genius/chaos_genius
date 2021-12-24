@@ -1,9 +1,8 @@
-import React, { useState,useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  onboardOrganisation
-} from '../../redux/actions';
+import { onboardOrganisation } from '../../redux/actions';
+import { validateEmail } from '../../utils/regex-helper';
 
 const OrganisationOnboardingForm = () => {
   const dispatch = useDispatch();
@@ -11,7 +10,7 @@ const OrganisationOnboardingForm = () => {
 
   const { organisationData } = useSelector((state) => state.organisation);
   const [emailAddress, setEmailAddress] = useState('');
-  const [ErrorMessage, setErrorMessage] = useState(false)
+  const [ErrorMessage, setErrorMessage] = useState(false);
   const [isAnonymizeData, setIsAnonymizeData] = useState(false);
   const [isNewsSubscribed, setIsNewsSubscribed] = useState(false);
 
@@ -20,12 +19,6 @@ const OrganisationOnboardingForm = () => {
   };
   const onCheckingNews = (status) => {
     setIsNewsSubscribed(status);
-  };
-
-  const validateEmail = (email) => {
-    let regex =
-    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
-    return regex.test(String(email).toLowerCase());
   };
 
   const handleSubmit = () => {
@@ -43,21 +36,24 @@ const OrganisationOnboardingForm = () => {
     };
     if (emailAddress !== '' && validateEmail(emailAddress)) {
       dispatch(onboardOrganisation(data));
-    } else if( emailAddress === '') {
+    } else if (emailAddress === '') {
       dispatch(onboardOrganisation(data));
-    }else{
+    } else {
       setErrorMessage(true);
     }
   };
 
   useEffect(() => {
-    if(organisationData !== undefined &&
-      Object.keys(organisationData).length && organisationData.active){
+    if (
+      organisationData !== undefined &&
+      Object.keys(organisationData).length &&
+      organisationData.active
+    ) {
       history.push('/');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [organisationData])
-  
+  }, [organisationData]);
+
   return (
     <>
       <div className="og-onboarding-section">
@@ -75,10 +71,8 @@ const OrganisationOnboardingForm = () => {
               placeholder="name@company.com"
             />
             {ErrorMessage === true ? (
-            <div className="invalid-email">
-              Enter a valid email.
-            </div>
-          ) : null}
+              <div className="invalid-email">Enter a valid email.</div>
+            ) : null}
           </div>
           <p className="sub-headings">Anonymize usage data collection</p>
           <p>

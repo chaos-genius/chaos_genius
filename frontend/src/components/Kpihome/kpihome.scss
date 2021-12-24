@@ -39,6 +39,15 @@
     text-transform: capitalize;
     color: $black_variation-2;
     // margin-bottom: 8px;
+    &.name-tooltip {
+      max-width: 85%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      white-space: initial;
+    }
   }
   label {
     font-weight: $font-weight-400;
@@ -59,7 +68,7 @@
     align-items: center;
     label {
       font-weight: $font-weight-400;
-      font-size: $font-size-18;
+      font-size: $font-size-16;
       line-height: $line-height-22;
       letter-spacing: $letter-spacing;
       text-transform: capitalize;
@@ -98,39 +107,67 @@
   .kpi-content {
     display: flex;
     flex-direction: column;
-    width: 15%;
+    width: 17%;
     &.kpi-content-label {
-      // width: 180px;
       label {
         margin-bottom: 0px;
       }
     }
-    // .highcharts-title {
-    //   display: none;
-    // }
+
     .highcharts-container {
-      width: 80px !important;
+      width: 90px !important;
+    }
+    .highcharts-root {
+      width: 180px !important;
+      height: 50px !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   }
+
   .kpi-graph {
-    // width: 234px;
     height: 56px;
     display: flex;
     align-items: center;
     justify-content: center;
     div {
       overflow: visible !important;
-      // width: 120px !important;
       .highcharts-container {
         margin-bottom: 0px !important;
       }
     }
   }
 }
+
+.home-explore-wrapper {
+  width: 100%;
+}
+.home-card-section {
+  width: 78%;
+}
 .no-data-kpihome {
-  min-height: 65vh;
+  min-height: 485px;
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
+}
+
+.heading-option {
+  .homepage-search-dropdown {
+    display: flex;
+    .form-group {
+      margin-right: 24px;
+      margin-bottom: 0px;
+    }
+    .css-2b097c-container {
+      width: 250px;
+    }
+  }
+}
+.kpihome-heading {
+  .css-1hwfws3 {
+    padding: 2px 8px !important;
+  }
 }

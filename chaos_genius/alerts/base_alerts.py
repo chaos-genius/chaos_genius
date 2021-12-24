@@ -5,6 +5,7 @@ from typing import Optional, List, Tuple
 import pandas as pd
 import datetime
 from datetime import date
+from copy import deepcopy
 from chaos_genius.utils.io_helper import is_file_exists
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.alert_model import Alert
@@ -15,7 +16,15 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import anomaly_alert_slack_formatted, event_alert_slack
+from chaos_genius.alerts.anomaly_alert_config import (
+    ANOMALY_TABLE_COLUMN_NAMES_MAPPER,
+    IGNORE_COLUMNS_ANOMALY_TABLE,
+    ANOMALY_ALERT_COLUMN_NAMES,
+    ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS
+)
+from chaos_genius.core.rca.rca_utils.string_helpers import convert_query_string_to_user_string
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from tabulate import tabulate
 
 logger = logging.getLogger()
 
@@ -370,35 +379,52 @@ class AnomalyAlertController:
 
         # TODO: Add the series type filter for query optimisation
         anomaly_data = AnomalyDataOutput.query.filter(
-            AnomalyDataOutput.kpi_id == kpi_id,
-            AnomalyDataOutput.anomaly_type == "overall",
-            AnomalyDataOutput.is_anomaly.in_([1, -1]),
-            AnomalyDataOutput.data_datetime >= self.anomaly_end_date,
-        ).all()
+                                            AnomalyDataOutput.kpi_id == kpi_id,
+                                            AnomalyDataOutput.anomaly_type.in_(["overall", "subdim"]),
+                                            AnomalyDataOutput.is_anomaly.in_([1,-1]),
+                                            AnomalyDataOutput.data_datetime >= self.anomaly_end_date,
+                                            AnomalyDataOutput.severity >= self.alert_info["severity_cutoff_score"]
+                                        ).all()
 
         if len(anomaly_data) == 0:
             logger.info(f"No anomaly exists (Alert ID - {alert_id})")
             return True
 
-        anomaly_data.sort(
-            key=lambda anomaly: getattr(anomaly, "severity"), reverse=True
-        )
-        anomaly = anomaly_data[0]
-
-        if getattr(anomaly, "severity") < self.alert_info["severity_cutoff_score"]:
-            logger.info(
-                f"The anomaliy's severity score is below the threshold (Alert ID - {alert_id})"
-            )
-            return True
-
         logger.info(f"Alert ID {alert_id} is sent to the respective alert channel")
 
         if self.alert_info["alert_channel"] == "email":
-            return self.send_alert_email(anomaly)
+            return self.send_alert_email(anomaly_data)
         elif self.alert_info["alert_channel"] == "slack":
-            return self.send_slack_alert(anomaly)
+            return self.send_slack_alert(anomaly_data)
 
-    def send_alert_email(self, anomaly):
+    def get_overall_subdim_data(self, anomaly_data):
+
+        anomaly_data = [anomaly_point.as_dict for anomaly_point in anomaly_data]
+        anomaly_data = [{key: value for key, value in anomaly_point.items() if key not in IGNORE_COLUMNS_ANOMALY_TABLE} for anomaly_point in anomaly_data]
+
+        for anomaly_point in anomaly_data:
+            anomaly_point["series_type"] = "Overall KPI" if anomaly_point.get("anomaly_type") == "overall" else anomaly_point["series_type"]
+            for key, value in anomaly_point.items():
+                if key in ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS:
+                    anomaly_point[key] = round(value, 2)
+            anomaly_point["series_type"] = convert_query_string_to_user_string(anomaly_point["series_type"])
+
+        overall_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "overall"]
+        subdim_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "subdim"]
+        overall_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
+        subdim_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
+
+        return overall_data, subdim_data
+
+    def format_alert_data(self, data):
+        for anomaly_point in data:
+            lower = anomaly_point.get("yhat_lower")
+            upper = anomaly_point.get("yhat_upper")
+            anomaly_point["Expected Value"] = f"{lower} - {upper}"
+            for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
+                anomaly_point[value] = anomaly_point[key]
+
+    def send_alert_email(self, anomaly_data):
 
         alert_channel_conf = self.alert_info["alert_channel_conf"]
 
@@ -413,36 +439,51 @@ class AnomalyAlertController:
         if recipient_emails:
             subject = f"{self.alert_info['alert_name']} - Chaos Genius Alert❗"
             alert_message = self.alert_info["alert_message"]
-            time_of_anomaly = str(getattr(anomaly, "data_datetime"))
-            highest_value = round(getattr(anomaly, "y"), 1)
-            lower_bound = round(getattr(anomaly, "yhat_lower"), 2)
-            upper_bound = round(getattr(anomaly, "yhat_upper"), 2)
-            severity_value = round(getattr(anomaly, "severity"), 2)
 
             kpi_id = self.alert_info["kpi"]
-            kpi_obj = Kpi.get_by_id(kpi_id)
+            kpi_obj = Kpi.query.filter(Kpi.active == True, Kpi.id == kpi_id).first()
 
             if kpi_obj is None:
                 logger.info(f"No KPI exists for Alert ID - {self.alert_info['id']}")
                 return False
 
-            kpi_name = getattr(kpi_obj, "name")
+            kpi_name = getattr(kpi_obj, 'name')
+            
+            overall_data, subdim_data = self.get_overall_subdim_data(anomaly_data)
 
-            test = self.send_template_email(
-                "email_alert.html",
-                recipient_emails,
-                subject,
-                alert_message=alert_message,
-                time_of_anomaly=time_of_anomaly,
-                highest_value=highest_value,
-                lower_bound=lower_bound,
-                upper_bound=upper_bound,
-                severity_value=severity_value,
-                kpi_name=kpi_name,
-                alert_frequency=self.alert_info["alert_frequency"].capitalize(),
-                preview_text="Anomaly Alert",
-                alert_name=self.alert_info.get("alert_name"),
-            )
+            overall_data_email_body = deepcopy([overall_data[0]]) if len(overall_data) > 0 else []
+            len_subdim = min(10, len(subdim_data))
+            subdim_data_email_body = deepcopy(subdim_data[0:len_subdim]) if len(subdim_data) > 0 else []
+
+            overall_data.extend(subdim_data)
+            overall_data_email_body.extend(subdim_data_email_body)
+
+            self.format_alert_data(overall_data)
+            self.format_alert_data(overall_data_email_body)
+
+            column_names = ANOMALY_ALERT_COLUMN_NAMES
+            anomaly_data = pd.DataFrame(overall_data, columns=column_names)
+            files = []
+            if not anomaly_data.empty:
+                file_detail = {}
+                file_detail["fname"] = "data.csv"
+                with io.StringIO() as buffer:
+                    anomaly_data.to_csv(buffer, encoding="utf-8")
+                    file_detail["fdata"] = buffer.getvalue()
+                files = [file_detail]
+
+            test = self.send_template_email('email_alert.html', 
+                                            recipient_emails, 
+                                            subject,
+                                            files,
+                                            column_names=column_names,
+                                            data=overall_data_email_body,
+                                            alert_message=alert_message,
+                                            kpi_name = kpi_name,
+                                            alert_frequency=self.alert_info['alert_frequency'].capitalize(),
+                                            preview_text="Anomaly Alert",
+                                            alert_name=self.alert_info.get("alert_name")
+                                        )
             logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
             return True
         else:
@@ -451,7 +492,7 @@ class AnomalyAlertController:
             )
             return False
 
-    def send_template_email(self, template, recipient_emails, subject, **kwargs):
+    def send_template_email(self, template, recipient_emails, subject, files, **kwargs):
         """Sends an email using a template."""
 
         path = os.path.join(os.path.dirname(__file__), "email_templates")
@@ -460,9 +501,7 @@ class AnomalyAlertController:
         )
 
         template = env.get_template(template)
-        test = send_static_alert_email(
-            recipient_emails, subject, template.render(**kwargs), self.alert_info
-        )
+        test = send_static_alert_email(recipient_emails, subject, template.render(**kwargs), self.alert_info, files)
 
         if test == True:
             logger.info(
@@ -475,22 +514,47 @@ class AnomalyAlertController:
 
         return test
 
-    def send_slack_alert(self, anomaly):
-        alert_name = self.alert_info["alert_name"]
-        kpi_name = Kpi.get_by_id(self.alert_info["kpi"]).safe_dict["name"]
-        data_source_name = DataSource.get_by_id(
-            self.alert_info["data_source"]
-        ).safe_dict["name"]
+    def send_slack_alert(self, anomaly_data):
+        kpi_id = self.alert_info["kpi"]
+        kpi_obj = Kpi.query.filter(Kpi.active == True, Kpi.id == kpi_id).first()
+
+        if kpi_obj is None:
+            logger.info(f"No KPI exists for Alert ID - {self.alert_info['id']}")
+            return False
+
+        data_source_obj = DataSource.query.filter(
+                                            DataSource.id == self.alert_info["data_source"],
+                                            DataSource.active == True
+                                        ).first()
+        
+        if data_source_obj is None:
+            logger.info(f"The data source provided for Alert ID - {self.alert_info['id']} does not exist")
+            return False
+
+        kpi_name = getattr(kpi_obj, "name")
+        data_source_name = getattr(data_source_obj, "name")
+        alert_name = self.alert_info.get("alert_name")
+
+        overall_data, subdim_data = self.get_overall_subdim_data(anomaly_data)
+
+        overall_data_alert_body = deepcopy([overall_data[0]]) if len(overall_data) > 0 else []
+        len_subdim = min(10, len(subdim_data))
+        subdim_data_alert_body = deepcopy(subdim_data[0:len_subdim]) if len(subdim_data) > 0 else []
+
+        overall_data_alert_body.extend(subdim_data_alert_body)
+
+        self.format_alert_data(overall_data_alert_body)
+
+        column_names = ANOMALY_ALERT_COLUMN_NAMES
+        anomaly_data = pd.DataFrame(overall_data_alert_body, columns=column_names)
+        table_data = tabulate(anomaly_data, tablefmt="fancy_grid", headers="keys")
+        table_data = "```" + table_data + "```"
         test = anomaly_alert_slack_formatted(
-            alert_name,
-            kpi_name,
-            data_source_name,
-            highest_value=round(getattr(anomaly, "y"), 1),
-            time_of_anomaly=str(getattr(anomaly, "data_datetime")),
-            lower_bound=round(getattr(anomaly, "yhat_lower"), 2),
-            upper_bound=round(getattr(anomaly, "yhat_upper"), 2),
-            severity_value=round(getattr(anomaly, "severity"), 2),
-        )
+                alert_name,
+                kpi_name,
+                data_source_name,
+                table_data
+            )
 
         if test == "ok":
             logger.info(

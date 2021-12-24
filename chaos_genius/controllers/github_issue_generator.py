@@ -9,7 +9,7 @@ from urllib.parse import quote_plus
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.task_model import Task
-from chaos_genius.settings import IN_DOCKER
+from chaos_genius.settings import CHAOSGENIUS_VERSION, IN_DOCKER
 
 logger = logging.getLogger(__name__)
 
@@ -23,8 +23,8 @@ Exception message: `{exception_message}`
 
 ## Environment
 
-- **Chaos Genius version**: <!--example is 0.1.3-alpha-->
 - **Instance/System type**: <!--Laptop/MacBook/Desktop/AWS EC2/GCP VM-->
+- **Chaos Genius version**: {cg_version}
 - **OS Version**: {os_info}
 - **Deployment type**: {deployment_type}
 - **Python version**: {python_version}
@@ -121,6 +121,7 @@ def generate_github_issue_link(task: Task) -> str:
         data_source=pprint.pformat(data_source.safe_dict),
         python_version=platform.python_version(),
         os_info=platform.platform(aliased=True, terse=True),
+        cg_version=CHAOSGENIUS_VERSION,
     )
 
     issue_title = quote_plus(issue_title)

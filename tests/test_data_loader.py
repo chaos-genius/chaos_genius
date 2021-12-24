@@ -112,7 +112,6 @@ def test_data_loader(monkeypatch: MonkeyPatch):
     # query, end_date, start_date, count
     output_query = r"select count\(\*\) from \(select \* from cloud_cost\) as \"[a-z]{10}\""\
         + f""" where "date" >= '{start_date.strftime("%Y-%m-%d")}' and "date" < '{end_date.strftime("%Y-%m-%d")}'"""
-    import pdb; pdb.set_trace()
     assert re.match(output_query, dl._build_query(count=True).strip())
 
     # query, end_date, start_date, tail

@@ -37,7 +37,7 @@ const RESET = {
   type: 'RESET_DRILL'
 };
 
-const Anomaly = ({ kpi, anomalystatus }) => {
+const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
   const dispatch = useDispatch();
   const history = useHistory();
   const [chartData, setChartData] = useState([]);
@@ -121,7 +121,7 @@ const Anomaly = ({ kpi, anomalystatus }) => {
   }
   useEffect(() => {
     if (anomalystatus && anomalystatus?.is_anomaly_setup === false) {
-      history.push(`/kpi/settings/${kpi}`);
+      history.push(`/dashboard/${dashboard}/settings/${kpi}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anomalystatus]);

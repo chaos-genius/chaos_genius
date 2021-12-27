@@ -7,10 +7,12 @@ import GreenArrow from '../../assets/images/green-arrow.svg';
 import Fuse from 'fuse.js';
 
 import { v4 as uuidv4 } from 'uuid';
+import { useParams } from 'react-router-dom';
 
 const FilterAnalystics = ({ kpi, setKpi, data, onboarding }) => {
   const [listData, setListData] = useState(data);
   const [searchData, setSearchData] = useState(data);
+  const dashboard = useParams().dashboard;
 
   useEffect(() => {
     if (data) {
@@ -39,7 +41,11 @@ const FilterAnalystics = ({ kpi, setKpi, data, onboarding }) => {
   const handleClick = (item) => {
     setKpi(item.id);
     if (!onboarding) {
-      window.history.pushState('', '', `/#/kpi/settings/${item.id}`);
+      window.history.pushState(
+        '',
+        '',
+        `/#/dashboard/${dashboard}/settings/${item.id}`
+      );
     }
   };
   return (

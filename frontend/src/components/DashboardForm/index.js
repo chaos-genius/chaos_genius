@@ -198,7 +198,7 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
         };
       });
     }
-    if (formData.dashboardname && formData.kpi) {
+    if (formData.dashboardname !== '' && formData.kpi.length !== 0) {
       if (path[2] === 'edit') {
         const payload = {
           dashboard_id: dashboardId,

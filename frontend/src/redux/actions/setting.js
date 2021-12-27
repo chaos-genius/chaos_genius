@@ -1,3 +1,4 @@
+import { env } from '../../env';
 import { getRequest, postRequest } from '../../utils/http-helper';
 import { BASE_URL, SETTING_META_INFO_URL } from '../../utils/url-helper';
 import {
@@ -31,24 +32,36 @@ export const kpiSettingFailure = () => {
   };
 };
 
-export const kpiSettingSetup = (kpi, kpiData) => {
-  return async (dispatch) => {
-    dispatch(kpiSettingRequest());
-    const URL = `${BASE_URL}/api/anomaly-data/${kpi}/anomaly-params`;
-    const { data, error, status } = await postRequest({
-      url: URL,
-      data: kpiData,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      noAuth: true
-    });
-    if (error) {
-      dispatch(kpiSettingFailure());
-    } else if (data && status === 200) {
-      dispatch(kpiSettingSuccess(data));
+export const kpiSettingSetup = (kpi, kpiData, customToast) => {
+  if (env.REACT_APP_IS_DEMO === 'true') {
+    if (customToast) {
+      customToast({
+        type: 'error',
+        header: 'This is a demo version'
+      });
     }
-  };
+    return {
+      type: 'default'
+    };
+  } else {
+    return async (dispatch) => {
+      dispatch(kpiSettingRequest());
+      const URL = `${BASE_URL}/api/anomaly-data/${kpi}/anomaly-params`;
+      const { data, error, status } = await postRequest({
+        url: URL,
+        data: kpiData,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        noAuth: true
+      });
+      if (error) {
+        dispatch(kpiSettingFailure());
+      } else if (data && status === 200) {
+        dispatch(kpiSettingSuccess(data));
+      }
+    };
+  }
 };
 
 export const kpiEditRequest = () => {

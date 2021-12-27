@@ -70,7 +70,7 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
     const payload = {
       data_source_id: datasource.id
     };
-    dispatch(deleteDatasource(payload));
+    dispatch(deleteDatasource(payload, customToast));
   };
 
   const datasourceIcon = (type) => {

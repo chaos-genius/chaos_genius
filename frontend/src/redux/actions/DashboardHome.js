@@ -1,3 +1,4 @@
+import { env } from '../../env';
 import { getRequest, postRequest } from '../../utils/http-helper';
 import {
   DASHBOARD_LIST_URL,
@@ -77,12 +78,13 @@ export const getDashboardDeleteFailure = () => {
   };
 };
 
-export const getDashboardDelete = (params) => {
+export const getDashboardDelete = (params, customToast) => {
   return async (dispatch) => {
     dispatch(getDashboardDeleteRequest());
     const URL = attachParams(DASHBOARD_DELETE_URL, params);
     const { data, error, status } = await postRequest({
-      url: URL
+      url: URL,
+      customToast
     });
     if (error) {
       dispatch(getDashboardDeleteFailure());
@@ -111,12 +113,13 @@ export const getCreateDashboardFailure = () => {
   };
 };
 
-export const getCreateDashboard = (dashboard) => {
+export const getCreateDashboard = (dashboard, customToast) => {
   return async (dispatch) => {
     dispatch(getCreateDashboardRequest());
     const { data, error, status } = await postRequest({
       url: DASHBOARD_CREATE_URL,
-      data: dashboard
+      data: dashboard,
+      customToast
     });
     if (error) {
       dispatch(getCreateDashboardFailure());
@@ -179,17 +182,17 @@ export const getUpdateDashboardFailure = () => {
   };
 };
 
-export const getUpdateDashboard = (payload) => {
+export const getUpdateDashboard = (payload, customToast) => {
   return async (dispatch) => {
     dispatch(getUpdateDashboardRequest());
-    //const URL = attachParams(DASHBOARD_UPDATE_URL, params);
     const { data, error, status } = await postRequest({
       url: DASHBOARD_UPDATE_URL,
       data: JSON.stringify(payload),
       headers: {
         'Content-Type': 'application/json'
       },
-      noAuth: true
+      noAuth: true,
+      customToast
     });
     if (error) {
       dispatch(getUpdateDashboardFailure());

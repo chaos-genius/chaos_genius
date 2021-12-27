@@ -34,6 +34,7 @@ import {
   KPI_FORM_OPTION_URL,
   TEST_QUERY_URL
 } from '../../utils/url-helper';
+import { env } from '../../env';
 
 import { getRequest, postRequest, putRequest } from '../../utils/http-helper';
 
@@ -156,25 +157,37 @@ export const getAllKpiExplorerSubmitSuccess = (response) => {
   };
 };
 
-export const getAllKpiExplorerSubmit = (payload) => {
-  return async (dispatch) => {
-    dispatch(getAllKpiExplorerSubmitRequested());
-    const { data, error, status } = await postRequest({
-      url: KPI_URL + '/',
-      data: JSON.stringify(payload),
-      headers: {
-        'Content-Type': 'application/json;charset=UTF-8',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Credentials': true
-      },
-      noAuth: true
-    });
-    if (error) {
-      dispatch(getAllKpiExplorerSubmitFailure());
-    } else if (data && status === 200) {
-      dispatch(getAllKpiExplorerSubmitSuccess(data));
+export const getAllKpiExplorerSubmit = (payload, customToast) => {
+  if (env.REACT_APP_IS_DEMO === 'true') {
+    if (customToast) {
+      customToast({
+        type: 'error',
+        header: 'This is a demo version'
+      });
     }
-  };
+    return {
+      type: 'default'
+    };
+  } else {
+    return async (dispatch) => {
+      dispatch(getAllKpiExplorerSubmitRequested());
+      const { data, error, status } = await postRequest({
+        url: KPI_URL + '/',
+        data: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json;charset=UTF-8',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true
+        },
+        noAuth: true
+      });
+      if (error) {
+        dispatch(getAllKpiExplorerSubmitFailure());
+      } else if (data && status === 200) {
+        dispatch(getAllKpiExplorerSubmitSuccess(data));
+      }
+    };
+  }
 };
 
 export const getTestQueryRequested = () => {
@@ -230,18 +243,30 @@ export const kpiDisableSuccess = (response) => {
   };
 };
 
-export const kpiDisable = (id) => {
-  return async (dispatch) => {
-    dispatch(kpiDisableRequest());
-    const { data, error, status } = await getRequest({
-      url: `${KPI_URL}/${id}/disable`
-    });
-    if (error) {
-      dispatch(kpiDisableFailure());
-    } else if (data && status === 200) {
-      dispatch(kpiDisableSuccess(data));
+export const kpiDisable = (id, customToast) => {
+  if (env.REACT_APP_IS_DEMO === 'true') {
+    if (customToast) {
+      customToast({
+        type: 'error',
+        header: 'This is a demo version'
+      });
     }
-  };
+    return {
+      type: 'default'
+    };
+  } else {
+    return async (dispatch) => {
+      dispatch(kpiDisableRequest());
+      const { data, error, status } = await getRequest({
+        url: `${KPI_URL}/${id}/disable`
+      });
+      if (error) {
+        dispatch(kpiDisableFailure());
+      } else if (data && status === 200) {
+        dispatch(kpiDisableSuccess(data));
+      }
+    };
+  }
 };
 
 export const getEditMetaInfoRequest = () => {
@@ -325,23 +350,35 @@ export const getUpdateKpiFailure = () => {
   };
 };
 
-export const getUpdatekpi = (id, updateData) => {
-  return async (dispatch) => {
-    dispatch(getUpdateKpiRequest());
-    const { data, error, status } = await putRequest({
-      url: `${KPI_URL}/${id}/update`,
-      data: JSON.stringify(updateData),
-      headers: {
-        'Content-Type': 'application/json;charset=UTF-8',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Credentials': true
-      },
-      noAuth: true
-    });
-    if (error) {
-      dispatch(getUpdateKpiFailure());
-    } else if (data && status === 200) {
-      dispatch(getUpdateKpiSuccess(data));
+export const getUpdatekpi = (id, updateData, customToast) => {
+  if (env.REACT_APP_IS_DEMO === 'true') {
+    if (customToast) {
+      customToast({
+        type: 'error',
+        header: 'This is a demo version'
+      });
     }
-  };
+    return {
+      type: 'default'
+    };
+  } else {
+    return async (dispatch) => {
+      dispatch(getUpdateKpiRequest());
+      const { data, error, status } = await putRequest({
+        url: `${KPI_URL}/${id}/update`,
+        data: JSON.stringify(updateData),
+        headers: {
+          'Content-Type': 'application/json;charset=UTF-8',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true
+        },
+        noAuth: true
+      });
+      if (error) {
+        dispatch(getUpdateKpiFailure());
+      } else if (data && status === 200) {
+        dispatch(getUpdateKpiSuccess(data));
+      }
+    };
+  }
 };

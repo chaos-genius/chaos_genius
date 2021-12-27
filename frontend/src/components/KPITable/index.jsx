@@ -47,7 +47,7 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
   };
 
   const onDelete = (kpi) => {
-    dispatch(kpiDisable(kpi.id));
+    dispatch(kpiDisable(kpi.id, customToast));
   };
 
   useEffect(() => {

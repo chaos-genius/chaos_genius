@@ -622,7 +622,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         dashboard: formdata.dashboardNameList.map((el) => el.value)
       };
       if (data[2] === 'edit') {
-        dispatch(getUpdatekpi(kpiId, { name: formdata.kpiname }));
+        dispatch(getUpdatekpi(kpiId, { name: formdata.kpiname }, customToast));
       } else {
         dispatchgetAllKpiExplorerSubmit(kpiInfo);
       }
@@ -630,7 +630,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   };
 
   const dispatchgetAllKpiExplorerSubmit = (kpiInfo) => {
-    dispatch(getAllKpiExplorerSubmit(kpiInfo));
+    dispatch(getAllKpiExplorerSubmit(kpiInfo, customToast));
   };
 
   const onTestQuery = () => {

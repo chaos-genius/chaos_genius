@@ -33,6 +33,7 @@ import {
   DELETE_DATASOURCE,
   TEST_CONNECTION
 } from '../../utils/url-helper';
+import { env } from '../../env';
 
 import { getRequest, postRequest } from '../../utils/http-helper';
 
@@ -155,12 +156,13 @@ export const createDatesourceFailure = () => {
   };
 };
 
-export const createDataSource = (formData) => {
+export const createDataSource = (formData, customToast) => {
   return async (dispatch) => {
     dispatch(createDatasourceRequested());
     const { data, error, status } = await postRequest({
       url: CREATE_DATASOURCE,
-      data: formData
+      data: formData,
+      customToast
     });
     if (error) {
       dispatch(createDatesourceFailure());
@@ -189,12 +191,13 @@ export const deleteDatesourceFailure = () => {
   };
 };
 
-export const deleteDatasource = (id) => {
+export const deleteDatasource = (id, customToast) => {
   return async (dispatch) => {
     dispatch(deleteDatasourceRequested());
     const { data, error, status } = await postRequest({
       url: DELETE_DATASOURCE,
-      data: id
+      data: id,
+      customToast
     });
     if (error) {
       dispatch(deleteDatesourceFailure());
@@ -286,21 +289,33 @@ export const updateDatasourceByIdFailure = () => {
   };
 };
 
-export const updateDatasourceById = (id, updateData) => {
-  return async (dispatch) => {
-    dispatch(updateDatasourceByIdRequest());
-    const { data, error, status } = await postRequest({
-      url: `${CONNECTION_URL}/${id}/test-and-update`,
-      data: JSON.stringify(updateData),
-      headers: {
-        'Content-Type': 'application/json;charset=UTF-8'
-      },
-      noAuth: true
-    });
-    if (error) {
-      dispatch(updateDatasourceByIdFailure());
-    } else if (data && status === 200) {
-      dispatch(updateDatasourceByIdSuccess(data));
+export const updateDatasourceById = (id, updateData, customToast) => {
+  if (env.REACT_APP_IS_DEMO === 'true') {
+    if (customToast) {
+      customToast({
+        type: 'error',
+        header: 'This is a demo version'
+      });
     }
-  };
+    return {
+      type: 'default'
+    };
+  } else {
+    return async (dispatch) => {
+      dispatch(updateDatasourceByIdRequest());
+      const { data, error, status } = await postRequest({
+        url: `${CONNECTION_URL}/${id}/test-and-update`,
+        data: JSON.stringify(updateData),
+        headers: {
+          'Content-Type': 'application/json;charset=UTF-8'
+        },
+        noAuth: true
+      });
+      if (error) {
+        dispatch(updateDatasourceByIdFailure());
+      } else if (data && status === 200) {
+        dispatch(updateDatasourceByIdSuccess(data));
+      }
+    };
+  }
 };

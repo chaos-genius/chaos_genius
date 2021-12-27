@@ -286,7 +286,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
           scheduler_params_time: schedule
         }
       };
-      dispatch(kpiSettingSetup(kpi, data));
+      dispatch(kpiSettingSetup(kpi, data, customToast));
     }
   };
 

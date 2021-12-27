@@ -39,4 +39,4 @@ def upgrade():
 
 
 def downgrade():
-    pass
+    op.execute("DELETE FROM dashboard WHERE name='All' AND active=true")

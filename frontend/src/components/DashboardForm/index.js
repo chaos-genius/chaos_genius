@@ -278,7 +278,6 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
             options={kpiOption}
             classNamePrefix="selectcategory"
             placeholder="Select"
-            menuPlacement="top"
             value={
               formData.kpi.length !== 0
                 ? formData.kpi.map((el) => {

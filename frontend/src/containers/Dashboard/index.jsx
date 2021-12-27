@@ -98,7 +98,7 @@ const Dashboard = () => {
 
   const onTabClick = (tabs) => {
     setTabs(tabs);
-    // window.history.pushState('', '', `/#/dashboard/${tabs}/${kpi}`);
+
     window.history.pushState(
       '',
       '',
@@ -197,8 +197,12 @@ const Dashboard = () => {
                 anomalystatus={anomalySettingData}
               />
             )}
-            {tab === 'anomaly' && kpi && anomalySettingData && (
-              <Anomaly kpi={kpi} anomalystatus={anomalySettingData} />
+            {tab === 'anomaly' && kpi && anomalySettingData && dashboard && (
+              <Anomaly
+                kpi={kpi}
+                anomalystatus={anomalySettingData}
+                dashboard={dashboard}
+              />
             )}
 
             {location[2] === 'settings' && (

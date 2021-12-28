@@ -19,7 +19,6 @@ import {
 // import ModalPopUp from '../Modal';
 
 const DashboardForm = ({ setText, setModal, onboarding }) => {
-  // const [modal, setModal] = useState('false');
   const dispatch = useDispatch();
 
   const toast = useToast();
@@ -190,15 +189,7 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
         };
       });
     }
-    if (formData.kpi.length === 0) {
-      setErrorMsg((prev) => {
-        return {
-          ...prev,
-          kpi: true
-        };
-      });
-    }
-    if (formData.dashboardname !== '' && formData.kpi.length !== 0) {
+    if (formData.dashboardname !== '') {
       if (path[2] === 'edit') {
         const payload = {
           dashboard_id: dashboardId,
@@ -272,7 +263,7 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
           />
         </div> */}
         <div className="form-group">
-          <label>KPI *</label>
+          <label>KPI </label>
           <Select
             isMulti
             options={kpiOption}

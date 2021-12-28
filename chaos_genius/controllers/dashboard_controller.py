@@ -130,6 +130,37 @@ def check_kpis_in_dashboard(dashboard_id, kpi_ids):
     return set(kpi_ids).issubset(temp_list)
 
 
+def edit_kpi_dashboards(kpi_id,dashboard_id_list):
+    mapper_list = DashboardKpiMapper.query.filter(
+        DashboardKpiMapper.kpi == kpi_id,
+        DashboardKpiMapper.active == True,
+    ).all()
+    current_dashboard_id_list = [mapper.dashboard for mapper in mapper_list]
+    add_dashboard_ids = [dashboard_id for dashboard_id in dashboard_id_list 
+                        if dashboard_id not in current_dashboard_id_list]
+    delete_dashboard_ids = [dashboard_id for dashboard_id in current_dashboard_id_list
+                            if dashboard_id not in dashboard_id_list]
+
+    add_mapper_list = []
+    for dashboard_id in add_dashboard_ids:
+        mapper_obj = DashboardKpiMapper.query.filter(
+                    DashboardKpiMapper.dashboard == dashboard_id,
+                    DashboardKpiMapper.kpi == kpi_id
+                ).first()
+        if mapper_obj is None:
+            mapper_obj = DashboardKpiMapper(dashboard = dashboard_id, kpi= kpi_id)
+        else:
+            mapper_obj.active = True
+        add_mapper_list.append(mapper_obj)
+
+    delete_mapper_list = DashboardKpiMapper.query.filter(
+                        DashboardKpiMapper.dashboard.in_(delete_dashboard_ids),
+                        DashboardKpiMapper.kpi == kpi_id,
+                        DashboardKpiMapper.active == True
+            ).all()
+    return {"add_mapper_list":add_mapper_list, "delete_mapper_list":delete_mapper_list}
+
+
 def disable_mapper_for_kpi_ids(kpi_list):
     mapper_obj = get_mapper_obj_by_kpi_ids(kpi_list)
     for mapper in mapper_obj:

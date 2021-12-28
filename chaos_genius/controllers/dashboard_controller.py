@@ -11,9 +11,9 @@ def get_dashboard_by_id(dashboard_id):
     ).first()
 
 
-def get_dashboard_list_by_ids(dashboard_list=[]):
+def get_dashboard_list_by_ids(dashboard_list=None):
     filters = [Dashboard.active == True]
-    if dashboard_list:
+    if dashboard_list is not None:
         filters.append(Dashboard.id.in_(dashboard_list))
     return Dashboard.query.filter(*filters).order_by(Dashboard.last_modified.desc()).all()
 

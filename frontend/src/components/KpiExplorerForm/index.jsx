@@ -338,7 +338,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       });
     } else if (
       kpiUpdateData &&
-      kpiUpdateData.status === 'failed' &&
+      kpiUpdateData.status === 'failure' &&
       onboarding !== true
     ) {
       customToast({

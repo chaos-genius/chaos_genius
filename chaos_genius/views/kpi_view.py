@@ -342,6 +342,11 @@ def get_kpi_info(kpi_id):
     try:
         kpi_obj = get_kpi_data_from_id(kpi_id)
         data = kpi_obj
+        mapper_obj_list = get_mapper_obj_by_kpi_ids([kpi_id])
+        dashboard_id_list = [mapper.dashboard for mapper in mapper_obj_list]
+        dashboard_list = get_dashboard_list_by_ids(dashboard_id_list)
+        dashboard_list = [dashboard.as_dict for dashboard in dashboard_list]
+        data["dashboards"] = dashboard_list
         status = "success"
     except Exception as err:
         status = "failure"

@@ -131,10 +131,7 @@ def check_kpis_in_dashboard(dashboard_id, kpi_ids):
 
 
 def edit_kpi_dashboards(kpi_id,dashboard_id_list):
-    mapper_list = DashboardKpiMapper.query.filter(
-        DashboardKpiMapper.kpi == kpi_id,
-        DashboardKpiMapper.active == True,
-    ).all()
+    mapper_list = get_mapper_obj_by_kpi_ids([kpi_id])
     current_dashboard_id_list = [mapper.dashboard for mapper in mapper_list]
     add_dashboard_ids = [dashboard_id for dashboard_id in dashboard_id_list 
                         if dashboard_id not in current_dashboard_id_list]

@@ -346,7 +346,7 @@ def get_kpi_info(kpi_id):
         dashboard_id_list = [mapper.dashboard for mapper in mapper_obj_list]
         dashboard_list = get_dashboard_list_by_ids(dashboard_id_list)
         dashboard_list = [dashboard.as_dict for dashboard in dashboard_list]
-        data["dashboard_list"] = dashboard_list
+        data["dashboards"] = dashboard_list
         status = "success"
     except Exception as err:
         status = "failure"

@@ -184,6 +184,14 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       obj['datetimecolumns'] = kpiEditData?.datetime_column || '';
       obj['addfilter'] = kpiEditData?.filters || [];
       obj['dimensions'] = kpiEditData?.dimensions || [];
+      let arr = [];
+      kpiEditData?.dashboards.map((data) =>
+        arr.push({
+          label: data.name,
+          value: data.id
+        })
+      );
+      obj['dashboardNameList'] = arr;
       setDataset({
         label: kpiEditData?.kpi_type,
         value: kpiEditData?.kpi_type
@@ -1164,7 +1172,11 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               isMulti
               options={option.dashboard}
               classNamePrefix="selectcategory"
-              placeholder="Select"
+              placeholder={
+                formdata.dashboardNameList.length === 0 && data[2] === 'edit'
+                  ? ''
+                  : 'Select'
+              }
               menuPlacement="top"
               value={
                 formdata.dashboardNameList.length !== 0

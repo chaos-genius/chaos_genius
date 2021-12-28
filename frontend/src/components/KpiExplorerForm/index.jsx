@@ -735,8 +735,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         formdata.dataset &&
         formdata.metriccolumns &&
         formdata.aggregate &&
-        formdata.datetimecolumns &&
-        formdata.dashboardNameList.length !== 0) !== ''
+        formdata.datetimecolumns) !== '' &&
+      formdata.dashboardNameList.length !== 0
     ) {
       const kpiInfo = {
         name: formdata.kpiname,
@@ -1199,6 +1199,13 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                       }
                     })
                   : setFormdata({ ...formdata, dashboardNameList: e });
+
+                setErrorMsg((prev) => {
+                  return {
+                    ...prev,
+                    dashboardNameList: false
+                  };
+                });
               }}
             />
             {errorMsg.dashboardNameList === true ? (

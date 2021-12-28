@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import NoKpis from '../../assets/images/nokpisdashboard.svg';
 import './emptykpisdashboard.scss';

@@ -22,27 +22,12 @@ depends_on = None
 
 def upgrade():
     dashboard = table('dashboard',
+        column('id', Integer),
         column('name', String),
         column('active', Boolean),
         column('last_modified', DateTime),
         column('created_at', DateTime),
     )
-
-    op.bulk_insert(dashboard, [
-        {
-            'name': 'All',
-            'active': True,
-            'last_modified': datetime.now(),
-            'created_at': datetime.now()
-        },
-    ])
-
-    # ref: https://stackoverflow.com/a/18739259/11199009
-    conn = op.get_bind()
-
-    all_dashboard_id = conn.execute(
-        "SELECT id FROM dashboard WHERE name='All' AND active=true LIMIT 1"
-    ).fetchone()[0]
 
     dashboard_kpi_mapper = table(
         "dashboard_kpi_mapper",
@@ -52,13 +37,25 @@ def upgrade():
         column("active", Boolean),
     )
 
-    all_kpi_ids = conn.execute("SELECT id FROM kpi").fetchall()
+    # We will be using the dashboard id 0 to represent the All dashboard.
+    op.bulk_insert(dashboard, [
+        {
+            'id': 0,
+            'name': 'All',
+            'active': True,
+            'last_modified': datetime.now(),
+            'created_at': datetime.now()
+        },
+    ])
 
+    # ref: https://stackoverflow.com/a/18739259/11199009
+    conn = op.get_bind()
+    all_kpi_ids = conn.execute("SELECT id FROM kpi where active=true").fetchall()
     op.bulk_insert(
         dashboard_kpi_mapper,
         [
             {
-                "dashboard": all_dashboard_id,
+                "dashboard": 0,
                 "kpi": kpi[0],
                 "created_at": datetime.now(),
                 "active": True
@@ -69,15 +66,5 @@ def upgrade():
 
 def downgrade():
     conn = op.get_bind()
-
-    all_dashboard_ids = conn.execute(
-        "SELECT id FROM dashboard WHERE name='All' AND active=true"
-    ).fetchall()
-
-    for (all_dashboard_id,) in all_dashboard_ids:
-        conn.execute(
-            text("DELETE FROM dashboard_kpi_mapper WHERE id=:all_dashboard_id"),
-            all_dashboard_id=all_dashboard_id
-        )
-
-    op.execute("DELETE FROM dashboard WHERE name='All' AND active=true")
+    op.execute("DELETE FROM dashboard_kpi_mapper WHERE dashboard=0")
+    op.execute("DELETE FROM dashboard WHERE id=0")

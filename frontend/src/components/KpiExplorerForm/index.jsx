@@ -184,6 +184,14 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       obj['datetimecolumns'] = kpiEditData?.datetime_column || '';
       obj['addfilter'] = kpiEditData?.filters || [];
       obj['dimensions'] = kpiEditData?.dimensions || [];
+      let arr = [];
+      kpiEditData?.dashboards.map((data) =>
+        arr.push({
+          label: data.name,
+          value: data.id
+        })
+      );
+      obj['dashboardNameList'] = arr;
       setDataset({
         label: kpiEditData?.kpi_type,
         value: kpiEditData?.kpi_type
@@ -330,7 +338,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       });
     } else if (
       kpiUpdateData &&
-      kpiUpdateData.status === 'failed' &&
+      kpiUpdateData.status === 'failure' &&
       onboarding !== true
     ) {
       customToast({
@@ -727,8 +735,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         formdata.dataset &&
         formdata.metriccolumns &&
         formdata.aggregate &&
-        formdata.datetimecolumns &&
-        formdata.dashboardNameList.length !== 0) !== ''
+        formdata.datetimecolumns) !== '' &&
+      formdata.dashboardNameList.length !== 0
     ) {
       const kpiInfo = {
         name: formdata.kpiname,
@@ -743,10 +751,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         datetime_column: formdata.datetimecolumns,
         dimensions: formdata.dimensions,
         filters: formdata.addfilter,
-        dashboard: formdata.dashboardNameList.map((el) => el.value)
+        dashboards: formdata.dashboardNameList.map((el) => el.value)
       };
       if (data[2] === 'edit') {
-        dispatch(getUpdatekpi(kpiId, { name: formdata.kpiname }));
+        dispatch(getUpdatekpi(kpiId, kpiInfo));
       } else {
         dispatchgetAllKpiExplorerSubmit(kpiInfo);
       }
@@ -1164,7 +1172,11 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               isMulti
               options={option.dashboard}
               classNamePrefix="selectcategory"
-              placeholder="Select"
+              placeholder={
+                formdata.dashboardNameList.length === 0 && data[2] === 'edit'
+                  ? ''
+                  : 'Select'
+              }
               menuPlacement="top"
               value={
                 formdata.dashboardNameList.length !== 0
@@ -1187,6 +1199,13 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                       }
                     })
                   : setFormdata({ ...formdata, dashboardNameList: e });
+
+                setErrorMsg((prev) => {
+                  return {
+                    ...prev,
+                    dashboardNameList: false
+                  };
+                });
               }}
             />
             {errorMsg.dashboardNameList === true ? (

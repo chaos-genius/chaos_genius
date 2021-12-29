@@ -22,8 +22,6 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.rca_data_model import RcaData
-from chaos_genius.databases.models.dashboard_kpi_mapper_model import DashboardKpiMapper
-from chaos_genius.databases.models.dashboard_model import Dashboard
 from chaos_genius.extensions import cache, db
 from chaos_genius.databases.db_utils import chech_editable_field
 from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
@@ -34,6 +32,7 @@ from chaos_genius.controllers.dashboard_controller import (
     get_dashboard_list_by_ids,
     disable_mapper_for_kpi_ids,
     edit_kpi_dashboards
+    enable_mapper_for_kpi_ids
 )
 from chaos_genius.utils.datetime_helper import get_rca_timestamp, get_epoch_timestamp
 
@@ -87,7 +86,9 @@ def kpi():
 
         new_kpi.save(commit=True)
 
-        dashboard_list = data.get("dashboard", [])
+        # Add the dashboard id 0 to the kpi
+        dashboard_list = data.get("dashboard", []) + [0]
+        dashboard_list = list(set(dashboard_list))
         mapper_obj_list = create_dashboard_kpi_mapper(dashboard_list, [new_kpi.id])
 
         # TODO: Fix circular import error
@@ -229,6 +230,7 @@ def enable_kpi(kpi_id):
         if kpi_obj:
             kpi_obj.active = True
             kpi_obj.save(commit=True)
+            enable = enable_mapper_for_kpi_ids([kpi_id])
             status = "success"
         else:
             message = "KPI not found"

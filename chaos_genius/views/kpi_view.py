@@ -31,7 +31,7 @@ from chaos_genius.controllers.dashboard_controller import (
     get_mapper_obj_by_kpi_ids,
     get_dashboard_list_by_ids,
     disable_mapper_for_kpi_ids,
-    edit_kpi_dashboards
+    edit_kpi_dashboards,
     enable_mapper_for_kpi_ids
 )
 from chaos_genius.utils.datetime_helper import get_rca_timestamp, get_epoch_timestamp

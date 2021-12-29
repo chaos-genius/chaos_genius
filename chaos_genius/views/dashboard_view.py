@@ -64,6 +64,11 @@ def edit_dashboard():
             "status": "failure",
             "message": "Dashboard id is required"
         })
+    if int(dashboard_id) == 0:
+        return jsonify({
+            "status": "failure",
+            "message": "Dashboard 'All' cannot be edited"
+        })
     dashboard_name = payload.get("dashboard_name")
     kpi_list = payload.get("kpi_list", [])
 
@@ -117,13 +122,18 @@ def get_dashboard():
 @blueprint.route("/delete", methods=["POST"])
 def delete_dashboard():
     status, message = "", ""
+    dashboard_id = request.args.get("dashboard_id")
+    if int(dashboard_id) == 0:
+        return jsonify({
+            "status": "failure",
+            "message": "Dashboard 'All' cannot be deleted"
+        })
     if not is_enterprise_edition():
         return jsonify({
-            "status": "error",
+            "status": "failure",
             "message": "This feature is only available in the enterprise edition."
         }), 403
     try:
-        dashboard_id = request.args.get("dashboard_id")
         dashboard = get_dashboard_by_id(dashboard_id)
         if dashboard is not None:
             dashboard.active = False

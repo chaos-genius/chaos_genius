@@ -136,3 +136,13 @@ def disable_mapper_for_kpi_ids(kpi_list):
         mapper.active = False
         mapper.save(commit=True)
     return True
+
+
+def enable_mapper_for_kpi_ids(kpi_list):
+    mapper_obj = DashboardKpiMapper.query.filter(
+        DashboardKpiMapper.kpi.in_(kpi_list)
+    ).all()
+    for mapper in mapper_obj:
+        mapper.active = True
+        mapper.save(commit=True)
+    return True

@@ -1,6 +1,5 @@
 from chaos_genius.databases.models.dashboard_model import Dashboard
 from chaos_genius.databases.models.dashboard_kpi_mapper_model import DashboardKpiMapper
-import bisect
 
 # TODO: Refactor these functions
 
@@ -129,12 +128,6 @@ def check_kpis_in_dashboard(dashboard_id, kpi_ids):
         temp_list.append(val.kpi)
 
     return set(kpi_ids).issubset(temp_list)
-
-def filter_mappers_by_dashboard_id(all_dashboard_ids, dashboard_id):
-    ind = bisect.bisect_left(all_dashboard_ids, dashboard_id)
-    if ind != len(all_dashboard_ids) and all_dashboard_ids[ind] == dashboard_id:
-        return ind
-    return None
 
 
 def edit_kpi_dashboards(kpi_id, dashboard_id_list):

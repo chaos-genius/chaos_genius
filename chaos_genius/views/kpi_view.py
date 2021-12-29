@@ -113,6 +113,7 @@ def kpi():
 
     elif request.method == "GET":
         dashboard_id = request.args.get("dashboard_id")
+        dashboard_id = int(dashboard_id)
         kpi_result_list, kpi_dashboard_mapper = [], []
         if dashboard_id:
             kpi_dashboard_mapper = get_mapper_obj_by_dashboard_ids([dashboard_id])
@@ -147,11 +148,20 @@ def kpi():
             data_source_info = row[1].safe_dict
             kpi_info["data_source"] = data_source_info
             dashboards = []
-            for dashboard_id in kpi_dashboard_dict[kpi_info["id"]]:
-                dashboards.append(dashboard_dict[dashboard_id])
+            for dashboard in kpi_dashboard_dict[kpi_info["id"]]:
+                dashboards.append(dashboard_dict[dashboard])
             kpi_info["dashboards"] = dashboards
             kpis.append(kpi_info)
-        return jsonify({"count": len(kpis), "data": kpis})
+        dashboard_details = []
+        if dashboard_id:
+            if dashboard_dict:
+                dashboard_details = [dashboard_dict[dashboard_id]]
+            else:
+                dashboards = get_dashboard_list_by_ids([dashboard_id])
+                dashboard_details = [dashboard.as_dict for dashboard in dashboards]
+        else:
+            dashboard_details = list(dashboard_dict.values())
+        return jsonify({"count": len(kpis), "data": kpis, "dashboards": dashboard_details})
 
 
 @blueprint.route("/get-dashboard-list", methods=["GET"])

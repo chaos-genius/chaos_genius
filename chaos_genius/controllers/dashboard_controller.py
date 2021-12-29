@@ -1,5 +1,6 @@
 from chaos_genius.databases.models.dashboard_model import Dashboard
 from chaos_genius.databases.models.dashboard_kpi_mapper_model import DashboardKpiMapper
+import bisect
 
 # TODO: Refactor these functions
 
@@ -129,19 +130,11 @@ def check_kpis_in_dashboard(dashboard_id, kpi_ids):
 
     return set(kpi_ids).issubset(temp_list)
 
-def filter_mappers_by_dashboard_id(mapper_obj_list, dashboard_id):
-    start = 0; end = len(mapper_obj_list) - 1
-
-    while start <= end:
-        mid = (start + end) // 2
-        if mapper_obj_list[mid].dashboard == dashboard_id:
-            return mapper_obj_list[mid]
-        elif mapper_obj_list[mid].dashboard < dashboard_id:
-            start = mid + 1
-        else:
-            end = mid - 1
+def filter_mappers_by_dashboard_id(all_dashboard_ids, dashboard_id):
+    ind = bisect.bisect_left(all_dashboard_ids, dashboard_id)
+    if ind != len(all_dashboard_ids) and all_dashboard_ids[ind] == dashboard_id:
+        return ind
     return None
-
 
 def edit_kpi_dashboards(kpi_id,dashboard_id_list):
     mapper_list = get_mapper_obj_by_kpi_ids([kpi_id])
@@ -153,10 +146,12 @@ def edit_kpi_dashboards(kpi_id,dashboard_id_list):
 
     mapper_obj_list = DashboardKpiMapper.query.filter(DashboardKpiMapper.kpi == kpi_id).all()
     mapper_obj_list.sort(key = lambda mapper_obj: mapper_obj.dashboard)
+    all_dashboard_ids = [mapper_obj.dashboard for mapper_obj in mapper_obj_list]
 
     add_mapper_list = []
     for dashboard_id in add_dashboard_ids:
-        mapper_obj = filter_mappers_by_dashboard_id(mapper_obj_list, dashboard_id)
+        ind = filter_mappers_by_dashboard_id(all_dashboard_ids, dashboard_id)
+        mapper_obj = mapper_obj_list[ind] if ind is not None else None
         if mapper_obj is None:
             mapper_obj = DashboardKpiMapper(dashboard=dashboard_id, kpi=kpi_id)
         else:

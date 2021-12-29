@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Click commands."""
+import json
 import os
 from datetime import datetime
 from glob import glob
@@ -8,6 +9,13 @@ from subprocess import call
 import click
 from flask.cli import with_appcontext
 
+from chaos_genius.controllers.dashboard_controller import create_dashboard_kpi_mapper
+from chaos_genius.core.utils.kpi_validation import validate_kpi
+from chaos_genius.databases.models.kpi_model import Kpi
+from chaos_genius.views.anomaly_data_view import (
+    update_anomaly_params,
+    validate_partial_anomaly_params,
+)
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.join(HERE, os.pardir)
@@ -143,6 +151,142 @@ def run_anomaly_rca_scheduler():
     res = anomaly_scheduler.delay()
     res.get()
     click.echo("Completed running scheduler. Tasks should be running in the worker.")
+
+
+@click.command()
+@with_appcontext
+@click.argument("file_name")
+def kpi_import(file_name: str):
+    """Adds KPIs defined in given JSON file.
+
+    The JSON must be in the following format:
+
+    \b
+    ```
+    [
+            {
+                "name": "",
+                "is_certified": false,
+                "data_source": 0,
+                "kpi_type": "",
+                "kpi_query": "",
+                "schema_name": null,
+                "table_name": "",
+                "metric": "",
+                "aggregation": "",
+                "datetime_column": "",
+                "filters": [],
+                "dimensions": [],
+                "run_anomaly": true,
+                "anomaly_params": {
+                    "frequency": "D",
+                    "anomaly_period": 90,
+                    "seasonality": [],
+                    "model_name": "ProphetModel",
+                    "sensitivity": "High"
+                }
+            }
+    ]
+    ```
+    """
+    with open(file_name) as f:
+        kpis = json.load(f)
+
+    for data in kpis:
+        data: dict
+
+        try:
+            # TODO: separate this and KPI endpoint code in a new function
+            data["dimensions"] = [] if data.get("dimensions") is None else data["dimensions"]
+
+            if data.get("kpi_query", "").strip():
+                data["kpi_query"] = data["kpi_query"].strip()
+                # remove trailing semicolon
+                if data["kpi_query"][-1] == ";":
+                    data["kpi_query"] = data["kpi_query"][:-1]
+
+            has_anomaly_setup = "anomaly_params" in data
+            new_anomaly_params = {}
+
+            if has_anomaly_setup:
+                # validate anomaly params
+                err, new_anomaly_params = validate_partial_anomaly_params(
+                    data["anomaly_params"]
+                )
+                if err != "":
+                    click.echo(f"Error in validating anomaly params for KPI {data['name']}: {err}")
+                    return 1
+
+            new_kpi = Kpi(
+                name=data.get("name"),
+                is_certified=data.get("is_certified"),
+                data_source=data.get("data_source"),
+                kpi_type=data.get("kpi_type"),
+                kpi_query=data.get("kpi_query"),
+                schema_name=data.get("schema_name"),
+                table_name=data.get("table_name"),
+                metric=data.get("metric"),
+                aggregation=data.get("aggregation"),
+                datetime_column=data.get("datetime_column"),
+                filters=data.get("filters"),
+                dimensions=data.get("dimensions"),
+                run_anomaly=data.get("run_anomaly"),
+            )
+
+            # Perform KPI Validation
+            status, message = validate_kpi(new_kpi.as_dict)
+            if status is not True:
+                click.echo(f"KPI validation failed for KPI {new_kpi.name}. Error: {message}")
+                return 1
+
+            new_kpi = new_kpi.save(commit=True)
+
+            # Add the dashboard id 0 to the kpi
+            dashboard_list = data.get("dashboard", []) + [0]
+            dashboard_list = list(set(dashboard_list))
+            create_dashboard_kpi_mapper(dashboard_list, [new_kpi.id])
+
+            if has_anomaly_setup:
+                # update anomaly params
+                err, new_kpi = update_anomaly_params(
+                    new_kpi, new_anomaly_params, check_editable=False
+                )
+
+                if err != "":
+                    click.echo(f"Error updating anomaly params for KPI {new_kpi.name}: {err}")
+                    return 1
+
+            # we ensure anomaly task is run as soon as analytics is configured
+            # we also run RCA at the same time
+            # TODO: move this import to top and fix import issue
+            from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task, ready_rca_task
+
+            anomaly_task = None
+            if has_anomaly_setup:
+                anomaly_task = ready_anomaly_task(new_kpi.id)
+
+            rca_task = ready_rca_task(new_kpi.id)
+            if rca_task is None:
+                click.echo(
+                    "Could not run RCA task since newly configured KPI "
+                    f"({new_kpi.name}) was not found: {new_kpi.id}"
+                )
+            else:
+                if anomaly_task is None:
+                    click.echo(
+                        "Not running anomaly since it is not configured or KPI "
+                        f"({new_kpi.name}) was not found."
+                    )
+                else:
+                    anomaly_task.apply_async()
+                rca_task.apply_async()
+
+        except Exception as e:
+            click.echo(click.style(
+                f"Could not set up KPI with name: {data['name']}, skipping. Error: {e}",
+                fg="red",
+                bold=True
+            ))
 
 
 @click.command()

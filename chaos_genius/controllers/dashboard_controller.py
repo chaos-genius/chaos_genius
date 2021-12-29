@@ -129,6 +129,19 @@ def check_kpis_in_dashboard(dashboard_id, kpi_ids):
 
     return set(kpi_ids).issubset(temp_list)
 
+def filter_mappers_by_dashboard_id(mapper_obj_list, dashboard_id):
+    start = 0; end = len(mapper_obj_list) - 1
+
+    while start <= end:
+        mid = (start + end) // 2
+        if mapper_obj_list[mid].dashboard == dashboard_id:
+            return mapper_obj_list[mid]
+        elif mapper_obj_list[mid].dashboard < dashboard_id:
+            start = mid + 1
+        else:
+            end = mid - 1
+    return None
+
 
 def edit_kpi_dashboards(kpi_id,dashboard_id_list):
     mapper_list = get_mapper_obj_by_kpi_ids([kpi_id])
@@ -138,14 +151,14 @@ def edit_kpi_dashboards(kpi_id,dashboard_id_list):
     delete_dashboard_ids = [dashboard_id for dashboard_id in current_dashboard_id_list
                             if dashboard_id not in dashboard_id_list]
 
+    mapper_obj_list = DashboardKpiMapper.query.filter(DashboardKpiMapper.kpi == kpi_id).all()
+    mapper_obj_list.sort(key = lambda mapper_obj: mapper_obj.dashboard)
+
     add_mapper_list = []
     for dashboard_id in add_dashboard_ids:
-        mapper_obj = DashboardKpiMapper.query.filter(
-                    DashboardKpiMapper.dashboard == dashboard_id,
-                    DashboardKpiMapper.kpi == kpi_id
-                ).first()
+        mapper_obj = filter_mappers_by_dashboard_id(mapper_obj_list, dashboard_id)
         if mapper_obj is None:
-            mapper_obj = DashboardKpiMapper(dashboard = dashboard_id, kpi= kpi_id)
+            mapper_obj = DashboardKpiMapper(dashboard=dashboard_id, kpi=kpi_id)
         else:
             mapper_obj.active = True
         add_mapper_list.append(mapper_obj)

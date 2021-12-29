@@ -338,7 +338,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       });
     } else if (
       kpiUpdateData &&
-      kpiUpdateData.status === 'failed' &&
+      kpiUpdateData.status === 'failure' &&
       onboarding !== true
     ) {
       customToast({
@@ -754,7 +754,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         dashboard: formdata.dashboardNameList.map((el) => el.value)
       };
       if (data[2] === 'edit') {
-        dispatch(getUpdatekpi(kpiId, { name: formdata.kpiname }));
+        dispatch(getUpdatekpi(kpiId, kpiInfo));
       } else {
         dispatchgetAllKpiExplorerSubmit(kpiInfo);
       }

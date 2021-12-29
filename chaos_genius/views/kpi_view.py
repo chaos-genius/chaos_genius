@@ -113,9 +113,9 @@ def kpi():
 
     elif request.method == "GET":
         dashboard_id = request.args.get("dashboard_id")
-        dashboard_id = int(dashboard_id)
         kpi_result_list, kpi_dashboard_mapper = [], []
         if dashboard_id:
+            dashboard_id = int(dashboard_id)
             kpi_dashboard_mapper = get_mapper_obj_by_dashboard_ids([dashboard_id])
             kpi_list = [mapper.kpi for mapper in kpi_dashboard_mapper]
             kpi_result_list = (

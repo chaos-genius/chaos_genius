@@ -80,7 +80,7 @@ const Kpihome = () => {
   }, [dashboardList]);
 
   useEffect(() => {
-    if (dashboard) {
+    if (![null, undefined, ''].includes(dashboard)) {
       getHomeList();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

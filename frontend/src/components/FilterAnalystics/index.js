@@ -14,6 +14,7 @@ const FilterAnalystics = ({ kpi, setKpi, data, onboarding }) => {
   const [searchData, setSearchData] = useState(data);
   const dashboard = useParams().dashboard;
 
+  console.log(listData);
   useEffect(() => {
     if (data) {
       setListData(data);

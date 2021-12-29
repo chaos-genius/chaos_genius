@@ -64,33 +64,46 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (
-      sidebarList &&
-      sidebarList.length !== 0 &&
+      sidebarList?.data &&
+      sidebarList?.data.length !== 0 &&
       dashboard &&
       kpi === undefined
     ) {
-      setActive(sidebarList[0]?.name);
-      //setKpi(sidebarList[0]?.id);
+      setActive(sidebarList?.data[0]?.name);
+
       setTabs(location[3]);
-      SetKpiAggregate(sidebarList[0]?.aggregation);
-      getAnomalySetting(sidebarList[0]?.id);
+      SetKpiAggregate(sidebarList?.data[0]?.aggregation);
+      getAnomalySetting(sidebarList?.data[0]?.id);
       history.push(
-        `/dashboard/${dashboard}/${location[3]}/${sidebarList[0].id}`
+        `/dashboard/${dashboard}/${location[3]}/${sidebarList?.data[0].id}`
       );
-    } else if (sidebarList && sidebarList.length !== 0 && kpi && dashboard) {
+    } else if (
+      sidebarList?.data &&
+      sidebarList?.data.length !== 0 &&
+      kpi &&
+      dashboard
+    ) {
       setActive(
-        sidebarList.find((item) => item.id.toString() === kpi.toString())?.name
+        sidebarList?.data.find((item) => item.id.toString() === kpi.toString())
+          ?.name
       );
+
       setBreadCrumbs(
-        sidebarList[0]?.dashboards.find(
+        sidebarList?.dashboards.find(
           (item) => item.id.toString() === dashboard.toString()
         )?.name
       );
       setTabs(location[3]);
       getAnomalySetting(kpi);
       SetKpiAggregate(
-        sidebarList.find((item) => item.id.toString() === kpi.toString())
+        sidebarList?.data.find((item) => item.id.toString() === kpi.toString())
           ?.aggregation
+      );
+    } else if (sidebarList && sidebarList?.dashboards) {
+      setBreadCrumbs(
+        sidebarList?.dashboards.find(
+          (item) => item.id.toString() === dashboard.toString()
+        )?.name
       );
     }
 
@@ -143,7 +156,7 @@ const Dashboard = () => {
             {/* )} */}
           </div>
         </div>
-        {sidebarList && sidebarList.length === 0 ? (
+        {sidebarList?.data && sidebarList?.data.length === 0 ? (
           <div className="no-alert-container">
             <EmptyKpisDashboard />
           </div>
@@ -153,12 +166,12 @@ const Dashboard = () => {
             <div className="explore-wrapper">
               {/* filter section */}
               <div className="filter-section">
-                {sidebarList && kpi && (
+                {sidebarList?.data && kpi && (
                   <FilterWithTab
                     tabs={tab}
                     kpi={kpi}
                     dashboard={dashboard}
-                    data={sidebarList}
+                    data={sidebarList?.data}
                     setActive={setActive}
                     SetKpiAggregate={SetKpiAggregate}
                   />

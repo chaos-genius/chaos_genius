@@ -35,7 +35,7 @@ export const getDashboardSidebar = (params) => {
     if (error) {
       dispatch(dashboardSidebarFailure());
     } else if (data && status === 200) {
-      dispatch(dashboardSidebarSuccess(data.data));
+      dispatch(dashboardSidebarSuccess(data));
     }
   };
 };

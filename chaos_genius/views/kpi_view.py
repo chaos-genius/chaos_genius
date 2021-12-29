@@ -31,6 +31,7 @@ from chaos_genius.controllers.dashboard_controller import (
     get_mapper_obj_by_kpi_ids,
     get_dashboard_list_by_ids,
     disable_mapper_for_kpi_ids,
+    edit_kpi_dashboards,
     enable_mapper_for_kpi_ids
 )
 from chaos_genius.utils.datetime_helper import get_rca_timestamp, get_epoch_timestamp
@@ -320,10 +321,14 @@ def edit_kpi(kpi_id):
         data = request.get_json()
         meta_info = Kpi.meta_info()
         if kpi_obj and kpi_obj.active is True:
+            dashboard_id_list = data.pop("dashboards", []) + [0]
+            dashboard_id_list = list(set(dashboard_id_list))
+
             for key, value in data.items():
                 if chech_editable_field(meta_info, key):
                     setattr(kpi_obj, key, value)
 
+            mapper_dict = edit_kpi_dashboards(kpi_id, dashboard_id_list)
             kpi_obj.save(commit=True)
             status = "success"
         else:

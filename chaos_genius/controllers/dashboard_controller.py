@@ -136,34 +136,34 @@ def filter_mappers_by_dashboard_id(all_dashboard_ids, dashboard_id):
         return ind
     return None
 
-def edit_kpi_dashboards(kpi_id,dashboard_id_list):
-    mapper_list = get_mapper_obj_by_kpi_ids([kpi_id])
-    current_dashboard_id_list = [mapper.dashboard for mapper in mapper_list]
-    add_dashboard_ids = [dashboard_id for dashboard_id in dashboard_id_list 
-                        if dashboard_id not in current_dashboard_id_list]
-    delete_dashboard_ids = [dashboard_id for dashboard_id in current_dashboard_id_list
-                            if dashboard_id not in dashboard_id_list]
 
+def edit_kpi_dashboards(kpi_id, dashboard_id_list):
     mapper_obj_list = DashboardKpiMapper.query.filter(DashboardKpiMapper.kpi == kpi_id).all()
-    mapper_obj_list.sort(key = lambda mapper_obj: mapper_obj.dashboard)
-    all_dashboard_ids = [mapper_obj.dashboard for mapper_obj in mapper_obj_list]
+    all_active_dashboard_ids = set([mapper.dashboard for mapper in mapper_obj_list if mapper.active==True])
+    all_dashboard_ids = set([mapper.dashboard for mapper in mapper_obj_list])
+    add_dashboard_ids = set([dashboard_id for dashboard_id in dashboard_id_list
+                             if dashboard_id not in all_dashboard_ids])
+    enable_dashboard_ids = set([dashboard_id for dashboard_id in dashboard_id_list
+                                  if dashboard_id not in all_active_dashboard_ids and dashboard_id in all_dashboard_ids])
+    delete_dashboard_ids = set([dashboard_id for dashboard_id in all_active_dashboard_ids
+                                if dashboard_id not in dashboard_id_list])
 
-    add_mapper_list = []
-    for dashboard_id in add_dashboard_ids:
-        ind = filter_mappers_by_dashboard_id(all_dashboard_ids, dashboard_id)
-        mapper_obj = mapper_obj_list[ind] if ind is not None else None
-        if mapper_obj is None:
-            mapper_obj = DashboardKpiMapper(dashboard=dashboard_id, kpi=kpi_id)
-        else:
+    for mapper_obj in mapper_obj_list:
+        if mapper_obj.dashboard in delete_dashboard_ids:
+            mapper_obj.active = False
+            mapper_obj.save(commit=True)
+        elif mapper_obj.dashboard in enable_dashboard_ids:
             mapper_obj.active = True
-        add_mapper_list.append(mapper_obj)
+            mapper_obj.save(commit=True)
 
-    delete_mapper_list = DashboardKpiMapper.query.filter(
-                        DashboardKpiMapper.dashboard.in_(delete_dashboard_ids),
-                        DashboardKpiMapper.kpi == kpi_id,
-                        DashboardKpiMapper.active == True
-            ).all()
-    return {"add_mapper_list":add_mapper_list, "delete_mapper_list":delete_mapper_list}
+    for add_dashboard_id in add_dashboard_ids:
+        mapper_obj = DashboardKpiMapper(dashboard=add_dashboard_id, kpi=kpi_id)
+        mapper_obj.save(commit=True)
+
+    return {
+        "add_mapper_list": list(add_dashboard_ids) + list(enable_dashboard_ids),
+        "delete_mapper_list": list(delete_dashboard_ids)
+    }
 
 
 def disable_mapper_for_kpi_ids(kpi_list):

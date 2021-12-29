@@ -321,19 +321,14 @@ def edit_kpi(kpi_id):
         data = request.get_json()
         meta_info = Kpi.meta_info()
         if kpi_obj and kpi_obj.active is True:
+            dashboard_id_list = data.pop("dashboards", []) + [0]
+            dashboard_id_list = list(set(dashboard_id_list))
+
             for key, value in data.items():
                 if chech_editable_field(meta_info, key):
                     setattr(kpi_obj, key, value)
 
-            dashboard_id_list = data.get("dashboard", None)
-            if dashboard_id_list is not None:
-                mapper_dict = edit_kpi_dashboards(kpi_id,dashboard_id_list)
-                for mapper_obj in mapper_dict["add_mapper_list"]:
-                    mapper_obj.save(commit=True)
-                for mapper_obj in mapper_dict["delete_mapper_list"]:
-                    mapper_obj.active = False
-                    mapper_obj.save(commit=True)
-
+            mapper_dict = edit_kpi_dashboards(kpi_id, dashboard_id_list)
             kpi_obj.save(commit=True)
             status = "success"
         else:

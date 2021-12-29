@@ -751,7 +751,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         datetime_column: formdata.datetimecolumns,
         dimensions: formdata.dimensions,
         filters: formdata.addfilter,
-        dashboard: formdata.dashboardNameList.map((el) => el.value)
+        dashboards: formdata.dashboardNameList.map((el) => el.value)
       };
       if (data[2] === 'edit') {
         dispatch(getUpdatekpi(kpiId, kpiInfo));

@@ -69,6 +69,7 @@ def kpi():
             data_source=data.get("data_source"),
             kpi_type=data.get("dataset_type"),
             kpi_query=data.get("kpi_query"),
+            schema_name=data.get("schema_name"),
             table_name=data.get("table_name"),
             metric=data.get("metric"),
             aggregation=data.get("aggregation"),
@@ -219,6 +220,23 @@ def disable_kpi(kpi_id):
         logger.info(f"Error in disabling the KPI: {err}")
     return jsonify({"message": message, "status": status})
 
+@blueprint.route("/<int:kpi_id>/enable", methods=["GET"])
+def enable_kpi(kpi_id):
+    status, message = "", ""
+    try:
+        kpi_obj = Kpi.get_by_id(kpi_id)
+        if kpi_obj:
+            kpi_obj.active = True
+            kpi_obj.save(commit=True)
+            status = "success"
+        else:
+            message = "KPI not found"
+            status = "failure"
+    except Exception as err:
+        status = "failure"
+        logger.info(f"Error in enabling the KPI: {err}")
+    return jsonify({"message": message, "status": status})
+
 
 @blueprint.route("/<int:kpi_id>/get-dimensions", methods=["GET"])
 def kpi_get_dimensions(kpi_id):
@@ -324,6 +342,11 @@ def get_kpi_info(kpi_id):
     try:
         kpi_obj = get_kpi_data_from_id(kpi_id)
         data = kpi_obj
+        mapper_obj_list = get_mapper_obj_by_kpi_ids([kpi_id])
+        dashboard_id_list = [mapper.dashboard for mapper in mapper_obj_list]
+        dashboard_list = get_dashboard_list_by_ids(dashboard_id_list)
+        dashboard_list = [dashboard.as_dict for dashboard in dashboard_list]
+        data["dashboards"] = dashboard_list
         status = "success"
     except Exception as err:
         status = "failure"

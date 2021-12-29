@@ -37,10 +37,11 @@ const RESET = {
   type: 'RESET_DRILL'
 };
 
-const Anomaly = ({ kpi, anomalystatus }) => {
+const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
   const dispatch = useDispatch();
   const history = useHistory();
   const [chartData, setChartData] = useState([]);
+  const [subDimLoading, setSubDimloading] = useState(true);
   const [subDimList, setSubDimList] = useState([]);
   const [drilldownCollapse, setDrilldownCollapse] = useState(false);
   const [dataQualityCollapse, setDataQualityCollapse] = useState(false);
@@ -73,6 +74,9 @@ const Anomaly = ({ kpi, anomalystatus }) => {
   }, [kpiTab]);
 
   const getAnomaly = (tab) => {
+    if (tab === 'Sub-dimensions') {
+      setSubDimloading(true);
+    }
     dispatch(anomalyDetection(kpi, tab));
   };
   useEffect(() => {
@@ -84,6 +88,7 @@ const Anomaly = ({ kpi, anomalystatus }) => {
         handleDataQuality(anomalyDetectionData?.data?.base_anomaly_id);
       }
     } else if (kpiTab === 'Sub-dimensions') {
+      setSubDimloading(false);
       if (anomalyDetectionData && anomalyDetectionData?.data?.length) {
         subDimesionList = anomalyDetectionData.data.map((anomaly) => (
           <Anomalygraph key={`dl-${anomaly.title}`} drilldown={anomaly} />
@@ -116,7 +121,7 @@ const Anomaly = ({ kpi, anomalystatus }) => {
   }
   useEffect(() => {
     if (anomalystatus && anomalystatus?.is_anomaly_setup === false) {
-      history.push(`/kpi/settings/${kpi}`);
+      history.push(`/dashboard/${dashboard}/settings/${kpi}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anomalystatus]);
@@ -419,7 +424,7 @@ const Anomaly = ({ kpi, anomalystatus }) => {
                       highcharts={Highcharts}
                       options={chartData}
                     />
-                  ) : subDimList && subDimList.length ? (
+                  ) : subDimLoading ? null : subDimList && subDimList.length ? (
                     subDimList
                   ) : (
                     <div className="dashboard-layout setup-layout-empty">
@@ -437,7 +442,8 @@ const Anomaly = ({ kpi, anomalystatus }) => {
                       drilldownCollapse
                         ? 'dashboard-header-wrapper '
                         : 'dashboard-header-wrapper header-wrapper-disable '
-                    }>
+                    }
+                    onClick={() => setDrilldownCollapse(!drilldownCollapse)}>
                     <div className="dashboard-header">
                       <h3>Drill Downs</h3>
                     </div>
@@ -446,8 +452,7 @@ const Anomaly = ({ kpi, anomalystatus }) => {
                         !drilldownCollapse
                           ? 'header-collapse header-disable'
                           : 'header-collapse'
-                      }
-                      onClick={() => setDrilldownCollapse(!drilldownCollapse)}>
+                      }>
                       <img src={Toparrow} alt="CollapseOpen" />
                     </div>
                   </div>
@@ -479,6 +484,9 @@ const Anomaly = ({ kpi, anomalystatus }) => {
                       !dataQualityCollapse
                         ? 'dashboard-header-wrapper header-wrapper-disable'
                         : 'dashboard-header-wrapper'
+                    }
+                    onClick={() =>
+                      setDataQualityCollapse(!dataQualityCollapse)
                     }>
                     <div className="dashboard-header">
                       <h3>Data Quality</h3>
@@ -488,9 +496,6 @@ const Anomaly = ({ kpi, anomalystatus }) => {
                         !dataQualityCollapse
                           ? 'header-collapse header-disable'
                           : 'header-collapse'
-                      }
-                      onClick={() =>
-                        setDataQualityCollapse(!dataQualityCollapse)
                       }>
                       <img src={Toparrow} alt="CollapseOpen" />
                     </div>

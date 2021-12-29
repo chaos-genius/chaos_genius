@@ -62,3 +62,6 @@ class BigQueryDb(BaseDb):
     def get_schema(self):
         self.schema = None
         return self.schema
+
+    def get_schema_names_list(self):
+        return None

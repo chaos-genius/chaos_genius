@@ -21,6 +21,10 @@ export const CONNECTION_TYPE = `${BASE_URL}/api/connection/types`;
 export const CREATE_DATASOURCE = `${BASE_URL}/api/connection/create`;
 export const TEST_CONNECTION = `${BASE_URL}/api/connection/test`;
 export const KPI_FORM_OPTION_URL = `${BASE_URL}/api/connection/metadata`;
+export const ADD_KPI_GET_AVAILABILITY = `${BASE_URL}/api/connection/get-availability`;
+export const KPI_LIST_SCHEMA = `${BASE_URL}/api/connection/list-schema`;
+export const KPI_TABLE_LIST_ON_SCHEMA = `${BASE_URL}/api/connection/get-table-list`;
+export const KPI_TABLE_INFO_DATA = `${BASE_URL}/api/connection/table-info`;
 export const DELETE_DATASOURCE = `${BASE_URL}/api/connection/delete`;
 export const DASHBOARD_SIDEBAR_URL = `${BASE_URL}/api/kpi`;
 //export const DASHBOARD_DIMENSION = `${BASE_URL}/api/kpi//get-dimensions`;
@@ -53,15 +57,14 @@ const urlBlackListForDemo = [
   DASHBOARD_CREATE_URL,
   DASHBOARD_DELETE_URL,
   CREATE_DATASOURCE,
-  DELETE_DATASOURCE
+  DELETE_DATASOURCE,
+  CREATE_KPI_ALERT_URL
 ];
 
 export const checkBlackList = (url) => {
-  const blackListIndex = urlBlackListForDemo.findIndex((item) => {
+  return urlBlackListForDemo.findIndex((item) => {
     return item === url;
-  });
-  if (blackListIndex > -1) {
-    return true;
-  }
-  return false;
+  }) > -1
+    ? true
+    : false;
 };

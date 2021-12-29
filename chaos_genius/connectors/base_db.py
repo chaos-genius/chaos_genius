@@ -137,3 +137,7 @@ class BaseDb:
         Example Output: ['secrets_id_seq', 'API_secrets_id_seq', 'hashed__encryption_id_seq']
         """
         return self.inspector.get_sequence_names(schema=use_schema)
+    
+    def get_view_names_list(self, schema_name):
+        data = self.inspector.get_view_names(schema=schema_name)
+        return data

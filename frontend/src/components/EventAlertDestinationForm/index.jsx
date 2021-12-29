@@ -12,7 +12,7 @@ import './eventalertdestinationform.scss';
 
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
 import { useToast } from 'react-toast-wnm';
-
+import { EMAIL_REGEX } from '../../utils/regex-helper';
 import {
   getChannelStatus,
   createKpiAlert,
@@ -21,8 +21,10 @@ import {
 
 import store from '../../redux/store';
 
-import ReactTagInput from '@pathofdev/react-tag-input';
-import '@pathofdev/react-tag-input/build/index.css';
+import TagsInput from 'react-tagsinput';
+
+import 'react-tagsinput/react-tagsinput.css';
+
 import { useDispatch, useSelector } from 'react-redux';
 
 const RESET_ACTION = {
@@ -205,11 +207,6 @@ const EventAlertDestinationForm = ({
     }
   };
 
-  const validateEmail = (email) => {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line
-    return re.test(String(email).toLowerCase());
-  };
-
   const onSubmit = () => {
     var obj = { ...error };
     if (alertFormData.alert_channel === '') {
@@ -218,9 +215,9 @@ const EventAlertDestinationForm = ({
     setError(obj);
     if (error.alert_channel === '') {
       if (path[2] === 'edit') {
-        dispatch(updateKpiAlert(kpiId, alertFormData));
+        dispatch(updateKpiAlert(kpiId, alertFormData, customToast));
       } else {
-        dispatch(createKpiAlert(alertFormData));
+        dispatch(createKpiAlert(alertFormData, customToast));
       }
     }
   };
@@ -351,17 +348,21 @@ const EventAlertDestinationForm = ({
         <div className="form-group">
           <label>Add Recepients </label>
           <div className="editable-field">
-            <ReactTagInput
-              tags={resp}
-              placeholder="Add Recepients"
-              onChange={(newTags) => handleChange(newTags, 'email')}
-              validator={(value) => {
-                const isEmail = validateEmail(value);
-                if (!isEmail) {
-                }
-                // Return boolean to indicate validity
-                return isEmail;
+            <TagsInput
+              value={resp}
+              inputProps={{
+                className: 'react-tagsinput-input',
+                placeholder: 'Add Recepients'
               }}
+              onChange={(e) => handleChange(e, 'email')}
+              validationRegex={EMAIL_REGEX}
+              onValidationReject={() =>
+                customToast({
+                  type: 'error',
+                  header: 'Invalid Email',
+                  description: 'Please enter a valid email ID'
+                })
+              }
             />
           </div>
         </div>

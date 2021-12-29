@@ -21,30 +21,20 @@
 
 <h2 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Anomaly Details
 </h2>
-<table style="border-spacing: 15px; color: #F6F5F5;text-align: left;">
-  <tr>
-    <th>Value</th>
-    <th>Time of Occurrence</th>
-  </tr>
-  <tr>
-    <td>{{ highest_value }}</td>
-    <td>{{ time_of_anomaly }}</td>
-  </tr>
-  <tr>
-    <th>Lower Bound of Range</th>
-    <th>Upper Bound of Range</th>
-  </tr>
-  <tr>
-    <td>{{ lower_bound }}</td>
-    <td>{{ upper_bound }}</td>
-  </tr>
-  <tr>
-    <th>Severity Value</th>
-  </tr>
-  <tr>
-    <td>{{ severity_value }}</td>
-  </tr>
-</table>
-
-
+{% if data|length > 0 %}
+    <table style="border-collapse: collapse;border-spacing: 15px; color: #F6F5F5;text-align: left; padding: 10px;">
+      <tr style="border:1px solid #8A8A8A ; border-color: #8A8A8A;">
+          {% for column in column_names %}
+          <th style="border: 1px solid #8A8A8A ; padding: 10px;">{{column}}</th>
+          {% endfor %}
+      </tr>
+      {% for item in data %}
+          <tr style="border:1px solid #8A8A8A">
+              {% for column in column_names %}
+              <td style="color: #F6F5F5;border: 1px solid #8A8A8A ; padding: 10px;">{{item[column]}}</td>
+              {% endfor %}
+          </tr>
+      {% endfor %}
+    </table>
+{% endif %}
 {% endblock %}

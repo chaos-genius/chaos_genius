@@ -13,6 +13,7 @@ import {
 } from '../../utils/url-helper';
 
 import { getRequest, postRequest, putRequest } from '../../utils/http-helper';
+import { env } from '../../env';
 
 import {
   ALERTEMAILREQUEST,
@@ -283,7 +284,7 @@ export const createKpiAlertFailure = () => {
   };
 };
 
-export const createKpiAlert = (payload) => {
+export const createKpiAlert = (payload, customToast) => {
   return async (dispatch) => {
     dispatch(createKpiAlertRequest());
     const { data, error, status } = await postRequest({
@@ -292,7 +293,8 @@ export const createKpiAlert = (payload) => {
       headers: {
         'Content-Type': 'application/json'
       },
-      noAuth: true
+      noAuth: true,
+      customToast
     });
     if (error) {
       dispatch(createKpiAlertFailure());
@@ -387,23 +389,35 @@ export const updateKpiAlertFailure = () => {
   };
 };
 
-export const updateKpiAlert = (id, payload) => {
-  return async (dispatch) => {
-    dispatch(updateKpiAlertRequest());
-    const { data, error, status } = await putRequest({
-      url: `${UPDATE_KPI_ALERT_URL}/${id}/update`,
-      data: JSON.stringify(payload),
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      noAuth: true
-    });
-    if (error) {
-      dispatch(updateKpiAlertFailure());
-    } else if (data && status === 200) {
-      dispatch(updateKpiAlertSuccess(data));
+export const updateKpiAlert = (id, payload, customToast) => {
+  if (env.REACT_APP_IS_DEMO === 'true') {
+    if (customToast) {
+      customToast({
+        type: 'error',
+        header: 'This is a demo version'
+      });
     }
-  };
+    return {
+      type: 'default'
+    };
+  } else {
+    return async (dispatch) => {
+      dispatch(updateKpiAlertRequest());
+      const { data, error, status } = await putRequest({
+        url: `${UPDATE_KPI_ALERT_URL}/${id}/update`,
+        data: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        noAuth: true
+      });
+      if (error) {
+        dispatch(updateKpiAlertFailure());
+      } else if (data && status === 200) {
+        dispatch(updateKpiAlertSuccess(data));
+      }
+    };
+  }
 };
 
 export const kpiAlertDisableRequest = () => {
@@ -472,24 +486,24 @@ export const kpiAlertEnable = (id) => {
   };
 };
 
-export const kpiAlertDeleteRequest = () =>{
+export const kpiAlertDeleteRequest = () => {
   return {
     type: KPIALERTDELETEREQUEST
-  }
-}
+  };
+};
 
-export const kpiAlertDeleteFailure = () =>{
+export const kpiAlertDeleteFailure = () => {
   return {
     type: KPIALERTDELETEFAILURE
-  }
-}
+  };
+};
 
-export const kpiAlertDeleteSuccess = (response) =>{
+export const kpiAlertDeleteSuccess = (response) => {
   return {
     type: KPIALERTDELETERESPONSE,
     data: response
-  }
-}
+  };
+};
 
 export const kpiAlertDeleteById = (id) => {
   return async (dispatch) => {
@@ -503,4 +517,4 @@ export const kpiAlertDeleteById = (id) => {
       dispatch(kpiAlertDeleteSuccess(data));
     }
   };
-}
+};

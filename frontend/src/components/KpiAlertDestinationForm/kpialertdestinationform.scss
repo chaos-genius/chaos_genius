@@ -8,7 +8,7 @@
   min-height: 150px;
 }
 .form-group {
-  .react-tag-input {
+  .react-tagsinput {
     min-height: 48px;
     height: auto;
     background: $white;
@@ -19,7 +19,7 @@
     align-items: center;
     padding: 2px 8px;
     width: 100%;
-    .react-tag-input__input {
+    .react-tagsinput-input {
       font-weight: $font-weight-400;
       font-size: $font-size-14;
       line-height: $line-height-20;
@@ -30,28 +30,26 @@
         color: $grey_variation-1;
       }
     }
-    .react-tag-input__tag {
+    .react-tagsinput-tag {
       background: $grey_variation-2;
       box-sizing: border-box;
       border: none;
       border-radius: 2px;
-      .react-tag-input__tag__content {
-        font-weight: $font-weight-400;
-        font-size: $font-size-14;
-        line-height: $line-height-16;
-        letter-spacing: $letter-spacing;
-        color: $black_variation-2;
-        background: $grey_variation-2;
-        padding: 3px 3px 3px 6px;
+      font-weight: $font-weight-400;
+      font-size: $font-size-14;
+      line-height: $line-height-16;
+      letter-spacing: $letter-spacing;
+      color: $black_variation-2;
+      background: $grey_variation-2;
+      padding: 3px 3px 3px 6px;
+    }
+    .react-tagsinput-remove {
+      background: $grey_variation-2;
+      &::after {
+        color: $green;
       }
-      .react-tag-input__tag__remove {
-        background: $grey_variation-2;
-        &::after {
-          background-color: $green;
-        }
-        &::before {
-          background-color: $green;
-        }
+      &::before {
+        color: $green;
       }
     }
   }

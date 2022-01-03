@@ -32,6 +32,7 @@ jobs:
           context: frontend
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+          file: frontend/Dockerfile.prod
 
   docker-build-server:
     runs-on: ubuntu-latest

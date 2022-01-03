@@ -7,6 +7,6 @@ RUN apt-get update \
 
 COPY requirements /requirements
 
-RUN pip install -r /requirements/dev.txt --no-cache-dir
+RUN pip install -r /requirements/prod.txt --no-cache-dir
 
 COPY . .

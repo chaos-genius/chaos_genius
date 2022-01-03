@@ -1,0 +1,18 @@
+@import '../../assets/styles/variable.scss';
+
+.dashboard-no-kpi-card {
+  width: 461px;
+  min-height: 300px;
+  padding: 68px 65px 32px 65px;
+  justify-content: center;
+  .no-data-img {
+    width: 155px;
+    height: 128px;
+    img {
+      object-fit: contain;
+    }
+  }
+  h3 {
+    margin-bottom: 0px;
+  }
+}

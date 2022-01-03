@@ -55,10 +55,15 @@ export const onboarding = (state = initialState, action) => {
       return {
         ...state,
         homeKpiLoading: false,
-        homeKpiData: [],
         homeKpiError: true
       };
     }
+    case 'RESET_KPI_HOME_DATA':
+      return {
+        ...state,
+        homeKpiData: ''
+      };
+
     default:
       return state;
   }

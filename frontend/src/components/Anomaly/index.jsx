@@ -351,6 +351,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
       (row) => row[0] === event.point.x
     );
     store.dispatch(RESET);
+    setDrilldownCollapse(true);
     if (severity_score[1] !== 0) {
       dispatch(
         anomalyDrilldown(kpi, {

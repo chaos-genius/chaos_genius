@@ -1,33 +1,34 @@
 import React, { useState, useEffect, useContext } from 'react';
-
 import { useHistory, useParams } from 'react-router-dom';
-
+import { useToast } from 'react-toast-wnm';
 import { useDispatch, useSelector } from 'react-redux';
-
 import Select from 'react-select';
+import Modal from 'react-modal';
 
 import Play from '../../assets/images/play-green.png';
 import Success from '../../assets/images/success.svg';
 import Fail from '../../assets/images/fail.svg';
-//import Toast_error from '../../assets/images/toast-error.svg';
-//import Cancel from '../../assets/images/cancel.svg';
+import Close from '../../assets/images/close.svg';
+import Add from '../../assets/images/add.svg';
 
 import '../../assets/styles/addform.scss';
-
-import { useToast } from 'react-toast-wnm';
-
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
-
 import {
   getAllKpiExplorerForm,
-  getAllKpiExplorerField,
   getAllKpiExplorerSubmit,
+  getSchemaAvailability,
+  getTableListOnSchema,
+  getTableinfoData,
   getTestQuery,
   getEditMetaInfo,
   getKpibyId,
-  getUpdatekpi
+  getUpdatekpi,
+  getDashboard,
+  getCreateDashboard
 } from '../../redux/actions';
 import { connectionContext } from '../context';
+import './kpiexplorerform.scss';
+import { getLocalStorage } from '../../utils/storage-helper';
 
 const datasettype = [
   {
@@ -46,14 +47,6 @@ const aggregate = [
   { value: 'sum', label: 'Sum' }
 ];
 
-// const operator = [
-//   { value: '=', label: '=' },
-//   { value: '+', label: '+' },
-//   { value: '-', label: '-' },
-//   { value: '/', label: '/' },
-//   { value: '>', label: '>' },
-//   { value: '<', label: '<' }
-// ];
 const customSingleValue = ({ data }) => (
   <div className="input-select">
     <div className="input-select__single-value">
@@ -65,7 +58,7 @@ const customSingleValue = ({ data }) => (
 
 const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   const dispatch = useDispatch();
-
+  const limited = getLocalStorage('GlobalSetting');
   const toast = useToast();
 
   const history = useHistory();
@@ -78,23 +71,29 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     datasource: '',
     tableoption: '',
     metricOption: '',
-    datetime_column: ''
+    schemaOption: '',
+    datetime_column: '',
+    dashboard: ''
   });
 
-  //const [inputList, setInputList] = useState([]);
   const [formdata, setFormdata] = useState({
     kpiname: '',
     datasource: '',
     selectDatasource: '',
     dataset: 'table',
     tablename: '',
+    schemaName: '',
     query: '',
     metriccolumns: '',
     aggregate: '',
     datetimecolumns: '',
     addfilter: [],
-    dimensions: []
+    dimensions: [],
+    dashboardNameList: [],
+    dashboardName: ''
   });
+
+  const [editedFormData, setEditedFormData] = useState({});
 
   const [errorMsg, setErrorMsg] = useState({
     kpiname: false,
@@ -102,11 +101,14 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     selectDatasource: false,
     dataset: false,
     tablename: false,
+    schemaName: false,
     query: false,
     metriccolumns: false,
     aggregate: false,
     datetimecolumns: false,
-    dimension: false
+    dimension: false,
+    dashboardName: false,
+    dashboardNameList: false
   });
 
   const [dataset, setDataset] = useState({ value: 'Table', label: 'Table' });
@@ -117,13 +119,19 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   });
 
   const [datasourceid, setDataSourceId] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
 
   const {
     kpiFormLoading,
     kpiFormData,
     kpiFieldLoading,
+    dataSourceHasSchema,
+    tableListOnSchema,
+    schemaNamesList,
+    schemaListLoading,
     kpiField,
     testQueryData,
+    tableInfoData,
     kpiSubmitLoading,
     kpiSubmit,
     kpiMetaInfoData,
@@ -132,24 +140,30 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     kpiUpdateData
   } = useSelector((state) => state.kpiExplorer);
 
-  // const resetFieldsOnchangeDataSetTypeOrTable = () => {
-  //   setFormdata({
-  //     tablename: '',
-  //   query: '',
-  //   metriccolumns: '',
-  //   aggregate: '',
-  //   datetimecolumns: ''
-  //   });
-  // }
+  const { dashboardList } = useSelector((state) => state.DashboardHome);
+
+  const { createDashboardLoading, createDashboard } = useSelector(
+    (state) => state.DashboardHome
+  );
 
   useEffect(() => {
     dispatchGetAllKpiExplorerForm();
+    dispatchGetAllDashboard();
     if (data[2] === 'edit') {
       dispatch(getEditMetaInfo());
       dispatch(getKpibyId(kpiId));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    dispatchGetAllDashboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createDashboard]);
+
+  const dispatchGetAllDashboard = () => {
+    dispatch(getDashboard());
+  };
 
   useEffect(() => {
     if (kpiFormData && connectionType) {
@@ -159,21 +173,28 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   }, [kpiFormData, connectionType]);
 
   useEffect(() => {
-    // if (kpiFormData) {
-    //   fieldData();
-    // }
     if (kpiEditData && data[2] === 'edit') {
       const obj = { ...formdata };
       obj['kpiname'] = kpiEditData?.name || '';
       obj['datasource'] = kpiEditData?.data_source;
       obj['dataset'] = kpiEditData?.kpi_type || '';
       obj['tablename'] = kpiEditData?.table_name || '';
+      obj['schemaName'] = kpiEditData?.schema_name || '';
       obj['query'] = kpiEditData?.kpi_query || '';
       obj['metriccolumns'] = kpiEditData?.metric || '';
       obj['aggregate'] = kpiEditData?.aggregation || '';
       obj['datetimecolumns'] = kpiEditData?.datetime_column || '';
       obj['addfilter'] = kpiEditData?.filters || [];
       obj['dimensions'] = kpiEditData?.dimensions || [];
+      let arr = [];
+      kpiEditData?.dashboards &&
+        kpiEditData?.dashboards.map((data) =>
+          arr.push({
+            label: data.name,
+            value: data.id
+          })
+        );
+      obj['dashboardNameList'] = arr;
       setDataset({
         label: kpiEditData?.kpi_type,
         value: kpiEditData?.kpi_type
@@ -211,6 +232,37 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       arr = [];
     }
     setOption({ ...option, metricOption: arr });
+  };
+
+  useEffect(() => {
+    if (dashboardList) {
+      dashboardOptionList();
+    } // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dashboardList]);
+
+  const dashboardOptionList = () => {
+    let arr = [];
+    if (limited?.is_ee) {
+      arr.push({
+        value: 'newdashboard',
+        label: (
+          <span className="add-dashboard">
+            <img src={Add} alt="Add" />
+            New Dashboard
+          </span>
+        )
+      });
+    }
+    if (dashboardList) {
+      dashboardList &&
+        dashboardList.forEach((item) => {
+          arr.push({
+            label: item.name,
+            value: item.id
+          });
+        });
+    }
+    setOption({ ...option, dashboard: arr });
   };
 
   const datasourceIcon = (type) => {
@@ -289,7 +341,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       });
     } else if (
       kpiUpdateData &&
-      kpiUpdateData.status === 'failed' &&
+      kpiUpdateData.status === 'failure' &&
       onboarding !== true
     ) {
       customToast({
@@ -346,7 +398,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             id: data.id,
             label: <div className="optionlabel">{datasourceIcon(data)}</div>
           });
-          setOption({ datasource: optionArr });
+          setOption({ ...option, datasource: optionArr });
         });
     }
   };
@@ -357,11 +409,13 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       ...formdata,
       datasource: e.id,
       tablename: '',
+      schemaName: '',
       query: '',
       metriccolumns: '',
       aggregate: '',
       datetimecolumns: '',
-      dimensions: []
+      dimensions: [],
+      dashboardNameList: []
     });
     setTableAdditional({
       ...tableAdditional,
@@ -382,7 +436,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         from_query: false,
         query: ''
       };
-      dispatchGetAllExplorerFiled(data);
+      dispatchGetAvailability(data);
     };
     if (datasourceid !== '') {
       fetchData();
@@ -390,8 +444,43 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datasourceid]);
 
-  const dispatchGetAllExplorerFiled = (data) => {
-    dispatch(getAllKpiExplorerField(data));
+  useEffect(() => {
+    if (
+      datasourceid &&
+      dataSourceHasSchema &&
+      tableListOnSchema &&
+      tableListOnSchema.table_names
+    ) {
+      var optionArr = [];
+      for (const [key, value] of Object.entries(
+        tableListOnSchema.table_names
+      )) {
+        optionArr.push({
+          index: key,
+          value: value,
+          label: value
+        });
+      }
+      setOption({
+        ...option,
+        tableoption: optionArr
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tableListOnSchema]);
+
+  useEffect(() => {
+    if (dataSourceHasSchema && schemaNamesList && schemaListLoading === false) {
+      schemaNameOption();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schemaNamesList]);
+
+  const dispatchGetAvailability = (data) => {
+    dispatch(getSchemaAvailability(data));
+  };
+  const dispatchGetTableListOnSchema = (data) => {
+    dispatch(getTableListOnSchema(data));
   };
 
   useEffect(() => {
@@ -399,7 +488,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       tableOption();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpiField, formdata.tablename]);
+  }, [kpiField]);
 
   const tableOption = () => {
     if (kpiField && kpiFieldLoading === false && kpiField?.tables) {
@@ -417,9 +506,55 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     }
   };
 
+  const schemaNameOption = () => {
+    if (schemaNamesList && schemaNamesList.data) {
+      var optionArr = [];
+      for (const [key, value] of Object.entries(schemaNamesList.data)) {
+        optionArr.push({
+          index: key,
+          label: value,
+          value: value
+        });
+      }
+      setOption({
+        ...option,
+        tableoption: [],
+        schemaOption: optionArr
+      });
+    }
+  };
+
+  useEffect(() => {
+    setOption({
+      ...option,
+      schemaOption: [],
+      tableoption: []
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataSourceHasSchema]);
+
+  const schemaName = (e) => {
+    setErrorMsg({ schemaName: false });
+    if (e.value && datasourceid !== '') {
+      dispatchGetTableListOnSchema({
+        datasource_id: datasourceid,
+        schema: e.value
+      });
+      setFormdata({
+        ...formdata,
+        schemaName: e.value,
+        tablename: '',
+        metriccolumns: '',
+        aggregate: '',
+        datetimecolumns: '',
+        dimensions: []
+      });
+    }
+  };
+
   const tableName = (e) => {
-    if (kpiField && kpiField?.tables) {
-      setErrorMsg({ tablename: false });
+    setErrorMsg({ tablename: false });
+    if (!dataSourceHasSchema && kpiField && kpiField?.tables) {
       var optionValueArr = [];
       for (const [key, value] of Object.entries(kpiField.tables)) {
         const valueData = e.value;
@@ -439,12 +574,52 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           metriccolumns: '',
           aggregate: '',
           datetimecolumns: '',
-          dimensions: []
+          dimensions: [],
+          dashboardNameList: []
         });
       }
-
-      // setFormdata({ ...formdata, tablename: e.value });
+    } else if (dataSourceHasSchema) {
+      const valueData = e.value;
+      setFormdata({
+        ...formdata,
+        tablename: valueData,
+        metriccolumns: '',
+        aggregate: '',
+        datetimecolumns: '',
+        dimensions: []
+      });
+      dispatchGetTableInfoData(valueData);
     }
+  };
+
+  useEffect(() => {
+    if (
+      tableInfoData &&
+      tableInfoData.table_info &&
+      tableInfoData.table_info.columns
+    ) {
+      let optionArr = [];
+      for (const [key, value] of Object.entries(
+        tableInfoData.table_info.columns
+      )) {
+        optionArr.push({
+          index: key,
+          label: value.name,
+          value: value.name
+        });
+      }
+      setOption({ ...option, metricOption: optionArr });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tableInfoData]);
+
+  const dispatchGetTableInfoData = (table) => {
+    const obj = {
+      datasource_id: datasourceid,
+      schema: formdata.schemaName,
+      table_name: table
+    };
+    dispatch(getTableinfoData(obj));
   };
 
   const handleDataset = (e) => {
@@ -452,7 +627,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     setOption({
       ...option,
       dataset: e.value,
-      metricOption: []
+      metricOption: [],
+      tableoption: dataSourceHasSchema ? [] : option.tableoption
     });
     setFormdata({
       ...formdata,
@@ -461,7 +637,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       aggregate: '',
       datetimecolumns: '',
       dimensions: [],
-      tablename: ''
+      tablename: '',
+      schemaName: '',
+      dashboardNameList: []
     });
     setTableAdditional({
       ...tableAdditional,
@@ -485,6 +663,16 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           datasource: true
         };
       });
+    }
+    if (dataSourceHasSchema) {
+      if (formdata.schemaName === '') {
+        setErrorMsg((prev) => {
+          return {
+            ...prev,
+            schemaName: true
+          };
+        });
+      }
     }
     if (formdata.dataset === '') {
       setErrorMsg((prev) => {
@@ -527,6 +715,15 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       });
     }
 
+    if (formdata.dashboardNameList.length === 0) {
+      setErrorMsg((prev) => {
+        return {
+          ...prev,
+          dashboardNameList: true
+        };
+      });
+    }
+
     if (formdata.query === '') {
       setErrorMsg((prev) => {
         return {
@@ -541,7 +738,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         formdata.dataset &&
         formdata.metriccolumns &&
         formdata.aggregate &&
-        formdata.datetimecolumns) !== ''
+        formdata.datetimecolumns) !== '' &&
+      formdata.dashboardNameList.length !== 0
     ) {
       const kpiInfo = {
         name: formdata.kpiname,
@@ -549,15 +747,17 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         data_source: formdata.datasource,
         dataset_type: formdata.dataset,
         table_name: formdata.tablename,
+        schema_name: formdata.schemaName,
         kpi_query: formdata.query,
         metric: formdata.metriccolumns,
         aggregation: formdata.aggregate,
         datetime_column: formdata.datetimecolumns,
         dimensions: formdata.dimensions,
-        filters: formdata.addfilter
+        filters: formdata.addfilter,
+        dashboards: formdata.dashboardNameList.map((el) => el.value)
       };
       if (data[2] === 'edit') {
-        dispatch(getUpdatekpi(kpiId, { name: formdata.kpiname }));
+        dispatch(getUpdatekpi(kpiId, editedFormData));
       } else {
         dispatchgetAllKpiExplorerSubmit(kpiInfo);
       }
@@ -583,31 +783,33 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       dimensions: []
     });
   };
+  const closeModal = () => {
+    setIsOpen(false);
+  };
 
-  /* This is add filter function code */
+  const dashboardSubmit = () => {
+    if (formdata.dashboardName === '') {
+      setErrorMsg((prev) => {
+        return {
+          ...prev,
+          dashboardName: true
+        };
+      });
+    }
+    if (formdata.dashboardName) {
+      const dashboardData = {
+        dashboard_name: formdata.dashboardName,
+        kpi_list: []
+      };
+      dispatch(getCreateDashboard(dashboardData));
+    }
+  };
 
-  // const handleAddClick = () => {
-  //   setInputList([...inputList, { country: '', operator: '', value: '' }]);
-  // };
-
-  // const handleRemoveClick = (index) => {
-  //   const list = [...inputList];
-  //   list.splice(index, 1);
-  //   setInputList(list);
-  // };
-
-  // const handleInputChange = (e, index, name) => {
-  //   if (name === 'value') {
-  //     const { value } = e.target;
-  //     const list = [...inputList];
-  //     list[index][name] = value;
-  //     setInputList(list);
-  //   } else {
-  //     const list = [...inputList];
-  //     list[index][name] = e.value;
-  //     setInputList(list);
-  //   }
-  // };
+  useEffect(() => {
+    if (createDashboard && createDashboard.status === 'success') {
+      setIsOpen(false);
+    }
+  }, [createDashboard]);
 
   const editableStatus = (type) => {
     var status = false;
@@ -619,6 +821,14 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         return '';
       });
     return status;
+  };
+
+  const onEditData = (e, name) => {
+    setEditedFormData({
+      ...editedFormData,
+      [name]: e
+    });
+    setFormdata({ ...formdata, dashboardNameList: e });
   };
 
   if (kpiFormLoading) {
@@ -637,10 +847,15 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             className="form-control"
             placeholder="Name of your KPI"
             required
+            name="name"
             value={formdata.kpiname}
             disabled={data[2] === 'edit' ? editableStatus('name') : false}
             onChange={(e) => {
               setFormdata({ ...formdata, kpiname: e.target.value });
+              setEditedFormData({
+                ...editedFormData,
+                [e.target.name]: e.target.value
+              });
               setErrorMsg((prev) => {
                 return {
                   ...prev,
@@ -753,30 +968,59 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             </div>
           </> // end of for query
         ) : (
-          <div className="form-group">
-            <label>Table Name *</label>
-            <Select
-              options={option.tableoption}
-              value={
-                formdata.tablename !== '' && {
-                  label: formdata.tablename,
-                  value: formdata.tablename
-                }
-              }
-              isDisabled={
-                data[2] === 'edit' ? editableStatus('table_name') : false
-              }
-              classNamePrefix="selectcategory"
-              placeholder="Select Table"
-              onChange={(e) => tableName(e)}
-            />
+          <>
+            {dataSourceHasSchema && (
+              <div className="form-group">
+                <label>Schema Name *</label>
+                <Select
+                  options={option.schemaOption}
+                  value={
+                    formdata.schemaName !== '' && {
+                      label: formdata.schemaName,
+                      value: formdata.schemaName
+                    }
+                  }
+                  isDisabled={
+                    data[2] === 'edit' ? editableStatus('schema_name') : false
+                  }
+                  classNamePrefix="selectcategory"
+                  placeholder="Select Schema Name"
+                  onChange={(e) => schemaName(e)}
+                />
 
-            {errorMsg.tablename === true ? (
-              <div className="connection__fail">
-                <p>Select Table Name</p>
+                {errorMsg.tablename === true ? (
+                  <div className="connection__fail">
+                    <p>Select Schema Name</p>
+                  </div>
+                ) : null}
               </div>
-            ) : null}
-          </div>
+            )}
+
+            <div className="form-group">
+              <label>Table Name *</label>
+              <Select
+                options={option.tableoption}
+                value={
+                  formdata.tablename !== '' && {
+                    label: formdata.tablename,
+                    value: formdata.tablename
+                  }
+                }
+                isDisabled={
+                  data[2] === 'edit' ? editableStatus('table_name') : false
+                }
+                classNamePrefix="selectcategory"
+                placeholder="Select Table"
+                onChange={(e) => tableName(e)}
+              />
+
+              {errorMsg.tablename === true ? (
+                <div className="connection__fail">
+                  <p>Select Table Name</p>
+                </div>
+              ) : null}
+            </div>
+          </>
         )}
         <>
           <div className="form-group">
@@ -935,62 +1179,63 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               </p>
             </div>
           </div>
-          {/* {inputList && inputList.length !== 0 && (
-            <div className="form-group">
-              <label>Filters</label>
-              {inputList.map((item, index) => {
-                return (
-                  <div className="multi-filter-selection">
-                    <Select
-                      options={option.metricOption}
-                      classNamePrefix="selectcategory"
-                      isSearchable={false}
-                      closeMenuOnSelect="true"
-                      placeholder="Country"
-                      onChange={(e) => handleInputChange(e, index, 'country')}
-                    />
-                    <Select
-                      options={operator}
-                      classNamePrefix="selectcategory"
-                      isSearchable={false}
-                      closeMenuOnSelect="true"
-                      placeholder="="
-                      name="operator"
-                      onChange={(e) => handleInputChange(e, index, 'operator')}
-                    />
-                    <input
-                      className="form-control"
-                      placeholder="France"
-                      name="value"
-                      onChange={(e) => handleInputChange(e, index, 'value')}
-                    />
-                    <img
-                      src={Cancel}
-                      alt="Cancel"
-                      onClick={() => handleRemoveClick(index)}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          )} */}
 
-          {/* add option form */}
-          <div className="add-options-wrapper">
-            {/*Add filter code*/}
-            {/* <div
-              className="add-options"
-              onClick={() =>
-                // setTableAdditional({
-                // ...tableAdditional,
-                // tablefilter: true
-                // })
-                handleAddClick()
-              }>
-              <label>+ Add Filters</label>
-            </div> */}
+          <div className="form-group">
+            <label>Dashboard *</label>
+            <Select
+              closeMenuOnSelect={false}
+              blurInputOnSelect={false}
+              isMulti
+              options={option.dashboard}
+              classNamePrefix="selectcategory"
+              placeholder={
+                formdata.dashboardNameList.length === 0 && data[2] === 'edit'
+                  ? ''
+                  : 'Select'
+              }
+              menuPlacement="top"
+              value={
+                formdata.dashboardNameList.length !== 0
+                  ? formdata.dashboardNameList
+                  : []
+              }
+              isDisabled={
+                data[2] === 'edit' ? editableStatus('dashboards') : false
+              }
+              onChange={(e) => {
+                var arr = [];
+                e.length !== 0
+                  ? e.forEach((data) => {
+                      if (data.value === 'newdashboard') {
+                        setIsOpen(true);
+                      } else if (data.value !== 'newdashboard') {
+                        arr.push(data);
+                        setEditedFormData({
+                          ...editedFormData,
+                          dashboards: arr.map((el) => el.value)
+                        });
+                        setFormdata({
+                          ...formdata,
+                          dashboardNameList: arr
+                        });
+                      }
+                    })
+                  : onEditData(e, 'dashboards');
+
+                setErrorMsg((prev) => {
+                  return {
+                    ...prev,
+                    dashboardNameList: false
+                  };
+                });
+              }}
+            />
+            {errorMsg.dashboardNameList === true ? (
+              <div className="connection__fail">
+                <p>Select Dashboard</p>
+              </div>
+            ) : null}
           </div>
-
           <div className="form-action">
             <button
               className={
@@ -1017,6 +1262,60 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             </button>
           </div>
         </>
+        <Modal
+          isOpen={isOpen}
+          shouldCloseOnOverlayClick={false}
+          portalClassName="dashboardmodal">
+          <div className="modal-close">
+            <img src={Close} alt="Close" onClick={closeModal} />
+          </div>
+          <div className="modal-head">
+            <h3>Create New Dashboard</h3>
+          </div>
+          <div className="modal-body">
+            <div className="modal-contents">
+              <div className="form-group">
+                <label>Dashboard Name *</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Dashboard Name"
+                  onChange={(e) => {
+                    setErrorMsg({ ...errorMsg, dashboardName: false });
+                    setFormdata({ ...formdata, dashboardName: e.target.value });
+                  }}
+                />
+                {errorMsg.dashboardName === true ? (
+                  <div className="connection__fail">
+                    <p>Enter Dashboard Name</p>
+                  </div>
+                ) : null}
+              </div>
+              <div className="next-step-navigate">
+                <button className="btn white-button" onClick={closeModal}>
+                  <span>Cancel</span>
+                </button>
+                <button
+                  className={
+                    createDashboardLoading
+                      ? 'btn black-button btn-loading'
+                      : 'btn black-button'
+                  }
+                  onClick={dashboardSubmit}>
+                  <div className="btn-spinner">
+                    <div className="spinner-border" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <span>Loading...</span>
+                  </div>
+                  <div className="btn-content">
+                    <span>Create</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </Modal>
       </>
     );
   }

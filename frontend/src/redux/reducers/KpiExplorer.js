@@ -9,6 +9,12 @@ import {
   KPIEXPLORERFIELDSUCCESS,
   KPIEXPLORERFIELDFAILURE,
   KPIEXPLORERSUBMITSUCCESS,
+  TABLELISTONSCHEMASUCCESS,
+  SCHEMAAVAILABILITYSUCCESS,
+  SCHEMAAVAILABILITYFAILURE,
+  GETALLSCHEMALISTFAILURE,
+  SCHEMALISTSUCCESS,
+  TABLEINFODATASUCCESS,
   KPIEXPLORERSUBMITREQUEST,
   KPIEXPLORERSUBMITFAILURE,
   TESTQUERYSUCCESS,
@@ -37,7 +43,15 @@ const initialState = {
   kpiFormError: false,
   kpiField: [],
   kpiFieldLoading: true,
+  dataSourceHasSchema: false,
+  schemaNamesList: [],
   kpiFieldError: false,
+  schemaAvailabilityLoading: true,
+  schemaAvailabilityError: false,
+  schemaListLoading: true,
+  schemaListError: false,
+  tableListOnSchema: [],
+  tableInfoData: [],
   kpiSubmit: [],
   kpiSubmitLoading: false,
   kpiSubmitError: false,
@@ -112,10 +126,60 @@ export const kpiExplorer = (state = initialState, action) => {
       };
     }
     case KPIEXPLORERFIELDSUCCESS: {
-      return { ...state, kpiFieldLoading: false, kpiField: action.data };
+      return {
+        ...state,
+        kpiFieldLoading: false,
+        kpiField: action.data,
+        tableListOnSchema: []
+      };
+    }
+    case SCHEMAAVAILABILITYSUCCESS: {
+      return {
+        ...state,
+        schemaNamesList: [],
+        schemaAvailabilityLoading: false,
+        tableListOnSchema: [],
+        dataSourceHasSchema: action.data.available.schema
+      };
+    }
+    case TABLEINFODATASUCCESS: {
+      return {
+        ...state,
+        tableInfoData: action.data
+      };
+    }
+    case TABLELISTONSCHEMASUCCESS: {
+      return {
+        ...state,
+        tableListOnSchema: action.data
+      };
+    }
+    case SCHEMALISTSUCCESS: {
+      return {
+        ...state,
+        kpiField: [],
+        tableListOnSchema: [],
+        schemaListLoading: false,
+
+        schemaNamesList: action.data
+      };
     }
     case KPIEXPLORERFIELDFAILURE: {
       return { ...state, kpiFieldLoading: false, kpiFieldError: true };
+    }
+    case SCHEMAAVAILABILITYFAILURE: {
+      return {
+        ...state,
+        schemaAvailabilityLoading: false,
+        schemaAvailabilityError: true
+      };
+    }
+    case GETALLSCHEMALISTFAILURE: {
+      return {
+        ...state,
+        schemaListLoading: false,
+        schemaListError: true
+      };
     }
     case KPIEXPLORERSUBMITREQUEST: {
       return { ...state, kpiSubmitLoading: true, kpiSubmitError: false };
@@ -212,6 +276,13 @@ export const kpiExplorer = (state = initialState, action) => {
     }
     case 'KPI_RESET': {
       return {
+        kpiSubmit: [],
+        kpiUpdateData: []
+      };
+    }
+    case 'DASHBOARD_KPILIST_RESET': {
+      return {
+        ...state,
         kpiSubmit: [],
         kpiUpdateData: []
       };

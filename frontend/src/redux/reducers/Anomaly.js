@@ -23,7 +23,7 @@ const initialState = {
   anomalyDrilldownLoading: true,
   anomalyDrilldownData: '',
   anomalyDrilldownError: false,
-  anomalySettingLoading: true,
+  anomalySettingLoading: false,
   anomalySettingData: '',
   anomalySettingError: false
 };

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 
 import { Link } from 'react-router-dom';
 import Modal from 'react-modal';
-
+import Tooltip from 'react-tooltip-lite';
 import Noresult from '../Noresult';
 
 import Edit from '../../assets/images/edit.svg';
@@ -140,7 +140,14 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
             ? tableData.map((datasource) => {
                 return (
                   <tr key={uuidv4()}>
-                    <td>{datasource.name}</td>
+                    <td className="name-tooltip">
+                      <Tooltip
+                        className="tooltip-name"
+                        direction="right"
+                        content={<span>{datasource.name}</span>}>
+                        <span>{datasource.name}</span>
+                      </Tooltip>
+                    </td>
                     <td>
                       <div
                         className={

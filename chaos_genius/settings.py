@@ -7,7 +7,10 @@ For local development, use a .env file to set
 environment variables.
 """
 import os
+
 from dotenv import load_dotenv
+
+from chaos_genius.utils.utils import latest_git_commit_hash
 
 load_dotenv(".env")  # loads environment variables from .env
 
@@ -22,7 +25,7 @@ CWD = os.getcwd()
 ENV = os.getenv("FLASK_ENV", default="production")
 DEBUG = ENV == "development"
 SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL_CG_DB")
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY", default="t8GIEp8hWmR8y6VLqd6qQCMXzjRaKsx8nRruWNtFuec=")
 SEND_FILE_MAX_AGE_DEFAULT = os.getenv("SEND_FILE_MAX_AGE_DEFAULT")
 BCRYPT_LOG_ROUNDS = os.getenv("BCRYPT_LOG_ROUNDS", default=13)
 DEBUG_TB_ENABLED = DEBUG
@@ -55,10 +58,12 @@ elif MULTIDIM_ANALYSIS_FOR_ANOMALY == "False":
 MAX_SUBDIM_CARDINALITY = int(os.getenv('MAX_SUBDIM_CARDINALITY', default=100))
 TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN = int(os.getenv('TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN', default=10))
 MIN_DATA_IN_SUBGROUP = int(os.getenv('MIN_DATA_IN_SUBGROUP', default=90))
+TOP_SUBDIMENSIONS_FOR_ANOMALY = int(os.getenv('TOP_SUBDIMENSIONS_FOR_ANOMALY', default=10))
 MAX_ROWS_FOR_DEEPDRILLS = int(os.getenv("MAX_ROWS_FOR_DEEPDRILLS", default=10000000))
 MAX_FILTER_SUBGROUPS_ANOMALY = int(os.getenv('MAX_FILTER_SUBGROUPS_ANOMALY', default=100))
 MAX_DEEPDRILLS_SLACK_DAYS = int(os.getenv('MAX_DEEPDRILLS_SLACK_DAYS', default=14))
 MAX_ANOMALY_SLACK_DAYS = int(os.getenv('MAX_ANOMALY_SLACK_DAYS', default=14))
+DAYS_OFFSET_FOR_ANALTYICS = int(os.getenv('DAYS_OFFSET_FOR_ANALTYICS', default=2))
 
 SENTRY_DSN = os.getenv('SENTRY_DSN')
 
@@ -70,3 +75,17 @@ else:
 
 TASK_CHECKPOINT_LIMIT: int = int(os.getenv("TASK_CHECKPOINT_LIMIT", 1000))
 """Number of last checkpoints to retrieve in Task Monitor"""
+
+CHAOSGENIUS_VERSION_MAIN = os.getenv("CHAOSGENIUS_VERSION_MAIN", "0.2.0")
+"""ChaosGenius version - semver part only"""
+CHAOSGENIUS_VERSION_POSTFIX = os.getenv("CHAOSGENIUS_VERSION_POSTFIX", "git")
+"""ChaosGenius version - postfix to identify deployment"""
+
+# append latest git commit hash if running from main
+if CHAOSGENIUS_VERSION_POSTFIX == "git":
+    CHAOSGENIUS_VERSION_POSTFIX += "-" + (latest_git_commit_hash() or "unknown")
+
+CHAOSGENIUS_VERSION = CHAOSGENIUS_VERSION_MAIN + "-" + CHAOSGENIUS_VERSION_POSTFIX
+"""ChaosGenius full version string"""
+
+CHAOSGENIUS_ENTERPRISE_EDITION_KEY = os.getenv("CHAOSGENIUS_ENTERPRISE_EDITION_KEY")

@@ -159,7 +159,8 @@ def fill_data(
             )
 
     if end_date is not None:
-        end_date_diff_1 = end_date - timedelta(**FREQUENCY_DELTA[freq])
+        end_datetime = datetime(end_date.year, end_date.month, end_date.day)
+        end_date_diff_1 = end_datetime - timedelta(**FREQUENCY_DELTA[freq])
 
         if date_time_checker(input_data, end_date_diff_1, dt_col, freq):
             input_data = pd.concat(

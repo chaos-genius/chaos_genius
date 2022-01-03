@@ -7,7 +7,7 @@ import { Link, useHistory, useParams } from 'react-router-dom';
 import './dashboard.scss';
 
 import Setting from '../../assets/images/setting.svg';
-
+import rightarrow from '../../assets/images/rightarrow.svg';
 import Dashboardgraph from '../../components/DashboardGraph';
 import FilterWithTab from '../../components/FilterWithTab';
 import Anomaly from '../../components/Anomaly';
@@ -16,6 +16,7 @@ import Analystics from '../../components/Analystics';
 import { getDashboardSidebar, anomalySetting } from '../../redux/actions';
 
 import store from '../../redux/store';
+import EmptyKpisDashboard from '../../components/EmptyKpisDashboard';
 
 const SETTING_RESET = {
   type: 'SETTING_RESET'
@@ -31,6 +32,7 @@ const Dashboard = () => {
 
   const location = history.location.pathname.split('/');
   const kpi = useParams().kpi;
+  const dashboard = useParams().dashboard;
 
   const { sidebarLoading, sidebarList } = useSelector((state) => {
     return state.sidebar;
@@ -43,6 +45,7 @@ const Dashboard = () => {
   const [active, setActive] = useState('');
   const [kpiAggregate, SetKpiAggregate] = useState('');
   const [tab, setTabs] = useState('deepdrills');
+  const [breadCrumbs, setBreadCrumbs] = useState('');
 
   useEffect(() => {
     getAllDashboardSidebar();
@@ -52,7 +55,7 @@ const Dashboard = () => {
   }, []);
 
   const getAllDashboardSidebar = () => {
-    dispatch(getDashboardSidebar());
+    dispatch(getDashboardSidebar({ dashboard_id: dashboard }));
   };
 
   const getAnomalySetting = (id) => {
@@ -60,22 +63,47 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (sidebarList && sidebarList.length !== 0 && kpi === undefined) {
-      setActive(sidebarList[0]?.name);
-      //setKpi(sidebarList[0]?.id);
-      setTabs(location[2]);
-      SetKpiAggregate(sidebarList[0]?.aggregation);
-      getAnomalySetting(sidebarList[0]?.id);
-      history.push(`/dashboard/${location[2]}/${sidebarList[0]?.id}`);
-    } else if (sidebarList && sidebarList.length !== 0) {
-      setActive(
-        sidebarList.find((item) => item.id.toString() === kpi.toString())?.name
+    if (
+      sidebarList?.data &&
+      sidebarList?.data.length !== 0 &&
+      dashboard &&
+      kpi === undefined
+    ) {
+      setActive(sidebarList?.data[0]?.name);
+
+      setTabs(location[3]);
+      SetKpiAggregate(sidebarList?.data[0]?.aggregation);
+      getAnomalySetting(sidebarList?.data[0]?.id);
+      history.push(
+        `/dashboard/${dashboard}/${location[3]}/${sidebarList?.data[0].id}`
       );
-      setTabs(location[2]);
+    } else if (
+      sidebarList?.data &&
+      sidebarList?.data.length !== 0 &&
+      kpi &&
+      dashboard
+    ) {
+      setActive(
+        sidebarList?.data.find((item) => item.id.toString() === kpi.toString())
+          ?.name
+      );
+
+      setBreadCrumbs(
+        sidebarList?.dashboards.find(
+          (item) => item.id.toString() === dashboard.toString()
+        )?.name
+      );
+      setTabs(location[3]);
       getAnomalySetting(kpi);
       SetKpiAggregate(
-        sidebarList.find((item) => item.id.toString() === kpi.toString())
+        sidebarList?.data.find((item) => item.id.toString() === kpi.toString())
           ?.aggregation
+      );
+    } else if (sidebarList && sidebarList?.dashboards) {
+      setBreadCrumbs(
+        sidebarList?.dashboards.find(
+          (item) => item.id.toString() === dashboard.toString()
+        )?.name
       );
     }
 
@@ -84,7 +112,12 @@ const Dashboard = () => {
 
   const onTabClick = (tabs) => {
     setTabs(tabs);
-    window.history.pushState('', '', `/#/dashboard/${tabs}/${kpi}`);
+
+    window.history.pushState(
+      '',
+      '',
+      `/#/dashboard/${dashboard}/${tabs}/${kpi}`
+    );
   };
 
   if (sidebarLoading || anomalySettingLoading) {
@@ -98,78 +131,119 @@ const Dashboard = () => {
       <>
         {/* common heading and options */}
         <div className="heading-option">
-          <div className="heading-title">
-            <h3>Dashboard</h3>
+          <div className="page-navigation dashboard-page-navigate">
+            {/* Breadcrumb */}
+            <nav aria-label="breadcrumb">
+              <ol className="breadcrumb">
+                <li className="breadcrumb-item">
+                  <Link to="/dashboard">Dashboard </Link>
+                </li>
+
+                <li className="breadcrumb-item active" aria-current="page">
+                  {breadCrumbs}
+                </li>
+                {/* )} */}
+              </ol>
+            </nav>
+            {/* Back */}
+
+            <div className="backnavigation">
+              <Link to="/dashboard">
+                <img src={rightarrow} alt="Back" />
+                <span>{breadCrumbs}</span>
+              </Link>
+            </div>
+            {/* )} */}
           </div>
         </div>
-        {/* explore wrapper */}
-        <div className="explore-wrapper">
-          {/* filter section */}
-          <div className="filter-section">
-            {sidebarList && kpi && (
-              <FilterWithTab
-                tabs={tab}
-                kpi={kpi}
-                data={sidebarList}
-                setActive={setActive}
-                SetKpiAggregate={SetKpiAggregate}
-              />
-            )}
+        {sidebarList?.data && sidebarList?.data.length === 0 ? (
+          <div className="no-alert-container">
+            <EmptyKpisDashboard />
           </div>
-          {/* Graph Section*/}
-          <div className="graph-section">
-            {/* Dashboard Header */}
-            {location[2] !== 'settings' ? (
-              <div className="dashboard-layout dashboard-header-tab">
-                <div className="dashboard-subheader">
-                  <div className="common-tab">
-                    <ul>
-                      <li
-                        className={tab === 'deepdrills' ? 'active' : ''}
-                        onClick={() => onTabClick('deepdrills')}>
-                        DeepDrills
-                      </li>
+        ) : (
+          <>
+            {/* explore wrapper */}
+            <div className="explore-wrapper">
+              {/* filter section */}
+              <div className="filter-section">
+                {sidebarList?.data && kpi && (
+                  <FilterWithTab
+                    tabs={tab}
+                    kpi={kpi}
+                    dashboard={dashboard}
+                    data={sidebarList?.data}
+                    setActive={setActive}
+                    SetKpiAggregate={SetKpiAggregate}
+                  />
+                )}
+              </div>
+              {/* Graph Section*/}
+              <div className="graph-section">
+                {/* Dashboard Header */}
+                {location[2] !== 'settings' ? (
+                  <div className="dashboard-layout dashboard-header-tab">
+                    <div className="dashboard-subheader">
+                      <div className="common-tab">
+                        <ul>
+                          <li
+                            className={tab === 'deepdrills' ? 'active' : ''}
+                            onClick={() => onTabClick('deepdrills')}>
+                            DeepDrills
+                          </li>
 
-                      <li
-                        className={tab === 'anomaly' ? 'active' : ''}
-                        onClick={() => onTabClick('anomaly')}>
-                        Anomaly
-                      </li>
-                    </ul>
-                  </div>
-                  <Link to={`/kpi/settings/${kpi}`}>
-                    <div className="common-option">
-                      <button className="btn grey-button">
-                        <img src={Setting} alt="Setting" />
-                        <span>Settings</span>
-                      </button>
+                          <li
+                            className={tab === 'anomaly' ? 'active' : ''}
+                            onClick={() => onTabClick('anomaly')}>
+                            Anomaly
+                          </li>
+                        </ul>
+                      </div>
+                      <Link to={`/dashboard/${dashboard}/settings/${kpi}`}>
+                        <div className="common-option">
+                          <button className="btn grey-button">
+                            <img src={Setting} alt="Setting" />
+                            <span>Settings</span>
+                          </button>
+                        </div>
+                      </Link>
                     </div>
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              ''
-            )}
+                  </div>
+                ) : (
+                  ''
+                )}
 
-            {tab === 'deepdrills' && kpi && active && anomalySettingData && (
-              <Dashboardgraph
-                kpi={kpi}
-                kpiName={active}
-                kpiAggregate={kpiAggregate}
-                anomalystatus={anomalySettingData}
-              />
-            )}
-            {tab === 'anomaly' && kpi && anomalySettingData && (
-              <Anomaly kpi={kpi} anomalystatus={anomalySettingData} />
-            )}
+                {tab === 'deepdrills' &&
+                  kpi &&
+                  active &&
+                  anomalySettingData && (
+                    <Dashboardgraph
+                      kpi={kpi}
+                      dashboard={dashboard}
+                      kpiName={active}
+                      kpiAggregate={kpiAggregate}
+                      anomalystatus={anomalySettingData}
+                    />
+                  )}
+                {tab === 'anomaly' &&
+                  kpi &&
+                  anomalySettingData &&
+                  dashboard && (
+                    <Anomaly
+                      kpi={kpi}
+                      anomalystatus={anomalySettingData}
+                      dashboard={dashboard}
+                    />
+                  )}
 
-            {location[2] === 'settings' && (
-              <div className="table-section setting-section">
-                <Analystics />
+                {location[2] === 'settings' && (
+                  <div className="table-section setting-section">
+                    <Analystics />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
+            </div>
+          </>
+        )}{' '}
       </>
     );
   }

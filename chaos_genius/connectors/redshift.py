@@ -63,3 +63,8 @@ class Redshift(BaseDb):
         else:
             self.schema = 'public'
         return self.schema
+
+    def get_schema_names_list(self):
+        data = self.inspector.get_schema_names()
+        return data
+        

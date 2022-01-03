@@ -23,14 +23,30 @@ const KPI_RESET = {
   type: 'KPI_RESET'
 };
 
+const DASHBOARD_RESET = {
+  type: 'DASHBOARD_RESET'
+};
+const DASHBOARD_KPILIST_RESET = {
+  type: 'DASHBOARD_KPILIST_RESET'
+};
+
 const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
   const history = useHistory();
 
+  const path = history.location.pathname.split('/');
+
   const closeModal = () => {
     setIsOpen(false);
-    store.dispatch(SETTING_RESET);
-    store.dispatch(RESET_ACTION);
-    store.dispatch(KPI_RESET);
+    if (path[1] === 'onboarding' && path[2] === '3') {
+      store.dispatch(SETTING_RESET);
+      store.dispatch(RESET_ACTION);
+      store.dispatch(DASHBOARD_RESET);
+      store.dispatch(DASHBOARD_KPILIST_RESET);
+    } else {
+      store.dispatch(SETTING_RESET);
+      store.dispatch(RESET_ACTION);
+      store.dispatch(KPI_RESET);
+    }
   };
 
   const onNavigate = () => {
@@ -40,6 +56,11 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
     } else if (text === 'datasource') {
       store.dispatch(RESET_ACTION);
       history.push('/onboarding/2');
+    } else if (text === 'dashboard') {
+      store.dispatch(DASHBOARD_KPILIST_RESET);
+      store.dispatch(DASHBOARD_RESET);
+
+      history.push('/onboarding/4');
     } else {
       store.dispatch(SETTING_RESET);
       history.push('/dashboard/deepdrills');
@@ -53,6 +74,10 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
     } else if (text === 'datasource') {
       store.dispatch(RESET_ACTION);
       history.push('/datasource');
+    } else if (text === 'dashboard') {
+      store.dispatch(DASHBOARD_RESET);
+      store.dispatch(DASHBOARD_KPILIST_RESET);
+      history.push('/dashboard');
     } else if (text === 'activateanalytics') {
       store.dispatch(SETTING_RESET);
       history.push('/dashboard/deepdrills');
@@ -91,7 +116,7 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
             <button className="btn black-button" onClick={() => onNavigate()}>
               <span>
                 {text === 'kpi'
-                  ? ' Add Activate Analytics'
+                  ? ' Create Dashboard'
                   : text === 'datasource'
                   ? 'Add KPI'
                   : text === 'activateanalytics'
@@ -103,7 +128,7 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
           <div onClick={() => onViewHandler()}>
             <label>
               {text === 'kpi'
-                ? 'View added KPI’s'
+                ? "View added KPI's"
                 : text === 'datasource'
                 ? 'View added data source'
                 : text === 'activateanalytics'

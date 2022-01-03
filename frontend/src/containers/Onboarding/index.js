@@ -6,9 +6,7 @@ import rightarrow from '../../assets/images/rightarrow.svg';
 
 import DataSourceForm from '../../components/DataSourceForm';
 import KpiExplorerForm from '../../components/KpiExplorerForm';
-//import DashboardForm from '../../components/DashboardForm';
-// import FilterAnalystics from '../../components/FilterAnalystics';
-// import Analystics from '../../components/Analystics';
+
 import Kpisetting from '../KpiSetting';
 
 import './onboarding.scss';
@@ -39,8 +37,6 @@ const Onboarding = () => {
                 ? 'Add KPI'
                 : data[2] === '3'
                 ? 'Activate Analytics'
-                : data[2] === '4'
-                ? 'Add Dashboard'
                 : null}
             </li>
           </ol>
@@ -56,8 +52,6 @@ const Onboarding = () => {
                 ? 'Add KPI'
                 : data[2] === '3'
                 ? 'Activate Analytics'
-                : data[2] === '4'
-                ? 'Add Dashboard'
                 : null}
             </span>
           </Link>
@@ -77,12 +71,6 @@ const Onboarding = () => {
             }>
             Add KPI
           </li>
-          {/* <li
-            className={
-              data[2] === '4' ? 'active' : data[2] >= '4' ? 'selected' : null
-            }>
-            Create Dashboard
-          </li> */}
           <li
             className={
               data[2] === '3' ? 'active' : data[2] >= '3' ? 'selected' : null
@@ -91,38 +79,27 @@ const Onboarding = () => {
           </li>
         </ul>
       </div>
-      {data[2] !== '3' ? (
-        <div className="add-form-container">
-          {data[2] === '1' ? (
+      <>
+        {data[2] === '1' ? (
+          <div className="add-form-container">
             <DataSourceForm
               onboarding={true}
               setModal={setModal}
               setText={setText}
             />
-          ) : data[2] === '2' ? (
+          </div>
+        ) : data[2] === '2' ? (
+          <div className="add-form-container">
             <KpiExplorerForm
               onboarding={true}
               setModal={setModal}
               setText={setText}
             />
-          ) : // data[2] === '3' ? (
-          //   <DashboardForm />
-          // ) :
-          null}
-        </div>
-      ) : (
-        // <div className="explore-wrapper">
-        //   {/* filter section */}
-        //   <div className="filter-section">
-        //     <FilterAnalystics />
-        //   </div>
-        //   {/* table section */}
-        //   <div className="table-section">
-        //     <Analystics />
-        //   </div>
-        // </div>
-        <Kpisetting onboarding={true} setModal={setModal} setText={setText} />
-      )}
+          </div>
+        ) : data[2] === '3' ? (
+          <Kpisetting onboarding={true} setModal={setModal} setText={setText} />
+        ) : null}
+      </>
 
       <ModalPopUp isOpen={modal} setIsOpen={setModal} text={text} />
     </>

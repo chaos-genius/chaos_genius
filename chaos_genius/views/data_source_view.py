@@ -23,8 +23,18 @@ from chaos_genius.third_party.integration_server_config import (
     DATA_SOURCE_ABBREVIATION
 )
 from chaos_genius.databases.db_utils import create_sqlalchemy_uri
-from chaos_genius.connectors import get_metadata
+from chaos_genius.connectors import (
+        get_metadata,
+        get_table_info as get_table_metadata,
+        get_schema_names,
+        get_table_list,
+        get_view_list
+)
 from chaos_genius.third_party.integration_utils import get_connection_config
+from chaos_genius.utils.metadata_api_config import (
+    SCHEMAS_AVAILABLE,
+    TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY
+)
 # from chaos_genius.databases.db_metadata import DbMetadata, get_metadata
 
 from chaos_genius.controllers.data_source_controller import (
@@ -364,3 +374,167 @@ def data_source_meta_info():
     """data source meta info view."""
     current_app.logger.info("data source meta info")
     return jsonify({"data": DataSource.meta_info()})
+
+@blueprint.route("/get-availability", methods = ["POST"])
+def check_views_availability():
+
+    views = False
+    materialize_views = False
+    schema_exist = False
+    message = ""
+    status = "failure"
+
+    try:
+        data = request.get_json()
+        datasource_id = data.get("datasource_id", None)
+
+        if datasource_id is None:
+            message = "Datasource ID needs to be provided"
+        else:
+            ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
+            if not ds_data or not getattr(ds_data, "active"):
+                raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
+
+            datasource_name = getattr(ds_data, "connection_type")
+            schema_exist = SCHEMAS_AVAILABLE.get(datasource_name , False)
+            views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["views"]
+            materialize_views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["materialized_views"]
+            status = "success"
+    except Exception as err:
+        message = "Error in fetching table info: {}".format(err)
+
+    return jsonify({"message":message, "status": status, "available": {"schema": schema_exist, "views": views, "materialize_views": materialize_views}})
+
+@blueprint.route("/list-schema", methods=["POST"])
+def get_schema_list():
+    status = "failure"
+    message = ""
+    data = []
+
+    try:
+        data = request.get_json()
+        datasource_id = data.get("datasource_id", None)
+
+        if datasource_id is None:
+            message = "Datasource ID needs to be provided"
+        else:
+            ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
+            if not ds_data or not getattr(ds_data, "active"):
+                raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
+
+            data = get_schema_names(ds_data.as_dict)
+            if data is None:
+                message = "Error occurred while establishing DB Connection"
+                data = []
+            else:
+                status = "success"
+    except Exception as err:
+        message = "Error in fetching table info: {}".format(err)
+
+    return jsonify({"message":message, "status":status, "data":data})
+
+@blueprint.route("/get-table-list", methods=["POST"])
+def get_schema_tables():
+    status = "failure"
+    message = ""
+    table_names = []
+
+    try:
+        data = request.get_json()
+        datasource_id = data.get("datasource_id", None)
+        schema = data.get("schema", None)
+
+        if datasource_id is None:
+            message = "Datasource ID needs to be provided"
+        else:
+            ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
+            if not ds_data or not getattr(ds_data, "active"):
+                raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
+
+            ds_name = getattr(ds_data, "connection_type")
+            schema = None if SCHEMAS_AVAILABLE[ds_name] == False else schema
+
+            table_names = get_table_list(ds_data.as_dict, schema)
+            if table_names is None:
+                message = "Error occurred while establishing DB Connection"
+                table_names = []
+            else:
+                status = "success"
+    except Exception as err:
+        message = "Error in fetching table info: {}".format(err)
+
+    return jsonify({"message":message, "status":status, "table_names":table_names})
+
+@blueprint.route("/get-view-list", methods=["POST"])
+def get_schema_views():
+    """
+    Returns a list of names of both views and materialized views
+    """
+
+    status = "failure"
+    message = ""
+    view_names = []
+    try:
+        data = request.get_json()
+        datasource_id = data.get("datasource_id", None)
+        schema = data.get("schema", None)
+
+        if datasource_id is None:
+            message = "Datasource ID needs to be provided"
+        else:
+            ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
+            if not ds_data or not getattr(ds_data, "active"):
+                raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
+
+            ds_name = getattr(ds_data, "connection_type")
+            schema = None if SCHEMAS_AVAILABLE[ds_name] == False else schema
+
+            view_names = get_view_list(ds_data.as_dict, schema)
+            if view_names is None:
+                message = "Error occurred while establishing DB Connection"
+                view_names = []
+            else:
+                status = "success"
+    except Exception as err:
+        message = "Error in fetching table info: {}".format(err)
+
+    return jsonify({"message":message, "status":status, "view_names":view_names})
+
+@blueprint.route("/table-info",methods=["POST"])
+def get_table_info():
+    """
+    Returns Columns and primary key of a given table/view in a Dict
+    """
+    status = ""
+    message = ""
+    table_info = {}
+    try:
+        data = request.get_json()
+        params_list = ["datasource_id", "schema", "table_name"]
+        if not set(params_list).issubset(list(data.keys())):
+            status = "failure"
+            message = "Missing required parameters. Please follow request format"
+            return jsonify({"status":status, "message":message, "table_info":table_info})
+
+        datasource_id = data["datasource_id"]
+        schema = data["schema"]
+        table_name = data["table_name"]
+        ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
+        if not ds_data or not getattr(ds_data, "active"):
+            raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
+
+        ds_name = getattr(ds_data, "connection_type")
+
+        schema = None if SCHEMAS_AVAILABLE[ds_name] == False else schema
+
+        table_info = get_table_metadata(ds_data.as_dict, schema, table_name)
+        if table_info is None:
+            raise Exception("Unable to fetch table info for the requested table")
+        else:
+            status = "success"
+    except Exception as e:
+        status = "failure"
+        message = "Error in fetching table info: {}".format(e)
+        table_info = {}
+    return jsonify({"table_info":table_info, "status":status, "message":message})
+    

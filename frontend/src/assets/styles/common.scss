@@ -312,6 +312,16 @@ a:hover {
       display: none;
     }
   }
+  .add-dashboard {
+    display: flex;
+    align-items: center;
+    color: $green;
+    img {
+      width: 16px;
+      height: 16px;
+      margin-right: 10px;
+    }
+  }
 }
 
 // connection-success
@@ -451,6 +461,18 @@ a:hover {
       }
       img {
         display: none;
+      }
+      .filter-tooltipcontent {
+        width: 85%;
+      }
+      .name-tooltip {
+        width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        white-space: initial;
       }
     }
   }
@@ -900,6 +922,7 @@ a:hover {
       height: 100%;
     }
   }
+
   h3 {
     font-weight: $font-weight-600;
     font-size: $font-size-18;

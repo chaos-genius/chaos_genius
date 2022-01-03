@@ -31,7 +31,7 @@ const KpiExplorer = () => {
   const [data, setData] = useState(false);
   const [kpiFilter, setKpiFilter] = useState([]);
   const [dashboardFilter, setDashboardFilter] = useState([]);
-  const [dashboardSearch, setDashboardSearch] = useState('');
+
   const { isLoading, kpiExplorerList } = useSelector(
     (state) => state.kpiExplorer
   );
@@ -56,30 +56,6 @@ const KpiExplorer = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSearch, kpiExplorerList]);
-
-  useEffect(() => {
-    if (dashboardSearch !== '') {
-      searchDashboardName();
-    } else if (kpiExplorerList) {
-      setKpiExplorerData(kpiExplorerList);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dashboardSearch]);
-
-  const searchDashboardName = () => {
-    const options = {
-      keys: ['dashboards.name']
-    };
-
-    const fuse = new Fuse(kpiExplorerList, options);
-
-    const result = fuse.search(dashboardSearch);
-    setKpiExplorerData(
-      result.map((item) => {
-        return item.item;
-      })
-    );
-  };
 
   const searchDataSource = () => {
     const options = {
@@ -185,7 +161,7 @@ const KpiExplorer = () => {
               setKpiFilter={setKpiFilter}
               kpiList={kpiExplorerList}
               setDashboardFilter={setDashboardFilter}
-              setDashboardNameSearch={setDashboardSearch}
+              kpi={true}
             />
           </div>
           {/* table section */}

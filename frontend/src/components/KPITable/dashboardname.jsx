@@ -5,7 +5,7 @@ import '../../assets/styles/table.scss';
 import Tooltip from 'react-tooltip-lite';
 
 const Dashboardname = ({ data }) => {
-  const [show, setShow] = useState(1);
+  const [show, setShow] = useState(2);
 
   return (
     <ul className="table-tips dashboard-tip">
@@ -18,9 +18,9 @@ const Dashboardname = ({ data }) => {
                 className="tooltip-name"
                 direction="right"
                 content={<span>{dashboard?.name}</span>}>
-                {data.length - 1 === index
+                {data.length - 2 === index
                   ? dashboard?.name
-                  : show > 1
+                  : show > 2
                   ? dashboard?.name.concat('', ',')
                   : dashboard?.name}
               </Tooltip>
@@ -32,13 +32,13 @@ const Dashboardname = ({ data }) => {
       {data && data.length !== 0 && data.length > show && (
         <li className="additional-tips" onClick={() => setShow(data.length)}>
           <label>
-            +{data.length - 1}
+            +{data.length - 2}
             <img src={Down} alt="Down" />
           </label>
         </li>
       )}
-      {show === data.length && data.length !== 1 && (
-        <li className="additional-tips" onClick={() => setShow(1)}>
+      {show === data.length && data.length !== 2 && (
+        <li className="additional-tips" onClick={() => setShow(2)}>
           <span>
             <img src={Up} alt="Up" />
           </span>

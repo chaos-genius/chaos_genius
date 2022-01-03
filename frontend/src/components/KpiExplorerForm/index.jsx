@@ -93,6 +93,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     dashboardName: ''
   });
 
+  const [editedFormData, setEditedFormData] = useState({});
+
   const [errorMsg, setErrorMsg] = useState({
     kpiname: false,
     datasource: false,
@@ -185,12 +187,13 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       obj['addfilter'] = kpiEditData?.filters || [];
       obj['dimensions'] = kpiEditData?.dimensions || [];
       let arr = [];
-      kpiEditData?.dashboards.map((data) =>
-        arr.push({
-          label: data.name,
-          value: data.id
-        })
-      );
+      kpiEditData?.dashboards &&
+        kpiEditData?.dashboards.map((data) =>
+          arr.push({
+            label: data.name,
+            value: data.id
+          })
+        );
       obj['dashboardNameList'] = arr;
       setDataset({
         label: kpiEditData?.kpi_type,
@@ -754,7 +757,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         dashboards: formdata.dashboardNameList.map((el) => el.value)
       };
       if (data[2] === 'edit') {
-        dispatch(getUpdatekpi(kpiId, kpiInfo));
+        dispatch(getUpdatekpi(kpiId, editedFormData));
       } else {
         dispatchgetAllKpiExplorerSubmit(kpiInfo);
       }
@@ -820,6 +823,14 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     return status;
   };
 
+  const onEditData = (e, name) => {
+    setEditedFormData({
+      ...editedFormData,
+      [name]: e
+    });
+    setFormdata({ ...formdata, dashboardNameList: e });
+  };
+
   if (kpiFormLoading) {
     return (
       <div className="load ">
@@ -836,10 +847,15 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             className="form-control"
             placeholder="Name of your KPI"
             required
+            name="name"
             value={formdata.kpiname}
             disabled={data[2] === 'edit' ? editableStatus('name') : false}
             onChange={(e) => {
               setFormdata({ ...formdata, kpiname: e.target.value });
+              setEditedFormData({
+                ...editedFormData,
+                [e.target.name]: e.target.value
+              });
               setErrorMsg((prev) => {
                 return {
                   ...prev,
@@ -1183,7 +1199,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                   ? formdata.dashboardNameList
                   : []
               }
-              // components={{ SingleValue: customAddDashboard }}
+              isDisabled={
+                data[2] === 'edit' ? editableStatus('dashboards') : false
+              }
               onChange={(e) => {
                 var arr = [];
                 e.length !== 0
@@ -1192,13 +1210,17 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                         setIsOpen(true);
                       } else if (data.value !== 'newdashboard') {
                         arr.push(data);
+                        setEditedFormData({
+                          ...editedFormData,
+                          dashboards: arr.map((el) => el.value)
+                        });
                         setFormdata({
                           ...formdata,
                           dashboardNameList: arr
                         });
                       }
                     })
-                  : setFormdata({ ...formdata, dashboardNameList: e });
+                  : onEditData(e, 'dashboards');
 
                 setErrorMsg((prev) => {
                   return {

@@ -1,4 +1,3 @@
-import { env } from '../../env';
 import { getRequest, postRequest } from '../../utils/http-helper';
 import {
   DASHBOARD_LIST_URL,

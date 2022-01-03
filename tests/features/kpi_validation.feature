@@ -31,6 +31,25 @@ Feature: KPI Validation
         Then validation should fail
         And error message should be ""abcd" aggregation is not supported. Supported aggregations are mean, sum, count"
 
+    Scenario: date column in dimensions
+        Given a newly added KPI and its DataFrame
+        When the date column is also included in dimension
+        Then validation should fail
+        And error message should be "Date column cannot be in dimensions"
+
+    Scenario: metric column in dimensions
+        Given a newly added KPI and its DataFrame
+        When the metric column is also included in dimension
+        Then validation should fail
+        And error message should be "Metric column cannot be in dimensions"
+
+    Scenario: data has more than 10 million rows
+        Given a newly added KPI and its DataFrame
+        When the data for KPI has more than 10 million rows
+        Then validation should fail
+        And error message should start with "Chaos Genius does not currently support datasets with monthly rows greater than "
+        And error message should end with "Please try materialized views for such datasets (coming soon)."
+
     Scenario: numerical aggregation on categorical column
         Given a newly added KPI and its DataFrame
         When a numerical aggregation (mean or sum) on a non-numerical column

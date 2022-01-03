@@ -150,7 +150,7 @@ if [ "$ans1" = 'y' ] || [ "$ans1" = '' ];
 then
     echo "Building Frontend Image ......"
     echo
-    docker build -t $FRONTEND_REPO:$FTAG "$BASE_DIR/frontend/"
+    docker build -f "$BASE_DIR/frontend/Dockerfile.prod" -t $FRONTEND_REPO:$FTAG "$BASE_DIR/frontend/"
     echo
 fi
 

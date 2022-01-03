@@ -15,7 +15,6 @@ const DataSourceFilter = ({
   datasourceList,
   kpiList,
   setDashboardFilter,
-
   kpi
 }) => {
   const [checked, setChecked] = useState([]);
@@ -89,6 +88,7 @@ const DataSourceFilter = ({
       );
       setDashboard([...new Set(unique)]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datasourceList, kpiData]);
 
   const onChangeFilter = (e) => {

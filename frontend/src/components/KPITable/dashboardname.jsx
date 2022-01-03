@@ -18,13 +18,14 @@ const Dashboardname = ({ data }) => {
                 className="tooltip-name"
                 direction="right"
                 content={<span>{dashboard?.name}</span>}>
-                {data.length - 2 === index
+                {data.length - 1 === index
                   ? dashboard?.name
                   : show > 2
                   ? dashboard?.name.concat('', ',')
-                  : dashboard?.name}
+                  : show === 2 && show - 1 === index
+                  ? dashboard?.name
+                  : dashboard?.name.concat('', ',')}
               </Tooltip>
-              {/* {show !== 1 && ','} */}
             </label>
           </li>
         ))}

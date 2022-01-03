@@ -509,7 +509,7 @@ export const kpiAlertDeleteById = (id) => {
   return async (dispatch) => {
     dispatch(kpiAlertDeleteRequest());
     const { data, error, status } = await getRequest({
-      url: `${BASE_URL}/api/alert/${id}/disable`
+      url: `${BASE_URL}/api/alert/${id}/delete`
     });
     if (error) {
       dispatch(kpiAlertDeleteFailure());

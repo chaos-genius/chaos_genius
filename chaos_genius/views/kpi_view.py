@@ -22,8 +22,6 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.rca_data_model import RcaData
-from chaos_genius.databases.models.dashboard_kpi_mapper_model import DashboardKpiMapper
-from chaos_genius.databases.models.dashboard_model import Dashboard
 from chaos_genius.extensions import cache, db
 from chaos_genius.databases.db_utils import chech_editable_field
 from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
@@ -33,6 +31,8 @@ from chaos_genius.controllers.dashboard_controller import (
     get_mapper_obj_by_kpi_ids,
     get_dashboard_list_by_ids,
     disable_mapper_for_kpi_ids,
+    edit_kpi_dashboards,
+    enable_mapper_for_kpi_ids
 )
 from chaos_genius.utils.datetime_helper import get_rca_timestamp, get_epoch_timestamp
 
@@ -86,7 +86,9 @@ def kpi():
 
         new_kpi.save(commit=True)
 
-        dashboard_list = data.get("dashboard", [])
+        # Add the dashboard id 0 to the kpi
+        dashboard_list = data.get("dashboard", []) + [0]
+        dashboard_list = list(set(dashboard_list))
         mapper_obj_list = create_dashboard_kpi_mapper(dashboard_list, [new_kpi.id])
 
         # TODO: Fix circular import error
@@ -113,6 +115,7 @@ def kpi():
         dashboard_id = request.args.get("dashboard_id")
         kpi_result_list, kpi_dashboard_mapper = [], []
         if dashboard_id:
+            dashboard_id = int(dashboard_id)
             kpi_dashboard_mapper = get_mapper_obj_by_dashboard_ids([dashboard_id])
             kpi_list = [mapper.kpi for mapper in kpi_dashboard_mapper]
             kpi_result_list = (
@@ -145,11 +148,20 @@ def kpi():
             data_source_info = row[1].safe_dict
             kpi_info["data_source"] = data_source_info
             dashboards = []
-            for dashboard_id in kpi_dashboard_dict[kpi_info["id"]]:
-                dashboards.append(dashboard_dict[dashboard_id])
+            for dashboard in kpi_dashboard_dict[kpi_info["id"]]:
+                dashboards.append(dashboard_dict[dashboard])
             kpi_info["dashboards"] = dashboards
             kpis.append(kpi_info)
-        return jsonify({"count": len(kpis), "data": kpis})
+        dashboard_details = []
+        if dashboard_id:
+            if dashboard_dict:
+                dashboard_details = [dashboard_dict[dashboard_id]]
+            else:
+                dashboards = get_dashboard_list_by_ids([dashboard_id])
+                dashboard_details = [dashboard.as_dict for dashboard in dashboards]
+        else:
+            dashboard_details = list(dashboard_dict.values())
+        return jsonify({"count": len(kpis), "data": kpis, "dashboards": dashboard_details})
 
 
 @blueprint.route("/get-dashboard-list", methods=["GET"])
@@ -228,6 +240,7 @@ def enable_kpi(kpi_id):
         if kpi_obj:
             kpi_obj.active = True
             kpi_obj.save(commit=True)
+            enable = enable_mapper_for_kpi_ids([kpi_id])
             status = "success"
         else:
             message = "KPI not found"
@@ -318,10 +331,14 @@ def edit_kpi(kpi_id):
         data = request.get_json()
         meta_info = Kpi.meta_info()
         if kpi_obj and kpi_obj.active is True:
+            dashboard_id_list = data.pop("dashboards", []) + [0]
+            dashboard_id_list = list(set(dashboard_id_list))
+
             for key, value in data.items():
                 if chech_editable_field(meta_info, key):
                     setattr(kpi_obj, key, value)
 
+            mapper_dict = edit_kpi_dashboards(kpi_id, dashboard_id_list)
             kpi_obj.save(commit=True)
             status = "success"
         else:

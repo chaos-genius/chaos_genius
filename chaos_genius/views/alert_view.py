@@ -149,10 +149,29 @@ def enable_alert(alert_id):
     return jsonify({"message": message, "status": status})
 
 
+@blueprint.route("/<int:alert_id>/delete", methods=["GET"])
+def delete_alert(alert_id):
+    """delete alert."""
+    status, message = "", ""
+    try:
+        alert_obj = Alert.get_by_id(alert_id)
+        if alert_obj:
+            alert_obj.active = False
+            alert_obj.alert_status = False
+            alert_obj.save(commit=True)
+            message = "Alert deleted Successfully"
+            status = "success"
+        else:
+            message = "Alert not found"
+            status = "failure"
+    except Exception as err:
+        status = "failure"
+        current_app.logger.info(f"Error in deleting the Alert: {err}")
+    return jsonify({"message": message, "status": status})
+
+
 @blueprint.route("/meta-info", methods=["GET"])
 def alert_meta_info():
     """alert meta info view."""
     current_app.logger.info("alert meta info")
     return jsonify({"data": Alert.meta_info(), "status":"success"})
-
- 

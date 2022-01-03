@@ -24,6 +24,12 @@ import Homefilter from '../Homefilter';
 import { formatDateTime, getTimezone } from '../../utils/date-helper';
 import { getDashboard } from '../../redux/actions';
 
+import store from '../../redux/store';
+
+const RESET_ACTION = {
+  type: 'RESET_KPI_HOME_DATA'
+};
+
 highchartsMore(Highcharts);
 Highcharts.setOptions({
   time: {
@@ -69,6 +75,7 @@ const Kpihome = () => {
   });
 
   useEffect(() => {
+    store.dispatch(RESET_ACTION);
     dispatch(getDashboard());
   }, [dispatch]);
 
@@ -80,13 +87,14 @@ const Kpihome = () => {
   }, [dashboardList]);
 
   useEffect(() => {
-    if (dashboard) {
+    if (![null, undefined, ''].includes(dashboard)) {
       getHomeList();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dashboard, timeline]);
 
   const getHomeList = () => {
+    store.dispatch(RESET_ACTION);
     dispatch(getHomeKpi({ timeline: timeline.value, dashboard_id: dashboard }));
   };
 

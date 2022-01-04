@@ -1,10 +1,10 @@
 import React from 'react';
 import './navbar.scss';
 import { Link } from 'react-router-dom';
-import Setting from '../../assets/images/setting.svg';
+import Setting from '../../assets/images/setting_navbar.svg';
 import TaskManager from '../../assets/images/task-1.svg';
 import Profiledown from '../../assets/images/profile-down.svg';
-import Document from '../../assets/images/document.svg'
+import Document from '../../assets/images/document.svg';
 
 const Navbar = () => {
   const dropDownItems = [
@@ -53,7 +53,9 @@ const Navbar = () => {
           aria-labelledby="userdetails">
           {dropDownLinks}
           <li className="">
-            <a target="_blank" rel="noreferrer"
+            <a
+              target="_blank"
+              rel="noreferrer"
               href="https://docs.chaosgenius.io/docs/introduction"
               className="dropdown-item">
               <img src={Document} alt={'Document'} />

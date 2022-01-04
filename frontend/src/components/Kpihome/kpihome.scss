@@ -34,7 +34,7 @@
   margin-bottom: 16px;
   h3 {
     font-weight: $font-weight-500;
-    font-size: $font-size-18;
+    font-size: $font-size-16;
     line-height: $line-height-22;
     text-transform: capitalize;
     color: $black_variation-2;
@@ -108,17 +108,21 @@
     display: flex;
     flex-direction: column;
     width: 17%;
+    &.kpi-current {
+      width: 15%;
+    }
     &.kpi-content-label {
+      width: 19%;
       label {
         margin-bottom: 0px;
       }
     }
 
     .highcharts-container {
-      width: 90px !important;
+      width: 85px !important;
     }
     .highcharts-root {
-      width: 180px !important;
+      width: 190px !important;
       height: 50px !important;
       display: flex;
       align-items: center;
@@ -131,6 +135,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 20%;
     div {
       overflow: visible !important;
       .highcharts-container {

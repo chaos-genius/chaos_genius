@@ -4,7 +4,7 @@ SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 suffix="/scripts/docker"
 BASE_DIR=${SCRIPT_DIR%"$suffix"}
 
-echo "###### REMOVING CONTAINERS ###########"
+echo "###### REMOVING CONTAINERS #######################"
 echo
 echo "Select the .yml that was used to start Chaos Genius"
 yml_files=$(ls $BASE_DIR/docker-compose*yml)
@@ -39,13 +39,18 @@ else
 fi
 
 
-echo "#### CLEANING UP LOCAL DIRECTORIES ###############"
+echo "###### CLEANING UP LOCAL DIRECTORIES #############"
 rm -rf $BASE_DIR/docker/airbyte-db
 rm -rf $BASE_DIR/docker/cg-db
 rm -rf /tmp/workspace
 rm -rf /tmp/airbyte_local
 echo "Done"
-echo "####### REMOVING ALL RELATED IMAGES ##############"
+
+echo "###### CLEANING UP DOCKER VOLUMES ################"
+docker volume rm cg_db airbyte_data airbyte_db airbyte_workspace
+echo "Done"
+
+echo "###### REMOVING ALL RELATED IMAGES ###############"
 declare -a image_names=("airbyte/webapp" "airbyte/server" "airbyte/worker" "airbyte/scheduler" "airbyte/db" "airbyte/init" "airbyte/source-google-ads" "airbyte/source-postgres" "airbyte/source-snowflake" "airbyte/source-mysql" "airbyte/source-bing-ads" "airbyte/source-google-sheets" "airbyte/source-shopify" "airbyte/source-stripe" "airbyte/source-bigquery" "airbyte/source-facebook-marketing" "airbyte/source-googleanalytics-singer" "temporalio/auto-setup" "redis" "node" "postgres" "chaosgenius/chaosgenius-server" "chaosgenius/chaosgenius-webapp" "docker")
 
 for image in "${image_names[@]}"

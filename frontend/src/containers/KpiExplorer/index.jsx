@@ -59,7 +59,7 @@ const KpiExplorer = () => {
 
   const searchDataSource = () => {
     const options = {
-      keys: ['name', 'connection_type']
+      keys: ['name', 'dashboards.name']
     };
 
     const fuse = new Fuse(kpiExplorerList, options);

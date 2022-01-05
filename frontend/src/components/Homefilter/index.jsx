@@ -8,9 +8,12 @@ import Fuse from 'fuse.js';
 import './homefilter.scss';
 import { useState } from 'react';
 import { formatDateTime } from '../../utils/date-helper';
+import { useHistory } from 'react-router-dom';
 
 const Homefilter = ({ data, setDashboard, dashboard }) => {
   const [filterData, setFilterData] = useState(data);
+
+  const history = useHistory();
 
   const onSearch = (event) => {
     if (event.target.value === '') {
@@ -89,9 +92,12 @@ const Homefilter = ({ data, setDashboard, dashboard }) => {
             filterData.map((item) => {
               return (
                 <li
-                  className={dashboard === item.id ? 'active' : ''}
+                  className={
+                    dashboard.toString() === item.id.toString() ? 'active' : ''
+                  }
                   onClick={() => {
                     setDashboard(item.id);
+                    history.push(`${item?.id}`);
                   }}>
                   <div className="filter-tooltipcontent">
                     <Tooltip

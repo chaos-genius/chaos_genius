@@ -20,6 +20,11 @@ from chaos_genius.core.utils.end_date import load_input_data_end_date
 from chaos_genius.core.utils.round import round_series
 from chaos_genius.databases.models.rca_data_model import RcaData, db
 from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
+from chaos_genius.settings import (
+    DEEPDRILLS_HTABLE_MAX_CHILDREN, 
+    DEEPDRILLS_HTABLE_MAX_DEPTH, 
+    DEEPDRILLS_HTABLE_MAX_PARENTS,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -234,7 +239,12 @@ class RootCauseAnalysisController:
         :return: hierarchical table data
         :rtype: dict
         """
-        htable = rca.get_hierarchical_table(dimension)
+        htable = rca.get_hierarchical_table(
+            dimension,
+            max_depth=DEEPDRILLS_HTABLE_MAX_DEPTH,
+            max_children=DEEPDRILLS_HTABLE_MAX_CHILDREN,
+            max_parents=DEEPDRILLS_HTABLE_MAX_PARENTS,
+        )
         impact_table_col_map = rca.get_impact_column_map(timeline)
         return {
             "data_table": self._process_rca_output(htable),

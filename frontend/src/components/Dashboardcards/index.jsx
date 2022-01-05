@@ -75,8 +75,7 @@ const Dashboardcards = ({ dashboarddata, setChange }) => {
     if (dashboardDelete && dashboardDelete.status === 'success') {
       customToast({
         type: 'success',
-        header: 'Dashboard deleted successfully',
-        description: dashboardDelete.message
+        header: 'Dashboard deleted successfully'
       });
       setChange((prev) => !prev);
     } else if (dashboardDelete && dashboardDelete.status === 'failure') {

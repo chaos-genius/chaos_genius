@@ -54,7 +54,7 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
       setKpi(sidebarList[0]?.id);
     } else if (sidebarList && sidebarList.length !== 0) {
       setBreadCrumbs(
-        sidebarList?.dashboards.find(
+        sidebarList?.dashboards?.find(
           (item) => item.id.toString() === dashboardId.toString()
         )?.name
       );

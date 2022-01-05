@@ -346,11 +346,12 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
   };
 
   const handleGraphClick = (graphData, event) => {
-    store.dispatch(RESET);
     const unixDate = event.point.x;
     const severity_score = graphData.severity.find(
       (row) => row[0] === event.point.x
     );
+    store.dispatch(RESET);
+    setDrilldownCollapse(true);
     if (severity_score[1] !== 0) {
       dispatch(
         anomalyDrilldown(kpi, {

@@ -134,7 +134,7 @@ const Kpihome = () => {
           borderWidth: 0,
           type: 'line',
           margin: [2, 0, 2, 0],
-          width: 150,
+          width: 200,
           height: 50,
           style: {
             overflow: 'visible'
@@ -256,7 +256,7 @@ const Kpihome = () => {
                             </Tooltip>
                           </h3>
                         </div>
-                        <div className="kpi-content">
+                        <div className="kpi-content kpi-current">
                           <label>
                             {timeline.value === 'wow'
                               ? 'This Week'

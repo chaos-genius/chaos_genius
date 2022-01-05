@@ -89,7 +89,7 @@ const Dashboard = () => {
       );
 
       setBreadCrumbs(
-        sidebarList?.dashboards.find(
+        sidebarList?.dashboards?.find(
           (item) => item.id.toString() === dashboard.toString()
         )?.name
       );
@@ -101,7 +101,7 @@ const Dashboard = () => {
       );
     } else if (sidebarList && sidebarList?.dashboards) {
       setBreadCrumbs(
-        sidebarList?.dashboards.find(
+        sidebarList?.dashboards?.find(
           (item) => item.id.toString() === dashboard.toString()
         )?.name
       );

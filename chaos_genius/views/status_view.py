@@ -65,6 +65,7 @@ def container_status() -> Optional[Dict[str, bool]]:
 
 
 @blueprint.route("", methods=["GET"])
+@blueprint.route("/", methods=["GET"]) # TODO: Remove this
 def task_monitor_view():
     """A view with a basic UI to monitor analytics tasks."""
     tasks = get_checkpoints(track_subtasks=False, include_github_issue_link=True)

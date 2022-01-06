@@ -47,6 +47,7 @@ logger = logging.getLogger(__name__)
 
 
 @blueprint.route("", methods=["GET", "POST"])
+@blueprint.route("/", methods=["GET", "POST"]) # TODO: Remove this
 def kpi():
     """kpi list view."""
     # Handle logging in

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+import { useHistory, useLocation } from 'react-router-dom';
+
 import Tooltip from 'react-tooltip-lite';
 
 import Search from '../../assets/images/search.svg';
@@ -17,6 +19,10 @@ const DataSourceFilter = ({
   setDashboardFilter,
   kpi
 }) => {
+  const location = useLocation();
+  const history = useHistory();
+  const query = new URLSearchParams(location.search);
+
   const [checked, setChecked] = useState([]);
   const [datasourceType, setDatasourceType] = useState([]);
   const [dashboard, setDashboard] = useState([]);
@@ -27,10 +33,26 @@ const DataSourceFilter = ({
   const onSearch = (e) => {
     if (datasource) {
       setSearch(e.target.value);
+      let params = new URLSearchParams();
+      params.append('search', e.target.value);
+      window.history.pushState('', '', '/#/datasource?' + params.toString());
     } else {
       setKpiSearch(e.target.value);
+      let params = new URLSearchParams();
+      params.append('search', e.target.value);
+      window.history.pushState('', '', '/#/kpiexplorer?' + params.toString());
     }
   };
+
+  useEffect(() => {
+    if (query.getAll('datasourcetype').length !== 0) {
+      setChecked(query.getAll('datasourcetype'));
+    }
+    if (query.getAll('dashboard').length !== 0) {
+      setDashboardFilterList(query.getAll('dashboard'));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (datasource) {
@@ -94,35 +116,89 @@ const DataSourceFilter = ({
   const onChangeFilter = (e) => {
     if (datasource) {
       if (e.target.checked === true) {
-        let selected = checked.concat(e.target.name);
+        let selected = checked.concat(e.target.name.toLowerCase());
         setChecked(selected);
         setDataSourceFilter(checked);
+        let params = new URLSearchParams();
+        for (const key of selected) {
+          params.append('datasourcetype', key);
+        }
+        history.push({
+          pathname: '/datasource',
+          search: '?' + params.toString()
+        });
       } else if (e.target.checked === false) {
-        let selected = checked.filter((data) => data !== e.target.name);
+        let selected = checked.filter(
+          (data) => data !== e.target.name.toLowerCase()
+        );
         setChecked(selected);
+        let params = new URLSearchParams();
+        for (const key of selected) {
+          params.append('datasourcetype', key);
+        }
+        history.push({
+          pathname: '/datasource',
+          search: '?' + params.toString()
+        });
       }
     } else {
       if (e.target.checked === true) {
-        let selected = checked.concat(e.target.name);
+        let selected = checked.concat(e.target.name.toLowerCase());
         setChecked(selected);
         setKpiFilter(checked);
+        let params = new URLSearchParams();
+        for (const key of selected) {
+          params.append('datasourcetype', key);
+        }
+        history.push({
+          pathname: '/kpiexplorer',
+          search: '?' + params.toString()
+        });
       } else if (e.target.checked === false) {
-        let selected = checked.filter((data) => data !== e.target.name);
+        let selected = checked.filter(
+          (data) => data !== e.target.name.toLowerCase()
+        );
         setChecked(selected);
+        let params = new URLSearchParams();
+        for (const key of selected) {
+          params.append('datasourcetype', key.toLowerCase());
+        }
+
+        history.push({
+          pathname: '/kpiexplorer',
+          search: '?' + params.toString()
+        });
       }
     }
   };
 
   const onDashboardFilter = (e) => {
     if (e.target.checked === true) {
-      let selected = dashboardFilterList.concat(e.target.name);
-
+      let selected = dashboardFilterList.concat(e.target.name.toLowerCase());
       setDashboardFilterList(selected);
+
+      let params = new URLSearchParams();
+      for (const key of selected) {
+        params.append('dashboard', key);
+      }
+
+      history.push({
+        pathname: '/kpiexplorer',
+        search: '?' + params.toString()
+      });
     } else if (e.target.checked === false) {
       let selected = dashboardFilterList.filter(
-        (data) => data !== e.target.name
+        (data) => data !== e.target.name.toLowerCase()
       );
+      let params = new URLSearchParams();
+      for (const key of selected) {
+        params.append('dashboard', key);
+      }
 
+      history.push({
+        pathname: '/kpiexplorer',
+        search: '?' + params.toString()
+      });
       setDashboardFilterList(selected);
     }
   };
@@ -168,6 +244,7 @@ const DataSourceFilter = ({
                       className="form-check-input"
                       name={item}
                       id={item}
+                      checked={dashboardFilterList.includes(item.toLowerCase())}
                       type="checkbox"
                       onChange={(e) => onDashboardFilter(e)}
                     />
@@ -204,6 +281,7 @@ const DataSourceFilter = ({
                     type="checkbox"
                     id={type}
                     name={type}
+                    checked={checked.includes(type.toLowerCase())}
                     onChange={(e) => onChangeFilter(e)}
                   />
                   <label className="form-check-label" htmlFor={type}>

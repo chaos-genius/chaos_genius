@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -27,6 +27,10 @@ const SETTING_RESET = {
 const KpiExplorer = () => {
   const dispatch = useDispatch();
 
+  const location = useLocation();
+
+  const query = new URLSearchParams(location.search);
+
   const [kpiSearch, setKpiSearch] = useState('');
   const [data, setData] = useState(false);
   const [kpiFilter, setKpiFilter] = useState([]);
@@ -47,6 +51,15 @@ const KpiExplorer = () => {
   const dispatchGetAllKpiExplorer = () => {
     dispatch(getAllKpiExplorer());
   };
+
+  useEffect(() => {
+    if (query.getAll('datasourcetype').length !== 0 && kpiExplorerList) {
+      setKpiFilter(query.getAll('datasourcetype'));
+    } else if (query.getAll('dashboard').length !== 0 && kpiExplorerList) {
+      setDashboardFilter(query.getAll('dashboard'));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kpiExplorerList]);
 
   useEffect(() => {
     if (kpiSearch !== '') {
@@ -95,7 +108,7 @@ const KpiExplorer = () => {
           dashboardFilter.forEach((data) => {
             kpiExplorerList.forEach((list) => {
               list.dashboards.forEach((value) => {
-                if (data === value.name) {
+                if (data.toLowerCase() === value.name.toLowerCase()) {
                   arr.push(list);
                 }
               });

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -22,6 +22,10 @@ const RESET_ACTION = {
 const DataSource = () => {
   const dispatch = useDispatch();
 
+  const location = useLocation();
+
+  const query = new URLSearchParams(location.search);
+
   const [search, setSearch] = useState('');
 
   const [dataSourceFilter, setDataSourceFilter] = useState([]);
@@ -41,6 +45,13 @@ const DataSource = () => {
   const dispatchGetAllDataSources = () => {
     dispatch(getAllDataSources());
   };
+
+  useEffect(() => {
+    if (query.getAll('datasourcetype').length !== 0 && dataSourcesList) {
+      setDataSourceFilter(query.getAll('datasourcetype'));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataSourcesList]);
 
   useEffect(() => {
     if (search !== '') {

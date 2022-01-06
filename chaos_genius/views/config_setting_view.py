@@ -7,7 +7,7 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.alerts.slack import trigger_overall_kpi_stats
 from chaos_genius.utils.datetime_helper import get_server_timezone
 from chaos_genius.utils.modules_utils import is_enterprise_edition
-from chaos_genius.views.kpi_view import kpi_aggregation
+from chaos_genius.core.rca.rca_utils.api_utils import kpi_aggregation
 from chaos_genius.databases.models.config_setting_model import ConfigSetting
 from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 from chaos_genius.controllers.config_controller import (

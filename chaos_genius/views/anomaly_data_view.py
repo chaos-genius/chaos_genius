@@ -29,7 +29,7 @@ from chaos_genius.core.rca.rca_utils.string_helpers import (
 blueprint = Blueprint("anomaly_data", __name__)
 
 
-@blueprint.route("/", methods=["GET"])
+@blueprint.route("", methods=["GET"])
 def list_anomaly_data():
     # FIXME: Update home route
     return jsonify({"data": "Hello World!"})

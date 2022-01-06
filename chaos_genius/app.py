@@ -19,6 +19,7 @@ from chaos_genius.views import (
     alert_view,
     dashboard_view,
     status_view,
+    rca_view,
 )
 from chaos_genius.extensions import (
     bcrypt,
@@ -76,6 +77,7 @@ def register_blueprints(app):
     app.register_blueprint(dashboard_view.blueprint, url_prefix='/api/dashboard')
     app.register_blueprint(status_view.blueprint, url_prefix='/api/status')
     app.register_blueprint(meta_view.blueprint, url_prefix='/api/meta')
+    app.register_blueprint(rca_view.blueprint, url_prefix='/api/rca')
     return None
 
 

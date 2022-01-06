@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 
 import Select from 'react-select';
-import Tooltip from 'react-tooltip-lite';
 import Search from '../../assets/images/search.svg';
 import Up from '../../assets/images/up.svg';
 import Down from '../../assets/images/down.svg';
@@ -23,6 +22,7 @@ import Homefilter from '../Homefilter';
 
 import { formatDateTime, getTimezone } from '../../utils/date-helper';
 import { getDashboard } from '../../redux/actions';
+import { CustomTooltip } from '../../utils/tooltip-helper';
 
 import store from '../../redux/store';
 
@@ -248,12 +248,7 @@ const Kpihome = () => {
                       <div className="kpi-card" key={item.id}>
                         <div className="kpi-content kpi-content-label">
                           <h3 className="name-tooltip">
-                            <Tooltip
-                              className="tooltip-name"
-                              direction="left"
-                              content={<span> {item.name}</span>}>
-                              {item.name}
-                            </Tooltip>
+                            {CustomTooltip(item.name, true)}
                           </h3>
                         </div>
                         <div className="kpi-content kpi-current">

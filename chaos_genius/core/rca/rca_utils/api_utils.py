@@ -43,6 +43,7 @@ def kpi_aggregation(kpi_id, timeline="mom"):
 
 def kpi_line_data(kpi_id):
     """Get KPI line data."""
+    final_data = []
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
         end_date = get_rca_output_end_date(kpi_info)

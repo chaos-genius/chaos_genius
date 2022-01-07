@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""KPI views for creating and viewing the kpis."""
+"""Endpoints for data retrieval of computed RCAs."""
 import logging
 
 from flask import Blueprint, jsonify, request  # noqa: F401
@@ -33,14 +33,14 @@ def kpi_get_line_data(kpi_id):
     """API endpoint for KPI line data."""
     data = []
     try:
-        data = kpi_line_data(kpi_id)
-        for _row in data:
+        line_data = kpi_line_data(kpi_id)
+        for _row in line_data:
             date_timstamp = get_rca_timestamp(_row["date"])
             _row["date"] = get_epoch_timestamp(date_timstamp)
-        formatted_date = data
+        data = line_data
     except Exception as err:  # noqa: B902
         logger.info(f"Error Found: {err}")
-    return jsonify({"data": formatted_date, "msg": ""})
+    return jsonify({"data": data, "msg": ""})
 
 
 @blueprint.route("/<int:kpi_id>/rca-analysis", methods=["GET"])

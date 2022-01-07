@@ -108,7 +108,7 @@ const KpiExplorer = () => {
           dashboardFilter.forEach((data) => {
             kpiExplorerList.forEach((list) => {
               list.dashboards.forEach((value) => {
-                if (data.toLowerCase() === value.name.toLowerCase()) {
+                if (data.toString() === value.id.toString()) {
                   arr.push(list);
                 }
               });
@@ -128,7 +128,7 @@ const KpiExplorer = () => {
                     arr.push(list);
                   } else {
                     list.dashboards.forEach((value) => {
-                      if (value.name === dashboard) {
+                      if (value.id.toString() === dashboard.toString()) {
                         arr.push(list);
                       }
                     });

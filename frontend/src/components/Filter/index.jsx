@@ -59,9 +59,21 @@ const DataSourceFilter = ({
       setDataSourceFilter(checked);
     } else {
       setKpiFilter(checked);
+      setDashboardFilter(dashboardFilterList);
+      let params = new URLSearchParams();
+      for (const key of checked) {
+        params.append('datasourcetype', key.toLowerCase());
+      }
+      for (const key of dashboardFilterList) {
+        params.append('dashboard', key.toLowerCase());
+      }
+      history.push({
+        pathname: '/kpiexplorer',
+        search: '?' + params.toString()
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checked]);
+  }, [checked, dashboardFilterList]);
 
   useEffect(() => {
     if (dashboardSearch !== '') {
@@ -88,13 +100,6 @@ const DataSourceFilter = ({
   };
 
   useEffect(() => {
-    if (kpiList) {
-      setDashboardFilter(dashboardFilterList);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dashboardFilterList]);
-
-  useEffect(() => {
     if (datasourceList) {
       setDatasourceType([
         ...new Set(datasourceList.map((item) => item.connection_type))
@@ -106,9 +111,15 @@ const DataSourceFilter = ({
       ]);
       var unique = [];
       kpiData.map((item) =>
-        item.dashboards.map((key) => unique.push(key.name))
+        item.dashboards.map((key) =>
+          unique.push({ name: key.name, id: key.id })
+        )
       );
-      setDashboard([...new Set(unique)]);
+      let key = 'id';
+
+      setDashboard([
+        ...new Map(unique.map((item) => [item[key], item])).values()
+      ]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datasourceList, kpiData]);
@@ -119,86 +130,34 @@ const DataSourceFilter = ({
         let selected = checked.concat(e.target.name.toLowerCase());
         setChecked(selected);
         setDataSourceFilter(checked);
-        let params = new URLSearchParams();
-        for (const key of selected) {
-          params.append('datasourcetype', key);
-        }
-        history.push({
-          pathname: '/datasource',
-          search: '?' + params.toString()
-        });
       } else if (e.target.checked === false) {
         let selected = checked.filter(
           (data) => data !== e.target.name.toLowerCase()
         );
         setChecked(selected);
-        let params = new URLSearchParams();
-        for (const key of selected) {
-          params.append('datasourcetype', key);
-        }
-        history.push({
-          pathname: '/datasource',
-          search: '?' + params.toString()
-        });
       }
     } else {
       if (e.target.checked === true) {
         let selected = checked.concat(e.target.name.toLowerCase());
         setChecked(selected);
         setKpiFilter(checked);
-        let params = new URLSearchParams();
-        for (const key of selected) {
-          params.append('datasourcetype', key);
-        }
-        history.push({
-          pathname: '/kpiexplorer',
-          search: '?' + params.toString()
-        });
       } else if (e.target.checked === false) {
         let selected = checked.filter(
           (data) => data !== e.target.name.toLowerCase()
         );
         setChecked(selected);
-        let params = new URLSearchParams();
-        for (const key of selected) {
-          params.append('datasourcetype', key.toLowerCase());
-        }
-
-        history.push({
-          pathname: '/kpiexplorer',
-          search: '?' + params.toString()
-        });
       }
     }
   };
 
-  const onDashboardFilter = (e) => {
+  const onDashboardFilter = (e, type) => {
     if (e.target.checked === true) {
-      let selected = dashboardFilterList.concat(e.target.name.toLowerCase());
+      let selected = dashboardFilterList.concat(type.id.toString());
       setDashboardFilterList(selected);
-
-      let params = new URLSearchParams();
-      for (const key of selected) {
-        params.append('dashboard', key);
-      }
-
-      history.push({
-        pathname: '/kpiexplorer',
-        search: '?' + params.toString()
-      });
     } else if (e.target.checked === false) {
       let selected = dashboardFilterList.filter(
-        (data) => data !== e.target.name.toLowerCase()
+        (data) => data !== type.id.toString()
       );
-      let params = new URLSearchParams();
-      for (const key of selected) {
-        params.append('dashboard', key);
-      }
-
-      history.push({
-        pathname: '/kpiexplorer',
-        search: '?' + params.toString()
-      });
       setDashboardFilterList(selected);
     }
   };
@@ -242,20 +201,20 @@ const DataSourceFilter = ({
                   <div className="form-check check-box">
                     <input
                       className="form-check-input"
-                      name={item}
-                      id={item}
-                      checked={dashboardFilterList.includes(item.toLowerCase())}
+                      name={item.name}
+                      id={item.name}
+                      checked={dashboardFilterList.includes(item.id.toString())}
                       type="checkbox"
-                      onChange={(e) => onDashboardFilter(e)}
+                      onChange={(e) => onDashboardFilter(e, item)}
                     />
                     <Tooltip
                       className="tooltip-name"
                       direction="right"
-                      content={<span> {item}</span>}>
+                      content={<span> {item.name}</span>}>
                       <label
                         className="form-check-label name-tooltip"
-                        htmlFor={item}>
-                        {item}
+                        htmlFor={item.name}>
+                        {item.name}
                       </label>
                     </Tooltip>
                   </div>

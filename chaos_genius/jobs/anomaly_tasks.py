@@ -147,11 +147,16 @@ def rca_single_kpi(kpi_id: int):
     return status
 
 
-@celery.task
-def anomaly_kpi():
+def get_anomaly_kpis():
     kpis = Kpi.query.distinct("kpi_id").filter(
         (Kpi.run_anomaly == True) & (Kpi.active == True)
     )
+    return kpis
+
+
+@celery.task
+def anomaly_kpi():
+    kpis = get_anomaly_kpis()
     task_group = []
     for kpi in kpis:
         print(f"Starting anomaly task for KPI: {kpi.id}")
@@ -216,19 +221,22 @@ def ready_rca_task(kpi_id: int):
     return rca_single_kpi.s(kpi_id)
 
 
+def get_active_kpis():
+    kpis: Kpi = Kpi.query.distinct("kpi_id").filter(
+        (Kpi.active == True) & (Kpi.is_static == False)
+    )
+    return kpis
+
+
 # runs every N time (set in celery_config)
 # if time > scheduled time today, run task
 # last_scheduled_time -> if it's < specified time of today's date, run task
 # TODO: Need to add logic for running RCA after KPI setup.
 @celery.task
 def anomaly_scheduler():
-    # find KPIs
-    kpis: Kpi = Kpi.query.distinct("kpi_id").filter(
-        (Kpi.active == True) & (Kpi.is_static == False)
-    )
 
     task_group = []
-
+    kpis = get_active_kpis()
     for kpi in kpis:
         kpi: Kpi
 

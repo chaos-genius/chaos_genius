@@ -5,17 +5,41 @@ import Down from '../../assets/images/down.svg';
 import HumanReadableNumbers from '../HumanReadableNumbers';
 import './dashboardgraphcard.scss';
 
-const Dashboardgraphcard = ({
-  aggregationData,
-  monthWeek,
-  kpi,
-  kpiName,
-  kpiAggregate
-}) => {
+const Dashboardgraphcard = ({ aggregationData, monthWeek, kpiAggregate }) => {
   return (
     <>
-      <div className="graph-custom-card-container">
-        <div className="graph-custom-card-titles">
+      <div>
+        <div>
+          <span>This Month</span>
+          <h5>
+            {aggregationData &&
+            aggregationData.panel_metrics?.grp1_metrics?.sum ? (
+              <HumanReadableNumbers
+                is_bold
+                number={aggregationData.panel_metrics.grp1_metrics.sum}
+              />
+            ) : (
+              '-'
+            )}
+          </h5>
+        </div>
+        <div>
+          <span>This Month</span>
+          <h5>
+            {aggregationData &&
+            aggregationData.panel_metrics?.grp1_metrics?.sum ? (
+              <HumanReadableNumbers
+                is_bold
+                number={aggregationData.panel_metrics.grp1_metrics.sum}
+              />
+            ) : (
+              '-'
+            )}
+          </h5>
+        </div>
+      </div>
+      {/*<div className="graph-custom-card-container">
+         <div className="graph-custom-card-titles">
           <div className="graph-titles">
             {kpiAggregate === 'sum' ? <h5>Sum</h5> : <h4>Sum</h4>}
             {kpiAggregate === 'mean' ? <h5>Mean</h5> : <h4>Mean</h4>}
@@ -25,7 +49,7 @@ const Dashboardgraphcard = ({
             {kpiAggregate === 'min' ? <h5>Max</h5> : <h4>Min</h4>}
           </div>
         </div>
-        {/* Last Month/Last Week */}
+        
         <div className="graph-custom-card">
           <label>
             {monthWeek.value === 'wow'
@@ -201,7 +225,7 @@ const Dashboardgraphcard = ({
             )}
           </div>
         </div>
-        {/* This Month/This Week */}
+        
         <div className="graph-custom-card">
           <label>
             {monthWeek.value === 'wow'
@@ -378,7 +402,7 @@ const Dashboardgraphcard = ({
             )}
           </div>
         </div>
-        {/* Difference */}
+        
         <div className="graph-custom-card">
           <label>Difference</label>
           <div className="white-card">
@@ -782,8 +806,10 @@ const Dashboardgraphcard = ({
               </>
             )}
           </div>
-        </div>
-      </div>
+        </div> 
+
+
+                </div>*/}
     </>
   );
 };

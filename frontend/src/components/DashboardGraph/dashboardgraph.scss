@@ -108,7 +108,7 @@
     justify-content: space-between;
     padding-bottom: 23px;
     .common-graph {
-      width: 49%;
+      width: 100%;
       min-height: 333px;
       border: 1px solid $grey_variation-4;
       box-sizing: border-box;
@@ -119,6 +119,22 @@
       .highcharts-container {
         margin-bottom: 0px;
       }
+    }
+  }
+  .dashboard-aggregate-section {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-bottom: 15px;
+    .aggregate-card-container {
+      width: 100%;
+      border: 1px solid $grey_variation-4;
+      box-sizing: border-box;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      flex-direction: row;
+      justify-content: center;
     }
   }
   .dashboard-header-wrapper {

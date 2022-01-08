@@ -279,7 +279,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
         chart: {
           type: 'line',
           height: '308',
-          width: '400'
+          width: '850'
         },
         title: {
           text: kpiName
@@ -353,9 +353,8 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                   }}
                 />
               </div>
-              {/* Graph Section */}
-              <div className="dashboard-graph-section">
-                <div className="common-graph">
+              <div className="dashboard-aggregate-section">
+                <div className="aggregate-card-container">
                   {aggregationLoading ? (
                     <div className="load">
                       <div className="preload"></div>
@@ -374,6 +373,9 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                     </>
                   )}
                 </div>
+              </div>
+              {/* Graph Section */}
+              <div className="dashboard-graph-section">
                 {/* Line Chart */}
                 <div className="common-graph">
                   {linechartLoading ? (

@@ -126,7 +126,7 @@ const Anomalygraph = ({ drilldown }) => {
           },
           labels: {
             formatter: function () {
-              return HRNumbers.toHumanString(this.value, 2);
+              return HRNumbers.toHumanString(this.value);
             }
           }
         },
@@ -150,7 +150,11 @@ const Anomalygraph = ({ drilldown }) => {
               ' - ' +
               intervals[2] +
               '</b>';
-            s = s + '<br>Value: <b>' + Highcharts.numberFormat(this.y) + '</b>';
+            s =
+              s +
+              '<br>Value: <b>' +
+              Highcharts.numberFormat(this.y, 2) +
+              '</b>';
             s = s + '<br>Severity: <b>' + severity_score[1] + '</b>';
             s =
               s +

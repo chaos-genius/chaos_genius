@@ -164,7 +164,7 @@ const Kpihome = () => {
           title: '',
           labels: {
             formatter: function () {
-              return HRNumbers.toHumanString(this.value, 2);
+              return HRNumbers.toHumanString(this.value);
             }
           },
           gridLineWidth: 0,

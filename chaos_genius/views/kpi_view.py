@@ -39,7 +39,7 @@ from chaos_genius.core.rca.rca_utils.api_utils import (
     kpi_line_data,
     kpi_aggregation,
 )
-from chaos_genius.core.rca.constants import TIME_DICT
+from chaos_genius.core.rca.constants import TIME_RANGES_ACTIVE
 
 blueprint = Blueprint("api_kpi", __name__)
 logger = logging.getLogger(__name__)
@@ -168,7 +168,7 @@ def get_all_kpis():
     """returning all kpis"""
 
     status, message = "success", ""
-    timeline = request.args.get("timeline", "wow")
+    timeline = request.args.get("timeline", "last_7_days")
     dashboard_id = request.args.get("dashboard_id")
 
     try:
@@ -198,7 +198,8 @@ def get_all_kpis():
             )
             info["change"] = round_number(info["current"] - info["prev"])
 
-            info["timeline"] = TIME_DICT[timeline]["expansion"]
+            info["display_value_prev"] = TIME_RANGES_ACTIVE[timeline]["last_period_name"]
+            info["display_value_current"] = TIME_RANGES_ACTIVE[timeline]["current_period_name"]
             info["anomaly_count"] = get_anomaly_count(kpi.id, timeline)
             info["graph_data"] = kpi_line_data(kpi.id)
             info["percentage_change"] = find_percentage_change(
@@ -347,14 +348,14 @@ def find_percentage_change(curr_val, prev_val):
 def get_anomaly_count(kpi_id, timeline):
 
     curr_date = datetime.now()
-    lower_time_dt = curr_date - TIME_DICT[timeline]["time_delta"]
+    (_, _), (sd, _) = TIME_RANGES_ACTIVE[timeline]["function"](curr_date)
 
     # TODO: Add the series type filter
     anomaly_data = AnomalyDataOutput.query.filter(
         AnomalyDataOutput.kpi_id == kpi_id,
         AnomalyDataOutput.anomaly_type == "overall",
         AnomalyDataOutput.is_anomaly == 1,
-        AnomalyDataOutput.data_datetime >= lower_time_dt,
+        AnomalyDataOutput.data_datetime >= sd,
     ).all()
 
     return len(anomaly_data)

@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from chaos_genius.core.rca.constants import TIME_RANGES_ACTIVE
 from chaos_genius.core.rca.rca_utils.string_helpers import (
     convert_df_dims_to_query_strings,
     convert_query_string_to_user_string,
@@ -401,7 +402,7 @@ class RootCauseAnalysis:
 
         # Calculate steps for each subgroup
         col_values = (
-            col_values[0:1]
+            col_values[:1]
             + [sum(col_values[: i + 1]) for i in range(1, len(col_values) - 1)]
             + col_values[-1:]
         )
@@ -551,30 +552,25 @@ class RootCauseAnalysis:
 
         return round_df(impact_table).to_dict("records")
 
-    def get_impact_column_map(self, timeline: str = "mom") -> List[Dict[str, str]]:
+    def get_impact_column_map(self, timeline: str = "last_30_days") -> List[Dict[str, str]]:
         """Return a mapping of column names to values for UI.
 
-        :param timeline: timeline to use, defaults to "mom"
+        :param timeline: timeline to use, defaults to "last_30_days"
         :type timeline: str, optional
         :return: List of mappings
         :rtype: List[Dict[str, str]]
         """
-        timestr = ""
-        if timeline == "mom":
-            timestr = "Month"
-        elif timeline == "wow":
-            timestr = "Week"
-        elif timeline == "dod":
-            timestr = "Day"
+        prev_timestr = TIME_RANGES_ACTIVE[timeline]["last_period_name"]
+        curr_timestr = TIME_RANGES_ACTIVE[timeline]["current_period_name"]
 
         mapping = [
             ("subgroup", "Subgroup Name"),
-            ("g1_agg", f"Last {timestr} Value"),
-            ("g1_count", f"Last {timestr} Count (#)"),
-            ("g1_size", f"Last {timestr} Size (%)"),
-            ("g2_agg", f"Current {timestr} Value"),
-            ("g2_count", f"Current {timestr} Count (#)"),
-            ("g2_size", f"Current {timestr} Size (%)"),
+            ("g1_agg", f"{prev_timestr} Value"),
+            ("g1_count", f"{prev_timestr} Count (#)"),
+            ("g1_size", f"{prev_timestr} Size (%)"),
+            ("g2_agg", f"{curr_timestr} Value"),
+            ("g2_count", f"{curr_timestr} Count (#)"),
+            ("g2_size", f"{curr_timestr} Size (%)"),
             ("impact", "Impact"),
         ]
 
@@ -725,9 +721,8 @@ class RootCauseAnalysis:
 
     def _check_nan(self, df: pd.DataFrame, message: str) -> None:
         """Check if NaN values in dataframe."""
-
         nan_df = df.isna().sum()
         nan_dict: dict = nan_df[nan_df > 0].to_dict()
 
-        if len(nan_dict) != 0:
+        if nan_dict:
             raise ValueError(f"{message} contains NaN values. {nan_dict}")

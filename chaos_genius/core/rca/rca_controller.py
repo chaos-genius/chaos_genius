@@ -1,28 +1,27 @@
 """Provides a controller class for performing RCA."""
 
 import json
-from datetime import datetime, date, timedelta
 import logging
-from typing import Tuple, Optional
+from datetime import date, datetime
+from typing import Optional, Tuple
 
 import numpy as np
 import pandas as pd
 
+from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
 from chaos_genius.core.rca.constants import (
     LINE_DATA_TIMESTAMP_FORMAT,
-    STATIC_END_DATA_FORMAT,
-    TIMELINE_NUM_DAYS_MAP,
-    TIMELINES,
+    TIME_RANGES_ACTIVE,
+    TIMERANGES_KEYS_ACTIVE,
 )
 from chaos_genius.core.rca.root_cause_analysis import RootCauseAnalysis
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.core.utils.end_date import load_input_data_end_date
 from chaos_genius.core.utils.round import round_series
 from chaos_genius.databases.models.rca_data_model import RcaData, db
-from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
 from chaos_genius.settings import (
-    DEEPDRILLS_HTABLE_MAX_CHILDREN, 
-    DEEPDRILLS_HTABLE_MAX_DEPTH, 
+    DEEPDRILLS_HTABLE_MAX_CHILDREN,
+    DEEPDRILLS_HTABLE_MAX_DEPTH,
     DEEPDRILLS_HTABLE_MAX_PARENTS,
 )
 
@@ -59,33 +58,37 @@ class RootCauseAnalysisController:
         self._task_id = task_id
 
     def _load_data(
-        self, timeline: str = "mom"
+        self, timeline: str = "last_30_days"
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Load data for performing RCA.
 
-        :param timeline: timeline to load data for, defaults to "mom"
+        :param timeline: timeline to load data for, defaults to "last_30_days"
         :type timeline: str, optional
         :return: tuple with baseline data and rca data for
         :rtype: Tuple[pd.DataFrame, pd.DataFrame]
         """
+        # TODO: Write data loader which can cache data and pull from cache
+        (prev_start_date, prev_end_date), (curr_start_date, curr_end_date) = (
+            TIME_RANGES_ACTIVE[timeline]["function"](self.end_date)
+        )
 
-        num_days = TIMELINE_NUM_DAYS_MAP[timeline]
-
-        df = DataLoader(
+        base_df = DataLoader(
             self.kpi_info,
-            end_date=self.end_date,
-            days_before=num_days*2
+            end_date=prev_end_date,
+            start_date=prev_start_date,
         ).get_data()
 
-        mid_date = pd.to_datetime(self.end_date - timedelta(days=num_days))
-        base_df = df[df[self.dt_col] < mid_date]
-        rca_df = df[df[self.dt_col] >= mid_date]
+        rca_df = DataLoader(
+            self.kpi_info,
+            end_date=curr_end_date,
+            start_date=curr_start_date,
+        ).get_data()
 
         logger.info(f"Loaded {len(base_df)}, {len(rca_df)} rows of data")
         return base_df, rca_df
 
     def _output_to_row(
-        self, data_type: str, data: dict, timeline: str = "mom", dimension: str = None
+        self, data_type: str, data: dict, timeline: str = "last_30_days", dimension: str = None
     ) -> dict:
         """Output RCA data to a standardized dictionary.
 
@@ -93,7 +96,7 @@ class RootCauseAnalysisController:
         :type data_type: str
         :param data: rca data to store
         :type data: dict
-        :param timeline: timeline used for calculation, defaults to "mom"
+        :param timeline: timeline used for calculation, defaults to "last_30_days"
         :type timeline: str, optional
         :param dimension: dimension on which data is computed, defaults to None
         :type dimension: str, optional
@@ -109,17 +112,22 @@ class RootCauseAnalysisController:
             "data": json.dumps(data),
         }
 
-    def _get_line_data(self, timeline: str = "mom") -> dict:
+    def _get_line_data(self, timeline: str = "last_30_days") -> dict:
         """Get line data for KPI.
 
-        :param timeline: timeline to get data format, defaults to "mom"
+        :param timeline: timeline to get data format, defaults to "last_30_days"
         :type timeline: str, optional
         :return: dictionary with line data
         :rtype: dict
         """
+        (prev_start_date, prev_end_date), (curr_start_date, curr_end_date) = (
+            TIME_RANGES_ACTIVE[timeline]["function"](self.end_date)
+        )
+
         rca_df = DataLoader(
-            self.kpi_info, self.end_date, days_before=TIMELINE_NUM_DAYS_MAP[timeline]
+            self.kpi_info, curr_end_date, start_date=curr_start_date
         ).get_data()
+
         rca_df = (
             rca_df.resample("D", on=self.dt_col)
             .agg({self.metric: self.agg})
@@ -194,7 +202,7 @@ class RootCauseAnalysisController:
         return df.to_dict(orient="records")
 
     def _get_rca(
-        self, rca: RootCauseAnalysis, dimension: str = None, timeline: str = "mom"
+        self, rca: RootCauseAnalysis, dimension: str = None, timeline: str = "last_30_days"
     ) -> dict:
         """Get RCA output for specific dimension.
 
@@ -202,7 +210,7 @@ class RootCauseAnalysisController:
         :type rca: RootCauseAnalysis
         :param dimension: dimension to compute for, defaults to None
         :type dimension: str, optional
-        :param timeline: dimension to compute for, defaults to "mom"
+        :param timeline: dimension to compute for, defaults to "last_30_days"
         :type timeline: str, optional
         :return: rca dictionary
         :rtype: dict
@@ -226,7 +234,7 @@ class RootCauseAnalysisController:
         }
 
     def _get_htable(
-        self, rca: RootCauseAnalysis, dimension: str, timeline: str = "mom"
+        self, rca: RootCauseAnalysis, dimension: str, timeline: str = "last_30_days"
     ) -> dict:
         """Get hierarchical table output for specific dimension.
 
@@ -234,7 +242,7 @@ class RootCauseAnalysisController:
         :type rca: RootCauseAnalysis
         :param dimension: dimension to compute for
         :type dimension: str
-        :param timeline: dimension to compute for, defaults to "mom"
+        :param timeline: dimension to compute for, defaults to "last_30_days"
         :type timeline: str, optional
         :return: hierarchical table data
         :rtype: dict
@@ -300,7 +308,7 @@ class RootCauseAnalysisController:
             raise e
         logger.info("Line Data for KPI completed.")
 
-        for timeline in TIMELINES:
+        for timeline in TIMERANGES_KEYS_ACTIVE:
             logger.info(f"Running RCA for timeline: {timeline}.")
             try:
                 rca = self._load_rca_obj(timeline)

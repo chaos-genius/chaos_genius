@@ -35,10 +35,11 @@ const KpiExplorer = () => {
   const [data, setData] = useState(false);
   const [kpiFilter, setKpiFilter] = useState([]);
   const [dashboardFilter, setDashboardFilter] = useState([]);
-
+  const [filterData, setFilterData] = useState([]);
   const { isLoading, kpiExplorerList } = useSelector(
     (state) => state.kpiExplorer
   );
+
   const [kpiExplorerData, setKpiExplorerData] = useState(kpiExplorerList);
 
   useEffect(() => {
@@ -64,18 +65,20 @@ const KpiExplorer = () => {
   useEffect(() => {
     if (kpiSearch !== '') {
       searchDataSource();
+    } else if (filterData.length !== 0) {
+      setKpiExplorerData(filterData);
     } else if (kpiExplorerList) {
       setKpiExplorerData(kpiExplorerList);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpiSearch, kpiExplorerList]);
+  }, [kpiSearch, kpiExplorerList, filterData]);
 
   const searchDataSource = () => {
     const options = {
       keys: ['name', 'dashboards.name']
     };
 
-    const fuse = new Fuse(kpiExplorerList, options);
+    const fuse = new Fuse(kpiExplorerData, options);
 
     const result = fuse.search(kpiSearch);
     setKpiExplorerData(
@@ -89,7 +92,8 @@ const KpiExplorer = () => {
     const fetchFilter = () => {
       var arr = [];
       if (kpiFilter.length === 0 && dashboardFilter.length === 0) {
-        setKpiExplorerData(kpiExplorerList);
+        //setKpiExplorerData(kpiExplorerList);
+        setFilterData(kpiExplorerList);
       } else if (kpiFilter.length !== 0 && dashboardFilter.length === 0) {
         kpiFilter &&
           kpiFilter.forEach((data) => {
@@ -102,7 +106,8 @@ const KpiExplorer = () => {
               }
             });
           });
-        setKpiExplorerData(arr);
+        setFilterData(arr);
+        // setKpiExplorerData(arr);
       } else if (dashboardFilter.length !== 0 && kpiFilter.length === 0) {
         dashboardFilter &&
           dashboardFilter.forEach((data) => {
@@ -114,7 +119,8 @@ const KpiExplorer = () => {
               });
             });
           });
-        setKpiExplorerData(arr);
+        setFilterData(arr);
+        //setKpiExplorerData(arr);
       } else if (dashboardFilter.length !== 0 && kpiFilter.length !== 0) {
         dashboardFilter &&
           dashboardFilter.forEach((dashboard) => {
@@ -136,7 +142,8 @@ const KpiExplorer = () => {
                 });
               });
           });
-        setKpiExplorerData(arr);
+        setFilterData(arr);
+        //setKpiExplorerData(arr);
       }
     };
     fetchFilter();

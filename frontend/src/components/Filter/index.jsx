@@ -57,6 +57,14 @@ const DataSourceFilter = ({
   useEffect(() => {
     if (datasource) {
       setDataSourceFilter(checked);
+      let params = new URLSearchParams();
+      for (const key of checked) {
+        params.append('datasourcetype', key.toLowerCase());
+      }
+      history.push({
+        pathname: '/datasource',
+        search: '?' + params.toString()
+      });
     } else {
       setKpiFilter(checked);
       setDashboardFilter(dashboardFilterList);

@@ -83,7 +83,6 @@ const DataSource = () => {
     const fetchFilter = () => {
       if (dataSourceFilter.length === 0) {
         setFilterData(dataSourcesList);
-        //setDataSourceData(dataSourcesList);
       } else {
         var arr = [];
         dataSourceFilter &&
@@ -94,7 +93,7 @@ const DataSource = () => {
               }
             });
           });
-        //setDataSourceData(arr);
+
         setFilterData(arr);
       }
     };

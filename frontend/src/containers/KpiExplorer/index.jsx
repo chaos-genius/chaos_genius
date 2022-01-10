@@ -92,7 +92,6 @@ const KpiExplorer = () => {
     const fetchFilter = () => {
       var arr = [];
       if (kpiFilter.length === 0 && dashboardFilter.length === 0) {
-        //setKpiExplorerData(kpiExplorerList);
         setFilterData(kpiExplorerList);
       } else if (kpiFilter.length !== 0 && dashboardFilter.length === 0) {
         kpiFilter &&
@@ -107,7 +106,6 @@ const KpiExplorer = () => {
             });
           });
         setFilterData(arr);
-        // setKpiExplorerData(arr);
       } else if (dashboardFilter.length !== 0 && kpiFilter.length === 0) {
         dashboardFilter &&
           dashboardFilter.forEach((data) => {
@@ -120,7 +118,6 @@ const KpiExplorer = () => {
             });
           });
         setFilterData(arr);
-        //setKpiExplorerData(arr);
       } else if (dashboardFilter.length !== 0 && kpiFilter.length !== 0) {
         dashboardFilter &&
           dashboardFilter.forEach((dashboard) => {
@@ -143,7 +140,6 @@ const KpiExplorer = () => {
               });
           });
         setFilterData(arr);
-        //setKpiExplorerData(arr);
       }
     };
     fetchFilter();

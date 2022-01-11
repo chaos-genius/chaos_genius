@@ -2,8 +2,8 @@
 
 from datetime import datetime
 
+from chaos_genius.core.rca.rca_utils.api_utils import get_rca_output_end_date
 from chaos_genius.views.anomaly_data_view import get_anomaly_output_end_date
-from chaos_genius.views.kpi_view import get_rca_output_end_date
 
 
 def test_get_anomaly_output_end_date():

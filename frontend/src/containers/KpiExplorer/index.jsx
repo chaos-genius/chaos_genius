@@ -124,18 +124,15 @@ const KpiExplorer = () => {
             kpiFilter &&
               kpiFilter.forEach((kpi) => {
                 kpiExplorerList.forEach((list) => {
-                  if (
-                    list.data_source.connection_type.toLowerCase() ===
-                    kpi.toLowerCase()
-                  ) {
-                    arr.push(list);
-                  } else {
-                    list.dashboards.forEach((value) => {
-                      if (value.id.toString() === dashboard.toString()) {
-                        arr.push(list);
-                      }
-                    });
-                  }
+                  list.dashboards.forEach((value) => {
+                    if (
+                      list.data_source.connection_type.toLowerCase() ===
+                        kpi.toLowerCase() &&
+                      value.id.toString() === dashboard.toString()
+                    ) {
+                      arr.push(list);
+                    }
+                  });
                 });
               });
           });

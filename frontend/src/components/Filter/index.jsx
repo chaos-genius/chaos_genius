@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
-import Tooltip from 'react-tooltip-lite';
-
 import Search from '../../assets/images/search.svg';
 
 import Fuse from 'fuse.js';
+import { CustomTooltip } from '../../utils/tooltip-helper';
 
 const DataSourceFilter = ({
   datasource,
@@ -171,16 +170,12 @@ const DataSourceFilter = ({
                       type="checkbox"
                       onChange={(e) => onDashboardFilter(e)}
                     />
-                    <Tooltip
-                      className="tooltip-name"
-                      direction="right"
-                      content={<span> {item}</span>}>
-                      <label
-                        className="form-check-label name-tooltip"
-                        htmlFor={item}>
-                        {item}
-                      </label>
-                    </Tooltip>
+
+                    <label
+                      className="form-check-label name-tooltip"
+                      htmlFor={item}>
+                      {CustomTooltip(item)}
+                    </label>
                   </div>
                 );
               })

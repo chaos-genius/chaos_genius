@@ -21,6 +21,7 @@ import Noresult from '../Noresult';
 import Homefilter from '../Homefilter';
 
 import { formatDateTime, getTimezone } from '../../utils/date-helper';
+import { HRNumbers } from '../../utils/Formatting/Numbers/humanReadableNumberFormatter';
 import { getDashboard } from '../../redux/actions';
 import { CustomTooltip } from '../../utils/tooltip-helper';
 
@@ -161,6 +162,11 @@ const Kpihome = () => {
         yAxis: {
           step: 1,
           title: '',
+          labels: {
+            formatter: function () {
+              return HRNumbers.toHumanString(this.value);
+            }
+          },
           gridLineWidth: 0,
           lineWidth: 1
         },

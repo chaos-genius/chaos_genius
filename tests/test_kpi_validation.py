@@ -1,4 +1,6 @@
 """Tests for KPI Validation."""
+from typing import Tuple
+
 import pandas as pd
 import pytest
 from pytest_bdd import given, parsers, scenario, then, when
@@ -102,9 +104,9 @@ def new_kpi_df():  # noqa: D103
 @then(
     parsers.parse("validation should {status}"), target_fixture="kpi_validation_message"
 )
-def check_kpi_validation(new_kpi_df, status, mock_dataloader):  # noqa: D103
-    kpi: Kpi
-    df: pd.DataFrame
+def check_kpi_validation(  # noqa: D103
+    new_kpi_df: Tuple[Kpi, pd.DataFrame], status, mock_dataloader
+):
     kpi, df = new_kpi_df
 
     kpi_info = kpi.as_dict
@@ -243,13 +245,10 @@ def test_date_unix():  # noqa: D103
     pass
 
 
-# TODO: add remaining scenarios
-
-
 @when("metric column name is incorrect", target_fixture="new_kpi_df")
-def incorrect_metric_col(new_kpi_df, monkeypatch):  # noqa: D103
-    kpi: Kpi
-    df: pd.DataFrame
+def incorrect_metric_col(  # noqa: D103
+    new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch
+):
     kpi, df = new_kpi_df
 
     monkeypatch.setattr(kpi, "metric", "some_column_that_does_not_exist")
@@ -258,9 +257,9 @@ def incorrect_metric_col(new_kpi_df, monkeypatch):  # noqa: D103
 
 
 @when("date/time column name is incorrect", target_fixture="new_kpi_df")
-def incorrect_datetime_col(new_kpi_df, monkeypatch):  # noqa: D103
-    kpi: Kpi
-    df: pd.DataFrame
+def incorrect_datetime_col(  # noqa: D103
+    new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch
+):
     kpi, df = new_kpi_df
 
     monkeypatch.setattr(kpi, "datetime_column", "some_column_that_does_not_exist")
@@ -269,9 +268,7 @@ def incorrect_datetime_col(new_kpi_df, monkeypatch):  # noqa: D103
 
 
 @when("a column name is repeated", target_fixture="new_kpi_df")
-def duplicate_col_name(new_kpi_df):  # noqa: D103
-    kpi: Kpi
-    df: pd.DataFrame
+def duplicate_col_name(new_kpi_df: Tuple[Kpi, pd.DataFrame]):  # noqa: D103
     kpi, df = new_kpi_df
 
     # add a column to DF
@@ -284,9 +281,9 @@ def duplicate_col_name(new_kpi_df):  # noqa: D103
     parsers.parse('aggregation given for metric is invalid - say "{agg_name}"'),
     target_fixture="new_kpi_df",
 )
-def invalid_agg(new_kpi_df, agg_name, monkeypatch):  # noqa: D103
-    kpi: Kpi
-    df: pd.DataFrame
+def invalid_agg(  # noqa: D103
+    new_kpi_df: Tuple[Kpi, pd.DataFrame], agg_name, monkeypatch
+):
     kpi, df = new_kpi_df
 
     monkeypatch.setattr(kpi, "aggregation", agg_name)
@@ -295,9 +292,9 @@ def invalid_agg(new_kpi_df, agg_name, monkeypatch):  # noqa: D103
 
 
 @when("the date column is also included in dimension", target_fixture="new_kpi_df")
-def date_col_in_dimension(new_kpi_df, monkeypatch):  # noqa: D103
-    kpi: Kpi
-    df: pd.DataFrame
+def date_col_in_dimension(  # noqa: D103
+    new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch
+):
     kpi, df = new_kpi_df
 
     monkeypatch.setattr(kpi, "dimensions", kpi.dimensions + ["date_col"])
@@ -306,9 +303,9 @@ def date_col_in_dimension(new_kpi_df, monkeypatch):  # noqa: D103
 
 
 @when("the metric column is also included in dimension", target_fixture="new_kpi_df")
-def metric_col_in_dimension(new_kpi_df, monkeypatch):  # noqa: D103
-    kpi: Kpi
-    df: pd.DataFrame
+def metric_col_in_dimension(  # noqa: D103
+    new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch
+):
     kpi, df = new_kpi_df
 
     monkeypatch.setattr(kpi, "dimensions", kpi.dimensions + ["metric_col"])
@@ -329,9 +326,7 @@ def more_than_10m_rows(mock_dataloader, monkeypatch):  # noqa: D103
     "a numerical aggregation (mean or sum) on a column with strings",
     target_fixture="new_kpi_df",
 )
-def num_agg_on_str_col(new_kpi_df, monkeypatch):  # noqa: D103
-    kpi: Kpi
-    df: pd.DataFrame
+def num_agg_on_str_col(new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch):  # noqa: D103
     kpi, df = new_kpi_df
 
     monkeypatch.setattr(kpi, "metric", "dim3")
@@ -344,9 +339,7 @@ def num_agg_on_str_col(new_kpi_df, monkeypatch):  # noqa: D103
     "a numerical aggregation (mean or sum) on a non-numerical column",
     target_fixture="new_kpi_df",
 )
-def num_agg_on_cat_col(new_kpi_df, monkeypatch):  # noqa: D103
-    kpi: Kpi
-    df: pd.DataFrame
+def num_agg_on_cat_col(new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch):  # noqa: D103
     kpi, df = new_kpi_df
 
     monkeypatch.setattr(kpi, "metric", "dim1")
@@ -360,9 +353,7 @@ def num_agg_on_cat_col(new_kpi_df, monkeypatch):  # noqa: D103
     "a numerical aggregation (mean or sum) on a numerical column",
     target_fixture="new_kpi_df",
 )
-def num_agg_on_num_col(new_kpi_df, monkeypatch):  # noqa: D103
-    kpi: Kpi
-    df: pd.DataFrame
+def num_agg_on_num_col(new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch):  # noqa: D103
     kpi, df = new_kpi_df
 
     monkeypatch.setattr(kpi, "metric", "metric_col")
@@ -375,9 +366,9 @@ def num_agg_on_num_col(new_kpi_df, monkeypatch):  # noqa: D103
     "the metric column name is same as the date/time column",
     target_fixture="new_kpi_df",
 )
-def metric_col_is_date_col(new_kpi_df, monkeypatch):  # noqa: D103
-    kpi: Kpi
-    df: pd.DataFrame
+def metric_col_is_date_col(  # noqa: D103
+    new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch
+):
     kpi, df = new_kpi_df
 
     monkeypatch.setattr(kpi, "datetime_column", "metric_col")
@@ -389,9 +380,7 @@ def metric_col_is_date_col(new_kpi_df, monkeypatch):  # noqa: D103
     "the date/time column is of type float",
     target_fixture="new_kpi_df",
 )
-def date_col_is_float(new_kpi_df, monkeypatch):  # noqa: D103
-    kpi: Kpi
-    df: pd.DataFrame
+def date_col_is_float(new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch):  # noqa: D103
     kpi, df = new_kpi_df
 
     monkeypatch.setattr(kpi, "datetime_column", "some_float_col")
@@ -403,9 +392,7 @@ def date_col_is_float(new_kpi_df, monkeypatch):  # noqa: D103
     "the date/time column is a categorical string",
     target_fixture="new_kpi_df",
 )
-def date_col_is_cat(new_kpi_df, monkeypatch):  # noqa: D103
-    kpi: Kpi
-    df: pd.DataFrame
+def date_col_is_cat(new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch):  # noqa: D103
     kpi, df = new_kpi_df
 
     monkeypatch.setattr(kpi, "datetime_column", "dim1")
@@ -418,9 +405,7 @@ def date_col_is_cat(new_kpi_df, monkeypatch):  # noqa: D103
     "date/time column has a very large timestamp",
     target_fixture="new_kpi_df",
 )
-def date_very_large(new_kpi_df, monkeypatch):  # noqa: D103
-    kpi: Kpi
-    df: pd.DataFrame
+def date_very_large(new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch):  # noqa: D103
     kpi, df = new_kpi_df
 
     monkeypatch.setattr(kpi, "datetime_column", "large_time_col")
@@ -432,9 +417,7 @@ def date_very_large(new_kpi_df, monkeypatch):  # noqa: D103
     "date/time column has is in a weird format",
     target_fixture="new_kpi_df",
 )
-def date_weird(new_kpi_df, monkeypatch):  # noqa: D103
-    kpi: Kpi
-    df: pd.DataFrame
+def date_weird(new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch):  # noqa: D103
     kpi, df = new_kpi_df
 
     monkeypatch.setattr(kpi, "datetime_column", "invalid_time_col")
@@ -446,7 +429,7 @@ def date_weird(new_kpi_df, monkeypatch):  # noqa: D103
     "date/time column has integer unix timestamp",
     target_fixture="new_kpi_df",
 )
-def date_unix(new_kpi_df, monkeypatch):  # noqa: D103
+def date_unix(new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch):  # noqa: D103
     kpi: Kpi
     df: pd.DataFrame
     kpi, df = new_kpi_df

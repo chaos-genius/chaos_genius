@@ -1,7 +1,5 @@
 import React from 'react';
 
-import Tooltip from 'react-tooltip-lite';
-
 import Search from '../../assets/images/search.svg';
 import Dropdown from '../../assets/images/dropdownlist.svg';
 import Fuse from 'fuse.js';
@@ -9,6 +7,7 @@ import './homefilter.scss';
 import { useState } from 'react';
 import { formatDateTime } from '../../utils/date-helper';
 import { useHistory } from 'react-router-dom';
+import { CustomTooltip } from '../../utils/tooltip-helper';
 
 const Homefilter = ({ data, setDashboard, dashboard }) => {
   const [filterData, setFilterData] = useState(data);
@@ -100,12 +99,7 @@ const Homefilter = ({ data, setDashboard, dashboard }) => {
                     history.push(`${item?.id}`);
                   }}>
                   <div className="filter-tooltipcontent">
-                    <Tooltip
-                      className="tooltip-name"
-                      direction="right"
-                      content={<span> {item.name}</span>}>
-                      <label className="name-tooltip">{item.name}</label>
-                    </Tooltip>
+                    {CustomTooltip(item.name)}
                   </div>
                   <span>{item?.kpis.length}</span>
                 </li>

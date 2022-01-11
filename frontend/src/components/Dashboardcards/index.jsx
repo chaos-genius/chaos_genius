@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import Modal from 'react-modal';
-import Tooltip from 'react-tooltip-lite';
 import More from '../../assets/images/more.svg';
 import Moreactive from '../../assets/images/more-active.svg';
 import Edit from '../../assets/images/edit.svg';
@@ -22,6 +21,7 @@ import { useToast } from 'react-toast-wnm';
 
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
 import { getLocalStorage } from '../../utils/storage-helper';
+import { CustomTooltip } from '../../utils/tooltip-helper';
 
 const Dashboardcards = ({ dashboarddata, setChange }) => {
   const dispatch = useDispatch();
@@ -75,8 +75,7 @@ const Dashboardcards = ({ dashboarddata, setChange }) => {
     if (dashboardDelete && dashboardDelete.status === 'success') {
       customToast({
         type: 'success',
-        header: 'Dashboard deleted successfully',
-        description: dashboardDelete.message
+        header: 'Dashboard deleted successfully'
       });
       setChange((prev) => !prev);
     } else if (dashboardDelete && dashboardDelete.status === 'failure') {
@@ -104,12 +103,7 @@ const Dashboardcards = ({ dashboarddata, setChange }) => {
                   <div className="header-card">
                     <div className="header-content">
                       <h3 className="name-tooltip">
-                        <Tooltip
-                          className="tooltip-name"
-                          direction="right"
-                          content={<span> {dashboard.name}</span>}>
-                          {dashboard.name}
-                        </Tooltip>
+                        {CustomTooltip(dashboard.name)}
                       </h3>
                     </div>
                     <div className="more-dropdown dropstart">

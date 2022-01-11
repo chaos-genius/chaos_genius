@@ -53,13 +53,10 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
 
   const KPITabs = [{ name: 'Overall KPI' }, { name: 'Sub-dimensions' }];
 
-  const {
-    anomalyDetectionData,
-    anomalyDrilldownData,
-    anomalyQualityData
-  } = useSelector((state) => {
-    return state.anomaly;
-  });
+  const { anomalyDetectionData, anomalyDrilldownData, anomalyQualityData } =
+    useSelector((state) => {
+      return state.anomaly;
+    });
 
   useEffect(() => {
     store.dispatch(RESET_ACTION);
@@ -212,8 +209,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
           borderWidth: 1,
           padding: 20,
           title: {
-            text:
-              'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
+            text: 'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
             style: {
               fontStyle: 'italic'
             }

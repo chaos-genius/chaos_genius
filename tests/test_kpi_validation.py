@@ -380,7 +380,7 @@ def metric_col_is_date_col(new_kpi_df, monkeypatch):  # noqa: D103
     df: pd.DataFrame
     kpi, df = new_kpi_df
 
-    monkeypatch.setattr(kpi, "metric", "date_col")
+    monkeypatch.setattr(kpi, "datetime_column", "metric_col")
 
     return kpi, df
 

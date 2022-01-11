@@ -72,7 +72,6 @@ Feature: KPI Validation
         When the metric column name is same as the date/time column
         Then validation should fail
         And error message should end with "KPI column cannot be the date column"
-        # And error message should end with " column is categorical. Quantitative data is required to perform sum aggregation."
 
     Scenario: date/time column is a floating point value
         Given a newly added KPI and its DataFrame
@@ -102,7 +101,9 @@ Feature: KPI Validation
         And error message should start with "Timestamps in "
         And error message should end with " were out of bounds. Check that your date column is formatted properly and consistely."
 
+    # not currently supported
     Scenario: date/time column has unix timestamp
         Given a newly added KPI and its DataFrame
         When date/time column has integer unix timestamp
-        Then validation should pass
+        Then validation should fail
+        And error message should be "The datetime column is of the type int64, acceptable types are string and datetime"

@@ -54,13 +54,13 @@ Feature: KPI Validation
         Given a newly added KPI and its DataFrame
         When a numerical aggregation (mean or sum) on a non-numerical column
         Then validation should fail
-        And error message should end with "column is categorical. Quantitative data is required to perform sum aggregation."
+        And error message should end with "column is non-numerical. Quantitative data is required to perform sum aggregation."
 
     Scenario: numerical aggregation on a string column
         Given a newly added KPI and its DataFrame
         When a numerical aggregation (mean or sum) on a column with strings
         Then validation should fail
-        And error message should end with "column is categorical. Quantitative data is required to perform sum aggregation."
+        And error message should end with "column is non-numerical. Quantitative data is required to perform sum aggregation."
 
     Scenario: numerical aggregation on a numerical column
         Given a newly added KPI and its DataFrame

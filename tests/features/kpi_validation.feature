@@ -72,12 +72,13 @@ Feature: KPI Validation
         When the metric column name is same as the date/time column
         Then validation should fail
         And error message should end with "KPI column cannot be the date column"
+        # And error message should end with " column is categorical. Quantitative data is required to perform sum aggregation."
 
     Scenario: date/time column is a floating point value
         Given a newly added KPI and its DataFrame
         When the date/time column is of type float
         Then validation should fail
-        And error message should be "The datetime column is of the type float, acceptable types are string and datetime"
+        And error message should be "The datetime column is of the type float64, acceptable types are string and datetime"
 
     Scenario: date/time column is some categorical string
         Given a newly added KPI and its DataFrame
@@ -86,9 +87,17 @@ Feature: KPI Validation
         And error message should start with "Unable to parse"
         And error message should end with "Check that your date column is formatted properly and consistely."
 
-    Scenario: date/time column has a very large timestamp or in a weird format
+    Scenario: date/time column has a very large timestamp
         Given a newly added KPI and its DataFrame
-        When date/time column has a very large timestamp or in a weird format
+        When date/time column has a very large timestamp
+        Then validation should fail
+        And error message should start with "Timestamps in "
+        And error message should end with " were out of bounds. Check that your date column is formatted properly and consistely."
+
+    # example: "Jan 19,17 05:04:50 PM"
+    Scenario: date/time column has is in a weird format
+        Given a newly added KPI and its DataFrame
+        When date/time column has is in a weird format
         Then validation should fail
         And error message should start with "Timestamps in "
         And error message should end with " were out of bounds. Check that your date column is formatted properly and consistely."

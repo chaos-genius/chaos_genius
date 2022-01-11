@@ -38,12 +38,62 @@ def new_kpi_df():  # noqa: D103
     )
     df = pd.DataFrame(
         [
-            ["2021-12-21", 1, "a", "q"],
-            ["2021-12-22", 2, "b", "w"],
-            ["2021-12-23", 3, "c", "e"],
-            ["2021-12-24", 4, "d", "r"],
+            [
+                "2021-12-21",
+                1,
+                "a",
+                "q",
+                "1",
+                1.0,
+                "Jan 19,17 05:04:50 PM",
+                "2262-04-11 23:47:16.854775807",
+                1641890403,
+            ],
+            [
+                "2021-12-22",
+                2,
+                "b",
+                "w",
+                "2",
+                1.1,
+                "Jan 19,17 05:04:51 PM",
+                "2262-04-12 23:47:16.854775807",
+                1000000000,
+            ],
+            [
+                "2021-12-23",
+                3,
+                "c",
+                "e",
+                "3",
+                2.5,
+                "Jan 19,17 05:04:52 PM",
+                "2262-04-13 23:47:16.854775807",
+                10,
+            ],
+            [
+                "2021-12-24",
+                4,
+                "d",
+                "r",
+                "4",
+                6.9,
+                "Jan 19,17 05:04:53 PM",
+                "2262-04-14 23:47:16.854775807",
+                1641890438,
+            ],
         ],
-        columns=["date_col", "metric_col", "dim1", "dim2"],
+        columns=[
+            "date_col",
+            "metric_col",
+            "dim1",
+            "dim2",
+            "dim3",
+            "some_float_col",
+            "invalid_time_col",
+            "large_time_col",
+            "unix_time",
+        ],
     )
 
     return kpi, df
@@ -125,8 +175,71 @@ def test_metric_col_in_dimension():  # noqa: D103
 
 
 @scenario("features/kpi_validation.feature", "data has more than 10 million rows")
-@pytest.mark.parametrize("mock_dataloader", [100_000_001])
 def test_more_than_10m_rows():  # noqa: D103
+    pass
+
+
+@scenario(
+    "features/kpi_validation.feature", "numerical aggregation on categorical column"
+)
+def test_num_agg_on_cat_col():  # noqa: D103
+    pass
+
+
+@scenario("features/kpi_validation.feature", "numerical aggregation on a string column")
+def test_num_agg_on_str_col():  # noqa: D103
+    pass
+
+
+@scenario(
+    "features/kpi_validation.feature", "numerical aggregation on a numerical column"
+)
+def test_num_agg_on_num_col():  # noqa: D103
+    pass
+
+
+@scenario(
+    "features/kpi_validation.feature", "metric column is same as date/time column"
+)
+def test_metric_col_is_date_col():  # noqa: D103
+    pass
+
+
+@scenario(
+    "features/kpi_validation.feature", "date/time column is a floating point value"
+)
+def test_date_col_is_float():  # noqa: D103
+    pass
+
+
+@scenario(
+    "features/kpi_validation.feature", "date/time column is some categorical string"
+)
+def test_date_col_is_cat():  # noqa: D103
+    pass
+
+
+@scenario(
+    "features/kpi_validation.feature",
+    "date/time column has a very large timestamp",
+)
+def test_date_very_large():  # noqa: D103
+    pass
+
+
+@scenario(
+    "features/kpi_validation.feature",
+    "date/time column has is in a weird format",
+)
+def test_date_weird():  # noqa: D103
+    pass
+
+
+@scenario(
+    "features/kpi_validation.feature",
+    "date/time column has unix timestamp",
+)
+def test_date_unix():  # noqa: D103
     pass
 
 
@@ -210,3 +323,134 @@ def metric_col_in_dimension(new_kpi_df, monkeypatch):  # noqa: D103
 def more_than_10m_rows(mock_dataloader, monkeypatch):  # noqa: D103
 
     monkeypatch.setattr(DataLoader, "get_count", lambda _: 10_000_001)
+
+
+@when(
+    "a numerical aggregation (mean or sum) on a column with strings",
+    target_fixture="new_kpi_df",
+)
+def num_agg_on_str_col(new_kpi_df, monkeypatch):  # noqa: D103
+    kpi: Kpi
+    df: pd.DataFrame
+    kpi, df = new_kpi_df
+
+    monkeypatch.setattr(kpi, "metric", "dim3")
+    monkeypatch.setattr(kpi, "aggregation", "sum")
+
+    return kpi, df
+
+
+@when(
+    "a numerical aggregation (mean or sum) on a non-numerical column",
+    target_fixture="new_kpi_df",
+)
+def num_agg_on_cat_col(new_kpi_df, monkeypatch):  # noqa: D103
+    kpi: Kpi
+    df: pd.DataFrame
+    kpi, df = new_kpi_df
+
+    monkeypatch.setattr(kpi, "metric", "dim1")
+    monkeypatch.setattr(kpi, "dimensions", ["dim2", "dim3"])
+    monkeypatch.setattr(kpi, "aggregation", "sum")
+
+    return kpi, df
+
+
+@when(
+    "a numerical aggregation (mean or sum) on a numerical column",
+    target_fixture="new_kpi_df",
+)
+def num_agg_on_num_col(new_kpi_df, monkeypatch):  # noqa: D103
+    kpi: Kpi
+    df: pd.DataFrame
+    kpi, df = new_kpi_df
+
+    monkeypatch.setattr(kpi, "metric", "metric_col")
+    monkeypatch.setattr(kpi, "aggregation", "sum")
+
+    return kpi, df
+
+
+@when(
+    "the metric column name is same as the date/time column",
+    target_fixture="new_kpi_df",
+)
+def metric_col_is_date_col(new_kpi_df, monkeypatch):  # noqa: D103
+    kpi: Kpi
+    df: pd.DataFrame
+    kpi, df = new_kpi_df
+
+    monkeypatch.setattr(kpi, "metric", "date_col")
+
+    return kpi, df
+
+
+@when(
+    "the date/time column is of type float",
+    target_fixture="new_kpi_df",
+)
+def date_col_is_float(new_kpi_df, monkeypatch):  # noqa: D103
+    kpi: Kpi
+    df: pd.DataFrame
+    kpi, df = new_kpi_df
+
+    monkeypatch.setattr(kpi, "datetime_column", "some_float_col")
+
+    return kpi, df
+
+
+@when(
+    "the date/time column is a categorical string",
+    target_fixture="new_kpi_df",
+)
+def date_col_is_cat(new_kpi_df, monkeypatch):  # noqa: D103
+    kpi: Kpi
+    df: pd.DataFrame
+    kpi, df = new_kpi_df
+
+    monkeypatch.setattr(kpi, "datetime_column", "dim1")
+    monkeypatch.setattr(kpi, "dimensions", ["dim2", "dim3"])
+
+    return kpi, df
+
+
+@when(
+    "date/time column has a very large timestamp",
+    target_fixture="new_kpi_df",
+)
+def date_very_large(new_kpi_df, monkeypatch):  # noqa: D103
+    kpi: Kpi
+    df: pd.DataFrame
+    kpi, df = new_kpi_df
+
+    monkeypatch.setattr(kpi, "datetime_column", "large_time_col")
+
+    return kpi, df
+
+
+@when(
+    "date/time column has is in a weird format",
+    target_fixture="new_kpi_df",
+)
+def date_weird(new_kpi_df, monkeypatch):  # noqa: D103
+    kpi: Kpi
+    df: pd.DataFrame
+    kpi, df = new_kpi_df
+
+    monkeypatch.setattr(kpi, "datetime_column", "invalid_time_col")
+
+    return kpi, df
+
+
+@when(
+    "date/time column has integer unix timestamp",
+    target_fixture="new_kpi_df",
+)
+def date_unix(new_kpi_df, monkeypatch):  # noqa: D103
+    kpi: Kpi
+    df: pd.DataFrame
+    kpi, df = new_kpi_df
+
+    monkeypatch.setattr(kpi, "datetime_column", "unix_time")
+
+    return kpi, df

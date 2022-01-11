@@ -45,10 +45,10 @@ Feature: KPI Validation
 
     Scenario: data has more than 10 million rows
         Given a newly added KPI and its DataFrame
-        When the data for KPI has more than 10 million rows
+        When the data for KPI has 10,000,001 rows
         Then validation should fail
         And error message should start with "Chaos Genius does not currently support datasets with monthly rows greater than "
-        And error message should end with "Please try materialized views for such datasets (coming soon)."
+        And error message should end with "Please try materialized viewsfor such datasets (coming soon)."
 
     Scenario: numerical aggregation on categorical column
         Given a newly added KPI and its DataFrame

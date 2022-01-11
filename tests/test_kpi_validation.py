@@ -16,8 +16,6 @@ def mock_dataloader(monkeypatch):
         pass
 
     def mock_dataloader_get_count(_):
-        # TODO: use marker to pass this data
-        #       see: https://docs.pytest.org/en/6.2.x/fixture.html#using-markers-to-pass-data-to-fixtures
         return 100
 
     monkeypatch.setattr(DataLoader, "__init__", mock_dataloader_init)
@@ -25,10 +23,10 @@ def mock_dataloader(monkeypatch):
 
 
 @given("a newly added KPI and its DataFrame", target_fixture="new_kpi_df")
-def new_kpi_df(mock_dataloader):  # noqa: D103
+def new_kpi_df():  # noqa: D103
     kpi = Kpi(
         name="test_validation_kpi",
-        data_source=0,
+        data_source=-1,
         kpi_type="table",
         kpi_query="",
         table_name="some_table_that_should_not_exist",
@@ -54,7 +52,7 @@ def new_kpi_df(mock_dataloader):  # noqa: D103
 @then(
     parsers.parse("validation should {status}"), target_fixture="kpi_validation_message"
 )
-def check_kpi_validation(new_kpi_df, status):  # noqa: D103
+def check_kpi_validation(new_kpi_df, status, mock_dataloader):  # noqa: D103
     kpi: Kpi
     df: pd.DataFrame
     kpi, df = new_kpi_df
@@ -116,6 +114,22 @@ def test_invalid_agg():  # noqa: D103
     pass
 
 
+@scenario("features/kpi_validation.feature", "date column in dimensions")
+def test_date_col_in_dimension():  # noqa: D103
+    pass
+
+
+@scenario("features/kpi_validation.feature", "metric column in dimensions")
+def test_metric_col_in_dimension():  # noqa: D103
+    pass
+
+
+@scenario("features/kpi_validation.feature", "data has more than 10 million rows")
+@pytest.mark.parametrize("mock_dataloader", [100_000_001])
+def test_more_than_10m_rows():  # noqa: D103
+    pass
+
+
 # TODO: add remaining scenarios
 
 
@@ -153,7 +167,10 @@ def duplicate_col_name(new_kpi_df):  # noqa: D103
     return kpi, df
 
 
-@when(parsers.parse('aggregation given for metric is invalid - say "{agg_name}"'))
+@when(
+    parsers.parse('aggregation given for metric is invalid - say "{agg_name}"'),
+    target_fixture="new_kpi_df",
+)
 def invalid_agg(new_kpi_df, agg_name, monkeypatch):  # noqa: D103
     kpi: Kpi
     df: pd.DataFrame
@@ -162,3 +179,34 @@ def invalid_agg(new_kpi_df, agg_name, monkeypatch):  # noqa: D103
     monkeypatch.setattr(kpi, "aggregation", agg_name)
 
     return kpi, df
+
+
+@when("the date column is also included in dimension", target_fixture="new_kpi_df")
+def date_col_in_dimension(new_kpi_df, monkeypatch):  # noqa: D103
+    kpi: Kpi
+    df: pd.DataFrame
+    kpi, df = new_kpi_df
+
+    monkeypatch.setattr(kpi, "dimensions", kpi.dimensions + ["date_col"])
+
+    return kpi, df
+
+
+@when("the metric column is also included in dimension", target_fixture="new_kpi_df")
+def metric_col_in_dimension(new_kpi_df, monkeypatch):  # noqa: D103
+    kpi: Kpi
+    df: pd.DataFrame
+    kpi, df = new_kpi_df
+
+    monkeypatch.setattr(kpi, "dimensions", kpi.dimensions + ["metric_col"])
+
+    return kpi, df
+
+
+@when(
+    "the data for KPI has 10,000,001 rows",
+    target_fixture="mock_dataloader",
+)
+def more_than_10m_rows(mock_dataloader, monkeypatch):  # noqa: D103
+
+    monkeypatch.setattr(DataLoader, "get_count", lambda _: 10_000_001)

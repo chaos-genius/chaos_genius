@@ -153,8 +153,8 @@ def get_anomaly_kpis() -> Iterator[Kpi]:
 
 
 def get_active_kpis() -> Iterator[Kpi]:
-    """Returns a list of all active KPIs"""
-    kpis: Kpi = Kpi.query.distinct("kpi_id").filter(
+    """Returns a list of all active KPIs."""
+    kpis = Kpi.query.distinct("kpi_id").filter(
         (Kpi.active == True) & (Kpi.is_static == False)
     )
     return kpis

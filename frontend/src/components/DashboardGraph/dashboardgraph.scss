@@ -121,6 +121,9 @@
       }
     }
   }
+  .preload {
+    position: static !important;
+  }
   .dashboard-aggregate-section {
     display: flex;
     flex-direction: row;
@@ -128,9 +131,7 @@
     padding-bottom: 15px;
     .aggregate-card-container {
       width: 100%;
-      border: 1px solid $grey_variation-4;
       box-sizing: border-box;
-      border-radius: 20px;
       display: flex;
       align-items: center;
       flex-direction: row;

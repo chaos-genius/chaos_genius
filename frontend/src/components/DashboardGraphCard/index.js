@@ -8,34 +8,74 @@ import './dashboardgraphcard.scss';
 const Dashboardgraphcard = ({ aggregationData, monthWeek, kpiAggregate }) => {
   return (
     <>
-      <div>
-        <div>
-          <span>This Month</span>
-          <h5>
-            {aggregationData &&
-            aggregationData.panel_metrics?.grp1_metrics?.sum ? (
-              <HumanReadableNumbers
-                is_bold
-                number={aggregationData.panel_metrics.grp1_metrics.sum}
-              />
-            ) : (
-              '-'
-            )}
-          </h5>
+      <div className="aggregate-parent-container">
+        <div className="aggregate-card">
+          <div className="card-border"></div>
+          <div className="content-container">
+            <span>This Month</span>
+            <h5>
+              {aggregationData &&
+              aggregationData.panel_metrics?.grp1_metrics?.sum ? (
+                <HumanReadableNumbers
+                  is_bold
+                  number={aggregationData.panel_metrics.grp1_metrics.sum}
+                />
+              ) : (
+                '-'
+              )}
+            </h5>
+          </div>
         </div>
-        <div>
-          <span>This Month</span>
-          <h5>
-            {aggregationData &&
-            aggregationData.panel_metrics?.grp1_metrics?.sum ? (
-              <HumanReadableNumbers
-                is_bold
-                number={aggregationData.panel_metrics.grp1_metrics.sum}
-              />
-            ) : (
-              '-'
-            )}
-          </h5>
+        <div className="aggregate-card">
+          <div className="card-border"></div>
+          <div className="content-container">
+            <span>This Month</span>
+            <h5>
+              {aggregationData &&
+              aggregationData.panel_metrics?.grp1_metrics?.sum ? (
+                <HumanReadableNumbers
+                  is_bold
+                  number={aggregationData.panel_metrics.grp1_metrics.sum}
+                />
+              ) : (
+                '-'
+              )}
+            </h5>
+          </div>
+        </div>
+        <div className="aggregate-card">
+          <div className="card-border"></div>
+          <div className="content-container">
+            <span>This Month</span>
+            <h5>
+              {aggregationData &&
+              aggregationData.panel_metrics?.grp1_metrics?.sum ? (
+                <HumanReadableNumbers
+                  is_bold
+                  number={aggregationData.panel_metrics.grp1_metrics.sum}
+                />
+              ) : (
+                '-'
+              )}
+            </h5>
+          </div>
+        </div>
+        <div className="aggregate-card">
+          <div className="card-border"></div>
+          <div className="content-container">
+            <span>This Month</span>
+            <h5>
+              {aggregationData &&
+              aggregationData.panel_metrics?.grp1_metrics?.sum ? (
+                <HumanReadableNumbers
+                  is_bold
+                  number={aggregationData.panel_metrics.grp1_metrics.sum}
+                />
+              ) : (
+                '-'
+              )}
+            </h5>
+          </div>
         </div>
       </div>
       {/*<div className="graph-custom-card-container">

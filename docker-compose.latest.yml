@@ -47,6 +47,7 @@ services:
     environment:
       - *chaosgenius-version
       - IN_DOCKER=True
+      - REACT_APP_IS_DEMO=${REACT_APP_IS_DEMO}
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}

@@ -113,14 +113,17 @@ def register_shellcontext(app):
 
 
 def register_hooks(app):
-    if REACT_APP_IS_DEMO:
-        @app.before_request
-        def before_request():
-            if request.endpoint not in DEMO_ENDPOINT_WHITELIST:
-                return jsonify({"status":"failure",
-                                "message":"Endpoint not accessable in demo version"})
-            else:
-                pass
+    @app.before_request
+    def authenticate():
+
+        if REACT_APP_IS_DEMO:
+            @app.before_request
+            def before_request():
+                if request.endpoint not in DEMO_ENDPOINT_WHITELIST:
+                    return jsonify({"status":"failure",
+                                    "message":"Endpoint not accessable in demo version"})
+                else:
+                    pass
 
 
 def register_commands(app):

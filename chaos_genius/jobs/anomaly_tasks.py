@@ -14,18 +14,13 @@ from chaos_genius.controllers.task_monitor import (
     checkpoint_initial,
     checkpoint_success,
 )
+
+from chaos_genius.controllers.kpi_controller import get_anomaly_kpis, get_active_kpis
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.extensions import celery as celery_ext
 
 celery = cast(Celery, celery_ext.celery)
 logger = get_task_logger(__name__)
-
-
-# @celery.task
-# def add_together(a, b):
-#     print(a + b)
-#     print("It works...xD")
-#     # return a + b
 
 
 def update_scheduler_params(key: str, value: str):
@@ -147,12 +142,6 @@ def rca_single_kpi(kpi_id: int):
     return status
 
 
-def get_anomaly_kpis():
-    kpis = Kpi.query.distinct("kpi_id").filter(
-        (Kpi.run_anomaly == True) & (Kpi.active == True)
-    )
-    return kpis
-
 
 @celery.task
 def anomaly_kpi():
@@ -219,13 +208,6 @@ def ready_rca_task(kpi_id: int):
     kpi.update(commit=True)
 
     return rca_single_kpi.s(kpi_id)
-
-
-def get_active_kpis():
-    kpis: Kpi = Kpi.query.distinct("kpi_id").filter(
-        (Kpi.active == True) & (Kpi.is_static == False)
-    )
-    return kpis
 
 
 # runs every N time (set in celery_config)

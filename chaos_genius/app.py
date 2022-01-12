@@ -4,11 +4,14 @@ import logging
 import sys
 import json
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
+from flask.json import jsonify
 from flask_cors import CORS
 
 from chaos_genius import commands
 from chaos_genius.logger import configure_logger
+from chaos_genius.settings import REACT_APP_IS_DEMO
+from chaos_genius.utils.utils import DEMO_ENDPOINT_WHITELIST
 from chaos_genius.views import (
     data_source_view,
     kpi_view,
@@ -42,6 +45,7 @@ def create_app(config_object="chaos_genius.settings"):
     app.config.from_object(config_object)
     register_extensions(app)
     register_blueprints(app)
+    register_hooks(app)
     register_errorhandlers(app)
     register_shellcontext(app)
     register_commands(app)
@@ -106,6 +110,17 @@ def register_shellcontext(app):
         return {"db": db}  # , "User": user.models.User}
 
     app.shell_context_processor(shell_context)
+
+
+def register_hooks(app):
+    if REACT_APP_IS_DEMO:
+        @app.before_request
+        def before_request():
+            if request.endpoint not in DEMO_ENDPOINT_WHITELIST:
+                return jsonify({"status":"failure",
+                                "message":"Endpoint not accessable in demo version"})
+            else:
+                pass
 
 
 def register_commands(app):

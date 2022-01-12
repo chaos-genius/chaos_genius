@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
 
-import Tooltip from 'react-tooltip-lite';
-
 import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import Search from '../../assets/images/search.svg';
@@ -14,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import store from '../../redux/store';
 
 import { anomalySetting } from '../../redux/actions';
+import { CustomTooltip } from '../../utils/tooltip-helper';
 
 const RESET = {
   type: 'RESET_DATA'
@@ -96,12 +95,9 @@ const DashboardFilter = ({
                     history.push(`/dashboard/${dashboard}/${tabs}/${item.id}`);
                   }}>
                   <div className="filter-tooltipcontent">
-                    <Tooltip
-                      className="tooltip-name"
-                      direction="right"
-                      content={<span> {item.name}</span>}>
-                      <label className="name-tooltip">{item.name}</label>{' '}
-                    </Tooltip>
+                    <label className="name-tooltip">
+                      {CustomTooltip(item.name)}
+                    </label>{' '}
                   </div>
                   <img src={GreenArrow} alt="Arrow" />
                 </li>

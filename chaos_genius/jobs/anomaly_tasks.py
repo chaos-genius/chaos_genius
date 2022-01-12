@@ -142,7 +142,6 @@ def rca_single_kpi(kpi_id: int):
     return status
 
 
-
 @celery.task
 def anomaly_kpi():
     kpis = get_anomaly_kpis()

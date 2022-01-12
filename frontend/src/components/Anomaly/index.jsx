@@ -12,6 +12,7 @@ import Noresult from '../Noresult';
 import AnomalyEmptyState from '../AnomalyEmptyState';
 import EmptyAnomalyDrilldown from '../EmptyDrillDown';
 import { formatDateTime, getTimezone } from '../../utils/date-helper';
+import { HRNumbers } from '../../utils/Formatting/Numbers/humanReadableNumberFormatter';
 import './anomaly.scss';
 
 import {
@@ -152,6 +153,11 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
         yAxis: {
           title: {
             text: graphData.y_axis_label
+          },
+          labels: {
+            formatter: function () {
+              return HRNumbers.toHumanString(this.value);
+            }
           }
         },
         tooltip: {
@@ -171,7 +177,11 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
               ' - ' +
               intervals[2] +
               '</b>';
-            s = s + '<br>Value: <b>' + this.y + '</b>';
+            s =
+              s +
+              '<br>Value: <b>' +
+              Highcharts.numberFormat(this.y, 2) +
+              '</b>';
             s = s + '<br>Severity: <b>' + severity_score[1] + '</b>';
             s =
               s +
@@ -346,11 +356,12 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
   };
 
   const handleGraphClick = (graphData, event) => {
-    store.dispatch(RESET);
     const unixDate = event.point.x;
     const severity_score = graphData.severity.find(
       (row) => row[0] === event.point.x
     );
+    store.dispatch(RESET);
+    setDrilldownCollapse(true);
     if (severity_score[1] !== 0) {
       dispatch(
         anomalyDrilldown(kpi, {

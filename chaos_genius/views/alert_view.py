@@ -19,7 +19,8 @@ from chaos_genius.databases.db_utils import chech_editable_field
 blueprint = Blueprint("alert", __name__)
 
 
-@blueprint.route("/", methods=["GET"])
+@blueprint.route("", methods=["GET"])
+@blueprint.route("/", methods=["GET"]) # TODO: Remove this
 def list_alert():
     """List the alert data."""
     results = get_alert_list()

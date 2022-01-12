@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 
 import Select from 'react-select';
-import Tooltip from 'react-tooltip-lite';
 import Search from '../../assets/images/search.svg';
 import Up from '../../assets/images/up.svg';
 import Down from '../../assets/images/down.svg';
@@ -22,7 +21,9 @@ import Noresult from '../Noresult';
 import Homefilter from '../Homefilter';
 
 import { formatDateTime, getTimezone } from '../../utils/date-helper';
+import { HRNumbers } from '../../utils/Formatting/Numbers/humanReadableNumberFormatter';
 import { getDashboard } from '../../redux/actions';
+import { CustomTooltip } from '../../utils/tooltip-helper';
 
 import store from '../../redux/store';
 
@@ -134,7 +135,7 @@ const Kpihome = () => {
           borderWidth: 0,
           type: 'line',
           margin: [2, 0, 2, 0],
-          width: 150,
+          width: 200,
           height: 50,
           style: {
             overflow: 'visible'
@@ -161,6 +162,11 @@ const Kpihome = () => {
         yAxis: {
           step: 1,
           title: '',
+          labels: {
+            formatter: function () {
+              return HRNumbers.toHumanString(this.value);
+            }
+          },
           gridLineWidth: 0,
           lineWidth: 1
         },
@@ -248,15 +254,10 @@ const Kpihome = () => {
                       <div className="kpi-card" key={item.id}>
                         <div className="kpi-content kpi-content-label">
                           <h3 className="name-tooltip">
-                            <Tooltip
-                              className="tooltip-name"
-                              direction="left"
-                              content={<span> {item.name}</span>}>
-                              {item.name}
-                            </Tooltip>
+                            {CustomTooltip(item.name, true)}
                           </h3>
                         </div>
-                        <div className="kpi-content">
+                        <div className="kpi-content kpi-current">
                           <label>
                             {timeline.value === 'wow'
                               ? 'This Week'

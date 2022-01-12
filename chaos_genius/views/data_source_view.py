@@ -49,7 +49,8 @@ from chaos_genius.controllers.data_source_controller import (
 blueprint = Blueprint("api_data_source", __name__)
 
 
-@blueprint.route("/", methods=["GET", "POST"])
+@blueprint.route("", methods=["GET", "POST"])
+@blueprint.route("/", methods=["GET", "POST"]) # TODO: Remove this
 def data_source():
     """DataSource List view."""
     current_app.logger.info("DataSource list")

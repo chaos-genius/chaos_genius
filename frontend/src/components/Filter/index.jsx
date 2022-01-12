@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
-import Tooltip from 'react-tooltip-lite';
-
 import Search from '../../assets/images/search.svg';
+
+import Fuse from 'fuse.js';
+import { CustomTooltip } from '../../utils/tooltip-helper';
 
 const DataSourceFilter = ({
   datasource,
@@ -13,12 +14,14 @@ const DataSourceFilter = ({
   datasourceList,
   kpiList,
   setDashboardFilter,
-  setDashboardNameSearch
+  kpi
 }) => {
   const [checked, setChecked] = useState([]);
   const [datasourceType, setDatasourceType] = useState([]);
   const [dashboard, setDashboard] = useState([]);
   const [dashboardFilterList, setDashboardFilterList] = useState([]);
+  const [dashboardSearch, setDashboardSearch] = useState('');
+  const [kpiData, setKpiData] = useState(kpiList);
 
   const onSearch = (e) => {
     if (datasource) {
@@ -27,6 +30,7 @@ const DataSourceFilter = ({
       setKpiSearch(e.target.value);
     }
   };
+
   useEffect(() => {
     if (datasource) {
       setDataSourceFilter(checked);
@@ -35,6 +39,30 @@ const DataSourceFilter = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checked]);
+
+  useEffect(() => {
+    if (dashboardSearch !== '') {
+      searchDashboardName();
+    } else if (kpiList) {
+      setKpiData(kpiList);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dashboardSearch]);
+
+  const searchDashboardName = () => {
+    const options = {
+      keys: ['dashboards.name']
+    };
+
+    const fuse = new Fuse(kpiList, options);
+
+    const result = fuse.search(dashboardSearch);
+    setKpiData(
+      result.map((item) => {
+        return item.item;
+      })
+    );
+  };
 
   useEffect(() => {
     if (kpiList) {
@@ -49,17 +77,18 @@ const DataSourceFilter = ({
         ...new Set(datasourceList.map((item) => item.connection_type))
       ]);
     }
-    if (kpiList) {
+    if (kpiData) {
       setDatasourceType([
         ...new Set(kpiList.map((item) => item.data_source.connection_type))
       ]);
       var unique = [];
-      kpiList.map((item) =>
+      kpiData.map((item) =>
         item.dashboards.map((key) => unique.push(key.name))
       );
       setDashboard([...new Set(unique)]);
     }
-  }, [datasourceList, kpiList]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [datasourceList, kpiData]);
 
   const onChangeFilter = (e) => {
     if (datasource) {
@@ -82,6 +111,7 @@ const DataSourceFilter = ({
       }
     }
   };
+
   const onDashboardFilter = (e) => {
     if (e.target.checked === true) {
       let selected = dashboardFilterList.concat(e.target.name);
@@ -112,7 +142,7 @@ const DataSourceFilter = ({
           </span>
         </div>
       </div>{' '}
-      {kpiList && kpiList.length !== 0 && (
+      {kpi && (
         <div className="filter-layout">
           <h3>Dashboard</h3>{' '}
           <div className="form-group icon ">
@@ -121,7 +151,7 @@ const DataSourceFilter = ({
               className="form-control h-40"
               placeholder="Search dashboard"
               onChange={(e) => {
-                setDashboardNameSearch(e.target.value);
+                setDashboardSearch(e.target.value);
               }}
             />
             <span>
@@ -129,8 +159,7 @@ const DataSourceFilter = ({
             </span>
           </div>{' '}
           <div className="filter-size">
-            {dashboard &&
-              dashboard.length !== 0 &&
+            {dashboard && dashboard.length !== 0 ? (
               dashboard.map((item) => {
                 return (
                   <div className="form-check check-box">
@@ -141,19 +170,18 @@ const DataSourceFilter = ({
                       type="checkbox"
                       onChange={(e) => onDashboardFilter(e)}
                     />
-                    <Tooltip
-                      className="tooltip-name"
-                      direction="right"
-                      content={<span> {item}</span>}>
-                      <label
-                        className="form-check-label name-tooltip"
-                        htmlFor={item}>
-                        {item}
-                      </label>
-                    </Tooltip>
+
+                    <label
+                      className="form-check-label name-tooltip"
+                      htmlFor={item}>
+                      {CustomTooltip(item)}
+                    </label>
                   </div>
                 );
-              })}
+              })
+            ) : (
+              <div className="empty-content">No Data Found</div>
+            )}
           </div>
         </div>
       )}

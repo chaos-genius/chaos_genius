@@ -219,8 +219,6 @@ def anomaly_scheduler():
     task_group = []
     kpis = get_active_kpis()
     for kpi in kpis:
-        kpi: Kpi
-
         # if anomaly isn't setup yet, we still run RCA at     tR + 24 hours
         # if anomaly is setup, we run both anomaly and RCA at tA + 24 hours
 

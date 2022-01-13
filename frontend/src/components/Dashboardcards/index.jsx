@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { Link, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import Modal from 'react-modal';
 import More from '../../assets/images/more.svg';
@@ -25,7 +25,6 @@ import { CustomTooltip } from '../../utils/tooltip-helper';
 
 const Dashboardcards = ({ dashboarddata, setChange }) => {
   const dispatch = useDispatch();
-  const history = useHistory();
   const limited = getLocalStorage('GlobalSetting');
   const toast = useToast();
 
@@ -147,23 +146,19 @@ const Dashboardcards = ({ dashboarddata, setChange }) => {
                           </li>
                         </Link>
 
-                        {/* {limited?.is_ee && ( */}
-                        <button
-                          disabled={!limited?.is_ee}
-                          className="delete-item menu-button ">
-                          <li
-                            className={!limited?.is_ee ? 'disabled' : ''}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              history.push('/dashboard');
-                              setIsOpen(true);
-                              setData(dashboard);
-                            }}>
-                            <img src={DeleteActive} alt="Delete" />
-                            Delete
-                          </li>
-                        </button>
-                        {/* )} */}
+                        {limited?.is_ee && (
+                          <Link to="/dashboard">
+                            <li
+                              className="delete-item"
+                              onClick={() => {
+                                setIsOpen(true);
+                                setData(dashboard);
+                              }}>
+                              <img src={DeleteActive} alt="Delete" />
+                              Delete
+                            </li>
+                          </Link>
+                        )}
                       </ul>
                     </div>
                   </div>

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Click commands."""
+import json
 import os
 from datetime import datetime
 from glob import glob
@@ -8,6 +9,7 @@ from subprocess import call
 import click
 from flask.cli import with_appcontext
 
+from chaos_genius.controllers.kpi_controller import add_kpi
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.join(HERE, os.pardir)
@@ -143,6 +145,66 @@ def run_anomaly_rca_scheduler():
     res = anomaly_scheduler.delay()
     res.get()
     click.echo("Completed running scheduler. Tasks should be running in the worker.")
+
+
+@click.command()
+@with_appcontext
+@click.argument("file_name")
+def kpi_import(file_name: str):
+    """Adds KPIs defined in given JSON file.
+
+    The JSON must be in the following format:
+
+    \b
+    ```
+    [
+            {
+                "name": "",
+                "is_certified": false,
+                "data_source": 0,
+                "kpi_type": "",
+                "kpi_query": "",
+                "schema_name": null,
+                "table_name": "",
+                "metric": "",
+                "aggregation": "",
+                "datetime_column": "",
+                "filters": [],
+                "dimensions": [],
+                "run_anomaly": true,
+                "anomaly_params": {
+                    "frequency": "D",
+                    "anomaly_period": 90,
+                    "seasonality": [],
+                    "model_name": "ProphetModel",
+                    "sensitivity": "High"
+                }
+            }
+    ]
+    ```
+    """
+    with open(file_name) as f:
+        kpis = json.load(f)
+
+    for data in kpis:
+        data: dict
+
+        try:
+            kpi, err, _ = add_kpi(data, validate=True, run_analytics=True)
+
+            if err != "":
+                click.echo(click.style(
+                    f"Error in KPI ({kpi.name}): {err}",
+                    fg="red",
+                    bold=True
+                ))
+
+        except Exception as e:
+            click.echo(click.style(
+                f"Could not set up KPI with name: {data['name']}, skipping. Error: {e}",
+                fg="red",
+                bold=True
+            ))
 
 
 @click.command()

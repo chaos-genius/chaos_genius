@@ -301,3 +301,30 @@ def anomaly_scheduler():
     g = group(task_group)
     res = g.apply_async()
     return res
+
+
+def queue_kpi_analytics(kpi_id: int, run_anomaly=True):
+    """Adds analytics tasks to the queue for given KPI."""
+    anomaly_task = None
+    if run_anomaly:
+        anomaly_task = ready_anomaly_task(kpi_id)
+
+    # run rca as soon as new KPI is added
+    rca_task = ready_rca_task(kpi_id)
+    if rca_task is None:
+        logger.error(
+            "Could not run RCA task since newly added KPI was not found: %s",
+            kpi_id,
+        )
+    else:
+        rca_task.apply_async()
+
+        if run_anomaly:
+            if anomaly_task is None:
+                logger.error(
+                    "Not running anomaly since it is not configured or KPI "
+                    "(%d) was not found.",
+                    kpi_id,
+                )
+            else:
+                anomaly_task.apply_async()

@@ -1,23 +1,132 @@
 import logging
 import typing
 from datetime import date, datetime, timedelta
-from typing import Optional, Union, Iterator
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
-from flask import current_app  # noqa: F401
+from flask import current_app
 
+from chaos_genius.controllers.dashboard_controller import create_dashboard_kpi_mapper  # noqa: F401
 from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
 from chaos_genius.core.anomaly.controller import AnomalyDetectionController
 from chaos_genius.core.rca.rca_controller import RootCauseAnalysisController
 from chaos_genius.core.utils.data_loader import DataLoader
+from chaos_genius.core.utils.kpi_validation import validate_kpi
 from chaos_genius.databases.models.kpi_model import Kpi
-
-from chaos_genius.settings import (
-    MAX_DEEPDRILLS_SLACK_DAYS,
-    DAYS_OFFSET_FOR_ANALTYICS,
-)
-
+from chaos_genius.settings import DAYS_OFFSET_FOR_ANALTYICS, MAX_DEEPDRILLS_SLACK_DAYS
 
 logger = logging.getLogger(__name__)
+
+
+def add_kpi(
+    data: Dict[str, Any],
+    validate=True,
+    run_analytics=True
+) -> Tuple[Kpi, str, bool]:
+    """Adds a new KPI.
+
+    Also handles adding the KPI to the default dashboard, running analytics and
+    validations.
+
+    If "anomaly_params" is present in data, it also performs anomaly params validation
+    and runs anomaly.
+
+    Arguments:
+        data: the KPI data. Field names are same as the KPI model.
+        validate: whether to perform KPI validation. (Default: True).
+        run_rca: whether to start RCA task after adding. (Default: True).
+
+    Returns:
+        A tuple of (newly added KPI, error message - empty if success, boolean
+        indicating whether error was critical)
+    """
+    data["dimensions"] = data.get("dimensions", [])
+
+    data["kpi_query"] = _kpi_query_strip_trailing_semicolon(
+        (data.get("kpi_query", "") or "")
+    )
+
+    has_anomaly_setup = "anomaly_params" in data
+    new_anomaly_params = {}
+
+    new_kpi = Kpi(
+        name=data.get("name"),
+        is_certified=data.get("is_certified"),
+        data_source=data.get("data_source"),
+        kpi_type=data.get("dataset_type") or data.get("kpi_type"),
+        kpi_query=data.get("kpi_query"),
+        schema_name=data.get("schema_name"),
+        table_name=data.get("table_name"),
+        metric=data.get("metric"),
+        aggregation=data.get("aggregation"),
+        datetime_column=data.get("datetime_column"),
+        filters=data.get("filters"),
+        dimensions=data.get("dimensions"),
+        run_anomaly=data.get("run_anomaly", True),
+    )
+
+    if has_anomaly_setup:
+        from chaos_genius.views.anomaly_data_view import validate_partial_anomaly_params
+
+        # validate anomaly params
+        err, new_anomaly_params = validate_partial_anomaly_params(
+            data["anomaly_params"]
+        )
+        if err != "":
+            return (
+                new_kpi,
+                f"Error in validating anomaly params for KPI {data['name']}: {err}",
+                True,
+            )
+
+    if validate:
+        # Perform KPI Validation
+        status, message = validate_kpi(new_kpi.as_dict)
+        if status is not True:
+            return new_kpi, message, True
+
+    new_kpi.save(commit=True)
+
+    # Add KPI to dashboard 0 and all required dashboards
+    _add_kpi_to_dashboards(new_kpi.id, data.get("dashboard", []) + [0])
+
+    if has_anomaly_setup:
+        from chaos_genius.views.anomaly_data_view import update_anomaly_params
+
+        # update anomaly params
+        err, new_kpi = update_anomaly_params(
+            new_kpi, new_anomaly_params, check_editable=False
+        )
+
+        if err != "":
+            return (
+                new_kpi,
+                f"Error updating anomaly params for KPI {new_kpi.name}: {err}",
+                True
+            )
+
+    if run_analytics:
+        # we ensure analytics tasks are run as soon as analytics is configured
+        from chaos_genius.jobs.anomaly_tasks import queue_kpi_analytics
+        queue_kpi_analytics(new_kpi.id, has_anomaly_setup)
+
+    return new_kpi, "", False
+
+
+def _kpi_query_strip_trailing_semicolon(query: str) -> str:
+    if not query:
+        return ""
+
+    query = query.strip()
+
+    # remove trailing semicolon
+    if query[-1] == ";":
+        query = query[:-1]
+    return query
+
+
+def _add_kpi_to_dashboards(kpi_id: int, dashboards: List[int]):
+    dashboards = list(set(dashboards))
+    create_dashboard_kpi_mapper(dashboards, [kpi_id])
 
 
 def _is_data_present_for_end_date(

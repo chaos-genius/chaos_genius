@@ -9,14 +9,7 @@ from subprocess import call
 import click
 from flask.cli import with_appcontext
 
-from chaos_genius.controllers.dashboard_controller import create_dashboard_kpi_mapper
 from chaos_genius.controllers.kpi_controller import add_kpi
-from chaos_genius.core.utils.kpi_validation import validate_kpi
-from chaos_genius.databases.models.kpi_model import Kpi
-from chaos_genius.views.anomaly_data_view import (
-    update_anomaly_params,
-    validate_partial_anomaly_params,
-)
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.join(HERE, os.pardir)

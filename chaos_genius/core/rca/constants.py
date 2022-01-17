@@ -16,7 +16,7 @@ LINE_DATA_TIMESTAMP_FORMAT = "%Y/%m/%d %H:%M:%S"
 
 STATIC_END_DATA_FORMAT = "%Y-%m-%d"
 
-TIME_RANGES_ALL = {
+TIME_RANGES = {
     "last_30_days": {
         "function": get_dates_for_last_30_days,
         "display_name": "Last 30 days",
@@ -72,10 +72,3 @@ TIME_RANGES_ALL = {
         "current_period_name": "QTD",
     },
 }
-
-TIME_RANGES_KEYS_ALL = list(TIME_RANGES_ALL.keys())
-
-# TODO: Create env var for this
-TIME_RANGES_ACTIVE = {i: TIME_RANGES_ALL[i] for i in ["last_30_days", "last_7_days", "previous_day"]}
-
-TIMERANGES_KEYS_ACTIVE = list(TIME_RANGES_ACTIVE.keys())

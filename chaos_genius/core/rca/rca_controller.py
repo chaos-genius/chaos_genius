@@ -120,7 +120,7 @@ class RootCauseAnalysisController:
         :return: dictionary with line data
         :rtype: dict
         """
-        (prev_start_date, prev_end_date), (curr_start_date, curr_end_date) = (
+        (_, _), (curr_start_date, curr_end_date) = (
             TIME_RANGES_ACTIVE[timeline]["function"](self.end_date)
         )
 

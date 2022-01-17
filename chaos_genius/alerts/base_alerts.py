@@ -10,6 +10,7 @@ from chaos_genius.utils.io_helper import is_file_exists
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
+from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
 from chaos_genius.databases.models.kpi_model import Kpi
 
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
@@ -22,6 +23,7 @@ from chaos_genius.alerts.anomaly_alert_config import (
     ANOMALY_ALERT_COLUMN_NAMES,
     ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS
 )
+from chaos_genius.alerts.triggered_alert_helpers import set_alert_metadata
 from chaos_genius.core.rca.rca_utils.string_helpers import convert_query_string_to_user_string
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from tabulate import tabulate
@@ -393,9 +395,31 @@ class AnomalyAlertController:
         logger.info(f"Alert ID {alert_id} is sent to the respective alert channel")
 
         if self.alert_info["alert_channel"] == "email":
-            return self.send_alert_email(anomaly_data)
+            outcome, alert_data = self.send_alert_email(anomaly_data)
         elif self.alert_info["alert_channel"] == "slack":
-            return self.send_slack_alert(anomaly_data)
+            outcome, alert_data =  self.send_slack_alert(anomaly_data)
+        
+        if alert_data is None:
+            return outcome
+
+        triggered_alert = TriggeredAlerts(
+                            alert_conf_id=self.alert_info["id"],
+                            alert_type="Anomaly Alert",
+                            is_sent=outcome,
+                            created_at=datetime.datetime.now()       
+                        )
+        alert_metadata = {
+                            "alert_frequency": self.alert_info["alert_frequency"],
+                            "alert_data": alert_data,
+                            "end_date": self.anomaly_end_date,
+                            "severity_cutoff_score": self.alert_info["severity_cutoff_score"],
+                            "kpi": self.alert_info["kpi"],
+                            "alert_channel": self.alert_info["alert_channel"],
+                            "alert_channel_conf": self.alert_info["alert_channel_conf"]
+                        }    
+
+        set_alert_metadata(triggered_alert, alert_metadata)    
+        return outcome
 
     def get_overall_subdim_data(self, anomaly_data):
 
@@ -485,12 +509,12 @@ class AnomalyAlertController:
                                             alert_name=self.alert_info.get("alert_name")
                                         )
             logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
-            return True
+            return test, overall_data
         else:
             logger.info(
                 f"No receipent email available (Alert ID - {self.alert_info['id']})"
             )
-            return False
+            return False, None
 
     def send_template_email(self, template, recipient_emails, subject, files, **kwargs):
         """Sends an email using a template."""

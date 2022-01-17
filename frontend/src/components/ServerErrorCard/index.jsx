@@ -11,7 +11,7 @@ const ServerErrorCard = () => {
       <h5>Cannot reach server.</h5>{' '}
       <h5 className="server-next-line">The server may still be starting up.</h5>
       <a
-        href="https://docs.chaosgenius.io/docs/introduction"
+        href="https://docs.chaosgenius.io/docs/Troubleshooting/installation"
         target="_blank"
         rel="noopener noreferrer"
         className="btn green-variant-button server-error-btn">

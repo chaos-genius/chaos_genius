@@ -4,6 +4,7 @@ from collections import defaultdict
 import logging
 import traceback  # noqa: F401
 from datetime import date, datetime, timedelta
+from typing import cast
 
 from flask import (  # noqa: F401
     Blueprint,
@@ -24,7 +25,7 @@ from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.extensions import cache, db
 from chaos_genius.databases.db_utils import chech_editable_field
-from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
+from chaos_genius.controllers.kpi_controller import add_kpi, get_kpi_data_from_id
 from chaos_genius.controllers.dashboard_controller import (
     create_dashboard_kpi_mapper,
     get_mapper_obj_by_dashboard_ids,
@@ -46,67 +47,28 @@ logger = logging.getLogger(__name__)
 
 
 @blueprint.route("", methods=["GET", "POST"])
-@blueprint.route("/", methods=["GET", "POST"]) # TODO: Remove this
+@blueprint.route("/", methods=["GET", "POST"])  # TODO: Remove this
 def kpi():
-    """kpi list view."""
+    """KPI add and list view."""
     # Handle logging in
     if request.method == "POST":
-        if not request.is_json:
+        data = request.get_json()
+
+        if data is None:
             return jsonify({"error": "The request payload is not in JSON format"})
 
-        data = request.get_json()
-        data["dimensions"] = [] if data["dimensions"] is None else data["dimensions"]
+        kpi, err_msg, critical = add_kpi(data)
 
-        if data.get("kpi_query", "").strip():
-            data["kpi_query"] = data["kpi_query"].strip()
-            # remove trailing semicolon
-            if data["kpi_query"][-1] == ";":
-                data["kpi_query"] = data["kpi_query"][:-1]
-
-        new_kpi = Kpi(
-            name=data.get("name"),
-            is_certified=data.get("is_certified"),
-            data_source=data.get("data_source"),
-            kpi_type=data.get("dataset_type"),
-            kpi_query=data.get("kpi_query"),
-            schema_name=data.get("schema_name"),
-            table_name=data.get("table_name"),
-            metric=data.get("metric"),
-            aggregation=data.get("aggregation"),
-            datetime_column=data.get("datetime_column"),
-            filters=data.get("filters"),
-            dimensions=data.get("dimensions"),
-        )
-        # Perform KPI Validation
-        status, message = validate_kpi(new_kpi.as_dict)
-        if status is not True:
-            return jsonify(
-                {"error": message, "status": "failure", "is_critical": "true"}
-            )
-
-        new_kpi.save(commit=True)
-
-        # Add the dashboard id 0 to the kpi
-        dashboard_list = data.get("dashboard", []) + [0]
-        dashboard_list = list(set(dashboard_list))
-        mapper_obj_list = create_dashboard_kpi_mapper(dashboard_list, [new_kpi.id])
-
-        # TODO: Fix circular import error
-        from chaos_genius.jobs.anomaly_tasks import ready_rca_task
-
-        # run rca as soon as new KPI is added
-        rca_task = ready_rca_task(new_kpi.id)
-        if rca_task is None:
-            print(
-                f"Could not run RCA task since newly added KPI was not found: {new_kpi.id}"
-            )
-        else:
-            rca_task.apply_async()
+        if err_msg != "":
+            ret = {"error": err_msg, "status": "failure"}
+            if critical:
+                ret["is_critical"] = "true"
+            return jsonify(ret)
 
         return jsonify(
             {
-                "data": {"kpi_id": new_kpi.id},
-                "message": f"KPI {new_kpi.name} has been created successfully.",
+                "data": {"kpi_id": kpi.id},
+                "message": f"KPI {kpi.name} has been created successfully.",
                 "status": "success",
             }
         )

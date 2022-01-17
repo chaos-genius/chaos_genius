@@ -28,9 +28,9 @@ const Dashboardgraphcard = ({
         {/* Last Month/Last Week */}
         <div className="graph-custom-card">
           <label>
-            {monthWeek.value === 'wow'
+            {monthWeek.value === 'last_7_days'
               ? 'Last Week'
-              : monthWeek.value === 'mom'
+              : monthWeek.value === 'last_30_days'
               ? 'Last Month'
               : 'Last Day'}
           </label>
@@ -204,9 +204,9 @@ const Dashboardgraphcard = ({
         {/* This Month/This Week */}
         <div className="graph-custom-card">
           <label>
-            {monthWeek.value === 'wow'
+            {monthWeek.value === 'last_7_days'
               ? 'This Week'
-              : monthWeek.value === 'mom'
+              : monthWeek.value === 'last_30_days'
               ? 'This Month'
               : 'This Day'}
           </label>

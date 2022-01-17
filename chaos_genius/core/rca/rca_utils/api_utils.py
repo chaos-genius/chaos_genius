@@ -9,7 +9,7 @@ from chaos_genius.utils.datetime_helper import get_epoch_timestamp, get_rca_time
 logger = logging.getLogger(__name__)
 
 
-def kpi_aggregation(kpi_id, timeline="mom"):
+def kpi_aggregation(kpi_id, timeline="last_30_days"):
     """Get KPI aggregation data."""
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
@@ -31,9 +31,10 @@ def kpi_aggregation(kpi_id, timeline="mom"):
             final_data["analysis_date"] = get_analysis_date(kpi_id, end_date)
         else:
             final_data = {
-                "panel_metrics": {},
-                "line_chart_data": [],
-                "insights": [],
+                "group1_value": 0,
+                "group2_value": 0,
+                "difference": 0,
+                "perc_change": 0,
                 "analysis_date": "",
             }
     except Exception as err:  # noqa: B902
@@ -64,7 +65,7 @@ def kpi_line_data(kpi_id):
     return final_data
 
 
-def rca_analysis(kpi_id, timeline="mom", dimension=None):
+def rca_analysis(kpi_id, timeline="last_30_days", dimension=None):
     """Get RCA analysis data."""
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
@@ -100,7 +101,7 @@ def rca_analysis(kpi_id, timeline="mom", dimension=None):
     return final_data
 
 
-def rca_hierarchical_data(kpi_id, timeline="mom", dimension=None):
+def rca_hierarchical_data(kpi_id, timeline="last_30_days", dimension=None):
     """Get RCA hierarchical data."""
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)

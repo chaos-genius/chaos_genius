@@ -319,11 +319,12 @@ def queue_kpi_analytics(kpi_id: int, run_anomaly=True):
     else:
         rca_task.apply_async()
 
-        if anomaly_task is None:
-            logger.error(
-                "Not running anomaly since it is not configured or KPI "
-                "(%d) was not found.",
-                kpi_id,
-            )
-        else:
-            anomaly_task.apply_async()
+        if run_anomaly:
+            if anomaly_task is None:
+                logger.error(
+                    "Not running anomaly since it is not configured or KPI "
+                    "(%d) was not found.",
+                    kpi_id,
+                )
+            else:
+                anomaly_task.apply_async()

@@ -230,7 +230,7 @@ def get_timecuts_list():
         }
         message = "All timecuts fetched succesfully."
     except Exception as e:
-        status = 'failure'
+        status = "failure"
         message = str(e)
         logger.error(message)
     return jsonify({"data": ret, "message": message, "status": status})

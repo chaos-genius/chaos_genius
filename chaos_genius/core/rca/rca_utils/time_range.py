@@ -4,6 +4,8 @@ import calendar
 from datetime import date, timedelta
 from typing import Tuple
 
+from dateutil.relativedelta import relativedelta
+
 
 def get_dates_for_last_30_days(
     end_date: date,
@@ -122,5 +124,62 @@ def get_dates_for_week_to_date(
     base_end_date = base_start_date + timedelta(days=end_date_weekday)
 
     rca_start_date = end_date - timedelta(days=end_date_weekday)
+
+    return (base_start_date, base_end_date), (rca_start_date, end_date)
+
+
+def get_dates_for_quarter_on_quarter(
+    end_date: date,
+) -> Tuple[Tuple[date, date], Tuple[date, date]]:
+    """Returns dates for running RCA on the quarter on quarter.
+
+    The first tuple contains start of prev quarter, end of prev quarter.
+    The second tuple contains start of current quarter, t.
+    """
+    if end_date.month >= 10:
+        rca_start_month = 10
+    elif end_date.month >= 7:
+        rca_start_month = 7
+    elif end_date.month >= 4:
+        rca_start_month = 4
+    else:
+        rca_start_month = 1
+
+    rca_start_date = end_date.replace(month=rca_start_month, day=1)
+
+    base_start_date = rca_start_date - relativedelta(months=3)
+    base_end_date = rca_start_date - timedelta(days=1)
+
+    return (base_start_date, base_end_date), (rca_start_date, end_date)
+
+
+def get_dates_for_quarter_to_date(
+    end_date: date,
+) -> Tuple[Tuple[date, date], Tuple[date, date]]:
+    """Returns dates for running RCA on the quarter to date.
+
+    The first tuple contains start of prev quarter, date in prev quarter where date = t.
+    The second tuple contains start of current quarter, t.
+    """
+    if end_date.month >= 10:
+        rca_start_month = 10
+    elif end_date.month >= 7:
+        rca_start_month = 7
+    elif end_date.month >= 4:
+        rca_start_month = 4
+    else:
+        rca_start_month = 1
+
+    rca_start_date = end_date.replace(month=rca_start_month, day=1)
+
+    base_start_date = rca_start_date - relativedelta(months=3)
+    base_end_date = base_start_date + (end_date - rca_start_date)
+
+    year = base_start_date.year + ((base_start_date.month + 3) // 12)
+    month = (base_start_date.month + 3) % 12
+    base_end_date = min(
+        base_end_date,
+        date(year, month, 1) - timedelta(days=1),
+    )
 
     return (base_start_date, base_end_date), (rca_start_date, end_date)

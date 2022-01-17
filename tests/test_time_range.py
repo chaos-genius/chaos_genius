@@ -190,3 +190,68 @@ def test_week_to_date():
         (base_start_date, base_end_date),
         (rca_start_date, rca_end_date),
     )
+
+
+def test_quarter_on_quarter():
+    """Test quarter on quarter."""
+    func = TIME_RANGES_ALL["quarter_on_quarter"]["function"]
+
+    base_start_date = date(2020, 1, 1)
+    base_end_date = date(2020, 3, 31)
+    rca_start_date = date(2020, 4, 1)
+    rca_end_date = date(2020, 4, 12)
+
+    output = func(rca_end_date)
+    assert output == (
+        (base_start_date, base_end_date),
+        (rca_start_date, rca_end_date),
+    )
+
+    base_start_date = date(2020, 10, 1)
+    base_end_date = date(2020, 12, 31)
+    rca_start_date = date(2021, 1, 1)
+    rca_end_date = date(2021, 2, 12)
+
+    output = func(rca_end_date)
+    assert output == (
+        (base_start_date, base_end_date),
+        (rca_start_date, rca_end_date),
+    )
+
+
+def test_quarter_to_date():
+    """Test quarter to date."""
+    func = TIME_RANGES_ALL["quarter_to_date"]["function"]
+
+    base_start_date = date(2020, 1, 1)
+    base_end_date = date(2020, 1, 12)
+    rca_start_date = date(2020, 4, 1)
+    rca_end_date = date(2020, 4, 12)
+
+    output = func(rca_end_date)
+    assert output == (
+        (base_start_date, base_end_date),
+        (rca_start_date, rca_end_date),
+    )
+
+    base_start_date = date(2020, 10, 1)
+    base_end_date = date(2020, 11, 12)
+    rca_start_date = date(2021, 1, 1)
+    rca_end_date = date(2021, 2, 12)
+
+    output = func(rca_end_date)
+    assert output == (
+        (base_start_date, base_end_date),
+        (rca_start_date, rca_end_date),
+    )
+
+    base_start_date = date(2021, 1, 1)
+    base_end_date = date(2021, 3, 31)
+    rca_start_date = date(2021, 4, 1)
+    rca_end_date = date(2021, 6, 30)
+
+    output = func(rca_end_date)
+    assert output == (
+        (base_start_date, base_end_date),
+        (rca_start_date, rca_end_date),
+    )

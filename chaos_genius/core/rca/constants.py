@@ -8,6 +8,8 @@ from chaos_genius.core.rca.rca_utils.time_range import (
     get_dates_for_previous_day,
     get_dates_for_week_on_week,
     get_dates_for_week_to_date,
+    get_dates_for_quarter_on_quarter,
+    get_dates_for_quarter_to_date,
 )
 
 LINE_DATA_TIMESTAMP_FORMAT = "%Y/%m/%d %H:%M:%S"
@@ -56,6 +58,18 @@ TIME_RANGES_ALL = {
         "display_name": "WTD",
         "last_period_name": "WTD Previous week",
         "current_period_name": "WTD",
+    },
+    "quarter_on_quarter": {
+        "function": get_dates_for_quarter_on_quarter,
+        "display_name": "Quarter on quarter",
+        "last_period_name": "Previous quarter",
+        "current_period_name": "QTD",
+    },
+    "quarter_to_date": {
+        "function": get_dates_for_quarter_to_date,
+        "display_name": "QTD",
+        "last_period_name": "QTD Previous quarter",
+        "current_period_name": "QTD",
     },
 }
 

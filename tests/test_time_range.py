@@ -115,6 +115,28 @@ def test_month_to_date():
         (rca_start_date, rca_end_date),
     )
 
+    base_start_date = date(2021, 2, 1)
+    base_end_date = date(2021, 2, 28)
+    rca_start_date = date(2021, 3, 1)
+    rca_end_date = date(2021, 3, 31)
+
+    output = func(rca_end_date)
+    assert output == (
+        (base_start_date, base_end_date),
+        (rca_start_date, rca_end_date),
+    )
+
+    base_start_date = date(2021, 4, 1)
+    base_end_date = date(2021, 4, 30)
+    rca_start_date = date(2021, 5, 1)
+    rca_end_date = date(2021, 5, 31)
+
+    output = func(rca_end_date)
+    assert output == (
+        (base_start_date, base_end_date),
+        (rca_start_date, rca_end_date),
+    )
+
 
 def test_week_on_week():
     """Test week on week."""

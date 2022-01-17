@@ -1,5 +1,6 @@
 """Functions to get dates for various time ranges in RCA."""
 
+import calendar
 from datetime import date, timedelta
 from typing import Tuple
 
@@ -74,8 +75,13 @@ def get_dates_for_month_to_date(
     try:
         base_end_date = base_start_date.replace(day=end_date.day)
     except ValueError as e:
-        if end_date.day == 29 and base_start_date.month == 2:
-            base_end_date = base_start_date.replace(day=28)
+        if base_start_date.month == 2 and end_date.day >= 29:
+            if calendar.isleap(base_start_date.year):
+                base_end_date = base_start_date.replace(day=29)
+            else:
+                base_end_date = base_start_date.replace(day=28)
+        elif end_date.day == 31 and base_start_date.month in [4, 6, 9, 11]:
+            base_end_date = base_start_date.replace(day=30)
         else:
             raise e
 

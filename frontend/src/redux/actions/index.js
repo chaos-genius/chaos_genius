@@ -33,6 +33,7 @@ import {
 import { getOnboardingStatus, getHomeKpi } from './Onboarding';
 import { getDashboardLinechart } from './LineChart';
 import { getDashboardSidebar } from './Sidebarlist';
+import { getVersionSetting } from './VersionControl';
 import {
   getAllAlertEmail,
   getChannelStatus,
@@ -129,5 +130,6 @@ export {
   onboardOrganisationUpdate,
   getDashboardConfig,
   getGlobalSetting,
-  kpiAlertDeleteById
+  kpiAlertDeleteById,
+  getVersionSetting
 };

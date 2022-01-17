@@ -91,4 +91,12 @@
       }
     }
   }
+  .common-watermark {
+    text-align: center;
+    span {
+      color: #bdbdbd;
+      font-size: 15px;
+      opacity: 0.7;
+    }
+  }
 }

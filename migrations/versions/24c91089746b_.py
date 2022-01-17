@@ -40,8 +40,8 @@ def upgrade():
     for row in df.to_dict(orient="records"):
         agg = row["aggregation"]
 
-        g1_v = row["data"]["panel_metrics"]["grp1_metrics"][agg]
-        g2_v = row["data"]["panel_metrics"]["grp2_metrics"][agg]
+        g1_v = row["data"]["panel_metrics"]["grp1_metrics"].get(agg, 0)
+        g2_v = row["data"]["panel_metrics"]["grp2_metrics"].get(agg, 0)
         diff = round_number(g2_v - g1_v)
         perc_diff = round_number((diff / g1_v) * 100 if g1_v else 0)
 

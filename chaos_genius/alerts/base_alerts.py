@@ -23,7 +23,6 @@ from chaos_genius.alerts.anomaly_alert_config import (
     ANOMALY_ALERT_COLUMN_NAMES,
     ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS
 )
-from chaos_genius.alerts.triggered_alert_helpers import set_alert_metadata
 from chaos_genius.core.rca.rca_utils.string_helpers import convert_query_string_to_user_string
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from tabulate import tabulate
@@ -401,24 +400,26 @@ class AnomalyAlertController:
         
         if alert_data is None:
             return outcome
-
-        triggered_alert = TriggeredAlerts(
-                            alert_conf_id=self.alert_info["id"],
-                            alert_type="Anomaly Alert",
-                            is_sent=outcome,
-                            created_at=datetime.datetime.now()       
-                        )
+        
         alert_metadata = {
                             "alert_frequency": self.alert_info["alert_frequency"],
                             "alert_data": alert_data,
-                            "end_date": self.anomaly_end_date,
+                            "end_date": str(self.anomaly_end_date),
                             "severity_cutoff_score": self.alert_info["severity_cutoff_score"],
                             "kpi": self.alert_info["kpi"],
                             "alert_channel": self.alert_info["alert_channel"],
                             "alert_channel_conf": self.alert_info["alert_channel_conf"]
                         }    
 
-        set_alert_metadata(triggered_alert, alert_metadata)    
+        triggered_alert = TriggeredAlerts(
+                            alert_conf_id=self.alert_info["id"],
+                            alert_type="KPI Alert",
+                            is_sent=outcome,
+                            created_at=datetime.datetime.now(),
+                            alert_metadata=alert_metadata       
+                        )
+
+        triggered_alert.update(commit=True)
         return outcome
 
     def get_overall_subdim_data(self, anomaly_data):
@@ -447,6 +448,8 @@ class AnomalyAlertController:
             anomaly_point["Expected Value"] = f"{lower} - {upper}"
             for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
                 anomaly_point[value] = anomaly_point[key]
+            anomaly_point["Time of Occurrence"] = str(anomaly_point["Time of Occurrence"])
+            anomaly_point["data_datetime"] = str(anomaly_point["data_datetime"])
 
     def send_alert_email(self, anomaly_data):
 

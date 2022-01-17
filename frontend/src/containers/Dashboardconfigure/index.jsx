@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 
 import { useHistory } from 'react-router-dom';
 
+import Tooltip from 'react-tooltip-lite';
+
 import Select from 'react-select';
 
 import Plus from '../../assets/images/plus.svg';
@@ -133,13 +135,27 @@ const Dashboardconfigure = () => {
           </div>
 
           <div className="option-button">
-            <button
-              onClick={() => history.push('/dashboard/add')}
-              className="btn green-variant-button"
-              disabled={!limited?.is_ee}>
-              <img src={Plus} alt="Add" />
-              <span>New Dashboard</span>
-            </button>
+            {!limited?.is_ee ? (
+              <Tooltip
+                className="tooltip-name"
+                direction="left"
+                content={<span>Only Available in Enterprise Edition</span>}>
+                <button
+                  onClick={() => history.push('/dashboard/add')}
+                  className="btn green-variant-button"
+                  disabled={!limited?.is_ee}>
+                  <img src={Plus} alt="Add" />
+                  <span>New Dashboard</span>
+                </button>
+              </Tooltip>
+            ) : (
+              <button
+                onClick={() => history.push('/dashboard/add')}
+                className="btn green-variant-button">
+                <img src={Plus} alt="Add" />
+                <span>New Dashboard</span>
+              </button>
+            )}
           </div>
         </div>{' '}
         {dashboardList && dashboardList.length !== 0 ? (

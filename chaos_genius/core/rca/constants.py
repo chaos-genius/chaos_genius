@@ -31,7 +31,7 @@ TIME_RANGES_ALL = {
         "function": get_dates_for_previous_day,
         "display_name": "Previous day",
         "last_period_name": "Previous day",
-        "current_period_name": "Previous day",
+        "current_period_name": "This day",
     },
     "month_on_month": {
         "function": get_dates_for_month_on_month,

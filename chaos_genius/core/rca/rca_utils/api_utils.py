@@ -31,9 +31,10 @@ def kpi_aggregation(kpi_id, timeline="last_30_days"):
             final_data["analysis_date"] = get_analysis_date(kpi_id, end_date)
         else:
             final_data = {
-                "panel_metrics": {},
-                "line_chart_data": [],
-                "insights": [],
+                "group1_value": 0,
+                "group2_value": 0,
+                "difference": 0,
+                "perc_change": 0,
                 "analysis_date": "",
             }
     except Exception as err:  # noqa: B902

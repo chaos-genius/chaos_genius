@@ -39,7 +39,7 @@ def add_kpi(
         A tuple of (newly added KPI, error message - empty if success, boolean
         indicating whether error was critical)
     """
-    data["dimensions"] = [] if data.get("dimensions") is None else data["dimensions"]
+    data["dimensions"] = data.get("dimensions", [])
 
     data["kpi_query"] = _kpi_query_strip_trailing_semicolon(
         (data.get("kpi_query", "") or "")

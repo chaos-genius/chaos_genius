@@ -214,6 +214,28 @@ def get_all_kpis():
     return jsonify({"data": ret, "message": message, "status": status})
 
 
+@blueprint.route("/get-timecuts-list", methods=["GET"])
+def get_timecuts_list():
+    """Returns all active timecuts."""
+
+    status, message = "success", ""
+    ret = {}
+    try:
+        ret = {
+            time_cut: {
+                "display_name": details["display_name"],
+                "last_period_name": details["last_period_name"],
+                "current_period_name": details["current_period_name"],
+            } for time_cut, details in TIME_RANGES_ACTIVE.items()
+        }
+        message = "All timecuts fetched succesfully."
+    except Exception as e:
+        status = 'failure'
+        message = str(e)
+        logger.error(message)
+    return jsonify({"data": ret, "message": message, "status": status})
+
+
 @blueprint.route("/<int:kpi_id>/disable", methods=["GET"])
 def disable_kpi(kpi_id):
     status, message = "", ""

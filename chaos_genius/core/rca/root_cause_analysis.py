@@ -467,60 +467,29 @@ class RootCauseAnalysis:
 
         return best_subgroups
 
-    def get_panel_metrics(self) -> "OrderedDict[str, List[float]]":
+    def get_panel_metrics(self) -> Dict[str, float]:
         """Return panel metrics for the KPI.
 
-        :return: ordered dictionary with metrics
-        :rtype: OrderedDict[str, List[float]]
+        :return: Dictionary with metrics
+        :rtype: Dict[str, float]
         """
-        panel_metrics = []
-        for data in [self._grp1_df, self._grp2_df]:
-            len_data = len(data[self._metric])
-            out_dict = OrderedDict()
-            try:
-                # numerical data
-                if not self._metric_is_cat:
-                    out_dict = OrderedDict(
-                        {
-                            "mean": data[self._metric].mean().item(),
-                            "min": data[self._metric].min().item(),
-                            "median": data[self._metric].median().item(),
-                            "max": data[self._metric].max().item(),
-                            "sum": data[self._metric].sum().item(),
-                            "count": len_data,
-                            "null_count": len_data - data[self._metric].count().item(),
-                        }
-                    )
-                # categorical data
-                else:
-                    out_dict = OrderedDict(
-                        {
-                            "count": len_data,
-                            "null_count": len_data - data[self._metric].count().item(),
-                        }
-                    )
-                out_dict.move_to_end(self._agg, last=False)
-            except Exception:  # noqa: B902
-                pass
-            panel_metrics.append(out_dict)
 
-        d1_metrics, d2_metrics = panel_metrics
+        g1_agg = self._grp1_df[self._metric].agg(self._agg)
+        g2_agg = self._grp2_df[self._metric].agg(self._agg)
+        impact = g2_agg - g1_agg
+        perc_diff = (impact / g1_agg) * 100 if g1_agg != 0 else 0
 
         panel_metrics = {
-            "grp1_metrics": {k: round_number(v) for k, v in d1_metrics.items()},
-            "grp2_metrics": {k: round_number(v) for k, v in d2_metrics.items()},
-            "impact": OrderedDict(),
+            "group1_value": round_number(g1_agg),
+            "group2_value": round_number(g2_agg),
+            "difference": round_number(impact),
+            "perc_change": round_number(perc_diff),
         }
 
-        for metric in panel_metrics["grp1_metrics"].keys():
-            metric_impact = d2_metrics[metric] - d1_metrics[metric]
-            panel_metrics["impact"][metric] = round_number(metric_impact)
-
         # Check for None or NaN values in output
-        for overall_key, value_dict in panel_metrics.items():
-            for key, value in value_dict.items():
-                if value is None or pd.isna(value):
-                    raise ValueError(f"{key} in {overall_key} is {value} (either None or NaN)")
+        for k, v in panel_metrics.items():
+            if v is None or pd.isna(v):
+                raise ValueError(f"{k} with value: {v} is either None or NaN")
 
         return panel_metrics
 

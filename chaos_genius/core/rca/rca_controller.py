@@ -172,9 +172,8 @@ class RootCauseAnalysisController:
         :return: dictionary with aggregations for KPI
         :rtype: dict
         """
-        panel_metrics = rca.get_panel_metrics()
 
-        return {"panel_metrics": panel_metrics, "line_chart_data": [], "insights": []}
+        return rca.get_panel_metrics()
 
     def _process_rca_output(self, impact_table: dict) -> dict:
         """Process output of RCA for UI friendly output.

@@ -189,23 +189,16 @@ def get_all_kpis():
         metrics = ["name", "metric", "id"]
         for kpi in results:
             info = {key: getattr(kpi, key) for key in metrics}
-            aggregation_type = kpi.aggregation
             aggregate_data = kpi_aggregation(kpi.id, timeline)
-            info["prev"] = round_number(
-                aggregate_data.get("panel_metrics", {}).get("grp1_metrics", {}).get(aggregation_type, 0)
-            )
-            info["current"] = round_number(
-                aggregate_data.get("panel_metrics", {}).get("grp2_metrics", {}).get(aggregation_type, 0)
-            )
-            info["change"] = round_number(info["current"] - info["prev"])
+            info["prev"] = round_number(aggregate_data.get("group1_value", 0))
+            info["current"] = round_number(aggregate_data.get("group2_value", 0))
+            info["change"] = round_number(aggregate_data.get("difference", 0))
+            info["percentage_change"] = round_number(aggregate_data.get("perc_change", 0))
 
             info["display_value_prev"] = TIME_RANGES_ACTIVE[timeline]["last_period_name"]
             info["display_value_current"] = TIME_RANGES_ACTIVE[timeline]["current_period_name"]
             info["anomaly_count"] = get_anomaly_count(kpi.id, timeline)
             info["graph_data"] = kpi_line_data(kpi.id)
-            info["percentage_change"] = find_percentage_change(
-                info["current"], info["prev"]
-            )
             ret.append(info)
     except Exception as e:
         status = "failure"

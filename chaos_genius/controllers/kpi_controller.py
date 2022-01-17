@@ -1,7 +1,7 @@
 import logging
 import typing
 from datetime import date, datetime, timedelta
-from typing import Optional, Union
+from typing import Optional, Union, Iterator
 
 from flask import current_app  # noqa: F401
 
@@ -142,3 +142,19 @@ def run_rca_for_kpi(kpi_id: int, end_date: date = None, task_id: Optional[int] =
         checkpoint_success(task_id, kpi_id, "DeepDrills", "DeepDrills complete")
 
     return True
+
+
+def get_anomaly_kpis() -> Iterator[Kpi]:
+    """Returns a list of all KPIs for which anomaly needs to run."""
+    kpis = Kpi.query.distinct("kpi_id").filter(
+        (Kpi.run_anomaly == True) & (Kpi.active == True)
+    )
+    return kpis
+
+
+def get_active_kpis() -> Iterator[Kpi]:
+    """Returns a list of all active KPIs."""
+    kpis = Kpi.query.distinct("kpi_id").filter(
+        (Kpi.active == True) & (Kpi.is_static == False)
+    )
+    return kpis

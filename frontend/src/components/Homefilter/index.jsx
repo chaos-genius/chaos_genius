@@ -35,11 +35,13 @@ const Homefilter = ({ data, setDashboard, dashboard }) => {
       if (type === 'alpha') {
         return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
       } else if (type === 'recent') {
-        return formatDateTime(b.created_at) - formatDateTime(a.created_at);
+        return (
+          formatDateTime(b.last_modified) - formatDateTime(a.last_modified)
+        );
       } else if (type === 'kpi') {
-        return a.kpis.length < b.kpis.length
+        return a.kpis.length > b.kpis.length
           ? -1
-          : a.kpis.length > b.kpis.length
+          : a.kpis.length < b.kpis.length
           ? 1
           : 0;
       } else {

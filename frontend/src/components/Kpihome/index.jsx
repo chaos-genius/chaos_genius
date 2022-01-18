@@ -22,7 +22,7 @@ import Homefilter from '../Homefilter';
 
 import { formatDateTime, getTimezone } from '../../utils/date-helper';
 import { HRNumbers } from '../../utils/Formatting/Numbers/humanReadableNumberFormatter';
-import { getDashboard } from '../../redux/actions';
+import { getDashboard, getTimeCuts } from '../../redux/actions';
 import { CustomTooltip } from '../../utils/tooltip-helper';
 
 import store from '../../redux/store';
@@ -38,21 +38,6 @@ Highcharts.setOptions({
   }
 });
 
-const data = [
-  {
-    value: 'last_30_days',
-    label: 'Current Month on Last Month'
-  },
-  {
-    value: 'last_7_days',
-    label: 'Current Week on Last Week'
-  },
-  {
-    value: 'previous_day',
-    label: 'Current Day on Last Day'
-  }
-];
-
 const Kpihome = () => {
   const dispatch = useDispatch();
 
@@ -61,6 +46,7 @@ const Kpihome = () => {
   const { homeKpiData, homeKpiLoading } = useSelector(
     (state) => state.onboarding
   );
+  const { timeCutsData } = useSelector((state) => state.TimeCuts);
 
   const { dashboardListLoading, dashboardList } = useSelector((state) => {
     return state.DashboardHome;
@@ -69,15 +55,14 @@ const Kpihome = () => {
   const [search, setSearch] = useState('');
   const [kpiHomeData, setKpiHomeData] = useState(homeKpiData);
   const [dashboard, setDashboard] = useState(dashboardList[0]?.id);
+  const [timeCutOptions, setTimeCutOptions] = useState([]);
 
-  const [timeline, setTimeLine] = useState({
-    value: 'last_30_days',
-    label: 'Current Month on Last Month'
-  });
+  const [timeline, setTimeLine] = useState({});
 
   useEffect(() => {
     store.dispatch(RESET_ACTION);
     dispatch(getDashboard());
+    dispatch(getTimeCuts());
   }, [dispatch]);
 
   useEffect(() => {
@@ -87,12 +72,40 @@ const Kpihome = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dashboardList]);
 
+  const getAllTimeCutOptions = (data) => {
+    let res = [];
+    if (data && Object.keys(data).length) {
+      for (const dataKey in data) {
+        res.push({
+          value: `${dataKey}`,
+          label: data[dataKey]?.display_name,
+          grp1_name: data[dataKey]?.current_period_name,
+          grp2_name: data[dataKey]?.last_period_name
+        });
+      }
+    }
+    setTimeCutOptions(res);
+  };
+
+  useEffect(() => {
+    if (timeCutsData && Object.keys(timeCutsData).length) {
+      setTimeLine({
+        label: timeCutsData[Object.keys(timeCutsData)[0]]?.display_name,
+        value: `${Object.keys(timeCutsData)[0]}`,
+        grp1_name:
+          timeCutsData[Object.keys(timeCutsData)[0]]?.current_period_name,
+        grp2_name: timeCutsData[Object.keys(timeCutsData)[0]]?.last_period_name
+      });
+      getAllTimeCutOptions(timeCutsData);
+    }
+  }, [timeCutsData]);
+
   useEffect(() => {
     if (![null, undefined, ''].includes(dashboard)) {
       getHomeList();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dashboard, timeline]);
+  }, [dashboard, timeline.value]);
 
   const getHomeList = () => {
     store.dispatch(RESET_ACTION);
@@ -228,7 +241,7 @@ const Kpihome = () => {
               </span>
             </div>
             <Select
-              options={data}
+              options={timeCutOptions}
               classNamePrefix="selectcategory"
               placeholder="Current week on last week"
               value={timeline}

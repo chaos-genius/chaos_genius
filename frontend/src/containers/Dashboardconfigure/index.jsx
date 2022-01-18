@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
+
+import Tooltip from 'react-tooltip-lite';
 
 import Select from 'react-select';
 
@@ -43,6 +45,7 @@ const sort = [
 
 const Dashboardconfigure = () => {
   const dispatch = useDispatch();
+  const history = useHistory();
   const limited = getLocalStorage('GlobalSetting');
   const [dashboardData, setDashboardData] = useState([]);
   const [data, setData] = useState(false);
@@ -130,14 +133,30 @@ const Dashboardconfigure = () => {
           <div className="heading-title">
             <h3>Dashboard</h3>
           </div>
-          {limited?.is_ee && (
-            <div className="option-button">
-              <Link to="/dashboard/add" className="btn green-variant-button">
+
+          <div className="option-button">
+            {!limited?.is_ee ? (
+              <Tooltip
+                className="tooltip-name"
+                direction="left"
+                content={<span>Only Available in Enterprise Edition</span>}>
+                <button
+                  onClick={() => history.push('/dashboard/add')}
+                  className="btn green-variant-button"
+                  disabled={!limited?.is_ee}>
+                  <img src={Plus} alt="Add" />
+                  <span>New Dashboard</span>
+                </button>
+              </Tooltip>
+            ) : (
+              <button
+                onClick={() => history.push('/dashboard/add')}
+                className="btn green-variant-button">
                 <img src={Plus} alt="Add" />
                 <span>New Dashboard</span>
-              </Link>
-            </div>
-          )}
+              </button>
+            )}
+          </div>
         </div>{' '}
         {dashboardList && dashboardList.length !== 0 ? (
           <>

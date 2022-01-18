@@ -50,21 +50,6 @@ Highcharts.setOptions({
   }
 });
 
-const data = [
-  {
-    value: 'mom',
-    label: 'Current Month on Last Month'
-  },
-  {
-    value: 'wow',
-    label: 'Current Week on Last Week'
-  },
-  {
-    value: 'dod',
-    label: 'Current Day on Last Day'
-  }
-];
-
 const multidimensional = [
   {
     value: 'singledimension',
@@ -83,14 +68,14 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
   const [collapse, setCollapse] = useState(true);
   const [singleDimensionData, SetSingleDimensionData] = useState(0);
 
-  const [monthWeek, setMonthWeek] = useState({
-    value: 'mom',
-    label: 'Current Month on Last Month'
-  });
+  const [monthWeek, setMonthWeek] = useState({});
+  const [timeCutOptions, setTimeCutOptions] = useState([]);
   const [dimension, setDimension] = useState({
     value: 'singledimension',
     label: 'Single Dimension'
   });
+
+  const { timeCutsData } = useSelector((state) => state.TimeCuts);
 
   const { aggregationData, aggregationLoading } = useSelector(
     (state) => state.aggregation
@@ -121,6 +106,34 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
   const getAllLinechart = () => {
     dispatch(getDashboardLinechart(kpi, { timeline: monthWeek.value }));
   };
+
+  const getAllTimeCutOptions = (data) => {
+    let res = [];
+    if (data && Object.keys(data).length) {
+      for (const dataKey in data) {
+        res.push({
+          value: `${dataKey}`,
+          label: data[dataKey]?.display_name,
+          grp1_name: data[dataKey]?.current_period_name,
+          grp2_name: data[dataKey]?.last_period_name
+        });
+      }
+    }
+    setTimeCutOptions(res);
+  };
+
+  useEffect(() => {
+    if (timeCutsData && Object.keys(timeCutsData).length) {
+      setMonthWeek({
+        label: timeCutsData[Object.keys(timeCutsData)[0]]?.display_name,
+        value: `${Object.keys(timeCutsData)[0]}`,
+        grp1_name:
+          timeCutsData[Object.keys(timeCutsData)[0]]?.current_period_name,
+        grp2_name: timeCutsData[Object.keys(timeCutsData)[0]]?.last_period_name
+      });
+      getAllTimeCutOptions(timeCutsData);
+    }
+  }, [timeCutsData]);
 
   useEffect(() => {
     if (kpi !== undefined) {
@@ -294,9 +307,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
           height: '308',
           width: '850'
         },
-        title: {
-          text: kpiName
-        },
+        title: false,
         time: {
           timezone: getTimezone()
         },
@@ -362,7 +373,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                 </div>
                 <Select
                   value={monthWeek}
-                  options={data}
+                  options={timeCutOptions}
                   classNamePrefix="selectcategory"
                   placeholder="select"
                   isSearchable={false}
@@ -370,6 +381,9 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                     setMonthWeek(e);
                   }}
                 />
+              </div>
+              <div className="dashboard-title-container">
+                <span>{kpiName}</span>
               </div>
               <div className="dashboard-aggregate-section">
                 <div className="aggregate-card-container">

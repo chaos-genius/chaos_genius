@@ -53,3 +53,5 @@ export const DASHBOARD_UPDATE_URL = `${BASE_URL}/api/dashboard/edit`;
 export const ORGANIZATION_UPDATE_URL = `${BASE_URL}/api/config/update`;
 export const GLOBAL_SETTING_URL = `${BASE_URL}/api/config/global-config`;
 export const TASK_MANAGER_API_STATUS_URL = `${BASE_URL}/api/status`;
+
+export const TIME_CUTS_URL = `${BASE_URL}/api/kpi/get-timecuts-list`;

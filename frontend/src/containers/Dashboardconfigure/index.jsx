@@ -65,9 +65,9 @@ const Dashboardconfigure = () => {
     if (dashboardList) {
       setDashboardData(
         dashboardList.sort(function (a, b) {
-          return a.kpis.length < b.kpis.length
+          return a.kpis.length > b.kpis.length
             ? -1
-            : a.kpis.length > b.kpis.length
+            : a.kpis.length < b.kpis.length
             ? 1
             : 0;
         })
@@ -105,9 +105,9 @@ const Dashboardconfigure = () => {
           formatDateTime(b.last_modified) - formatDateTime(a.last_modified)
         );
       } else if (type.value === 'kpi') {
-        return a.kpis.length < b.kpis.length
+        return a.kpis.length > b.kpis.length
           ? -1
-          : a.kpis.length > b.kpis.length
+          : a.kpis.length < b.kpis.length
           ? 1
           : 0;
       } else {

@@ -1150,6 +1150,10 @@ a:hover {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  .empty-dashboard-btn {
+    padding: 12px 24px;
+    margin-top: 40px;
+  }
   &.deepdrill-drilldown-empty {
     height: 260px;
     .empty-state-image {

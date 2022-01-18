@@ -59,6 +59,14 @@
           .delete-item {
             border-top: none;
           }
+          .menu-button {
+            border: none;
+            background-color: transparent;
+            border: opx solid white;
+          }
+          .disabled {
+            cursor: not-allowed;
+          }
         }
       }
     }

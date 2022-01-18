@@ -37,4 +37,9 @@
       width: 90%;
     }
   }
+  .aggregate-card:last-child {
+    .content-container {
+      width: 100% !important;
+    }
+  }
 }

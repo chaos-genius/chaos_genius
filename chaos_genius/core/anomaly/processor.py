@@ -125,13 +125,14 @@ class ProcessAnomalyDetection:
                 logger.warning(f"Insufficient slack for {self.series}-{self.subgroup}")
 
         else:
-            while self.last_date <= input_last_date:
-                curr_period = self.last_date - input_first_date
+            date_to_predict = self.last_date + datetime.timedelta(**FREQUENCY_DELTA[self.freq])
+            while date_to_predict <= input_last_date:
+                curr_period = date_to_predict - input_first_date
 
                 if curr_period >= max_period:
                     df = input_data[
-                        (input_data["dt"] >= self.last_date - max_period)
-                        & (input_data["dt"] <= self.last_date)
+                        (input_data["dt"] >= date_to_predict - max_period)
+                        & (input_data["dt"] <= date_to_predict)
                     ]
 
                     prediction = model.predict(
@@ -142,7 +143,7 @@ class ProcessAnomalyDetection:
 
                     pred_series = pred_series.append(to_append, ignore_index=True)
 
-                self.last_date += datetime.timedelta(**FREQUENCY_DELTA[self.freq])
+                date_to_predict += datetime.timedelta(**FREQUENCY_DELTA[self.freq])
 
         return pred_series
 

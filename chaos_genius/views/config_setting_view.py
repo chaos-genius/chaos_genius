@@ -156,7 +156,7 @@ def test_alert():
         kpi_info = Kpi.get_by_id(data["kpiId"]).as_dict
         connection_info = DataSource.get_by_id(kpi_info["data_source"]).as_dict
         kpi_aggregation_stats = kpi_aggregation(
-            kpi_info, connection_info, "wow"
+            kpi_info, connection_info, "last_7_days"
         )
         overall_stats = {
             "current": kpi_aggregation_stats["panel_metrics"]["grp2_metrics"],

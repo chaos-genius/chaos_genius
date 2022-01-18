@@ -40,15 +40,15 @@ Highcharts.setOptions({
 
 const data = [
   {
-    value: 'mom',
+    value: 'last_30_days',
     label: 'Current Month on Last Month'
   },
   {
-    value: 'wow',
+    value: 'last_7_days',
     label: 'Current Week on Last Week'
   },
   {
-    value: 'dod',
+    value: 'previous_day',
     label: 'Current Day on Last Day'
   }
 ];
@@ -71,7 +71,7 @@ const Kpihome = () => {
   const [dashboard, setDashboard] = useState(dashboardList[0]?.id);
 
   const [timeline, setTimeLine] = useState({
-    value: 'mom',
+    value: 'last_30_days',
     label: 'Current Month on Last Month'
   });
 
@@ -259,9 +259,9 @@ const Kpihome = () => {
                         </div>
                         <div className="kpi-content kpi-current">
                           <label>
-                            {timeline.value === 'wow'
+                            {timeline.value === 'last_7_days'
                               ? 'This Week'
-                              : timeline.value === 'mom'
+                              : timeline.value === 'last_30_days'
                               ? 'This Month'
                               : 'This Day'}
                           </label>
@@ -269,9 +269,9 @@ const Kpihome = () => {
                         </div>
                         <div className="kpi-content">
                           <label>
-                            {timeline.value === 'wow'
+                            {timeline.value === 'last_7_days'
                               ? 'Previous Week'
-                              : timeline.value === 'mom'
+                              : timeline.value === 'last_30_days'
                               ? 'Previous Month'
                               : 'Previous Day'}
                           </label>

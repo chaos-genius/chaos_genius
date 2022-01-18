@@ -39,7 +39,7 @@ from chaos_genius.core.rca.rca_utils.api_utils import (
     kpi_line_data,
     kpi_aggregation,
 )
-from chaos_genius.core.rca.constants import TIME_DICT
+from chaos_genius.core.rca.constants import TIME_RANGES_ACTIVE
 
 blueprint = Blueprint("api_kpi", __name__)
 logger = logging.getLogger(__name__)
@@ -169,7 +169,7 @@ def get_all_kpis():
     """returning all kpis"""
 
     status, message = "success", ""
-    timeline = request.args.get("timeline", "wow")
+    timeline = request.args.get("timeline", "last_7_days")
     dashboard_id = request.args.get("dashboard_id")
 
     try:
@@ -189,28 +189,44 @@ def get_all_kpis():
         metrics = ["name", "metric", "id"]
         for kpi in results:
             info = {key: getattr(kpi, key) for key in metrics}
-            aggregation_type = kpi.aggregation
             aggregate_data = kpi_aggregation(kpi.id, timeline)
-            info["prev"] = round_number(
-                aggregate_data.get("panel_metrics", {}).get("grp1_metrics", {}).get(aggregation_type, 0)
-            )
-            info["current"] = round_number(
-                aggregate_data.get("panel_metrics", {}).get("grp2_metrics", {}).get(aggregation_type, 0)
-            )
-            info["change"] = round_number(info["current"] - info["prev"])
+            info["prev"] = round_number(aggregate_data.get("group1_value", 0))
+            info["current"] = round_number(aggregate_data.get("group2_value", 0))
+            info["change"] = round_number(aggregate_data.get("difference", 0))
+            info["percentage_change"] = round_number(aggregate_data.get("perc_change", 0))
 
-            info["timeline"] = TIME_DICT[timeline]["expansion"]
+            info["display_value_prev"] = TIME_RANGES_ACTIVE[timeline]["last_period_name"]
+            info["display_value_current"] = TIME_RANGES_ACTIVE[timeline]["current_period_name"]
             info["anomaly_count"] = get_anomaly_count(kpi.id, timeline)
             info["graph_data"] = kpi_line_data(kpi.id)
-            info["percentage_change"] = find_percentage_change(
-                info["current"], info["prev"]
-            )
             ret.append(info)
     except Exception as e:
         status = "failure"
         message = str(e)
         logger.error(message)
 
+    return jsonify({"data": ret, "message": message, "status": status})
+
+
+@blueprint.route("/get-timecuts-list", methods=["GET"])
+def get_timecuts_list():
+    """Returns all active timecuts."""
+
+    status, message = "success", ""
+    ret = {}
+    try:
+        ret = {
+            time_cut: {
+                "display_name": details["display_name"],
+                "last_period_name": details["last_period_name"],
+                "current_period_name": details["current_period_name"],
+            } for time_cut, details in TIME_RANGES_ACTIVE.items()
+        }
+        message = "All timecuts fetched succesfully."
+    except Exception as e:
+        status = "failure"
+        message = str(e)
+        logger.error(message)
     return jsonify({"data": ret, "message": message, "status": status})
 
 
@@ -348,14 +364,14 @@ def find_percentage_change(curr_val, prev_val):
 def get_anomaly_count(kpi_id, timeline):
 
     curr_date = datetime.now()
-    lower_time_dt = curr_date - TIME_DICT[timeline]["time_delta"]
+    (_, _), (sd, _) = TIME_RANGES_ACTIVE[timeline]["function"](curr_date)
 
     # TODO: Add the series type filter
     anomaly_data = AnomalyDataOutput.query.filter(
         AnomalyDataOutput.kpi_id == kpi_id,
         AnomalyDataOutput.anomaly_type == "overall",
         AnomalyDataOutput.is_anomaly == 1,
-        AnomalyDataOutput.data_datetime >= lower_time_dt,
+        AnomalyDataOutput.data_datetime >= sd,
     ).all()
 
     return len(anomaly_data)

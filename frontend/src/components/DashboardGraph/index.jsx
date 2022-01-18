@@ -52,15 +52,15 @@ Highcharts.setOptions({
 
 const data = [
   {
-    value: 'mom',
+    value: 'last_30_days',
     label: 'Current Month on Last Month'
   },
   {
-    value: 'wow',
+    value: 'last_7_days',
     label: 'Current Week on Last Week'
   },
   {
-    value: 'dod',
+    value: 'previous_day',
     label: 'Current Day on Last Day'
   }
 ];
@@ -84,7 +84,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
   const [singleDimensionData, SetSingleDimensionData] = useState(0);
 
   const [monthWeek, setMonthWeek] = useState({
-    value: 'mom',
+    value: 'last_30_days',
     label: 'Current Month on Last Month'
   });
   const [dimension, setDimension] = useState({

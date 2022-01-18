@@ -112,20 +112,18 @@ class RootCauseAnalysisController:
             "data": json.dumps(data),
         }
 
-    def _get_line_data(self, timeline: str = "last_30_days") -> dict:
+    def _get_line_data(self, days: int = 60) -> dict:
         """Get line data for KPI.
 
-        :param timeline: timeline to get data format, defaults to "last_30_days"
-        :type timeline: str, optional
+        :param days: number of days to get data for, defaults to 60
+        :type days: int, optional
         :return: dictionary with line data
         :rtype: dict
         """
-        (_, _), (curr_start_date, curr_end_date) = (
-            TIME_RANGES_ACTIVE[timeline]["function"](self.end_date)
-        )
-
         rca_df = DataLoader(
-            self.kpi_info, curr_end_date, start_date=curr_start_date
+            self.kpi_info,
+            end_date=self.end_date,
+            days_before=days,
         ).get_data()
 
         rca_df = (

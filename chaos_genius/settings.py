@@ -72,7 +72,7 @@ DEEPDRILLS_ENABLED_TIME_RANGES = os.getenv('DEEPDRILLS_ENABLED_TIME_RANGES', def
 DEEPDRILLS_ENABLED_TIME_RANGES = list(map(lambda x: x.strip(), DEEPDRILLS_ENABLED_TIME_RANGES.split(',')))
 for enabled_time_range in DEEPDRILLS_ENABLED_TIME_RANGES:
     if enabled_time_range not in TIME_RANGES:
-        raise ValueError("Values in DEEPDRILLS_ENABLED_TIME_RANGES must be in TIME_RANGES.")
+        raise ValueError(f"Values in DEEPDRILLS_ENABLED_TIME_RANGES must be one of {', '.join(TIME_RANGES)}. Got: {enabled_time_range}.")
 
 SENTRY_DSN = os.getenv('SENTRY_DSN')
 

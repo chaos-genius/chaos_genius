@@ -190,10 +190,10 @@ def get_all_kpis():
         for kpi in results:
             info = {key: getattr(kpi, key) for key in metrics}
             aggregate_data = kpi_aggregation(kpi.id, timeline)
-            info["prev"] = round_number(aggregate_data.get("group1_value", 0))
-            info["current"] = round_number(aggregate_data.get("group2_value", 0))
-            info["change"] = round_number(aggregate_data.get("difference", 0))
-            info["percentage_change"] = round_number(aggregate_data.get("perc_change", 0))
+            info["prev"] = round_number(aggregate_data["aggregation"][0]["value"])
+            info["current"] = round_number(aggregate_data["aggregation"][1]["value"])
+            info["change"] = round_number(aggregate_data["aggregation"][2]["value"])
+            info["percentage_change"] = round_number(aggregate_data["aggregation"][3]["value"])
 
             info["display_value_prev"] = TIME_RANGES_ACTIVE[timeline]["last_period_name"]
             info["display_value_current"] = TIME_RANGES_ACTIVE[timeline]["current_period_name"]

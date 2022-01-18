@@ -304,10 +304,17 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
       let demoChart = {
         chart: {
           type: 'line',
-          height: '308',
-          width: '850'
+          height: '350',
+          width: '850',
+          marginLeft: 70
         },
-        title: false,
+        title: {
+          text: kpiName,
+          style: {
+            fontWeight: 'bold',
+            fontSize: '14px'
+          }
+        },
         time: {
           timezone: getTimezone()
         },
@@ -321,6 +328,10 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
             }
           }
         },
+        legend: {
+          enabled: true,
+          padding: 5
+        },
         yAxis: {
           type: 'value',
           step: 1,
@@ -328,6 +339,9 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
             formatter: function () {
               return HRNumbers.toHumanString(this.value);
             }
+          },
+          title: {
+            margin: 25
           }
         },
         plotOptions: {
@@ -337,13 +351,14 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
             }
           }
         },
-        legend: {
-          enabled: false
-        },
         series: [
           {
             color: '#60ca9a',
-            data: line.map((linedata) => linedata.value)
+            data: line.map((linedata) => linedata.value),
+            name: monthWeek.grp1_name,
+            id: 'first series',
+            zIndex: 2,
+            type: 'line'
           }
         ]
       };
@@ -381,9 +396,6 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                     setMonthWeek(e);
                   }}
                 />
-              </div>
-              <div className="dashboard-title-container">
-                <span>{kpiName}</span>
               </div>
               <div className="dashboard-aggregate-section">
                 <div className="aggregate-card-container">

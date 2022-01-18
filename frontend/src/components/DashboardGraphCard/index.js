@@ -17,7 +17,7 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
         case 'perc_change': {
           return {
             label: '% Change',
-            value: data?.value ? `${data?.value} %` : '-',
+            value: data?.value ? `${Math.abs(data?.value)} %` : '-',
             textColor: data?.value
               ? data?.value >= 0
                 ? { indicator: 'Up', color: '#60CA9A' }
@@ -38,7 +38,7 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
                 : { indicator: 'Down', color: '#E96560' }
               : { color: '#222222' },
             format: true,
-            borderColor: 'main-dark'
+            borderColor: 'primary-green'
           };
         }
         case 'group1_value': {
@@ -47,7 +47,7 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
             value: data.value ? data.value : '-',
             format: true,
             textColor: { color: '#222222' },
-            borderColor: 'main-grey'
+            borderColor: 'main-dark '
           };
         }
         case 'group2_value': {
@@ -56,7 +56,7 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
             value: data.value ? data.value : '-',
             format: true,
             textColor: { color: '#222222' },
-            borderColor: 'primary-green'
+            borderColor: 'main-grey'
           };
         }
         default:

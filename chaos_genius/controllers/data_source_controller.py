@@ -100,11 +100,11 @@ def update_third_party(payload):
         dict: status of the connection
     """
     is_third_party = SOURCE_WHITELIST_AND_TYPE[payload["sourceDefinitionId"]]
+    connection_status = {}
     if is_third_party:
-        connector_client = connector.connection
-        for _property in ["sourceDefinitionId", "workspaceId", "sourceName", "connection_type"]:
-            payload.pop(_property, None)
-        connection_status = connector_client.update_source(payload)
-    else:
-        connection_status = {}
+        if AIRBYTE_ENABLED:
+            connector_client = connector.connection
+            for _property in ["sourceDefinitionId", "workspaceId", "sourceName", "connection_type"]:
+                payload.pop(_property, None)
+            connection_status = connector_client.update_source(payload)
     return connection_status

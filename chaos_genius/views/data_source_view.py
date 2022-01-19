@@ -241,7 +241,8 @@ def delete_data_source():
         data_source_obj = DataSource.get_by_id(data_source_id)
         if data_source_obj:
             ds_data = data_source_obj.as_dict
-            if ds_data["is_third_party"]:
+            # Remove the third party data source even if airbyte is disabled
+            if ds_data["is_third_party"] and AIRBYTE_ENABLED:
                 connector_client = connector.connection
                 # delete the connection
                 connection_details = ds_data["connectionConfig"]
@@ -301,7 +302,7 @@ def log_data_source():
         connection_details = ds_data["connectionConfig"]
         connection_id = connection_details.get("connectionId", {})
 
-        if connection_id:
+        if connection_id and AIRBYTE_ENABLED:
             connector_client = connector.connection
             logs_details = connector_client.get_job_list(connection_id)
 

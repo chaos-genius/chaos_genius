@@ -36,3 +36,41 @@ class TriggeredAlerts(PkModel):
             "alert_metadata": self.alert_metadata,
             "created_at": self.created_at
         }
+
+    @classmethod
+    def meta_info(cls):
+        return{
+            "name": "TriggeredAlerts",
+            "table_name": "triggered_alerts",
+            "fields":[
+                {
+                    "name": "alert_conf_id",
+                    "is_editable": False,
+                    "is_sensitive": False,
+                },
+                {
+                    "name": "alert_type",
+                    "is_editable": False,
+                    "is_sensitive": False,
+                },
+                {
+                    "name": "is_sent",
+                    "is_editable": True,
+                    "is_sensitive": False,
+
+                },
+                {
+                    "name": "alert_metadata",
+                    "is_editable": False,
+                    "is_sensitive": False,
+
+                },
+                {
+                    "name": "created_at",
+                    "is_editable": True,
+                    "is_sensitive": False,
+
+                }
+            ]
+
+        }

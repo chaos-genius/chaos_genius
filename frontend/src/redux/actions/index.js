@@ -34,6 +34,7 @@ import { getOnboardingStatus, getHomeKpi } from './Onboarding';
 import { getDashboardLinechart } from './LineChart';
 import { getDashboardSidebar } from './Sidebarlist';
 import { getTimeCuts } from './TimeCuts';
+import { getVersionSetting } from './VersionControl';
 import {
   getAllAlertEmail,
   getChannelStatus,
@@ -131,5 +132,6 @@ export {
   getDashboardConfig,
   getGlobalSetting,
   kpiAlertDeleteById,
-  getTimeCuts
+  getTimeCuts,
+  getVersionSetting
 };

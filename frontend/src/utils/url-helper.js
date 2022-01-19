@@ -55,3 +55,4 @@ export const GLOBAL_SETTING_URL = `${BASE_URL}/api/config/global-config`;
 export const TASK_MANAGER_API_STATUS_URL = `${BASE_URL}/api/status`;
 
 export const TIME_CUTS_URL = `${BASE_URL}/api/kpi/get-timecuts-list`;
+export const VERSION_SETTING_URL = `${BASE_URL}/api/meta/version`;

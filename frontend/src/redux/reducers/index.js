@@ -9,6 +9,7 @@ import { hierarchial } from './Hierarchical';
 import { onboarding } from './Onboarding';
 import { lineChart } from './LineChart';
 import { sidebar } from './Sidebarlist';
+import { VersionSetting } from './VersionControl';
 import { anomaly } from './Anomaly';
 import { TimeCuts } from './TimeCuts';
 import { alert } from './Alert';
@@ -36,7 +37,8 @@ const rootReducer = combineReducers({
   organisation: organisation,
   config: config,
   GlobalSetting: GlobalSetting,
-  TimeCuts: TimeCuts
+  TimeCuts: TimeCuts,
+  VersionSetting: VersionSetting
 });
 
 export default rootReducer;

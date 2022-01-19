@@ -406,9 +406,7 @@ class AnomalyAlertController:
                             "alert_data": alert_data,
                             "end_date": str(self.anomaly_end_date),
                             "severity_cutoff_score": self.alert_info["severity_cutoff_score"],
-                            "kpi": self.alert_info["kpi"],
-                            "alert_channel": self.alert_info["alert_channel"],
-                            "alert_channel_conf": self.alert_info["alert_channel_conf"]
+                            "kpi": self.alert_info["kpi"]
                         }    
 
         triggered_alert = TriggeredAlerts(

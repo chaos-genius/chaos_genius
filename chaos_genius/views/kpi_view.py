@@ -34,12 +34,13 @@ from chaos_genius.controllers.dashboard_controller import (
     edit_kpi_dashboards,
     enable_mapper_for_kpi_ids
 )
+from chaos_genius.settings import DEEPDRILLS_ENABLED_TIME_RANGES
 from chaos_genius.utils.datetime_helper import get_rca_timestamp, get_epoch_timestamp
 from chaos_genius.core.rca.rca_utils.api_utils import (
     kpi_line_data,
     kpi_aggregation,
 )
-from chaos_genius.core.rca.constants import TIME_RANGES_ACTIVE
+from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
 
 blueprint = Blueprint("api_kpi", __name__)
 logger = logging.getLogger(__name__)
@@ -195,8 +196,8 @@ def get_all_kpis():
             info["change"] = round_number(aggregate_data["aggregation"][2]["value"])
             info["percentage_change"] = round_number(aggregate_data["aggregation"][3]["value"])
 
-            info["display_value_prev"] = TIME_RANGES_ACTIVE[timeline]["last_period_name"]
-            info["display_value_current"] = TIME_RANGES_ACTIVE[timeline]["current_period_name"]
+            info["display_value_prev"] = TIME_RANGES_BY_KEY[timeline]["last_period_name"]
+            info["display_value_current"] = TIME_RANGES_BY_KEY[timeline]["current_period_name"]
             info["anomaly_count"] = get_anomaly_count(kpi.id, timeline)
             info["graph_data"] = kpi_line_data(kpi.id)
             ret.append(info)
@@ -211,17 +212,15 @@ def get_all_kpis():
 @blueprint.route("/get-timecuts-list", methods=["GET"])
 def get_timecuts_list():
     """Returns all active timecuts."""
-
     status, message = "success", ""
     ret = {}
     try:
-        ret = {
-            time_cut: {
-                "display_name": details["display_name"],
-                "last_period_name": details["last_period_name"],
-                "current_period_name": details["current_period_name"],
-            } for time_cut, details in TIME_RANGES_ACTIVE.items()
-        }
+        enabled_cuts = [
+            {**{k: v for k, v in value.items() if k != "function"}, "id": key}
+            for key, value in TIME_RANGES_BY_KEY.items()
+            if key in DEEPDRILLS_ENABLED_TIME_RANGES
+        ]
+        ret = enabled_cuts
         message = "All timecuts fetched succesfully."
     except Exception as e:
         status = "failure"
@@ -364,7 +363,7 @@ def find_percentage_change(curr_val, prev_val):
 def get_anomaly_count(kpi_id, timeline):
 
     curr_date = datetime.now()
-    (_, _), (sd, _) = TIME_RANGES_ACTIVE[timeline]["function"](curr_date)
+    (_, _), (sd, _) = TIME_RANGES_BY_KEY[timeline]["function"](curr_date)
 
     # TODO: Add the series type filter
     anomaly_data = AnomalyDataOutput.query.filter(

@@ -57,7 +57,7 @@ def get_dates_for_month_on_month(
     The first tuple contains start of prev month, end of prev month.
     The second tuple contains start of current month, t.
     """
-    base_start_date = end_date.replace(month=end_date.month - 1, day=1)
+    base_start_date = end_date.replace(day=1) - relativedelta(months=1)
     base_end_date = end_date.replace(day=1) - timedelta(days=1)
 
     rca_start_date = end_date.replace(day=1)
@@ -73,7 +73,7 @@ def get_dates_for_month_to_date(
     The first tuple contains start of prev month, date in prev month where date = t.
     The second tuple contains start of current month, t.
     """
-    base_start_date = end_date.replace(month=end_date.month - 1, day=1)
+    base_start_date = end_date.replace(day=1) - relativedelta(months=1)
     try:
         base_end_date = base_start_date.replace(day=end_date.day)
     except ValueError as e:

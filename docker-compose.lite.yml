@@ -1,0 +1,228 @@
+version: "3.7"
+#https://github.com/compose-spec/compose-spec/blob/master/spec.md#using-extensions-as-fragments
+x-logging: &default-logging
+  options:
+    max-size: "100m"
+    max-file: "5"
+  driver: json-file
+x-version:
+  &chaosgenius-version
+  CHAOSGENIUS_VERSION_POSTFIX=latest-compose
+
+services:
+  chaosgenius-server:
+    container_name: chaosgenius-server
+    image: chaosgenius/chaosgenius-server:lite
+    command: sh setup/run-backend-docker.sh
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - chaosgenius-db
+    environment:
+      - *chaosgenius-version
+      - IN_DOCKER=True
+      - AIRBYTE_ENABLED=False
+      - FLASK_APP=${FLASK_APP}
+      - FLASK_ENV=${FLASK_ENV}
+      - FLASK_DEBUG=${FLASK_DEBUG}
+      - FLASK_RUN_PORT=${FLASK_RUN_PORT}
+      - SECRET_KEY=${SECRET_KEY}
+      - SEND_FILE_MAX_AGE_DEFAULT=${SEND_FILE_MAX_AGE_DEFAULT}
+      - DB_HOST=${DB_HOST}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_PORT=${DB_PORT}
+      - META_DATABASE=${META_DATABASE}
+      - DATA_DATABASE=${DATA_DATABASE}
+      - DATABASE_URL_CG_DB=${DATABASE_URL_CG_DB}
+      - INTEGRATION_SERVER=${INTEGRATION_SERVER}
+      - INTEGRATION_DB_HOST=${INTEGRATION_DB_HOST}
+      - INTEGRATION_DB_USERNAME=${INTEGRATION_DB_USERNAME}
+      - INTEGRATION_DB_PASSWORD=${INTEGRATION_DB_PASSWORD}
+      - INTEGRATION_DB_PORT=${INTEGRATION_DB_PORT}
+      - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - CACHE_DEFAULT_TIMEOUT=${CACHE_DEFAULT_TIMEOUT}
+      - MULTIDIM_ANALYSIS_FOR_ANOMALY=${MULTIDIM_ANALYSIS_FOR_ANOMALY}
+      - MAX_SUBDIM_CARDINALITY=${MAX_SUBDIM_CARDINALITY}
+      - TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN=${TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN}
+      - MIN_DATA_IN_SUBGROUP=${MIN_DATA_IN_SUBGROUP}
+      - TOP_SUBDIMENSIONS_FOR_ANOMALY=${TOP_SUBDIMENSIONS_FOR_ANOMALY}
+      - MAX_ROWS_FOR_DEEPDRILLS=${MAX_ROWS_FOR_DEEPDRILLS}
+      - MAX_FILTER_SUBGROUPS_ANOMALY=${MAX_FILTER_SUBGROUPS_ANOMALY}
+      - MAX_DEEPDRILLS_SLACK_DAYS=${MAX_DEEPDRILLS_SLACK_DAYS}
+      - MAX_ANOMALY_SLACK_DAYS=${MAX_ANOMALY_SLACK_DAYS}
+      - DAYS_OFFSET_FOR_ANALTYICS=${DAYS_OFFSET_FOR_ANALTYICS}
+      - DEEPDRILLS_HTABLE_MAX_PARENTS=${DEEPDRILLS_HTABLE_MAX_PARENTS}
+      - DEEPDRILLS_HTABLE_MAX_CHILDREN=${DEEPDRILLS_HTABLE_MAX_CHILDREN}
+      - DEEPDRILLS_HTABLE_MAX_DEPTH=${DEEPDRILLS_HTABLE_MAX_DEPTH}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - CHAOSGENIUS_ENTERPRISE_EDITION_KEY=${CHAOSGENIUS_ENTERPRISE_EDITION_KEY}
+    ports:
+      - "5000:5000"
+
+  chaosgenius-webapp:
+    container_name: chaosgenius-webapp
+    image: chaosgenius/chaosgenius-webapp:lite
+    command: >
+      sh -c "npx react-inject-env set -d ./ &&
+             nginx -g 'daemon off;'"
+    volumes:
+      - ./frontend/nginx:/etc/nginx/conf.d/
+    ports:
+      - "8080:8080"
+    environment:
+      - REACT_APP_BASE_URL=${REACT_APP_BASE_URL}
+      - REACT_APP_DISABLE_TELEMETRY=${REACT_APP_DISABLE_TELEMETRY}
+    depends_on:
+      - chaosgenius-server
+
+  chaosgenius-db:
+    container_name: chaosgenius-db
+    image: postgres:13
+    restart: always
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "chaosgenius_data", "-U", "postgres" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./docker/cg-db-setup:/docker-entrypoint-initdb.d/
+      - cg-db:/var/lib/postgresql/data
+    ports:
+      - 5433:5432
+
+  chaosgenius-redis:
+    container_name: chaosgenius-redis
+    image: "redis:6.2-alpine"
+    ports:
+      - 6379:6379
+    
+  chaosgenius-scheduler:
+    container_name: chaosgenius-scheduler
+    image: chaosgenius/chaosgenius-server:lite
+    command: celery -A run.celery beat --loglevel=DEBUG
+    environment:
+      - IN_DOCKER=True
+      - AIRBYTE_ENABLED=False
+      - FLASK_APP=${FLASK_APP}
+      - FLASK_ENV=${FLASK_ENV}
+      - FLASK_DEBUG=${FLASK_DEBUG}
+      - FLASK_RUN_PORT=${FLASK_RUN_PORT}
+      - SECRET_KEY=${SECRET_KEY}
+      - SEND_FILE_MAX_AGE_DEFAULT=${SEND_FILE_MAX_AGE_DEFAULT}
+      - DB_HOST=${DB_HOST}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_PORT=${DB_PORT}
+      - META_DATABASE=${META_DATABASE}
+      - DATA_DATABASE=${DATA_DATABASE}
+      - DATABASE_URL_CG_DB=${DATABASE_URL_CG_DB}
+      - INTEGRATION_SERVER=${INTEGRATION_SERVER}
+      - INTEGRATION_DB_HOST=${INTEGRATION_DB_HOST}
+      - INTEGRATION_DB_USERNAME=${INTEGRATION_DB_USERNAME}
+      - INTEGRATION_DB_PASSWORD=${INTEGRATION_DB_PASSWORD}
+      - INTEGRATION_DB_PORT=${INTEGRATION_DB_PORT}
+      - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - CHAOSGENIUS_ENTERPRISE_EDITION_KEY=${CHAOSGENIUS_ENTERPRISE_EDITION_KEY}
+    depends_on:
+      - chaosgenius-redis
+  
+  chaosgenius-worker-analytics:
+    container_name: chaosgenius-worker-analytics
+    image: chaosgenius/chaosgenius-server:lite
+    command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
+    environment:
+      - IN_DOCKER=True
+      - AIRBYTE_ENABLED=False
+      - FLASK_APP=${FLASK_APP}
+      - FLASK_ENV=${FLASK_ENV}
+      - FLASK_DEBUG=${FLASK_DEBUG}
+      - FLASK_RUN_PORT=${FLASK_RUN_PORT}
+      - SECRET_KEY=${SECRET_KEY}
+      - SEND_FILE_MAX_AGE_DEFAULT=${SEND_FILE_MAX_AGE_DEFAULT}
+      - DB_HOST=${DB_HOST}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_PORT=${DB_PORT}
+      - META_DATABASE=${META_DATABASE}
+      - DATA_DATABASE=${DATA_DATABASE}
+      - DATABASE_URL_CG_DB=${DATABASE_URL_CG_DB}
+      - INTEGRATION_SERVER=${INTEGRATION_SERVER}
+      - INTEGRATION_DB_HOST=${INTEGRATION_DB_HOST}
+      - INTEGRATION_DB_USERNAME=${INTEGRATION_DB_USERNAME}
+      - INTEGRATION_DB_PASSWORD=${INTEGRATION_DB_PASSWORD}
+      - INTEGRATION_DB_PORT=${INTEGRATION_DB_PORT}
+      - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - MULTIDIM_ANALYSIS_FOR_ANOMALY=${MULTIDIM_ANALYSIS_FOR_ANOMALY}
+      - MAX_SUBDIM_CARDINALITY=${MAX_SUBDIM_CARDINALITY}
+      - TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN=${TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN}
+      - MIN_DATA_IN_SUBGROUP=${MIN_DATA_IN_SUBGROUP}
+      - TOP_SUBDIMENSIONS_FOR_ANOMALY=${TOP_SUBDIMENSIONS_FOR_ANOMALY}
+      - MAX_ROWS_FOR_DEEPDRILLS=${MAX_ROWS_FOR_DEEPDRILLS}
+      - MAX_FILTER_SUBGROUPS_ANOMALY=${MAX_FILTER_SUBGROUPS_ANOMALY}
+      - MAX_DEEPDRILLS_SLACK_DAYS=${MAX_DEEPDRILLS_SLACK_DAYS}
+      - MAX_ANOMALY_SLACK_DAYS=${MAX_ANOMALY_SLACK_DAYS}
+      - DAYS_OFFSET_FOR_ANALTYICS=${DAYS_OFFSET_FOR_ANALTYICS}
+      - DEEPDRILLS_HTABLE_MAX_PARENTS=${DEEPDRILLS_HTABLE_MAX_PARENTS}
+      - DEEPDRILLS_HTABLE_MAX_CHILDREN=${DEEPDRILLS_HTABLE_MAX_CHILDREN}
+      - DEEPDRILLS_HTABLE_MAX_DEPTH=${DEEPDRILLS_HTABLE_MAX_DEPTH}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - CHAOSGENIUS_ENTERPRISE_EDITION_KEY=${CHAOSGENIUS_ENTERPRISE_EDITION_KEY}
+    depends_on:
+      - chaosgenius-redis
+      - chaosgenius-db
+
+  chaosgenius-worker-alerts:
+    container_name: chaosgenius-worker-alerts
+    image: chaosgenius/chaosgenius-server:lite
+    command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
+    environment:
+      - IN_DOCKER=True
+      - AIRBYTE_ENABLED=False
+      - FLASK_APP=${FLASK_APP}
+      - FLASK_ENV=${FLASK_ENV}
+      - FLASK_DEBUG=${FLASK_DEBUG}
+      - FLASK_RUN_PORT=${FLASK_RUN_PORT}
+      - SECRET_KEY=${SECRET_KEY}
+      - SEND_FILE_MAX_AGE_DEFAULT=${SEND_FILE_MAX_AGE_DEFAULT}
+      - DB_HOST=${DB_HOST}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_PORT=${DB_PORT}
+      - META_DATABASE=${META_DATABASE}
+      - DATA_DATABASE=${DATA_DATABASE}
+      - DATABASE_URL_CG_DB=${DATABASE_URL_CG_DB}
+      - INTEGRATION_SERVER=${INTEGRATION_SERVER}
+      - INTEGRATION_DB_HOST=${INTEGRATION_DB_HOST}
+      - INTEGRATION_DB_USERNAME=${INTEGRATION_DB_USERNAME}
+      - INTEGRATION_DB_PASSWORD=${INTEGRATION_DB_PASSWORD}
+      - INTEGRATION_DB_PORT=${INTEGRATION_DB_PORT}
+      - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - CHAOSGENIUS_ENTERPRISE_EDITION_KEY=${CHAOSGENIUS_ENTERPRISE_EDITION_KEY}
+    depends_on:
+      - chaosgenius-redis
+      - chaosgenius-db
+
+volumes:
+  workspace:
+    name: ${WORKSPACE_DOCKER_MOUNT}
+  data:
+    name: ${DATA_DOCKER_MOUNT}
+  db:
+    name: ${DB_DOCKER_MOUNT}
+  cg-db:
+    name: ${CG_DB_DOCKER_MOUNT}

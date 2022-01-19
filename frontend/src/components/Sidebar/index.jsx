@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Link, useHistory } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 import logo from '../../assets/images/logo.svg';
 import home from '../../assets/images/sidebar/home.svg';
@@ -9,8 +10,6 @@ import dashboard from '../../assets/images/sidebar/dashboard.svg';
 import dashboardactive from '../../assets/images/sidebar/dashboard-active.svg';
 import kpi from '../../assets/images/sidebar/kpiexplorer.svg';
 import kpiactive from '../../assets/images/sidebar/kpiexplorer-active.svg';
-//import anomolies from '../../assets/images/sidebar/anomolies.svg';
-//import anomoliesactive from '../../assets/images/sidebar/anomolies-active.svg';
 import datasource from '../../assets/images/sidebar/datasource.svg';
 import datasourceactive from '../../assets/images/sidebar/datasource-active.svg';
 import alerts from '../../assets/images/sidebar/alerts.svg';
@@ -21,6 +20,7 @@ import './sidebar.scss';
 const Sidebar = () => {
   const history = useHistory();
   const location = history.location.pathname.split('/');
+  const { versionSettingData } = useSelector((state) => state.VersionSetting);
 
   return (
     <div className="sidebar-menu">
@@ -29,6 +29,7 @@ const Sidebar = () => {
           <img src={logo} alt="Logo" />
         </Link>
       </div>
+
       <div className="sidebar-options">
         <ul>
           <li
@@ -67,15 +68,6 @@ const Sidebar = () => {
               <span>KPI Explorer</span>
             </Link>
           </li>
-          {/* <li className={location[2] === 'anomaly' ? 'active' : ''}>
-            <Link to="/dashboard/anomaly/kpi">
-              <img
-                src={location[2] === 'anomaly' ? anomoliesactive : anomolies}
-                alt="Anomaly"
-              />
-              <span>Anomaly</span>
-            </Link>
-          </li> */}
         </ul>
         <ul>
           <li className={location[1] === 'datasource' ? 'active' : ''}>
@@ -104,6 +96,11 @@ const Sidebar = () => {
           </li>
         </ul>
       </div>
+      <ul>
+        <li className="common-watermark">
+          <span>Ver. {versionSettingData && versionSettingData.main}</span>
+        </li>
+      </ul>
     </div>
   );
 };

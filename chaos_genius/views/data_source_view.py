@@ -44,7 +44,7 @@ from chaos_genius.controllers.data_source_controller import (
     update_third_party
 )
 
-# from chaos_genius.utils import flash_errors
+from chaos_genius.settings import AIRBYTE_ENABLED
 
 blueprint = Blueprint("api_data_source", __name__)
 
@@ -130,6 +130,8 @@ def create_data_source():
         conn_type = payload.get('connection_type')
         source_form = payload.get('sourceForm')
         is_third_party = SOURCE_WHITELIST_AND_TYPE[source_form["sourceDefinitionId"]]
+        if is_third_party and not AIRBYTE_ENABLED:
+            raise Exception("Airbytes is not enabled.")
         sourceCreationPayload = {
             "name": f"CG-{conn_name}",
             "sourceDefinitionId": source_form.get("sourceDefinitionId"),
@@ -344,6 +346,8 @@ def update_data_source_info(datasource_id):
         conn_name = payload.get('name')
         source_form = payload.get('sourceForm')
         ds_obj = get_datasource_data_from_id(datasource_id, as_obj=True)
+        if ds_obj.is_third_party and not AIRBYTE_ENABLED:
+            raise Exception("Airbyte is not enabled")
         ds_obj.name = conn_name
         connection_config = deepcopy(ds_obj.sourceConfig)
         connection_config["connectionConfiguration"].update(
@@ -376,9 +380,9 @@ def data_source_meta_info():
     current_app.logger.info("data source meta info")
     return jsonify({"data": DataSource.meta_info()})
 
-@blueprint.route("/get-availability", methods = ["POST"])
-def check_views_availability():
 
+@blueprint.route("/get-availability", methods=["POST"])
+def check_views_availability():
     views = False
     materialize_views = False
     schema_exist = False

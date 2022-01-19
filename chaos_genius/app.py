@@ -60,7 +60,8 @@ def register_extensions(app):
     # login_manager.init_app(app)
     migrate.init_app(app, db)
     flask_static_digest.init_app(app)
-    integration_connector.init_app(app)
+    if app.config.get('AIRBYTE_ENABLED'):
+        integration_connector.init_app(app)
     celery.init_app(app)
     return None
 

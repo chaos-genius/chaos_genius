@@ -146,7 +146,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
   }, [timeCutsData]);
 
   useEffect(() => {
-    if (kpi !== undefined) {
+    if (kpi !== undefined && monthWeek.value) {
       dispatch(getDashboardConfig({ kpi_id: kpi }));
       getAllAggregationData();
       getAllLinechart();

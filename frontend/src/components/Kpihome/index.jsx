@@ -100,7 +100,7 @@ const Kpihome = () => {
   }, [timeCutsData]);
 
   useEffect(() => {
-    if (![null, undefined, ''].includes(dashboard)) {
+    if (![null, undefined, ''].includes(dashboard) && timeline.value) {
       getHomeList();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

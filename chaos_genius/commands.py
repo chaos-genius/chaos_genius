@@ -134,11 +134,10 @@ def run_alert(id):
 @click.command()
 @with_appcontext
 def run_digest():
-    """Check and perform the alert operation for provided Alert ID."""
+    """Trigger alert digests"""
     click.echo(f"Starting the digest check")
-    from chaos_genius.alerts.base_alert_digests import AlertDigestController
-    obj = AlertDigestController("daily")
-    obj.prepare_digests()
+    from chaos_genius.alerts.base_alert_digests import check_and_trigger_digest
+    test = check_and_trigger_digest("daily")
     click.echo(f"The digest check has ended")
 
 

@@ -6,6 +6,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.alert_model import Alert
+from chaos_genius.controllers.config_controller import get_config_object
 
 from chaos_genius.alerts.email import send_static_alert_email
 
@@ -73,8 +74,8 @@ class AlertDigestController:
         slack_digests = [alert for alert in data if alert.alert_channel == "slack" and getattr(alert, ALERT_ATTRIBUTES_MAPPER[self.frequency]) == True] 
         email_digests = [alert for alert in data if alert.alert_channel == "email" and getattr(alert, ALERT_ATTRIBUTES_MAPPER[self.frequency]) == True]
 
-        self.segregate_email_digests(email_digests)
-        self.send_slack_digests(slack_digests)
+        email_status = self.segregate_email_digests(email_digests)
+        slack_status = self.send_slack_digests(slack_digests)
 
     def segregate_email_digests(self, email_digests):
         
@@ -135,3 +136,34 @@ class AlertDigestController:
 
     def send_slack_digests(self, slack_digests):
         pass
+
+
+def check_and_trigger_digest(frequency: str):
+    """Check the alert and trigger alert digest
+
+    Args:
+        frequency (str): frequency of alert digest
+
+    Raises:
+        Exception: Raise if digest frequency is incorrect or alert digests have not been configured
+
+    Returns:
+        bool: status of the alert digest trigger
+    """
+    
+    digest_config_settings = get_config_object("alert_digest_settings")
+    
+    if digest_config_settings is None:
+        raise Exception("Alert Digests havent been configured yet")
+    
+    if frequency not in ALERT_ATTRIBUTES_MAPPER.keys():
+        raise Exception("Alert Digest frequency is incorrect")
+
+    digest_freq = ALERT_ATTRIBUTES_MAPPER[frequency]
+    if not getattr(digest_config_settings, digest_freq):
+        raise Exception("Alert Digests havent been configured yet")
+
+    digest_obj = AlertDigestController(frequency)
+    digest_obj.prepare_digests()
+
+    return True

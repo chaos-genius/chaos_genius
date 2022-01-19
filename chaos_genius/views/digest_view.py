@@ -1,4 +1,4 @@
-"""A basic view for monitoring services and analytics tasks status."""
+"""View to handle requests pertaining to alert digests"""
 
 import logging
 from typing import Dict, Optional, cast

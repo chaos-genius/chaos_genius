@@ -71,7 +71,7 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
           <div className="aggregate-card" key={index}>
             <div className={`card-border ${data.borderColor}`}></div>
             <div className="content-container">
-              <span>{data.label}</span>
+              <span className="label-container">{data.label}</span>
               <h5 style={{ color: data.textColor.color }}>
                 {data.hasChangeIndicator ? (
                   data.textColor.indicator === 'Up' ? (

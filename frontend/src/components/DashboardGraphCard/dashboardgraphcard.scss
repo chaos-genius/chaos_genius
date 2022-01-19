@@ -31,10 +31,16 @@
       display: flex;
       align-items: center;
       flex-direction: column;
-      justify-content: center;
+      justify-content: space-evenly;
       background-color: #f9f9f9;
       height: 100%;
       width: 90%;
+      .label-container {
+        font-size: 16px;
+      }
+      h5 {
+        font-size: 22px;
+      }
     }
   }
   .aggregate-card:last-child {

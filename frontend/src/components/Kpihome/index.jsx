@@ -271,23 +271,11 @@ const Kpihome = () => {
                           </h3>
                         </div>
                         <div className="kpi-content kpi-current">
-                          <label>
-                            {timeline.value === 'last_7_days'
-                              ? 'This Week'
-                              : timeline.value === 'last_30_days'
-                              ? 'This Month'
-                              : 'This Day'}
-                          </label>
+                          <label>{item?.display_value_current}</label>
                           <HumanReadableNumbers number={item.current} />
                         </div>
                         <div className="kpi-content">
-                          <label>
-                            {timeline.value === 'last_7_days'
-                              ? 'Previous Week'
-                              : timeline.value === 'last_30_days'
-                              ? 'Previous Month'
-                              : 'Previous Day'}
-                          </label>
+                          <label>{item?.display_value_prev}</label>
                           <HumanReadableNumbers number={item.prev} />
                         </div>
                         <div className="kpi-content">

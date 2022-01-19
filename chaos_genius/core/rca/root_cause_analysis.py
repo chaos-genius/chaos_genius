@@ -1,7 +1,6 @@
 """Provides RootCauseAnalysis class for computing RCA."""
 
 import warnings
-from collections import OrderedDict
 from itertools import combinations
 from math import isclose
 from textwrap import wrap
@@ -11,7 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from chaos_genius.core.rca.constants import TIME_RANGES
+from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
 from chaos_genius.core.rca.rca_utils.string_helpers import (
     convert_df_dims_to_query_strings,
     convert_query_string_to_user_string,
@@ -529,8 +528,8 @@ class RootCauseAnalysis:
         :return: List of mappings
         :rtype: List[Dict[str, str]]
         """
-        prev_timestr = TIME_RANGES[timeline]["last_period_name"]
-        curr_timestr = TIME_RANGES[timeline]["current_period_name"]
+        prev_timestr = TIME_RANGES_BY_KEY[timeline]["last_period_name"]
+        curr_timestr = TIME_RANGES_BY_KEY[timeline]["current_period_name"]
 
         mapping = [
             ("subgroup", "Subgroup Name"),

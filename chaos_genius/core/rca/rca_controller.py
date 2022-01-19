@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
-from chaos_genius.core.rca.constants import LINE_DATA_TIMESTAMP_FORMAT, TIME_RANGES
+from chaos_genius.core.rca.constants import LINE_DATA_TIMESTAMP_FORMAT, TIME_RANGES_BY_KEY
 from chaos_genius.core.rca.root_cause_analysis import RootCauseAnalysis
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.core.utils.end_date import load_input_data_end_date
@@ -66,7 +66,7 @@ class RootCauseAnalysisController:
         """
         # TODO: Write data loader which can cache data and pull from cache
         (prev_start_date, prev_end_date), (curr_start_date, curr_end_date) = (
-            TIME_RANGES[timeline]["function"](self.end_date)
+            TIME_RANGES_BY_KEY[timeline]["function"](self.end_date)
         )
 
         base_df = DataLoader(

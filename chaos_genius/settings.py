@@ -9,7 +9,7 @@ environment variables.
 import os
 
 from dotenv import load_dotenv
-from chaos_genius.core.rca.constants import TIME_RANGES
+from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
 
 from chaos_genius.utils.utils import latest_git_commit_hash
 
@@ -71,8 +71,8 @@ DEEPDRILLS_HTABLE_MAX_DEPTH = int(os.getenv('DEEPDRILLS_HTABLE_MAX_DEPTH', defau
 DEEPDRILLS_ENABLED_TIME_RANGES = os.getenv('DEEPDRILLS_ENABLED_TIME_RANGES', default='last_30_days,last_7_days,previous_day')
 DEEPDRILLS_ENABLED_TIME_RANGES = list(map(lambda x: x.strip(), DEEPDRILLS_ENABLED_TIME_RANGES.split(',')))
 for enabled_time_range in DEEPDRILLS_ENABLED_TIME_RANGES:
-    if enabled_time_range not in TIME_RANGES:
-        raise ValueError(f"Values in DEEPDRILLS_ENABLED_TIME_RANGES must be one of {', '.join(TIME_RANGES)}. Got: {enabled_time_range}.")
+    if enabled_time_range not in TIME_RANGES_BY_KEY.keys():
+        raise ValueError(f"Values in DEEPDRILLS_ENABLED_TIME_RANGES must be one of {', '.join(TIME_RANGES_BY_KEY.keys())}. Got: {enabled_time_range}.")
 
 SENTRY_DSN = os.getenv('SENTRY_DSN')
 

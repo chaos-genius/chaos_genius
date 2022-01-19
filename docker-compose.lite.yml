@@ -21,7 +21,7 @@ services:
     environment:
       - *chaosgenius-version
       - IN_DOCKER=True
-      - AIRBYTE_ENABLED=False
+      - AIRBYTE_ENABLED=${AIRBYTE_ENABLED}
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -109,7 +109,7 @@ services:
     command: celery -A run.celery beat --loglevel=DEBUG
     environment:
       - IN_DOCKER=True
-      - AIRBYTE_ENABLED=False
+      - AIRBYTE_ENABLED=${AIRBYTE_ENABLED}
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -142,7 +142,7 @@ services:
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
     environment:
       - IN_DOCKER=True
-      - AIRBYTE_ENABLED=False
+      - AIRBYTE_ENABLED=${AIRBYTE_ENABLED}
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -189,7 +189,7 @@ services:
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
     environment:
       - IN_DOCKER=True
-      - AIRBYTE_ENABLED=False
+      - AIRBYTE_ENABLED=${AIRBYTE_ENABLED}
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}

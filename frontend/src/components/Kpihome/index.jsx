@@ -74,13 +74,13 @@ const Kpihome = () => {
 
   const getAllTimeCutOptions = (data) => {
     let res = [];
-    if (data && Object.keys(data).length) {
-      for (const dataKey in data) {
+    if (data && data.length) {
+      for (const dataKey of data) {
         res.push({
-          value: `${dataKey}`,
-          label: data[dataKey]?.display_name,
-          grp1_name: data[dataKey]?.current_period_name,
-          grp2_name: data[dataKey]?.last_period_name
+          value: `${dataKey?.id}`,
+          label: dataKey?.display_name,
+          grp1_name: dataKey?.current_period_name,
+          grp2_name: dataKey?.last_period_name
         });
       }
     }
@@ -88,13 +88,12 @@ const Kpihome = () => {
   };
 
   useEffect(() => {
-    if (timeCutsData && Object.keys(timeCutsData).length) {
+    if (timeCutsData && timeCutsData.length) {
       setTimeLine({
-        label: timeCutsData[Object.keys(timeCutsData)[0]]?.display_name,
-        value: `${Object.keys(timeCutsData)[0]}`,
-        grp1_name:
-          timeCutsData[Object.keys(timeCutsData)[0]]?.current_period_name,
-        grp2_name: timeCutsData[Object.keys(timeCutsData)[0]]?.last_period_name
+        label: timeCutsData[0]?.display_name,
+        value: `${timeCutsData[0]?.id}`,
+        grp1_name: timeCutsData[0]?.current_period_name,
+        grp2_name: timeCutsData[0]?.last_period_name
       });
       getAllTimeCutOptions(timeCutsData);
     }

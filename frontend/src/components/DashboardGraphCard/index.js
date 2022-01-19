@@ -17,7 +17,10 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
         case 'perc_change': {
           return {
             label: '% Change',
-            value: data?.value ? `${Math.abs(data?.value)} %` : '-',
+            value:
+              data.value !== undefined && data.value !== null
+                ? `${Math.abs(data?.value)} %`
+                : '-',
             textColor: data?.value
               ? data?.value >= 0
                 ? { indicator: 'Up', color: '#60CA9A' }
@@ -31,7 +34,10 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
         case 'difference': {
           return {
             label: 'Difference',
-            value: data.value ? data.value : '-',
+            value:
+              data.value !== undefined && data.value !== null
+                ? data.value
+                : '-',
             textColor: data?.value
               ? data?.value >= 0
                 ? { indicator: 'Up', color: '#60CA9A' }
@@ -44,7 +50,10 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
         case 'group1_value': {
           return {
             label: monthWeek?.grp1_name,
-            value: data.value ? data.value : '-',
+            value:
+              data.value !== undefined && data.value !== null
+                ? data.value
+                : '-',
             format: true,
             textColor: { color: '#222222' },
             borderColor: 'main-dark '
@@ -53,7 +62,10 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
         case 'group2_value': {
           return {
             label: monthWeek?.grp2_name,
-            value: data.value ? data.value : '-',
+            value:
+              data.value !== undefined && data.value !== null
+                ? data.value
+                : '-',
             format: true,
             textColor: { color: '#222222' },
             borderColor: 'main-grey'

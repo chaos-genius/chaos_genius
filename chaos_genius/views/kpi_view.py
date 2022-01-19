@@ -40,7 +40,7 @@ from chaos_genius.core.rca.rca_utils.api_utils import (
     kpi_line_data,
     kpi_aggregation,
 )
-from chaos_genius.core.rca.constants import TIME_RANGES, TIME_RANGES_BY_KEY
+from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
 
 blueprint = Blueprint("api_kpi", __name__)
 logger = logging.getLogger(__name__)

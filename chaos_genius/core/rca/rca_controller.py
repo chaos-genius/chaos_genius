@@ -9,17 +9,14 @@ import numpy as np
 import pandas as pd
 
 from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
-from chaos_genius.core.rca.constants import (
-    LINE_DATA_TIMESTAMP_FORMAT,
-    TIME_RANGES_ACTIVE,
-    TIMERANGES_KEYS_ACTIVE,
-)
+from chaos_genius.core.rca.constants import LINE_DATA_TIMESTAMP_FORMAT, TIME_RANGES
 from chaos_genius.core.rca.root_cause_analysis import RootCauseAnalysis
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.core.utils.end_date import load_input_data_end_date
 from chaos_genius.core.utils.round import round_series
 from chaos_genius.databases.models.rca_data_model import RcaData, db
 from chaos_genius.settings import (
+    DEEPDRILLS_ENABLED_TIME_RANGES,
     DEEPDRILLS_HTABLE_MAX_CHILDREN,
     DEEPDRILLS_HTABLE_MAX_DEPTH,
     DEEPDRILLS_HTABLE_MAX_PARENTS,
@@ -69,7 +66,7 @@ class RootCauseAnalysisController:
         """
         # TODO: Write data loader which can cache data and pull from cache
         (prev_start_date, prev_end_date), (curr_start_date, curr_end_date) = (
-            TIME_RANGES_ACTIVE[timeline]["function"](self.end_date)
+            TIME_RANGES[timeline]["function"](self.end_date)
         )
 
         base_df = DataLoader(
@@ -305,7 +302,7 @@ class RootCauseAnalysisController:
             raise e
         logger.info("Line Data for KPI completed.")
 
-        for timeline in TIMERANGES_KEYS_ACTIVE:
+        for timeline in DEEPDRILLS_ENABLED_TIME_RANGES:
             logger.info(f"Running RCA for timeline: {timeline}.")
             try:
                 rca = self._load_rca_obj(timeline)

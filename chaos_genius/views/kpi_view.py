@@ -39,7 +39,7 @@ from chaos_genius.core.rca.rca_utils.api_utils import (
     kpi_line_data,
     kpi_aggregation,
 )
-from chaos_genius.core.rca.constants import TIME_RANGES_ACTIVE
+from chaos_genius.core.rca.constants import TIME_RANGES
 
 blueprint = Blueprint("api_kpi", __name__)
 logger = logging.getLogger(__name__)
@@ -195,8 +195,8 @@ def get_all_kpis():
             info["change"] = round_number(aggregate_data["aggregation"][2]["value"])
             info["percentage_change"] = round_number(aggregate_data["aggregation"][3]["value"])
 
-            info["display_value_prev"] = TIME_RANGES_ACTIVE[timeline]["last_period_name"]
-            info["display_value_current"] = TIME_RANGES_ACTIVE[timeline]["current_period_name"]
+            info["display_value_prev"] = TIME_RANGES[timeline]["last_period_name"]
+            info["display_value_current"] = TIME_RANGES[timeline]["current_period_name"]
             info["anomaly_count"] = get_anomaly_count(kpi.id, timeline)
             info["graph_data"] = kpi_line_data(kpi.id)
             ret.append(info)
@@ -220,7 +220,7 @@ def get_timecuts_list():
                 "display_name": details["display_name"],
                 "last_period_name": details["last_period_name"],
                 "current_period_name": details["current_period_name"],
-            } for time_cut, details in TIME_RANGES_ACTIVE.items()
+            } for time_cut, details in TIME_RANGES.items()
         }
         message = "All timecuts fetched succesfully."
     except Exception as e:
@@ -364,7 +364,7 @@ def find_percentage_change(curr_val, prev_val):
 def get_anomaly_count(kpi_id, timeline):
 
     curr_date = datetime.now()
-    (_, _), (sd, _) = TIME_RANGES_ACTIVE[timeline]["function"](curr_date)
+    (_, _), (sd, _) = TIME_RANGES[timeline]["function"](curr_date)
 
     # TODO: Add the series type filter
     anomaly_data = AnomalyDataOutput.query.filter(

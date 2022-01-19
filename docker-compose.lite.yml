@@ -218,11 +218,5 @@ services:
       - chaosgenius-db
 
 volumes:
-  workspace:
-    name: ${WORKSPACE_DOCKER_MOUNT}
-  data:
-    name: ${DATA_DOCKER_MOUNT}
-  db:
-    name: ${DB_DOCKER_MOUNT}
   cg-db:
     name: ${CG_DB_DOCKER_MOUNT}

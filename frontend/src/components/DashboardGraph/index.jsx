@@ -60,6 +60,17 @@ const multidimensional = [
     label: 'Multi Dimension'
   }
 ];
+const customStyles = {
+  option: (provided) => ({
+    ...provided,
+    textAlign: 'center',
+    verticalAlign: 'middle'
+  }),
+  container: (provided) => ({
+    ...provided,
+    width: 180
+  })
+};
 
 const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
   const dispatch = useDispatch();
@@ -389,6 +400,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                 <Select
                   value={monthWeek}
                   options={timeCutOptions}
+                  styles={customStyles}
                   classNamePrefix="selectcategory"
                   placeholder="select"
                   isSearchable={false}

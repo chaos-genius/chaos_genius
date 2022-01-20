@@ -28,6 +28,7 @@ export const onboarding = (state = initialState, action) => {
       return {
         ...state,
         isLoading: false,
+        error: '',
         onboardingList: action.data
       };
     }

@@ -16,6 +16,10 @@
     display: flex;
     align-items: center;
     flex-direction: column;
+    .server-error-btn {
+      padding: 12px 24px;
+      margin-top: 24px;
+    }
     .server-error-img {
       width: 380px;
       height: 180px;
@@ -32,6 +36,9 @@
       letter-spacing: $letter-spacing;
       color: $black_variation-2;
       margin-top: 24px;
+      &.server-next-line {
+        margin-top: 0px;
+      }
       &:last-child {
         margin-top: 0px;
       }

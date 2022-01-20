@@ -7,7 +7,7 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.alerts.slack import trigger_overall_kpi_stats
 from chaos_genius.utils.datetime_helper import get_server_timezone
 from chaos_genius.utils.modules_utils import is_enterprise_edition
-from chaos_genius.views.kpi_view import kpi_aggregation
+from chaos_genius.core.rca.rca_utils.api_utils import kpi_aggregation
 from chaos_genius.databases.models.config_setting_model import ConfigSetting
 from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 from chaos_genius.controllers.config_controller import (
@@ -156,7 +156,7 @@ def test_alert():
         kpi_info = Kpi.get_by_id(data["kpiId"]).as_dict
         connection_info = DataSource.get_by_id(kpi_info["data_source"]).as_dict
         kpi_aggregation_stats = kpi_aggregation(
-            kpi_info, connection_info, "wow"
+            kpi_info, connection_info, "last_7_days"
         )
         overall_stats = {
             "current": kpi_aggregation_stats["panel_metrics"]["grp2_metrics"],

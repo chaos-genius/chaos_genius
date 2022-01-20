@@ -16,6 +16,7 @@ import Sidebar from '../components/Sidebar';
 import {
   getConnectionType,
   getGlobalSetting,
+  getVersionSetting,
   onboardingOrganisationStatus
 } from '../redux/actions';
 
@@ -72,6 +73,7 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
   useEffect(() => {
     dispatchGetConnectionType();
     dispatch(getGlobalSetting());
+    dispatch(getVersionSetting());
     dispatch(getOnboardingStatus());
     dispatch(onboardingOrganisationStatus());
     // eslint-disable-next-line react-hooks/exhaustive-deps

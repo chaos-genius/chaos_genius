@@ -61,11 +61,6 @@ const multidimensional = [
   }
 ];
 const customStyles = {
-  option: (provided) => ({
-    ...provided,
-    textAlign: 'center',
-    verticalAlign: 'middle'
-  }),
   container: (provided) => ({
     ...provided,
     width: 180

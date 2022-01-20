@@ -31,6 +31,13 @@ const RESET_ACTION = {
   type: 'RESET_KPI_HOME_DATA'
 };
 
+const customStyles = {
+  container: (provided) => ({
+    ...provided,
+    width: 180
+  })
+};
+
 highchartsMore(Highcharts);
 Highcharts.setOptions({
   time: {
@@ -241,6 +248,7 @@ const Kpihome = () => {
             </div>
             <Select
               options={timeCutOptions}
+              styles={customStyles}
               classNamePrefix="selectcategory"
               placeholder="Current week on last week"
               value={timeline}

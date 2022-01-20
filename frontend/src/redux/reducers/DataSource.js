@@ -215,6 +215,7 @@ export const dataSource = (state = initialState, action) => {
     }
     case 'CREATE_RESPONSE_RESET': {
       return {
+        ...state,
         createDatasourceResponse: [],
         testConnectionResponse: [],
         deleteDataSourceResponse: [],

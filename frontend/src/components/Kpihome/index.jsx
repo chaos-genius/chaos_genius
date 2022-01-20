@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 
 import Select from 'react-select';
 import Search from '../../assets/images/search.svg';
@@ -58,6 +58,8 @@ const Kpihome = () => {
 
   const history = useHistory();
 
+  const dashboardId = useParams().id;
+
   const { homeKpiData, homeKpiLoading } = useSelector(
     (state) => state.onboarding
   );
@@ -81,22 +83,31 @@ const Kpihome = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (dashboardList && dashboardList.length !== 0) {
+    if (
+      dashboardList &&
+      dashboardList.length !== 0 &&
+      dashboardId === undefined
+    ) {
+      setDashboard(dashboardList[0]?.id);
+      history.push(`/${dashboardList[0]?.id}`);
+    } else if (dashboardList && dashboardList.length !== 0 && dashboardId) {
       setDashboard(dashboardList[0]?.id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dashboardList]);
+  }, [dashboardList, history.location.pathname]);
 
   useEffect(() => {
-    if (![null, undefined, ''].includes(dashboard)) {
+    if (![null, undefined, ''].includes(dashboardId)) {
       getHomeList();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dashboard, timeline]);
+  }, [dashboardId, timeline]);
 
   const getHomeList = () => {
     store.dispatch(RESET_ACTION);
-    dispatch(getHomeKpi({ timeline: timeline.value, dashboard_id: dashboard }));
+    dispatch(
+      getHomeKpi({ timeline: timeline.value, dashboard_id: dashboardId })
+    );
   };
 
   useEffect(() => {
@@ -240,11 +251,13 @@ const Kpihome = () => {
         <div className="homepage-setup-card-wrapper">
           <div className="explore-wrapper home-explore-wrapper">
             <div className="filter-section">
-              <Homefilter
-                data={dashboardList}
-                setDashboard={setDashboard}
-                dashboard={dashboard}
-              />
+              {dashboardId && (
+                <Homefilter
+                  data={dashboardList}
+                  setDashboard={setDashboard}
+                  dashboard={dashboardId}
+                />
+              )}
             </div>
             {kpiHomeData && kpiHomeData.length !== 0 ? (
               <div className="graph-section">

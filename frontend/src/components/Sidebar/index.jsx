@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useRouteMatch } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 import logo from '../../assets/images/logo.svg';
@@ -20,6 +20,7 @@ import './sidebar.scss';
 const Sidebar = () => {
   const history = useHistory();
   const location = history.location.pathname.split('/');
+  const match = useRouteMatch();
   const { versionSettingData } = useSelector((state) => state.VersionSetting);
 
   return (
@@ -39,7 +40,9 @@ const Sidebar = () => {
             <Link to="/">
               <img
                 src={
-                  location[1] === '' || location[1] === 'onboarding'
+                  location[1] === '' ||
+                  location[1] === 'onboarding' ||
+                  match.path === '/:id'
                     ? homeactive
                     : home
                 }

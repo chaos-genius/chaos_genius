@@ -16,141 +16,153 @@
 
         <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-4 sm:ml-3 sm:w-auto sm:text-sm" onclick="downloadCSV()">Download CSV</button>
 
-        <div class="flex flex-col py-4">
-            <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                    <div class="shadow overflow-hidden border-b border-gray-200 bg-gray-100 sm:rounded-2xl">
-                        <table class="min-w-full divide-y divide-gray-200 table-fixed w-full" id="tasktable-anomaly">
-                            <thead class="bg-gray-900">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                        Alert Name (ID)
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                        KPI Name
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                        Dimension
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                        Value
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                        Expected Value
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                        Severity Score
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                        Timestamp
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for triggered_alert in anomaly_alerts_data %}
-                                    {% for i, point in enumerate(triggered_alert.alert_metadata["alert_data"]) %}
-                                        {% if i % 2 == 1 %}
-                                        <!-- Odd row -->
-                                        <tr class="bg-white">
-                                            {% else %}
-                                            <!-- Even row -->
-                                        <tr class="bg-gray-50">
-                                            {% endif %}
-                                            <td class="px-6 py-4 text-sm text-gray-500">
-                                                {{ triggered_alert.alert_name }} ({{ triggered_alert.id }})
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500">
-                                                {{ triggered_alert.kpi_name }}
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500">
-                                                {{ point["Dimension"] }}
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500">
-                                                {{ point["Value"] }}
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500">
-                                                {{ point["Expected Value"] }}
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500">
-                                                {{ point["Severity Score"] }}
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500">
-                                                {{ triggered_alert.created_at }}
-                                            </td>
-                                        </tr>
+    <!-- Tabs -->
+    <ul id="tabs" class="inline-flex pt-2 px-1 w-full border-b">
+        <li class="bg-white px-4 text-gray-800 font-semibold py-2 rounded-t border-t border-r border-l -mb-px"><a id="default-tab" href="#anomaly-alerts">Anomaly Alerts</a></li>
+        <li class="px-4 text-gray-800 font-semibold py-2 rounded-t"><a href="#event-alerts">Event Alerts</a></li>
+    </ul>
+
+    <div id="tab-contents">
+        <div id="anomaly-alerts" class="p-4">
+            <div class="flex flex-col py-4">
+                <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                    <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+                        <div class="shadow overflow-hidden border-b border-gray-200 bg-gray-100 sm:rounded-2xl">
+                            <table class="min-w-full divide-y divide-gray-200 table-fixed w-full" id="tasktable-anomaly">
+                                <thead class="bg-gray-900">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                            Alert Name (ID)
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                            KPI Name
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                            Dimension
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                            Value
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                            Expected Value
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                            Severity Score
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                            Timestamp
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for triggered_alert in anomaly_alerts_data %}
+                                        {% for i, point in enumerate(triggered_alert.alert_metadata["alert_data"]) %}
+                                            {% if i % 2 == 1 %}
+                                            <!-- Odd row -->
+                                            <tr class="bg-white">
+                                                {% else %}
+                                                <!-- Even row -->
+                                            <tr class="bg-gray-50">
+                                                {% endif %}
+                                                <td class="px-6 py-4 text-sm text-gray-500">
+                                                    {{ triggered_alert.alert_name }} ({{ triggered_alert.id }})
+                                                </td>
+                                                <td class="px-6 py-4 text-sm text-gray-500">
+                                                    {{ triggered_alert.kpi_name }}
+                                                </td>
+                                                <td class="px-6 py-4 text-sm text-gray-500">
+                                                    {{ point["Dimension"] }}
+                                                </td>
+                                                <td class="px-6 py-4 text-sm text-gray-500">
+                                                    {{ point["Value"] }}
+                                                </td>
+                                                <td class="px-6 py-4 text-sm text-gray-500">
+                                                    {{ point["Expected Value"] }}
+                                                </td>
+                                                <td class="px-6 py-4 text-sm text-gray-500">
+                                                    {{ point["Severity Score"] }}
+                                                </td>
+                                                <td class="px-6 py-4 text-sm text-gray-500">
+                                                    {{ triggered_alert.created_at }}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
                                     {% endfor %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    
-        <div class="flex flex-col py-4">
-            <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                    <div class="shadow overflow-hidden border-b border-gray-200 bg-gray-100 sm:rounded-2xl">
-                        <table class="min-w-full divide-y divide-gray-200" id="tasktable-event">
-                            <thead class="bg-gray-900">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                        ID
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                        Alert Name
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                        Alert Message
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                        Timestamp
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                        Channel
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                        Users
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for triggered_alert in event_alerts_data %}
-                                    {% for i, point in enumerate(triggered_alert.alert_metadata["alert_data"]) %}
-                                        {% if i % 2 == 1 %}
-                                        <!-- Odd row -->
-                                        <tr class="bg-white">
-                                            {% else %}
-                                            <!-- Even row -->
-                                        <tr class="bg-gray-50">
-                                            {% endif %}
-                                            <td class="px-6 py-4 text-sm font-medium text-gray-900">
-                                                {{ triggered_alert.id }}
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500">
-                                                {{ triggered_alert.alert_name }}
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500">
-                                                {{ triggered_alert.alert_message }}
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500">
-                                                {{ triggered_alert.created_at }}
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500">
-                                                {{ triggered_alert.alert_channel }}
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500">
-                                                {{ triggered_alert.alert_channel_conf }}
-                                            </td>
-                                        </tr>
+
+        <div id="event-alerts" class="hidden p-4">
+            <div class="flex flex-col py-4">
+                <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                    <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+                        <div class="shadow overflow-hidden border-b border-gray-200 bg-gray-100 sm:rounded-2xl">
+                            <table class="min-w-full divide-y divide-gray-200" id="tasktable-event">
+                                <thead class="bg-gray-900">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                            ID
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                            Alert Name
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                            Alert Message
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                            Timestamp
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                            Channel
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                            Users
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for triggered_alert in event_alerts_data %}
+                                        {% for i, point in enumerate(triggered_alert.alert_metadata["alert_data"]) %}
+                                            {% if i % 2 == 1 %}
+                                            <!-- Odd row -->
+                                            <tr class="bg-white">
+                                                {% else %}
+                                                <!-- Even row -->
+                                            <tr class="bg-gray-50">
+                                                {% endif %}
+                                                <td class="px-6 py-4 text-sm font-medium text-gray-900">
+                                                    {{ triggered_alert.id }}
+                                                </td>
+                                                <td class="px-6 py-4 text-sm text-gray-500">
+                                                    {{ triggered_alert.alert_name }}
+                                                </td>
+                                                <td class="px-6 py-4 text-sm text-gray-500">
+                                                    {{ triggered_alert.alert_message }}
+                                                </td>
+                                                <td class="px-6 py-4 text-sm text-gray-500">
+                                                    {{ triggered_alert.created_at }}
+                                                </td>
+                                                <td class="px-6 py-4 text-sm text-gray-500">
+                                                    {{ triggered_alert.alert_channel }}
+                                                </td>
+                                                <td class="px-6 py-4 text-sm text-gray-500">
+                                                    {{ triggered_alert.alert_channel_conf }}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
                                     {% endfor %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>                        
+        </div>
+    </div>
 
     <style>
         .dataTableAnomaly-table > thead > tr > th {
@@ -168,11 +180,13 @@
     <script>
         const dataTableAnomaly = new simpleDatatables.DataTable("#tasktable-anomaly");
         const dataTableEvent = new simpleDatatables.DataTable("#tasktable-event");
+
+        const dataTables = [dataTableAnomaly, dataTableEvent];
+        // CSV export
+        let currentTable = dataTables[0];
     </script>
 
     <script type="text/javascript">
-        let currentTable = dataTableAnomaly;
-
         function downloadCSV() {
             // Variable to store the final csv data
             let csv_data = [];
@@ -244,6 +258,34 @@
             temp_link.click();
             document.body.removeChild(temp_link);
         }
+    </script>
+
+    <script>
+        let tabsContainer = document.querySelector("#tabs");
+
+        let tabTogglers = tabsContainer.querySelectorAll("#tabs a");
+
+        tabTogglers.forEach(function(toggler) {
+          toggler.addEventListener("click", function(e) {
+            e.preventDefault();
+
+            let tabName = this.getAttribute("href");
+
+            let tabContents = document.getElementById("tab-contents");
+
+            for (let i = 0; i < tabContents.children.length; i++) {
+              tabTogglers[i].parentElement.classList.remove("border-t", "border-r", "border-l", "-mb-px", "bg-white");
+              tabContents.children[i].classList.remove("hidden");
+              if ("#" + tabContents.children[i].id === tabName) {
+                currentTable = dataTables[i];
+                continue;
+              }
+              tabContents.children[i].classList.add("hidden");
+            }
+            e.target.parentElement.classList.add("border-t", "border-r", "border-l", "-mb-px", "bg-white");
+          });
+        });
+
     </script>
 </body>
 

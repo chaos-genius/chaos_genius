@@ -18,7 +18,7 @@
             <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                 <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
                     <div class="shadow overflow-hidden border-b border-gray-200 bg-gray-100 sm:rounded-2xl">
-                        <table class="min-w-full divide-y divide-gray-200" id="tasktable-anomaly">
+                        <table class="min-w-full divide-y divide-gray-200 table-fixed w-full" id="tasktable-anomaly">
                             <thead class="bg-gray-900">
                                 <tr>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
@@ -64,36 +64,36 @@
                                             <!-- Even row -->
                                         <tr class="bg-gray-50">
                                             {% endif %}
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            <td class="px-6 py-4 text-sm font-medium text-gray-900">
                                                 {{ triggered_alert.id }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 text-sm text-gray-500">
                                                 {{ triggered_alert.alert_name }}
 
                                                 <!-- TODO: place progress bar in a better place -->
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 text-sm text-gray-500">
                                                 {{ triggered_alert.kpi_name }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 text-sm text-gray-500">
                                                 {{ point["Dimension"] }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 text-sm text-gray-500">
                                                 {{ point["Value"] }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 text-sm text-gray-500">
                                                 {{ point["Expected Value"] }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 text-sm text-gray-500">
                                                 {{ point["Severity Score"] }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 text-sm text-gray-500">
                                                 {{ triggered_alert.created_at }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 text-sm text-gray-500">
                                                 {{ triggered_alert.alert_channel }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 text-sm text-gray-500">
                                                 {{ triggered_alert.alert_channel_conf }}
                                             </td>
                                             {% set count = count + 1 %}
@@ -144,22 +144,22 @@
                                             <!-- Even row -->
                                         <tr class="bg-gray-50">
                                             {% endif %}
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            <td class="px-6 py-4 text-sm font-medium text-gray-900">
                                                 {{ triggered_alert.id }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 text-sm text-gray-500">
                                                 {{ triggered_alert.alert_name }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 text-sm text-gray-500">
                                                 {{ triggered_alert.alert_message }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 text-sm text-gray-500">
                                                 {{ triggered_alert.created_at }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 text-sm text-gray-500">
                                                 {{ triggered_alert.alert_channel }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 text-sm text-gray-500">
                                                 {{ triggered_alert.alert_channel_conf }}
                                             </td>
                                         </tr>

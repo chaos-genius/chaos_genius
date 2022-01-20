@@ -22,10 +22,7 @@
                             <thead class="bg-gray-900">
                                 <tr>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                        ID
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                        Alert Name
+                                        Alert Name (ID)
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
                                         KPI Name
@@ -45,16 +42,9 @@
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
                                         Timestamp
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                        Channel
-                                    </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                        Users
-                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% set count = 0 %}
                                 {% for triggered_alert in anomaly_alerts_data %}
                                     {% for i, point in enumerate(triggered_alert.alert_metadata["alert_data"]) %}
                                         {% if i % 2 == 1 %}
@@ -64,13 +54,8 @@
                                             <!-- Even row -->
                                         <tr class="bg-gray-50">
                                             {% endif %}
-                                            <td class="px-6 py-4 text-sm font-medium text-gray-900">
-                                                {{ triggered_alert.id }}
-                                            </td>
                                             <td class="px-6 py-4 text-sm text-gray-500">
-                                                {{ triggered_alert.alert_name }}
-
-                                                <!-- TODO: place progress bar in a better place -->
+                                                {{ triggered_alert.alert_name }} ({{ triggered_alert.id }})
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-500">
                                                 {{ triggered_alert.kpi_name }}
@@ -90,13 +75,6 @@
                                             <td class="px-6 py-4 text-sm text-gray-500">
                                                 {{ triggered_alert.created_at }}
                                             </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500">
-                                                {{ triggered_alert.alert_channel }}
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500">
-                                                {{ triggered_alert.alert_channel_conf }}
-                                            </td>
-                                            {% set count = count + 1 %}
                                         </tr>
                                     {% endfor %}
                                 {% endfor %}

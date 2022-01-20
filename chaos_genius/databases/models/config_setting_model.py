@@ -105,6 +105,10 @@ class ConfigSetting(PkModel):
                     "is_editable": True,
                     "is_sensitive": False
                 },
+                "weekly_digest": {
+                    "is_editable": True,
+                    "is_sensitive": False
+                },
                 "scheduled_time": {
                     "is_editable": True,
                     "is_sensitive": False

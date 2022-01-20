@@ -22,7 +22,8 @@ ORGANISATION_SETTINGS_EXPOSE = {
 ALERT_DIGEST_SETTINGS_EXPOSE = {
     "active": True,
     "daily_digest": True,
-    "scheduled_time": True
+    "scheduled_time": True,
+    "weekly_digest": True
 }
 
 helper_objects = {

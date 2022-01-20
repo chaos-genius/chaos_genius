@@ -1,13 +1,15 @@
 import logging
 import os
 import datetime
+import pandas as pd
+from tabulate import tabulate
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.controllers.config_controller import get_config_object
-
+from chaos_genius.alerts.slack import alert_digest_slack_formatted
 from chaos_genius.alerts.email import send_static_alert_email
 
 logger = logging.getLogger()
@@ -65,6 +67,7 @@ class AlertDigestController:
             alert.alert_channel = alert_conf.get("alert_channel")
             alert.daily_digest = alert_conf.get("daily_digest", False)
             alert.weekly_digest = alert_conf.get("weekly_digest", False)
+            alert.pop("alert_metadata")
 
             if alert_conf.get("alert_channel_conf") is None:
                 alert.alert_channel_conf = None
@@ -102,7 +105,7 @@ class AlertDigestController:
     def send_alert_digest(self, recipient, triggered_alert_ids, triggered_alert_dict):
         data = []
 
-        for id_ in triggered_alert_dict:
+        for id_ in triggered_alert_ids:
             data.append(triggered_alert_dict.get(id_))
             data[-1].link = f"http://localhost:5000/api/digest?id={id_}"
 
@@ -131,11 +134,31 @@ class AlertDigestController:
         template = env.get_template(template)
         test = send_static_alert_email(recipient_emails, subject, template.render(**kwargs), None, files)
 
-        print(test)
         return test
 
     def send_slack_digests(self, slack_digests):
-        pass
+        """Sends a slack alert containing a summary of triggered alerts"""
+
+        column_names = ["alert_name", "kpi_name", "created_at"],
+        data = pd.DataFrame(slack_digests, columns=column_names)
+        table_data = tabulate(data, tablefmt="fancy_grid", headers="keys")
+        table_data = "```" + table_data + "```"
+        test = alert_digest_slack_formatted(
+                self.frequency,
+                data
+            )
+
+        if test == "ok":
+            logger.info(
+                f"The slack alert digest was successfully sent"
+            )
+        else:
+            logger.info(
+                f"The slack alert digest has not been sent"
+            )
+
+        message = f"Status for slack alert digest: {test}"
+        return message
 
 
 def check_and_trigger_digest(frequency: str):

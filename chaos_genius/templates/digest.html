@@ -14,6 +14,8 @@
     <div class="container mx-auto py-4">
         <h1 class="text-3xl">ChaosGenius Alerts Digest</h1>
 
+        <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-4 sm:ml-3 sm:w-auto sm:text-sm" onclick="downloadCSV()">Download CSV</button>
+
         <div class="flex flex-col py-4">
             <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                 <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
@@ -169,49 +171,80 @@
     </script>
 
     <script type="text/javascript">
-        var taskErrorMapping = {
-            {% for i, task in enumerate(tasks) %}
-                {% if task.error %}
-                {{i}}: {{ (list(task.error.split("\n", maxsplit = 1)) + [task.github_issue_link]) | tojson }},
-                {% endif %}
-            {% endfor %}
-        };
+        let currentTable = dataTableAnomaly;
 
-        function showerror(id) {
-            let error = taskErrorMapping[id];
+        function downloadCSV() {
+            // Variable to store the final csv data
+            let csv_data = [];
 
-            if (!error) {
-                console.log("Could not find error for ", id);
-                return;
+            const headerRow = document.createElement("tr");
+            const headers = currentTable.headings;
+            for(let i = 0; i < headers.length; ++i) {
+                headerRow.appendChild(headers[i].cloneNode(true));
             }
 
-            let header = error[0];
-            let traceback = error[1];
-            let githubIssueLink = error[2];
+            // Get each row data
+            function getRows() {
+                let rows = null;
+                if (currentTable.searching) {
+                    const searchedRows = new Set(currentTable.searchData);
+                    rows = currentTable.data.filter((_, index) => searchedRows.has(index));
+                } else {
+                    rows = currentTable.data;
+                }
 
-            document.getElementById("error-modal").classList.remove("hidden");
+                return ([headerRow]).concat(rows);
+            }
 
-            document.getElementById("error-modal-title").innerHTML = header;
-            document.getElementById("error-modal-traceback").innerHTML = traceback;
+            const rows = getRows();
 
-            document.getElementById("error-github-link").href = githubIssueLink;
-        }
+            for (let i = 0; i < rows.length; i++) {
 
-        function closeerrormodal() {
-            document.getElementById("error-modal").classList.add("hidden");
+                // Get each column data
+                const cols = rows[i].querySelectorAll("td,th");
+
+                // Stores each csv row data
+                let csvrow = [];
+                for (let j = 0; j < cols.length; j++) {
+
+                    // Get the text data of each cell
+                    // of a row and push it to csvrow
+                    csvrow.push(cols[j].innerText.trim());
+                }
+
+                // Combine each column value with comma
+                csv_data.push(csvrow.join(","));
+            }
+
+            // Combine each row data with new line character
+            csv_data = csv_data.join('\n');
+
+            // Create CSV file object and feed
+            // our csv_data into it
+            const CSVFile = new Blob([csv_data], {
+                type: "text/csv"
+            });
+
+            // Create to temporary link to initiate
+            // download process
+            let temp_link = document.createElement("a");
+
+            // Download csv file
+            temp_link.download = "ChaosGenius_alert_digest_export_" + (new Date()).toISOString().slice(0, 10)
+ + ".csv";
+            const url = window.URL.createObjectURL(CSVFile);
+            temp_link.href = url;
+
+            // This link should not be displayed
+            temp_link.style.display = "none";
+            document.body.appendChild(temp_link);
+
+            // Automatically click the link to
+            // trigger download
+            temp_link.click();
+            document.body.removeChild(temp_link);
         }
     </script>
-    <style type="text/css">
-        #error-modal-traceback {
-            max-height: calc(100vh - 18rem);
-        }
-
-        @media (min-width: 640px) {
-            #error-modal-traceback {
-                max-height: calc(100vh - 12rem);
-            }
-        }
-    </style>
 </body>
 
 </html>

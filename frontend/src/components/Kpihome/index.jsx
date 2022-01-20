@@ -95,8 +95,8 @@ const Kpihome = () => {
         res.push({
           value: `${dataKey?.id}`,
           label: dataKey?.display_name,
-          grp1_name: dataKey?.current_period_name,
-          grp2_name: dataKey?.last_period_name
+          grp2_name: dataKey?.current_period_name,
+          grp1_name: dataKey?.last_period_name
         });
       }
     }
@@ -108,8 +108,8 @@ const Kpihome = () => {
       setTimeLine({
         label: timeCutsData[0]?.display_name,
         value: `${timeCutsData[0]?.id}`,
-        grp1_name: timeCutsData[0]?.current_period_name,
-        grp2_name: timeCutsData[0]?.last_period_name
+        grp2_name: timeCutsData[0]?.current_period_name,
+        grp1_name: timeCutsData[0]?.last_period_name
       });
       getAllTimeCutOptions(timeCutsData);
     }

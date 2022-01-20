@@ -58,7 +58,7 @@ def get_dates_for_month_on_month(
     The second tuple contains start of current month, t.
     """
     base_start_date = end_date.replace(day=1) - relativedelta(months=1)
-    base_end_date = end_date.replace(day=1) - timedelta(days=1)
+    base_end_date = end_date.replace(day=1)
 
     rca_start_date = end_date.replace(day=1)
 
@@ -103,7 +103,7 @@ def get_dates_for_week_on_week(
     end_date_weekday = end_date.weekday()
 
     base_start_date = end_date - timedelta(days=6 + end_date_weekday + 1)
-    base_end_date = base_start_date + timedelta(days=6)
+    base_end_date = base_start_date + timedelta(days=7)
 
     rca_start_date = end_date - timedelta(days=end_date_weekday)
 
@@ -148,7 +148,7 @@ def get_dates_for_quarter_on_quarter(
     rca_start_date = end_date.replace(month=rca_start_month, day=1)
 
     base_start_date = rca_start_date - relativedelta(months=3)
-    base_end_date = rca_start_date - timedelta(days=1)
+    base_end_date = rca_start_date
 
     return (base_start_date, base_end_date), (rca_start_date, end_date)
 

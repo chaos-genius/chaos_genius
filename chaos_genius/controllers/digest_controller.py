@@ -1,4 +1,5 @@
 import datetime
+from typing import List
 
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
 from chaos_genius.databases.models.alert_model import Alert
@@ -38,7 +39,20 @@ def triggered_alert_data_processing(data):
     
     return data
 
-def get_digest_view_data(triggered_alert_id=None):
+
+def _filter_anomaly_alerts(
+    anomaly_alerts_data: List[TriggeredAlerts],
+    include_subdims: bool = False
+):
+    if not include_subdims:
+        for alert in anomaly_alerts_data:
+            alert.alert_metadata["alert_data"] = list(filter(
+                lambda point: point["Dimension"] == "Overall KPI",
+                alert.alert_metadata["alert_data"]
+            ))
+
+
+def get_digest_view_data(triggered_alert_id=None, include_subdims: bool = False):
 
     curr_time = datetime.datetime.now()
     time_diff = datetime.timedelta(days=7)
@@ -49,9 +63,9 @@ def get_digest_view_data(triggered_alert_id=None):
 
     data = TriggeredAlerts.query.filter(*filters).order_by(TriggeredAlerts.created_at.desc()).all()
     data = triggered_alert_data_processing(data)
-    
 
     anomaly_alerts_data = [alert for alert in data if alert.alert_type == "KPI Alert"]
+    _filter_anomaly_alerts(anomaly_alerts_data, include_subdims)
     event_alerts_data = [alert for alert in data if alert.alert_type == "Event Alert"]
 
     return anomaly_alerts_data, event_alerts_data

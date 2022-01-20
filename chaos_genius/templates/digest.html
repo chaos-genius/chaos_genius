@@ -24,6 +24,14 @@
 
     <div id="tab-contents">
         <div id="anomaly-alerts" class="p-4">
+
+            <div class="m-4">
+               <div class="toggle colour flex">
+                   <span>Show subdimensions:&nbsp</span><input id="subdims-check" class="toggle-checkbox hidden" type="checkbox">
+                  <label for="subdims-check" class="toggle-label inline-block w-12 h-6 rounded-full transition-color duration-150 ease-out"></label>
+               </div>
+            </div>
+
             <div class="flex flex-col py-4">
                 <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                     <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
@@ -176,6 +184,49 @@
         }
     </style>
 
+    <style>
+    .toggle-label {
+      position: relative;
+    }
+    .toggle-label:before {
+      position: absolute;
+      top: 0.125rem;
+      left: 0.125rem;
+      display: block;
+      content: "";
+      width: 1.25rem;
+      height: 1.25rem;
+      border-radius: 9999%;
+      background-color: white;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: 40%;
+      background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23a0aec0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>');
+      transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1);
+      transform: translateX(0);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .toggle-checkbox:checked + .toggle-label:before {
+      transform: translateX(1.5rem);
+      background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23a0aec0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check"><polyline points="20 6 9 17 4 12"></polyline></svg>');
+    }
+
+    .toggle.slim .toggle-label:before {
+      top: -0.15rem;
+      left: 0;
+    }
+    .toggle.slim .toggle-checkbox:checked + .toggle-label:before {
+      transform: translateX(1.75rem);
+    }
+    .toggle.colour .toggle-label {
+      background-color: #feb2b2;
+    }
+    .toggle.colour .toggle-checkbox:checked + .toggle-label {
+      background-color: #9ae6b4;
+    }
+    </style>
+
     <script src="https://unpkg.com/simple-datatables@3.2.0/dist/umd/simple-datatables.js" type="text/javascript"></script>
     <script>
         const dataTableAnomaly = new simpleDatatables.DataTable("#tasktable-anomaly");
@@ -286,6 +337,30 @@
           });
         });
 
+    </script>
+
+    <script>
+        const subdimsCheck = document.getElementById("subdims-check");
+
+        function initSubdimsCheck() {
+            let params = new URLSearchParams(location.search);
+
+            if (params.get("subdims") == "true") {
+                subdimsCheck.checked = true;
+            }
+        }
+
+        initSubdimsCheck();
+
+        subdimsCheck.addEventListener("click", () => {
+            const parser = new URL(window.location);
+            if (subdimsCheck.checked) {
+                parser.searchParams.set("subdims", true);
+            } else {
+                parser.searchParams.set("subdims", false);
+            }
+            window.location = parser.href;
+        });
     </script>
 </body>
 

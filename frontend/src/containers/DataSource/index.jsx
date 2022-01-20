@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -22,11 +22,15 @@ const RESET_ACTION = {
 const DataSource = () => {
   const dispatch = useDispatch();
 
+  const location = useLocation();
+
+  const query = new URLSearchParams(location.search);
+
   const [search, setSearch] = useState('');
 
   const [dataSourceFilter, setDataSourceFilter] = useState([]);
   const [data, setData] = useState(false);
-
+  const [filterData, setFilterData] = useState([]);
   const { isLoading, dataSourcesList } = useSelector(
     (state) => state.dataSource
   );
@@ -43,20 +47,29 @@ const DataSource = () => {
   };
 
   useEffect(() => {
+    if (query.getAll('datasourcetype').length !== 0 && dataSourcesList) {
+      setDataSourceFilter(query.getAll('datasourcetype'));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataSourcesList]);
+
+  useEffect(() => {
     if (search !== '') {
       searchDataSource();
+    } else if (filterData.length !== 0) {
+      setDataSourceData(filterData);
     } else {
       setDataSourceData(dataSourcesList);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, dataSourcesList]);
+  }, [search, dataSourcesList, filterData]);
 
   const searchDataSource = () => {
     const options = {
       keys: ['name', 'connection_type']
     };
 
-    const fuse = new Fuse(dataSourcesList, options);
+    const fuse = new Fuse(dataSourceData, options);
 
     const result = fuse.search(search);
     setDataSourceData(
@@ -69,7 +82,7 @@ const DataSource = () => {
   useEffect(() => {
     const fetchFilter = () => {
       if (dataSourceFilter.length === 0) {
-        setDataSourceData(dataSourcesList);
+        setFilterData(dataSourcesList);
       } else {
         var arr = [];
         dataSourceFilter &&
@@ -80,7 +93,8 @@ const DataSource = () => {
               }
             });
           });
-        setDataSourceData(arr);
+
+        setFilterData(arr);
       }
     };
     fetchFilter();

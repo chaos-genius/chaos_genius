@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+import { useHistory, useLocation } from 'react-router-dom';
+
 import Search from '../../assets/images/search.svg';
 
 import Fuse from 'fuse.js';
@@ -16,6 +18,10 @@ const DataSourceFilter = ({
   setDashboardFilter,
   kpi
 }) => {
+  const location = useLocation();
+  const history = useHistory();
+  const query = new URLSearchParams(location.search);
+
   const [checked, setChecked] = useState([]);
   const [datasourceType, setDatasourceType] = useState([]);
   const [dashboard, setDashboard] = useState([]);
@@ -26,19 +32,55 @@ const DataSourceFilter = ({
   const onSearch = (e) => {
     if (datasource) {
       setSearch(e.target.value);
+      let params = new URLSearchParams();
+      params.append('search', e.target.value);
+      window.history.pushState('', '', '/#/datasource?' + params.toString());
     } else {
       setKpiSearch(e.target.value);
+      let params = new URLSearchParams();
+      params.append('search', e.target.value);
+      window.history.pushState('', '', '/#/kpiexplorer?' + params.toString());
     }
   };
 
   useEffect(() => {
-    if (datasource) {
-      setDataSourceFilter(checked);
-    } else {
-      setKpiFilter(checked);
+    if (query.getAll('datasourcetype').length !== 0) {
+      setChecked(query.getAll('datasourcetype'));
+    }
+    if (query.getAll('dashboard').length !== 0) {
+      setDashboardFilterList(query.getAll('dashboard'));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checked]);
+  }, []);
+
+  useEffect(() => {
+    if (datasource) {
+      setDataSourceFilter(checked);
+      let params = new URLSearchParams();
+      for (const key of checked) {
+        params.append('datasourcetype', key.toLowerCase());
+      }
+      history.push({
+        pathname: '/datasource',
+        search: '?' + params.toString()
+      });
+    } else {
+      setKpiFilter(checked);
+      setDashboardFilter(dashboardFilterList);
+      let params = new URLSearchParams();
+      for (const key of checked) {
+        params.append('datasourcetype', key.toLowerCase());
+      }
+      for (const key of dashboardFilterList) {
+        params.append('dashboard', key.toLowerCase());
+      }
+      history.push({
+        pathname: '/kpiexplorer',
+        search: '?' + params.toString()
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checked, dashboardFilterList]);
 
   useEffect(() => {
     if (dashboardSearch !== '') {
@@ -65,13 +107,6 @@ const DataSourceFilter = ({
   };
 
   useEffect(() => {
-    if (kpiList) {
-      setDashboardFilter(dashboardFilterList);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dashboardFilterList]);
-
-  useEffect(() => {
     if (datasourceList) {
       setDatasourceType([
         ...new Set(datasourceList.map((item) => item.connection_type))
@@ -83,9 +118,15 @@ const DataSourceFilter = ({
       ]);
       var unique = [];
       kpiData.map((item) =>
-        item.dashboards.map((key) => unique.push(key.name))
+        item.dashboards.map((key) =>
+          unique.push({ name: key.name, id: key.id })
+        )
       );
-      setDashboard([...new Set(unique)]);
+      let key = 'id';
+
+      setDashboard([
+        ...new Map(unique.map((item) => [item[key], item])).values()
+      ]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datasourceList, kpiData]);
@@ -93,35 +134,37 @@ const DataSourceFilter = ({
   const onChangeFilter = (e) => {
     if (datasource) {
       if (e.target.checked === true) {
-        let selected = checked.concat(e.target.name);
+        let selected = checked.concat(e.target.name.toLowerCase());
         setChecked(selected);
         setDataSourceFilter(checked);
       } else if (e.target.checked === false) {
-        let selected = checked.filter((data) => data !== e.target.name);
+        let selected = checked.filter(
+          (data) => data !== e.target.name.toLowerCase()
+        );
         setChecked(selected);
       }
     } else {
       if (e.target.checked === true) {
-        let selected = checked.concat(e.target.name);
+        let selected = checked.concat(e.target.name.toLowerCase());
         setChecked(selected);
         setKpiFilter(checked);
       } else if (e.target.checked === false) {
-        let selected = checked.filter((data) => data !== e.target.name);
+        let selected = checked.filter(
+          (data) => data !== e.target.name.toLowerCase()
+        );
         setChecked(selected);
       }
     }
   };
 
-  const onDashboardFilter = (e) => {
+  const onDashboardFilter = (e, type) => {
     if (e.target.checked === true) {
-      let selected = dashboardFilterList.concat(e.target.name);
-
+      let selected = dashboardFilterList.concat(type.id.toString());
       setDashboardFilterList(selected);
     } else if (e.target.checked === false) {
       let selected = dashboardFilterList.filter(
-        (data) => data !== e.target.name
+        (data) => data !== type.id.toString()
       );
-
       setDashboardFilterList(selected);
     }
   };
@@ -165,16 +208,17 @@ const DataSourceFilter = ({
                   <div className="form-check check-box">
                     <input
                       className="form-check-input"
-                      name={item}
-                      id={item}
+                      name={item.name}
+                      id={item.name}
+                      checked={dashboardFilterList.includes(item.id.toString())}
                       type="checkbox"
-                      onChange={(e) => onDashboardFilter(e)}
+                      onChange={(e) => onDashboardFilter(e, item)}
                     />
 
                     <label
                       className="form-check-label name-tooltip"
-                      htmlFor={item}>
-                      {CustomTooltip(item)}
+                      htmlFor={item.name}>
+                      {CustomTooltip(item.name)}
                     </label>
                   </div>
                 );
@@ -199,6 +243,7 @@ const DataSourceFilter = ({
                     type="checkbox"
                     id={type}
                     name={type}
+                    checked={checked.includes(type.toLowerCase())}
                     onChange={(e) => onChangeFilter(e)}
                   />
                   <label className="form-check-label" htmlFor={type}>

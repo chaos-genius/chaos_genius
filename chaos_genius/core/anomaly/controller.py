@@ -436,7 +436,7 @@ class AnomalyDetectionController(object):
         try:
             agg = self.kpi_info["aggregation"]
             dq_list = ["max", "count", "mean"] if agg != "mean" else ["max", "count"]
-            is_categorical_metric = 1 if input_data[self.kpi_info['metric']].dtypes == "object" else 0
+            is_categorical_metric = 1 if input_data[self.kpi_info["metric"]].dtypes == "object" else 0
             if agg == "count" and is_categorical_metric:
                 dq_list = []
         except Exception as e:

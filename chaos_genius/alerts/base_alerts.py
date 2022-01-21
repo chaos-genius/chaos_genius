@@ -113,14 +113,17 @@ class StaticEventAlertController:
         else:
             raise Exception("Alert Setting isn't configured")
 
+        output = False
+        alert_data = None
+
         if (
             not change_df.empty
             and self.alert_info["alert_settings"] != "missing_data_alert"
         ):
             if self.alert_info["alert_channel"] == "email":
-                self.prepare_email(change_df)
+                outcome, alert_data = self.prepare_email(change_df)
             elif self.alert_info["alert_channel"] == "slack":
-                self.send_slack_event_alert(change_df)
+                outcome, alert_data = self.send_slack_event_alert(change_df)
 
         # send the missing data alert with different template
         if (
@@ -128,11 +131,31 @@ class StaticEventAlertController:
             and self.alert_info["alert_settings"] == "missing_data_alert"
         ):
             if self.alert_info["alert_channel"] == "email":
-                self.send_missing_data_email_alert()
+                outcome, alert_data = self.send_missing_data_email_alert()
             elif self.alert_info["alert_channel"] == "slack":
-                self.send_slack_event_alert(change_df)
+                outcome, alert_data = self.send_slack_event_alert(change_df)
 
         self.pickle_df()
+
+        if alert_data is None:
+            return outcome
+        
+        alert_metadata = {
+                            "alert_frequency": self.alert_info["alert_frequency"],
+                            "alert_data": alert_data,
+                        }    
+
+        triggered_alert = TriggeredAlerts(
+                            alert_conf_id=self.alert_info["id"],
+                            alert_type="Event Alert",
+                            is_sent=outcome,
+                            created_at=datetime.datetime.now(),
+                            alert_metadata=alert_metadata       
+                        )
+
+        triggered_alert.update(commit=True)
+        return outcome
+
 
     @staticmethod
     def test_new_entry(new_df, old_df):
@@ -242,12 +265,14 @@ class StaticEventAlertController:
                 alert_name=self.alert_info["alert_name"],
                 preview_text="Static Event Alert",
             )
-            return test
+
+            alert_data = change_df.T.to_dict().values()
+            return test, alert_data
         else:
             logger.info(
                 f"No email recipients available for Alert ID - {self.alert_info['id']}"
             )
-            return False
+            return False, None
 
     def send_template_email(self, template, recipient_emails, subject, files, **kwargs):
         """Sends an email using a template."""
@@ -303,15 +328,21 @@ class StaticEventAlertController:
             )
 
         message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
-        return message
+        logger.info(
+            message
+        )
+
+        test = test == "ok"
+        alert_data = change_df.T.to_dict().values()
+        return test, alert_data
 
     def send_missing_data_email_alert(self):
         alert_channel_conf = self.alert_info["alert_channel_conf"]
         recipient_emails = alert_channel_conf.get("email", [])
         subject = f"{self.alert_info['alert_name']} - Chaos Genius Event Alert❗"
         if not recipient_emails:
-            return True
-        self.send_template_email(
+            return False, None
+        test = self.send_template_email(
             template="missing_data_alert.html",
             recipient_emails=recipient_emails,
             subject=subject,
@@ -321,6 +352,8 @@ class StaticEventAlertController:
             alert_name=self.alert_info.get("alert_name", ""),
             preview_text="Missing Data Alert",
         )
+
+        return test, []
 
     def send_missing_data_slack_alert(self):
         test = event_alert_slack(
@@ -340,7 +373,12 @@ class StaticEventAlertController:
             )
 
         message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
-        return message
+        logger.info(
+            message
+        )
+
+        test = test == "ok"
+        return test, []
 
 class AnomalyAlertController:
     def __init__(self, alert_info, anomaly_end_date=None):

@@ -113,7 +113,7 @@ class StaticEventAlertController:
         else:
             raise Exception("Alert Setting isn't configured")
 
-        output = False
+        outcome = False
         alert_data = None
 
         if (

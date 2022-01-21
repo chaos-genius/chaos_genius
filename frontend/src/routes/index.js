@@ -37,16 +37,6 @@ const Routes = () => (
       component={OrganisationOnboarding}></Route>
     <PrivateRouteWithSidebar
       exact
-      path="/"
-      component={(props) => <Home {...props} />}
-    />{' '}
-    {/* <PrivateRouteWithSidebar
-      exact
-      path={['/dashboard/deepdrills/', '/dashboard/deepdrills/:kpi']}
-      component={(props) => <Dashboard {...props} />}
-    />{' '} */}
-    <PrivateRouteWithSidebar
-      exact
       path={[
         '/dashboard/:dashboard/deepdrills/',
         '/dashboard/:dashboard/deepdrills/:kpi'
@@ -163,9 +153,15 @@ const Routes = () => (
     />
     <PrivateRouteWithSidebar
       exact
+      path={['/', '/:id']}
+      component={(props) => <Home {...props} />}
+    />{' '}
+    <PrivateRouteWithSidebar
+      exact
       component={(props) => <Anomolies {...props} />}
     />
   </Switch>
 );
 
 export default Routes;
+

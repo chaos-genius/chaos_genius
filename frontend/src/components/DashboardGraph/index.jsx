@@ -35,25 +35,32 @@ import {
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import highchartsMore from 'highcharts/highcharts-more';
+import {
+  HRNumbers,
+  HRN_PREFIXES
+} from '../../utils/Formatting/Numbers/humanReadableNumberFormatter';
 
 highchartsMore(Highcharts);
 Highcharts.setOptions({
   time: {
     timezone: getTimezone()
+  },
+  lang: {
+    thousandsSep: ','
   }
 });
 
 const data = [
   {
-    value: 'mom',
+    value: 'last_30_days',
     label: 'Current Month on Last Month'
   },
   {
-    value: 'wow',
+    value: 'last_7_days',
     label: 'Current Week on Last Week'
   },
   {
-    value: 'dod',
+    value: 'previous_day',
     label: 'Current Day on Last Day'
   }
 ];
@@ -77,7 +84,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
   const [singleDimensionData, SetSingleDimensionData] = useState(0);
 
   const [monthWeek, setMonthWeek] = useState({
-    value: 'mom',
+    value: 'last_30_days',
     label: 'Current Month on Last Month'
   });
   const [dimension, setDimension] = useState({
@@ -188,6 +195,12 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
       let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
       valueAxis.renderer.minGridDistance = 50;
       valueAxis.renderer.grid.template.opacity = 0.6;
+      valueAxis.numberFormatter = new am4core.NumberFormatter();
+      valueAxis.numberFormatter.numberFormat = '#a';
+      valueAxis.numberFormatter.bigNumberPrefixes = HRN_PREFIXES;
+
+      valueAxis.tooltip.numberFormatter = new am4core.NumberFormatter();
+      valueAxis.tooltip.numberFormat = '#,###,###.##';
 
       if (rcaAnalysisData?.chart?.y_axis_lim.length > 0) {
         valueAxis.min = rcaAnalysisData?.chart?.y_axis_lim[0];
@@ -207,7 +220,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
       columnTemplate.propertyFields.fill = 'color';
 
       let label = columnTemplate.createChild(am4core.Label);
-      label.text = "{displayValue.formatNumber('###,###.##')}";
+      label.text = "{displayValue.formatNumber('#,###,###.##')}";
       label.align = 'center';
       label.valign = 'middle';
       label.wrap = true;
@@ -299,7 +312,12 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
         },
         yAxis: {
           type: 'value',
-          step: 1
+          step: 1,
+          labels: {
+            formatter: function () {
+              return HRNumbers.toHumanString(this.value);
+            }
+          }
         },
         plotOptions: {
           line: {

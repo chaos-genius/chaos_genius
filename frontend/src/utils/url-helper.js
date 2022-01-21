@@ -17,6 +17,7 @@ export const attachParams = (relativeUrl, params) => {
 export const DASHBOARD_URL = `${BASE_URL}/api/dashboard`;
 export const KPI_URL = `${BASE_URL}/api/kpi`;
 export const KPI_RELATIVE_URL = `/api/kpi`;
+export const RCA_RELATIVE_URL = `/api/rca`;
 export const CONNECTION_URL = `${BASE_URL}/api/connection`;
 export const CONNECTION_TYPE = `${BASE_URL}/api/connection/types`;
 export const CREATE_DATASOURCE = `${BASE_URL}/api/connection/create`;
@@ -52,3 +53,5 @@ export const DASHBOARD_UPDATE_URL = `${BASE_URL}/api/dashboard/edit`;
 export const ORGANIZATION_UPDATE_URL = `${BASE_URL}/api/config/update`;
 export const GLOBAL_SETTING_URL = `${BASE_URL}/api/config/global-config`;
 export const TASK_MANAGER_API_STATUS_URL = `${BASE_URL}/api/status`;
+
+export const VERSION_SETTING_URL = `${BASE_URL}/api/meta/version`;

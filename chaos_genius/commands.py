@@ -8,6 +8,7 @@ from subprocess import call
 import click
 from flask.cli import with_appcontext
 
+from chaos_genius.settings import AIRBYTE_ENABLED
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.join(HERE, os.pardir)
@@ -75,12 +76,15 @@ def integration_connector():
     click.echo(f"Third Party Setup: Third Party setup started.")
 
     from chaos_genius.third_party.integration_client import init_integration_server
-    status = init_integration_server()
 
-    if status:
-        click.echo(f"Third Party Setup: Connector initialised successfully.")
+    if AIRBYTE_ENABLED:
+        status = init_integration_server()
+        if status:
+            click.echo("Third Party Setup: Connector initialised successfully.")
+        else:
+            click.echo("Third Party Setup: Connector initialisation failed.")
     else:
-        click.echo(f"Third Party Setup: Connector initialisation failed.")
+        click.echo("Third Party Setup: Connector is disabled in the env file.")
 
 
 @click.command()

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-import Tooltip from 'react-tooltip-lite';
 import Search from '../../assets/images/search.svg';
 import GreenArrow from '../../assets/images/green-arrow.svg';
 
@@ -8,6 +7,7 @@ import Fuse from 'fuse.js';
 
 import { v4 as uuidv4 } from 'uuid';
 import { useParams } from 'react-router-dom';
+import { CustomTooltip } from '../../utils/tooltip-helper';
 
 const FilterAnalystics = ({ kpi, setKpi, data, onboarding }) => {
   const [listData, setListData] = useState(data);
@@ -78,12 +78,9 @@ const FilterAnalystics = ({ kpi, setKpi, data, onboarding }) => {
                     handleClick(item);
                   }}>
                   <div className="filter-tooltipcontent">
-                    <Tooltip
-                      className="tooltip-name"
-                      direction="right"
-                      content={<span> {item.name}</span>}>
-                      <label className="name-tooltip">{item.name}</label>
-                    </Tooltip>
+                    <label className="name-tooltip">
+                      {CustomTooltip(item.name)}
+                    </label>
                   </div>
                   <img src={GreenArrow} alt="Arrow" />
                 </li>

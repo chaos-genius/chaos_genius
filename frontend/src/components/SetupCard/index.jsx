@@ -15,7 +15,7 @@ import KpiActive from '../../assets/images/setupcard/kpi-active.svg';
 const description = [
   'Select the Data Sources you want to add',
   'Define the KPIs you want to monitor and analyse',
-  'Setup Anomaly Detection & AutoRCA for your KPIs',
+  'Setup Anomaly Detection & Deepdrills for your KPIs',
   'Setup Alerts to get notified on changes in events & KPIs'
 ];
 
@@ -36,7 +36,7 @@ const SetupCard = ({ heading, step, buttonText, active }) => {
       } else if (step === 2) {
         history.push('/kpiexplorer');
       } else if (step === 3) {
-        history.push('/dashboard/autorca/kpi');
+        history.push('/dashboard/0/deepdrills');
       } else if (step === 4) {
         history.push('/alerts');
       }

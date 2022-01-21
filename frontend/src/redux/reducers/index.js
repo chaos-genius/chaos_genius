@@ -9,6 +9,7 @@ import { hierarchial } from './Hierarchical';
 import { onboarding } from './Onboarding';
 import { lineChart } from './LineChart';
 import { sidebar } from './Sidebarlist';
+import { VersionSetting } from './VersionControl';
 import { anomaly } from './Anomaly';
 import { alert } from './Alert';
 import { setting } from './setting';
@@ -34,7 +35,8 @@ const rootReducer = combineReducers({
   DashboardHome: DashboardHome,
   organisation: organisation,
   config: config,
-  GlobalSetting: GlobalSetting
+  GlobalSetting: GlobalSetting,
+  VersionSetting: VersionSetting
 });
 
 export default rootReducer;

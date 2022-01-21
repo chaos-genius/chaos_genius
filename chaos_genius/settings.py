@@ -9,6 +9,7 @@ environment variables.
 import os
 
 from dotenv import load_dotenv
+from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
 
 from chaos_genius.utils.utils import latest_git_commit_hash
 
@@ -43,6 +44,7 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_SENDER = os.getenv('EMAIL_SENDER')
 
+AIRBYTE_ENABLED = os.getenv("AIRBYTE_ENABLED", default=False)
 INTEGRATION_SERVER = os.getenv("INTEGRATION_SERVER")
 INTEGRATION_DB_HOST = os.getenv("INTEGRATION_DB_HOST")
 INTEGRATION_DB_USERNAME = os.getenv("INTEGRATION_DB_USERNAME")
@@ -67,6 +69,11 @@ DAYS_OFFSET_FOR_ANALTYICS = int(os.getenv('DAYS_OFFSET_FOR_ANALTYICS', default=2
 DEEPDRILLS_HTABLE_MAX_PARENTS = int(os.getenv('DEEPDRILLS_HTABLE_MAX_PARENTS', default=5))
 DEEPDRILLS_HTABLE_MAX_CHILDREN = int(os.getenv('DEEPDRILLS_HTABLE_MAX_CHILDREN', default=5))
 DEEPDRILLS_HTABLE_MAX_DEPTH = int(os.getenv('DEEPDRILLS_HTABLE_MAX_DEPTH', default=3))
+DEEPDRILLS_ENABLED_TIME_RANGES = os.getenv('DEEPDRILLS_ENABLED_TIME_RANGES', default='last_30_days,last_7_days,previous_day')
+DEEPDRILLS_ENABLED_TIME_RANGES = list(map(lambda x: x.strip(), DEEPDRILLS_ENABLED_TIME_RANGES.split(',')))
+for enabled_time_range in DEEPDRILLS_ENABLED_TIME_RANGES:
+    if enabled_time_range not in TIME_RANGES_BY_KEY.keys():
+        raise ValueError(f"Values in DEEPDRILLS_ENABLED_TIME_RANGES must be one of {', '.join(TIME_RANGES_BY_KEY.keys())}. Got: {enabled_time_range}.")
 
 SENTRY_DSN = os.getenv('SENTRY_DSN')
 

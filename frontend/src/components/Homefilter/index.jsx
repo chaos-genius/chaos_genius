@@ -1,16 +1,18 @@
 import React from 'react';
 
-import Tooltip from 'react-tooltip-lite';
-
 import Search from '../../assets/images/search.svg';
 import Dropdown from '../../assets/images/dropdownlist.svg';
 import Fuse from 'fuse.js';
 import './homefilter.scss';
 import { useState } from 'react';
 import { formatDateTime } from '../../utils/date-helper';
+import { useHistory } from 'react-router-dom';
+import { CustomTooltip } from '../../utils/tooltip-helper';
 
 const Homefilter = ({ data, setDashboard, dashboard }) => {
   const [filterData, setFilterData] = useState(data);
+
+  const history = useHistory();
 
   const onSearch = (event) => {
     if (event.target.value === '') {
@@ -36,11 +38,13 @@ const Homefilter = ({ data, setDashboard, dashboard }) => {
       if (type === 'alpha') {
         return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
       } else if (type === 'recent') {
-        return formatDateTime(b.created_at) - formatDateTime(a.created_at);
+        return (
+          formatDateTime(b.last_modified) - formatDateTime(a.last_modified)
+        );
       } else if (type === 'kpi') {
-        return a.kpis.length < b.kpis.length
+        return a.kpis.length > b.kpis.length
           ? -1
-          : a.kpis.length > b.kpis.length
+          : a.kpis.length < b.kpis.length
           ? 1
           : 0;
       } else {
@@ -89,17 +93,15 @@ const Homefilter = ({ data, setDashboard, dashboard }) => {
             filterData.map((item) => {
               return (
                 <li
-                  className={dashboard === item.id ? 'active' : ''}
+                  className={
+                    dashboard.toString() === item.id.toString() ? 'active' : ''
+                  }
                   onClick={() => {
                     setDashboard(item.id);
+                    history.push(`${item?.id}`);
                   }}>
                   <div className="filter-tooltipcontent">
-                    <Tooltip
-                      className="tooltip-name"
-                      direction="right"
-                      content={<span> {item.name}</span>}>
-                      <label className="name-tooltip">{item.name}</label>
-                    </Tooltip>
+                    {CustomTooltip(item.name)}
                   </div>
                   <span>{item?.kpis.length}</span>
                 </li>

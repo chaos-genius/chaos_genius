@@ -11,16 +11,10 @@ from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.controllers.config_controller import get_config_object
 from chaos_genius.alerts.slack import alert_digest_slack_formatted
 from chaos_genius.alerts.email import send_static_alert_email
+from chaos_genius.alerts.base_alerts import FREQUENCY_DICT
+from chaos_genius.settings import WEBAPP_URL
 
 logger = logging.getLogger()
-
-FREQUENCY_DICT = {
-    "weekly": datetime.timedelta(days=7, hours=0, minutes=0),
-    "daily": datetime.timedelta(days=1, hours=0, minutes=0),
-    "hourly": datetime.timedelta(days=0, hours=1, minutes=0),
-    "every_15_minute": datetime.timedelta(days=0, hours=0, minutes=15),
-    "every_minute": datetime.timedelta(days=0, hours=0, minutes=1),
-}
 
 ALERT_ATTRIBUTES_MAPPER = {
     "daily": "daily_digest",
@@ -107,7 +101,12 @@ class AlertDigestController:
 
         for id_ in triggered_alert_ids:
             data.append(triggered_alert_dict.get(id_))
-            data[-1].link = f"http://localhost:5000/api/digest?id={id_}"
+            if not WEBAPP_URL:
+                data[-1].link = "Webapp URL not setup"
+                continue
+
+            forward_slash = "/" if not WEBAPP_URL[-1] == "/" else ""
+            data[-1].link = f"{WEBAPP_URL}{forward_slash}api/digest?id={id_}"
 
         data_len = min(len(data), 10)
         data = data if data_len == 0 else data[0:data_len]

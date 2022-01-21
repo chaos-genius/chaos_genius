@@ -50,21 +50,6 @@ Highcharts.setOptions({
   }
 });
 
-const data = [
-  {
-    value: 'last_30_days',
-    label: 'Current Month on Last Month'
-  },
-  {
-    value: 'last_7_days',
-    label: 'Current Week on Last Week'
-  },
-  {
-    value: 'previous_day',
-    label: 'Current Day on Last Day'
-  }
-];
-
 const multidimensional = [
   {
     value: 'singledimension',
@@ -75,6 +60,12 @@ const multidimensional = [
     label: 'Multi Dimension'
   }
 ];
+const customStyles = {
+  container: (provided) => ({
+    ...provided,
+    width: 180
+  })
+};
 
 const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
   const dispatch = useDispatch();
@@ -83,14 +74,14 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
   const [collapse, setCollapse] = useState(true);
   const [singleDimensionData, SetSingleDimensionData] = useState(0);
 
-  const [monthWeek, setMonthWeek] = useState({
-    value: 'last_30_days',
-    label: 'Current Month on Last Month'
-  });
+  const [monthWeek, setMonthWeek] = useState({});
+  const [timeCutOptions, setTimeCutOptions] = useState([]);
   const [dimension, setDimension] = useState({
     value: 'singledimension',
     label: 'Single Dimension'
   });
+
+  const { timeCutsData } = useSelector((state) => state.TimeCuts);
 
   const { aggregationData, aggregationLoading } = useSelector(
     (state) => state.aggregation
@@ -122,8 +113,35 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
     dispatch(getDashboardLinechart(kpi, { timeline: monthWeek.value }));
   };
 
+  const getAllTimeCutOptions = (data) => {
+    let res = [];
+    if (data && data.length) {
+      for (const dataKey of data) {
+        res.push({
+          value: `${dataKey?.id}`,
+          label: dataKey?.display_name,
+          grp2_name: dataKey?.current_period_name,
+          grp1_name: dataKey?.last_period_name
+        });
+      }
+    }
+    setTimeCutOptions(res);
+  };
+
   useEffect(() => {
-    if (kpi !== undefined) {
+    if (timeCutsData && timeCutsData.length) {
+      setMonthWeek({
+        label: timeCutsData[0]?.display_name,
+        value: `${timeCutsData[0]?.id}`,
+        grp2_name: timeCutsData[0]?.current_period_name,
+        grp1_name: timeCutsData[0]?.last_period_name
+      });
+      getAllTimeCutOptions(timeCutsData);
+    }
+  }, [timeCutsData]);
+
+  useEffect(() => {
+    if (kpi !== undefined && monthWeek.value) {
       dispatch(getDashboardConfig({ kpi_id: kpi }));
       getAllAggregationData();
       getAllLinechart();
@@ -291,11 +309,16 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
       let demoChart = {
         chart: {
           type: 'line',
-          height: '308',
-          width: '400'
+          height: '350',
+          width: '850',
+          marginLeft: 70
         },
         title: {
-          text: kpiName
+          text: kpiName,
+          style: {
+            fontWeight: 'bold',
+            fontSize: '14px'
+          }
         },
         time: {
           timezone: getTimezone()
@@ -310,6 +333,10 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
             }
           }
         },
+        legend: {
+          enabled: true,
+          padding: 5
+        },
         yAxis: {
           type: 'value',
           step: 1,
@@ -317,6 +344,9 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
             formatter: function () {
               return HRNumbers.toHumanString(this.value);
             }
+          },
+          title: {
+            margin: 25
           }
         },
         plotOptions: {
@@ -326,13 +356,14 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
             }
           }
         },
-        legend: {
-          enabled: false
-        },
         series: [
           {
             color: '#60ca9a',
-            data: line.map((linedata) => linedata.value)
+            data: line.map((linedata) => linedata.value),
+            name: monthWeek.grp1_name,
+            id: 'first series',
+            zIndex: 2,
+            type: 'line'
           }
         ]
       };
@@ -362,7 +393,8 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                 </div>
                 <Select
                   value={monthWeek}
-                  options={data}
+                  options={timeCutOptions}
+                  styles={customStyles}
                   classNamePrefix="selectcategory"
                   placeholder="select"
                   isSearchable={false}
@@ -371,9 +403,8 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                   }}
                 />
               </div>
-              {/* Graph Section */}
-              <div className="dashboard-graph-section">
-                <div className="common-graph">
+              <div className="dashboard-aggregate-section">
+                <div className="aggregate-card-container">
                   {aggregationLoading ? (
                     <div className="load">
                       <div className="preload"></div>
@@ -392,6 +423,9 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                     </>
                   )}
                 </div>
+              </div>
+              {/* Graph Section */}
+              <div className="dashboard-graph-section">
                 {/* Line Chart */}
                 <div className="common-graph">
                   {linechartLoading ? (

@@ -13,7 +13,11 @@ import FilterWithTab from '../../components/FilterWithTab';
 import Anomaly from '../../components/Anomaly';
 import Analystics from '../../components/Analystics';
 
-import { getDashboardSidebar, anomalySetting } from '../../redux/actions';
+import {
+  getDashboardSidebar,
+  anomalySetting,
+  getTimeCuts
+} from '../../redux/actions';
 
 import store from '../../redux/store';
 import EmptyKpisDashboard from '../../components/EmptyKpisDashboard';
@@ -51,6 +55,7 @@ const Dashboard = () => {
     getAllDashboardSidebar();
     store.dispatch(SETTING_RESET);
     store.dispatch(RESET);
+    dispatch(getTimeCuts());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

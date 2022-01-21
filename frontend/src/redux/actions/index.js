@@ -33,6 +33,7 @@ import {
 import { getOnboardingStatus, getHomeKpi } from './Onboarding';
 import { getDashboardLinechart } from './LineChart';
 import { getDashboardSidebar } from './Sidebarlist';
+import { getTimeCuts } from './TimeCuts';
 import { getVersionSetting } from './VersionControl';
 import {
   getAllAlertEmail,
@@ -131,5 +132,6 @@ export {
   getDashboardConfig,
   getGlobalSetting,
   kpiAlertDeleteById,
+  getTimeCuts,
   getVersionSetting
 };

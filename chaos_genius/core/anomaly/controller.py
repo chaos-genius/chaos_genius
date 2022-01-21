@@ -226,7 +226,6 @@ class AnomalyDetectionController(object):
 
         group_list = []
         dim_comb = self._get_dimension_combinations(valid_subdims)
-        print(dim_comb)
         for dim_list in dim_comb:
             grouped_dims = input_data.groupby(dim_list)
             subgroup_raw = list(grouped_dims.groups.keys())
@@ -434,10 +433,12 @@ class AnomalyDetectionController(object):
         :param input_data: Dataframe with all of the relevant KPI data
         :type input_data: pd.DataFrame
         """
-
         try:
             agg = self.kpi_info["aggregation"]
             dq_list = ["max", "count", "mean"] if agg != "mean" else ["max", "count"]
+            is_categorical_metric = 1 if input_data[self.kpi_info["metric"]].dtypes == "object" else 0
+            if agg == "count" and is_categorical_metric:
+                dq_list = []
         except Exception as e:
             self._checkpoint_failure("Data Quality - Preprocessor", e)
             raise e

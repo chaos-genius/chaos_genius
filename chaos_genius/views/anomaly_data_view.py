@@ -124,7 +124,8 @@ def kpi_anomaly_data_quality(kpi_id):
         for dq in dq_list:
             anom_data = get_dq_and_subdim_data(kpi_id, end_date, "dq", dq, period)
             anom_data["x_axis_limits"] = graph_xlims
-            data.append(anom_data)
+            if anom_data["values"] != []:
+                data.append(anom_data)
 
         current_app.logger.info(f"Anomaly DQ Retrieval Completed for KPI ID: {kpi_id}")
 
@@ -193,7 +194,7 @@ def kpi_subdim_anomaly(kpi_id):
 
     return jsonify({"data": subdim_graphs, "msg": "", "anomaly_end_date": end_date})
 
-    
+
 @blueprint.route("/anomaly-params/meta-info", methods=["GET"])
 def kpi_anomaly_params_meta():
     # TODO: Move this dict into the corresponding data model

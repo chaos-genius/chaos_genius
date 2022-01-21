@@ -200,11 +200,11 @@ def _validate_agg_type_fits_column(
             f'Supported aggregations are {", ".join(SUPPORTED_AGGREGATIONS)}',
         )
 
-    # Check if trying to use a numerical aggregation on a categorical column.
+    # Check if trying to use a numerical aggregation on a non-numerical column.
     if str(df[column_name].dtype) == "object" and agg_type != "count":
         return (
             False,
-            f'"{column_name}" column is categorical. Quantitative data is '
+            f'"{column_name}" column is non-numerical. Quantitative data is '
             f"required to perform {agg_type} aggregation.",
         )
 

@@ -19,7 +19,7 @@ from chaos_genius.views import (
     alert_view,
     dashboard_view,
     status_view,
-    digest_view
+    digest_view,
     rca_view,
 )
 from chaos_genius.extensions import (

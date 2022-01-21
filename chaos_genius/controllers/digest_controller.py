@@ -50,6 +50,20 @@ def _filter_anomaly_alerts(
                 lambda point: point["Dimension"] == "Overall KPI",
                 alert.alert_metadata["alert_data"]
             ))
+    else:
+        for alert in anomaly_alerts_data:
+            overall_anomaly_points = list(filter(
+                lambda point: point["Dimension"] == "Overall KPI",
+                alert.alert_metadata["alert_data"]
+            ))
+
+            subdim_anomaly_points = list(filter(
+                lambda point: point["Dimension"] != "Overall KPI",
+                alert.alert_metadata["alert_data"]
+            ))
+
+            subdim_anomaly_points = subdim_anomaly_points[0:20]
+            alert.alert_metadata["alert_data"] = overall_anomaly_points + subdim_anomaly_points
 
 
 def get_digest_view_data(triggered_alert_id=None, include_subdims: bool = False):

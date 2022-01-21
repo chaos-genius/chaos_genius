@@ -15,7 +15,10 @@ const EmptyKPI = () => {
       </p>
       <div className="empty-kpi-title">
         <h4>How it will work?</h4>
-        <a>
+        <a
+          href="https://docs.chaosgenius.io/docs/kpi_explorer/adding-kpis"
+          target="_blank"
+          rel="noopener noreferrer">
           <img src={Documents} alt="Documents" />
           Documentation
         </a>
@@ -29,10 +32,8 @@ const EmptyKPI = () => {
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen></iframe>
       </div>
-      <h5>
-        Have any questions? Feel free to send us a message at
-        <label>support@Chaosgenius.com</label>
-      </h5>
+      <h5>Have any questions? Feel free to send us a message at</h5>
+      <a href="mailto:support@choasgenius.com">support@Chaosgenius.com</a>
     </div>
   );
 };

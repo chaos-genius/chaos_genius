@@ -14,6 +14,13 @@
     color: $black_variation-2;
     margin-bottom: 16px;
   }
+  a {
+    cursor: pointer;
+    color: $blue;
+    &:hover {
+      color: $blue;
+    }
+  }
   p {
     font-weight: $font-weight-400;
     font-size: $font-size-14;

@@ -38,7 +38,7 @@ const Dashboard = () => {
     return state.sidebar;
   });
 
-  const { anomalySettingData, anomalySettingLoading } = useSelector((state) => {
+  const { anomalySettingData } = useSelector((state) => {
     return state.anomaly;
   });
 
@@ -113,14 +113,10 @@ const Dashboard = () => {
   const onTabClick = (tabs) => {
     setTabs(tabs);
 
-    window.history.pushState(
-      '',
-      '',
-      `/#/dashboard/${dashboard}/${tabs}/${kpi}`
-    );
+    history.push(`/dashboard/${dashboard}/${tabs}/${kpi}`);
   };
 
-  if (sidebarLoading || anomalySettingLoading) {
+  if (sidebarLoading) {
     return (
       <div className="load loader-page">
         <div className="preload"></div>
@@ -186,13 +182,17 @@ const Dashboard = () => {
                       <div className="common-tab">
                         <ul>
                           <li
-                            className={tab === 'deepdrills' ? 'active' : ''}
+                            className={
+                              location[3] === 'deepdrills' ? 'active' : ''
+                            }
                             onClick={() => onTabClick('deepdrills')}>
                             DeepDrills
                           </li>
 
                           <li
-                            className={tab === 'anomaly' ? 'active' : ''}
+                            className={
+                              location[3] === 'anomaly' ? 'active' : ''
+                            }
                             onClick={() => onTabClick('anomaly')}>
                             Anomaly
                           </li>

@@ -36,6 +36,9 @@ class AlertDigestController:
         data = TriggeredAlerts.query.filter(
                                     TriggeredAlerts.created_at >= (self.curr_time - self.time_diff)
                                 ).order_by(TriggeredAlerts.created_at.desc()).all()
+        
+        slack_digests = []
+        email_digests = []
 
         for alert in data:
             id_ = getattr(alert, "alert_conf_id")
@@ -59,17 +62,18 @@ class AlertDigestController:
             alert.kpi_name = kpi.get("name") if kpi is not None else "Doesn't Exist"
             alert.alert_name = alert_conf.get("alert_name")
             alert.alert_channel = alert_conf.get("alert_channel")
-            alert.daily_digest = alert_conf.get("daily_digest", False)
-            alert.weekly_digest = alert_conf.get("weekly_digest", False)
             alert.pop("alert_metadata")
 
             if alert_conf.get("alert_channel_conf") is None:
                 alert.alert_channel_conf = None
             else:
                 alert.alert_channel_conf = alert_conf.get("alert_channel_conf").get(alert.alert_channel, None)
-        
-        slack_digests = [alert for alert in data if alert.alert_channel == "slack" and getattr(alert, ALERT_ATTRIBUTES_MAPPER[self.frequency]) == True] 
-        email_digests = [alert for alert in data if alert.alert_channel == "email" and getattr(alert, ALERT_ATTRIBUTES_MAPPER[self.frequency]) == True]
+            
+            if alert_conf.get(ALERT_ATTRIBUTES_MAPPER[self.frequency]):
+                if alert.alert_channel == "slack":
+                    slack_digests.append(alert)
+                if alert.alert_channel == "email":
+                    email_digests.append(alert)
 
         email_status = self.segregate_email_digests(email_digests)
         slack_status = self.send_slack_digests(slack_digests)

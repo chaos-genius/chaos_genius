@@ -66,6 +66,8 @@ def add_alert():
                     alert_frequency=data.get('alert_frequency'),
                     alert_channel=data.get('alert_channel'),
                     alert_channel_conf=data.get('alert_channel_conf'),
+                    daily_digest=data.get("daily_digest"),
+                    weekly_digest=data.get("weekly_digest"),
                     active=True
                 )
                 new_alert.save(commit=True)

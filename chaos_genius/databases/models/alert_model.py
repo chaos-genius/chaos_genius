@@ -32,6 +32,7 @@ class Alert(PkModel):
     created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
     last_alerted = Column(db.DateTime, nullable=True)
     daily_digest = Column(db.Boolean(), default=False)
+    weekly_digest = Column(db.Boolean(), default=False)
 
     def __init__(self, **kwargs):
         """Create instance."""
@@ -60,7 +61,8 @@ class Alert(PkModel):
             "active": self.active,
             "created_at": self.created_at,
             "alert_status": self.alert_status,
-            "daily_digest": self.daily_digest
+            "daily_digest": self.daily_digest,
+            "weekly_digest": self.weekly_digest
         }
 
 
@@ -142,6 +144,11 @@ class Alert(PkModel):
                 },
                 {
                     "name": "daily_digest",
+                    "is_editable": True,
+                    "is_sensitive": False
+                },
+                {
+                    "name": "weekly_digest",
                     "is_editable": True,
                     "is_sensitive": False
                 }

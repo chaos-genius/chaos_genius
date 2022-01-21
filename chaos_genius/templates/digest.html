@@ -14,10 +14,12 @@
     <div class="container mx-auto py-4">
         <h1 class="text-3xl">ChaosGenius Alerts Digest</h1>
 
-        <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-4 sm:ml-3 sm:w-auto sm:text-sm" onclick="downloadCSV()">Download CSV</button>
+        <div class="mt-4 flex">
+            <select id="email-select" multiple class="grow">
+            </select>
 
-        <select id="email-select" multiple>
-        </select>
+            <button type="button" class="rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3" onclick="downloadCSV()">Download CSV</button>
+        </div>
 
     <!-- Tabs -->
     <ul id="tabs" class="inline-flex pt-2 px-1 w-full border-b">
@@ -124,6 +126,12 @@
     <style>
         .dataTableEvent-table > thead > tr > th {
             vertical-align: middle;
+        }
+    </style>
+
+    <style>
+        .grow {
+            flex-grow: 1;
         }
     </style>
 
@@ -358,6 +366,22 @@
         });
     </script>
 
+
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.0.0/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.0.0/dist/js/tom-select.popular.min.js"></script>
+
+    <script>
+        const emailSelect = new TomSelect("#email-select", {
+            items: ["Any"],
+            placeholder: "Select recipient emails",
+            plugins: {
+                remove_button:{
+                    title: "Remove this email",
+                }
+            },
+        });
+    </script>
+
     <script type="text/javascript">
         function initUserEmails(currentTable) {
             const userEmails = new Set();
@@ -368,17 +392,16 @@
                 })
             });
 
-            const optionEls = Array.from(userEmails).map(email => {
-                const optionEl = document.createElement("option");
-                optionEl.selected = true;
-                optionEl.value = email;
-                optionEl.textContent = email;
-
-                return optionEl;
-            })
-
-            const dropdown = document.getElementById("email-select");
-            dropdown.replaceChildren(...optionEls);
+            emailSelect.clear(false);
+            emailSelect.clearOptions();
+            emailSelect.addOptions(Array.from(userEmails).map((email) => {
+                console.log(email);
+                return {value: email, text: email};
+            }), false);
+            emailSelect.addOption({"value": "Any"}, false);
+            emailSelect.refreshOptions(false);
+            emailSelect.addItem("Any", false);
+            emailSelect.refreshItems();
 
             return userEmails;
         }

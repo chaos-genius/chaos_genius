@@ -220,15 +220,18 @@
 
         const dataEvent = [
             {% for triggered_alert in event_alerts_data %}
-            {% for point in triggered_alert.alert_metadata["alert_data"] %}
             [
-                {{ triggered_alert.id }},
-                {{ triggered_alert.alert_name }},
-                {{ triggered_alert.created_at }},
-                {{ triggered_alert.alert_channel }},
-                {{ triggered_alert.alert_channel_conf }},
+                "{{ triggered_alert.id }}",
+                "{{ triggered_alert.alert_name }}",
+                "{{ triggered_alert.alert_message }}",
+                "{{ triggered_alert.created_at }}",
+                "{{ triggered_alert.alert_channel }}",
+                [
+                    {% for email in ["Any"] + (triggered_alert.alert_channel_conf or []) %}
+                    "{{ email }}",
+                    {% endfor %}
+                ],
             ],
-            {% endfor %}
             {% endfor %}
         ]
         const dataTableEvent = new simpleDatatables.DataTable("#tasktable-event", {
@@ -237,7 +240,7 @@
             }
         });
         dataTableEvent.origData = dataEvent;
-        dataTableEvent.emailColIndex = 4;
+        dataTableEvent.emailColIndex = 5;
         dataTableEvent.columns().hide([dataTableEvent.emailColIndex]);
 
         const dataTables = [dataTableAnomaly, dataTableEvent];

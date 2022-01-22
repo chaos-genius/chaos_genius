@@ -266,7 +266,7 @@ class StaticEventAlertController:
                 preview_text="Static Event Alert",
             )
 
-            alert_data = change_df.T.to_dict().values()
+            alert_data = list(change_df.T.astype(str).to_dict().values())
             return test, alert_data
         else:
             logger.info(
@@ -333,7 +333,7 @@ class StaticEventAlertController:
         )
 
         test = test == "ok"
-        alert_data = change_df.T.to_dict().values()
+        alert_data = list(change_df.T.astype(str).to_dict().values())
         return test, alert_data
 
     def send_missing_data_email_alert(self):

@@ -189,11 +189,11 @@
                   "{{ point['Value'] }}",
                   "{{ point['Expected Value'] }}",
                   `{% if point['Severity Score'] >= 65 %}
-                        <span style='color:#E53935;font-weight: light'> <span class="badge mb-3 rounded-full px-2.5 py-1 text-center object-right-top text-white text-sm mr-3 bg-red-500">!</span>
+                        <span style='color:#E53935;font-weight: light' class="severity"> <span class="badge mb-3 rounded-full px-2.5 py-1 text-center object-right-top text-white text-sm mr-3 bg-red-500">!</span>
                     {% elif point['Severity Score'] >= 25 %}
-                        <span style='font-weight: light'> <span class="badge mb-3 rounded-full px-2.5 py-1 text-center object-right-top text-white text-sm mr-3 bg-yellow-500">!</span>
+                        <span style='font-weight: light' class="severity"> <span class="badge mb-3 rounded-full px-2.5 py-1 text-center object-right-top text-white text-sm mr-3 bg-yellow-500">!</span>
                     {% else %}
-                        <span style='font-weight: light'> <span class="badge mb-3 rounded-full px-2.5 py-1 text-center object-right-top text-white text-sm mr-3 bg-gray-400">!</span>
+                        <span style='font-weight: light' class="severity"> <span class="badge mb-3 rounded-full px-2.5 py-1 text-center object-right-top text-white text-sm mr-3 bg-gray-400">!</span>
                     {% endif %}
                         {{ point['Severity Score'] }}
                     </span>`,
@@ -282,9 +282,14 @@
                         continue;
                     }
 
-                    // Get the text data of each cell
-                    // of a row and push it to csvrow
-                    csvrow.push(cols[j].innerText.trim());
+                    // ignore severity "!"
+                    if (cols[j].lastChild && cols[j].lastChild.classList && cols[j].lastChild.classList.contains("severity")) {
+                        csvrow.push(cols[j].lastChild.lastChild.textContent.trim());
+                    } else {
+                        // Get the text data of each cell
+                        // of a row and push it to csvrow
+                        csvrow.push(cols[j].innerText.trim());
+                    }
                 }
 
                 // Combine each column value with comma

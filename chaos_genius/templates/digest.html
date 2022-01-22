@@ -188,7 +188,13 @@
                   "{{ point['Dimension'] }}",
                   "{{ point['Value'] }}",
                   "{{ point['Expected Value'] }}",
-                  "{{ point['Severity Score'] }}",
+                  `{% if point['Severity Score'] >= 20 %}
+                    <span style='color:#2EC1AC'>
+                        {% else %}
+                    <span style='color:red'>
+                        {% endif %}
+                    {{ point['Severity Score'] }}
+                    </span>`,
                   "{{ triggered_alert.created_at }}",
                   [
                       {% for email in ["Any"] + (triggered_alert.alert_channel_conf or []) %}

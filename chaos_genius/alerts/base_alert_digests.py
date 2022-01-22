@@ -12,7 +12,7 @@ from chaos_genius.controllers.config_controller import get_config_object
 from chaos_genius.alerts.slack import alert_digest_slack_formatted
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.base_alerts import FREQUENCY_DICT
-from chaos_genius.settings import WEBAPP_URL
+from chaos_genius.settings import CHAOSGENIUS_WEBAPP_URL
 
 logger = logging.getLogger()
 
@@ -105,12 +105,12 @@ class AlertDigestController:
 
         for id_ in triggered_alert_ids:
             data.append(triggered_alert_dict.get(id_))
-            if not WEBAPP_URL:
+            if not CHAOSGENIUS_WEBAPP_URL:
                 data[-1].link = "Webapp URL not setup"
                 continue
 
-            forward_slash = "/" if not WEBAPP_URL[-1] == "/" else ""
-            data[-1].link = f"{WEBAPP_URL}{forward_slash}api/digest?id={id_}"
+            forward_slash = "/" if not CHAOSGENIUS_WEBAPP_URL[-1] == "/" else ""
+            data[-1].link = f"{CHAOSGENIUS_WEBAPP_URL}{forward_slash}api/digest?id={id_}"
 
         data_len = min(len(data), 10)
         data = data if data_len == 0 else data[0:data_len]

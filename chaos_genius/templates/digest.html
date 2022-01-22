@@ -14,9 +14,14 @@
     <div class="container mx-auto py-4">
         <h1 class="text-3xl">ChaosGenius Alerts Digest</h1>
 
-        <div class="mt-4 flex">
+        <div class="mt-4 flex items-center">
             <select id="email-select" multiple class="grow">
             </select>
+
+             <div class="toggle colour flex mx-2">
+                 <span>Slack alerts only:&nbsp</span><input id="slack-check" class="toggle-checkbox hidden" type="checkbox">
+                <label for="slack-check" class="toggle-label inline-block w-12 h-6 rounded-full transition-color duration-150 ease-out"></label>
+             </div>
 
             <button type="button" class="rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3" onclick="downloadCSV()">Download CSV</button>
         </div>
@@ -203,6 +208,7 @@
                       "{{ email }}",
                       {% endfor %}
                   ],
+                  "{{ triggered_alert.alert_channel }}",
                 ],
             {% endfor %}
             {% endfor %}
@@ -214,9 +220,10 @@
             }
         });
         dataTableAnomaly.origData = dataAnomaly;
-        // hide user emails columns
+        // hide user emails and alert channel columns
         dataTableAnomaly.emailColIndex = 7;
-        dataTableAnomaly.columns().hide([dataTableAnomaly.emailColIndex]);
+        dataTableAnomaly.channelColIndex = 8;
+        dataTableAnomaly.columns().hide([dataTableAnomaly.emailColIndex, dataTableAnomaly.channelColIndex]);
 
         const dataEvent = [
             {% for triggered_alert in event_alerts_data %}
@@ -241,7 +248,8 @@
         });
         dataTableEvent.origData = dataEvent;
         dataTableEvent.emailColIndex = 5;
-        dataTableEvent.columns().hide([dataTableEvent.emailColIndex]);
+        dataTableEvent.channelColIndex = 4;
+        dataTableEvent.columns().hide([dataTableEvent.emailColIndex, dataTableEvent.channelColIndex]);
 
         const dataTables = [dataTableAnomaly, dataTableEvent];
         let currentTable = dataTables[0];
@@ -388,7 +396,7 @@
 
     <script>
         const emailSelect = new TomSelect("#email-select", {
-            items: ["Any"],
+            items: [],
             placeholder: "Select recipient emails",
             plugins: {
                 remove_button:{
@@ -414,9 +422,7 @@
                 console.log(email);
                 return {value: email, text: email};
             }), false);
-            emailSelect.addOption({"value": "Any"}, false);
             emailSelect.refreshOptions(false);
-            emailSelect.addItem("Any", false);
             emailSelect.refreshItems();
 
             return userEmails;
@@ -426,18 +432,54 @@
 
         const dropdown = document.getElementById("email-select");
         dropdown.addEventListener("input", () => {
-            const selected = Array.from(dropdown.options).filter(option => option.selected).map(option => option.value);
+            let selected = Array.from(dropdown.options).filter(option => option.selected).map(option => option.value);
+
+            if (selected.length == 0) {
+                selected = ["Any"];
+            }
+
             const selectedSet = new Set(selected);
-            applyFilter(currentTable, row => {
+            addFilter("email", row => {
                 const intersection = row[currentTable.emailColIndex].filter(email => selectedSet.has(email));
                 return intersection.length > 0;
             });
+            applyFilters(currentTable);
         });
     </script>
 
     <script type="text/javascript">
-        function applyFilter(table, cb) {
-            const newRows = table.origData.filter(cb);
+        document.getElementById("slack-check").addEventListener("input", (e) => {
+            const checked = e.target.checked;
+
+            if (checked) {
+                addFilter("slack", row => {
+                    console.log(row[currentTable.channelColIndex]);
+                    return row[currentTable.channelColIndex] == "slack";
+                });
+            } else {
+                removeFilter("slack");
+            }
+            applyFilters(currentTable);
+        });
+    </script>
+
+    <script type="text/javascript">
+        const filters = new Map();
+
+        function addFilter(name, cb) {
+            filters.set(name, cb);
+        }
+
+        function removeFilter(name) {
+            filters.delete(name);
+        }
+
+        function applyFilters(table) {
+            let newRows = table.origData;
+
+            for (const [filterName, cb] of filters) {
+                newRows = newRows.filter(cb);
+            }
 
             table.search("");
 

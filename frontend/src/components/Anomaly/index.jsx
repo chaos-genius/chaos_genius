@@ -22,6 +22,7 @@ import {
 } from '../../redux/actions';
 import store from '../../redux/store';
 import SubdimensionEmpty from '../SubdimensionEmpty';
+import EmptyDataQualityAnomaly from '../EmptyDataQualityAnomaly';
 
 highchartsMore(Highcharts);
 Highcharts.setOptions({
@@ -512,14 +513,22 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                     </div>
                   </div>
                   {dataQualityCollapse ? (
-                    <div
-                      className={
-                        dataQualityCollapse
-                          ? 'dashboard-container'
-                          : 'dashboard-container drilldown-disable'
-                      }>
-                      {dataQualityList}
-                    </div>
+                    <>
+                      {dataQualityList && dataQualityList.length !== 0 ? (
+                        <div
+                          className={
+                            dataQualityCollapse
+                              ? 'dashboard-container'
+                              : 'dashboard-container drilldown-disable'
+                          }>
+                          {dataQualityList}
+                        </div>
+                      ) : (
+                        <div className="anomaly-drilldown-empty">
+                          <EmptyDataQualityAnomaly />
+                        </div>
+                      )}
+                    </>
                   ) : null}
                 </div>
               ) : null}

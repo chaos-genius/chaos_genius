@@ -40,6 +40,16 @@
       // width: 60%;
       padding-left: 40px;
       padding-bottom: 72px;
+      .organization-button-container {
+        display: flex;
+        flex-direction: row;
+        width: 280px;
+        justify-content: flex-end;
+        .white-button {
+          margin-right: 16px;
+          min-width: 80px;
+        }
+      }
       .form-group {
         width: 440px;
         height: 100%;

@@ -27,20 +27,17 @@ const ReportSettings = () => {
             showSecond={false}
             value={schedule && moment(schedule, 'HH:mm')}
           />
-        </div>
-        <div className="button-container">
-          <div>
-            <button className="btn white-button">
-              <span>Cancel</span>
-            </button>
-          </div>
-          <div>
-            <button className="btn black-button">
-              <div className="btn-content">
-                <span>Save Changes</span>
-              </div>
-            </button>
-          </div>
+        </div>{' '}
+        <div className="organization-button-container">
+          <button className="btn white-button" disabled>
+            <span>Cancel</span>
+          </button>
+
+          <button className="btn black-button">
+            <div className="btn-content">
+              <span>Save Changes</span>
+            </div>
+          </button>
         </div>
       </div>
     </>

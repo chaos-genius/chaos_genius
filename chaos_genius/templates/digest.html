@@ -15,6 +15,12 @@
         <h1 class="text-3xl">ChaosGenius Alerts Digest</h1>
 
         <div class="mt-4 flex items-center">
+            <select id="alert-config-select" multiple class="grow">
+            </select>
+
+            <select id="kpi-select" multiple class="grow">
+            </select>
+            
             <select id="email-select" multiple class="grow">
             </select>
 
@@ -188,8 +194,8 @@
         const dataAnomaly = [
             {% for triggered_alert in anomaly_alerts_data %}
             {% for point in triggered_alert.alert_metadata["alert_data"] %}
-                [ "{{ triggered_alert.alert_name }} ({{ triggered_alert.id }})",
-                  "{{ triggered_alert.kpi_name }}",
+                [ "{{ triggered_alert.alert_name }} ({{ triggered_alert.alert_conf_id }})",
+                  "{{ triggered_alert.kpi_name }} ({{ triggered_alert.kpi_id }})",
                   "{{ point['Dimension'] }}",
                   "{{ point['Value'] }}",
                   "{{ point['Expected Value'] }}",
@@ -202,7 +208,7 @@
                     {% endif %}
                         {{ point['Severity Score'] }}
                     </span>`,
-                  "{{ triggered_alert.created_at }}",
+                  "{{ point['Time of Occurrence'] }}",
                   [
                       {% for email in ["Any"] + (triggered_alert.alert_channel_conf or []) %}
                       "{{ email }}",
@@ -221,6 +227,8 @@
         });
         dataTableAnomaly.origData = dataAnomaly;
         // hide user emails and alert channel columns
+        dataTableAnomaly.alertColIndex = 0;
+        dataTableAnomaly.kpiColIndex = 1;
         dataTableAnomaly.emailColIndex = 7;
         dataTableAnomaly.channelColIndex = 8;
         dataTableAnomaly.columns().hide([dataTableAnomaly.emailColIndex, dataTableAnomaly.channelColIndex]);
@@ -356,6 +364,8 @@
               if ("#" + tabContents.children[i].id === tabName) {
                 currentTable = dataTables[i];
                 initUserEmails(currentTable);
+                initAlertConfigs(currentTable);
+                initKpiSelect(currentTable);
                 continue;
               }
               tabContents.children[i].classList.add("hidden");
@@ -390,6 +400,33 @@
         });
     </script>
 
+    <script type="text/javascript">
+        const filters = new Map();
+
+        function addFilter(name, cb) {
+            filters.set(name, cb);
+        }
+
+        function removeFilter(name) {
+            filters.delete(name);
+        }
+
+        function applyFilters(table) {
+            let newRows = table.origData;
+
+            for (const [filterName, cb] of filters) {
+                newRows = newRows.filter(cb);
+            }
+
+            table.search("");
+
+            table.rows().remove("all");
+            table.rows().add(newRows);
+
+            table.search(table.wrapper.querySelector(".dataTable-input").value);
+        }
+    </script>
+
 
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.0.0/dist/css/tom-select.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.0.0/dist/js/tom-select.popular.min.js"></script>
@@ -397,10 +434,34 @@
     <script>
         const emailSelect = new TomSelect("#email-select", {
             items: [],
-            placeholder: "Select recipient emails",
+            placeholder: "Select Recipient Emails",
             plugins: {
                 remove_button:{
                     title: "Remove this email",
+                }
+            },
+        });
+    </script>
+
+    <script>
+        const alertSelect = new TomSelect("#alert-config-select", {
+            items: ["All"],
+            placeholder: "Select Alert Configurations",
+            plugins: {
+                remove_button:{
+                    title: "Remove this alert configuration",
+                }
+            },
+        });
+    </script>
+
+    <script>
+        const kpiSelect = new TomSelect("#kpi-select", {
+            items: ["All"],
+            placeholder: "Select KPI Names",
+            plugins: {
+                remove_button:{
+                    title: "Remove this KPI",
                 }
             },
         });
@@ -448,6 +509,84 @@
     </script>
 
     <script type="text/javascript">
+        function initAlertConfigs(currentTable) {
+            const alertConfigs = new Set();
+
+            currentTable.origData.forEach(datapoint => {
+                    alertConfigs.add(datapoint[currentTable.alertColIndex]);
+            });
+
+            alertSelect.clear(false);
+            alertSelect.clearOptions();
+            alertSelect.addOptions(Array.from(alertConfigs).map((alert) => {
+                console.log(alert);
+                return {value: alert, text: alert};
+            }), false);
+            alertSelect.refreshOptions(false);
+            alertSelect.refreshItems();
+
+            return alertConfigs;
+        }
+
+        let alertConfigs = initAlertConfigs(currentTable);
+        const dropdownAlerts = document.getElementById("alert-config-select");
+        dropdownAlerts.addEventListener("input", () => {
+            const selected = Array.from(dropdownAlerts.options).filter(option => option.selected).map(option => option.value);
+            const selectedSet = new Set(selected);
+
+            if(selectedSet.size > 0){
+                addFilter("alert-name", row => {
+                    return selectedSet.has(row[currentTable.alertColIndex])
+                });
+            }
+            else{
+                removeFilter("alert-name");
+            }
+
+            applyFilters(currentTable);
+        });
+    </script>
+
+    <script type="text/javascript">
+        function initKpiSelect(currentTable) {
+            const kpiNames = new Set();
+
+            currentTable.origData.forEach(datapoint => {
+                kpiNames.add(datapoint[currentTable.kpiColIndex]);
+            });
+
+            kpiSelect.clear(false);
+            kpiSelect.clearOptions();
+            kpiSelect.addOptions(Array.from(kpiNames).map((kpi) => {
+                console.log(kpi);
+                return {value: kpi, text: kpi};
+            }), false);
+            kpiSelect.refreshOptions(false);
+            kpiSelect.refreshItems();
+
+            return kpiNames;
+        }
+
+        let kpiNames = initKpiSelect(currentTable);
+        const dropdownKpi = document.getElementById("kpi-select");
+        dropdownKpi.addEventListener("input", () => {
+            const selected = Array.from(dropdownKpi.options).filter(option => option.selected).map(option => option.value);
+            const selectedSet = new Set(selected);
+
+            if(selectedSet.size > 0){
+                addFilter("kpi-name", row => {
+                    return selectedSet.has(row[currentTable.kpiColIndex])
+                });
+            }
+            else{
+                removeFilter("kpi-name");
+            }
+
+            applyFilters(currentTable);
+        });
+    </script>
+
+    <script type="text/javascript">
         document.getElementById("slack-check").addEventListener("input", (e) => {
             const checked = e.target.checked;
 
@@ -461,33 +600,6 @@
             }
             applyFilters(currentTable);
         });
-    </script>
-
-    <script type="text/javascript">
-        const filters = new Map();
-
-        function addFilter(name, cb) {
-            filters.set(name, cb);
-        }
-
-        function removeFilter(name) {
-            filters.delete(name);
-        }
-
-        function applyFilters(table) {
-            let newRows = table.origData;
-
-            for (const [filterName, cb] of filters) {
-                newRows = newRows.filter(cb);
-            }
-
-            table.search("");
-
-            table.rows().remove("all");
-            table.rows().add(newRows);
-
-            table.search(table.wrapper.querySelector(".dataTable-input").value);
-        }
     </script>
 </body>
 

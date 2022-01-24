@@ -28,6 +28,7 @@ def triggered_alert_data_processing(data):
                 kpi_cache[kpi_id] = kpi
             
         alert.kpi_name = kpi.get("name") if kpi is not None else "Doesn't Exist"
+        alert.kpi_id = kpi_id
         alert.alert_name = alert_conf.get("alert_name")
         alert.alert_channel = alert_conf.get("alert_channel")
         alert.alert_message = alert_conf.get("alert_message")

@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """DataSource views for creating and viewing the data source."""
+import logging
 from copy import deepcopy
 from datetime import datetime
 from uuid import uuid4
 
 from flask.blueprints import Blueprint
-from flask.globals import current_app, request
+from flask.globals import request
 from flask.json import jsonify
 from sqlalchemy import func
 
@@ -42,21 +43,21 @@ from chaos_genius.utils.metadata_api_config import (
     TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY,
 )
 
-# from chaos_genius.databases.db_metadata import DbMetadata, get_metadata
-
-
 blueprint = Blueprint("api_data_source", __name__)
+
+logger = logging.getLogger(__name__)
 
 
 @blueprint.route("/", methods=["GET", "POST"])  # TODO: Remove this
 @blueprint.route("", methods=["GET", "POST"])
 def data_source():
     """Data source List view."""
-    current_app.logger.info("DataSource list")
-
     if request.method == "POST":
-        if request.is_json:
-            data = request.get_json()
+        logger.info("Adding a data source.")
+
+        data = request.get_json()
+
+        if data is not None:
             conn_name = data.get("name")
             conn_type = data.get("connection_type")
             conn_uri = data.get("db_uri")
@@ -64,15 +65,23 @@ def data_source():
                 name=conn_name, db_uri=conn_uri, connection_type=conn_type
             )
             new_data_source.save()
+
+            logger.info("Data source '%s' added successfully.", new_data_source.name)
+
             return jsonify(
                 {
                     "message": f"DataSource {new_data_source.name} has been created successfully."
                 }
             )
         else:
-            return jsonify({"error": "The request payload is not in JSON format"})
+            err_msg = "The request payload is not in JSON format"
+            logger.error("Error adding data source: %s", err_msg)
+
+            return jsonify({"error": err_msg})
 
     elif request.method == "GET":
+        logger.info("Listing data sources.")
+
         data_sources = (
             DataSource.query.filter(DataSource.active == True)  # noqa: E712
             .order_by(DataSource.created_at.desc())
@@ -97,6 +106,9 @@ def data_source():
             conn_detail["kpi_count"] = data_source_kpi_map.get(conn_detail["id"], 0)
             results.append(conn_detail)
         results = sorted(results, reverse=True, key=lambda x: x["id"])
+
+        logger.info("Found %d data sources", len(results))
+
         return jsonify({"count": len(results), "data": results})
 
 
@@ -104,11 +116,15 @@ def data_source():
 @cache.memoize()
 def list_data_source_type():
     """Data source Type view."""
+    logger.info("Listing data sources types.")
+
     connection_types, msg, status = [], "", "success"
     try:
         connection_types = get_connection_config()
     except Exception as err_msg:
-        print(err_msg)
+        logger.error(
+            "Error in listing data source types: %s", err_msg, exc_info=err_msg
+        )
         msg = str(err_msg)
         status = "failed"
     return jsonify({"data": connection_types, "msg": msg, "status": status})
@@ -120,17 +136,28 @@ def test_data_source_connection():
     connection_status, msg, status = [], "", "success"
     try:
         payload = request.get_json()
-        connection_status = test_data_source(payload)
+
+        if payload is None:
+            msg = "The request payload is not in JSON format"
+            status = "failed"
+            logger.error("Error in testing data source: %s", msg)
+        else:
+            connection_status = test_data_source(payload)
+            logger.info("Testing a data source. Results: %s", connection_status)
+
     except Exception as err_msg:
-        print(err_msg)
+        logger.error("Error in testing data source: %s", err_msg, exc_info=err_msg)
         msg = str(err_msg)
         status = "failed"
+
     return jsonify({"data": connection_status, "msg": msg, "status": status})
 
 
 @blueprint.route("/create", methods=["POST"])
 def create_data_source():
     """Create DataSource."""
+    logger.info("Creating a new data source.")
+
     # TODO: Better error handling and proper message in case of the failure
     connection_status, msg, status = {}, "failed", False
     sourceRecord, desinationRecord, connectionRecord, stream_tables = {}, {}, {}, []
@@ -230,12 +257,12 @@ def create_data_source():
         )
         new_connection.save(commit=True)
         msg = f"Connection {new_connection.name} has been created successfully."
+        logger.info("Data source '%s' added successfully.", new_connection.name)
 
     except Exception as err_msg:
-        print("-" * 60)
-        print(err_msg)
         msg = str(err_msg)
-        # import traceback; print(traceback.format_exc())
+        logger.error("Error in creating data source: %s", err_msg, exc_info=err_msg)
+
     return jsonify({"data": {}, "msg": msg, "status": status})
 
 
@@ -248,6 +275,12 @@ def delete_data_source():
         data_source_id = payload["data_source_id"]
         data_source_obj = DataSource.get_by_id(data_source_id)
         if data_source_obj:
+            logger.info(
+                "Deleting data source - Name: %s, ID: %s",
+                data_source_obj.name,
+                data_source_obj.id,
+            )
+
             ds_data = data_source_obj.as_dict
             # Remove the third party data source even if airbyte is disabled
             if ds_data["is_third_party"] and AIRBYTE_ENABLED:
@@ -271,7 +304,8 @@ def delete_data_source():
             msg = "deleted"
             status = True
     except Exception as err_msg:
-        print(err_msg)
+        logger.error("Error in deleting data source: %s", err_msg, exc_info=err_msg)
+        msg = str(err_msg)
 
     return jsonify({"data": {}, "msg": msg, "status": status})
 
@@ -283,19 +317,29 @@ def metadata_data_source():
 
     try:
         payload = request.get_json()
-        data_source_id = payload["data_source_id"]
-        from_query = payload["from_query"]
-        query = payload["query"]
-        data_source_obj = DataSource.get_by_id(data_source_id)
-        if data_source_obj:
-            ds_data = data_source_obj.as_dict
-            metadata, msg = get_metadata(ds_data, from_query, query)
-            if msg != "":
-                status = "failure"
-        else:
+
+        if payload is None:
+            msg = "The request payload is not in JSON format"
             status = "failure"
+            logger.error("Error in data source metadata: %s", msg)
+        else:
+            data_source_id = payload["data_source_id"]
+
+            logger.info("Retrieving data source metadata. ID: %s", data_source_id)
+
+            from_query = payload["from_query"]
+            query = payload["query"]
+            data_source_obj = DataSource.get_by_id(data_source_id)
+            if data_source_obj:
+                ds_data = data_source_obj.as_dict
+                metadata, msg = get_metadata(ds_data, from_query, query)
+                if msg != "":
+                    status = "failure"
+            else:
+                status = "failure"
+
     except Exception as err_msg:
-        print(err_msg)
+        logger.error("Error in data source metadata: %s", err_msg, exc_info=err_msg)
         msg = str(err_msg)
         status = "failure"
 
@@ -309,6 +353,9 @@ def log_data_source():
     try:
         payload = request.get_json()
         data_source_id = payload["data_source_id"]
+
+        logger.info("Retrieving data source logs. ID: %s", data_source_id)
+
         data_source_obj = DataSource.get_by_id(data_source_id)
         ds_data = data_source_obj.as_dict
         connection_details = ds_data["connectionConfig"]
@@ -320,7 +367,7 @@ def log_data_source():
 
         status = True
     except Exception as err_msg:
-        print(err_msg)
+        logger.error("Error in data source logs: %s", err_msg, exc_info=err_msg)
 
     return jsonify({"data": logs_details, "status": status})
 
@@ -328,10 +375,13 @@ def log_data_source():
 @blueprint.route("/<int:datasource_id>", methods=["GET"])
 def get_data_source_info(datasource_id):
     """Get data source details."""
-    status, message = "", ""
+    status, message = "failure", ""
     data = None
     try:
         ds_obj = get_datasource_data_from_id(datasource_id, as_obj=True)
+
+        logger.info("Retrieving details of data source. ID: %s", datasource_id)
+
         data_source_def = ds_obj.sourceConfig["sourceDefinitionId"]
         if data_source_def:
             connection_types = get_connection_config()
@@ -354,15 +404,19 @@ def get_data_source_info(datasource_id):
     except Exception as err:
         status = "failure"
         message = str(err)
-        current_app.logger.info(f"Error in fetching the Data Source: {err}")
+        logger.error("Error in retrieving data source: %s", err, exc_info=err)
+
     return jsonify({"message": message, "status": status, "data": data})
 
 
 @blueprint.route("/<int:datasource_id>/test-and-update", methods=["POST"])
 def update_data_source_info(datasource_id):
     """Get data source details."""
-    status, message = "", ""
+    logger.info("Updating data source. ID: %s", datasource_id)
+
+    status, message = "failure", ""
     data = None
+
     try:
         payload = request.get_json()
         conn_name = payload.get("name")
@@ -394,14 +448,15 @@ def update_data_source_info(datasource_id):
     except Exception as err:
         status = "failure"
         message = str(err)
-        current_app.logger.info(f"Error in udpating the Data Source: {err}")
+        logger.error("Error in updating data source: %s", err, exc_info=err)
+
     return jsonify({"message": message, "status": status, "data": data})
 
 
 @blueprint.route("/meta-info", methods=["GET"])
 def data_source_meta_info():
     """Data source meta info view."""
-    current_app.logger.info("data source meta info")
+    logger.info("Retrieving data source meta info")
     return jsonify({"data": DataSource.meta_info()})
 
 
@@ -416,6 +471,8 @@ def check_views_availability():
     try:
         data = request.get_json()
         datasource_id = data.get("datasource_id", None)
+
+        logger.info("Getting data source availability. ID: %s", datasource_id)
 
         if datasource_id is None:
             message = "Datasource ID needs to be provided"
@@ -435,6 +492,10 @@ def check_views_availability():
             status = "success"
     except Exception as err:
         message = "Error in fetching table info: {}".format(err)
+        logger.error("Error in data source availability: %s", err, exc_info=err)
+    else:
+        if status == "failure":
+            logger.error("Error in data source availability: %s", message)
 
     return jsonify(
         {
@@ -459,6 +520,8 @@ def get_schema_list():
         data = request.get_json()
         datasource_id = data.get("datasource_id", None)
 
+        logger.info("Listing data source schemas. ID: %s", datasource_id)
+
         if datasource_id is None:
             message = "Datasource ID needs to be provided"
         else:
@@ -476,6 +539,10 @@ def get_schema_list():
                 status = "success"
     except Exception as err:
         message = "Error in fetching table info: {}".format(err)
+        logger.error("Error in data source schema list: %s", err, exc_info=err)
+    else:
+        if status == "failure":
+            logger.error("Error in data source schema list: %s", message)
 
     return jsonify({"message": message, "status": status, "data": data})
 
@@ -490,6 +557,8 @@ def get_schema_tables():
         data = request.get_json()
         datasource_id = data.get("datasource_id", None)
         schema = data.get("schema", None)
+
+        logger.info("Listing data source tables. ID: %s", datasource_id)
 
         if datasource_id is None:
             message = "Datasource ID needs to be provided"
@@ -511,6 +580,10 @@ def get_schema_tables():
                 status = "success"
     except Exception as err:
         message = "Error in fetching table info: {}".format(err)
+        logger.error("Error in data source table list: %s", err, exc_info=err)
+    else:
+        if status == "failure":
+            logger.error("Error in data source table list: %s", message)
 
     return jsonify({"message": message, "status": status, "table_names": table_names})
 
@@ -525,6 +598,8 @@ def get_schema_views():
         data = request.get_json()
         datasource_id = data.get("datasource_id", None)
         schema = data.get("schema", None)
+
+        logger.info("Listing data source views. ID: %s", datasource_id)
 
         if datasource_id is None:
             message = "Datasource ID needs to be provided"
@@ -546,6 +621,10 @@ def get_schema_views():
                 status = "success"
     except Exception as err:
         message = "Error in fetching table info: {}".format(err)
+        logger.error("Error in data source views list: %s", err, exc_info=err)
+    else:
+        if status == "failure":
+            logger.error("Error in data source views list: %s", message)
 
     return jsonify({"message": message, "status": status, "view_names": view_names})
 
@@ -553,20 +632,25 @@ def get_schema_views():
 @blueprint.route("/table-info", methods=["POST"])
 def get_table_info():
     """Returns Columns and primary key of a given table/view in a Dict."""
-    status = ""
+    status = "failure"
     message = ""
     table_info = {}
+
     try:
         data = request.get_json()
         params_list = ["datasource_id", "schema", "table_name"]
         if not set(params_list).issubset(list(data.keys())):
             status = "failure"
             message = "Missing required parameters. Please follow request format"
+            logger.error("Error in data source table info: %s", message)
             return jsonify(
                 {"status": status, "message": message, "table_info": table_info}
             )
 
         datasource_id = data["datasource_id"]
+
+        logger.info("Retrieving data source table info. ID: %s", datasource_id)
+
         schema = data["schema"]
         table_name = data["table_name"]
         ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
@@ -588,5 +672,9 @@ def get_table_info():
         status = "failure"
         message = "Error in fetching table info: {}".format(e)
         table_info = {}
+        logger.error("Error in data source table info: %s", e, exc_info=e)
+    else:
+        if status == "failure":
+            logger.error("Error in data source table info: %s", message)
 
     return jsonify({"table_info": table_info, "status": status, "message": message})

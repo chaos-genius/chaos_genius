@@ -99,10 +99,10 @@
                                 <thead class="bg-gray-900">
                                     <tr>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                            ID
+                                            Triggered Alert ID
                                         </th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                            Alert Name
+                                            Alert Name (ID)
                                         </th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
                                             Alert Message
@@ -227,7 +227,7 @@
         });
         dataTableAnomaly.origData = dataAnomaly;
         // hide user emails and alert channel columns
-        dataTableAnomaly.alertColIndex = 0;
+        dataTableAnomaly.alertColIndex = 1;
         dataTableAnomaly.kpiColIndex = 1;
         dataTableAnomaly.emailColIndex = 7;
         dataTableAnomaly.channelColIndex = 8;
@@ -237,7 +237,7 @@
             {% for triggered_alert in event_alerts_data %}
             [
                 "{{ triggered_alert.id }}",
-                "{{ triggered_alert.alert_name }}",
+                "{{ triggered_alert.alert_name }} ({{ triggered_alert.alert_conf_id }})",
                 "{{ triggered_alert.alert_message }}",
                 "{{ triggered_alert.created_at }}",
                 "{{ triggered_alert.alert_channel }}",

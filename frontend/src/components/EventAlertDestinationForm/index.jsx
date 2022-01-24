@@ -383,36 +383,37 @@ const EventAlertDestinationForm = ({
         ''
       )}
       {/* commented add another channel*/}
-      <div className="form-group">
+      <div className="form-group form-group-label-margin">
         <label>Send As *</label>
 
-        <div className="event-alert-setting">
+        <div className="alert-setting event-alert-send-setting">
           <div className="form-check">
             <input
               className="form-check-input"
               type="radio"
-              id="newentry"
+              id="individualalert"
               name="alert"
             />
-            <label className={'form-check-label active'} for="newentry">
-              Individual alert
+            <label className={'form-check-label active'} for="individualalert">
+              individual alert
             </label>
           </div>
           <div className="form-check">
             <input
               className="form-check-input"
               type="radio"
-              id="newentry"
+              id="consolidatedalertsreport"
               name="alert"
             />
-            <label className={'form-check-label'} for="newentry">
-              Consolidated Alerts Reports
+            <label
+              className={'form-check-label'}
+              for="consolidatedalertsreport">
+              consolidated alerts report
             </label>
           </div>
         </div>
       </div>
       {/*Add empty space div*/}
-      <div className="add-options-wrapper options-spacing"></div>
       <div className="form-action alerts-button">
         <button className="btn white-button" onClick={() => onBack()}>
           <span>Back</span>

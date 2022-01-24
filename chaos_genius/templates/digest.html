@@ -210,7 +210,7 @@
                     </span>`,
                   "{{ point['Time of Occurrence'] }}",
                   [
-                      {% for email in ["Any"] + (triggered_alert.alert_channel_conf or []) %}
+                      {% for email in (triggered_alert.alert_channel_conf or []) %}
                       "{{ email }}",
                       {% endfor %}
                   ],
@@ -242,7 +242,7 @@
                 "{{ triggered_alert.created_at }}",
                 "{{ triggered_alert.alert_channel }}",
                 [
-                    {% for email in ["Any"] + (triggered_alert.alert_channel_conf or []) %}
+                    {% for email in (triggered_alert.alert_channel_conf or []) %}
                     "{{ email }}",
                     {% endfor %}
                 ],
@@ -496,15 +496,16 @@
         dropdown.addEventListener("input", () => {
             let selected = Array.from(dropdown.options).filter(option => option.selected).map(option => option.value);
 
-            if (selected.length == 0) {
-                selected = ["Any"];
+            if (selected.length !== 0) {
+                const selectedSet = new Set(selected);
+                addFilter("email", row => {
+                    const intersection = row[currentTable.emailColIndex].filter(email => selectedSet.has(email));
+                    return intersection.length > 0;
+                });
+            } else {
+                removeFilter("email");
             }
 
-            const selectedSet = new Set(selected);
-            addFilter("email", row => {
-                const intersection = row[currentTable.emailColIndex].filter(email => selectedSet.has(email));
-                return intersection.length > 0;
-            });
             applyFilters(currentTable);
         });
     </script>

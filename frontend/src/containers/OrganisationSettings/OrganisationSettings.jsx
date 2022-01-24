@@ -7,6 +7,7 @@ import AccountSetting from './AccountSetting';
 import MetricsSettings from './MetricsSettings';
 import './organisationSettings.scss';
 import { onboardingOrganisationStatus } from '../../redux/actions';
+import ReportSettings from './ReportSetting';
 
 const OrganisationSettings = () => {
   const [tabSwitch, setTabSwitch] = useState({ account: true, metrics: false });
@@ -18,7 +19,7 @@ const OrganisationSettings = () => {
     };
     getOrganisationOnboardedData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[]);
+  }, []);
 
   return (
     <>
@@ -32,7 +33,9 @@ const OrganisationSettings = () => {
         <div className="settings-tab">
           <ul>
             <li
-              onClick={(e) => setTabSwitch({ account: true, metrics: false })}
+              onClick={(e) =>
+                setTabSwitch({ account: true, metrics: false, reports: false })
+              }
               key={uuidv4()}
               className={tabSwitch.account ? 'active' : ''}>
               Account
@@ -45,10 +48,19 @@ const OrganisationSettings = () => {
               Metrics
               <img src={GreenArrow} alt="Arrow" />
             </li>
+            <li
+              onClick={(e) =>
+                setTabSwitch({ account: false, metrics: false, reports: true })
+              }
+              key={uuidv4()}
+              className={tabSwitch.reports ? 'active' : ''}>
+              Reports
+              <img src={GreenArrow} alt="Arrow" />
+            </li>
           </ul>
         </div>
         <div className="settings-section">
-          {Object.keys(organisationData).length ? ( 
+          {Object.keys(organisationData).length ? (
             <>
               {tabSwitch.account ? (
                 <AccountSetting organisationData={organisationData} />
@@ -56,6 +68,7 @@ const OrganisationSettings = () => {
               {tabSwitch.metrics ? (
                 <MetricsSettings organisationData={organisationData} />
               ) : null}
+              {tabSwitch.reports ? <ReportSettings /> : null}
             </>
           ) : null}
         </div>

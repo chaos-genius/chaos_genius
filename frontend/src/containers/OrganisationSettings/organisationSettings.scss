@@ -42,7 +42,7 @@
       padding-bottom: 72px;
       .form-group {
         width: 440px;
-        height: 48px;
+        height: 100%;
         label {
           padding-left: 2px;
           font-weight: $font-weight-400;
@@ -61,6 +61,10 @@
             color: $black_variation-2;
             font-family: $font-family-inter;
           }
+        }
+        .time-picker {
+          width: 280px;
+          min-height: 48px;
         }
       }
       p {
@@ -89,8 +93,6 @@
         letter-spacing: 0.2px;
       }
     }
-
-    
 
     .form-switch {
       margin-top: 20px;

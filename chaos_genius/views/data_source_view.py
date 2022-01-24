@@ -1,80 +1,91 @@
 # -*- coding: utf-8 -*-
 """DataSource views for creating and viewing the data source."""
-from uuid import uuid4
 from copy import deepcopy
 from datetime import datetime
-from flask import (
-    Blueprint,
-    current_app,
-    request,
-    jsonify
-)
-from sqlalchemy import func
-from chaos_genius.extensions import cache, db
-from chaos_genius.third_party.integration_client import get_localhost_host
-from chaos_genius.databases.models.kpi_model import Kpi
-from chaos_genius.databases.models.data_source_model import DataSource
-from chaos_genius.extensions import integration_connector as connector
-from chaos_genius.third_party.integration_server_config import (
-    SOURCE_CONFIG_MAPPING,
-    SOURCE_WHITELIST_AND_TYPE,
-    DATABASE_CONFIG_MAPPER,
-    DESTINATION_TYPE as db_type,
-    DATA_SOURCE_ABBREVIATION
-)
-from chaos_genius.databases.db_utils import create_sqlalchemy_uri
-from chaos_genius.connectors import (
-        get_metadata,
-        get_table_info as get_table_metadata,
-        get_schema_names,
-        get_table_list,
-        get_view_list
-)
-from chaos_genius.third_party.integration_utils import get_connection_config
-from chaos_genius.utils.metadata_api_config import (
-    SCHEMAS_AVAILABLE,
-    TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY
-)
-# from chaos_genius.databases.db_metadata import DbMetadata, get_metadata
+from uuid import uuid4
 
+from flask.blueprints import Blueprint
+from flask.globals import current_app, request
+from flask.json import jsonify
+from sqlalchemy import func
+
+from chaos_genius.connectors import get_metadata, get_schema_names
+from chaos_genius.connectors import get_table_info as get_table_metadata
+from chaos_genius.connectors import get_table_list, get_view_list
 from chaos_genius.controllers.data_source_controller import (
     get_datasource_data_from_id,
     mask_sensitive_info,
     test_data_source,
-    update_third_party
+    update_third_party,
+)
+from chaos_genius.databases.db_utils import create_sqlalchemy_uri
+from chaos_genius.databases.models.data_source_model import DataSource
+from chaos_genius.databases.models.kpi_model import Kpi
+from chaos_genius.extensions import cache, db
+from chaos_genius.extensions import integration_connector as connector
+from chaos_genius.settings import AIRBYTE_ENABLED
+from chaos_genius.third_party.integration_client import get_localhost_host
+from chaos_genius.third_party.integration_server_config import (
+    DATA_SOURCE_ABBREVIATION,
+    DATABASE_CONFIG_MAPPER,
+)
+from chaos_genius.third_party.integration_server_config import (
+    DESTINATION_TYPE as db_type,
+)
+from chaos_genius.third_party.integration_server_config import (
+    SOURCE_CONFIG_MAPPING,
+    SOURCE_WHITELIST_AND_TYPE,
+)
+from chaos_genius.third_party.integration_utils import get_connection_config
+from chaos_genius.utils.metadata_api_config import (
+    SCHEMAS_AVAILABLE,
+    TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY,
 )
 
-from chaos_genius.settings import AIRBYTE_ENABLED
+# from chaos_genius.databases.db_metadata import DbMetadata, get_metadata
+
 
 blueprint = Blueprint("api_data_source", __name__)
 
 
-@blueprint.route("/", methods=["GET", "POST"]) # TODO: Remove this
+@blueprint.route("/", methods=["GET", "POST"])  # TODO: Remove this
 @blueprint.route("", methods=["GET", "POST"])
 def data_source():
-    """DataSource List view."""
+    """Data source List view."""
     current_app.logger.info("DataSource list")
 
-    if request.method == 'POST':
+    if request.method == "POST":
         if request.is_json:
             data = request.get_json()
-            conn_name = data.get('name')
-            conn_type = data.get('connection_type')
-            conn_uri = data.get('db_uri')
-            new_data_source = DataSource(name=conn_name, db_uri=conn_uri, connection_type=conn_type)
+            conn_name = data.get("name")
+            conn_type = data.get("connection_type")
+            conn_uri = data.get("db_uri")
+            new_data_source = DataSource(
+                name=conn_name, db_uri=conn_uri, connection_type=conn_type
+            )
             new_data_source.save()
-            return jsonify({"message": f"DataSource {new_data_source.name} has been created successfully."})
+            return jsonify(
+                {
+                    "message": f"DataSource {new_data_source.name} has been created successfully."
+                }
+            )
         else:
             return jsonify({"error": "The request payload is not in JSON format"})
 
-    elif request.method == 'GET':
-        data_sources = DataSource.query.filter(DataSource.active==True).order_by(DataSource.created_at.desc()).all()
-        ds_kpi_count = db.session.query(DataSource.id, func.count(Kpi.id)) \
-                    .join(Kpi, Kpi.data_source == DataSource.id) \
-                    .filter(DataSource.active==True, Kpi.active==True) \
-                    .group_by(DataSource.id) \
-                    .order_by(DataSource.created_at.desc()) \
-                    .all()
+    elif request.method == "GET":
+        data_sources = (
+            DataSource.query.filter(DataSource.active == True)  # noqa: E712
+            .order_by(DataSource.created_at.desc())
+            .all()
+        )
+        ds_kpi_count = (
+            db.session.query(DataSource.id, func.count(Kpi.id))
+            .join(Kpi, Kpi.data_source == DataSource.id)
+            .filter(DataSource.active == True, Kpi.active == True)  # noqa: E712
+            .group_by(DataSource.id)
+            .order_by(DataSource.created_at.desc())
+            .all()
+        )
         data_source_kpi_map = {}
         for row in ds_kpi_count:
             data_source_kpi_map[row[0]] = row[1]
@@ -82,8 +93,8 @@ def data_source():
         for conn in data_sources:
             # TODO: Add the kpi_count, real sync details and sorting info
             conn_detail = conn.safe_dict
-            conn_detail['last_sync'] = datetime.now()
-            conn_detail['kpi_count'] = data_source_kpi_map.get(conn_detail['id'], 0)
+            conn_detail["last_sync"] = datetime.now()
+            conn_detail["kpi_count"] = data_source_kpi_map.get(conn_detail["id"], 0)
             results.append(conn_detail)
         results = sorted(results, reverse=True, key=lambda x: x["id"])
         return jsonify({"count": len(results), "data": results})
@@ -92,7 +103,7 @@ def data_source():
 @blueprint.route("/types", methods=["GET"])
 @cache.memoize()
 def list_data_source_type():
-    """DataSource Type view."""
+    """Data source Type view."""
     connection_types, msg, status = [], "", "success"
     try:
         connection_types = get_connection_config()
@@ -126,28 +137,32 @@ def create_data_source():
     db_connection_uri = ""
     try:
         payload = request.get_json()
-        conn_name = payload.get('name')
-        conn_type = payload.get('connection_type')
-        source_form = payload.get('sourceForm')
+        conn_name = payload.get("name")
+        conn_type = payload.get("connection_type")
+        source_form = payload.get("sourceForm")
         is_third_party = SOURCE_WHITELIST_AND_TYPE[source_form["sourceDefinitionId"]]
         if is_third_party and not AIRBYTE_ENABLED:
             raise Exception("Airbytes is not enabled.")
         sourceCreationPayload = {
             "name": f"CG-{conn_name}",
             "sourceDefinitionId": source_form.get("sourceDefinitionId"),
-            "connectionConfiguration": source_form.get("connectionConfiguration")
+            "connectionConfiguration": source_form.get("connectionConfiguration"),
         }
         if is_third_party:
             connector_client = connector.connection
             sourceCreationPayload["workspaceId"] = connector_client.workspace_id
             # Create the source
             sourceRecord = connector_client.create_source(sourceCreationPayload)
-            sourceRecord["connectionConfiguration"] = sourceCreationPayload["connectionConfiguration"]
+            sourceRecord["connectionConfiguration"] = sourceCreationPayload[
+                "connectionConfiguration"
+            ]
 
             # create the destination record
             desinationRecord = connector_client.create_destination(conn_name)
             # create the third_party_connection
-            mapping_config = SOURCE_CONFIG_MAPPING.get(source_form.get("sourceDefinitionId"), {})
+            mapping_config = SOURCE_CONFIG_MAPPING.get(
+                source_form.get("sourceDefinitionId"), {}
+            )
             source_schema = connector_client.get_source_schema(sourceRecord["sourceId"])
             stream_schema = source_schema["catalog"]["streams"]
             for stream in stream_schema:
@@ -160,10 +175,7 @@ def create_data_source():
             conn_payload = {
                 "sourceId": sourceRecord["sourceId"],
                 "destinationId": desinationRecord["destinationId"],
-                "schedule": {
-                    "units": 24,
-                    "timeUnit": "hours"
-                },
+                "schedule": {"units": 24, "timeUnit": "hours"},
                 "prefix": table_prefix,
                 "status": "active",
                 "operations": [
@@ -172,15 +184,11 @@ def create_data_source():
                         "workspaceId": connector_client.workspace_id,
                         "operatorConfiguration": {
                             "operatorType": "normalization",
-                            "normalization": {
-                                "option": "basic"
-                            }
-                        }
+                            "normalization": {"option": "basic"},
+                        },
                     }
                 ],
-                "syncCatalog": {
-                    "streams": stream_schema
-                }
+                "syncCatalog": {"streams": stream_schema},
             }
             connectionRecord = connector_client.create_connection(conn_payload)
             if not connectionRecord:
@@ -218,13 +226,13 @@ def create_data_source():
             sourceConfig=sourceRecord,
             destinationConfig=desinationRecord,
             connectionConfig=connectionRecord,
-            dbConfig={"tables": stream_tables, "db_connection_uri": db_connection_uri}
+            dbConfig={"tables": stream_tables, "db_connection_uri": db_connection_uri},
         )
         new_connection.save(commit=True)
         msg = f"Connection {new_connection.name} has been created successfully."
 
     except Exception as err_msg:
-        print('-'*60)
+        print("-" * 60)
         print(err_msg)
         msg = str(err_msg)
         # import traceback; print(traceback.format_exc())
@@ -246,10 +254,14 @@ def delete_data_source():
                 connector_client = connector.connection
                 # delete the connection
                 connection_details = ds_data["connectionConfig"]
-                status = connector_client.delete_connection(connection_details["connectionId"])
+                status = connector_client.delete_connection(
+                    connection_details["connectionId"]
+                )
                 # delete the destination
                 destination_details = ds_data["destinationConfig"]
-                status = connector_client.delete_destination(destination_details["destinationId"])
+                status = connector_client.delete_destination(
+                    destination_details["destinationId"]
+                )
                 # delete the source
                 source_details = ds_data["sourceConfig"]
                 status = connector_client.delete_source(source_details["sourceId"])
@@ -315,7 +327,7 @@ def log_data_source():
 
 @blueprint.route("/<int:datasource_id>", methods=["GET"])
 def get_data_source_info(datasource_id):
-    """get data source details."""
+    """Get data source details."""
     status, message = "", ""
     data = None
     try:
@@ -323,10 +335,19 @@ def get_data_source_info(datasource_id):
         data_source_def = ds_obj.sourceConfig["sourceDefinitionId"]
         if data_source_def:
             connection_types = get_connection_config()
-            connection_def = next((source_def for source_def in connection_types if source_def["sourceDefinitionId"] == data_source_def), None)
+            connection_def = next(
+                (
+                    source_def
+                    for source_def in connection_types
+                    if source_def["sourceDefinitionId"] == data_source_def
+                ),
+                None,
+            )
             masked_details = {}
             if connection_def:
-                masked_details = mask_sensitive_info(connection_def, ds_obj.sourceConfig["connectionConfiguration"])
+                masked_details = mask_sensitive_info(
+                    connection_def, ds_obj.sourceConfig["connectionConfiguration"]
+                )
         data = ds_obj.safe_dict
         data["sourceForm"] = masked_details
         status = "success"
@@ -339,13 +360,13 @@ def get_data_source_info(datasource_id):
 
 @blueprint.route("/<int:datasource_id>/test-and-update", methods=["POST"])
 def update_data_source_info(datasource_id):
-    """get data source details."""
+    """Get data source details."""
     status, message = "", ""
     data = None
     try:
         payload = request.get_json()
-        conn_name = payload.get('name')
-        source_form = payload.get('sourceForm')
+        conn_name = payload.get("name")
+        source_form = payload.get("sourceForm")
         ds_obj = get_datasource_data_from_id(datasource_id, as_obj=True)
         if ds_obj.is_third_party and not AIRBYTE_ENABLED:
             raise Exception("Airbyte is not enabled")
@@ -357,12 +378,14 @@ def update_data_source_info(datasource_id):
         connection_config["connection_type"] = ds_obj.connection_type
         connection_status = test_data_source(deepcopy(connection_config))
         if connection_status["status"] == "failed":
-            raise Exception(connection_status['message'])
+            raise Exception(connection_status["message"])
 
         updated_config = update_third_party(connection_config)
         if updated_config:
             # third party configs update
-            updated_config["connectionConfiguration"] = connection_config["connectionConfiguration"]
+            updated_config["connectionConfiguration"] = connection_config[
+                "connectionConfiguration"
+            ]
             ds_obj.sourceConfig = updated_config
         else:
             ds_obj.sourceConfig = connection_config
@@ -377,7 +400,7 @@ def update_data_source_info(datasource_id):
 
 @blueprint.route("/meta-info", methods=["GET"])
 def data_source_meta_info():
-    """data source meta info view."""
+    """Data source meta info view."""
     current_app.logger.info("data source meta info")
     return jsonify({"data": DataSource.meta_info()})
 
@@ -399,17 +422,32 @@ def check_views_availability():
         else:
             ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
             if not ds_data or not getattr(ds_data, "active"):
-                raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
+                raise ValueError(
+                    f"There exists no active datasource matching the provided id: {datasource_id}"
+                )
 
             datasource_name = getattr(ds_data, "connection_type")
-            schema_exist = SCHEMAS_AVAILABLE.get(datasource_name , False)
+            schema_exist = SCHEMAS_AVAILABLE.get(datasource_name, False)
             views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["views"]
-            materialize_views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["materialized_views"]
+            materialize_views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[
+                datasource_name
+            ]["materialized_views"]
             status = "success"
     except Exception as err:
         message = "Error in fetching table info: {}".format(err)
 
-    return jsonify({"message":message, "status": status, "available": {"schema": schema_exist, "views": views, "materialize_views": materialize_views}})
+    return jsonify(
+        {
+            "message": message,
+            "status": status,
+            "available": {
+                "schema": schema_exist,
+                "views": views,
+                "materialize_views": materialize_views,
+            },
+        }
+    )
+
 
 @blueprint.route("/list-schema", methods=["POST"])
 def get_schema_list():
@@ -426,7 +464,9 @@ def get_schema_list():
         else:
             ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
             if not ds_data or not getattr(ds_data, "active"):
-                raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
+                raise ValueError(
+                    f"There exists no active datasource matching the provided id: {datasource_id}"
+                )
 
             data = get_schema_names(ds_data.as_dict)
             if data is None:
@@ -437,7 +477,8 @@ def get_schema_list():
     except Exception as err:
         message = "Error in fetching table info: {}".format(err)
 
-    return jsonify({"message":message, "status":status, "data":data})
+    return jsonify({"message": message, "status": status, "data": data})
+
 
 @blueprint.route("/get-table-list", methods=["POST"])
 def get_schema_tables():
@@ -455,7 +496,9 @@ def get_schema_tables():
         else:
             ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
             if not ds_data or not getattr(ds_data, "active"):
-                raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
+                raise ValueError(
+                    f"There exists no active datasource matching the provided id: {datasource_id}"
+                )
 
             ds_name = getattr(ds_data, "connection_type")
             schema = None if SCHEMAS_AVAILABLE[ds_name] == False else schema
@@ -469,14 +512,12 @@ def get_schema_tables():
     except Exception as err:
         message = "Error in fetching table info: {}".format(err)
 
-    return jsonify({"message":message, "status":status, "table_names":table_names})
+    return jsonify({"message": message, "status": status, "table_names": table_names})
+
 
 @blueprint.route("/get-view-list", methods=["POST"])
 def get_schema_views():
-    """
-    Returns a list of names of both views and materialized views
-    """
-
+    """Returns a list of names of both views and materialized views."""
     status = "failure"
     message = ""
     view_names = []
@@ -490,7 +531,9 @@ def get_schema_views():
         else:
             ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
             if not ds_data or not getattr(ds_data, "active"):
-                raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
+                raise ValueError(
+                    f"There exists no active datasource matching the provided id: {datasource_id}"
+                )
 
             ds_name = getattr(ds_data, "connection_type")
             schema = None if SCHEMAS_AVAILABLE[ds_name] == False else schema
@@ -504,13 +547,12 @@ def get_schema_views():
     except Exception as err:
         message = "Error in fetching table info: {}".format(err)
 
-    return jsonify({"message":message, "status":status, "view_names":view_names})
+    return jsonify({"message": message, "status": status, "view_names": view_names})
 
-@blueprint.route("/table-info",methods=["POST"])
+
+@blueprint.route("/table-info", methods=["POST"])
 def get_table_info():
-    """
-    Returns Columns and primary key of a given table/view in a Dict
-    """
+    """Returns Columns and primary key of a given table/view in a Dict."""
     status = ""
     message = ""
     table_info = {}
@@ -520,14 +562,18 @@ def get_table_info():
         if not set(params_list).issubset(list(data.keys())):
             status = "failure"
             message = "Missing required parameters. Please follow request format"
-            return jsonify({"status":status, "message":message, "table_info":table_info})
+            return jsonify(
+                {"status": status, "message": message, "table_info": table_info}
+            )
 
         datasource_id = data["datasource_id"]
         schema = data["schema"]
         table_name = data["table_name"]
         ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
         if not ds_data or not getattr(ds_data, "active"):
-            raise ValueError(f"There exists no active datasource matching the provided id: {datasource_id}")
+            raise ValueError(
+                f"There exists no active datasource matching the provided id: {datasource_id}"
+            )
 
         ds_name = getattr(ds_data, "connection_type")
 
@@ -542,5 +588,5 @@ def get_table_info():
         status = "failure"
         message = "Error in fetching table info: {}".format(e)
         table_info = {}
-    return jsonify({"table_info":table_info, "status":status, "message":message})
-    
+
+    return jsonify({"table_info": table_info, "status": status, "message": message})

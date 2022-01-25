@@ -548,7 +548,8 @@ class AnomalyAlertController:
                                             alert_name=self.alert_info.get("alert_name")
                                         )
             logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
-            return test, overall_data
+            anomaly_data = overall_data
+            return test, anomaly_data
         else:
             logger.info(
                 f"No receipent email available (Alert ID - {self.alert_info['id']})"
@@ -628,8 +629,11 @@ class AnomalyAlertController:
                 f"The slack alert for Alert ID - {self.alert_info['id']} has not been sent"
             )
 
+        overall_data.extend(subdim_data)
+        anomaly_data = overall_data
         message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
-        return message
+        test = test == "ok"
+        return test, anomaly_data
 
 
 class StaticKpiAlertController:

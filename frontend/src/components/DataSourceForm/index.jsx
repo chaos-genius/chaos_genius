@@ -1,6 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react';
 
 import Select from 'react-select';
+import Modal from 'react-modal';
+import Close from '../../assets/images/close.svg';
+import Sands_Of_Time from '../../assets/images/Sands_Of_Time.svg';
 
 import { useHistory, useParams } from 'react-router-dom';
 
@@ -50,6 +53,7 @@ const datasourceIcon = (type) => {
     </>
   );
 };
+Modal.setAppElement('body');
 
 const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const dispatch = useDispatch();
@@ -60,6 +64,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const [option, setOption] = useState([]);
   const [selectedDatasource, setSelectedDatasource] = useState();
   const [sourceDefinitionId, setSourceDefinitionId] = useState('');
+  const [showModal, setShowModal] = useState(false);
   const [connectionName, setConnectionName] = useState('');
   const [editedConnectionName, setEditedConnecitonName] = useState('');
   const [dsFormData, setDsFormData] = useState({});
@@ -87,6 +92,11 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const getEditDatasource = () => {
     dispatch(getDatasourceMetaInfo());
     dispatch(getDatasourceById(dsId));
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    history.push('/datasource');
   };
 
   useEffect(() => {
@@ -178,7 +188,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       createDatasourceResponse.status === 'connected' &&
       onboarding === false
     ) {
-      history.push('/datasource');
+      setShowModal(true);
     } else if (
       createDatasourceResponse &&
       createDatasourceResponse.status === 'connected' &&
@@ -211,7 +221,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       createDatasourceResponse.status === 'connected' &&
       path[2] === 'add'
     ) {
-      history.push('/datasource');
+      setShowModal(true);
       customToast({
         type: 'success',
         header: 'Successfully Added',
@@ -570,25 +580,6 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             formError,
             path
           )}
-
-        {/* test connection sucess message */}
-        {/* {status && status?.status === 'succeeded' && (
-          <div className="connection__success">
-            <p>
-              <img src={Success} alt="Success" />
-              Test Connection Success
-            </p>
-          </div>
-        )} */}
-        {/* test connection fail message */}
-        {/* {status && status?.status === 'failure' && (
-          <div className="connection__fail">
-            <p>
-              <img src={Fail} alt="Fail" />
-              Test Connection Failed
-            </p>
-          </div>
-        )} */}
         {path[2] === 'edit' ? (
           <div className="form-action">
             <button
@@ -667,6 +658,32 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             )}
           </div>
         )}
+        <Modal
+          portalClassName="datasourcemodal"
+          isOpen={showModal}
+          shouldCloseOnOverlayClick={false}
+          className="datasourcemodal">
+          <div className="modal-close">
+            <img src={Close} alt="Close" onClick={closeModal} />
+          </div>
+          <div className="sands-of-time">
+            <img src={Sands_Of_Time} alt="Sands_Of_Time" />
+          </div>
+          <div className="modal-body">
+            <div className="modal-contents">
+              <h3>Data Source Added Successfully</h3>
+              <p>
+                Please wait for a few minutes for data sync to complete before
+                adding a KPI
+              </p>
+              <div className="next-step-navigate">
+                <button className="btn black-button" onClick={closeModal}>
+                  <span>Okay</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </Modal>
       </>
     );
   }

@@ -7,17 +7,41 @@
 {% if data|length > 0 %}
     <table style="border-collapse: collapse;border-spacing: 15px; color: #F6F5F5;text-align: left; padding: 10px;">
       <tr style="border:1px solid #8A8A8A ; border-color: #8A8A8A;">
-          {% for column in column_names %}
-          <th style="border: 1px solid #8A8A8A ; padding: 10px;">{{column}}</th>
-          {% endfor %}
+        <th>
+            Alert Name
+        </th>
+        <th>
+            KPI Name
+        </th>
+        <th>
+            Created At
+        </th>
+        <th>
+            View Data
+        </th>
       </tr>
       {% for item in data %}
           <tr style="border:1px solid #8A8A8A">
-              {% for column in column_names %}
-              <td style="color: #F6F5F5;border: 1px solid #8A8A8A ; padding: 10px;">{{ getattr(item, column) }}</td>
-              {% endfor %}
+              <td style="color: #F6F5F5;border: 1px solid #8A8A8A ; padding: 10px;">{{ getattr(item, "alert_name") }}</td>
+              <td style="color: #F6F5F5;border: 1px solid #8A8A8A ; padding: 10px;">{{ getattr(item, "kpi_name") }}</td>
+              <td style="color: #F6F5F5;border: 1px solid #8A8A8A ; padding: 10px;">{{ getattr(item, "created_at") }}</td>
+              <td style="color: #F6F5F5;border: 1px solid #8A8A8A ; padding: 10px;">
+                    <a href="{{ getattr(item, 'link') }}" class="button">View Data</a>
+              </td>
           </tr>
       {% endfor %}
     </table>
+
+
+    <style>
+        a.button {
+            -webkit-appearance: button;
+            -moz-appearance: button;
+            appearance: button;
+
+            text-decoration: none;
+            color: initial;
+        }       
+    </style>
 {% endif %}
 {% endblock %}

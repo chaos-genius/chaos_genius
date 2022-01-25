@@ -67,7 +67,7 @@ def test_month_on_month():
     func = TIME_RANGES_BY_KEY["month_on_month"]["function"]
 
     base_start_date = date(2020, 2, 1)
-    base_end_date = date(2020, 2, 29)
+    base_end_date = date(2020, 3, 1)
     rca_start_date = date(2020, 3, 1)
     rca_end_date = date(2020, 3, 5)
 
@@ -78,7 +78,7 @@ def test_month_on_month():
     )
 
     base_start_date = date(2021, 2, 1)
-    base_end_date = date(2021, 2, 28)
+    base_end_date = date(2021, 3, 1)
     rca_start_date = date(2021, 3, 1)
     rca_end_date = date(2021, 3, 5)
 
@@ -89,7 +89,7 @@ def test_month_on_month():
     )
 
     base_start_date = date(2020, 12, 1)
-    base_end_date = date(2020, 12, 31)
+    base_end_date = date(2021, 1, 1)
     rca_start_date = date(2021, 1, 1)
     rca_end_date = date(2021, 1, 5)
 
@@ -165,7 +165,7 @@ def test_week_on_week():
     func = TIME_RANGES_BY_KEY["week_on_week"]["function"]
 
     base_start_date = date(2020, 3, 2)
-    base_end_date = date(2020, 3, 8)
+    base_end_date = date(2020, 3, 9)
     rca_start_date = date(2020, 3, 9)
     rca_end_date = date(2020, 3, 12)
 
@@ -176,7 +176,7 @@ def test_week_on_week():
     )
 
     base_start_date = date(2021, 3, 1)
-    base_end_date = date(2021, 3, 7)
+    base_end_date = date(2021, 3, 8)
     rca_start_date = date(2021, 3, 8)
     rca_end_date = date(2021, 3, 12)
 
@@ -219,7 +219,7 @@ def test_quarter_on_quarter():
     func = TIME_RANGES_BY_KEY["quarter_on_quarter"]["function"]
 
     base_start_date = date(2020, 1, 1)
-    base_end_date = date(2020, 3, 31)
+    base_end_date = date(2020, 4, 1)
     rca_start_date = date(2020, 4, 1)
     rca_end_date = date(2020, 4, 12)
 
@@ -230,7 +230,7 @@ def test_quarter_on_quarter():
     )
 
     base_start_date = date(2020, 10, 1)
-    base_end_date = date(2020, 12, 31)
+    base_end_date = date(2021, 1, 1)
     rca_start_date = date(2021, 1, 1)
     rca_end_date = date(2021, 2, 12)
 

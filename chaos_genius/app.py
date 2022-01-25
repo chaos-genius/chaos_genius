@@ -32,6 +32,7 @@ from chaos_genius.extensions import (
     integration_connector,
     celery
 )
+from chaos_genius.settings import AIRBYTE_ENABLED
 
 
 def create_app(config_object="chaos_genius.settings"):
@@ -60,7 +61,8 @@ def register_extensions(app):
     # login_manager.init_app(app)
     migrate.init_app(app, db)
     flask_static_digest.init_app(app)
-    integration_connector.init_app(app)
+    if AIRBYTE_ENABLED:
+        integration_connector.init_app(app)
     celery.init_app(app)
     return None
 

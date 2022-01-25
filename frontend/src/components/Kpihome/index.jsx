@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 
 import Select from 'react-select';
 import Search from '../../assets/images/search.svg';
@@ -22,13 +22,20 @@ import Homefilter from '../Homefilter';
 
 import { formatDateTime, getTimezone } from '../../utils/date-helper';
 import { HRNumbers } from '../../utils/Formatting/Numbers/humanReadableNumberFormatter';
-import { getDashboard } from '../../redux/actions';
+import { getDashboard, getTimeCuts } from '../../redux/actions';
 import { CustomTooltip } from '../../utils/tooltip-helper';
 
 import store from '../../redux/store';
 
 const RESET_ACTION = {
   type: 'RESET_KPI_HOME_DATA'
+};
+
+const customStyles = {
+  container: (provided) => ({
+    ...provided,
+    width: 180
+  })
 };
 
 highchartsMore(Highcharts);
@@ -38,29 +45,17 @@ Highcharts.setOptions({
   }
 });
 
-const data = [
-  {
-    value: 'last_30_days',
-    label: 'Current Month on Last Month'
-  },
-  {
-    value: 'last_7_days',
-    label: 'Current Week on Last Week'
-  },
-  {
-    value: 'previous_day',
-    label: 'Current Day on Last Day'
-  }
-];
-
 const Kpihome = () => {
   const dispatch = useDispatch();
 
   const history = useHistory();
 
+  const dashboardId = useParams().id;
+
   const { homeKpiData, homeKpiLoading } = useSelector(
     (state) => state.onboarding
   );
+  const { timeCutsData } = useSelector((state) => state.TimeCuts);
 
   const { dashboardListLoading, dashboardList } = useSelector((state) => {
     return state.DashboardHome;
@@ -69,34 +64,69 @@ const Kpihome = () => {
   const [search, setSearch] = useState('');
   const [kpiHomeData, setKpiHomeData] = useState(homeKpiData);
   const [dashboard, setDashboard] = useState(dashboardList[0]?.id);
+  const [timeCutOptions, setTimeCutOptions] = useState([]);
 
-  const [timeline, setTimeLine] = useState({
-    value: 'last_30_days',
-    label: 'Current Month on Last Month'
-  });
+  const [timeline, setTimeLine] = useState({});
 
   useEffect(() => {
     store.dispatch(RESET_ACTION);
     dispatch(getDashboard());
+    dispatch(getTimeCuts());
   }, [dispatch]);
 
   useEffect(() => {
-    if (dashboardList && dashboardList.length !== 0) {
+    if (
+      dashboardList &&
+      dashboardList.length !== 0 &&
+      dashboardId === undefined
+    ) {
+      setDashboard(dashboardList[0]?.id);
+      history.push(`/${dashboardList[0]?.id}`);
+    } else if (dashboardList && dashboardList.length !== 0 && dashboardId) {
       setDashboard(dashboardList[0]?.id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dashboardList]);
+  }, [dashboardList, history.location.pathname]);
+
+  const getAllTimeCutOptions = (data) => {
+    let res = [];
+    if (data && data.length) {
+      for (const dataKey of data) {
+        res.push({
+          value: `${dataKey?.id}`,
+          label: dataKey?.display_name,
+          grp2_name: dataKey?.current_period_name,
+          grp1_name: dataKey?.last_period_name
+        });
+      }
+    }
+    setTimeCutOptions(res);
+  };
 
   useEffect(() => {
-    if (![null, undefined, ''].includes(dashboard)) {
+    if (timeCutsData && timeCutsData.length) {
+      setTimeLine({
+        label: timeCutsData[0]?.display_name,
+        value: `${timeCutsData[0]?.id}`,
+        grp2_name: timeCutsData[0]?.current_period_name,
+        grp1_name: timeCutsData[0]?.last_period_name
+      });
+      getAllTimeCutOptions(timeCutsData);
+    }
+  }, [timeCutsData]);
+
+  useEffect(() => {
+    if (![null, undefined, ''].includes(dashboard) && timeline.value) {
       getHomeList();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dashboard, timeline]);
+  }, [dashboard, timeline.value]);
 
   const getHomeList = () => {
     store.dispatch(RESET_ACTION);
-    dispatch(getHomeKpi({ timeline: timeline.value, dashboard_id: dashboard }));
+    dispatch(
+      getHomeKpi({ timeline: timeline.value, dashboard_id: dashboardId })
+    );
   };
 
   useEffect(() => {
@@ -228,7 +258,8 @@ const Kpihome = () => {
               </span>
             </div>
             <Select
-              options={data}
+              options={timeCutOptions}
+              styles={customStyles}
               classNamePrefix="selectcategory"
               placeholder="Current week on last week"
               value={timeline}
@@ -240,11 +271,13 @@ const Kpihome = () => {
         <div className="homepage-setup-card-wrapper">
           <div className="explore-wrapper home-explore-wrapper">
             <div className="filter-section">
-              <Homefilter
-                data={dashboardList}
-                setDashboard={setDashboard}
-                dashboard={dashboard}
-              />
+              {dashboardId && (
+                <Homefilter
+                  data={dashboardList}
+                  setDashboard={setDashboard}
+                  dashboard={dashboardId}
+                />
+              )}
             </div>
             {kpiHomeData && kpiHomeData.length !== 0 ? (
               <div className="graph-section">
@@ -258,23 +291,11 @@ const Kpihome = () => {
                           </h3>
                         </div>
                         <div className="kpi-content kpi-current">
-                          <label>
-                            {timeline.value === 'last_7_days'
-                              ? 'This Week'
-                              : timeline.value === 'last_30_days'
-                              ? 'This Month'
-                              : 'This Day'}
-                          </label>
+                          <label>{item?.display_value_current}</label>
                           <HumanReadableNumbers number={item.current} />
                         </div>
                         <div className="kpi-content">
-                          <label>
-                            {timeline.value === 'last_7_days'
-                              ? 'Previous Week'
-                              : timeline.value === 'last_30_days'
-                              ? 'Previous Month'
-                              : 'Previous Day'}
-                          </label>
+                          <label>{item?.display_value_prev}</label>
                           <HumanReadableNumbers number={item.prev} />
                         </div>
                         <div className="kpi-content">

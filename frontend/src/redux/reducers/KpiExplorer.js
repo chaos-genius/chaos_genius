@@ -276,7 +276,6 @@ export const kpiExplorer = (state = initialState, action) => {
     }
     case 'KPI_RESET': {
       return {
-        ...state,
         kpiSubmit: [],
         kpiUpdateData: []
       };

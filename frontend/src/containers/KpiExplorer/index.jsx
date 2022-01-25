@@ -65,7 +65,7 @@ const KpiExplorer = () => {
   useEffect(() => {
     if (kpiSearch !== '') {
       searchDataSource();
-    } else if (filterData.length !== 0) {
+    } else if (filterData && filterData.length !== 0) {
       setKpiExplorerData(filterData);
     } else if (kpiExplorerList) {
       setKpiExplorerData(kpiExplorerList);

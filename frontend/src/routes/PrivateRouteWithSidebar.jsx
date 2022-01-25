@@ -124,7 +124,7 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
       clearTimeout(timeout);
     }
     timeout = setTimeout(() => {
-      dispatch(getOnboardingStatus());
+      reload();
     }, 15000);
     return <ServerError />;
   }

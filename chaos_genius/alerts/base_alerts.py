@@ -456,6 +456,9 @@ class AnomalyAlertController:
                         )
 
         triggered_alert.update(commit=True)
+        logger.info(
+                f"The triggered alert data was successfully stored"
+            )
         return outcome
 
     def get_overall_subdim_data(self, anomaly_data):
@@ -584,7 +587,7 @@ class AnomalyAlertController:
 
         if kpi_obj is None:
             logger.info(f"No KPI exists for Alert ID - {self.alert_info['id']}")
-            return False
+            return False, None
 
         data_source_obj = DataSource.query.filter(
                                             DataSource.id == self.alert_info["data_source"],
@@ -593,7 +596,7 @@ class AnomalyAlertController:
         
         if data_source_obj is None:
             logger.info(f"The data source provided for Alert ID - {self.alert_info['id']} does not exist")
-            return False
+            return False, None
 
         kpi_name = getattr(kpi_obj, "name")
         data_source_name = getattr(data_source_obj, "name")
@@ -605,8 +608,10 @@ class AnomalyAlertController:
         len_subdim = min(10, len(subdim_data))
         subdim_data_alert_body = deepcopy(subdim_data[0:len_subdim]) if len(subdim_data) > 0 else []
 
+        overall_data.extend(subdim_data)
         overall_data_alert_body.extend(subdim_data_alert_body)
-
+        
+        self.format_alert_data(overall_data)
         self.format_alert_data(overall_data_alert_body)
 
         column_names = ANOMALY_ALERT_COLUMN_NAMES
@@ -629,11 +634,9 @@ class AnomalyAlertController:
                 f"The slack alert for Alert ID - {self.alert_info['id']} has not been sent"
             )
 
-        overall_data.extend(subdim_data)
-        anomaly_data = overall_data
         message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
         test = test == "ok"
-        return test, anomaly_data
+        return test, overall_data
 
 
 class StaticKpiAlertController:

@@ -33,7 +33,7 @@ def triggered_alert_data_processing(data):
         alert.alert_channel = alert_conf.get("alert_channel")
         alert.alert_message = alert_conf.get("alert_message")
 
-        if alert_conf.get("alert_channel_conf") is None:
+        if not isinstance(alert_conf.get("alert_channel_conf"), dict):
             alert.alert_channel_conf = None
         else:
             alert.alert_channel_conf = alert_conf.get("alert_channel_conf").get(alert.alert_channel, None)

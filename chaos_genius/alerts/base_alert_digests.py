@@ -62,9 +62,8 @@ class AlertDigestController:
             alert.kpi_name = kpi.get("name") if kpi is not None else "Doesn't Exist"
             alert.alert_name = alert_conf.get("alert_name")
             alert.alert_channel = alert_conf.get("alert_channel")
-            alert.pop("alert_metadata")
 
-            if alert_conf.get("alert_channel_conf") is None:
+            if not isinstance(alert_conf.get("alert_channel_conf"), dict):
                 alert.alert_channel_conf = None
             else:
                 alert.alert_channel_conf = alert_conf.get("alert_channel_conf").get(alert.alert_channel, None)
@@ -75,8 +74,11 @@ class AlertDigestController:
                 if alert.alert_channel == "email":
                     email_digests.append(alert)
 
-        email_status = self.segregate_email_digests(email_digests)
-        slack_status = self.send_slack_digests(slack_digests)
+        if len(email_digests) > 0:
+            email_status = self.segregate_email_digests(email_digests)
+        
+        if len(slack_digests) > 0:
+            slack_status = self.send_slack_digests(slack_digests)
 
     def segregate_email_digests(self, email_digests):
         

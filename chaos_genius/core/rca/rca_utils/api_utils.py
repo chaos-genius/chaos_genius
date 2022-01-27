@@ -1,6 +1,7 @@
 """Utility functions for RCA API endpoints."""
 import logging
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+from typing import List
 
 from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
@@ -30,9 +31,6 @@ def kpi_aggregation(kpi_id, timeline="last_30_days"):
 
         if data_point:
             analysis_date = get_analysis_date(kpi_id, end_date)
-            (g1_sd, g1_ed), (g2_sd, g2_ed) = TIME_RANGES_BY_KEY[timeline][
-                "function"
-            ](analysis_date)
             final_data = {
                 "aggregation": [
                     {
@@ -53,18 +51,7 @@ def kpi_aggregation(kpi_id, timeline="last_30_days"):
                     },
                 ],
                 "analysis_date": get_epoch_timestamp(analysis_date),
-                "timecuts_date": [
-                    {
-                        "label": "group1_value",
-                        "start_date": get_epoch_timestamp(g1_sd),
-                        "end_date": get_epoch_timestamp(g1_ed),
-                    },
-                    {
-                        "label": "group2_value",
-                        "start_date": get_epoch_timestamp(g2_sd),
-                        "end_date": get_epoch_timestamp(g2_ed),
-                    },
-                ],
+                "timecuts_date": get_timecuts_dates(analysis_date, timeline)
             }
         else:
             raise ValueError("No data found")
@@ -214,6 +201,28 @@ def get_analysis_date(kpi_id: int, end_date: date) -> date:
     return get_rca_timestamp(analysis_date)
 
 
-def get_analysis_timestamp(kpi_id: int, end_date: date) -> int:
-    """Get analysis timestamp for RCA."""
-    return get_epoch_timestamp(get_analysis_date(kpi_id, end_date))
+def get_timecuts_dates(analysis_date: date, timeline: str) -> List:
+    """Get timecuts dates for RCA."""
+    (g1_sd, g1_ed), (g2_sd, g2_ed) = TIME_RANGES_BY_KEY[timeline][
+        "function"
+    ](analysis_date)
+    g1_ed = g1_ed - timedelta(days=1)
+    g2_ed = g2_ed - timedelta(days=1)
+    output = [
+        {
+            "label": "group1_value",
+            "start_date": get_epoch_timestamp(g1_sd),
+            "end_date": get_epoch_timestamp(g1_ed),
+        },
+        {
+            "label": "group2_value",
+            "start_date": get_epoch_timestamp(g2_sd),
+            "end_date": get_epoch_timestamp(g2_ed),
+        },
+    ]
+
+    if timeline == "previous_day":
+        del output[0]["start_date"]
+        del output[1]["start_date"]
+
+    return output

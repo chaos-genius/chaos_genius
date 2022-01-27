@@ -3,6 +3,7 @@ import logging
 from datetime import date, datetime
 
 from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
+from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
 from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.utils.datetime_helper import get_epoch_timestamp, get_rca_timestamp
 
@@ -28,6 +29,10 @@ def kpi_aggregation(kpi_id, timeline="last_30_days"):
         )
 
         if data_point:
+            analysis_date = get_analysis_date(kpi_id, end_date)
+            (g1_sd, g1_ed), (g2_sd, g2_ed) = TIME_RANGES_BY_KEY[timeline][
+                "function"
+            ](analysis_date)
             final_data = {
                 "aggregation": [
                     {
@@ -47,7 +52,19 @@ def kpi_aggregation(kpi_id, timeline="last_30_days"):
                         "value": data_point.data["perc_change"],
                     },
                 ],
-                "analysis_date": get_analysis_date(kpi_id, end_date),
+                "analysis_date": get_epoch_timestamp(analysis_date),
+                "timecuts_date": [
+                    {
+                        "label": "group1_value",
+                        "start_date": get_epoch_timestamp(g1_sd),
+                        "end_date": get_epoch_timestamp(g1_ed),
+                    },
+                    {
+                        "label": "group2_value",
+                        "start_date": get_epoch_timestamp(g2_sd),
+                        "end_date": get_epoch_timestamp(g2_ed),
+                    },
+                ],
             }
         else:
             raise ValueError("No data found")
@@ -120,7 +137,9 @@ def rca_analysis(kpi_id, timeline="last_30_days", dimension=None):
 
         if data_point:
             final_data = data_point.data
-            final_data["analysis_date"] = get_analysis_date(kpi_id, end_date)
+            final_data["analysis_date"] = get_epoch_timestamp(
+                get_analysis_date(kpi_id, end_date)
+            )
         else:
             final_data = {
                 "chart": {
@@ -179,7 +198,7 @@ def get_rca_output_end_date(kpi_info: dict) -> date:
         return datetime.strptime(end_date, "%Y-%m-%d").date()
 
 
-def get_analysis_date(kpi_id: int, end_date: date) -> int:
+def get_analysis_date(kpi_id: int, end_date: date) -> date:
     """Get analysis date for RCA."""
     data_point = (
         RcaData.query.filter(
@@ -192,5 +211,9 @@ def get_analysis_date(kpi_id: int, end_date: date) -> int:
     )
     final_data = data_point.data if data_point else []
     analysis_date = final_data[-1]["date"]
-    analysis_timestamp = get_rca_timestamp(analysis_date)
-    return get_epoch_timestamp(analysis_timestamp)
+    return get_rca_timestamp(analysis_date)
+
+
+def get_analysis_timestamp(kpi_id: int, end_date: date) -> int:
+    """Get analysis timestamp for RCA."""
+    return get_epoch_timestamp(get_analysis_date(kpi_id, end_date))

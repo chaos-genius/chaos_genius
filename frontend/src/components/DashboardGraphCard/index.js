@@ -56,7 +56,13 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
                 : '-',
             format: true,
             textColor: { color: '#222222' },
-            borderColor: 'main-dark '
+            borderColor: 'main-dark',
+            timeCutStartDate:
+              aggregationData?.timecuts_date &&
+              aggregationData?.timecuts_date[0]?.start_date,
+            timeCutEndDate:
+              aggregationData?.timecuts_date &&
+              aggregationData?.timecuts_date[0]?.end_date
           };
         }
         case 'group2_value': {
@@ -68,7 +74,13 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
                 : '-',
             format: true,
             textColor: { color: '#222222' },
-            borderColor: 'main-grey'
+            borderColor: 'main-grey',
+            timeCutStartDate:
+              aggregationData?.timecuts_date &&
+              aggregationData?.timecuts_date[1]?.start_date,
+            timeCutEndDate:
+              aggregationData?.timecuts_date &&
+              aggregationData?.timecuts_date[1]?.end_date
           };
         }
         default:
@@ -102,6 +114,7 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
                   '-'
                 )}
               </h5>
+              <span className="date-container">(10 Sep 21 - 30 Sep 21)</span>
             </div>
           </div>
         );

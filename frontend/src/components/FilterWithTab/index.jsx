@@ -21,15 +21,13 @@ const RESET = {
 const RESET_DATA = {
   type: 'RESET_CONFIG'
 };
-
-const DashboardFilter = ({
-  kpi,
-  data,
-  setActive,
-  tabs,
-  SetKpiAggregate,
-  dashboard
-}) => {
+const RESET_AGGREGATION = {
+  type: 'RESET_AGGREGATION'
+};
+const RESET_LINECHART = {
+  type: 'RESET_LINECHART'
+};
+const DashboardFilter = ({ kpi, data, setActive, tabs, dashboard }) => {
   const history = useHistory();
   const dispatch = useDispatch();
   const [listData, setListData] = useState(data);
@@ -87,11 +85,12 @@ const DashboardFilter = ({
                     kpi.toString() === item.id.toString() ? 'active' : ''
                   }
                   onClick={() => {
+                    store.dispatch(RESET_AGGREGATION);
+                    store.dispatch(RESET_LINECHART);
                     dispatch(anomalySetting(item.id));
                     store.dispatch(RESET);
                     store.dispatch(RESET_DATA);
                     setActive(item.name);
-                    SetKpiAggregate(item.aggregation);
                     history.push(`/dashboard/${dashboard}/${tabs}/${item.id}`);
                   }}>
                   <div className="filter-tooltipcontent">

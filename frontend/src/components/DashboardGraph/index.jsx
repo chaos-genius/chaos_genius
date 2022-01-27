@@ -39,6 +39,7 @@ import {
   HRNumbers,
   HRN_PREFIXES
 } from '../../utils/Formatting/Numbers/humanReadableNumberFormatter';
+import store from '../../redux/store';
 
 highchartsMore(Highcharts);
 Highcharts.setOptions({
@@ -67,7 +68,7 @@ const customStyles = {
   })
 };
 
-const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
+const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
   const dispatch = useDispatch();
 
   const [activeDimension, setActiveDimension] = useState('');
@@ -86,7 +87,6 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
   const { aggregationData, aggregationLoading } = useSelector(
     (state) => state.aggregation
   );
-
   const { linechartData, linechartLoading } = useSelector(
     (state) => state.lineChart
   );
@@ -267,9 +267,11 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
     }
   };
 
-  if (rcaAnalysisData) {
-    plotChart();
-  }
+  useEffect(() => {
+    if (rcaAnalysisData) {
+      plotChart();
+    }
+  }, [rcaAnalysisData]);
 
   const dispatchGetAllDashboardDimension = () => {
     dispatch(getAllDashboardDimension(kpi));
@@ -370,7 +372,6 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
       return demoChart;
     }
   };
-
   return (
     <>
       {anomalystatus.is_rca_precomputed ? (
@@ -415,9 +416,6 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                         <Dashboardgraphcard
                           aggregationData={aggregationData}
                           monthWeek={monthWeek}
-                          kpi={kpi}
-                          kpiName={kpiName}
-                          kpiAggregate={kpiAggregate}
                         />
                       )}
                     </>

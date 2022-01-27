@@ -1204,7 +1204,7 @@ a:hover {
   }
 }
 .anomaly-drilldown-empty {
-  min-height: 256px;
+  min-height: 280px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1231,6 +1231,9 @@ a:hover {
     text-align: center;
     letter-spacing: $letter-spacing;
     color: $grey_variation-3;
+  }
+  .empty-anomaly-btn {
+    margin-top: 20px;
   }
 }
 

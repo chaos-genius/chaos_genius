@@ -106,6 +106,7 @@ def kpi_line_data(kpi_id):
 
 def rca_analysis(kpi_id, timeline="last_30_days", dimension=None):
     """Get RCA analysis data."""
+    final_data = {}
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
         end_date = get_rca_output_end_date(kpi_info)
@@ -144,6 +145,7 @@ def rca_analysis(kpi_id, timeline="last_30_days", dimension=None):
 
 def rca_hierarchical_data(kpi_id, timeline="last_30_days", dimension=None):
     """Get RCA hierarchical data."""
+    final_data = {}
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
         end_date = get_rca_output_end_date(kpi_info)

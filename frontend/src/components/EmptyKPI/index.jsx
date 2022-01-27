@@ -32,8 +32,10 @@ const EmptyKPI = () => {
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen></iframe>
       </div>
-      <h5>Have any questions? Feel free to send us a message at</h5>
-      <a href="mailto:support@choasgenius.com">support@Chaosgenius.com</a>
+      <h5>
+        Have any questions? Feel free to send us a message at{' '}
+        <a href="mailto:support@choasgenius.com">support@Chaosgenius.com</a>
+      </h5>
     </div>
   );
 };

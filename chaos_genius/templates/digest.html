@@ -427,7 +427,9 @@
             table.search("");
 
             table.rows().remove("all");
-            table.rows().add(newRows);
+            // deepcopy new rows and sent to library
+            // - needed since the library may modify the passed object
+            table.rows().add(JSON.parse(JSON.stringify(newRows)));
 
             table.search(table.wrapper.querySelector(".dataTable-input").value);
         }

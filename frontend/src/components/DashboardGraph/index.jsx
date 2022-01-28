@@ -39,7 +39,6 @@ import {
   HRNumbers,
   HRN_PREFIXES
 } from '../../utils/Formatting/Numbers/humanReadableNumberFormatter';
-import store from '../../redux/store';
 
 highchartsMore(Highcharts);
 Highcharts.setOptions({

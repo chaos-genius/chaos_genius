@@ -47,7 +47,6 @@ const Dashboard = () => {
   });
 
   const [active, setActive] = useState('');
-  const [kpiAggregate, SetKpiAggregate] = useState('');
   const [tab, setTabs] = useState('deepdrills');
   const [breadCrumbs, setBreadCrumbs] = useState('');
 
@@ -77,7 +76,6 @@ const Dashboard = () => {
       setActive(sidebarList?.data[0]?.name);
 
       setTabs(location[3]);
-      SetKpiAggregate(sidebarList?.data[0]?.aggregation);
       getAnomalySetting(sidebarList?.data[0]?.id);
       history.push(
         `/dashboard/${dashboard}/${location[3]}/${sidebarList?.data[0].id}`
@@ -100,10 +98,6 @@ const Dashboard = () => {
       );
       setTabs(location[3]);
       getAnomalySetting(kpi);
-      SetKpiAggregate(
-        sidebarList?.data.find((item) => item.id.toString() === kpi.toString())
-          ?.aggregation
-      );
     } else if (sidebarList && sidebarList?.dashboards) {
       setBreadCrumbs(
         sidebarList?.dashboards?.find(
@@ -178,7 +172,6 @@ const Dashboard = () => {
                     dashboard={dashboard}
                     data={sidebarList?.data}
                     setActive={setActive}
-                    SetKpiAggregate={SetKpiAggregate}
                   />
                 )}
               </div>
@@ -223,9 +216,7 @@ const Dashboard = () => {
                   anomalySettingData && (
                     <Dashboardgraph
                       kpi={kpi}
-                      dashboard={dashboard}
                       kpiName={active}
-                      kpiAggregate={kpiAggregate}
                       anomalystatus={anomalySettingData}
                     />
                   )}

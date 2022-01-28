@@ -32,7 +32,7 @@ export const dimension = (state = initialState, action) => {
     }
     case 'RESET_DATA': {
       return {
-        dimensionData: []
+        ...initialState
       };
     }
     default:

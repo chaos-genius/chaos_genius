@@ -14,7 +14,7 @@ const ReportSettings = () => {
   return (
     <>
       <div className="heading">
-        <p>Account</p>
+        <p>Reports</p>
       </div>
       <div className="settings-form-container">
         <div className="form-group">

@@ -121,6 +121,7 @@ def test_data_source_connection():
 def create_data_source():
     """Create DataSource."""
     # TODO: Better error handling and proper message in case of the failure
+    connection_data = {}
     connection_status, msg, status = {}, "failed", False
     sourceRecord, desinationRecord, connectionRecord, stream_tables = {}, {}, {}, []
     db_connection_uri = ""
@@ -222,13 +223,14 @@ def create_data_source():
         )
         new_connection.save(commit=True)
         msg = f"Connection {new_connection.name} has been created successfully."
+        connection_data = new_connection.safe_dict
 
     except Exception as err_msg:
         print('-'*60)
         print(err_msg)
         msg = str(err_msg)
         # import traceback; print(traceback.format_exc())
-    return jsonify({"data": {}, "msg": msg, "status": status})
+    return jsonify({"data": connection_data, "msg": msg, "status": status})
 
 
 @blueprint.route("/delete", methods=["POST"])

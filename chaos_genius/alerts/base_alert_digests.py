@@ -40,6 +40,8 @@ class AlertDigestController:
         slack_digests = []
         email_digests = []
 
+        #TODO optimize to single db call
+
         for alert in data:
             id_ = getattr(alert, "alert_conf_id")
             alert_conf = None

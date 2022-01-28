@@ -270,6 +270,7 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
     if (rcaAnalysisData) {
       plotChart();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rcaAnalysisData]);
 
   const dispatchGetAllDashboardDimension = () => {

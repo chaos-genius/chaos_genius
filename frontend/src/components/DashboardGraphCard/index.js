@@ -4,6 +4,7 @@ import Up from '../../assets/images/up.svg';
 import Down from '../../assets/images/down.svg';
 import HumanReadableNumbers from '../HumanReadableNumbers';
 import './dashboardgraphcard.scss';
+import { formatDateTime } from '../../utils/date-helper';
 
 const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
   let aggregationDataMap = [];
@@ -57,12 +58,35 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
             format: true,
             textColor: { color: '#222222' },
             borderColor: 'main-dark',
-            timeCutStartDate:
+            timeCutsDate:
               aggregationData?.timecuts_date &&
-              aggregationData?.timecuts_date[0]?.start_date,
-            timeCutEndDate:
-              aggregationData?.timecuts_date &&
-              aggregationData?.timecuts_date[0]?.end_date
+              aggregationData?.timecuts_date[0]?.start_date
+                ? `(${
+                    aggregationData?.timecuts_date &&
+                    formatDateTime(
+                      aggregationData?.timecuts_date[0]?.start_date,
+                      true,
+                      false,
+                      false
+                    )
+                  } - ${
+                    aggregationData?.timecuts_date &&
+                    formatDateTime(
+                      aggregationData?.timecuts_date[0]?.end_date,
+                      true,
+                      false,
+                      false
+                    )
+                  })`
+                : `${
+                    aggregationData?.timecuts_date &&
+                    formatDateTime(
+                      aggregationData?.timecuts_date[0]?.end_date,
+                      true,
+                      false,
+                      false
+                    )
+                  }`
           };
         }
         case 'group2_value': {
@@ -75,12 +99,35 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
             format: true,
             textColor: { color: '#222222' },
             borderColor: 'main-grey',
-            timeCutStartDate:
+            timeCutsDate:
               aggregationData?.timecuts_date &&
-              aggregationData?.timecuts_date[1]?.start_date,
-            timeCutEndDate:
-              aggregationData?.timecuts_date &&
-              aggregationData?.timecuts_date[1]?.end_date
+              aggregationData?.timecuts_date[1]?.start_date
+                ? `(${
+                    aggregationData?.timecuts_date &&
+                    formatDateTime(
+                      aggregationData?.timecuts_date[1]?.start_date,
+                      true,
+                      false,
+                      false
+                    )
+                  } - ${
+                    aggregationData?.timecuts_date &&
+                    formatDateTime(
+                      aggregationData?.timecuts_date[1]?.end_date,
+                      true,
+                      false,
+                      false
+                    )
+                  })`
+                : `${
+                    aggregationData?.timecuts_date &&
+                    formatDateTime(
+                      aggregationData?.timecuts_date[1]?.end_date,
+                      true,
+                      false,
+                      false
+                    )
+                  }`
           };
         }
         default:
@@ -95,7 +142,12 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
           <div className="aggregate-card" key={index}>
             <div className={`card-border ${data.borderColor}`}></div>
             <div className="content-container">
-              <span className="label-container">{data.label}</span>
+              <div className="label-date-container">
+                <span className="label-container">{data.label}</span>
+                {data.timeCutsDate && (
+                  <span className="date-container">{data.timeCutsDate}</span>
+                )}
+              </div>
               <h5 style={{ color: data.textColor.color }}>
                 {data.hasChangeIndicator ? (
                   data.textColor.indicator === 'Up' ? (
@@ -114,7 +166,6 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
                   '-'
                 )}
               </h5>
-              <span className="date-container">(10 Sep 21 - 30 Sep 21)</span>
             </div>
           </div>
         );

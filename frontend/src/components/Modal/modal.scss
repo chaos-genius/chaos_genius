@@ -290,3 +290,62 @@
     }
   }
 }
+// Add Datasource Modal
+.datasourcemodal {
+  .ReactModal__Content {
+    min-width: 400px;
+    width: 470px;
+    height: 300px;
+    position: inherit !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    border-radius: 10px !important;
+    background-color: $white;
+    padding: 32px !important;
+  }
+  .ReactModal__Overlay {
+    background: rgba(0, 0, 0, 0.5) !important;
+    z-index: 100;
+  }
+  .modal-close {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    cursor: pointer;
+  }
+  .modal-head {
+    width: 100%;
+    h3 {
+      font-weight: 600;
+      font-size: 18px;
+      line-height: 20px;
+      letter-spacing: 0.2px;
+      color: #222222;
+      text-align: left;
+    }
+  }
+  .modal-body {
+    padding: 0px !important;
+    width: 100%;
+    margin-top: 20px;
+    .modal-contents {
+      width: 100%;
+      padding-left: 40px;
+      padding-right: 40px;
+      .next-step-navigate {
+        width: 100%;
+        display: flex;
+        margin-top: 25px;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
+    }
+  }
+}

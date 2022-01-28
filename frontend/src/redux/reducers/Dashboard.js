@@ -1,51 +1,17 @@
 import {
-  DASHBOARDAGGREGATIONREQUEST,
-  DASHBOARDAGGREGATIONSUCCESS,
-  DASHBOARDAGGREGATIONFAILURE,
   DASHBOARDRCAANALYSISFAILURE,
   DASHBOARDRCAANALYSISREQUEST,
-  DASHBOARDRCAANALYSISSUCCESS,
-  DASHBOARDDIMENSIONREQUEST,
-  DASHBOARDDIMENSIONSUCCESS,
-  DASHBOARDDIMENSIONFAILURE
+  DASHBOARDRCAANALYSISSUCCESS
 } from '../actions/ActionConstants';
 
 const initialState = {
-  aggregationLoading: true,
-  aggregationData: [],
-  aggregationError: false,
-  linechartData: [],
-  linechartLoading: true,
-  linechartError: false,
   rcaAnalysisData: [],
   rcaAnalysisLoading: true,
-  rcaAnalysisError: false,
-  dimensionLoading: false,
-  dimensionData: [],
-  dimensionError: false
+  rcaAnalysisError: false
 };
 
 export const dashboard = (state = initialState, action) => {
   switch (action.type) {
-    case DASHBOARDAGGREGATIONREQUEST: {
-      return {
-        aggregationLoading: true,
-        aggregationError: false
-      };
-    }
-    case DASHBOARDAGGREGATIONSUCCESS: {
-      return {
-        aggregationLoading: false,
-        aggregationData: action.data
-      };
-    }
-    case DASHBOARDAGGREGATIONFAILURE: {
-      return {
-        aggregationLoading: false,
-        aggregationError: true
-      };
-    }
-
     case DASHBOARDRCAANALYSISREQUEST: {
       return {
         rcaAnalysisLoading: true,
@@ -64,22 +30,9 @@ export const dashboard = (state = initialState, action) => {
         rcaAnalysisError: true
       };
     }
-    case DASHBOARDDIMENSIONREQUEST: {
+    case 'RESET_DASHBOARD': {
       return {
-        dimensionLoading: true,
-        dimensionError: false
-      };
-    }
-    case DASHBOARDDIMENSIONSUCCESS: {
-      return {
-        dimensionLoading: false,
-        dimensionData: action.data
-      };
-    }
-    case DASHBOARDDIMENSIONFAILURE: {
-      return {
-        dimensionError: true,
-        dimensionLoading: false
+        ...initialState
       };
     }
     default:

@@ -9,6 +9,8 @@ def triggered_alert_data_processing(data):
     alert_config_cache = dict()
     kpi_cache = dict()
 
+    #TODO optimize to single db call
+
     for alert in data:
         id_ = getattr(alert, "alert_conf_id")
         alert_conf = None

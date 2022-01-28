@@ -32,3 +32,11 @@ Commit message should talk about WHAT changed, and WHY. Not HOW – how is the d
 ### Issue linking
 
 Every commit in any branch should be linked to an issue. If no relevant issue exists, please ask Harshit or Manas to create it.
+
+
+### How to setup locally for development
+
+- git clone
+- install the prerequisite
+- set the variable in the `.env.local` (This file will override all the environment variables)
+- run `bash dev_server.sh` to run the local server

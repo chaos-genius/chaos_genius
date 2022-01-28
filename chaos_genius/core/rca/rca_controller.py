@@ -7,6 +7,7 @@ from typing import Optional, Tuple
 
 import numpy as np
 import pandas as pd
+from numpyencoder import NumpyEncoder
 
 from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
 from chaos_genius.core.rca.constants import LINE_DATA_TIMESTAMP_FORMAT, TIME_RANGES_BY_KEY
@@ -106,7 +107,7 @@ class RootCauseAnalysisController:
             "data_type": data_type,
             "timeline": timeline,
             "dimension": dimension,
-            "data": json.dumps(data),
+            "data": json.dumps(data, cls=NumpyEncoder),
         }
 
     def _get_line_data(self, days: int = 60) -> dict:

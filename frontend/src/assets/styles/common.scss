@@ -1155,7 +1155,7 @@ a:hover {
     margin-top: 40px;
   }
   &.deepdrill-drilldown-empty {
-    height: 260px;
+    height: 340px;
     .empty-state-image {
       width: 202px;
       height: 104px;
@@ -1204,7 +1204,7 @@ a:hover {
   }
 }
 .anomaly-drilldown-empty {
-  min-height: 300px;
+  min-height: 280px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1231,6 +1231,9 @@ a:hover {
     text-align: center;
     letter-spacing: $letter-spacing;
     color: $grey_variation-3;
+  }
+  .empty-anomaly-btn {
+    margin-top: 20px;
   }
 }
 

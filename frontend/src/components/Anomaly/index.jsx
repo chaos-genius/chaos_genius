@@ -22,6 +22,7 @@ import {
 } from '../../redux/actions';
 import store from '../../redux/store';
 import SubdimensionEmpty from '../SubdimensionEmpty';
+import EmptyDataQualityAnomaly from '../EmptyDataQualityAnomaly';
 
 highchartsMore(Highcharts);
 Highcharts.setOptions({
@@ -53,10 +54,13 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
 
   const KPITabs = [{ name: 'Overall KPI' }, { name: 'Sub-dimensions' }];
 
-  const { anomalyDetectionData, anomalyDrilldownData, anomalyQualityData } =
-    useSelector((state) => {
-      return state.anomaly;
-    });
+  const {
+    anomalyDetectionData,
+    anomalyDrilldownData,
+    anomalyQualityData
+  } = useSelector((state) => {
+    return state.anomaly;
+  });
 
   useEffect(() => {
     store.dispatch(RESET_ACTION);
@@ -120,6 +124,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
       return '';
     });
   }
+
   useEffect(() => {
     if (anomalystatus && anomalystatus?.is_anomaly_setup === false) {
       history.push(`/dashboard/${dashboard}/settings/${kpi}`);
@@ -209,7 +214,8 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
           borderWidth: 1,
           padding: 20,
           title: {
-            text: 'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
+            text:
+              'Legend<br/><span style="font-size: 9px; color: #666; font-weight: normal">(Click to hide)',
             style: {
               fontStyle: 'italic'
             }
@@ -512,14 +518,26 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                     </div>
                   </div>
                   {dataQualityCollapse ? (
-                    <div
-                      className={
-                        dataQualityCollapse
-                          ? 'dashboard-container'
-                          : 'dashboard-container drilldown-disable'
-                      }>
-                      {dataQualityList}
-                    </div>
+                    <>
+                      {anomalyQualityData !== '' &&
+                      dataQualityList &&
+                      dataQualityList.length !== 0 ? (
+                        <div
+                          className={
+                            dataQualityCollapse
+                              ? 'dashboard-container'
+                              : 'dashboard-container drilldown-disable'
+                          }>
+                          {dataQualityList}
+                        </div>
+                      ) : (
+                        anomalyQualityData !== '' && (
+                          <div className="anomaly-drilldown-empty">
+                            <EmptyDataQualityAnomaly />
+                          </div>
+                        )
+                      )}
+                    </>
                   ) : null}
                 </div>
               ) : null}

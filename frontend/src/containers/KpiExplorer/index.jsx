@@ -15,6 +15,7 @@ import './kpiexplorer.scss';
 import { getAllKpiExplorer } from '../../redux/actions';
 
 import store from '../../redux/store';
+import EmptyKPI from '../../components/EmptyKPI';
 
 const KPI_RESET = {
   type: 'KPI_RESET'
@@ -168,28 +169,36 @@ const KpiExplorer = () => {
           </div>
         </div>
 
-        {/* explore wrapper */}
-        <div className="explore-wrapper">
-          {/* filter section */}
-          <div className="filter-section">
-            <Filter
-              setKpiSearch={setKpiSearch}
-              setKpiFilter={setKpiFilter}
-              kpiList={kpiExplorerList}
-              setDashboardFilter={setDashboardFilter}
-              kpi={true}
-            />
+        {kpiExplorerData && kpiExplorerData.length === 0 ? (
+          <div className="empty-dashboard-container">
+            <EmptyKPI />
           </div>
-          {/* table section */}
-          <div className="table-section">
-            <KPITable
-              kpiData={kpiExplorerData}
-              kpiSearch={kpiSearch}
-              changeData={setData}
-              kpiLoading={isLoading}
-            />
-          </div>
-        </div>
+        ) : (
+          <>
+            {/* explore wrapper */}
+            <div className="explore-wrapper">
+              {/* filter section */}
+              <div className="filter-section">
+                <Filter
+                  setKpiSearch={setKpiSearch}
+                  setKpiFilter={setKpiFilter}
+                  kpiList={kpiExplorerList}
+                  setDashboardFilter={setDashboardFilter}
+                  kpi={true}
+                />
+              </div>
+              {/* table section */}
+              <div className="table-section">
+                <KPITable
+                  kpiData={kpiExplorerData}
+                  kpiSearch={kpiSearch}
+                  changeData={setData}
+                  kpiLoading={isLoading}
+                />
+              </div>
+            </div>
+          </>
+        )}
       </>
     );
   }

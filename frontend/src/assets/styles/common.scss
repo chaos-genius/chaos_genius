@@ -474,6 +474,9 @@ a:hover {
         -webkit-box-orient: vertical;
         white-space: initial;
         cursor: pointer;
+        word-break: break-word;
+        hyphens: auto;
+        overflow-wrap: break-word;
       }
     }
   }

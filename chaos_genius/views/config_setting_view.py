@@ -103,7 +103,7 @@ def set_config():
     if request.is_json:
         data = request.get_json()
         config_name = data.get("config_name")
-        if config_name not in ["email", "slack", "organisation_settings"]:
+        if config_name not in ["email", "slack", "organisation_settings", "alert_digest_settings"]:
             return jsonify({
                 "status": "not_found",
                 "message": "Config doesn't exist"
@@ -119,7 +119,8 @@ def set_config():
                 for module in config_settings.keys():
                     updated_config_settings[module].update(config_settings[module])
             else:
-                updated_config_settings.update(data.get("config_settings", {}))
+                updated_config_settings.update(data.get("config_settings", {})) #this will work for all email, slack and alert_digest_settings
+
         if not updated_config_settings:
             updated_config_settings = config_settings
         new_config = create_config_object(config_name, updated_config_settings)

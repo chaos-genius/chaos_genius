@@ -10,6 +10,7 @@ from chaos_genius.utils.io_helper import is_file_exists
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
+from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
 from chaos_genius.databases.models.kpi_model import Kpi
 
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
@@ -112,14 +113,17 @@ class StaticEventAlertController:
         else:
             raise Exception("Alert Setting isn't configured")
 
+        outcome = False
+        alert_data = None
+
         if (
             not change_df.empty
             and self.alert_info["alert_settings"] != "missing_data_alert"
         ):
             if self.alert_info["alert_channel"] == "email":
-                self.prepare_email(change_df)
+                outcome, alert_data = self.prepare_email(change_df)
             elif self.alert_info["alert_channel"] == "slack":
-                self.send_slack_event_alert(change_df)
+                outcome, alert_data = self.send_slack_event_alert(change_df)
 
         # send the missing data alert with different template
         if (
@@ -127,11 +131,31 @@ class StaticEventAlertController:
             and self.alert_info["alert_settings"] == "missing_data_alert"
         ):
             if self.alert_info["alert_channel"] == "email":
-                self.send_missing_data_email_alert()
+                outcome, alert_data = self.send_missing_data_email_alert()
             elif self.alert_info["alert_channel"] == "slack":
-                self.send_slack_event_alert(change_df)
+                outcome, alert_data = self.send_slack_event_alert(change_df)
 
         self.pickle_df()
+
+        if alert_data is None:
+            return outcome
+        
+        alert_metadata = {
+                            "alert_frequency": self.alert_info["alert_frequency"],
+                            "alert_data": alert_data,
+                        }    
+
+        triggered_alert = TriggeredAlerts(
+                            alert_conf_id=self.alert_info["id"],
+                            alert_type="Event Alert",
+                            is_sent=outcome,
+                            created_at=datetime.datetime.now(),
+                            alert_metadata=alert_metadata       
+                        )
+
+        triggered_alert.update(commit=True)
+        return outcome
+
 
     @staticmethod
     def test_new_entry(new_df, old_df):
@@ -241,12 +265,14 @@ class StaticEventAlertController:
                 alert_name=self.alert_info["alert_name"],
                 preview_text="Static Event Alert",
             )
-            return test
+
+            alert_data = list(change_df.T.astype(str).to_dict().values())
+            return test, alert_data
         else:
             logger.info(
                 f"No email recipients available for Alert ID - {self.alert_info['id']}"
             )
-            return False
+            return False, None
 
     def send_template_email(self, template, recipient_emails, subject, files, **kwargs):
         """Sends an email using a template."""
@@ -302,15 +328,21 @@ class StaticEventAlertController:
             )
 
         message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
-        return message
+        logger.info(
+            message
+        )
+
+        test = test == "ok"
+        alert_data = list(change_df.T.astype(str).to_dict().values())
+        return test, alert_data
 
     def send_missing_data_email_alert(self):
         alert_channel_conf = self.alert_info["alert_channel_conf"]
         recipient_emails = alert_channel_conf.get("email", [])
         subject = f"{self.alert_info['alert_name']} - Chaos Genius Event Alert❗"
         if not recipient_emails:
-            return True
-        self.send_template_email(
+            return False, None
+        test = self.send_template_email(
             template="missing_data_alert.html",
             recipient_emails=recipient_emails,
             subject=subject,
@@ -320,6 +352,8 @@ class StaticEventAlertController:
             alert_name=self.alert_info.get("alert_name", ""),
             preview_text="Missing Data Alert",
         )
+
+        return test, []
 
     def send_missing_data_slack_alert(self):
         test = event_alert_slack(
@@ -339,7 +373,12 @@ class StaticEventAlertController:
             )
 
         message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
-        return message
+        logger.info(
+            message
+        )
+
+        test = test == "ok"
+        return test, []
 
 class AnomalyAlertController:
     def __init__(self, alert_info, anomaly_end_date=None):
@@ -393,9 +432,34 @@ class AnomalyAlertController:
         logger.info(f"Alert ID {alert_id} is sent to the respective alert channel")
 
         if self.alert_info["alert_channel"] == "email":
-            return self.send_alert_email(anomaly_data)
+            outcome, alert_data = self.send_alert_email(anomaly_data)
         elif self.alert_info["alert_channel"] == "slack":
-            return self.send_slack_alert(anomaly_data)
+            outcome, alert_data =  self.send_slack_alert(anomaly_data)
+        
+        if alert_data is None:
+            return outcome
+        
+        alert_metadata = {
+                            "alert_frequency": self.alert_info["alert_frequency"],
+                            "alert_data": alert_data,
+                            "end_date": str(self.anomaly_end_date),
+                            "severity_cutoff_score": self.alert_info["severity_cutoff_score"],
+                            "kpi": self.alert_info["kpi"]
+                        }    
+
+        triggered_alert = TriggeredAlerts(
+                            alert_conf_id=self.alert_info["id"],
+                            alert_type="KPI Alert",
+                            is_sent=outcome,
+                            created_at=datetime.datetime.now(),
+                            alert_metadata=alert_metadata       
+                        )
+
+        triggered_alert.update(commit=True)
+        logger.info(
+                f"The triggered alert data was successfully stored"
+            )
+        return outcome
 
     def get_overall_subdim_data(self, anomaly_data):
 
@@ -423,6 +487,8 @@ class AnomalyAlertController:
             anomaly_point["Expected Value"] = f"{lower} - {upper}"
             for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
                 anomaly_point[value] = anomaly_point[key]
+            anomaly_point["Time of Occurrence"] = str(anomaly_point["Time of Occurrence"])
+            anomaly_point["data_datetime"] = str(anomaly_point["data_datetime"])
 
     def send_alert_email(self, anomaly_data):
 
@@ -485,12 +551,13 @@ class AnomalyAlertController:
                                             alert_name=self.alert_info.get("alert_name")
                                         )
             logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
-            return True
+            anomaly_data = overall_data
+            return test, anomaly_data
         else:
             logger.info(
                 f"No receipent email available (Alert ID - {self.alert_info['id']})"
             )
-            return False
+            return False, None
 
     def send_template_email(self, template, recipient_emails, subject, files, **kwargs):
         """Sends an email using a template."""
@@ -520,7 +587,7 @@ class AnomalyAlertController:
 
         if kpi_obj is None:
             logger.info(f"No KPI exists for Alert ID - {self.alert_info['id']}")
-            return False
+            return False, None
 
         data_source_obj = DataSource.query.filter(
                                             DataSource.id == self.alert_info["data_source"],
@@ -529,7 +596,7 @@ class AnomalyAlertController:
         
         if data_source_obj is None:
             logger.info(f"The data source provided for Alert ID - {self.alert_info['id']} does not exist")
-            return False
+            return False, None
 
         kpi_name = getattr(kpi_obj, "name")
         data_source_name = getattr(data_source_obj, "name")
@@ -541,8 +608,10 @@ class AnomalyAlertController:
         len_subdim = min(10, len(subdim_data))
         subdim_data_alert_body = deepcopy(subdim_data[0:len_subdim]) if len(subdim_data) > 0 else []
 
+        overall_data.extend(subdim_data)
         overall_data_alert_body.extend(subdim_data_alert_body)
-
+        
+        self.format_alert_data(overall_data)
         self.format_alert_data(overall_data_alert_body)
 
         column_names = ANOMALY_ALERT_COLUMN_NAMES
@@ -566,7 +635,8 @@ class AnomalyAlertController:
             )
 
         message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
-        return message
+        test = test == "ok"
+        return test, overall_data
 
 
 class StaticKpiAlertController:

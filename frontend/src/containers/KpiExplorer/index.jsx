@@ -65,7 +65,7 @@ const KpiExplorer = () => {
   useEffect(() => {
     if (kpiSearch !== '') {
       searchDataSource();
-    } else if (filterData.length !== 0) {
+    } else if (filterData && filterData.length !== 0) {
       setKpiExplorerData(filterData);
     } else if (kpiExplorerList) {
       setKpiExplorerData(kpiExplorerList);
@@ -96,26 +96,28 @@ const KpiExplorer = () => {
       } else if (kpiFilter.length !== 0 && dashboardFilter.length === 0) {
         kpiFilter &&
           kpiFilter.forEach((data) => {
-            kpiExplorerList.forEach((list) => {
-              if (
-                list.data_source.connection_type.toLowerCase() ===
-                data.toLowerCase()
-              ) {
-                arr.push(list);
-              }
-            });
+            kpiExplorerList &&
+              kpiExplorerList.forEach((list) => {
+                if (
+                  list.data_source.connection_type.toLowerCase() ===
+                  data.toLowerCase()
+                ) {
+                  arr.push(list);
+                }
+              });
           });
         setFilterData(arr);
       } else if (dashboardFilter.length !== 0 && kpiFilter.length === 0) {
         dashboardFilter &&
           dashboardFilter.forEach((data) => {
-            kpiExplorerList.forEach((list) => {
-              list.dashboards.forEach((value) => {
-                if (data.toString() === value.id.toString()) {
-                  arr.push(list);
-                }
+            kpiExplorerList &&
+              kpiExplorerList.forEach((list) => {
+                list.dashboards.forEach((value) => {
+                  if (data.toString() === value.id.toString()) {
+                    arr.push(list);
+                  }
+                });
               });
-            });
           });
         setFilterData(arr);
       } else if (dashboardFilter.length !== 0 && kpiFilter.length !== 0) {
@@ -123,17 +125,18 @@ const KpiExplorer = () => {
           dashboardFilter.forEach((dashboard) => {
             kpiFilter &&
               kpiFilter.forEach((kpi) => {
-                kpiExplorerList.forEach((list) => {
-                  list.dashboards.forEach((value) => {
-                    if (
-                      list.data_source.connection_type.toLowerCase() ===
-                        kpi.toLowerCase() &&
-                      value.id.toString() === dashboard.toString()
-                    ) {
-                      arr.push(list);
-                    }
+                kpiExplorerList &&
+                  kpiExplorerList.forEach((list) => {
+                    list.dashboards.forEach((value) => {
+                      if (
+                        list.data_source.connection_type.toLowerCase() ===
+                          kpi.toLowerCase() &&
+                        value.id.toString() === dashboard.toString()
+                      ) {
+                        arr.push(list);
+                      }
+                    });
                   });
-                });
               });
           });
         setFilterData(arr);

@@ -15,11 +15,13 @@ from chaos_genius.utils.utils import latest_git_commit_hash
 
 load_dotenv(".env")  # loads environment variables from .env
 
-# config = {
-#     **dotenv_values(".env"),  # load shared project variables
-#     **dotenv_values(".env.dev"),  # load developement/sensitive variables
-#     **os.environ,  # override loaded values with environment variables
-# }
+"""
+load the environment variables from the .env.local files
+and overide the variables
+Here is the order of precedence:
+.env.local > os.environ > .env
+"""
+load_dotenv(".env.local", override=True)
 
 CWD = os.getcwd()
 

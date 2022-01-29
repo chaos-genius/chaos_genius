@@ -16,7 +16,7 @@ def get_alert_kpi_configurations(data):
     alert_conf_ids = list(alert_conf_ids)
     alert_confs = Alert.query.filter(Alert.id.in_(alert_conf_ids)).all()
 
-    alert_config_cache = {alert.id: alert for alert in alert_confs}
+    alert_config_cache = {alert.id: alert.as_dict for alert in alert_confs}
 
     kpi_ids = set()
     for alert in data:
@@ -27,7 +27,7 @@ def get_alert_kpi_configurations(data):
 
     kpis = Kpi.query.filter(Kpi.id.in_(kpi_ids)).all()
 
-    kpi_cache = {kpi.id: kpi for kpi in kpis}
+    kpi_cache = {kpi.id: kpi.as_dict for kpi in kpis}
     return alert_config_cache, kpi_cache
 
 

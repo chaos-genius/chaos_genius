@@ -8,7 +8,7 @@ tasks:
     init: |
       pip install wheel
       # required for prophet
-      pip install numpy
+      pip install numpy pandas pystan==2.19.1.1
       pip install -r requirements/dev.txt # runs during prebuild
     command: |
       cp .gitpod.env .env.local

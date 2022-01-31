@@ -1,0 +1,22 @@
+# List the start up tasks. Learn more https://www.gitpod.io/docs/config-start-tasks/
+tasks:
+
+  - name: API Server
+    init: pip install -r requirements/dev.txt # runs during prebuild
+    command: bash dev_server.sh
+
+  - name: Webapp
+    init: |
+      cd frontend
+      npm install
+    command: REACT_APP_BASE_URL=http://localhost:5000 npm start
+
+# List the ports to expose. Learn more https://www.gitpod.io/docs/config-ports/
+ports:
+  - port: 3000
+    onOpen: open-preview
+  - port: 5000
+
+vscode:
+  extensions:
+    - "ms-python.python"

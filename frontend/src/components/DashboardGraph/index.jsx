@@ -81,7 +81,9 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
     label: 'Single Dimension'
   });
 
-  const { timeCutsData } = useSelector((state) => state.TimeCuts);
+  const { timeCutsData, activeTimeCut } = useSelector(
+    (state) => state.TimeCuts
+  );
 
   const { aggregationData, aggregationLoading } = useSelector(
     (state) => state.aggregation
@@ -129,15 +131,19 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
 
   useEffect(() => {
     if (timeCutsData && timeCutsData.length) {
-      setMonthWeek({
-        label: timeCutsData[0]?.display_name,
-        value: `${timeCutsData[0]?.id}`,
-        grp2_name: timeCutsData[0]?.current_period_name,
-        grp1_name: timeCutsData[0]?.last_period_name
-      });
+      if (activeTimeCut && Object.keys(activeTimeCut).length) {
+        setMonthWeek(activeTimeCut);
+      } else {
+        setMonthWeek({
+          label: timeCutsData[0]?.display_name,
+          value: `${timeCutsData[0]?.id}`,
+          grp2_name: timeCutsData[0]?.current_period_name,
+          grp1_name: timeCutsData[0]?.last_period_name
+        });
+      }
       getAllTimeCutOptions(timeCutsData);
     }
-  }, [timeCutsData]);
+  }, [timeCutsData, activeTimeCut]);
 
   useEffect(() => {
     if (kpi !== undefined && monthWeek.value) {

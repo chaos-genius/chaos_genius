@@ -11,7 +11,7 @@ def get_alert_kpi_configurations(data):
 
     alert_conf_ids = set()
     for alert in data:
-        alert_conf_ids.add(getattr(alert, "alert_conf_id"))
+        alert_conf_ids.add(alert.alert_conf_id)
     alert_conf_ids = list(alert_conf_ids)
     alert_confs = Alert.query.filter(Alert.id.in_(alert_conf_ids)).all()
 

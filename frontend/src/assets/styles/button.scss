@@ -79,8 +79,18 @@
   &.green-variant-button {
     background-color: $green;
     color: $white;
+    svg {
+      margin-right: 10px;
+    }
     span {
       color: $white;
+    }
+  }
+  &.btn-active {
+    svg {
+      path {
+        stroke: #ffff;
+      }
     }
   }
 

@@ -153,10 +153,11 @@ class AlertDigestController:
         """Sends a slack alert containing a summary of triggered alerts"""
 
         column_names = ["alert_name", "kpi_name", "created_at"]
+        slack_digests = [alert.__dict__ for alert in slack_digests]
         data = pd.DataFrame(slack_digests, columns=column_names)
         table_data = tabulate(data, tablefmt="fancy_grid", headers="keys")
         table_data = "```" + table_data + "```"
-        test = alert_digest_slack_formatted(self.frequency, data)
+        test = alert_digest_slack_formatted(self.frequency, table_data)
 
         if test == "ok":
             logger.info(f"The slack alert digest was successfully sent")

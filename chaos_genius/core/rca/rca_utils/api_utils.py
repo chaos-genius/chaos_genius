@@ -205,21 +205,26 @@ def get_analysis_date(kpi_id: int, end_date: date) -> date:
 
 def get_timecuts_dates(analysis_date: date, timeline: str) -> List:
     """Get timecuts dates for RCA."""
-    (g1_sd, g1_ed), (g2_sd, g2_ed) = TIME_RANGES_BY_KEY[timeline][
-        "function"
-    ](analysis_date)
+    # since we calculate date < analysis_date instead of date <= analysis_date
+    # we need to add 1 to the analysis_date
+    analysis_date += timedelta(days=1)
+    (g1_sd, g1_ed), (g2_sd, g2_ed) = TIME_RANGES_BY_KEY[timeline]["function"](
+        analysis_date
+    )
+
+    # end dates are always exclusive, so we need to remove 1 to make them inclusive
     g1_ed = g1_ed - timedelta(days=1)
     g2_ed = g2_ed - timedelta(days=1)
     output = [
         {
             "label": "group1_value",
-            "start_date": get_epoch_timestamp(g1_sd),
-            "end_date": get_epoch_timestamp(g1_ed),
+            "start_date": g1_sd,
+            "end_date": g1_ed,
         },
         {
             "label": "group2_value",
-            "start_date": get_epoch_timestamp(g2_sd),
-            "end_date": get_epoch_timestamp(g2_ed),
+            "start_date": g2_sd,
+            "end_date": g2_ed,
         },
     ]
 

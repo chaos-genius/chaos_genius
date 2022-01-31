@@ -10,7 +10,7 @@ from flask import Blueprint, render_template
 
 import docker
 from chaos_genius.controllers.task_monitor import get_checkpoints
-from chaos_genius.settings import IN_DOCKER
+from chaos_genius.settings import AIRBYTE_ENABLED, IN_DOCKER
 
 blueprint = Blueprint("status", __name__, static_folder="../static")
 logger = logging.getLogger(__name__)
@@ -22,7 +22,8 @@ if IN_DOCKER:
     except DockerException as e:
         logger.exception("Could not initialize docker client", exc_info=e)
 
-CONTAINERS: Dict[str, str] = {
+
+_CHAOS_GENIUS_CONTAINERS: Dict[str, str] = {
     "chaosgenius-server": "ChaosGenius API Server",
     "chaosgenius-webapp": "ChaosGenius WebApp",
     "chaosgenius-db": "ChaosGenius Database",
@@ -30,12 +31,19 @@ CONTAINERS: Dict[str, str] = {
     "chaosgenius-scheduler": "ChaosGenius Scheduler",
     "chaosgenius-worker-analytics": "ChaosGenius Analytics Worker",
     "chaosgenius-worker-alerts": "ChaosGenius Alerts Worker",
+}
+
+_AIRBYTE_CONTAINERS: Dict[str, str] = {
     "airbyte-db": "Airbyte Database",
     "airbyte-scheduler": "Airbyte Scheduler",
     "airbyte-server": "Airbyte Server",
     "airbyte-webapp": "Airbyte WebApp",
     "airbyte-temporal": "Airbyte Temporal",
 }
+
+CONTAINERS = {**_CHAOS_GENIUS_CONTAINERS}
+if AIRBYTE_ENABLED:
+    CONTAINERS = {**_CHAOS_GENIUS_CONTAINERS, **_AIRBYTE_CONTAINERS}
 
 
 def container_status() -> Optional[Dict[str, bool]]:
@@ -64,7 +72,7 @@ def container_status() -> Optional[Dict[str, bool]]:
         return None
 
 
-@blueprint.route("/", methods=["GET"]) # TODO: Remove this
+@blueprint.route("/", methods=["GET"])  # TODO: Remove this
 @blueprint.route("", methods=["GET"])
 def task_monitor_view():
     """A view with a basic UI to monitor analytics tasks."""

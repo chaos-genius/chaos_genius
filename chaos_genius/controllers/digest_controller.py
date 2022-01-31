@@ -5,30 +5,40 @@ from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
 
-
-def triggered_alert_data_processing(data):
+def get_alert_kpi_configurations(data):
     alert_config_cache = dict()
     kpi_cache = dict()
 
-    # TODO optimize to single db call
+    alert_conf_ids = set()
+    for alert in data:
+        alert_conf_ids.add(getattr(alert, "alert_conf_id"))
+    alert_conf_ids = list(alert_conf_ids)
+    alert_confs = Alert.query.filter(Alert.id.in_(alert_conf_ids)).all()
+
+    alert_config_cache = {alert.id: alert.as_dict for alert in alert_confs}
+
+    kpi_ids = set()
+    for alert in data:
+        kpi_id = alert.alert_metadata.get("kpi")
+        if kpi_id is not None:
+            kpi_ids.add(kpi_id)
+    kpi_ids = list(kpi_ids)
+
+    kpis = Kpi.query.filter(Kpi.id.in_(kpi_ids)).all()
+
+    kpi_cache = {kpi.id: kpi.as_dict for kpi in kpis}
+    return alert_config_cache, kpi_cache
+
+def triggered_alert_data_processing(data):
+    
+    alert_config_cache, kpi_cache = get_alert_kpi_configurations(data)
 
     for alert in data:
-        id_ = getattr(alert, "alert_conf_id")
-        alert_conf = None
-        if id_ in alert_config_cache.keys():
-            alert_conf = alert_config_cache.get(id_)
-        else:
-            alert_conf = Alert.query.filter(Alert.id == id_).first().as_dict
-            alert_config_cache[id_] = alert_conf
+        alert_conf_id = getattr(alert, "alert_conf_id")
+        alert_conf = alert_config_cache.get(alert_conf_id, None)
 
-        kpi_id = alert_conf.get("kpi")
-        kpi = None
-        if kpi_id is not None:
-            if kpi_id in kpi_cache.keys():
-                kpi = kpi_cache.get(kpi_id)
-            else:
-                kpi = Kpi.query.filter(Kpi.id == kpi_id).first().as_dict
-                kpi_cache[kpi_id] = kpi
+        kpi_id = alert_conf.get("kpi", None)
+        kpi = kpi_cache.get(kpi_id) if kpi_id is not None else None
 
         alert.kpi_name = kpi.get("name") if kpi is not None else "Doesn't Exist"
         alert.kpi_id = kpi_id

@@ -9,6 +9,7 @@ from tabulate import tabulate
 from chaos_genius.alerts.base_alerts import FREQUENCY_DICT
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import alert_digest_slack_formatted
+from chaos_genius.controllers.digest_controller import get_alert_kpi_configurations
 from chaos_genius.controllers.config_controller import get_config_object
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
@@ -42,26 +43,14 @@ class AlertDigestController:
         slack_digests = []
         email_digests = []
 
-        # TODO optimize to single db call
+        self.alert_config_cache, self.kpi_cache = get_alert_kpi_configurations(data)
 
         for alert in data:
-            id_ = getattr(alert, "alert_conf_id")
-            alert_conf = None
-            if id_ in self.alert_config_cache.keys():
-                alert_conf = self.alert_config_cache.get(id_)
-            else:
-                alert_conf = Alert.query.filter(Alert.id == id_).first().as_dict
-                self.alert_config_cache[id_] = alert_conf
+            alert_conf_id = getattr(alert, "alert_conf_id")
+            alert_conf = self.alert_config_cache.get(alert_conf_id, None)
 
-            kpi_id = alert_conf.get("kpi")
-            kpi = None
-
-            if kpi_id is not None:
-                if kpi_id in self.kpi_cache.keys():
-                    kpi = self.kpi_cache.get(kpi_id)
-                else:
-                    kpi = Kpi.query.filter(Kpi.id == kpi_id).first().as_dict
-                    self.kpi_cache[kpi_id] = kpi
+            kpi_id = alert_conf.get("kpi", None)
+            kpi = self.kpi_cache.get(kpi_id) if kpi_id is not None else None
 
             alert.kpi_name = kpi.get("name") if kpi is not None else "Doesn't Exist"
             alert.alert_name = alert_conf.get("alert_name")

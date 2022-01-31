@@ -2,7 +2,9 @@
 tasks:
 
   - name: API Server
-    init: pip install -r requirements/dev.txt # runs during prebuild
+    init: |
+      pip install wheel
+      pip install -r requirements/dev.txt # runs during prebuild
     command: bash dev_server.sh
 
   - name: Webapp

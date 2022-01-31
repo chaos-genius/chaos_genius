@@ -39,6 +39,7 @@ import {
   HRNumbers,
   HRN_PREFIXES
 } from '../../utils/Formatting/Numbers/humanReadableNumberFormatter';
+import store from '../../redux/store';
 
 highchartsMore(Highcharts);
 Highcharts.setOptions({
@@ -494,11 +495,14 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
                             {singleDimensionData > 2 ? (
                               <li
                                 className="previous-step"
-                                onClick={() =>
+                                onClick={() => {
+                                  store.dispatch({
+                                    type: 'RESET_DASHBOARD_RCA'
+                                  });
                                   SetSingleDimensionData(
                                     singleDimensionData - 3
-                                  )
-                                }>
+                                  );
+                                }}>
                                 <img src={Next} alt="Previous" />
                               </li>
                             ) : null}
@@ -516,6 +520,9 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
                                         activeDimension === data ? 'active' : ''
                                       }
                                       onClick={() => {
+                                        store.dispatch({
+                                          type: 'RESET_DASHBOARD_RCA'
+                                        });
                                         onActiveDimensionClick(data);
                                       }}>
                                       {data}
@@ -533,11 +540,14 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
                                     ? 'disable-next'
                                     : ''
                                 }
-                                onClick={() =>
+                                onClick={() => {
+                                  store.dispatch({
+                                    type: 'RESET_DASHBOARD_RCA'
+                                  });
                                   SetSingleDimensionData(
                                     singleDimensionData + 3
-                                  )
-                                }>
+                                  );
+                                }}>
                                 <img src={Next} alt="Next" />
                               </li>
                             ) : null}
@@ -554,6 +564,7 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
                         isDisabled={!configData?.multidim_status}
                         value={dimension}
                         onChange={(e) => {
+                          store.dispatch({ type: 'RESET_DASHBOARD_RCA' });
                           handleDimensionChange(e);
                         }}
                       />
@@ -572,14 +583,18 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
                           <div className="preload"></div>
                         </div>
                       )}
-                      <div
-                        className={
-                          'common-drilldown-graph' +
-                          (rcaAnalysisLoading
-                            ? ' common-drilldown-graph-none '
-                            : '')
-                        }
-                        id="chartdivWaterfall"></div>
+                      {rcaAnalysisData &&
+                        rcaAnalysisData?.chart &&
+                        rcaAnalysisData?.chart?.chart_data.length && (
+                          <div
+                            className={
+                              'common-drilldown-graph' +
+                              (rcaAnalysisLoading
+                                ? ' common-drilldown-graph-none '
+                                : '')
+                            }
+                            id="chartdivWaterfall"></div>
+                        )}
                       {/* Table */}
                       {dimension.value === 'multidimension' ? (
                         <>

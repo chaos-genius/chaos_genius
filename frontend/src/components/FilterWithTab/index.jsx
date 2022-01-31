@@ -87,6 +87,7 @@ const DashboardFilter = ({ kpi, data, setActive, tabs, dashboard }) => {
                   onClick={() => {
                     store.dispatch(RESET_AGGREGATION);
                     store.dispatch(RESET_LINECHART);
+                    store.dispatch({ type: 'RESET_DASHBOARD_RCA' });
                     dispatch(anomalySetting(item.id));
                     store.dispatch(RESET);
                     store.dispatch(RESET_DATA);

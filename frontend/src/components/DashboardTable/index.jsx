@@ -106,7 +106,7 @@ const DashboardTable = ({ rcaAnalysisData }) => {
             </table>
           </div>
         ) : (
-          <div class="table-responsive">
+          <div className="table-responsive">
             <table className="table ">
               <thead>
                 {

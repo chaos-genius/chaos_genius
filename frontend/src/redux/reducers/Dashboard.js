@@ -30,7 +30,7 @@ export const dashboard = (state = initialState, action) => {
         rcaAnalysisError: true
       };
     }
-    case 'RESET_DASHBOARD': {
+    case 'RESET_DASHBOARD_RCA': {
       return {
         ...initialState
       };

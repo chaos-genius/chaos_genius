@@ -6,9 +6,13 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-23-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-Chaos Genius is an open-source business observability platform. Chaos Genius enables businesses to monitor thousands of KPIs, across multiple data sources, and perform automated root cause analysis for any deviation in the KPIs. 
+Chaos Genius is an **open-source business observability platform**.
 
-Chaos Genius can help teams reduce their Mean-Time-To-Detect (MTTD) and Mean-Time-To-Resolve (MTTR) for any issues in their business and system KPIs. 
+## What can Chaos Genius do?
+
+Chaos Genius enables businesses to monitor thousands of KPIs, across multiple data sources, and perform automated root cause analysis for any deviation in the KPIs. This can help teams reduce their Mean-Time-To-Detect (MTTD) and Mean-Time-To-Resolve (MTTR) for any issues in their business and system KPIs. 
+
+## How is Chaos Genius different?
 
 Standard BI dashboards enable data visualization to track how select metrics are trending. However, diagnosing why a particular metric or KPI has changed, remains a woefully manual process involving slicing & dicing the data, coordination with multiple teams in an organisation to identify related events and monitoring externalities. 
 
@@ -16,30 +20,36 @@ With Chaos Genius, we aim to automate the diagnosis and root-cause-analysis for 
 
 Find detailed [Documentation](https://docs.chaosgenius.io/docs/introduction) here!
 
-![](https://chaosgenius-public.s3.amazonaws.com/test-cg-1-small.gif)
-
-
+![A small demo of Chaos Genius](https://chaosgenius-public.s3.amazonaws.com/test-cg-1-small.gif)
 
 ## :white_check_mark: Key Use-Cases
 
-**Business KPI Observability**  - All important business KPIs such as Sign Ups, Payment Gateway Failures, Fraud Detection, Ad Spend, Campaign Performance, DAUs, Retention, Engagement and many others. 
+**Business KPI Observability**  - metrics such as Sign Ups, Payment Gateway Failures, Fraud Detection, Ad Spend, Campaign Performance, DAUs, Retention, Engagement and many others. 
 
-**Data Quality KPI Observability** - Data quality metrics like Data Volume, Freshness, Max, Mean, Median, Min, Missing Data, Null Count and many others. 
+**Data Quality KPI Observability** - metrics such as Data Volume, Freshness, Max, Mean, Median, Min, Missing Data, Null Count and many others. 
 
-**Systems KPI Observability** - System metrics like Cloud Costs, Cloud Failure, Infra performance and many others. 
+**Systems KPI Observability** - metrics such as Cloud Costs, Cloud Failure, Infra performance and many others. 
 
-**IOT/Device KPI Observability** - Device metrics like performance, data volumes, uptime and many others. 
+**IOT/Device KPI Observability** - metrics such as performance, data volumes, uptime and many others. 
 
 
 ## 🧰 Key Features
 
-**DeepDrills** - Multidimensional drill-downs & waterfall analysis to identify the top drivers of change in a KPI across multiple dimensions. 
+**DeepDrills** - Multidimensional drill-downs & waterfall analysis to identify the top drivers of change in a KPI across multiple dimensions.
 
-**Anomaly Detection** - Modular anomaly detection toolkit for monitoring high-dimensional time series with ability to select from different models. Anomaly investigation across multiple dimensions and data quality metrics like volume, max, mean and missing data. 
+<!-- TODO: add an image or illustration here -->
+
+**Anomaly Detection** - Modular anomaly detection toolkit for monitoring high-dimensional time series with ability to select from different models. Anomaly investigation across multiple dimensions and data quality metrics like volume, max, mean and missing data.
+
+<!-- TODO: add an image or illustration here -->
 
 **Smart Alerts** - No more alert fatigue from static alerts. Self-learning thresholds to reduce false positives. Configurations to setup alert frequency & severity. Choose from multiple destinations like Slack, Email and other channels for your team.
 
+<!-- TODO: add an image or illustration here -->
+
 **Integrations** - Modular architecture to enable multiple data sources including databases, data warehouses and multiple third party connectors like Stripe, Shopify, Zendesk, Google Analytics, and many others.
+
+<!-- TODO: add an image or illustration here -->
 
 [See more on our website. ](https://chaosgenius.io/)
 
@@ -57,18 +67,7 @@ cd chaos_genius
 docker-compose up
 ```
 
-Visit[  http://127.0.0.1:8080](http://localhost:8080/)
-
-### Upgrade from earlier versions
-
-To update the install first make sure the docker containers are down with docker-compose down
-
-Then update the repo & docker builds by following commands:
-
-git pull
-docker-compose pull
-
-And then bring back the containers with docker-compose up
+Visit [http://localhost:8080](http://localhost:8080/)
 
 ### Quick start & support
 
@@ -78,40 +77,40 @@ If you want to schedule office hours with our team to help you get set up, pleas
 
 ## :seedling: Community
 
-Chaos Genius is a community driven initiative. For any help, discussions, suggestions feel free to reach out to the Chaos Genius team and the Community on either of the following channels. 
+For any help, discussions and suggestions feel free to reach out to the Chaos Genius team and the community here:
 
 -   [GitHub](https://github.com/chaos-genius/.github) (report bugs, contribute, follow roadmap)
 
--   Slack (For discussion with the Community and Chaos Genius team)
+-   Slack (discuss with the community and Chaos Genius team)
 
--   [Book Office Hours](https://calendly.com/chaosgenius/30min)(Set Up time with Chaos Genius team for any questions or help with setup)
+-   [Book Office Hours](https://calendly.com/chaosgenius/30min) (set up time with the Chaos Genius team for any questions or help with setup)
 
--   [Blog](https://chaosgenius.io/blog/) (Follow us on latest trends on Data, Machine Learning, Open Source and more)
+-   [Blog](https://chaosgenius.io/blog/) (follow us on latest trends on Data, Machine Learning, Open Source and more)
 
 
 ## 🚦 Roadmap
 
-Our goal is to make Chaos Genius production ready for all organisations irrespective of their data infrasturcture, data sources and scale requirements. With that in mind we have created the following [roadmap](https://docs.chaosgenius.io/docs/Roadmap/Roadmap) for Chaos Genius. If you see something missing or wish to make suggestions, please drop us a line on our community Slack or raise an issue.
+Our goal is to make Chaos Genius production ready for all organisations irrespective of their data infrasturcture, data sources and scale requirements. With that in mind we have created a [roadmap](https://docs.chaosgenius.io/docs/Roadmap/Roadmap) for Chaos Genius. If you see something missing or wish to make suggestions, please drop us a line on our community Slack or raise an issue.
 
 
 
 ## 🐛 Contributing 
 
-Here's a shout out to all our contributors.
-
 Want to contribute? Visit our Github repo and get started with:
 
 -   Try Chaos Genius and share your feedback.
 
--   Submit an issue. 
-
--   Create a pull request. Here's a [list of issues](https://github.com/chaos-genius/chaos_genius/issues) to start with.
+-   Submit an issue.
 
 -   Share a part of the documentation that you find difficult to follow.
 
 -   [Translate our Readme](https://github.com/chaos-genius/chaos_genius/blob/main/README.md).
 
 -   Show us some love - Give us a star!
+
+-   Create a pull request. Here's a [list of issues](https://github.com/chaos-genius/chaos_genius/issues) to start with.
+
+Please review our [contribution guidelines](https://github.com/chaos-genius/chaos_genius/blob/main/CONTRIBUTING.md) before opening a pull request. Thank you for contributing!
 
 
 ## 📜 License

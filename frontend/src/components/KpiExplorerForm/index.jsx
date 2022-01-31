@@ -834,6 +834,12 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       [name]: e
     });
     setFormdata({ ...formdata, dashboardNameList: e });
+    setErrorMsg((prev) => {
+      return {
+        ...prev,
+        dashboardNameList: true
+      };
+    });
   };
 
   if (kpiFormLoading) {
@@ -1233,15 +1239,14 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                           dashboardNameList: arr
                         });
                       }
+                      setErrorMsg((prev) => {
+                        return {
+                          ...prev,
+                          dashboardNameList: false
+                        };
+                      });
                     })
                   : onEditData(e, 'dashboards');
-
-                setErrorMsg((prev) => {
-                  return {
-                    ...prev,
-                    dashboardNameList: false
-                  };
-                });
               }}
             />
             {errorMsg.dashboardNameList === true ? (

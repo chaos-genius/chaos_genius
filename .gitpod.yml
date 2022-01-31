@@ -1,3 +1,6 @@
+image:
+  file: .gitpod.dockerfile
+
 # List the start up tasks. Learn more https://www.gitpod.io/docs/config-start-tasks/
 tasks:
 
@@ -5,7 +8,10 @@ tasks:
     init: |
       pip install wheel
       pip install -r requirements/dev.txt # runs during prebuild
-    command: bash dev_server.sh
+    command: |
+      pg_start
+      flask db upgrade
+      bash dev_server.sh
 
   - name: Webapp
     init: |
@@ -15,10 +21,13 @@ tasks:
       cd frontend
       REACT_APP_BASE_URL=http://localhost:5000 npm start
 
+  - name: Redis
+    command: redis-server
+
 # List the ports to expose. Learn more https://www.gitpod.io/docs/config-ports/
 ports:
   - port: 3000
-    onOpen: open-preview
+    onOpen: open-browser
   - port: 5000
 
 vscode:

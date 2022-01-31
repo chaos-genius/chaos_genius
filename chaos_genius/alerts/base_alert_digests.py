@@ -46,7 +46,7 @@ class AlertDigestController:
         self.alert_config_cache, self.kpi_cache = get_alert_kpi_configurations(data)
 
         for alert in data:
-            alert_conf_id = getattr(alert, "alert_conf_id")
+            alert_conf_id = alert.alert_conf_id
             alert_conf = self.alert_config_cache.get(alert_conf_id, None)
 
             kpi_id = alert_conf.get("kpi", None)

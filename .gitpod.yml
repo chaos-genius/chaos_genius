@@ -11,6 +11,8 @@ tasks:
       pip install numpy
       pip install -r requirements/dev.txt # runs during prebuild
     command: |
+      cp .gitpod.env .env.local
+      sed -i "s~CHAOSGENIUS_WEBAPP_URL_HERE~`gp url 5000`~g" ".env.local"
       pg_start
       flask db upgrade
       bash dev_server.sh

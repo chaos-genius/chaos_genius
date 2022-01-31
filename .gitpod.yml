@@ -7,9 +7,7 @@ tasks:
   - name: API Server
     init: |
       pip install wheel
-      # required for prophet
-      pip install numpy pandas pystan==2.19.1.1
-      pip install -r requirements/dev.txt # runs during prebuild
+      pip install -r requirements/dev.txt
     command: |
       cp .gitpod.env .env.local
       sed -i "s~CHAOSGENIUS_WEBAPP_URL_HERE~`gp url 5000`~g" ".env.local"

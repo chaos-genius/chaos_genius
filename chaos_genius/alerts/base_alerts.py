@@ -508,15 +508,15 @@ class AnomalyAlertController:
             intended_point = self.find_point(point, prev_day_data)
 
             if intended_point is None:
-                point["nl_message"] = f"Subdimension increased by (–%)"
+                point["nl_message"] = f"Increased by (–%)"
                 point["percentage_change"] = "–"
             else:
                 percentage_change = find_percentage_change(point["y"], intended_point["y"])
                 if isinstance(percentage_change, str):
-                    change_metric = "increased"
+                    change_metric = "Increased"
                 else:
-                    change_metric = "increased" if percentage_change > 0 else "decreased"
-                point["nl_message"] = f"Subdimension {change_metric} by ({percentage_change}%)"
+                    change_metric = "Increased" if percentage_change > 0 else "Decreased"
+                point["nl_message"] = f"{change_metric} by ({percentage_change}%)"
                 point["percentage_change"] = percentage_change
     
     def get_nl_message_hourly_freq(self, anomaly_data, kpi):
@@ -549,15 +549,15 @@ class AnomalyAlertController:
         
             intended_point = self.find_point(point, required_data)
             if intended_point is None:
-                point["nl_message"] = f"Subdimension increased by (–%)"
+                point["nl_message"] = f"Increased by (–%)"
                 point["percentage_change"] = "–"
             else:
                 percentage_change = find_percentage_change(point["y"], intended_point["y"])
                 if isinstance(percentage_change, str):
-                    change_metric = "increased"
+                    change_metric = "Increased"
                 else:
-                    change_metric = "increased" if percentage_change > 0 else "decreased"
-                point["nl_message"] = f"Subdimension {change_metric} by ({percentage_change}%)"
+                    change_metric = "Increased" if percentage_change > 0 else "Decreased"
+                point["nl_message"] = f"{change_metric} by ({percentage_change}%)"
                 point["percentage_change"] = percentage_change
     
     def construct_summary_for_anomaly_data(self, anomaly_data):

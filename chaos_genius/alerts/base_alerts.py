@@ -522,21 +522,21 @@ class AnomalyAlertController:
     def get_nl_message_hourly_freq(self, anomaly_data, kpi):
         data = dict()
         for point in anomaly_data:
-            if str(point["data_datetime"]) not in data.keys():
-                data[str(point["data_datetime"])] = []
-            data[str(point["data_datetime"])].append(point)
+            if point["data_datetime"].hour not in data.keys():
+                data[point["data_datetime"].hour] = []
+            data[point["data_datetime"].hour].append(point)
         
         anomaly_data_cache = dict()
 
         for point in anomaly_data:
             lower_bound = point["data_datetime"] - datetime.timedelta(days=0, hours=1, minutes=0)
-            str_repr = str(lower_bound)
+            hour_val = lower_bound.hour
 
             required_data = None
-            if str_repr in data.keys():
-                required_data = data.get(str_repr)
-            elif str_repr not in data.keys() and str_repr in anomaly_data_cache.keys():
-                required_data = anomaly_data_cache.get(str_repr)
+            if hour_val != 23 and hour_val in data.keys():
+                required_data = data.get(hour_val)
+            elif hour_val == 23 and hour_val in anomaly_data_cache.keys():
+                required_data = anomaly_data_cache.get(hour_val)
             else:
                 required_data = AnomalyDataOutput.query.filter(
                                             AnomalyDataOutput.kpi_id == kpi.id,
@@ -545,7 +545,7 @@ class AnomalyAlertController:
                                             AnomalyDataOutput.data_datetime >= lower_bound,
                                         ).all()
                 required_data = [anomaly_point.as_dict for anomaly_point in required_data]
-                anomaly_data_cache[str_repr] = required_data
+                anomaly_data_cache[hour_val] = required_data
         
             intended_point = self.find_point(point, required_data)
             if intended_point is None:

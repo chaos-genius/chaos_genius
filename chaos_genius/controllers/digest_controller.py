@@ -9,9 +9,10 @@ def structure_anomaly_data_for_digests(anomaly_data):
 
     data = dict()
     for point in anomaly_data:
-        if point["data_datetime"] not in data.keys():
-            data[point["data_datetime"]] = []
-        data[point["data_datetime"]].append(point)
+        dt_obj = datetime.datetime.strptime(point["data_datetime"], "%Y-%m-%d %H:%M:%S")
+        if dt_obj.hour not in data.keys():
+            data[dt_obj.hour] = []
+        data[dt_obj.hour].append(point)
 
     segregated_data = list(data.items())
     segregated_data.sort(key=lambda arr: arr[0], reverse=True)

@@ -63,7 +63,7 @@ const Kpihome = () => {
 
   const [search, setSearch] = useState('');
   const [kpiHomeData, setKpiHomeData] = useState(homeKpiData);
-  const [dashboard, setDashboard] = useState(dashboardList[0]?.id);
+  const [dashboard, setDashboard] = useState();
   const [timeCutOptions, setTimeCutOptions] = useState([]);
 
   const [timeline, setTimeLine] = useState({});
@@ -82,8 +82,6 @@ const Kpihome = () => {
     ) {
       setDashboard(dashboardList[0]?.id);
       history.push(`/${dashboardList[0]?.id}`);
-    } else if (dashboardList && dashboardList.length !== 0 && dashboardId) {
-      setDashboard(dashboardList[0]?.id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dashboardList, history.location.pathname]);
@@ -271,7 +269,7 @@ const Kpihome = () => {
         <div className="homepage-setup-card-wrapper">
           <div className="explore-wrapper home-explore-wrapper">
             <div className="filter-section">
-              {dashboardId && (
+              {dashboardId !== undefined && (
                 <Homefilter
                   data={dashboardList}
                   setDashboard={setDashboard}

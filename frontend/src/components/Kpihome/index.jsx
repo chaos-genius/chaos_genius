@@ -102,13 +102,15 @@ const Kpihome = () => {
   };
 
   useEffect(() => {
+    const timeCut = {
+      label: timeCutsData[0]?.display_name,
+      value: `${timeCutsData[0]?.id}`,
+      grp2_name: timeCutsData[0]?.current_period_name,
+      grp1_name: timeCutsData[0]?.last_period_name
+    };
     if (timeCutsData && timeCutsData.length) {
-      setTimeLine({
-        label: timeCutsData[0]?.display_name,
-        value: `${timeCutsData[0]?.id}`,
-        grp2_name: timeCutsData[0]?.current_period_name,
-        grp1_name: timeCutsData[0]?.last_period_name
-      });
+      setTimeLine(timeCut);
+      store.dispatch({ type: 'ACTIVE_TIMECUT', data: timeCut });
       getAllTimeCutOptions(timeCutsData);
     }
   }, [timeCutsData]);
@@ -127,7 +129,17 @@ const Kpihome = () => {
     );
   };
 
+  const clearDashboardDetails = () => {
+    store.dispatch({
+      type: 'RESET_AGGREGATION'
+    });
+    store.dispatch({
+      type: 'RESET_LINECHART'
+    });
+  };
+
   useEffect(() => {
+    clearDashboardDetails();
     if (search !== '') {
       searchKpi();
     } else {
@@ -261,7 +273,13 @@ const Kpihome = () => {
               classNamePrefix="selectcategory"
               placeholder="Current week on last week"
               value={timeline}
-              onChange={(e) => setTimeLine(e)}
+              onChange={(e) => {
+                store.dispatch({
+                  type: 'ACTIVE_TIMECUT',
+                  data: e
+                });
+                setTimeLine(e);
+              }}
               isSearchable={false}
             />
           </div>

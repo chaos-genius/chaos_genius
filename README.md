@@ -5,6 +5,9 @@
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-23-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
+[![Documentation](https://img.shields.io/badge/-documentation-informational?style=flat-square)](https://docs.chaosgenius.io)
+[![Website](https://img.shields.io/badge/-website-blueviolet?style=flat-square)](https://www.chaosgenius.io/)
+[![Tests status](https://github.com/chaos-genius/chaos_genius/actions/workflows/python-test.yml/badge.svg)](https://github.com/chaos-genius/chaos_genius/actions/workflows/python-test.yml)
 
 Chaos Genius is an **open-source business observability platform**.
 

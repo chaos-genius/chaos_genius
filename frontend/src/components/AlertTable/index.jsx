@@ -57,6 +57,10 @@ const AlertTable = ({ alertData, alertSearch }) => {
 
   const onChecking = (alert) => {
     store.dispatch(RESET_ENABLE_DISABLE_DATA);
+    store.dispatch({
+      type: 'CHANGING_ALERT',
+      data: { id: alert?.id, toggle: alert?.active }
+    });
     if (alert.active === true) {
       onDisable(alert.id);
     } else if (alert.active === false) {

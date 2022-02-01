@@ -100,6 +100,19 @@ def _filter_anomaly_alerts(
 
             alert.alert_metadata["alert_data"] = anomaly_data
 
+def _add_nl_messages_anomaly_alerts(anomaly_alerts_data):
+    
+    for triggered_alert in anomaly_alerts_data:
+        for point in triggered_alert.alert_metadata["alert_data"]:
+            percentage_change = point.get("percentage_change", None)
+            if percentage_change is None:
+                point["nl_message"] = "These are older triggered alerts"
+                continue
+            elif percentage_change == "–":
+                change_metric = "Increased"
+            else:
+                change_metric = "Increased" if percentage_change > 0 else "Decreased"
+            point["nl_message"] = f"{change_metric} by ({percentage_change}%)"
 
 def get_digest_view_data(triggered_alert_id=None, include_subdims: bool = False):
 
@@ -119,6 +132,7 @@ def get_digest_view_data(triggered_alert_id=None, include_subdims: bool = False)
 
     anomaly_alerts_data = [alert for alert in data if alert.alert_type == "KPI Alert"]
     _filter_anomaly_alerts(anomaly_alerts_data, include_subdims)
+    _add_nl_messages_anomaly_alerts(anomaly_alerts_data)
     event_alerts_data = [alert for alert in data if alert.alert_type == "Event Alert"]
 
     return anomaly_alerts_data, event_alerts_data

@@ -17,6 +17,7 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import anomaly_alert_slack_formatted, event_alert_slack
+from chaos_genius.controllers.digest_controller import structure_anomaly_data_for_digests
 from chaos_genius.alerts.anomaly_alert_config import (
     ANOMALY_TABLE_COLUMN_NAMES_MAPPER,
     IGNORE_COLUMNS_ANOMALY_TABLE,
@@ -551,7 +552,7 @@ class AnomalyAlertController:
                                             alert_name=self.alert_info.get("alert_name")
                                         )
             logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
-            anomaly_data = overall_data
+            anomaly_data = structure_anomaly_data_for_digests(overall_data)
             return test, anomaly_data
         else:
             logger.info(
@@ -636,7 +637,8 @@ class AnomalyAlertController:
 
         message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
         test = test == "ok"
-        return test, overall_data
+        anomaly_data = structure_anomaly_data_for_digests(overall_data)
+        return test, anomaly_data
 
 
 class StaticKpiAlertController:

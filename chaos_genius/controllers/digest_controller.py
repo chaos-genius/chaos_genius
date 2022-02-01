@@ -5,6 +5,24 @@ from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
 
+def structure_anomaly_data_for_digests(anomaly_data):
+
+    data = dict()
+    for point in anomaly_data:
+        if point["data_datetime"] not in data.keys():
+            data[point["data_datetime"]] = []
+        data[point["data_datetime"]].append(point)
+
+    segregated_data = list(data.items())
+    segregated_data.sort(key=lambda arr: arr[0], reverse=True)
+
+    anomaly_data_formatted = []
+    for _, arr in segregated_data:
+        arr.sort(key=lambda point: point["severity"], reverse=True)
+        anomaly_data_formatted.extend(arr)
+    
+    return anomaly_data_formatted
+
 def get_alert_kpi_configurations(data):
     alert_config_cache = dict()
     kpi_cache = dict()
@@ -69,24 +87,18 @@ def _filter_anomaly_alerts(
             )
     else:
         for alert in anomaly_alerts_data:
-            overall_anomaly_points = list(
-                filter(
-                    lambda point: point["Dimension"] == "Overall KPI",
-                    alert.alert_metadata["alert_data"],
-                )
-            )
+            anomaly_data = []
+            count = 0
+            subdim_len = 20
 
-            subdim_anomaly_points = list(
-                filter(
-                    lambda point: point["Dimension"] != "Overall KPI",
-                    alert.alert_metadata["alert_data"],
-                )
-            )
+            for point in alert.alert_metadata["alert_data"]:
+                if point["Dimension"] != "Overall KPI":
+                    count += 1
+                    if count > subdim_len:
+                        continue
+                anomaly_data.append(point)
 
-            subdim_anomaly_points = subdim_anomaly_points[0:20]
-            alert.alert_metadata["alert_data"] = (
-                overall_anomaly_points + subdim_anomaly_points
-            )
+            alert.alert_metadata["alert_data"] = anomaly_data
 
 
 def get_digest_view_data(triggered_alert_id=None, include_subdims: bool = False):

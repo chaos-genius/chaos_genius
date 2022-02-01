@@ -185,3 +185,16 @@
   border-radius: 4px;
   width: 5px;
 }
+
+.home-data-load {
+  &.home-data-loader-page {
+    display: block;
+    width: 78%;
+    background: #ffffff;
+  }
+  .preload {
+    position: relative !important;
+    left: 45%;
+    top: 35%;
+  }
+}

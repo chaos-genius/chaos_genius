@@ -6,13 +6,10 @@ import Fuse from 'fuse.js';
 import './homefilter.scss';
 import { useState } from 'react';
 import { formatDateTime } from '../../utils/date-helper';
-import { useHistory } from 'react-router-dom';
 import { CustomTooltip } from '../../utils/tooltip-helper';
 
 const Homefilter = ({ data, setDashboard, dashboard, setDashboardId }) => {
   const [filterData, setFilterData] = useState(data);
-
-  const history = useHistory();
 
   const onSearch = (event) => {
     if (event.target.value === '') {

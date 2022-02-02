@@ -136,9 +136,9 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
         <>
           <connectionContext.Provider value={stateValue}>
             <div className="container-wrapper">
+              <Navbar />
               <Sidebar />
               <main>
-                <Navbar />
                 <div className="body-container">
                   <Component {...props} />
                 </div>

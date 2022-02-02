@@ -1,5 +1,6 @@
 import React from 'react';
 import './navbar.scss';
+import logo from '../../assets/images/cg-logo.svg';
 import { Link } from 'react-router-dom';
 import Setting from '../../assets/images/setting_navbar.svg';
 import TaskManager from '../../assets/images/task-1.svg';
@@ -34,6 +35,11 @@ const Navbar = () => {
   });
   return (
     <div className="header-section">
+      <div className="sidebar-logo">
+        <Link to="/">
+          <img src={logo} alt="Logo" />
+        </Link>
+      </div>
       <div className="dropdown">
         <div
           id="userdetails"

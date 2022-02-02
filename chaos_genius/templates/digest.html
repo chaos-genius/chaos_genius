@@ -14,6 +14,12 @@
     <div class="container mx-auto py-4">
         <h1 class="text-3xl">ChaosGenius Alerts Digest</h1>
 
+        <!-- Tabs -->
+    <ul id="tabs" class="inline-flex pt-2 px-1 w-full border-b">
+        <li class="bg-white px-4 text-gray-800 font-semibold py-2 rounded-t border-t border-r border-l -mb-px"><a id="default-tab" href="#anomaly-alerts">Anomaly Alerts</a></li>
+        <li class="px-4 text-gray-800 font-semibold py-2 rounded-t"><a href="#event-alerts">Event Alerts</a></li>
+    </ul>
+
         <div class="mt-4 flex items-center">
             <select id="alert-config-select" multiple class="grow">
             </select>
@@ -29,12 +35,6 @@
 
             <button type="button" class="rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3" onclick="downloadCSV()">Download CSV</button>
         </div>
-
-    <!-- Tabs -->
-    <ul id="tabs" class="inline-flex pt-2 px-1 w-full border-b">
-        <li class="bg-white px-4 text-gray-800 font-semibold py-2 rounded-t border-t border-r border-l -mb-px"><a id="default-tab" href="#anomaly-alerts">Anomaly Alerts</a></li>
-        <li class="px-4 text-gray-800 font-semibold py-2 rounded-t"><a href="#event-alerts">Event Alerts</a></li>
-    </ul>
 
     <div id="tab-contents">
         <div id="anomaly-alerts" class="p-4">
@@ -208,14 +208,21 @@
                   "{{ point['Value'] }}",
                   "{{ point['Expected Value'] }}",
                   `{% if point['Severity Score'] >= 65 %}
-                        <span style='color:#E53935;font-weight: light' class="severity"> <span class="badge mb-3 rounded-full px-2.5 py-1 text-center object-right-top text-white text-sm mr-3 bg-red-500">!</span>
+                        <span style='color:#E53935;font-weight: light' class="severity"> <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" style="display: inline!important;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+</svg>
                     {% elif point['Severity Score'] >= 25 %}
-                        <span style='font-weight: light' class="severity"> <span class="badge mb-3 rounded-full px-2.5 py-1 text-center object-right-top text-white text-sm mr-3 bg-yellow-500">!</span>
+                        <span style='font-weight: light' class="severity"> <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="#00FFFF" style="display: inline!important;" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+</svg>
                     {% else %}
-                        <span style='font-weight: light' class="severity"> <span class="badge mb-3 rounded-full px-2.5 py-1 text-center object-right-top text-white text-sm mr-3 bg-gray-400">!</span>
+                        <span style='font-weight: light' class="severity"> <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" style="display: inline!important;" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+</svg>
                     {% endif %}
-                        {{ point['Severity Score'] }}
-                    </span>`,
+                    
+                        {{ point['Severity Score'] }}</span>`
+                    ,
                   "{{ point['Time of Occurrence'] }}",
                   [
                       {% for email in (triggered_alert.alert_channel_conf or []) %}

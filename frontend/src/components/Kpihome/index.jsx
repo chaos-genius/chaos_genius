@@ -73,10 +73,10 @@ const Kpihome = () => {
       setDashboardId('0');
     }
     history.push(`/${dashboardId}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dashboardId]);
 
   useEffect(() => {
-    store.dispatch(RESET_ACTION);
     dispatch(getDashboard());
     dispatch(getTimeCuts());
   }, [dispatch]);
@@ -142,6 +142,7 @@ const Kpihome = () => {
     store.dispatch({
       type: 'RESET_LINECHART'
     });
+    store.dispatch({ type: 'RESET_DASHBOARD_RCA' });
   };
 
   useEffect(() => {
@@ -375,7 +376,7 @@ const Kpihome = () => {
                   })}
                 </div>
               ) : (
-                kpiHomeData !== '' && (
+                kpiHomeData === [] && (
                   <div className="home-card-section">
                     <div className="no-data-kpihome">
                       <Noresult text={search} title={'KPI'} />

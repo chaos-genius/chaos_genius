@@ -136,6 +136,24 @@ def get_digest_view_data(triggered_alert_id=None, include_subdims: bool = False)
     anomaly_alerts_data = [alert for alert in data if alert.alert_type == "KPI Alert"]
     _filter_anomaly_alerts(anomaly_alerts_data, include_subdims)
     _add_nl_messages_anomaly_alerts(anomaly_alerts_data)
+    change_timestamp(anomaly_alerts_data)
     event_alerts_data = [alert for alert in data if alert.alert_type == "Event Alert"]
 
     return anomaly_alerts_data, event_alerts_data
+
+def change_timestamp(anomaly_alerts_data:List[TriggeredAlerts]) :
+    import humanize
+    import time
+    from datetime import datetime
+    
+    for alert in  anomaly_alerts_data:
+        
+        for point in alert.alert_metadata["alert_data"]:
+            point['tooltip_time'] = point['Time of Occurrence'] 
+            my_time = time.strptime(point['Time of Occurrence'] ,  "%Y-%m-%d %H:%M:%S")
+            timestamp = time.mktime(my_time)
+            my_datetime = datetime.fromtimestamp(timestamp)
+            readable_time=humanize.naturalday(my_datetime , format='%b %d')
+            point['Time of Occurrence']= humanize.naturalday(my_datetime , format='%b %d')
+
+    return None

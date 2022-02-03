@@ -256,7 +256,6 @@ const Kpihome = () => {
       </div>
     );
   } else {
-    console.log(homeKpiData.length);
     return (
       <>
         <div className="heading-option kpihome-heading">

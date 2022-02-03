@@ -10,7 +10,7 @@
     <link href="https://unpkg.com/simple-datatables@3.2.0/dist/style.css" rel="stylesheet" type="text/css">
 </head>
 
-<body class="bg-white">
+<body class="parent-container bg-white">
     <div class="container">
         <div class="logo-container">
             <svg width="177" height="32" viewBox="0 0 177 32" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -178,6 +178,12 @@
     <style>
     .toggle-label {
       position: relative;
+    }
+
+    .parent-container{
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .container{

@@ -61,19 +61,19 @@ def kpi_aggregation(kpi_id, timeline="last_30_days"):
             "aggregation": [
                 {
                     "label": "group1_value",
-                    "value": 0,
+                    "value": "-",
                 },
                 {
                     "label": "group2_value",
-                    "value": 0,
+                    "value": "-",
                 },
                 {
                     "label": "difference",
-                    "value": 0,
+                    "value": "-",
                 },
                 {
                     "label": "perc_change",
-                    "value": 0,
+                    "value": "-",
                 },
             ],
             "analysis_date": "",

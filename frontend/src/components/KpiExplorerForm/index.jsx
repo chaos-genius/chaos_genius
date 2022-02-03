@@ -734,7 +734,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     if (!present && data[2] === 'edit') {
       customToast({
         type: 'error',
-        header: 'All should be needed'
+        header: 'KPI cannot be deleted from "All" dashboard'
       });
     }
 

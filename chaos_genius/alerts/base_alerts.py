@@ -3,6 +3,7 @@ import os
 import io
 from typing import Optional, List, Tuple
 import pandas as pd
+import time
 import datetime
 from datetime import date
 from copy import deepcopy
@@ -559,7 +560,7 @@ class AnomalyAlertController:
                     change_metric = "Increased" if percentage_change > 0 else "Decreased"
                 point["nl_message"] = f"{change_metric} by ({percentage_change}%)"
                 point["percentage_change"] = percentage_change
-    
+ 
     def construct_summary_for_anomaly_data(self, anomaly_data):
         kpi_id = self.alert_info["kpi"]
         kpi = Kpi.query.filter(Kpi.id == kpi_id).first()
@@ -584,15 +585,18 @@ class AnomalyAlertController:
 
     def format_alert_data(self, data):
         self.construct_summary_for_anomaly_data(data)
-
+      
         for anomaly_point in data:
             lower = anomaly_point.get("yhat_lower")
             upper = anomaly_point.get("yhat_upper")
             anomaly_point["Expected Value"] = f"{lower} - {upper}"
             for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
                 anomaly_point[value] = anomaly_point[key]
-
-            anomaly_point["Time of Occurrence"] = str(anomaly_point["Time of Occurrence"])
+            my_time = time.strptime(str(anomaly_point["Time of Occurrence"]),  "%Y-%m-%d %H:%M:%S")
+            timestamp = time.mktime(my_time)
+            date_time = datetime.datetime.fromtimestamp(timestamp)
+            new_time = date_time.strftime("%b %d %Y %H:%M:%S")
+            anomaly_point["Time of Occurrence"] = new_time
             anomaly_point["data_datetime"] = str(anomaly_point["data_datetime"])
 
     def remove_attribute_from_anomaly_data(self, anomaly_data, list_attributes):
@@ -601,7 +605,7 @@ class AnomalyAlertController:
                 delattr(point, attr)
 
     def send_alert_email(self, anomaly_data):
-
+        
         alert_channel_conf = self.alert_info["alert_channel_conf"]
 
         if type(alert_channel_conf) != dict:
@@ -648,8 +652,6 @@ class AnomalyAlertController:
                     file_detail["fdata"] = buffer.getvalue()
                 files = [file_detail]
             
-            column_names.append("nl_message")
-
             test = self.send_template_email('email_alert.html', 
                                             recipient_emails, 
                                             subject,
@@ -674,7 +676,6 @@ class AnomalyAlertController:
 
     def send_template_email(self, template, recipient_emails, subject, files, **kwargs):
         """Sends an email using a template."""
-
         path = os.path.join(os.path.dirname(__file__), "email_templates")
         env = Environment(
             loader=FileSystemLoader(path), autoescape=select_autoescape(["html", "xml"])
@@ -682,7 +683,6 @@ class AnomalyAlertController:
 
         template = env.get_template(template)
         test = send_static_alert_email(recipient_emails, subject, template.render(**kwargs), self.alert_info, files)
-
         if test == True:
             logger.info(
                 f"The email for Alert ID - {self.alert_info['id']} was successfully sent"

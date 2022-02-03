@@ -111,3 +111,12 @@ SOURCE_STRIPE = os.getenv("SOURCE_STRIPE", default=False)
 SOURCE_GOOGLE_ADS = os.getenv("SOURCE_GOOGLE_ADS", default=False)
 SOURCE_FACEBOOK_ADS = os.getenv("SOURCE_FACEBOOK_ADS", default=False)
 SOURCE_BING_ADS = os.getenv("SOURCE_BING_ADS", default=False)
+
+"""Alert Digest configuration"""
+ALERT_DIGEST_ENABLED = os.getenv("ALERT_DIGEST_ENABLED", "False") == "True"
+ALERT_DIGEST_DAILY_TIME = os.getenv("ALERT_DIGEST_DAILY_TIME", "10:00").split(":")
+if len(ALERT_DIGEST_DAILY_TIME) != 2:
+    raise ValueError(
+        "ALERT_DIGEST_DAILY_TIME must be in HH:MM format. "
+        f"Got {':'.join(ALERT_DIGEST_DAILY_TIME)}"
+    )

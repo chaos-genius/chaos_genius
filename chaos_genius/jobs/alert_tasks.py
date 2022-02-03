@@ -4,6 +4,7 @@ from chaos_genius.extensions import db
 from chaos_genius.extensions import celery as celery_ext
 from chaos_genius.controllers.alert_controller import get_alert_list, get_alert_info
 from chaos_genius.alerts.base_alerts import check_and_trigger_alert
+from chaos_genius.alerts.base_alert_digests import check_and_trigger_digest
 
 celery = celery_ext.celery
 
@@ -48,3 +49,9 @@ def run_single_alert(alert_id):
     else:
         print(f"Trigger failed for the alert ID: {alert_id}.")
     return status
+
+
+@celery.task
+def alert_digest_daily():
+    """Sends daily alert digest."""
+    check_and_trigger_digest("daily")

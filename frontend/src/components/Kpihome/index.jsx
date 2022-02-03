@@ -256,6 +256,7 @@ const Kpihome = () => {
       </div>
     );
   } else {
+    console.log(homeKpiData.length);
     return (
       <>
         <div className="heading-option kpihome-heading">
@@ -304,7 +305,7 @@ const Kpihome = () => {
               )}
             </div>
             {!homeKpiLoading ? (
-              kpiHomeData && kpiHomeData.length !== 0 ? (
+              kpiHomeData !== [] && kpiHomeData.length !== 0 ? (
                 <div className="graph-section">
                   {kpiHomeData.map((item) => {
                     return (
@@ -376,7 +377,7 @@ const Kpihome = () => {
                   })}
                 </div>
               ) : (
-                kpiHomeData === [] && (
+                kpiHomeData.length === 0 && (
                   <div className="home-card-section">
                     <div className="no-data-kpihome">
                       <Noresult text={search} title={'KPI'} />

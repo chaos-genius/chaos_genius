@@ -110,12 +110,19 @@ def _validate_kpi_from_df(
             ),
         },
         {
-            "debug_str": "Check #5: Validate dimensions",
+            "debug_str": "Check #5: Validate date column is tz-naive",
+            "status": _validate_date_column_is_tz_naive(
+                df,
+                date_column_name=date_column_name
+            ),
+        },
+        {
+            "debug_str": "Check #6: Validate dimensions",
             "status": _validate_dimensions(kpi_info),
         },
         {
             "debug_str": (
-                "Check #6: Validate KPI has no more than "
+                "Check #7: Validate KPI has no more than "
                 f"{MAX_ROWS_FOR_DEEPDRILLS} rows"
             ),
             "status": _validate_for_maximum_kpi_size(kpi_info),
@@ -243,38 +250,29 @@ def _validate_date_column_is_parseable(
     return True, "Accepted!"
 
 
-    if unix_unit:
-        # If a unix_unit is specified, it will try to convert with this unit
-        try:
-            pd.to_datetime(
-                df[date_column_name], unit=unix_unit, infer_datetime_format=True
-            )
-        except pd.errors.OutOfBoundsDatetime:
-            return False, out_of_bounds_msg
-        except Exception:  # noqa: B902
-            return False, f"{generic_err_msg}"
-    elif date_format:
-        # If a date_format is specified, it will try to convert with it
-        try:
-            pd.to_datetime(
-                df[date_column_name], format=date_format, infer_datetime_format=True
-            )
-        except pd.errors.OutOfBoundsDatetime:
-            return False, out_of_bounds_msg
-        except Exception:  # noqa: B902
-            return False, f"{generic_err_msg}"
-    else:
-        # If neither date_format or unix_unit
-        # let pandas do its best to infer datetime format.
-        try:
-            pd.to_datetime(df[date_column_name], infer_datetime_format=True)
-        except pd.errors.OutOfBoundsDatetime:
-            return False, out_of_bounds_msg
-        except Exception:  # noqa: B902
-            return False, f"{generic_err_msg}"
+def _validate_date_column_is_tz_naive(
+    df: pd.core.frame.DataFrame,
+    date_column_name: str,
+) -> Tuple[bool, str]:
+    """Validate if specified date column is tz-naive.
 
-    # datetime column is parseable if code reaches here.
-    return True, valid_str
+    :param df: A pandas DataFrame
+    :type df: pd.core.frame.DataFrame
+    :param date_column_name: Name of the date column
+    :type date_column_name: str
+    :return: returns a tuple with the status as a bool and a status message
+    :rtype: Tuple[bool, str]
+    """
+    date_col = df[date_column_name]
+    all_tz_naive = date_col.apply(lambda t: t.tz is None).all()
+    if not all_tz_naive:
+        invalid_type_err_msg = (
+            "The datetime column has timezone aware data. Only timezone naive"
+            " data is acceptable."
+        )
+        return False, invalid_type_err_msg
+
+    return True, "Accepted!"
 
 
 def _validate_for_maximum_kpi_size(

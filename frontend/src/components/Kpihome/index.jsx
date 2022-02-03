@@ -304,7 +304,7 @@ const Kpihome = () => {
               )}
             </div>
             {!homeKpiLoading ? (
-              kpiHomeData !== [] && kpiHomeData.length !== 0 ? (
+              kpiHomeData && kpiHomeData.length !== 0 ? (
                 <div className="graph-section">
                   {kpiHomeData.map((item) => {
                     return (

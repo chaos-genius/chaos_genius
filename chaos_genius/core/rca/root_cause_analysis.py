@@ -476,13 +476,13 @@ class RootCauseAnalysis:
         g1_agg = self._grp1_df[self._metric].agg(self._agg)
         g2_agg = self._grp2_df[self._metric].agg(self._agg)
         impact = g2_agg - g1_agg
-        perc_diff = (impact / g1_agg) * 100 if g1_agg != 0 else 0
+        perc_diff = (impact / g1_agg) * 100 if g1_agg != 0 else np.inf
 
         panel_metrics = {
             "group1_value": round_number(g1_agg),
             "group2_value": round_number(g2_agg),
             "difference": round_number(impact),
-            "perc_change": round_number(perc_diff),
+            "perc_change": round_number(perc_diff) if not np.isinf(perc_diff) else "inf",
         }
 
         # Check for None or NaN values in output

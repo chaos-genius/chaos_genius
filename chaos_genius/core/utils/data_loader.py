@@ -166,9 +166,12 @@ class DataLoader:
             ],
         }
 
-    def get_data(self) -> pd.DataFrame:
-        """Return dataframe with KPI data."""
+    def get_data(self, return_empty=False) -> pd.DataFrame:
+        """Return dataframe with KPI data.
 
+        If return_empty is false, it will raise an error if no data is found.
+        If return_empty is true, it will return an empty dataframe.
+        """
         kpi_id = self.kpi_info["id"]
 
         query = self._build_query()
@@ -177,6 +180,9 @@ class DataLoader:
         df = self._run_query(query)
 
         if len(df) == 0:
+            if return_empty:
+                logger.warn("Returning empty dataframe for KPI {}".format(kpi_id))
+                return df
             raise ValueError("Dataframe is empty.")
 
         if not self.validation:

@@ -74,13 +74,23 @@ class RootCauseAnalysisController:
             self.kpi_info,
             end_date=prev_end_date,
             start_date=prev_start_date,
-        ).get_data()
+        ).get_data(return_empty=True)
 
         rca_df = DataLoader(
             self.kpi_info,
             end_date=curr_end_date,
             start_date=curr_start_date,
-        ).get_data()
+        ).get_data(return_empty=True)
+
+        if base_df.empty and rca_df.empty:
+            raise ValueError(f"No data to perform RCA on for timeline: {timeline}.")
+
+        if rca_df.empty:
+            rca_df = pd.DataFrame(data=[], columns=base_df.columns)
+            print(rca_df.columns)
+        elif base_df.empty:
+            base_df = pd.DataFrame(data=[], columns=rca_df.columns)
+            print(base_df.columns)
 
         logger.info(f"Loaded {len(base_df)}, {len(rca_df)} rows of data")
         return base_df, rca_df

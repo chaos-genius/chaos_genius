@@ -37,8 +37,6 @@ def validate_kpi(kpi_info: Dict[str, Any]) -> Tuple[bool, str]:
         kpi_column_name=kpi_info["metric"],
         agg_type=kpi_info["aggregation"],
         date_column_name=kpi_info["datetime_column"],
-        date_format=kpi_info.get("date_format"),
-        unix_unit=kpi_info.get("unix_unit"),
     )
 
 
@@ -48,8 +46,6 @@ def _validate_kpi_from_df(
     kpi_column_name: str,
     agg_type: str,
     date_column_name: str,
-    date_format: str = None,
-    unix_unit: str = None,
     debug: bool = False,
 ) -> Tuple[bool, str]:
     """Invoke each validation check and break if there's a falsy check.
@@ -64,11 +60,6 @@ def _validate_kpi_from_df(
     :type agg_type: str
     :param date_column_name: Name of the date column
     :type date_column_name: str
-    :param date_format: Specified strftime to parse, defaults to None
-    :type date_format: str, optional
-    :param unix_unit: The time unit if specified date column is in Unix format,
-    defaults to None
-    :type unix_unit: str, optional
     :param debug: Bool for using debug mode with extra print statements at each
     validation, defaults to False
     :type debug: bool, optional
@@ -115,9 +106,7 @@ def _validate_kpi_from_df(
             "debug_str": "Check #4: Validate date column is parseable",
             "status": _validate_date_column_is_parseable(
                 df,
-                date_column_name=date_column_name,
-                date_format=date_format,
-                unix_unit=unix_unit,
+                date_column_name=date_column_name
             ),
         },
         {
@@ -233,8 +222,6 @@ def _validate_kpi_not_datetime(
 def _validate_date_column_is_parseable(
     df: pd.core.frame.DataFrame,
     date_column_name: str,
-    date_format: str = None,
-    unix_unit: str = None,
 ) -> Tuple[bool, str]:
     """Validate if specified date column is parseable.
 
@@ -242,37 +229,19 @@ def _validate_date_column_is_parseable(
     :type df: pd.core.frame.DataFrame
     :param date_column_name: Name of the date column
     :type date_column_name: str
-    :param date_format: Specified strftime to parse, defaults to None
-    :type date_format: str, optional
-    :param unix_unit: The time unit if specified date column is in Unix format,
-    defaults to None
-    :type unix_unit: str, optional
     :return: returns a tuple with the status as a bool and a status message
     :rtype: Tuple[bool, str]
     """
-    # has to be datetime or string only then proceed else exit
-    if not is_datetime(df[date_column_name]) and not is_string(df[date_column_name]):
+    # has to be datetime only then proceed else exit
+    if not is_datetime(df[date_column_name]):
         invalid_type_err_msg = (
             "The datetime column is of the type"
-            f" {df[date_column_name].dtype}, acceptable types are string and datetime"
+            f" {df[date_column_name].dtype}, only datetime is acceptable"
         )
         return False, invalid_type_err_msg
 
-    valid_str = "Accepted!"
-    # Exit early if date column is a datetime object.
-    if is_datetime(df[date_column_name]):
-        return True, valid_str
+    return True, "Accepted!"
 
-    generic_err_msg = (
-        f'Unable to parse "{date_column_name}" column. '
-        + "Check that your date column is formatted properly "
-        + "and consistely."
-    )
-    out_of_bounds_msg = (
-        f'Timestamps in "{date_column_name}" were out of '
-        + "bounds. Check that your date column is formatted "
-        + "properly and consistely."
-    )
 
     if unix_unit:
         # If a unix_unit is specified, it will try to convert with this unit

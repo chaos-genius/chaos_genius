@@ -10,7 +10,10 @@ import pandas as pd
 from numpyencoder import NumpyEncoder
 
 from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
-from chaos_genius.core.rca.constants import LINE_DATA_TIMESTAMP_FORMAT, TIME_RANGES_BY_KEY
+from chaos_genius.core.rca.constants import (
+    LINE_DATA_TIMESTAMP_FORMAT,
+    TIME_RANGES_BY_KEY,
+)
 from chaos_genius.core.rca.root_cause_analysis import RootCauseAnalysis
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.core.utils.end_date import load_input_data_end_date
@@ -29,7 +32,12 @@ logger = logging.getLogger(__name__)
 class RootCauseAnalysisController:
     """RCA Controller class. Used to perform RCA analysis with Celery."""
 
-    def __init__(self, kpi_info: dict, end_date: date = None, task_id: Optional[int] = None):
+    def __init__(
+        self,
+        kpi_info: dict,
+        end_date: date = None,
+        task_id: Optional[int] = None,
+    ):
         """Initialize the controller.
 
         :param kpi_info: KPI information as a dictionary
@@ -51,7 +59,9 @@ class RootCauseAnalysisController:
         self.dt_col = kpi_info["datetime_column"]
         self.agg = kpi_info["aggregation"]
 
-        self.num_dim_combs = list(range(1, min(4, len(kpi_info["dimensions"]) + 1)))
+        self.num_dim_combs = list(
+            range(1, min(4, len(kpi_info["dimensions"]) + 1))
+        )
 
         self._task_id = task_id
 
@@ -66,9 +76,10 @@ class RootCauseAnalysisController:
         :rtype: Tuple[pd.DataFrame, pd.DataFrame]
         """
         # TODO: Write data loader which can cache data and pull from cache
-        (prev_start_date, prev_end_date), (curr_start_date, curr_end_date) = (
-            TIME_RANGES_BY_KEY[timeline]["function"](self.end_date)
-        )
+        (prev_start_date, prev_end_date), (
+            curr_start_date,
+            curr_end_date,
+        ) = TIME_RANGES_BY_KEY[timeline]["function"](self.end_date)
 
         base_df = DataLoader(
             self.kpi_info,
@@ -83,7 +94,9 @@ class RootCauseAnalysisController:
         ).get_data(return_empty=True)
 
         if base_df.empty and rca_df.empty:
-            raise ValueError(f"No data to perform RCA on for timeline: {timeline}.")
+            raise ValueError(
+                f"No data to perform RCA on for timeline: {timeline}."
+            )
 
         if rca_df.empty:
             rca_df = pd.DataFrame(data=[], columns=base_df.columns)
@@ -96,7 +109,11 @@ class RootCauseAnalysisController:
         return base_df, rca_df
 
     def _output_to_row(
-        self, data_type: str, data: dict, timeline: str = "last_30_days", dimension: str = None
+        self,
+        data_type: str,
+        data: dict,
+        timeline: str = "last_30_days",
+        dimension: str = None,
     ) -> dict:
         """Output RCA data to a standardized dictionary.
 
@@ -145,7 +162,9 @@ class RootCauseAnalysisController:
             LINE_DATA_TIMESTAMP_FORMAT
         )
 
-        rca_df = rca_df.rename(columns={self.dt_col: "date", self.metric: "value"})
+        rca_df = rca_df.rename(
+            columns={self.dt_col: "date", self.metric: "value"}
+        )
         rca_df["value"] = round_series(rca_df["value"])
 
         logger.debug(f"Line data has {len(rca_df)} rows.")
@@ -207,7 +226,10 @@ class RootCauseAnalysisController:
         return df.to_dict(orient="records")
 
     def _get_rca(
-        self, rca: RootCauseAnalysis, dimension: str = None, timeline: str = "last_30_days"
+        self,
+        rca: RootCauseAnalysis,
+        dimension: str = None,
+        timeline: str = "last_30_days",
     ) -> dict:
         """Get RCA output for specific dimension.
 
@@ -239,7 +261,10 @@ class RootCauseAnalysisController:
         }
 
     def _get_htable(
-        self, rca: RootCauseAnalysis, dimension: str, timeline: str = "last_30_days"
+        self,
+        rca: RootCauseAnalysis,
+        dimension: str,
+        timeline: str = "last_30_days",
     ) -> dict:
         """Get hierarchical table output for specific dimension.
 
@@ -273,11 +298,10 @@ class RootCauseAnalysisController:
                 checkpoint,
             )
         logger.info(
-            "(Task: %s, KPI: %d)"
-            " DeepDrills - %s - Success",
+            "(Task: %s, KPI: %d)" " DeepDrills - %s - Success",
             str(self._task_id),
             self.kpi_info["id"],
-            checkpoint
+            checkpoint,
         )
 
     def _checkpoint_failure(self, checkpoint: str, e: Exception):
@@ -290,12 +314,11 @@ class RootCauseAnalysisController:
                 e,
             )
         logger.exception(
-            "(Task: %s, KPI: %d) "
-            "DeepDrills - %s - Exception occured.",
+            "(Task: %s, KPI: %d) " "DeepDrills - %s - Exception occured.",
             str(self._task_id),
             self.kpi_info["id"],
             checkpoint,
-            exc_info=e
+            exc_info=e,
         )
 
     def compute(self):
@@ -320,7 +343,9 @@ class RootCauseAnalysisController:
                 self._checkpoint_success(f"{timeline} Data Loader")
             except Exception as e:
                 rca = None
-                logger.error(f"Error loading RCA for timeline [{timeline}]: {e}")
+                logger.error(
+                    f"Error loading RCA for timeline [{timeline}]: {e}"
+                )
                 self._checkpoint_failure(f"{timeline} Data Loader", e)
 
             if rca is None:
@@ -336,14 +361,17 @@ class RootCauseAnalysisController:
 
             except Exception as e:
                 logger.error(
-                    f"Error in agg for {timeline}. Skipping timeline.", exc_info=1
+                    f"Error in agg for {timeline}. Skipping timeline.",
+                    exc_info=1,
                 )
                 self._checkpoint_failure(f"{timeline} Card Metrics", e)
                 continue
 
             # Do not calculate further if no dimensions are present
             if not self.kpi_info.get("dimensions"):
-                logger.info(f"No dimensions in KPI ID: {kpi_id}. Skipping DeepDrills.")
+                logger.info(
+                    f"No dimensions in KPI ID: {kpi_id}. Skipping DeepDrills."
+                )
                 self._checkpoint_success(f"{timeline} DeepDrills Calculation")
                 continue
 
@@ -353,26 +381,42 @@ class RootCauseAnalysisController:
                     logger.info(f"Computing RCA for dimension: {dim}")
                     try:
                         rca_data = self._get_rca(rca, dim, timeline)
-                        output.append(self._output_to_row("rca", rca_data, timeline, dim))
+                        output.append(
+                            self._output_to_row("rca", rca_data, timeline, dim)
+                        )
                     except Exception as e:  # noqa E722
-                        logger.error(f"Error in RCA for {timeline, dim}", exc_info=1)
+                        logger.error(
+                            f"Error in RCA for {timeline, dim}", exc_info=1
+                        )
                         raise e
 
                     if dim is not None:
-                        logger.info(f"Computing Hierarchical table for dimension: {dim}")
+                        logger.info(
+                            f"Computing Hierarchical table for dimension: {dim}"
+                        )
                         try:
                             htable_data = self._get_htable(rca, dim, timeline)
                             output.append(
-                                self._output_to_row("htable", htable_data, timeline, dim)
+                                self._output_to_row(
+                                    "htable", htable_data, timeline, dim
+                                )
                             )
                         except Exception as e:  # noqa E722
-                            logger.error(f"Error in htable for {timeline, dim}", exc_info=1)
+                            logger.error(
+                                f"Error in htable for {timeline, dim}",
+                                exc_info=1,
+                            )
                             raise e
 
                 self._checkpoint_success(f"{timeline} DeepDrills Calculation")
             except Exception as e:
-                logger.error(f"Error in DeepDrills Calculation for {timeline}", exc_info=1)
-                self._checkpoint_failure(f"{timeline} DeepDrills Calculation", e)
+                logger.error(
+                    f"Error in DeepDrills Calculation for {timeline}",
+                    exc_info=1,
+                )
+                self._checkpoint_failure(
+                    f"{timeline} DeepDrills Calculation", e
+                )
 
         # don't store if there is only the line data
         if len(output) < 2:
@@ -383,7 +427,10 @@ class RootCauseAnalysisController:
             output = pd.DataFrame(output)
             output["created_at"] = datetime.now()
             output.to_sql(
-                RcaData.__tablename__, db.engine, if_exists="append", index=False
+                RcaData.__tablename__,
+                db.engine,
+                if_exists="append",
+                index=False,
             )
             self._checkpoint_success("Output Storage")
         except Exception as e:  # noqa E722

@@ -10,7 +10,6 @@ from chaos_genius.core.rca.rca_utils.api_utils import (
     rca_analysis,
     rca_hierarchical_data,
 )
-from chaos_genius.utils.datetime_helper import get_epoch_timestamp, get_rca_timestamp
 
 blueprint = Blueprint("api_rca", __name__)
 logger = logging.getLogger(__name__)
@@ -76,7 +75,9 @@ def kpi_rca_hierarchical_data(kpi_id):
         timeline = request.args.get("timeline")
         dimension = request.args.get("dimension", None)
 
-        status, message, data = rca_hierarchical_data(kpi_id, timeline, dimension)
+        status, message, data = rca_hierarchical_data(
+            kpi_id, timeline, dimension
+        )
     except Exception as err:  # noqa: B902
         logger.info(f"Error Found: {err}")
         status = "error"

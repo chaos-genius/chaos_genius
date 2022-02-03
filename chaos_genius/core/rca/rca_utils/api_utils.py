@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 def kpi_aggregation(kpi_id, timeline="last_30_days"):
     """Get KPI aggregation data."""
     final_data = {}
+    status = "success"
+    message = ""
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
         end_date = get_rca_output_end_date(kpi_info)
@@ -51,12 +53,14 @@ def kpi_aggregation(kpi_id, timeline="last_30_days"):
                     },
                 ],
                 "analysis_date": get_epoch_timestamp(analysis_date),
-                "timecuts_date": get_timecuts_dates(analysis_date, timeline)
+                "timecuts_date": get_timecuts_dates(analysis_date, timeline),
             }
         else:
             raise ValueError("No data found")
     except Exception as err:  # noqa: B902
         logger.error(f"Error in KPI aggregation retrieval: {err}", exc_info=1)
+        status = "error"
+        message = str(err)
         final_data = {
             "aggregation": [
                 {
@@ -78,12 +82,14 @@ def kpi_aggregation(kpi_id, timeline="last_30_days"):
             ],
             "analysis_date": "",
         }
-    return final_data
+    return status, message, final_data
 
 
 def kpi_line_data(kpi_id):
     """Get KPI line data."""
     final_data = []
+    status = "success"
+    message = ""
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
         end_date = get_rca_output_end_date(kpi_info)
@@ -98,15 +104,24 @@ def kpi_line_data(kpi_id):
             .first()
         )
 
-        final_data = data_point.data if data_point else []
+        if not data_point:
+            raise ValueError("No data found.")
+
+        final_data = data_point.data
+        for row in final_data:
+            row["date"] = get_epoch_timestamp(get_rca_timestamp(row["date"]))
     except Exception as err:  # noqa: B902
         logger.error(f"Error in KPI Line data retrieval: {err}", exc_info=1)
-    return final_data
+        status = "error"
+        message = str(err)
+    return status, message, final_data
 
 
 def rca_analysis(kpi_id, timeline="last_30_days", dimension=None):
     """Get RCA analysis data."""
     final_data = {}
+    status = "success"
+    message = ""
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
         end_date = get_rca_output_end_date(kpi_info)
@@ -129,23 +144,28 @@ def rca_analysis(kpi_id, timeline="last_30_days", dimension=None):
                 get_analysis_date(kpi_id, end_date)
             )
         else:
-            final_data = {
-                "chart": {
-                    "chart_data": [],
-                    "y_axis_lim": [],
-                    "chart_table": [],
-                },
-                "data_table": [],
-                "analysis_date": "",
-            }
+            raise ValueError("No data found.")
     except Exception as err:  # noqa: B902
         logger.error(f"Error in RCA Analysis retrieval: {err}", exc_info=1)
-    return final_data
+        status = "error"
+        message = str(err)
+        final_data = {
+            "chart": {
+                "chart_data": [],
+                "y_axis_lim": [],
+                "chart_table": [],
+            },
+            "data_table": [],
+            "analysis_date": "",
+        }
+    return status, message, final_data
 
 
 def rca_hierarchical_data(kpi_id, timeline="last_30_days", dimension=None):
     """Get RCA hierarchical data."""
     final_data = {}
+    status = "success"
+    message = ""
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
         end_date = get_rca_output_end_date(kpi_info)
@@ -166,12 +186,15 @@ def rca_hierarchical_data(kpi_id, timeline="last_30_days", dimension=None):
             final_data = data_point.data
             final_data["analysis_date"] = get_analysis_date(kpi_id, end_date)
         else:
-            final_data = {"data_table": [], "analysis_date": ""}
+            raise ValueError("No data found.")
     except Exception as err:  # noqa: B902
         logger.error(
             f"Error in RCA hierarchical table retrieval: {err}", exc_info=1
         )
-    return final_data
+        status = "error"
+        message = str(err)
+        final_data = {"data_table": [], "analysis_date": ""}
+    return status, message, final_data
 
 
 def get_rca_output_end_date(kpi_info: dict) -> date:

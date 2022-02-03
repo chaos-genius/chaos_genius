@@ -729,6 +729,15 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       });
     }
 
+    let present = formdata.dashboardNameList.some((val) => val.value === 0);
+
+    if (!present && data[2] === 'edit') {
+      customToast({
+        type: 'error',
+        header: 'KPI cannot be deleted from "All" dashboard'
+      });
+    }
+
     if (formdata.query === '') {
       setErrorMsg((prev) => {
         return {
@@ -761,9 +770,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         filters: formdata.addfilter,
         dashboards: formdata.dashboardNameList.map((el) => el.value)
       };
-      if (data[2] === 'edit') {
+
+      if (data[2] === 'edit' && present) {
         dispatch(getUpdatekpi(kpiId, editedFormData));
-      } else {
+      } else if (data[2] !== 'edit') {
         dispatchgetAllKpiExplorerSubmit(kpiInfo);
       }
     }

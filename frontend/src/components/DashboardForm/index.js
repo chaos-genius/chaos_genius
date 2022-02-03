@@ -122,7 +122,7 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
       history.push('/dashboard');
       customToast({
         type: 'success',
-        header: 'Dashboard created successfully'
+        header: 'Dashboard Added successfully'
       });
     } else if (
       createDashboard &&
@@ -132,7 +132,7 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
     ) {
       customToast({
         type: 'failure',
-        header: 'Failed to create dashboard',
+        header: 'Failed To Add Dashboard',
         description: createDashboard.message
       });
     }
@@ -145,7 +145,7 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
       setModal(true);
       customToast({
         type: 'success',
-        header: 'Dashboard created successfully'
+        header: 'Dashboard Added successfully'
       });
     } else if (
       createDashboard &&
@@ -154,7 +154,7 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
     ) {
       customToast({
         type: 'failure',
-        header: 'Failed to create dashboard',
+        header: 'Failed To Add Dashboard',
         description: createDashboard.message
       });
     }
@@ -170,7 +170,7 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
     } else if (updateDashboard && updateDashboard.status === 'failure') {
       customToast({
         type: 'failure',
-        header: 'Failed to update dashboard',
+        header: 'Failed to update',
         description: updateDashboard.message
       });
     }

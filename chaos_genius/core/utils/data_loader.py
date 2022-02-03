@@ -68,7 +68,9 @@ class DataLoader:
         self.start_date = start_date
         self.end_date = end_date
 
-        self.connection_info = DataSource.get_by_id(kpi_info["data_source"]).as_dict
+        self.connection_info = DataSource.get_by_id(
+            kpi_info["data_source"]
+        ).as_dict
         self.dt_col = self.kpi_info["datetime_column"]
         self.identifier = _SQL_IDENTIFIERS.get(
             self.connection_info["connection_type"], ""
@@ -88,17 +90,16 @@ class DataLoader:
         return f" where {start_query} and {end_query} "
 
     def _get_table_name(self):
-        if self.kpi_info["kpi_type"] == "table":
-            table_name = self._get_id_string(self.kpi_info['table_name'])
-            schema_name = self.kpi_info.get("schema_name", None)
-            if schema_name:
-                schema_name = self._get_id_string(schema_name)
-                return f"{schema_name}.{table_name}"
-            return table_name
-        else:
+        if self.kpi_info["kpi_type"] != "table":
             return f"({self.kpi_info['kpi_query']}) as " + self._get_id_string(
                 _randomword(10)
             )
+        table_name = self._get_id_string(self.kpi_info["table_name"])
+        schema_name = self.kpi_info.get("schema_name", None)
+        if schema_name:
+            schema_name = self._get_id_string(schema_name)
+            return f"{schema_name}.{table_name}"
+        return table_name
 
     def _get_filters_for_query(self):
         query = ""
@@ -120,7 +121,11 @@ class DataLoader:
     def _build_query(self, count=False):
         table_name = self._get_table_name()
 
-        date_filter = self._build_date_filter().strip() if self.start_date is not None else ""
+        date_filter = (
+            self._build_date_filter().strip()
+            if self.start_date is not None
+            else ""
+        )
 
         if count:
             query = f"select count(*) from {table_name} {date_filter}"
@@ -150,7 +155,7 @@ class DataLoader:
         query = self._build_query(count=True)
         logger.info(
             f"Created query for KPI {self.kpi_info['id']}",
-            extra={"data_query": query}
+            extra={"data_query": query},
         )
         df = self._run_query(query)
         return df.iloc[0, 0]
@@ -166,23 +171,36 @@ class DataLoader:
             ],
         }
 
-    def get_data(self) -> pd.DataFrame:
-        """Return dataframe with KPI data."""
+    def get_data(self, return_empty=False) -> pd.DataFrame:
+        """Return dataframe with KPI data.
 
+        If return_empty is false, it will raise an error if no data is found.
+        If return_empty is true, it will return an empty dataframe.
+        """
         kpi_id = self.kpi_info["id"]
 
         query = self._build_query()
-        logger.info(f"Created query for KPI {kpi_id}", extra={"data_query": query})
+        logger.info(
+            f"Created query for KPI {kpi_id}", extra={"data_query": query}
+        )
 
         df = self._run_query(query)
 
         if len(df) == 0:
+            if return_empty:
+                logger.warn(
+                    "Returning empty dataframe for KPI {}".format(kpi_id)
+                )
+                return df
             raise ValueError("Dataframe is empty.")
 
         if not self.validation:
             self._preprocess_df(df)
 
             data_stats = self._get_data_stats(df)
-            logger.info(f"Data stats for KPI {kpi_id}", extra={"data_stats": data_stats})
+            logger.info(
+                f"Data stats for KPI {kpi_id}",
+                extra={"data_stats": data_stats},
+            )
 
         return df

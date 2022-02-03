@@ -590,6 +590,10 @@ class AnomalyAlertController:
             lower = anomaly_point.get("yhat_lower")
             upper = anomaly_point.get("yhat_upper")
             anomaly_point["Expected Value"] = f"{lower} - {upper}"
+
+            # round off severity for better representation
+            anomaly_point["severity"] = round(anomaly_point["severity"])
+
             for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
                 anomaly_point[value] = anomaly_point[key]
             my_time = time.strptime(str(anomaly_point["Time of Occurrence"]),  "%Y-%m-%d %H:%M:%S")

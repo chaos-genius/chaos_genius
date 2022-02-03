@@ -7,14 +7,14 @@ import './emptykpi.scss';
 const EmptyKPI = () => {
   return (
     <div className="empty-kpi-card">
-      <h2>Creating your first KPI</h2>
+      <h2>Creating your first KPI with Dimensions</h2>
       <p>
-        We're kind of like Looker, but without the price tag. At Chaosgenius,
-        our mission is simple: we want to enable everybody in your company to
-        answer their own questions using data
+        Creating KPIs with Chaos Genius is super easy. Watch the 2 mins tutorial
+        to learn how to handle tricky situations like date time formats,
+        timezones, working with large data sets and how to select dimensions.
       </p>
       <div className="empty-kpi-title">
-        <h4>How it will work?</h4>
+        <h4>How will it work?</h4>
         <a
           href="https://docs.chaosgenius.io/docs/kpi_explorer/adding-kpis"
           target="_blank"
@@ -33,8 +33,8 @@ const EmptyKPI = () => {
           allowfullscreen></iframe>
       </div>
       <h5>
-        Have any questions? Feel free to send us a message at{' '}
-        <a href="mailto:support@choasgenius.com">support@Chaosgenius.com</a>
+        Have any questions? Here’s the Troubleshoot guide for you or feel free
+        to ping us on our Community Slack!
       </h5>
     </div>
   );

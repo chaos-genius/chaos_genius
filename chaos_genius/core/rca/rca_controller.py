@@ -100,10 +100,8 @@ class RootCauseAnalysisController:
 
         if rca_df.empty:
             rca_df = pd.DataFrame(data=[], columns=base_df.columns)
-            print(rca_df.columns)
         elif base_df.empty:
             base_df = pd.DataFrame(data=[], columns=rca_df.columns)
-            print(base_df.columns)
 
         logger.info(f"Loaded {len(base_df)}, {len(rca_df)} rows of data")
         return base_df, rca_df

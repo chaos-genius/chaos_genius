@@ -1,5 +1,6 @@
 import datetime
-from typing import List
+from collections import defaultdict
+from typing import DefaultDict, List
 
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
@@ -89,14 +90,15 @@ def _filter_anomaly_alerts(
     else:
         for alert in anomaly_alerts_data:
             anomaly_data = []
-            count = 0
-            subdim_len = 20
+            counts: DefaultDict[str, int] = defaultdict(lambda: 0)
+            max_subdims = 20
 
             for point in alert.alert_metadata["alert_data"]:
                 if point["Dimension"] != "Overall KPI":
-                    count += 1
-                    if count > subdim_len:
+                    counts[point["data_datetime"]] += 1
+                    if counts[point["data_datetime"]] > max_subdims:
                         continue
+
                 anomaly_data.append(point)
 
             alert.alert_metadata["alert_data"] = anomaly_data

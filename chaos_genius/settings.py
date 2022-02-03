@@ -114,7 +114,7 @@ SOURCE_BING_ADS = os.getenv("SOURCE_BING_ADS", default=False)
 
 """Alert Digest configuration"""
 ALERT_DIGEST_ENABLED = os.getenv("ALERT_DIGEST_ENABLED", "False") == "True"
-ALERT_DIGEST_DAILY_TIME = os.getenv("ALERT_DIGEST_DAILY_TIME", "10:00").split(":")
+ALERT_DIGEST_DAILY_TIME = os.getenv("ALERT_DIGEST_DAILY_TIME", "19:00").split(":")
 if len(ALERT_DIGEST_DAILY_TIME) != 2:
     raise ValueError(
         "ALERT_DIGEST_DAILY_TIME must be in HH:MM format. "

@@ -1,7 +1,7 @@
 import logging
 import os
 import io
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Union
 import pandas as pd
 import time
 import datetime
@@ -19,7 +19,6 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import anomaly_alert_slack_formatted, event_alert_slack
-from chaos_genius.controllers.digest_controller import structure_anomaly_data_for_digests
 from chaos_genius.alerts.anomaly_alert_config import (
     ANOMALY_TABLE_COLUMN_NAMES_MAPPER,
     IGNORE_COLUMNS_ANOMALY_TABLE,
@@ -509,16 +508,18 @@ class AnomalyAlertController:
             intended_point = self.find_point(point, prev_day_data)
 
             if intended_point is None:
-                point["nl_message"] = f"Increased by (–%)"
+                # previous point wasn't found
+                point["percentage_change"] = "–"
+            elif intended_point["y"] == point["y"]:
+                # previous data was same as current
+                point["percentage_change"] = 0
+            elif intended_point["y"] == 0:
+                # previous point was 0
                 point["percentage_change"] = "–"
             else:
-                percentage_change = find_percentage_change(point["y"], intended_point["y"])
-                if isinstance(percentage_change, str):
-                    change_metric = "Increased"
-                else:
-                    change_metric = "Increased" if percentage_change > 0 else "Decreased"
-                point["nl_message"] = f"{change_metric} by ({percentage_change}%)"
-                point["percentage_change"] = percentage_change
+                point["percentage_change"] = find_percentage_change(point["y"], intended_point["y"])
+
+            point["nl_message"] = change_message_from_percent(point["percentage_change"])
     
     def get_nl_message_hourly_freq(self, anomaly_data, kpi):
         data = dict()
@@ -550,17 +551,19 @@ class AnomalyAlertController:
         
             intended_point = self.find_point(point, required_data)
             if intended_point is None:
-                point["nl_message"] = f"Increased by (–%)"
+                # previous point wasn't found
+                point["percentage_change"] = "–"
+            elif intended_point["y"] == point["y"]:
+                # previous data was same as current
+                point["percentage_change"] = 0
+            elif intended_point["y"] == 0:
+                # previous point was 0
                 point["percentage_change"] = "–"
             else:
-                percentage_change = find_percentage_change(point["y"], intended_point["y"])
-                if isinstance(percentage_change, str):
-                    change_metric = "Increased"
-                else:
-                    change_metric = "Increased" if percentage_change > 0 else "Decreased"
-                point["nl_message"] = f"{change_metric} by ({percentage_change}%)"
-                point["percentage_change"] = percentage_change
- 
+                point["percentage_change"] = find_percentage_change(point["y"], intended_point["y"])
+
+            point["nl_message"] = change_message_from_percent(point["percentage_change"])
+    
     def construct_summary_for_anomaly_data(self, anomaly_data):
         kpi_id = self.alert_info["kpi"]
         kpi = Kpi.query.filter(Kpi.id == kpi_id).first()
@@ -670,6 +673,8 @@ class AnomalyAlertController:
                                         )
             logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
             #self.remove_attributes_from_anomaly_data(overall_data, ["nl_message"])
+            # TODO: fix this circular import
+            from chaos_genius.controllers.digest_controller import structure_anomaly_data_for_digests
             anomaly_data = structure_anomaly_data_for_digests(overall_data)
             return test, anomaly_data
         else:
@@ -754,6 +759,8 @@ class AnomalyAlertController:
         message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
         test = test == "ok"
         #self.remove_attributes_from_anomaly_data(overall_data, ["nl_message"])
+        # TODO: fix this circular import
+        from chaos_genius.controllers.digest_controller import structure_anomaly_data_for_digests
         anomaly_data = structure_anomaly_data_for_digests(overall_data)
         return test, anomaly_data
 
@@ -766,13 +773,27 @@ class StaticKpiAlertController:
         pass
 
 def find_percentage_change(curr_val, prev_val):
-
-    if prev_val == 0:
-        return "–"
-
     change = curr_val - prev_val
     percentage_change = (change / prev_val) * 100
     return round_number(percentage_change)
+
+def change_message_from_percent(percent_change: Union[str, int, float]) -> str:
+    """Creates a change message from given percentage change.
+
+    percent_change will be:
+        - "-" in case the last data point was missing
+        - 0 (int) in case there was no change
+        - positive value (int/float) in case there was an increase
+        - negative value (int/float) in case there was a decrease
+    """
+    if isinstance(percent_change, str):
+        return "-"
+    elif percent_change == 0:
+        return "No change (-)"
+    elif percent_change > 0:
+        return f"Increased by ({percent_change}%)"
+    else:
+        return f"Decreased by ({percent_change}%)"
 
 def check_and_trigger_alert(alert_id):
     """Check the alert and trigger the notification if found

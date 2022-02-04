@@ -1,8 +1,9 @@
 .add-kpi-wrapper {
   display: flex;
+  width: 100%;
+  justify-content: center;
   .add-form-container {
-    margin: 0px;
+    margin: 0;
     margin-right: 72px;
-    margin-left: 315px;
   }
 }

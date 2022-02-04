@@ -1,3 +1,5 @@
+@import '../../assets/styles/variable.scss';
+
 .faq-section {
   width: 280px;
   padding-top: 16px;
@@ -5,29 +7,32 @@
     &__wrapper-content {
       display: flex;
       flex-direction: column;
-      border-bottom: 1px solid #e6e6e6;
+      border-bottom: 1px solid $grey_variation-9;
     }
     &__title {
       margin-bottom: 20px;
       margin-top: 24px;
       h2 {
-        font-weight: 500;
-        font-size: 18px;
-        line-height: 18px;
-        color: #222222;
+        font-weight: $font-weight-500;
+        font-size: $font-size-18;
+        line-height: $line-height-18;
+        color: $black_variation-2;
       }
     }
     &__separate_links {
       display: flex;
       flex-direction: column;
-      a {
+      li {
         margin-bottom: 12px;
-        label {
-          font-size: 14px;
-          line-height: 20px;
-          color: #0597f2;
-          letter-spacing: 0.1px;
-          cursor: pointer;
+        a {
+          label {
+            font-weight: $font-weight-400;
+            font-size: $font-size-14;
+            line-height: $line-height-20;
+            color: $blue;
+            letter-spacing: $letter-spacing-point1;
+            cursor: pointer;
+          }
         }
         &:last-child {
           margin-bottom: 24px;
@@ -37,12 +42,13 @@
     &__support-content {
       margin-top: 24px;
       p {
-        font-size: 14px;
-        line-height: 24px;
-        letter-spacing: 0.2px;
-        color: #7a7a7a;
+        font-weight: $font-weight-400;
+        font-size: $font-size-14;
+        line-height: $line-height-24;
+        letter-spacing: $letter-spacing;
+        color: $grey_variation-3;
         a {
-          color: #0597f2;
+          color: $blue;
         }
       }
     }

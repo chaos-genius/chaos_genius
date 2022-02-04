@@ -473,7 +473,8 @@ class AnomalyAlertController:
             for key, value in anomaly_point.items():
                 if key in ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS:
                     anomaly_point[key] = round(value, 2)
-            anomaly_point["series_type"] = convert_query_string_to_user_string(anomaly_point["series_type"])
+            if anomaly_point["series_type"] != "Overall KPI":
+                anomaly_point["series_type"] = convert_query_string_to_user_string(anomaly_point["series_type"])
 
         overall_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "overall"]
         subdim_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "subdim"]
@@ -502,7 +503,10 @@ class AnomalyAlertController:
         prev_day_data = [anomaly_point.as_dict for anomaly_point in prev_day_data]
 
         for point in prev_day_data:
-            point["series_type"] = convert_query_string_to_user_string(point.get("series_type"))
+            if point.get("anomaly_type") != "overall":
+                point["series_type"] = convert_query_string_to_user_string(point.get("series_type"))
+            else:
+                point["series_type"] = "Overall KPI"
 
         for point in anomaly_data:
             intended_point = self.find_point(point, prev_day_data)

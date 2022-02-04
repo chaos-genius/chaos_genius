@@ -147,12 +147,19 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
   }, [timeCutsData, activeTimeCut]);
 
   useEffect(() => {
+    console.log(dimension.value);
     if (kpi !== undefined && monthWeek.value) {
       dispatch(getDashboardConfig({ kpi_id: kpi }));
       getAllAggregationData();
       getAllLinechart();
       if (dimension.value === 'singledimension') {
         dispatchGetAllDashboardDimension();
+      } else if (dimension.value === 'multidimension') {
+        dispatch(
+          getDashboardRcaAnalysis(kpi, {
+            timeline: monthWeek.value
+          })
+        );
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -108,6 +108,9 @@
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
                                             Change
                                         </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                            Date
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -356,6 +359,7 @@
                   ],
                   "{{ triggered_alert.alert_channel }}",
                   "{{ point.get('nl_message', 'These are older triggered alerts') }}",
+                  "{{ point['date_only'] }}",
                 ],
             {% endfor %}
             {% endfor %}
@@ -372,7 +376,8 @@
         dataTableAnomaly.kpiColIndex = 1;
         dataTableAnomaly.emailColIndex = 7;
         dataTableAnomaly.channelColIndex = 8;
-        dataTableAnomaly.columns().hide([dataTableAnomaly.emailColIndex, dataTableAnomaly.channelColIndex]);
+        dataTableAnomaly.dateOnlyColIndex = 10;
+        dataTableAnomaly.columns().hide([dataTableAnomaly.emailColIndex, dataTableAnomaly.channelColIndex, dataTableAnomaly.dateOnlyColIndex]);
 
         const dataEvent = [
             {% for triggered_alert in event_alerts_data %}
@@ -440,7 +445,7 @@
                 // Stores each csv row data
                 let csvrow = [];
                 for (let j = 0; j < cols.length; j++) {
-                    if (j == currentTable.emailColIndex) {
+                    if (j == currentTable.emailColIndex || j == currentTable.dateOnlyColIndex) {
                         continue;
                     }
 
@@ -631,7 +636,6 @@
             emailSelect.clear(false);
             emailSelect.clearOptions();
             emailSelect.addOptions(Array.from(userEmails).map((email) => {
-                console.log(email);
                 return {value: email, text: email};
             }), false);
             emailSelect.refreshOptions(false);
@@ -672,7 +676,6 @@
             alertSelect.clear(false);
             alertSelect.clearOptions();
             alertSelect.addOptions(Array.from(alertConfigs).map((alert) => {
-                console.log(alert);
                 return {value: alert, text: alert};
             }), false);
             alertSelect.refreshOptions(false);
@@ -712,7 +715,6 @@
             kpiSelect.clear(false);
             kpiSelect.clearOptions();
             kpiSelect.addOptions(Array.from(kpiNames).map((kpi) => {
-                console.log(kpi);
                 return {value: kpi, text: kpi};
             }), false);
             kpiSelect.refreshOptions(false);
@@ -747,7 +749,6 @@
 
             if (checked) {
                 addFilter("slack", row => {
-                    console.log(row[currentTable.channelColIndex]);
                     return row[currentTable.channelColIndex] == "slack";
                 });
             } else {

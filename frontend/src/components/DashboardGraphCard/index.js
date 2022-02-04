@@ -4,6 +4,8 @@ import Up from '../../assets/images/up.svg';
 import Down from '../../assets/images/down.svg';
 import HumanReadableNumbers from '../HumanReadableNumbers';
 import './dashboardgraphcard.scss';
+import { formatDateTime } from '../../utils/date-helper';
+import { isNumber } from 'highcharts';
 
 const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
   let aggregationDataMap = [];
@@ -18,17 +20,28 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
           return {
             label: '% Change',
             value:
-              data.value !== undefined && data.value !== null
+              data.value !== undefined &&
+              data.value !== null &&
+              isNumber(data.value)
                 ? `${Math.abs(data?.value)} %`
                 : '-',
-            textColor: data?.value
-              ? data?.value >= 0
-                ? { indicator: 'Up', color: '#60CA9A' }
-                : { indicator: 'Down', color: '#E96560' }
-              : { color: '#222222' },
+            textColor:
+              data?.value &&
+              data?.value !== undefined &&
+              data?.value !== null &&
+              isNumber(data?.value)
+                ? data?.value >= 0
+                  ? { indicator: 'Up', color: '#60CA9A' }
+                  : { indicator: 'Down', color: '#E96560' }
+                : { color: '#222222' },
             format: false,
             borderColor: 'accent-blue',
-            hasChangeIndicator: true
+            hasChangeIndicator:
+              data?.value !== undefined &&
+              data?.value !== null &&
+              isNumber(data?.value)
+                ? true
+                : false
           };
         }
         case 'difference': {
@@ -56,7 +69,36 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
                 : '-',
             format: true,
             textColor: { color: '#222222' },
-            borderColor: 'main-dark '
+            borderColor: 'main-dark',
+            timeCutsDate:
+              aggregationData?.timecuts_date &&
+              aggregationData?.timecuts_date[0]?.start_date
+                ? `(${
+                    aggregationData?.timecuts_date &&
+                    formatDateTime(
+                      aggregationData?.timecuts_date[0]?.start_date,
+                      true,
+                      false,
+                      false
+                    )
+                  } - ${
+                    aggregationData?.timecuts_date &&
+                    formatDateTime(
+                      aggregationData?.timecuts_date[0]?.end_date,
+                      true,
+                      false,
+                      false
+                    )
+                  })`
+                : `${
+                    aggregationData?.timecuts_date &&
+                    formatDateTime(
+                      aggregationData?.timecuts_date[0]?.end_date,
+                      true,
+                      false,
+                      false
+                    )
+                  }`
           };
         }
         case 'group2_value': {
@@ -68,7 +110,36 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
                 : '-',
             format: true,
             textColor: { color: '#222222' },
-            borderColor: 'main-grey'
+            borderColor: 'main-grey',
+            timeCutsDate:
+              aggregationData?.timecuts_date &&
+              aggregationData?.timecuts_date[1]?.start_date
+                ? `(${
+                    aggregationData?.timecuts_date &&
+                    formatDateTime(
+                      aggregationData?.timecuts_date[1]?.start_date,
+                      true,
+                      false,
+                      false
+                    )
+                  } - ${
+                    aggregationData?.timecuts_date &&
+                    formatDateTime(
+                      aggregationData?.timecuts_date[1]?.end_date,
+                      true,
+                      false,
+                      false
+                    )
+                  })`
+                : `${
+                    aggregationData?.timecuts_date &&
+                    formatDateTime(
+                      aggregationData?.timecuts_date[1]?.end_date,
+                      true,
+                      false,
+                      false
+                    )
+                  }`
           };
         }
         default:
@@ -83,7 +154,12 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
           <div className="aggregate-card" key={index}>
             <div className={`card-border ${data.borderColor}`}></div>
             <div className="content-container">
-              <span className="label-container">{data.label}</span>
+              <div className="label-date-container">
+                <span className="label-container">{data.label}</span>
+                {data.timeCutsDate && (
+                  <span className="date-container">{data.timeCutsDate}</span>
+                )}
+              </div>
               <h5 style={{ color: data.textColor.color }}>
                 {data.hasChangeIndicator ? (
                   data.textColor.indicator === 'Up' ? (

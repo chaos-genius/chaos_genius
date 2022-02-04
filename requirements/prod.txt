@@ -30,6 +30,7 @@ tabulate==0.8.9
 # Data Analysis
 matplotlib==3.4.2
 numpy==1.20.3
+numpyencoder==0.3.0
 pandas==1.2.4
 ipython==7.24.0
 pystan==2.19.1.1

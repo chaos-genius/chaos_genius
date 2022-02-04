@@ -6,13 +6,11 @@ import Fuse from 'fuse.js';
 import './homefilter.scss';
 import { useState } from 'react';
 import { formatDateTime } from '../../utils/date-helper';
-import { useHistory } from 'react-router-dom';
 import { CustomTooltip } from '../../utils/tooltip-helper';
+import { debuncerReturn } from '../../utils/simple-debouncer';
 
-const Homefilter = ({ data, setDashboard, dashboard }) => {
+const Homefilter = ({ data, setDashboard, dashboard, setDashboardId }) => {
   const [filterData, setFilterData] = useState(data);
-
-  const history = useHistory();
 
   const onSearch = (event) => {
     if (event.target.value === '') {
@@ -32,6 +30,8 @@ const Homefilter = ({ data, setDashboard, dashboard }) => {
       );
     }
   };
+
+  const debounce = () => debuncerReturn(onSearch, 500);
 
   const onSort = (type) => {
     let value = data.sort(function (a, b) {
@@ -64,7 +64,7 @@ const Homefilter = ({ data, setDashboard, dashboard }) => {
               type="text"
               className="form-control h-40"
               placeholder="Search Dashboard"
-              onChange={(e) => onSearch(e)}
+              onChange={debounce()}
             />
             <span>
               <img src={Search} alt="Search Icon" />
@@ -93,12 +93,13 @@ const Homefilter = ({ data, setDashboard, dashboard }) => {
             filterData.map((item) => {
               return (
                 <li
+                  key={item.id}
                   className={
                     dashboard.toString() === item.id.toString() ? 'active' : ''
                   }
                   onClick={() => {
                     setDashboard(item.id);
-                    history.push(`${item?.id}`);
+                    setDashboardId(item.id);
                   }}>
                   <div className="filter-tooltipcontent">
                     {CustomTooltip(item.name)}

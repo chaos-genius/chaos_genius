@@ -2,8 +2,6 @@ import React from 'react';
 
 import { Link, useHistory, useRouteMatch } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-
-import logo from '../../assets/images/logo.svg';
 import home from '../../assets/images/sidebar/home.svg';
 import homeactive from '../../assets/images/sidebar/home-active.svg';
 import dashboard from '../../assets/images/sidebar/dashboard.svg';
@@ -25,12 +23,6 @@ const Sidebar = () => {
 
   return (
     <div className="sidebar-menu">
-      <div className="sidebar-logo">
-        <Link to="/">
-          <img src={logo} alt="Logo" />
-        </Link>
-      </div>
-
       <div className="sidebar-options">
         <ul>
           <li
@@ -101,7 +93,7 @@ const Sidebar = () => {
       </div>
       <ul>
         <li className="common-watermark">
-          <span>Ver. {versionSettingData && versionSettingData.main}</span>
+          <span>Version {versionSettingData && versionSettingData.main}</span>
         </li>
       </ul>
     </div>

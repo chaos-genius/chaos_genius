@@ -39,6 +39,7 @@ import {
   HRNumbers,
   HRN_PREFIXES
 } from '../../utils/Formatting/Numbers/humanReadableNumberFormatter';
+import store from '../../redux/store';
 
 highchartsMore(Highcharts);
 Highcharts.setOptions({
@@ -67,7 +68,7 @@ const customStyles = {
   })
 };
 
-const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
+const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
   const dispatch = useDispatch();
 
   const [activeDimension, setActiveDimension] = useState('');
@@ -81,12 +82,13 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
     label: 'Single Dimension'
   });
 
-  const { timeCutsData } = useSelector((state) => state.TimeCuts);
+  const { timeCutsData, activeTimeCut } = useSelector(
+    (state) => state.TimeCuts
+  );
 
   const { aggregationData, aggregationLoading } = useSelector(
     (state) => state.aggregation
   );
-
   const { linechartData, linechartLoading } = useSelector(
     (state) => state.lineChart
   );
@@ -130,15 +132,19 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
 
   useEffect(() => {
     if (timeCutsData && timeCutsData.length) {
-      setMonthWeek({
-        label: timeCutsData[0]?.display_name,
-        value: `${timeCutsData[0]?.id}`,
-        grp2_name: timeCutsData[0]?.current_period_name,
-        grp1_name: timeCutsData[0]?.last_period_name
-      });
+      if (activeTimeCut && Object.keys(activeTimeCut).length) {
+        setMonthWeek(activeTimeCut);
+      } else {
+        setMonthWeek({
+          label: timeCutsData[0]?.display_name,
+          value: `${timeCutsData[0]?.id}`,
+          grp2_name: timeCutsData[0]?.current_period_name,
+          grp1_name: timeCutsData[0]?.last_period_name
+        });
+      }
       getAllTimeCutOptions(timeCutsData);
     }
-  }, [timeCutsData]);
+  }, [timeCutsData, activeTimeCut]);
 
   useEffect(() => {
     if (kpi !== undefined && monthWeek.value) {
@@ -267,9 +273,12 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
     }
   };
 
-  if (rcaAnalysisData) {
-    plotChart();
-  }
+  useEffect(() => {
+    if (rcaAnalysisData) {
+      plotChart();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rcaAnalysisData]);
 
   const dispatchGetAllDashboardDimension = () => {
     dispatch(getAllDashboardDimension(kpi));
@@ -370,7 +379,6 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
       return demoChart;
     }
   };
-
   return (
     <>
       {anomalystatus.is_rca_precomputed ? (
@@ -415,9 +423,6 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                         <Dashboardgraphcard
                           aggregationData={aggregationData}
                           monthWeek={monthWeek}
-                          kpi={kpi}
-                          kpiName={kpiName}
-                          kpiAggregate={kpiAggregate}
                         />
                       )}
                     </>
@@ -496,11 +501,14 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                             {singleDimensionData > 2 ? (
                               <li
                                 className="previous-step"
-                                onClick={() =>
+                                onClick={() => {
+                                  store.dispatch({
+                                    type: 'RESET_DASHBOARD_RCA'
+                                  });
                                   SetSingleDimensionData(
                                     singleDimensionData - 3
-                                  )
-                                }>
+                                  );
+                                }}>
                                 <img src={Next} alt="Previous" />
                               </li>
                             ) : null}
@@ -518,6 +526,9 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                                         activeDimension === data ? 'active' : ''
                                       }
                                       onClick={() => {
+                                        store.dispatch({
+                                          type: 'RESET_DASHBOARD_RCA'
+                                        });
                                         onActiveDimensionClick(data);
                                       }}>
                                       {data}
@@ -535,11 +546,14 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                                     ? 'disable-next'
                                     : ''
                                 }
-                                onClick={() =>
+                                onClick={() => {
+                                  store.dispatch({
+                                    type: 'RESET_DASHBOARD_RCA'
+                                  });
                                   SetSingleDimensionData(
                                     singleDimensionData + 3
-                                  )
-                                }>
+                                  );
+                                }}>
                                 <img src={Next} alt="Next" />
                               </li>
                             ) : null}
@@ -556,6 +570,7 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                         isDisabled={!configData?.multidim_status}
                         value={dimension}
                         onChange={(e) => {
+                          store.dispatch({ type: 'RESET_DASHBOARD_RCA' });
                           handleDimensionChange(e);
                         }}
                       />
@@ -574,14 +589,18 @@ const Dashboardgraph = ({ kpi, kpiName, kpiAggregate, anomalystatus }) => {
                           <div className="preload"></div>
                         </div>
                       )}
-                      <div
-                        className={
-                          'common-drilldown-graph' +
-                          (rcaAnalysisLoading
-                            ? ' common-drilldown-graph-none '
-                            : '')
-                        }
-                        id="chartdivWaterfall"></div>
+                      {rcaAnalysisData &&
+                        rcaAnalysisData?.chart &&
+                        rcaAnalysisData?.chart?.chart_data.length && (
+                          <div
+                            className={
+                              'common-drilldown-graph' +
+                              (rcaAnalysisLoading
+                                ? ' common-drilldown-graph-none '
+                                : '')
+                            }
+                            id="chartdivWaterfall"></div>
+                        )}
                       {/* Table */}
                       {dimension.value === 'multidimension' ? (
                         <>

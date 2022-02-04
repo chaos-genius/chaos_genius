@@ -22,8 +22,8 @@ TIME_RANGES = [
         "values": {
             "function": get_dates_for_last_30_days,
             "display_name": "Last 30 days",
-            "last_period_name": "Previous 30 days",
-            "current_period_name": "Last 30 days",
+            "last_period_name": "Previous Period",
+            "current_period_name": "Current Period",
         },
     },
     {
@@ -31,8 +31,8 @@ TIME_RANGES = [
         "values": {
             "function": get_dates_for_last_7_days,
             "display_name": "Last 7 days",
-            "last_period_name": "Previous 7 days",
-            "current_period_name": "Last 7 days",
+            "last_period_name": "Previous Period",
+            "current_period_name": "Current Period",
         },
     },
     {
@@ -40,8 +40,8 @@ TIME_RANGES = [
         "values": {
             "function": get_dates_for_previous_day,
             "display_name": "Previous day",
-            "last_period_name": "Previous day",
-            "current_period_name": "This day",
+            "last_period_name": "Previous Period",
+            "current_period_name": "Current Period",
         },
     },
     {

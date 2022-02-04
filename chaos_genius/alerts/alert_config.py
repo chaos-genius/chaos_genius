@@ -19,10 +19,18 @@ ORGANISATION_SETTINGS_EXPOSE = {
     "metrics": True
 }
 
+ALERT_DIGEST_SETTINGS_EXPOSE = {
+    "active": True,
+    "daily_digest": True,
+    "scheduled_time": True,
+    "weekly_digest": True
+}
+
 helper_objects = {
     "email": EMAIL_CONFIGS_EXPOSE,
     "slack": SLACK_CONFIGS_EXPOSE,
-    "organisation_settings": ORGANISATION_SETTINGS_EXPOSE
+    "organisation_settings": ORGANISATION_SETTINGS_EXPOSE,
+    "alert_digest_settings": ALERT_DIGEST_SETTINGS_EXPOSE
 }
 
 # TODO: Duplicate logic in the alert_cofig model too

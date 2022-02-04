@@ -126,9 +126,12 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     kpiFormData,
     kpiFieldLoading,
     dataSourceHasSchema,
+    schemaAvailabilityLoading,
+    tableListOnSchemaLoading,
     tableListOnSchema,
     schemaNamesList,
     schemaListLoading,
+    tableInfoLoading,
     kpiField,
     testQueryData,
     tableInfoData,
@@ -448,6 +451,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     if (
       datasourceid &&
       dataSourceHasSchema &&
+      tableListOnSchemaLoading === false &&
       tableListOnSchema &&
       tableListOnSchema.table_names
     ) {
@@ -594,6 +598,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
 
   useEffect(() => {
     if (
+      tableInfoLoading === false &&
       tableInfoData &&
       tableInfoData.table_info &&
       tableInfoData.table_info.columns
@@ -724,6 +729,15 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       });
     }
 
+    let present = formdata.dashboardNameList.some((val) => val.value === 0);
+
+    if (!present && data[2] === 'edit') {
+      customToast({
+        type: 'error',
+        header: 'KPI cannot be deleted from "All" dashboard'
+      });
+    }
+
     if (formdata.query === '') {
       setErrorMsg((prev) => {
         return {
@@ -756,9 +770,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         filters: formdata.addfilter,
         dashboards: formdata.dashboardNameList.map((el) => el.value)
       };
-      if (data[2] === 'edit') {
+
+      if (data[2] === 'edit' && present) {
         dispatch(getUpdatekpi(kpiId, editedFormData));
-      } else {
+      } else if (data[2] !== 'edit') {
         dispatchgetAllKpiExplorerSubmit(kpiInfo);
       }
     }
@@ -814,7 +829,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   const editableStatus = (type) => {
     var status = false;
     kpiMetaInfoData &&
-      kpiMetaInfoData.fields.find((field) => {
+      kpiMetaInfoData?.fields?.find((field) => {
         if (field.name === type) {
           status = field.is_editable ? false : true;
         }
@@ -840,6 +855,15 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   } else {
     return (
       <>
+        {kpiFieldLoading ||
+        schemaListLoading ||
+        schemaAvailabilityLoading ||
+        tableListOnSchemaLoading ||
+        tableInfoLoading ? (
+          <div className="load ">
+            <div className="preload"></div>
+          </div>
+        ) : null}
         <div className="form-group">
           <label>KPI Name *</label>
           <input

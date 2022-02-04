@@ -37,13 +37,16 @@
     color: $black_variation-2;
     // margin-bottom: 8px;
     &.name-tooltip {
-      max-width: 85%;
+      max-width: 83%;
       overflow: hidden;
       text-overflow: ellipsis;
       display: -webkit-box;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       white-space: initial;
+      word-break: break-word;
+      hyphens: auto;
+      overflow-wrap: break-word;
     }
   }
   label {
@@ -171,5 +174,27 @@
 .kpihome-heading {
   .css-1hwfws3 {
     padding: 2px 8px !important;
+  }
+}
+.selectcategory__menu-list::-webkit-scrollbar {
+  overflow-y: scroll !important;
+  width: 7px !important;
+}
+.selectcategory__menu-list::-webkit-scrollbar-thumb {
+  background: rgba(87, 87, 90, 0.8);
+  border-radius: 4px;
+  width: 5px;
+}
+
+.home-data-load {
+  &.home-data-loader-page {
+    display: block;
+    width: 78%;
+    background: #ffffff;
+  }
+  .preload {
+    position: relative !important;
+    left: 45%;
+    top: 35%;
   }
 }

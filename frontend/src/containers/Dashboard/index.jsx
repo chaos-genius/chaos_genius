@@ -42,12 +42,11 @@ const Dashboard = () => {
     return state.sidebar;
   });
 
-  const { anomalySettingData, anomalySettingLoading } = useSelector((state) => {
+  const { anomalySettingData } = useSelector((state) => {
     return state.anomaly;
   });
 
   const [active, setActive] = useState('');
-  const [kpiAggregate, SetKpiAggregate] = useState('');
   const [tab, setTabs] = useState('deepdrills');
   const [breadCrumbs, setBreadCrumbs] = useState('');
 
@@ -77,7 +76,6 @@ const Dashboard = () => {
       setActive(sidebarList?.data[0]?.name);
 
       setTabs(location[3]);
-      SetKpiAggregate(sidebarList?.data[0]?.aggregation);
       getAnomalySetting(sidebarList?.data[0]?.id);
       history.push(
         `/dashboard/${dashboard}/${location[3]}/${sidebarList?.data[0].id}`
@@ -100,10 +98,6 @@ const Dashboard = () => {
       );
       setTabs(location[3]);
       getAnomalySetting(kpi);
-      SetKpiAggregate(
-        sidebarList?.data.find((item) => item.id.toString() === kpi.toString())
-          ?.aggregation
-      );
     } else if (sidebarList && sidebarList?.dashboards) {
       setBreadCrumbs(
         sidebarList?.dashboards?.find(
@@ -118,14 +112,10 @@ const Dashboard = () => {
   const onTabClick = (tabs) => {
     setTabs(tabs);
 
-    window.history.pushState(
-      '',
-      '',
-      `/#/dashboard/${dashboard}/${tabs}/${kpi}`
-    );
+    history.push(`/dashboard/${dashboard}/${tabs}/${kpi}`);
   };
 
-  if (sidebarLoading || anomalySettingLoading) {
+  if (sidebarLoading) {
     return (
       <div className="load loader-page">
         <div className="preload"></div>
@@ -178,7 +168,6 @@ const Dashboard = () => {
                     dashboard={dashboard}
                     data={sidebarList?.data}
                     setActive={setActive}
-                    SetKpiAggregate={SetKpiAggregate}
                   />
                 )}
               </div>
@@ -191,13 +180,17 @@ const Dashboard = () => {
                       <div className="common-tab">
                         <ul>
                           <li
-                            className={tab === 'deepdrills' ? 'active' : ''}
+                            className={
+                              location[3] === 'deepdrills' ? 'active' : ''
+                            }
                             onClick={() => onTabClick('deepdrills')}>
                             DeepDrills
                           </li>
 
                           <li
-                            className={tab === 'anomaly' ? 'active' : ''}
+                            className={
+                              location[3] === 'anomaly' ? 'active' : ''
+                            }
                             onClick={() => onTabClick('anomaly')}>
                             Anomaly
                           </li>
@@ -223,9 +216,7 @@ const Dashboard = () => {
                   anomalySettingData && (
                     <Dashboardgraph
                       kpi={kpi}
-                      dashboard={dashboard}
                       kpiName={active}
-                      kpiAggregate={kpiAggregate}
                       anomalystatus={anomalySettingData}
                     />
                   )}

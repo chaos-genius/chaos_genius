@@ -190,21 +190,22 @@ def get_all_kpis():
         metrics = ["name", "metric", "id"]
         for kpi in results:
             info = {key: getattr(kpi, key) for key in metrics}
-            aggregate_data = kpi_aggregation(kpi.id, timeline)
-            info["prev"] = round_number(aggregate_data["aggregation"][0]["value"])
-            info["current"] = round_number(aggregate_data["aggregation"][1]["value"])
-            info["change"] = round_number(aggregate_data["aggregation"][2]["value"])
-            info["percentage_change"] = round_number(aggregate_data["aggregation"][3]["value"])
+            _, _, aggregate_data = kpi_aggregation(kpi.id, timeline)
+            info["prev"] = aggregate_data["aggregation"][0]["value"]
+            info["current"] = aggregate_data["aggregation"][1]["value"]
+            info["change"] = aggregate_data["aggregation"][2]["value"]
+            info["percentage_change"] = aggregate_data["aggregation"][3]["value"]
 
             info["display_value_prev"] = TIME_RANGES_BY_KEY[timeline]["last_period_name"]
             info["display_value_current"] = TIME_RANGES_BY_KEY[timeline]["current_period_name"]
             info["anomaly_count"] = get_anomaly_count(kpi.id, timeline)
-            info["graph_data"] = kpi_line_data(kpi.id)
+            _, _, info["graph_data"] = kpi_line_data(kpi.id)
             ret.append(info)
-    except Exception as e:
+
+    except Exception as e:  # noqa: E722
         status = "failure"
         message = str(e)
-        logger.error(message)
+        logger.error(message, exc_info=True)
 
     return jsonify({"data": ret, "message": message, "status": status})
 

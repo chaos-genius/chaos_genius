@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
 import { useHistory } from 'react-router-dom';
-
 import Tooltip from 'react-tooltip-lite';
-
 import Select from 'react-select';
-
-import Plus from '../../assets/images/plus.svg';
 import Search from '../../assets/images/search.svg';
 import Dashboardcards from '../../components/Dashboardcards';
 
@@ -23,6 +19,7 @@ import store from '../../redux/store';
 
 import { formatDateTime } from '../../utils/date-helper';
 import { getLocalStorage } from '../../utils/storage-helper';
+import { debuncerReturn } from '../../utils/simple-debouncer';
 
 const DASHBOARD_RESET = {
   type: 'DASHBOARD_RESET'
@@ -99,6 +96,8 @@ const Dashboardconfigure = () => {
     }
   };
 
+  const debounce = () => debuncerReturn(onSearch, 500);
+
   const onSort = (type) => {
     let value = dashboardList.sort(function (a, b) {
       if (type.value === 'alpha') {
@@ -144,15 +143,69 @@ const Dashboardconfigure = () => {
                   onClick={() => history.push('/dashboard/add')}
                   className="btn green-variant-button"
                   disabled={!limited?.is_ee}>
-                  <img src={Plus} alt="Add" />
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M8 14C11.3137 14 14 11.3137 14 8C14 4.68629 11.3137 2 8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14Z"
+                      stroke="#BDBDBD"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M6 8H10"
+                      stroke="#BDBDBD"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M8 6V10"
+                      stroke="#BDBDBD"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
                   <span>New Dashboard</span>
                 </button>
               </Tooltip>
             ) : (
               <button
                 onClick={() => history.push('/dashboard/add')}
-                className="btn green-variant-button">
-                <img src={Plus} alt="Add" />
+                className="btn green-variant-button btn-active">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M8 14C11.3137 14 14 11.3137 14 8C14 4.68629 11.3137 2 8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14Z"
+                    stroke="#BDBDBD"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M6 8H10"
+                    stroke="#BDBDBD"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M8 6V10"
+                    stroke="#BDBDBD"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
                 <span>New Dashboard</span>
               </button>
             )}
@@ -166,7 +219,7 @@ const Dashboardconfigure = () => {
                   type="text"
                   className="form-control h-40"
                   placeholder="Search dashboard"
-                  onChange={(e) => onSearch(e)}
+                  onChange={debounce()}
                 />
                 <span>
                   <img src={Search} alt="Search Icon" />

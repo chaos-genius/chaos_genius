@@ -13,6 +13,7 @@ import store from '../../redux/store';
 
 import { anomalySetting } from '../../redux/actions';
 import { CustomTooltip } from '../../utils/tooltip-helper';
+import { debuncerReturn } from '../../utils/simple-debouncer';
 
 const RESET = {
   type: 'RESET_DATA'
@@ -21,15 +22,13 @@ const RESET = {
 const RESET_DATA = {
   type: 'RESET_CONFIG'
 };
-
-const DashboardFilter = ({
-  kpi,
-  data,
-  setActive,
-  tabs,
-  SetKpiAggregate,
-  dashboard
-}) => {
+const RESET_AGGREGATION = {
+  type: 'RESET_AGGREGATION'
+};
+const RESET_LINECHART = {
+  type: 'RESET_LINECHART'
+};
+const DashboardFilter = ({ kpi, data, setActive, tabs, dashboard }) => {
   const history = useHistory();
   const dispatch = useDispatch();
   const [listData, setListData] = useState(data);
@@ -60,6 +59,8 @@ const DashboardFilter = ({
     }
   };
 
+  const debounce = (func) => debuncerReturn(func, 500);
+
   return (
     <div className="common-filter-section">
       <div className="filter-layout">
@@ -69,7 +70,7 @@ const DashboardFilter = ({
             type="text"
             className="form-control h-40"
             placeholder="Search KPI"
-            onChange={(e) => onSearch(e)}
+            onChange={debounce(onSearch)}
           />
           <span>
             <img src={Search} alt="Search Icon" />
@@ -87,11 +88,13 @@ const DashboardFilter = ({
                     kpi.toString() === item.id.toString() ? 'active' : ''
                   }
                   onClick={() => {
+                    store.dispatch(RESET_AGGREGATION);
+                    store.dispatch(RESET_LINECHART);
+                    store.dispatch({ type: 'RESET_DASHBOARD_RCA' });
                     dispatch(anomalySetting(item.id));
                     store.dispatch(RESET);
                     store.dispatch(RESET_DATA);
                     setActive(item.name);
-                    SetKpiAggregate(item.aggregation);
                     history.push(`/dashboard/${dashboard}/${tabs}/${item.id}`);
                   }}>
                   <div className="filter-tooltipcontent">

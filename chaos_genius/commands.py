@@ -135,6 +135,16 @@ def run_alert(id):
     status = check_and_trigger_alert(id)
     click.echo(f"Completed the alert check for ID: {id}.")
 
+@click.command()
+@with_appcontext
+@click.option("-f", "--frequency", required=True, type=str, help="Trigger Alert Digest for provided frequency.")
+def run_digest(frequency):
+    """Trigger alert digests"""
+    click.echo(f"Starting the digest check")
+    from chaos_genius.alerts.base_alert_digests import check_and_trigger_digest
+    test = check_and_trigger_digest(frequency)
+    click.echo(f"The digest check has ended")
+
 
 @click.command()
 @with_appcontext

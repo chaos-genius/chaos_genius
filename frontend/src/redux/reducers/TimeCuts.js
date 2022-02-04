@@ -6,8 +6,9 @@ import {
 
 const initialState = {
   timeCutsLoading: false,
-  timeCutsData: {},
-  timeCutsFailure: false
+  timeCutsData: [],
+  timeCutsFailure: false,
+  activeTimeCut: {}
 };
 export const TimeCuts = (state = initialState, action) => {
   switch (action.type) {
@@ -28,6 +29,17 @@ export const TimeCuts = (state = initialState, action) => {
       return {
         ...state,
         timeCutsLoading: false
+      };
+    }
+    case 'ACTIVE_TIMECUT': {
+      return {
+        ...state,
+        activeTimeCut: action.data
+      };
+    }
+    case 'CLEAR_TIMECUTS': {
+      return {
+        ...initialState
       };
     }
     default:

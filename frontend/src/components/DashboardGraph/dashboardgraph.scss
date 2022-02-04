@@ -121,7 +121,7 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    height: 100px;
+    height: 118px;
     padding-bottom: 15px;
     .aggregate-card-container {
       width: 100%;
@@ -229,4 +229,14 @@
 }
 .previous-step {
   transform: rotate(180deg);
+}
+
+.selectcategory__menu-list::-webkit-scrollbar {
+  overflow-y: scroll !important;
+  width: 7px !important;
+}
+.selectcategory__menu-list::-webkit-scrollbar-thumb {
+  background: rgba(87, 87, 90, 0.8);
+  border-radius: 4px;
+  width: 5px;
 }

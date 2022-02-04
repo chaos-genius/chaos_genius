@@ -15,6 +15,7 @@ import './kpiexplorer.scss';
 import { getAllKpiExplorer } from '../../redux/actions';
 
 import store from '../../redux/store';
+import EmptyKPI from '../../components/EmptyKPI';
 
 const KPI_RESET = {
   type: 'KPI_RESET'
@@ -65,7 +66,7 @@ const KpiExplorer = () => {
   useEffect(() => {
     if (kpiSearch !== '') {
       searchDataSource();
-    } else if (filterData.length !== 0) {
+    } else if (filterData && filterData.length !== 0) {
       setKpiExplorerData(filterData);
     } else if (kpiExplorerList) {
       setKpiExplorerData(kpiExplorerList);
@@ -96,26 +97,28 @@ const KpiExplorer = () => {
       } else if (kpiFilter.length !== 0 && dashboardFilter.length === 0) {
         kpiFilter &&
           kpiFilter.forEach((data) => {
-            kpiExplorerList.forEach((list) => {
-              if (
-                list.data_source.connection_type.toLowerCase() ===
-                data.toLowerCase()
-              ) {
-                arr.push(list);
-              }
-            });
+            kpiExplorerList &&
+              kpiExplorerList.forEach((list) => {
+                if (
+                  list.data_source.connection_type.toLowerCase() ===
+                  data.toLowerCase()
+                ) {
+                  arr.push(list);
+                }
+              });
           });
         setFilterData(arr);
       } else if (dashboardFilter.length !== 0 && kpiFilter.length === 0) {
         dashboardFilter &&
           dashboardFilter.forEach((data) => {
-            kpiExplorerList.forEach((list) => {
-              list.dashboards.forEach((value) => {
-                if (data.toString() === value.id.toString()) {
-                  arr.push(list);
-                }
+            kpiExplorerList &&
+              kpiExplorerList.forEach((list) => {
+                list.dashboards.forEach((value) => {
+                  if (data.toString() === value.id.toString()) {
+                    arr.push(list);
+                  }
+                });
               });
-            });
           });
         setFilterData(arr);
       } else if (dashboardFilter.length !== 0 && kpiFilter.length !== 0) {
@@ -123,17 +126,18 @@ const KpiExplorer = () => {
           dashboardFilter.forEach((dashboard) => {
             kpiFilter &&
               kpiFilter.forEach((kpi) => {
-                kpiExplorerList.forEach((list) => {
-                  list.dashboards.forEach((value) => {
-                    if (
-                      list.data_source.connection_type.toLowerCase() ===
-                        kpi.toLowerCase() &&
-                      value.id.toString() === dashboard.toString()
-                    ) {
-                      arr.push(list);
-                    }
+                kpiExplorerList &&
+                  kpiExplorerList.forEach((list) => {
+                    list.dashboards.forEach((value) => {
+                      if (
+                        list.data_source.connection_type.toLowerCase() ===
+                          kpi.toLowerCase() &&
+                        value.id.toString() === dashboard.toString()
+                      ) {
+                        arr.push(list);
+                      }
+                    });
                   });
-                });
               });
           });
         setFilterData(arr);
@@ -165,28 +169,36 @@ const KpiExplorer = () => {
           </div>
         </div>
 
-        {/* explore wrapper */}
-        <div className="explore-wrapper">
-          {/* filter section */}
-          <div className="filter-section">
-            <Filter
-              setKpiSearch={setKpiSearch}
-              setKpiFilter={setKpiFilter}
-              kpiList={kpiExplorerList}
-              setDashboardFilter={setDashboardFilter}
-              kpi={true}
-            />
+        {kpiExplorerData && kpiExplorerData.length === 0 ? (
+          <div className="empty-dashboard-container">
+            <EmptyKPI />
           </div>
-          {/* table section */}
-          <div className="table-section">
-            <KPITable
-              kpiData={kpiExplorerData}
-              kpiSearch={kpiSearch}
-              changeData={setData}
-              kpiLoading={isLoading}
-            />
-          </div>
-        </div>
+        ) : (
+          <>
+            {/* explore wrapper */}
+            <div className="explore-wrapper">
+              {/* filter section */}
+              <div className="filter-section">
+                <Filter
+                  setKpiSearch={setKpiSearch}
+                  setKpiFilter={setKpiFilter}
+                  kpiList={kpiExplorerList}
+                  setDashboardFilter={setDashboardFilter}
+                  kpi={true}
+                />
+              </div>
+              {/* table section */}
+              <div className="table-section">
+                <KPITable
+                  kpiData={kpiExplorerData}
+                  kpiSearch={kpiSearch}
+                  changeData={setData}
+                  kpiLoading={isLoading}
+                />
+              </div>
+            </div>
+          </>
+        )}
       </>
     );
   }

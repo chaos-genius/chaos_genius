@@ -104,7 +104,7 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
             <div
               className="backnavigation"
               onClick={() => store.dispatch(SETTING_RESET)}>
-              <Link to={`/dashboard/${dashboardId}/deepdrills`}>
+              <Link to={`/dashboard/${dashboardId}/deepdrills/${kpiId}`}>
                 <img src={rightarrow} alt="Back" />
                 <span>Settings</span>
               </Link>

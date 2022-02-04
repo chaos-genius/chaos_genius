@@ -359,7 +359,15 @@
                       {% endfor %}
                   ],
                   "{{ triggered_alert.alert_channel }}",
-                  "{{ point.get('nl_message', 'These are older triggered alerts') }}",
+                  {% if 'nl_message' not in point %}
+                    "Not available for older triggered alerts",
+                  {% elif point['nl_message'].startswith("Increased") %}
+                    "{{ point['nl_message'][:len('Increased by')] }} <span style=\"color: rgb(96, 202, 154); font-weight: 600;\">{{point['nl_message'][len('Increased by'):]}}</span>",
+                  {% elif point['nl_message'].startswith("Decreased") %}
+                    "{{ point['nl_message'][:len('Decreased by')] }} <span style=\"color: rgb(233, 101, 96); font-weight: 600;\">{{point['nl_message'][len('Decreased by'):]}}</span>",
+                  {% else %}
+                    "{{ point['nl_message'] }}",
+                  {% endif %}
                   "{{ point['date_only'] }}",
                 ],
             {% endfor %}

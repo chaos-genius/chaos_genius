@@ -29,5 +29,6 @@ def task_monitor_view():
         enumerate=enumerate,
         str=str,
         repr=repr,
-        list=list
+        list=list,
+        len=len,
     )

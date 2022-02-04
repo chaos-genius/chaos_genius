@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useToast } from 'react-toast-wnm';
+import Alertnotification from '../../assets/images/alerts/alert-notify.svg';
 
 import Plus from '../../assets/images/plus.svg';
 import Frame from '../../assets/images/table/channelconfig.svg';
@@ -234,7 +235,10 @@ const Alerts = () => {
         {/* common heading and options */}
         <div className="heading-option">
           <div className="heading-title">
-            <h3>Alerts</h3>
+            <Link to="" className="alert-linked">
+              <h1>Alerts</h1>
+              <img src={Alertnotification} alt="alert-notification" />
+            </Link>
           </div>
 
           <div className="alert-option-button">

@@ -6,10 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import Slack from '../../assets/images/alerts/slack.svg';
 import Email from '../../assets/images/alerts/email.svg';
-import Datadog from '../../assets/images/alerts/datadog.svg';
-import Asana from '../../assets/images/alerts/asana.svg';
-import Teams from '../../assets/images/alerts/teams.svg';
-import PagerDuty from '../../assets/images/alerts/pagerduty.svg';
+import Webhook from '../../assets/images/alerts/webhook.svg';
 import Succestick from '../../assets/images/setupcard/success-tick.svg';
 
 import '../SetupCard/setupcard.scss';
@@ -115,10 +112,10 @@ const AlertsCard = () => {
           </Link>
         </div>
         <div className="setup-card">
-          <img src={Datadog} className="in-active" alt="Datadog" />
+          <img src={Webhook} className="in-active" alt="webhook" />
           <h1>
-            Datadog{' '}
-            {statusChecking('datadog') && (
+            Webhook{' '}
+            {statusChecking('webhook') && (
               <img src={Succestick} alt="success tik"></img>
             )}
           </h1>
@@ -126,82 +123,14 @@ const AlertsCard = () => {
           <button
             disabled
             className={
-              statusChecking('datadog')
+              statusChecking('webhook')
                 ? 'btn black-button'
                 : 'btn white-button'
             }>
             <span>
-              {statusChecking('datadog')
-                ? 'Edit Datadog Connection'
-                : 'Connect Datadog'}
-            </span>
-          </button>
-          <h3>Soon</h3>
-        </div>
-        <div className="setup-card">
-          <img src={Asana} className="in-active" alt="Asana" />
-          <h1>
-            Asana
-            {statusChecking('asana') && (
-              <img src={Succestick} alt="success tik"></img>
-            )}
-          </h1>
-          <p>Update the configuration for the channel to receive alerts</p>
-          <button
-            disabled
-            className={
-              statusChecking('asana') ? 'btn black-button' : 'btn white-button'
-            }>
-            <span>
-              {statusChecking('asana')
-                ? 'Edit Asana Connection'
-                : 'Connect Asana'}
-            </span>
-          </button>
-          <h3>Soon</h3>
-        </div>
-        <div className="setup-card">
-          <img src={Teams} className="in-active" alt="Teams" />
-          <h1>
-            Teams
-            {statusChecking('teams') && (
-              <img src={Succestick} alt="success tik"></img>
-            )}
-          </h1>
-          <p>Update the configuration for the channel to receive alerts</p>
-          <button
-            disabled
-            className={
-              statusChecking('teams') ? 'btn black-button' : 'btn white-button'
-            }>
-            <span>
-              {statusChecking('teams')
-                ? 'Edit Teams Connection'
-                : 'Connect Teams'}
-            </span>
-          </button>
-          <h3>Soon</h3>
-        </div>
-        <div className="setup-card">
-          <img src={PagerDuty} className="in-active" alt="Pager Duty" />
-          <h1>
-            PagerDuty
-            {statusChecking('pagerduty') && (
-              <img src={Succestick} alt="success tik"></img>
-            )}
-          </h1>
-          <p>Update the configuration for the channel to receive alerts</p>
-          <button
-            disabled
-            className={
-              statusChecking('pagerduty')
-                ? 'btn black-button'
-                : 'btn white-button'
-            }>
-            <span>
-              {statusChecking('datadog')
-                ? 'Edit PagerDuty Connection'
-                : 'Connect PagerDuty'}
+              {statusChecking('webhook')
+                ? 'Edit Webhook Connection'
+                : 'Connect Webhook'}
             </span>
           </button>
           <h3>Soon</h3>

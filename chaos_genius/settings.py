@@ -103,14 +103,13 @@ CHAOSGENIUS_VERSION = CHAOSGENIUS_VERSION_MAIN + "-" + CHAOSGENIUS_VERSION_POSTF
 CHAOSGENIUS_ENTERPRISE_EDITION_KEY = os.getenv("CHAOSGENIUS_ENTERPRISE_EDITION_KEY")
 
 """Dynamic Third Party Data Sources"""
-<<<<<<< HEAD
-SOURCE_GOOGLE_ANALYTICS = os.getenv("SOURCE_GOOGLE_ANALYTICS", default=True)
-SOURCE_GOOGLE_SHEETS = os.getenv("SOURCE_GOOGLE_SHEETS", default=True)
-SOURCE_SHOPIFY = os.getenv("SOURCE_SHOPIFY", default=False)
-SOURCE_STRIPE = os.getenv("SOURCE_STRIPE", default=False)
-SOURCE_GOOGLE_ADS = os.getenv("SOURCE_GOOGLE_ADS", default=False)
-SOURCE_FACEBOOK_ADS = os.getenv("SOURCE_FACEBOOK_ADS", default=False)
-SOURCE_BING_ADS = os.getenv("SOURCE_BING_ADS", default=False)
+SOURCE_GOOGLE_ANALYTICS = _make_bool(os.getenv("SOURCE_GOOGLE_ANALYTICS", default=True))
+SOURCE_GOOGLE_SHEETS = _make_bool(os.getenv("SOURCE_GOOGLE_SHEETS", default=True))
+SOURCE_SHOPIFY = _make_bool(os.getenv("SOURCE_SHOPIFY", default=False))
+SOURCE_STRIPE = _make_bool(os.getenv("SOURCE_STRIPE", default=False))
+SOURCE_GOOGLE_ADS = _make_bool(os.getenv("SOURCE_GOOGLE_ADS", default=False))
+SOURCE_FACEBOOK_ADS = _make_bool(os.getenv("SOURCE_FACEBOOK_ADS", default=False))
+SOURCE_BING_ADS = _make_bool(os.getenv("SOURCE_BING_ADS", default=False))
 
 """Alert Digest configuration"""
 ALERT_DIGEST_ENABLED = os.getenv("ALERT_DIGEST_ENABLED", "False") == "True"
@@ -120,12 +119,3 @@ if len(ALERT_DIGEST_DAILY_TIME) != 2:
         "ALERT_DIGEST_DAILY_TIME must be in HH:MM format. "
         f"Got {':'.join(ALERT_DIGEST_DAILY_TIME)}"
     )
-=======
-SOURCE_GOOGLE_ANALYTICS = _make_bool(os.getenv("SOURCE_GOOGLE_ANALYTICS", default=True))
-SOURCE_GOOGLE_SHEETS = _make_bool(os.getenv("SOURCE_GOOGLE_SHEETS", default=True))
-SOURCE_SHOPIFY = _make_bool(os.getenv("SOURCE_SHOPIFY", default=False))
-SOURCE_STRIPE = _make_bool(os.getenv("SOURCE_STRIPE", default=False))
-SOURCE_GOOGLE_ADS = _make_bool(os.getenv("SOURCE_GOOGLE_ADS", default=False))
-SOURCE_FACEBOOK_ADS = _make_bool(os.getenv("SOURCE_FACEBOOK_ADS", default=False))
-SOURCE_BING_ADS = _make_bool(os.getenv("SOURCE_BING_ADS", default=False))
->>>>>>> origin/develop

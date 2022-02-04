@@ -1,5 +1,5 @@
 import React from 'react';
-import AddFaq from '../../components/AddFAQ';
+import AddFaq from '../../components/KpiFaq';
 
 import { Link, useHistory } from 'react-router-dom';
 

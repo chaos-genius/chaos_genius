@@ -4,6 +4,7 @@ import { Link, useHistory } from 'react-router-dom';
 
 import rightarrow from '../../assets/images/rightarrow.svg';
 import AlertsForm from '../../components/AlertsForm';
+import AddFaq from '../../components/AddFAQ';
 
 const AddAlerts = () => {
   const history = useHistory();
@@ -55,6 +56,7 @@ const AddAlerts = () => {
       </div>
       <div className="add-form-container">
         <AlertsForm />
+        <AddFaq />
       </div>
     </>
   );

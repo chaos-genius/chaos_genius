@@ -394,7 +394,7 @@ const EventAlertDestinationForm = ({
               id="individualalert"
               name="alert"
             />
-            <label className={'form-check-label active'} for="individualalert">
+            <label className="form-check-label active" for="individualalert">
               individual alert
             </label>
           </div>

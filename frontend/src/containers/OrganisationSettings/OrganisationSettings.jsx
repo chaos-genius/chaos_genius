@@ -7,7 +7,7 @@ import AccountSetting from './AccountSetting';
 import MetricsSettings from './MetricsSettings';
 import './organisationSettings.scss';
 import { onboardingOrganisationStatus } from '../../redux/actions';
-import ReportSettings from './ReportSetting';
+// import ReportSettings from './ReportSetting';
 
 const OrganisationSettings = () => {
   const [tabSwitch, setTabSwitch] = useState({ account: true, metrics: false });
@@ -48,7 +48,7 @@ const OrganisationSettings = () => {
               Metrics
               <img src={GreenArrow} alt="Arrow" />
             </li>
-            <li
+            {/* <li
               onClick={(e) =>
                 setTabSwitch({ account: false, metrics: false, reports: true })
               }
@@ -56,7 +56,7 @@ const OrganisationSettings = () => {
               className={tabSwitch.reports ? 'active' : ''}>
               Reports
               <img src={GreenArrow} alt="Arrow" />
-            </li>
+            </li> */}
           </ul>
         </div>
         <div className="settings-section">
@@ -68,7 +68,7 @@ const OrganisationSettings = () => {
               {tabSwitch.metrics ? (
                 <MetricsSettings organisationData={organisationData} />
               ) : null}
-              {tabSwitch.reports ? <ReportSettings /> : null}
+              {/* {tabSwitch.reports ? <ReportSettings /> : null} */}
             </>
           ) : null}
         </div>

@@ -30,7 +30,8 @@ const AddKpiAlert = () => {
     alert_message: '',
     alert_frequency: '',
     alert_channel: '',
-    alert_channel_conf: '{}'
+    alert_channel_conf: '{}',
+    daily_digest: false
   });
 
   const { kpiAlertMetaInfoData } = useSelector((state) => {

@@ -1,20 +1,19 @@
 import datetime
 from collections import defaultdict
 from typing import DefaultDict, List
-from chaos_genius.alerts.base_alerts import change_message_from_percent
 
+from chaos_genius.alerts.base_alerts import change_message_from_percent
+from chaos_genius.alerts.constants import ALERT_DATE_FORMAT, ALERT_DATETIME_FORMAT
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
-
-_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 def structure_anomaly_data_for_digests(anomaly_data):
 
     data = dict()
     for point in anomaly_data:
-        dt_obj = datetime.datetime.strptime(point["data_datetime"], _DATETIME_FORMAT)
+        dt_obj = datetime.datetime.strptime(point["data_datetime"], ALERT_DATETIME_FORMAT)
         if dt_obj.hour not in data.keys():
             data[dt_obj.hour] = []
         data[dt_obj.hour].append(point)
@@ -125,8 +124,8 @@ def _preprocess_anomaly_alerts(anomaly_alerts_data: list):
             if exact_time is None:
                 point["date_only"] = "Older Alerts"
             else:
-                exact_time = datetime.datetime.strptime(exact_time, _DATETIME_FORMAT)
-                point["date_only"] = exact_time.strftime("%b %d %Y")
+                exact_time = datetime.datetime.strptime(exact_time, ALERT_DATETIME_FORMAT)
+                point["date_only"] = exact_time.strftime(ALERT_DATE_FORMAT)
 
     _add_nl_messages_anomaly_alerts(anomaly_alerts_data)
 

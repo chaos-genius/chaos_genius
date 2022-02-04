@@ -1,5 +1,11 @@
+from datetime import datetime
+from typing import List
+
 from slack_sdk.webhook import WebhookClient
+
 from chaos_genius.alerts.alert_channel_creds import get_creds
+from chaos_genius.alerts.constants import ALERT_DATE_FORMAT, ALERT_DATETIME_FORMAT
+from chaos_genius.alerts.utils import webapp_url_prefix
 
 
 def get_webhook_client():
@@ -83,21 +89,112 @@ def event_alert_slack(alert_name, alert_frequency, alert_message , alert_overvie
     return response.body
 
 
-def alert_digest_slack_formatted(frequency, table_data):
+def _format_slack_anomalies(top10: List[dict]) -> str:
+    out = ""
+
+    for point in top10:
+        kpi_name_link = (
+            f'<{webapp_url_prefix()}#/dashboard/0/anomaly/{point["kpi_id"]}'
+            f'|{point["kpi_name"]}>'
+        )
+
+        dt = datetime.strptime(point["data_datetime"], ALERT_DATETIME_FORMAT)
+        time = dt.strftime("%H:%M:%S")
+
+        change_percent = point["percentage_change"]
+        change_message = "remained same"
+        if isinstance(change_percent, (int, float)):
+            if change_percent > 0:
+                change_message = "increased"
+            else:
+                change_message = "decreased"
+
+        out += f'- *{kpi_name_link}* ({point["Dimension"]}) {change_message} by ' \
+               f'*{change_percent}%* to ' \
+               f'*{point["y"]}* on {time} (severity: *{point["severity"]}*)\n'
+
+    return out
+
+
+def alert_digest_slack_formatted(
+    frequency: str,
+    curr_time: datetime,
+    top10: List[dict],
+    overall_count: int,
+    subdim_count: int
+):
     client = get_webhook_client()
     if not client:
         raise Exception("Slack not configured properly.")
+
     response = client.send(
-        text=f"Alert Digest: {frequency}"
+        blocks=[
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": f"{frequency.title()} Alert Digest ({curr_time.strftime(ALERT_DATE_FORMAT)})",
+                    "emoji": True,
+                },
+            },
+            {
+                "type": "divider",
+            },
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Summary",
+                    "emoji": True,
+                },
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"- Total alerts generated (Overall KPI): *{overall_count}*\n"
+                            f"- Total alerts generated (including subdimenions): *{subdim_count}*\n"
+                }
+            },
+            {
+                "type": "actions",
+                "elements": [
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "View Alerts Module"
+                        },
+                        "url": f"{webapp_url_prefix()}api/digest",
+                        "action_id": "alert_dashboard"
+                    }
+                ]
+            },
+            {
+                "type": "divider",
+            },
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": f"Top 10 anomalies ({curr_time.strftime(ALERT_DATE_FORMAT)})",
+                    "emoji": True,
+                },
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": _format_slack_anomalies(top10),
+                }
+            },
+        ]
     )
-    
-    subsequent_response = "failed"
-    if response.body == "ok":
-        subsequent_response = alert_table_sender(client, table_data)
-    
-    if response.body == "ok" and subsequent_response == "ok":
-        return "ok"
-    return subsequent_response
+
+    if response.body != "ok":
+        print(response.body)
+
+    return response.body
 
 
 def anomaly_alert_slack_formatted(alert_name, kpi_name, data_source_name, table_data):

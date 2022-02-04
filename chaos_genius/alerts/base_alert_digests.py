@@ -1,15 +1,17 @@
 import datetime
+import heapq
 import logging
 import os
 from collections import defaultdict
+from typing import Dict, List, Tuple
 
 import pandas as pd
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from tabulate import tabulate
 
 from chaos_genius.alerts.base_alerts import FREQUENCY_DICT
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import alert_digest_slack_formatted
+from chaos_genius.alerts.utils import webapp_url_prefix
 from chaos_genius.controllers.digest_controller import get_alert_kpi_configurations
 from chaos_genius.controllers.config_controller import get_config_object
 from chaos_genius.databases.models.alert_model import Alert
@@ -53,6 +55,7 @@ class AlertDigestController:
             kpi_id = alert_conf.get("kpi")
             kpi = self.kpi_cache.get(kpi_id) if kpi_id is not None else None
 
+            alert.kpi_id = kpi_id
             alert.kpi_name = kpi.get("name") if kpi is not None else "Doesn't Exist"
             alert.alert_name = alert_conf.get("alert_name")
             alert.alert_channel = alert_conf.get("alert_channel")
@@ -93,14 +96,7 @@ class AlertDigestController:
 
         for id_ in triggered_alert_ids:
             data.append(triggered_alert_dict.get(id_))
-            if not CHAOSGENIUS_WEBAPP_URL:
-                data[-1].link = "Webapp URL not setup"
-                continue
-
-            forward_slash = "/" if not CHAOSGENIUS_WEBAPP_URL[-1] == "/" else ""
-            data[
-                -1
-            ].link = f"{CHAOSGENIUS_WEBAPP_URL}{forward_slash}api/digest?id={id_}"
+            data[-1].link = webapp_url_prefix() + f"api/digest?id={id_}"
 
         data_len = min(len(data), 10)
         data = data if data_len == 0 else data[0:data_len]
@@ -131,23 +127,59 @@ class AlertDigestController:
 
         return test
 
-    def send_slack_digests(self, slack_digests):
-        """Sends a slack alert containing a summary of triggered alerts"""
-
+    def send_slack_digests(self, triggered_alerts):
+        """Sends a slack alert containing a summary of triggered alerts."""
         column_names = ["alert_name", "kpi_name", "created_at"]
-        slack_digests = [alert.__dict__ for alert in slack_digests]
-        data = pd.DataFrame(slack_digests, columns=column_names)
-        table_data = tabulate(data, tablefmt="fancy_grid", headers="keys")
-        table_data = "```" + table_data + "```"
-        test = alert_digest_slack_formatted(self.frequency, table_data)
+        triggered_alerts = [alert.__dict__ for alert in triggered_alerts]
+
+        points = _all_anomaly_points(triggered_alerts)
+        top10 = _top_10_anomalies(points)
+        overall_count, subdim_count = _count_alerts(points)
+
+        test = alert_digest_slack_formatted(
+            self.frequency,
+            self.curr_time,
+            top10,
+            overall_count,
+            subdim_count
+        )
 
         if test == "ok":
-            logger.info(f"The slack alert digest was successfully sent")
+            logger.info("The slack alert digest was successfully sent")
         else:
-            logger.info(f"The slack alert digest has not been sent")
+            logger.info("The slack alert digest has not been sent")
 
         message = f"Status for slack alert digest: {test}"
         return message
+
+
+def _all_anomaly_points(triggered_alerts: List[Dict]) -> List[Dict]:
+    return [
+        dict(
+            point,
+            kpi_name=alert["kpi_name"],
+            alert_name=alert["alert_name"],
+            kpi_id=alert["kpi_id"]
+        )
+        for alert in triggered_alerts
+        for point in alert["alert_metadata"]["alert_data"]
+    ]
+
+
+def _top_10_anomalies(points: List[Dict]) -> List[Dict]:
+    return heapq.nlargest(
+        10,
+        points,
+        key=lambda point: point["severity"]
+    )
+
+
+def _count_alerts(points: List[Dict]) -> Tuple[int, int]:
+    """Returns a count of overall anomalies and subdim anomalies."""
+    total = len(points)
+    overall = sum(1 for point in points if point["Dimension"] == "Overall KPI")
+    subdims = total - overall
+    return overall, subdims
 
 
 def check_and_trigger_digest(frequency: str):

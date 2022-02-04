@@ -6,6 +6,7 @@ import Search from '../../assets/images/search.svg';
 
 import Fuse from 'fuse.js';
 import { CustomTooltip } from '../../utils/tooltip-helper';
+import { debuncerReturn } from '../../utils/simple-debouncer';
 
 const DataSourceFilter = ({
   datasource,
@@ -169,6 +170,12 @@ const DataSourceFilter = ({
     }
   };
 
+  const implementDashboardSearch = (e) => {
+    setDashboardSearch(e.target.value);
+  };
+
+  const debounce = (func) => debuncerReturn(func, 500);
+
   return (
     <div className="common-filter-section">
       <div className="filter-layout">
@@ -178,7 +185,7 @@ const DataSourceFilter = ({
             type="text"
             className="form-control h-40"
             placeholder={kpiList ? 'Search KPI' : 'Search Data Source'}
-            onChange={(e) => onSearch(e)}
+            onChange={debounce(onSearch)}
           />
           <span>
             <img src={Search} alt="Search Icon" />
@@ -193,9 +200,7 @@ const DataSourceFilter = ({
               type="text"
               className="form-control h-40"
               placeholder="Search dashboard"
-              onChange={(e) => {
-                setDashboardSearch(e.target.value);
-              }}
+              onChange={debounce(implementDashboardSearch)}
             />
             <span>
               <img src={Search} alt="Search Icon" />

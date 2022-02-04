@@ -26,6 +26,7 @@ import { getDashboard, getTimeCuts } from '../../redux/actions';
 import { CustomTooltip } from '../../utils/tooltip-helper';
 
 import store from '../../redux/store';
+import { debuncerReturn } from '../../utils/simple-debouncer';
 
 const RESET_ACTION = {
   type: 'RESET_KPI_HOME_DATA'
@@ -249,6 +250,11 @@ const Kpihome = () => {
     }
   };
 
+  const implementSearch = (e) => {
+    setSearch(e.target.value);
+  };
+  const debounce = () => debuncerReturn(implementSearch, 500);
+
   if (dashboardListLoading) {
     return (
       <div className="load loader-page">
@@ -268,7 +274,7 @@ const Kpihome = () => {
                 type="text"
                 className="form-control h-40"
                 placeholder="Search KPI"
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={debounce()}
               />
               <span>
                 <img src={Search} alt="Search Icon" />

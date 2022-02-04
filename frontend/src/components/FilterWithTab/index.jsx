@@ -13,6 +13,7 @@ import store from '../../redux/store';
 
 import { anomalySetting } from '../../redux/actions';
 import { CustomTooltip } from '../../utils/tooltip-helper';
+import { debuncerReturn } from '../../utils/simple-debouncer';
 
 const RESET = {
   type: 'RESET_DATA'
@@ -58,6 +59,8 @@ const DashboardFilter = ({ kpi, data, setActive, tabs, dashboard }) => {
     }
   };
 
+  const debounce = (func) => debuncerReturn(func, 500);
+
   return (
     <div className="common-filter-section">
       <div className="filter-layout">
@@ -67,7 +70,7 @@ const DashboardFilter = ({ kpi, data, setActive, tabs, dashboard }) => {
             type="text"
             className="form-control h-40"
             placeholder="Search KPI"
-            onChange={(e) => onSearch(e)}
+            onChange={debounce(onSearch)}
           />
           <span>
             <img src={Search} alt="Search Icon" />

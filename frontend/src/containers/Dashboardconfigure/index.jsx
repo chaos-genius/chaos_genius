@@ -19,6 +19,7 @@ import store from '../../redux/store';
 
 import { formatDateTime } from '../../utils/date-helper';
 import { getLocalStorage } from '../../utils/storage-helper';
+import { debuncerReturn } from '../../utils/simple-debouncer';
 
 const DASHBOARD_RESET = {
   type: 'DASHBOARD_RESET'
@@ -94,6 +95,8 @@ const Dashboardconfigure = () => {
       setDashboardData(dashboardList);
     }
   };
+
+  const debounce = () => debuncerReturn(onSearch, 500);
 
   const onSort = (type) => {
     let value = dashboardList.sort(function (a, b) {
@@ -216,7 +219,7 @@ const Dashboardconfigure = () => {
                   type="text"
                   className="form-control h-40"
                   placeholder="Search dashboard"
-                  onChange={(e) => onSearch(e)}
+                  onChange={debounce()}
                 />
                 <span>
                   <img src={Search} alt="Search Icon" />

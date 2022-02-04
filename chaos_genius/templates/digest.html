@@ -52,25 +52,26 @@
                 <label class="search-box-label">KPI Names</label>
             <select id="kpi-select" multiple class="search-box">
             </select>   
+            </div>
+            <div class="search-box-container">
+                <label class="search-box-label">Select Dates</label>
+            <select id="date-select" multiple class="search-box">
+            </select>   
             </div>   
         </div>
         <div class="checkbox-container">
         <div class="toggle colour">
+            <label class="checkbox-label">Show subdimensions:  </label><input id="subdims-check" class="toggle-checkbox hidden" type="checkbox">
+            <label for="subdims-check" class="toggle-label inline-block w-12 h-6 rounded-full transition-color duration-150 ease-out"></label>
+        </div>
+        <div class="toggle colour">
             <label class="checkbox-label">Slack alerts only:  </label><input id="slack-check" class="toggle-checkbox hidden" type="checkbox">
            <label for="slack-check" class="toggle-label inline-block w-12 h-6 rounded-full transition-color duration-150 ease-out"></label>
-        </div>
-        
-        <div class="toggle colour">
-                <label class="checkbox-label">Show subdimensions:  </label><input id="subdims-check" class="toggle-checkbox hidden" type="checkbox">
-               <label for="subdims-check" class="toggle-label inline-block w-12 h-6 rounded-full transition-color duration-150 ease-out"></label>
         </div>
     </div>
         
     <div id="tab-contents">
         <div id="anomaly-alerts">
-
-            
-
             <div class="flex flex-col">
                 <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                     <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
@@ -244,7 +245,7 @@
     }
     .search-box-container {
         display: flex;
-        width:392px;
+        width:23%;
         flex-direction: column;
         justify-content: space-evenly;
         height: 80px;
@@ -340,7 +341,7 @@
   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 </svg>
                     {% elif point['Severity Score'] >= 25 %}
-                        <span style='font-weight: light' class="severity"> <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="#CB9D06" style="display: inline!important;" viewBox="0 0 24 24" stroke="currentColor">
+                        <span style='color:#CB9D06;font-weight: light' class="severity"> <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" style="display: inline!important;" viewBox="0 0 24 24" stroke="currentColor">
   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 </svg>
                     {% else %}
@@ -358,7 +359,15 @@
                       {% endfor %}
                   ],
                   "{{ triggered_alert.alert_channel }}",
-                  "{{ point.get('nl_message', 'These are older triggered alerts') }}",
+                  {% if 'nl_message' not in point %}
+                    "Not available for older triggered alerts",
+                  {% elif point['nl_message'].startswith("Increased") %}
+                    "{{ point['nl_message'][:len('Increased by')] }} <span style=\"color: rgb(96, 202, 154); font-weight: 600;\">{{point['nl_message'][len('Increased by'):]}}</span>",
+                  {% elif point['nl_message'].startswith("Decreased") %}
+                    "{{ point['nl_message'][:len('Decreased by')] }} <span style=\"color: rgb(233, 101, 96); font-weight: 600;\">{{point['nl_message'][len('Decreased by'):]}}</span>",
+                  {% else %}
+                    "{{ point['nl_message'] }}",
+                  {% endif %}
                   "{{ point['date_only'] }}",
                 ],
             {% endfor %}
@@ -622,6 +631,19 @@
         });
     </script>
 
+    <!-- Script for Date selection dropdown -->
+    <script>
+        const dateSelect = new TomSelect("#date-select", {
+            items: ["All"],
+            placeholder: "Select Dates",
+            plugins: {
+                remove_button:{
+                    title: "Remove this Date",
+                }
+            },
+        });
+    </script>
+
     <!-- Script for filtering search according to email selected-->
     <script type="text/javascript">
         function initUserEmails(currentTable) {
@@ -736,6 +758,45 @@
             }
             else{
                 removeFilter("kpi-name");
+            }
+
+            applyFilters(currentTable);
+        });
+    </script>
+
+    <!-- Script for filtering search accoring to Date configuration selected-->
+    <script type="text/javascript">
+        function initDateSelect(currentTable) {
+            const Dates = new Set();
+
+            currentTable.origData.forEach(datapoint => {
+                Dates.add(datapoint[currentTable.dateOnlyColIndex]);
+            });
+
+            dateSelect.clear(false);
+            dateSelect.clearOptions();
+            dateSelect.addOptions(Array.from(Dates).map((date) => {
+                return {value: date, text: date};
+            }), false);
+            dateSelect.refreshOptions(false);
+            dateSelect.refreshItems();
+
+            return Dates;
+        }
+
+        let Dates = initDateSelect(currentTable);
+        const dropdownDates = document.getElementById("date-select");
+        dropdownDates.addEventListener("input", () => {
+            const selected = Array.from(dropdownDates.options).filter(option => option.selected).map(option => option.value);
+            const selectedSet = new Set(selected);
+
+            if(selectedSet.size > 0){
+                addFilter("date", row => {
+                    return selectedSet.has(row[currentTable.dateOnlyColIndex])
+                });
+            }
+            else{
+                removeFilter("date");
             }
 
             applyFilters(currentTable);

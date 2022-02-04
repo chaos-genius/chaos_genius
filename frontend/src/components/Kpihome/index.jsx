@@ -26,6 +26,7 @@ import { getDashboard, getTimeCuts } from '../../redux/actions';
 import { CustomTooltip } from '../../utils/tooltip-helper';
 
 import store from '../../redux/store';
+import { debuncerReturn } from '../../utils/simple-debouncer';
 
 const RESET_ACTION = {
   type: 'RESET_KPI_HOME_DATA'
@@ -50,7 +51,7 @@ const Kpihome = () => {
 
   const history = useHistory();
 
-  const dashboardId = useParams().id;
+  const [dashboardId, setDashboardId] = useState(useParams()?.id);
 
   const { homeKpiData, homeKpiLoading } = useSelector(
     (state) => state.onboarding
@@ -69,7 +70,14 @@ const Kpihome = () => {
   const [timeline, setTimeLine] = useState({});
 
   useEffect(() => {
-    store.dispatch(RESET_ACTION);
+    if (dashboardId === undefined) {
+      setDashboardId('0');
+    }
+    history.push(`/${dashboardId}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dashboardId]);
+
+  useEffect(() => {
     dispatch(getDashboard());
     dispatch(getTimeCuts());
   }, [dispatch]);
@@ -78,13 +86,12 @@ const Kpihome = () => {
     if (
       dashboardList &&
       dashboardList.length !== 0 &&
-      dashboardId === undefined
+      dashboardId !== undefined
     ) {
-      setDashboard(dashboardList[0]?.id);
-      history.push(`/${dashboardList[0]?.id}`);
+      setDashboard(dashboardId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dashboardList, history.location.pathname]);
+  }, [dashboardList]);
 
   const getAllTimeCutOptions = (data) => {
     let res = [];
@@ -136,6 +143,7 @@ const Kpihome = () => {
     store.dispatch({
       type: 'RESET_LINECHART'
     });
+    store.dispatch({ type: 'RESET_DASHBOARD_RCA' });
   };
 
   useEffect(() => {
@@ -242,7 +250,12 @@ const Kpihome = () => {
     }
   };
 
-  if (homeKpiLoading || dashboardListLoading) {
+  const implementSearch = (e) => {
+    setSearch(e.target.value);
+  };
+  const debounce = () => debuncerReturn(implementSearch, 500);
+
+  if (dashboardListLoading) {
     return (
       <div className="load loader-page">
         <div className="preload"></div>
@@ -261,7 +274,7 @@ const Kpihome = () => {
                 type="text"
                 className="form-control h-40"
                 placeholder="Search KPI"
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={debounce()}
               />
               <span>
                 <img src={Search} alt="Search Icon" />
@@ -292,86 +305,96 @@ const Kpihome = () => {
                   data={dashboardList}
                   setDashboard={setDashboard}
                   dashboard={dashboardId}
+                  setDashboardId={setDashboardId}
                 />
               )}
             </div>
-            {kpiHomeData && kpiHomeData.length !== 0 ? (
-              <div className="graph-section">
-                {kpiHomeData.map((item) => {
-                  return (
-                    <Link to={`/dashboard/${dashboard}/deepdrills/${item.id}`}>
-                      <div className="kpi-card" key={item.id}>
-                        <div className="kpi-content kpi-content-label">
-                          <h3 className="name-tooltip">
-                            {CustomTooltip(item.name, true)}
-                          </h3>
-                        </div>
-                        <div className="kpi-content kpi-current">
-                          <label>{item?.display_value_current}</label>
-                          <HumanReadableNumbers number={item.current} />
-                        </div>
-                        <div className="kpi-content">
-                          <label>{item?.display_value_prev}</label>
-                          <HumanReadableNumbers number={item.prev} />
-                        </div>
-                        <div className="kpi-content">
-                          <label>Change</label>
-                          <span>
-                            {item.percentage_change !== '--' && (
-                              <>
-                                <HumanReadableNumbers number={item.change} />
-                                <label
-                                  className={
-                                    item.percentage_change > 0
-                                      ? 'high-change'
-                                      : 'low-change'
-                                  }>
-                                  {item.percentage_change > 0 ? (
-                                    <img src={Up} alt="High" />
-                                  ) : (
-                                    <img src={Down} alt="Low" />
-                                  )}
-                                  {item.percentage_change}
-                                  {item.percentage_change !== '--' ? '%' : ''}
-                                </label>
-                              </>
-                            )}
-                            {item.percentage_change === '--' && <>-</>}
-                          </span>
-                        </div>
+            {!homeKpiLoading ? (
+              kpiHomeData && kpiHomeData.length !== 0 ? (
+                <div className="graph-section">
+                  {kpiHomeData.map((item) => {
+                    return (
+                      <Link
+                        to={`/dashboard/${dashboard}/deepdrills/${item.id}`}
+                        key={item.id}>
+                        <div className="kpi-card" key={item.id}>
+                          <div className="kpi-content kpi-content-label">
+                            <h3 className="name-tooltip">
+                              {CustomTooltip(item.name, true)}
+                            </h3>
+                          </div>
+                          <div className="kpi-content kpi-current">
+                            <label>{item?.display_value_current}</label>
+                            <HumanReadableNumbers number={item.current} />
+                          </div>
+                          <div className="kpi-content">
+                            <label>{item?.display_value_prev}</label>
+                            <HumanReadableNumbers number={item.prev} />
+                          </div>
+                          <div className="kpi-content">
+                            <label>Change</label>
+                            <span>
+                              {item.percentage_change !== '-' && (
+                                <>
+                                  <HumanReadableNumbers number={item.change} />
+                                  <label
+                                    className={
+                                      item.percentage_change > 0
+                                        ? 'high-change'
+                                        : 'low-change'
+                                    }>
+                                    {item.percentage_change > 0 ? (
+                                      <img src={Up} alt="High" />
+                                    ) : (
+                                      <img src={Down} alt="Low" />
+                                    )}
+                                    {item.percentage_change}
+                                    {item.percentage_change !== '-' ? '%' : ''}
+                                  </label>
+                                </>
+                              )}
+                              {item.percentage_change === '-' && <>-</>}
+                            </span>
+                          </div>
 
-                        <div className=" kpi-content kpi-graph ">
-                          {item.graph_data && item.graph_data.length !== 0 && (
-                            <HighchartsReact
-                              className="sparkline-graph"
-                              highcharts={Highcharts}
-                              options={lineChart(item.graph_data)}
-                            />
-                          )}
+                          <div className=" kpi-content kpi-graph ">
+                            {item.graph_data &&
+                              item.graph_data.length !== 0 && (
+                                <HighchartsReact
+                                  className="sparkline-graph"
+                                  highcharts={Highcharts}
+                                  options={lineChart(item.graph_data)}
+                                />
+                              )}
+                          </div>
+                          <div
+                            className="kpi-content kpi-details"
+                            onClick={() =>
+                              history.push(
+                                `/dashboard/${dashboard}/deepdrills/${item.id}`
+                              )
+                            }>
+                            Details
+                          </div>
                         </div>
-                        <div
-                          className="kpi-content kpi-details"
-                          onClick={() =>
-                            history.push(
-                              `/dashboard/${dashboard}/deepdrills/${item.id}`
-                            )
-                          }>
-                          Details
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            ) : (
-              kpiHomeData !== '' && (
-                <div className="home-card-section">
-                  <div className="no-data-kpihome">
-                    <Noresult text={search} title={'KPI'} />
-                  </div>
+                      </Link>
+                    );
+                  })}
                 </div>
+              ) : (
+                kpiHomeData.length === 0 && (
+                  <div className="home-card-section">
+                    <div className="no-data-kpihome">
+                      <Noresult text={search} title={'KPI'} />
+                    </div>
+                  </div>
+                )
               )
-            )}{' '}
+            ) : (
+              <div className="home-data-load home-data-loader-page">
+                <div className="preload"></div>
+              </div>
+            )}
           </div>
         </div>
       </>

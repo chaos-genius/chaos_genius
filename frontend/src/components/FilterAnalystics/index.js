@@ -8,6 +8,7 @@ import Fuse from 'fuse.js';
 import { v4 as uuidv4 } from 'uuid';
 import { useParams } from 'react-router-dom';
 import { CustomTooltip } from '../../utils/tooltip-helper';
+import { debuncerReturn } from '../../utils/simple-debouncer';
 
 const FilterAnalystics = ({ kpi, setKpi, data, onboarding }) => {
   const [listData, setListData] = useState(data);
@@ -38,6 +39,9 @@ const FilterAnalystics = ({ kpi, setKpi, data, onboarding }) => {
       setListData(searchData);
     }
   };
+
+  const debounce = (func) => debuncerReturn(func, 500);
+
   const handleClick = (item) => {
     setKpi(item.id);
     if (!onboarding) {
@@ -57,7 +61,7 @@ const FilterAnalystics = ({ kpi, setKpi, data, onboarding }) => {
             type="text"
             className="form-control h-40"
             placeholder="Search KPI"
-            onChange={(e) => onSearch(e)}
+            onChange={debounce(onSearch)}
           />
           <span>
             <img src={Search} alt="Search Icon" />

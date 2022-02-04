@@ -40,19 +40,18 @@ def get_connection_config():
 def get_activated_third_party_from_env():
     """Get the activated third party data source from the env file"""
     third_party_source = set()
-    truthy_values = (True, "True", "true", 1)
-    if SOURCE_GOOGLE_ANALYTICS in truthy_values:
+    if SOURCE_GOOGLE_ANALYTICS:
         third_party_source.add("39f092a6-8c87-4f6f-a8d9-5cef45b7dbe1")
-    if SOURCE_GOOGLE_SHEETS in truthy_values:
+    if SOURCE_GOOGLE_SHEETS:
         third_party_source.add("71607ba1-c0ac-4799-8049-7f4b90dd50f7")
-    if SOURCE_SHOPIFY in truthy_values:
+    if SOURCE_SHOPIFY:
         third_party_source.add("9da77001-af33-4bcd-be46-6252bf9342b9")
-    if SOURCE_STRIPE in truthy_values:
+    if SOURCE_STRIPE:
         third_party_source.add("e094cb9a-26de-4645-8761-65c0c425d1de")
-    if SOURCE_BING_ADS in truthy_values:
+    if SOURCE_BING_ADS:
         third_party_source.add("47f25999-dd5e-4636-8c39-e7cea2453331")
-    if SOURCE_FACEBOOK_ADS in truthy_values:
+    if SOURCE_FACEBOOK_ADS:
         third_party_source.add("e7778cfc-e97c-4458-9ecb-b4f2bba8946c")
-    if SOURCE_GOOGLE_ADS in truthy_values:
+    if SOURCE_GOOGLE_ADS:
         third_party_source.add("253487c0-2246-43ba-a21f-5116b20a2c50")
     return third_party_source

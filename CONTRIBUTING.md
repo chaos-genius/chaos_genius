@@ -109,12 +109,14 @@ Follow these steps if you want to make a code contribution to Chaos Genius.
 
 We will use Semantic Commit Messages, that are an adoption of Conventional Commits:
 
+```
 feat: add hat wobble
 ^--^  ^------------^
 |     |
 |     +-> Summary in present tense.
 |
 +-------> Type: chore, docs, feat, fix, refactor, style, or test.
+```
 
 #### Description of each commit type:
 

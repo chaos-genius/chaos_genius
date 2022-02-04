@@ -91,44 +91,44 @@ def _validate_kpi_from_df(
     validations = [
         {
             "debug_str": "Check #2: Validate column fits agg type",
-            "status": _validate_agg_type_fits_column(
+            "status": lambda: _validate_agg_type_fits_column(
                 df, column_name=kpi_column_name, agg_type=agg_type
             ),
         },
         {
             "debug_str": "Check #3: Validate kpi not datetime",
-            "status": _validate_kpi_not_datetime(
+            "status": lambda: _validate_kpi_not_datetime(
                 df, kpi_column_name=kpi_column_name, date_column_name=date_column_name
             ),
         },
         {
             "debug_str": "Check #4: Validate date column is parseable",
-            "status": _validate_date_column_is_parseable(
+            "status": lambda: _validate_date_column_is_parseable(
                 df,
                 date_column_name=date_column_name
             ),
         },
         {
             "debug_str": "Check #5: Validate date column is tz-naive",
-            "status": _validate_date_column_is_tz_naive(
+            "status": lambda: _validate_date_column_is_tz_naive(
                 df,
                 date_column_name=date_column_name
             ),
         },
         {
             "debug_str": "Check #6: Validate dimensions",
-            "status": _validate_dimensions(kpi_info),
+            "status": lambda: _validate_dimensions(kpi_info),
         },
         {
             "debug_str": (
                 "Check #7: Validate KPI has no more than "
                 f"{MAX_ROWS_FOR_DEEPDRILLS} rows"
             ),
-            "status": _validate_for_maximum_kpi_size(kpi_info),
+            "status": lambda: _validate_for_maximum_kpi_size(kpi_info),
         },
     ]
     for validation in validations:
-        status_bool, status_msg = validation["status"]
+        status_bool, status_msg = validation["status"]()
         logger.info(validation["debug_str"])
         logger.info(", ".join(map(str, [status_bool, status_msg])))
         if not status_bool:

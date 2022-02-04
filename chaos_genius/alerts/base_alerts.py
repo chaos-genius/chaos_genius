@@ -483,15 +483,17 @@ class AnomalyAlertController:
 
         return overall_data, subdim_data
 
-    def find_point(self, point, prev_data):
+    def _find_point(self, point, prev_data):
+        """Finds same type of point in previous data."""
         intended_point = None
         for prev_point in prev_data:
             if prev_point.get("series_type") == point.get("series_type"):
                 intended_point = prev_point
                 break
         return intended_point
-    
-    def get_nl_message_daily_freq(self, anomaly_data, kpi):
+
+    def _save_nl_message_daily_freq(self, anomaly_data: List[dict], kpi: Kpi):
+        """Saves change message for every point, for a daily frequency KPI."""
         time_diff = datetime.timedelta(days=1, hours=0, minutes=0)
 
         # TODO: fix circular import
@@ -502,12 +504,12 @@ class AnomalyAlertController:
 
         for point in prev_day_data:
             if point.get("anomaly_type") != "overall":
-                point["series_type"] = convert_query_string_to_user_string(point.get("series_type"))
+                point["series_type"] = convert_query_string_to_user_string(point["series_type"])
             else:
                 point["series_type"] = "Overall KPI"
 
         for point in anomaly_data:
-            intended_point = self.find_point(point, prev_day_data)
+            intended_point = self._find_point(point, prev_day_data)
 
             if intended_point is None:
                 # previous point wasn't found
@@ -522,14 +524,15 @@ class AnomalyAlertController:
                 point["percentage_change"] = find_percentage_change(point["y"], intended_point["y"])
 
             point["nl_message"] = change_message_from_percent(point["percentage_change"])
-    
-    def get_nl_message_hourly_freq(self, anomaly_data, kpi):
+
+    def _save_nl_message_hourly_freq(self, anomaly_data: List[dict], kpi: Kpi):
+        """Saves change message for every point, for a hourly frequency KPI."""
         data = dict()
         for point in anomaly_data:
             if point["data_datetime"].hour not in data.keys():
                 data[point["data_datetime"].hour] = []
             data[point["data_datetime"].hour].append(point)
-        
+
         anomaly_data_cache = dict()
 
         for point in anomaly_data:
@@ -548,8 +551,8 @@ class AnomalyAlertController:
                 required_data = get_previous_data(kpi.id, point["data_datetime"], time_diff)
                 required_data = [anomaly_point.as_dict for anomaly_point in required_data]
                 anomaly_data_cache[hour_val] = required_data
-        
-            intended_point = self.find_point(point, required_data)
+
+            intended_point = self._find_point(point, required_data)
             if intended_point is None:
                 # previous point wasn't found
                 point["percentage_change"] = "–"
@@ -563,13 +566,14 @@ class AnomalyAlertController:
                 point["percentage_change"] = find_percentage_change(point["y"], intended_point["y"])
 
             point["nl_message"] = change_message_from_percent(point["percentage_change"])
-    
-    def construct_summary_for_anomaly_data(self, anomaly_data):
+
+    def save_nl_message(self, anomaly_data: List[dict]):
+        """Constructs and saves change message for every point."""
         kpi_id = self.alert_info["kpi"]
-        kpi = Kpi.query.filter(Kpi.id == kpi_id).first()
+        kpi = Kpi.get_by_id(kpi_id)
         if kpi is None:
             for point in anomaly_data:
-                point["nl_message"] = "KPI doesnt exist"
+                point["nl_message"] = "KPI does not exist"
             return
 
         time_series_freq = kpi.anomaly_params.get("frequency")
@@ -577,18 +581,19 @@ class AnomalyAlertController:
             for point in anomaly_data:
                 point["nl_message"] = "Time series frequency does not exist"
             return
-        
+
         if time_series_freq in ("d", "D", "daily", "Daily"):
-            self.get_nl_message_daily_freq(anomaly_data, kpi)
+            self._save_nl_message_daily_freq(anomaly_data, kpi)
         elif time_series_freq in ("h", "H", "hourly", "Hourly"):
-            self.get_nl_message_hourly_freq(anomaly_data, kpi)
+            self._save_nl_message_hourly_freq(anomaly_data, kpi)
         else:
             for point in anomaly_data:
-                point["nl_message"] = "The following Time series frequency is not supported"
+                point["nl_message"] = "Unsupported time series frequency"
 
-    def format_alert_data(self, data):
-        self.construct_summary_for_anomaly_data(data)
-      
+    def format_alert_data(self, data: List[dict]):
+        """Pre-processes anomaly alert data."""
+        self.save_nl_message(data)
+
         for anomaly_point in data:
             lower = anomaly_point.get("yhat_lower")
             upper = anomaly_point.get("yhat_upper")
@@ -597,8 +602,10 @@ class AnomalyAlertController:
             # round off severity for better representation
             anomaly_point["severity"] = round(anomaly_point["severity"])
 
+            # rename column names for human readability
             for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
                 anomaly_point[value] = anomaly_point[key]
+
             my_time = time.strptime(str(anomaly_point["Time of Occurrence"]),  "%Y-%m-%d %H:%M:%S")
             timestamp = time.mktime(my_time)
             date_time = datetime.datetime.fromtimestamp(timestamp)
@@ -606,13 +613,13 @@ class AnomalyAlertController:
             anomaly_point["Time of Occurrence"] = new_time
             anomaly_point["data_datetime"] = str(anomaly_point["data_datetime"])
 
-    def remove_attribute_from_anomaly_data(self, anomaly_data, list_attributes):
+    def _remove_attributes_from_anomaly_points(self, anomaly_data: List[dict], list_attributes: List[str]):
         for attr in list_attributes:
             for point in anomaly_data:
                 delattr(point, attr)
 
     def send_alert_email(self, anomaly_data):
-        
+
         alert_channel_conf = self.alert_info["alert_channel_conf"]
 
         if type(alert_channel_conf) != dict:
@@ -635,7 +642,7 @@ class AnomalyAlertController:
                 return False
 
             kpi_name = getattr(kpi_obj, 'name')
-            
+
             overall_data, subdim_data = self.get_overall_subdim_data(anomaly_data)
 
             overall_data_email_body = deepcopy([overall_data[0]]) if len(overall_data) > 0 else []
@@ -772,12 +779,18 @@ class StaticKpiAlertController:
     def check_and_prepare_alert(self):
         pass
 
-def find_percentage_change(curr_val, prev_val):
+
+def find_percentage_change(
+    curr_val: Union[int, float],
+    prev_val: Union[int, float]
+) -> Union[int, float, str]:
+    """Calculates percentage change between previous and current value."""
     if prev_val == 0:
         return "-"
     change = curr_val - prev_val
     percentage_change = (change / prev_val) * 100
     return round_number(percentage_change)
+
 
 def change_message_from_percent(percent_change: Union[str, int, float]) -> str:
     """Creates a change message from given percentage change.

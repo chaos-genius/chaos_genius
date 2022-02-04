@@ -112,7 +112,7 @@ SOURCE_FACEBOOK_ADS = _make_bool(os.getenv("SOURCE_FACEBOOK_ADS", default=False)
 SOURCE_BING_ADS = _make_bool(os.getenv("SOURCE_BING_ADS", default=False))
 
 """Alert Digest configuration"""
-ALERT_DIGEST_ENABLED = os.getenv("ALERT_DIGEST_ENABLED", "False") == "True"
+ALERT_DIGEST_ENABLED = _make_bool(os.getenv("ALERT_DIGEST_ENABLED", False))
 ALERT_DIGEST_DAILY_TIME = os.getenv("ALERT_DIGEST_DAILY_TIME", "19:00").split(":")
 if len(ALERT_DIGEST_DAILY_TIME) != 2:
     raise ValueError(

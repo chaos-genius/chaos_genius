@@ -155,10 +155,16 @@ def get_digest_view_data(triggered_alert_id=None, include_subdims: bool = False)
 
     return anomaly_alerts_data, event_alerts_data
 
-def get_previous_data(kpi_id: int, point_timestamp: datetime.datetime, time_diff: datetime.timedelta) -> Iterator[AnomalyDataOutput]:
+
+def get_previous_data(
+    kpi_id: int,
+    point_timestamp: datetime.datetime,
+    time_diff: datetime.timedelta
+) -> Iterator[AnomalyDataOutput]:
+    """Queries anomaly data in range [ts - time_diff, ts)."""
     prev_day_data = AnomalyDataOutput.query.filter(
         AnomalyDataOutput.kpi_id == kpi_id,
-        AnomalyDataOutput.anomaly_type.in_(["overall","subdim"]),
+        AnomalyDataOutput.anomaly_type.in_(["overall", "subdim"]),
         AnomalyDataOutput.data_datetime < point_timestamp,
         AnomalyDataOutput.data_datetime >= (point_timestamp - time_diff),
     ).all()

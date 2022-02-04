@@ -6,6 +6,7 @@ from chaos_genius.alerts.base_alerts import change_message_from_percent
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
+from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 
 def structure_anomaly_data_for_digests(anomaly_data):
 
@@ -136,3 +137,14 @@ def get_digest_view_data(triggered_alert_id=None, include_subdims: bool = False)
     event_alerts_data = [alert for alert in data if alert.alert_type == "Event Alert"]
 
     return anomaly_alerts_data, event_alerts_data
+
+def get_prev_data(kpi_id, point_timestamp, time_diff):
+    prev_day_data = AnomalyDataOutput.query.filter(
+        AnomalyDataOutput.kpi_id == kpi_id,
+        AnomalyDataOutput.anomaly_type.in_(["overall","subdim"]),
+        AnomalyDataOutput.data_datetime < point_timestamp,
+        AnomalyDataOutput.data_datetime >= (point_timestamp - time_diff),
+    ).all()
+    return prev_day_data
+
+

@@ -54,7 +54,7 @@ if ALERT_DIGEST_ENABLED:
     # TODO: this will only work for static time defined in settings.py.
     # For user configurable digest schedule time, this needs to be changed.
     CELERYBEAT_SCHEDULE["alert-digest-daily"] = {
-        "task": "chaos_genius.jobs.aleert_tasks.alert_digest_daily",
+        "task": "chaos_genius.jobs.alert_tasks.alert_digest_daily",
         "schedule": crontab(hour=ALERT_DIGEST_DAILY_TIME[0], minute=ALERT_DIGEST_DAILY_TIME[1]),
         "args": (),
     }

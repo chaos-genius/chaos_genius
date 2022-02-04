@@ -37,6 +37,11 @@ export const TimeCuts = (state = initialState, action) => {
         activeTimeCut: action.data
       };
     }
+    case 'CLEAR_TIMECUTS': {
+      return {
+        ...initialState
+      };
+    }
     default:
       return state;
   }

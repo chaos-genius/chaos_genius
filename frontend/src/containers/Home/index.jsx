@@ -9,16 +9,27 @@ import { getOnboardingStatus } from '../../redux/actions';
 import { useDispatch, useSelector } from 'react-redux';
 
 import './home.scss';
+import store from '../../redux/store';
+import { useState } from 'react';
 
 const Home = () => {
   const dispatch = useDispatch();
 
   const { onboardingList } = useSelector((state) => state.onboarding);
+  const [homeReady, setHomeReady] = useState(false);
+
+  const clearHomeData = () => {
+    store.dispatch({ type: 'RESET_KPI_HOME_DATA' });
+    store.dispatch({ type: 'CLEAR_TIMECUTS' });
+    store.dispatch({ type: 'DASHBOARD_RESET' });
+    setHomeReady(true);
+  };
 
   useEffect(() => {
+    clearHomeData();
     dispatchOnboarding();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch]);
+  }, []);
 
   const dispatchOnboarding = () => {
     dispatch(getOnboardingStatus());
@@ -110,7 +121,7 @@ const Home = () => {
           </div>
         </>
       ) : (
-        <Kpihome />
+        homeReady && <Kpihome />
       )}
     </>
   );

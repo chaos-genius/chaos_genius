@@ -373,17 +373,6 @@ const KpiAlertConfigurationForm = ({
                 </div>
               )}
             </div>
-            {/* <div
-            className={type === 'static' ? 'alerts-type active' : 'alerts-type'}
-            onClick={() => setType('static')}>
-            <img src={Static} alt="Static" className="alert-image" />
-            <img
-              src={StaticActive}
-              alt="Static"
-              className="alert-image-active"
-            />
-            <span>Static</span>
-          </div> */}
           </div>
         </div>
         <div className="form-group">

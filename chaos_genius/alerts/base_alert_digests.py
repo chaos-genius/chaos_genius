@@ -1,6 +1,7 @@
 import datetime
 import logging
 import os
+from collections import defaultdict
 
 import pandas as pd
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -47,9 +48,9 @@ class AlertDigestController:
 
         for alert in data:
             alert_conf_id = alert.alert_conf_id
-            alert_conf = self.alert_config_cache.get(alert_conf_id, None)
+            alert_conf = self.alert_config_cache.get(alert_conf_id)
 
-            kpi_id = alert_conf.get("kpi", None)
+            kpi_id = alert_conf.get("kpi")
             kpi = self.kpi_cache.get(kpi_id) if kpi_id is not None else None
 
             alert.kpi_name = kpi.get("name") if kpi is not None else "Doesn't Exist"
@@ -59,7 +60,7 @@ class AlertDigestController:
             if not isinstance(alert_conf.get("alert_channel_conf"), dict):
                 alert.alert_channel_conf = None
             else:
-                alert.alert_channel_conf = alert_conf.get("alert_channel_conf").get(
+                alert.alert_channel_conf = alert_conf.get("alert_channel_conf", {}).get(
                     alert.alert_channel, None
                 )
 
@@ -76,20 +77,12 @@ class AlertDigestController:
             slack_status = self.send_slack_digests(slack_digests)
 
     def segregate_email_digests(self, email_digests):
-
-        user_triggered_alerts = dict()
-
+        user_triggered_alerts = defaultdict(set)
         for alert in email_digests:
             for user in alert.alert_channel_conf:
-                if user not in user_triggered_alerts.keys():
-                    user_triggered_alerts[user] = set()
-
                 user_triggered_alerts[user].add(alert.id)
 
-        triggered_alert_dict = dict()
-        for alert in email_digests:
-            triggered_alert_dict[alert.id] = alert
-
+        triggered_alert_dict = {alert.id: alert for alert in email_digests}
         for recipient in user_triggered_alerts.keys():
             self.send_alert_digest(
                 recipient, user_triggered_alerts[recipient], triggered_alert_dict
@@ -115,7 +108,7 @@ class AlertDigestController:
         test = self.send_template_email(
             "digest_template.html",
             [recipient],
-            "The very first alert digest",
+            "Daily Alert Digest Report",
             [],
             column_names=["alert_name", "kpi_name", "created_at", "link"],
             data=data,

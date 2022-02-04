@@ -95,23 +95,26 @@ def _format_slack_anomalies(top10: List[dict]) -> str:
     for point in top10:
         kpi_name_link = (
             f'<{webapp_url_prefix()}#/dashboard/0/anomaly/{point["kpi_id"]}'
-            f'|{point["kpi_name"]}>'
+            f'|{point["kpi_name"]} (*{point["Dimension"]}*)>'
         )
 
         dt = datetime.strptime(point["data_datetime"], ALERT_DATETIME_FORMAT)
-        time = dt.strftime("%H:%M:%S")
+        time = dt.strftime("%b %d, %I %p")
 
         change_percent = point["percentage_change"]
-        change_message = "remained same"
+        change_message = "-"
+        threshold_message = f'Expected range: {point["yhat_lower"]} - {point["yhat_upper"]}'
         if isinstance(change_percent, (int, float)):
             if change_percent > 0:
-                change_message = "increased"
+                change_message = f"+{change_percent}%"
+                threshold_message = f'Max threshold: {point["yhat_upper"]}'
             else:
-                change_message = "decreased"
+                change_message = f"{change_percent}%"
+                threshold_message = f'Min threshold: {point["yhat_lower"]}'
 
-        out += f'- *{kpi_name_link}* ({point["Dimension"]}) {change_message} by ' \
-               f'*{change_percent}%* to ' \
-               f'*{point["y"]}* on {time} (severity: *{point["severity"]}*)\n'
+        out += f'- *{kpi_name_link}* changed to ' \
+               f'*{point["y"]}* (*{change_message}*) ' \
+               f'on {time} (Severity: *{point["severity"]}*, {threshold_message})\n'
 
     return out
 
@@ -163,10 +166,11 @@ def alert_digest_slack_formatted(
                         "type": "button",
                         "text": {
                             "type": "plain_text",
-                            "text": "View Alerts Module"
+                            "text": "Alerts Dashboard"
                         },
                         "url": f"{webapp_url_prefix()}api/digest",
-                        "action_id": "alert_dashboard"
+                        "action_id": "alert_dashboard",
+                        "style": "primary",
                     }
                 ]
             },

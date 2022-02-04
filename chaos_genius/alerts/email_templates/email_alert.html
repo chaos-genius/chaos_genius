@@ -33,10 +33,15 @@
               {% for column in column_names %}
               {% if column == 'Change' %}
                 {% if item[column][0]=='I' %}
-                <td style="color: green;border: 1px solid #8A8A8A ; padding: 10px;">{{item[column]}}</td>
+                <td style="color: #F6F5F5;border: 1px solid #8A8A8A ; padding: 10px;">{{item[column][:13]}}
+                  <span style="color: green">{{item[column][13:]}}</span></td>
                 {% endif %}
                 {% if item[column][0]=='D' %}
-                <td style="color: red;border: 1px solid #8A8A8A ; padding: 10px;">{{item[column]}}</td>
+                <td style="color: #F6F5F5;border: 1px solid #8A8A8A ; padding: 10px;">{{item[column][:13]}}
+                  <span style="color: red">{{item[column][13:]}}</span></td>
+                {% endif %}
+                {% if item[column][0]=='N' %}
+                <td style="color: #F6F5F5;border: 1px solid #8A8A8A ; padding: 10px;">{{item[column]}}</td>
                 {% endif %}
               {% endif %}
               {% if column !='Change' %}

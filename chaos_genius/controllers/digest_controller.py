@@ -23,35 +23,34 @@ def structure_anomaly_data_for_digests(anomaly_data):
     for _, arr in segregated_data:
         arr.sort(key=lambda point: point["severity"], reverse=True)
         anomaly_data_formatted.extend(arr)
-    
+
     return anomaly_data_formatted
 
 def get_alert_kpi_configurations(data):
+
     alert_config_cache = dict()
-    kpi_cache = dict()
-
-    alert_conf_ids = set()
-    for alert in data:
-        alert_conf_ids.add(alert.alert_conf_id)
-    alert_conf_ids = list(alert_conf_ids)
+    alert_conf_ids = list(set([alert.alert_conf_id for alert in data]))
     alert_confs = Alert.query.filter(Alert.id.in_(alert_conf_ids)).all()
-
     alert_config_cache = {alert.id: alert.as_dict for alert in alert_confs}
 
-    kpi_ids = set()
-    for alert in data:
-        kpi_id = alert.alert_metadata.get("kpi")
-        if kpi_id is not None:
-            kpi_ids.add(kpi_id)
-    kpi_ids = list(kpi_ids)
-
+    kpi_cache = dict()
+    kpi_ids = list(
+        set(
+            [
+                alert.alert_metadata.get("kpi")
+                for alert in data
+                if alert.alert_metadata.get("kpi") is not None
+            ]
+        )
+    )
     kpis = Kpi.query.filter(Kpi.id.in_(kpi_ids)).all()
-
     kpi_cache = {kpi.id: kpi.as_dict for kpi in kpis}
+
     return alert_config_cache, kpi_cache
 
+
 def triggered_alert_data_processing(data):
-    
+
     alert_config_cache, kpi_cache = get_alert_kpi_configurations(data)
 
     for alert in data:

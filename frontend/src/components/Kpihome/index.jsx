@@ -328,7 +328,7 @@ const Kpihome = () => {
                           <div className="kpi-content">
                             <label>Change</label>
                             <span>
-                              {item.percentage_change !== '--' && (
+                              {item.percentage_change !== '-' && (
                                 <>
                                   <HumanReadableNumbers number={item.change} />
                                   <label
@@ -343,11 +343,11 @@ const Kpihome = () => {
                                       <img src={Down} alt="Low" />
                                     )}
                                     {item.percentage_change}
-                                    {item.percentage_change !== '--' ? '%' : ''}
+                                    {item.percentage_change !== '-' ? '%' : ''}
                                   </label>
                                 </>
                               )}
-                              {item.percentage_change === '--' && <>-</>}
+                              {item.percentage_change === '-' && <>-</>}
                             </span>
                           </div>
 
@@ -376,7 +376,7 @@ const Kpihome = () => {
                   })}
                 </div>
               ) : (
-                kpiHomeData === [] && (
+                kpiHomeData.length === 0 && (
                   <div className="home-card-section">
                     <div className="no-data-kpihome">
                       <Noresult text={search} title={'KPI'} />

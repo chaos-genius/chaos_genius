@@ -5,6 +5,7 @@ import Down from '../../assets/images/down.svg';
 import HumanReadableNumbers from '../HumanReadableNumbers';
 import './dashboardgraphcard.scss';
 import { formatDateTime } from '../../utils/date-helper';
+import { isNumber } from 'highcharts';
 
 const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
   let aggregationDataMap = [];
@@ -19,17 +20,28 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
           return {
             label: '% Change',
             value:
-              data.value !== undefined && data.value !== null
+              data.value !== undefined &&
+              data.value !== null &&
+              isNumber(data.value)
                 ? `${Math.abs(data?.value)} %`
                 : '-',
-            textColor: data?.value
-              ? data?.value >= 0
-                ? { indicator: 'Up', color: '#60CA9A' }
-                : { indicator: 'Down', color: '#E96560' }
-              : { color: '#222222' },
+            textColor:
+              data?.value &&
+              data?.value !== undefined &&
+              data?.value !== null &&
+              isNumber(data?.value)
+                ? data?.value >= 0
+                  ? { indicator: 'Up', color: '#60CA9A' }
+                  : { indicator: 'Down', color: '#E96560' }
+                : { color: '#222222' },
             format: false,
             borderColor: 'accent-blue',
-            hasChangeIndicator: true
+            hasChangeIndicator:
+              data?.value !== undefined &&
+              data?.value !== null &&
+              isNumber(data?.value)
+                ? true
+                : false
           };
         }
         case 'difference': {

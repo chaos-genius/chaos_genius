@@ -14,7 +14,7 @@ from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
 from chaos_genius.databases.models.kpi_model import Kpi
-from chaos_genius.controllers.digest_controller import get_prev_data
+from chaos_genius.controllers.digest_controller import get_previous_data
 
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.connectors import get_sqla_db_conn
@@ -494,7 +494,7 @@ class AnomalyAlertController:
     def get_nl_message_daily_freq(self, anomaly_data, kpi):
         time_diff = datetime.timedelta(days=1, hours=0, minutes=0)
 
-        prev_day_data = get_prev_data(kpi.id, self.anomaly_end_date, time_diff)
+        prev_day_data = get_previous_data(kpi.id, self.anomaly_end_date, time_diff)
 
         prev_day_data = [anomaly_point.as_dict for anomaly_point in prev_day_data]
 
@@ -538,7 +538,7 @@ class AnomalyAlertController:
                 required_data = anomaly_data_cache.get(hour_val)
             else:
                 time_diff = datetime.timedelta(days=0, hours=1, minutes=0)
-                required_data = get_prev_data(kpi.id, point["data_datetime"], time_diff)
+                required_data = get_previous_data(kpi.id, point["data_datetime"], time_diff)
                 required_data = [anomaly_point.as_dict for anomaly_point in required_data]
                 anomaly_data_cache[hour_val] = required_data
         

@@ -766,6 +766,8 @@ class StaticKpiAlertController:
         pass
 
 def find_percentage_change(curr_val, prev_val):
+    if prev_val == 0:
+        return "-"
     change = curr_val - prev_val
     percentage_change = (change / prev_val) * 100
     return round_number(percentage_change)

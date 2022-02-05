@@ -97,7 +97,7 @@ def new_kpi_df():  # noqa: D103
             "unix_time",
         ],
     )
-
+    df["date_col"] = pd.to_datetime(df["date_col"])
     return kpi, df
 
 
@@ -117,8 +117,6 @@ def check_kpi_validation(  # noqa: D103
         kpi_column_name=kpi_info["metric"],
         agg_type=kpi_info["aggregation"],
         date_column_name=kpi_info["datetime_column"],
-        date_format=kpi_info.get("date_format"),
-        unix_unit=kpi_info.get("unix_unit"),
     )
 
     if status == "pass":

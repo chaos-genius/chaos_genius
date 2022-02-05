@@ -77,33 +77,30 @@ Feature: KPI Validation
         Given a newly added KPI and its DataFrame
         When the date/time column is of type float
         Then validation should fail
-        And error message should be "The datetime column is of the type float64, acceptable types are string and datetime"
+        And error message should be "The datetime column is of the type float64, only datetime is acceptable"
 
     Scenario: date/time column is some categorical string
         Given a newly added KPI and its DataFrame
         When the date/time column is a categorical string
         Then validation should fail
-        And error message should start with "Unable to parse"
-        And error message should end with "Check that your date column is formatted properly and consistely."
+        And error message should be "The datetime column is of the type object, only datetime is acceptable"
 
     Scenario: date/time column has a very large timestamp
         Given a newly added KPI and its DataFrame
         When date/time column has a very large timestamp
         Then validation should fail
-        And error message should start with "Timestamps in "
-        And error message should end with " were out of bounds. Check that your date column is formatted properly and consistely."
+        And error message should be "The datetime column is of the type object, only datetime is acceptable"
 
-    # example: "Jan 19,17 05:04:50 PM"
+    # example: "Jan 19,17 05:04:50 PM", not currently supported
     Scenario: date/time column has is in a weird format
         Given a newly added KPI and its DataFrame
         When date/time column has is in a weird format
         Then validation should fail
-        And error message should start with "Timestamps in "
-        And error message should end with " were out of bounds. Check that your date column is formatted properly and consistely."
+        And error message should be "The datetime column is of the type object, only datetime is acceptable"
 
     # not currently supported
     Scenario: date/time column has unix timestamp
         Given a newly added KPI and its DataFrame
         When date/time column has integer unix timestamp
         Then validation should fail
-        And error message should be "The datetime column is of the type int64, acceptable types are string and datetime"
+        And error message should be "The datetime column is of the type int64, only datetime is acceptable"

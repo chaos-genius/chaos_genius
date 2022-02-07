@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useToast } from 'react-toast-wnm';
+import Alertnotification from '../../assets/images/alerts/alert-notify.svg';
 
 import Plus from '../../assets/images/plus.svg';
 import Frame from '../../assets/images/table/channelconfig.svg';
@@ -15,6 +16,8 @@ import './alerts.scss';
 import AlertFilter from '../../components/AlertFilter';
 
 import { getAllAlerts } from '../../redux/actions';
+
+import { BASE_URL } from '../../utils/url-helper';
 
 import Fuse from 'fuse.js';
 import store from '../../redux/store';
@@ -234,7 +237,18 @@ const Alerts = () => {
         {/* common heading and options */}
         <div className="heading-option">
           <div className="heading-title">
-            <h3>Alerts</h3>
+            {alertList && alertList.length !== 0 ? (
+              <a
+                href={`${BASE_URL}/api/digest`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="alert-linked">
+                <h1>Alerts</h1>
+                <img src={Alertnotification} alt="alert-notification" />
+              </a>
+            ) : (
+              <h3>Alerts</h3>
+            )}
           </div>
 
           <div className="alert-option-button">

@@ -1,5 +1,24 @@
 @import '../../assets/styles/filterlayout.scss';
 
+.heading-option {
+  .heading-title {
+    .alert-linked {
+      display: flex;
+      width: 99px;
+      h1 {
+        font-weight: 600;
+        font-size: 24px;
+        line-height: 26px;
+        color: #0597f2;
+        margin-right: 6px;
+      }
+      img {
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+}
 .alert-option-button {
   display: flex;
   .btn {

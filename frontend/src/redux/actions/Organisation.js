@@ -6,7 +6,10 @@ import {
   ONBOARD_ORGANIZATION_UPDATE_SUCCESS,
   SAVE_REPORT_SETTINGTIME_FAILURE,
   SAVE_REPORT_SETTINGTIME_REQUEST,
-  SAVE_REPORT_SETTINGTIME_SUCCESS
+  SAVE_REPORT_SETTINGTIME_SUCCESS,
+  GET_REPORT_SETTINGTIME_REQUEST,
+  GET_REPORT_SETTINGTIME_FAILURE,
+  GET_REPORT_SETTINGTIME_SUCCESS
 } from './ActionConstants';
 
 import {
@@ -36,9 +39,29 @@ export const saveReportSettingTimeFailure = () => {
   };
 };
 
-export const saveReportSettingTimeSuccess = () => {
+export const saveReportSettingTimeSuccess = (data) => {
   return {
-    type: SAVE_REPORT_SETTINGTIME_SUCCESS
+    type: SAVE_REPORT_SETTINGTIME_SUCCESS,
+    data
+  };
+};
+
+export const getReportSettingTimeRequested = () => {
+  return {
+    type: GET_REPORT_SETTINGTIME_REQUEST
+  };
+};
+
+export const getReportSettingTimeFailure = () => {
+  return {
+    type: GET_REPORT_SETTINGTIME_FAILURE
+  };
+};
+
+export const getReportSettingTimeSuccess = (data) => {
+  return {
+    type: GET_REPORT_SETTINGTIME_SUCCESS,
+    data
   };
 };
 
@@ -151,7 +174,30 @@ export const saveReportSettingTime = (payload) => {
     if (error) {
       dispatch(saveReportSettingTimeFailure());
     } else if (data && status === 200) {
-      dispatch(saveReportSettingTimeSuccess());
+      dispatch(saveReportSettingTimeSuccess({ data: payload }));
+    }
+  };
+};
+
+export const getReportSettingTime = () => {
+  return async (dispatch) => {
+    dispatch(getReportSettingTimeRequested());
+    const { data, error, status } = await postRequest({
+      url: EDIT_CHANNEL_URL,
+      data: {
+        config_name: 'alert_digest_settings'
+      },
+      headers: {
+        'Content-Type': 'application/json;charset=UTF-8',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true
+      },
+      noAuth: true
+    });
+    if (error) {
+      dispatch(getReportSettingTimeFailure());
+    } else if (data && status === 200) {
+      dispatch(getReportSettingTimeSuccess(data.data));
     }
   };
 };

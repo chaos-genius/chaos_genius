@@ -5,18 +5,24 @@ import { v4 as uuidv4 } from 'uuid';
 import AccountSetting from './AccountSetting';
 import MetricsSettings from './MetricsSettings';
 import './organisationSettings.scss';
-import { onboardingOrganisationStatus } from '../../redux/actions';
+import {
+  onboardingOrganisationStatus,
+  getReportSettingTime
+} from '../../redux/actions';
 import ReportSettings from './ReportSetting';
 
 const OrganisationSettings = () => {
   const [tabSwitch, setTabSwitch] = useState({ account: true, metrics: false });
-  const { organisationData } = useSelector((state) => state.organisation);
+  const { organisationData, reportSettingTime } = useSelector(
+    (state) => state.organisation
+  );
   const dispatch = useDispatch();
   useEffect(() => {
     const getOrganisationOnboardedData = () => {
       dispatch(onboardingOrganisationStatus());
     };
     getOrganisationOnboardedData();
+    dispatch(getReportSettingTime());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -67,7 +73,9 @@ const OrganisationSettings = () => {
               {tabSwitch.metrics ? (
                 <MetricsSettings organisationData={organisationData} />
               ) : null}
-              {tabSwitch.reports ? <ReportSettings /> : null}
+              {tabSwitch.reports && reportSettingTime !== '' ? (
+                <ReportSettings />
+              ) : null}
             </>
           ) : null}
         </div>

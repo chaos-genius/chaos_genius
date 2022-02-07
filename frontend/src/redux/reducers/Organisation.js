@@ -6,7 +6,10 @@ import {
   ONBOARD_ORGANIZATION_UPDATE_SUCCESS,
   SAVE_REPORT_SETTINGTIME_REQUEST,
   SAVE_REPORT_SETTINGTIME_FAILURE,
-  SAVE_REPORT_SETTINGTIME_SUCCESS
+  SAVE_REPORT_SETTINGTIME_SUCCESS,
+  GET_REPORT_SETTINGTIME_FAILURE,
+  GET_REPORT_SETTINGTIME_REQUEST,
+  GET_REPORT_SETTINGTIME_SUCCESS
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -15,7 +18,11 @@ const initialState = {
   error: false,
   reportSettingTimeRequested: false,
   reportSettingTimeFailure: false,
-  reportSettingTimeSuccess: false
+  reportSettingTimeSuccess: false,
+  getreportSettingTimeSuccess: false,
+  getreportSettingTimeFailure: false,
+  getreportSettingTimeRequest: false,
+  reportSettingTime: ''
 };
 
 export const organisation = (state = initialState, action) => {
@@ -68,9 +75,38 @@ export const organisation = (state = initialState, action) => {
     case SAVE_REPORT_SETTINGTIME_SUCCESS: {
       return {
         ...state,
-        reportSettingTimeSuccess: true
+        reportSettingTimeSuccess: true,
+        reportSettingTime: action.data.data
       };
     }
+
+    case GET_REPORT_SETTINGTIME_FAILURE: {
+      return {
+        ...state,
+        getreportSettingTimeFailure: true,
+        getreportSettingTimeRequest: false
+      };
+    }
+    case GET_REPORT_SETTINGTIME_REQUEST: {
+      return {
+        ...state,
+        getreportSettingTimeRequest: true,
+        getreportSettingTimeFailure: false,
+        getreportSettingTimeSuccess: false,
+        reportSettingTime: ''
+      };
+    }
+
+    case GET_REPORT_SETTINGTIME_SUCCESS: {
+      return {
+        ...state,
+        getreportSettingTimeFailure: false,
+        getreportSettingTimeSuccess: true,
+        getreportSettingTimeRequest: false,
+        reportSettingTime: action.data?.config_setting?.scheduled_time
+      };
+    }
+
     default:
       return state;
   }

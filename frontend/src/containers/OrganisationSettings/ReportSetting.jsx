@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import moment from 'moment';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import TimePicker from 'rc-time-picker';
 import 'rc-time-picker/assets/index.css';
 
-import { saveReportSettingTime } from '../../redux/actions/Organisation';
+import { saveReportSettingTime } from '../../redux/actions';
 
 const ReportSettings = () => {
   const dispatch = useDispatch();
-  const [schedule, setSchedule] = useState(moment());
+
+  const { reportSettingTime } = useSelector((state) => state.organisation);
+  console.log(reportSettingTime);
+  const [schedule, setSchedule] = useState(reportSettingTime);
+
+  useEffect(() => {
+    if (reportSettingTime !== '') {
+      setSchedule(reportSettingTime);
+    }
+  }, [reportSettingTime]);
 
   const handleValueChange = (data) => {
     setSchedule(data ? data.format('HH:mm:00') : '');

@@ -44,9 +44,12 @@
           overflow: hidden;
           text-overflow: ellipsis;
           display: -webkit-box;
-          -webkit-line-clamp: 2;
+          -webkit-line-clamp: 1;
           -webkit-box-orient: vertical;
           white-space: initial;
+          word-break: break-word;
+          hyphens: auto;
+          overflow-wrap: break-word;
         }
       }
       .more-dropdown {

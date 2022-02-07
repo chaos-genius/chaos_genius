@@ -103,18 +103,16 @@ def _format_slack_anomalies(top10: List[dict]) -> str:
 
         change_percent = point["percentage_change"]
         change_message = "-"
-        threshold_message = f'Expected range: {point["yhat_lower"]} - {point["yhat_upper"]}'
+        threshold_message = f'expected: *{point["yhat_lower"]} - {point["yhat_upper"]}*'
         if isinstance(change_percent, (int, float)):
             if change_percent > 0:
-                change_message = f"+{change_percent}%"
-                threshold_message = f'Max threshold: {point["yhat_upper"]}'
+                change_message = f"up {change_percent}%"
             else:
-                change_message = f"{change_percent}%"
-                threshold_message = f'Min threshold: {point["yhat_lower"]}'
+                change_message = f"down {change_percent}%"
 
         out += f'- *{kpi_name_link}* changed to ' \
                f'*{point["y"]}* (*{change_message}*) ' \
-               f'on {time} (Severity: *{point["severity"]}*, {threshold_message})\n'
+               f'on {time} ({threshold_message}, severity: *{point["severity"]}*)\n'
 
     return out
 

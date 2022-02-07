@@ -2,9 +2,7 @@ import React from 'react';
 
 import { Link, useHistory } from 'react-router-dom';
 import { env } from '../../env';
-
 import Plus from '../../assets/images/plus.svg';
-//import DisablePlus from '../../assets/images/disableplus.svg';
 import EventAlert from '../../assets/images/alerts/eventalert.svg';
 import KpiAlert from '../../assets/images/alerts/kpialert.svg';
 import rightarrow from '../../assets/images/rightarrow.svg';

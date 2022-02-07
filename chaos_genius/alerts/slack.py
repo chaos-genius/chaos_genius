@@ -4,7 +4,7 @@ from typing import List
 from slack_sdk.webhook import WebhookClient
 
 from chaos_genius.alerts.alert_channel_creds import get_creds
-from chaos_genius.alerts.constants import ALERT_DATE_FORMAT, ALERT_DATETIME_FORMAT
+from chaos_genius.alerts.constants import ALERT_DATE_FORMAT, ALERT_DATETIME_FORMAT, ALERT_READABLE_DATETIME_FORMAT
 from chaos_genius.alerts.utils import webapp_url_prefix
 
 
@@ -98,21 +98,14 @@ def _format_slack_anomalies(top10: List[dict]) -> str:
             f'|{point["kpi_name"]} (*{point["Dimension"]}*)>'
         )
 
-        dt = datetime.strptime(point["data_datetime"], ALERT_DATETIME_FORMAT)
-        time = dt.strftime("%b %d, %I %p")
+        date = point["formatted_date"]
 
-        change_percent = point["percentage_change"]
-        change_message = "-"
         threshold_message = f'expected: *{point["yhat_lower"]} - {point["yhat_upper"]}*'
-        if isinstance(change_percent, (int, float)):
-            if change_percent > 0:
-                change_message = f"up {change_percent}%"
-            else:
-                change_message = f"down {change_percent}%"
+        change_message = point["change_message"]
 
         out += f'- *{kpi_name_link}* changed to ' \
                f'*{point["y"]}* (*{change_message}*) ' \
-               f'on {time} ({threshold_message}, severity: *{point["severity"]}*)\n'
+               f'on {date} ({threshold_message}, severity: *{point["severity"]}*)\n'
 
     return out
 
@@ -154,7 +147,7 @@ def alert_digest_slack_formatted(
                 "text": {
                     "type": "mrkdwn",
                     "text": f"- Total alerts generated (Overall KPI): *{overall_count}*\n"
-                            f"- Total alerts generated (including subdimenions): *{subdim_count}*\n"
+                            f"- Total alerts generated (including subdimenions): *{subdim_count + overall_count}*\n"
                 }
             },
             {
@@ -179,7 +172,7 @@ def alert_digest_slack_formatted(
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": f"Top 10 anomalies ({curr_time.strftime(ALERT_DATE_FORMAT)})",
+                    "text": "Top 10 anomalies",
                     "emoji": True,
                 },
             },

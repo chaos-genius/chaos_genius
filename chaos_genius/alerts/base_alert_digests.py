@@ -5,19 +5,16 @@ import os
 from collections import defaultdict
 from typing import Dict, List, Tuple
 
-import pandas as pd
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from chaos_genius.alerts.base_alerts import FREQUENCY_DICT
+from chaos_genius.alerts.constants import ALERT_DATE_FORMAT, ALERT_DATETIME_FORMAT, ALERT_READABLE_DATETIME_FORMAT
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import alert_digest_slack_formatted
 from chaos_genius.alerts.utils import webapp_url_prefix
-from chaos_genius.controllers.digest_controller import get_alert_kpi_configurations
 from chaos_genius.controllers.config_controller import get_config_object
-from chaos_genius.databases.models.alert_model import Alert
-from chaos_genius.databases.models.kpi_model import Kpi
+from chaos_genius.controllers.digest_controller import get_alert_kpi_configurations
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
-from chaos_genius.settings import CHAOSGENIUS_WEBAPP_URL
 
 logger = logging.getLogger(__name__)
 
@@ -94,22 +91,26 @@ class AlertDigestController:
     def send_alert_digest(self, recipient, triggered_alert_ids, triggered_alert_dict):
         data = []
 
-        for id_ in triggered_alert_ids:
-            data.append(triggered_alert_dict.get(id_))
-            data[-1].link = webapp_url_prefix() + f"api/digest?id={id_}"
-
-        data_len = min(len(data), 10)
-        data = data if data_len == 0 else data[0:data_len]
+        triggered_alerts = [triggered_alert_dict[id_].__dict__ for id_ in triggered_alert_ids]
+        points = _all_anomaly_points(triggered_alerts)
+        top_anomalies = _top_10_anomalies(points)
+        overall_count, subdim_count = _count_alerts(points)
+        _save_anomaly_point_formatting(points)
 
         test = self.send_template_email(
             "digest_template.html",
             [recipient],
-            "Daily Alert Digest Report",
+            f"Daily Alert Digest ({self.curr_time.strftime(ALERT_DATE_FORMAT)})",
             [],
             column_names=["alert_name", "kpi_name", "created_at", "link"],
-            data=data,
             preview_text="Alert Digest",
             getattr=getattr,
+            formatted_date=self.curr_time.strftime(ALERT_DATE_FORMAT),
+            overall_count=overall_count,
+            subdim_count=subdim_count,
+            alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
+            kpi_link_prefix=f"{webapp_url_prefix()}#/dashboard/0/anomaly",
+            top_anomalies=top_anomalies,
         )
 
     def send_template_email(self, template, recipient_emails, subject, files, **kwargs):
@@ -121,6 +122,9 @@ class AlertDigestController:
         )
 
         template = env.get_template(template)
+        rendered_template = template.render(**kwargs)
+        with open("temp_email.html", "wt") as f:
+            f.write(rendered_template)
         test = send_static_alert_email(
             recipient_emails, subject, template.render(**kwargs), None, files
         )
@@ -135,6 +139,7 @@ class AlertDigestController:
         points = _all_anomaly_points(triggered_alerts)
         top10 = _top_10_anomalies(points)
         overall_count, subdim_count = _count_alerts(points)
+        _save_anomaly_point_formatting(points)
 
         test = alert_digest_slack_formatted(
             self.frequency,
@@ -180,6 +185,23 @@ def _count_alerts(points: List[Dict]) -> Tuple[int, int]:
     overall = sum(1 for point in points if point["Dimension"] == "Overall KPI")
     subdims = total - overall
     return overall, subdims
+
+
+def _save_anomaly_point_formatting(points: List[Dict]):
+    """Adds formatted fields to each point, to be used in digest templates."""
+    for point in points:
+        dt = datetime.datetime.strptime(point["data_datetime"], ALERT_DATETIME_FORMAT)
+        date = dt.strftime(ALERT_READABLE_DATETIME_FORMAT)
+        point["formatted_date"] = date
+
+        change_percent = point["percentage_change"]
+        change_message = "-"
+        if isinstance(change_percent, (int, float)):
+            if change_percent > 0:
+                change_message = f"up {change_percent}%"
+            else:
+                change_message = f"down {change_percent}%"
+        point["change_message"] = change_message
 
 
 def check_and_trigger_digest(frequency: str):

@@ -665,25 +665,29 @@ class AnomalyAlertController:
                     anomaly_data.to_csv(buffer, encoding="utf-8")
                     file_detail["fdata"] = buffer.getvalue()
                 files = [file_detail]
-            
-            test = self.send_template_email('email_alert.html', 
-                                            recipient_emails, 
-                                            subject,
-                                            files,
-                                            column_names=column_names,
-                                            data=overall_data_email_body,
-                                            alert_message=alert_message,
-                                            kpi_name = kpi_name,
-                                            alert_frequency=self.alert_info['alert_frequency'].capitalize(),
-                                            preview_text="Anomaly Alert",
-                                            alert_name=self.alert_info.get("alert_name")
-                                        )
-            logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
+
+            daily_digest = self.alert_info.get("daily_digest", False)
+            weekly_digest = self.alert_info.get("weekly_digest", False)
+
+            if not (daily_digest or weekly_digest):
+                test = self.send_template_email('email_alert.html',
+                                                recipient_emails,
+                                                subject,
+                                                files,
+                                                column_names=column_names,
+                                                data=overall_data_email_body,
+                                                alert_message=alert_message,
+                                                kpi_name=kpi_name,
+                                                alert_frequency=self.alert_info['alert_frequency'].capitalize(),
+                                                preview_text="Anomaly Alert",
+                                                alert_name=self.alert_info.get("alert_name")
+                                            )
+                logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
             #self.remove_attributes_from_anomaly_data(overall_data, ["nl_message"])
             # TODO: fix this circular import
             from chaos_genius.controllers.digest_controller import structure_anomaly_data_for_digests
             anomaly_data = structure_anomaly_data_for_digests(overall_data)
-            return test, anomaly_data
+            return False, anomaly_data
         else:
             logger.info(
                 f"No receipent email available (Alert ID - {self.alert_info['id']})"
@@ -739,20 +743,26 @@ class AnomalyAlertController:
 
         overall_data.extend(subdim_data)
         overall_data_alert_body.extend(subdim_data_alert_body)
-        
+
         self.format_alert_data(overall_data)
         self.format_alert_data(overall_data_alert_body)
 
         column_names = ANOMALY_ALERT_COLUMN_NAMES
         anomaly_data = pd.DataFrame(overall_data_alert_body, columns=column_names)
-        table_data = tabulate(anomaly_data, tablefmt="fancy_grid", headers="keys")
-        table_data = "```" + table_data + "```"
-        test = anomaly_alert_slack_formatted(
-                alert_name,
-                kpi_name,
-                data_source_name,
-                table_data
-            )
+
+        daily_digest = self.alert_info.get("daily_digest", False)
+        weekly_digest = self.alert_info.get("weekly_digest", False)
+
+        test = "failed"
+        if not (daily_digest or weekly_digest):
+            table_data = tabulate(anomaly_data, tablefmt="fancy_grid", headers="keys")
+            table_data = "```" + table_data + "```"
+            test = anomaly_alert_slack_formatted(
+                    alert_name,
+                    kpi_name,
+                    data_source_name,
+                    table_data
+                )
 
         if test == "ok":
             logger.info(

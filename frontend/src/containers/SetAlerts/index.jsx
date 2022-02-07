@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { Link, useHistory } from 'react-router-dom';
-
 import { env } from '../../env';
 
 import Plus from '../../assets/images/plus.svg';
@@ -14,7 +13,6 @@ import './setalerts.scss';
 
 const SetAlerts = () => {
   const history = useHistory();
-
   const EVENT_ALERT_FLAG = env.REACT_APP_EVENT_ALERT;
 
   return (

@@ -7,6 +7,7 @@ import './homefilter.scss';
 import { useState } from 'react';
 import { formatDateTime } from '../../utils/date-helper';
 import { CustomTooltip } from '../../utils/tooltip-helper';
+import { debuncerReturn } from '../../utils/simple-debouncer';
 
 const Homefilter = ({ data, setDashboard, dashboard, setDashboardId }) => {
   const [filterData, setFilterData] = useState(data);
@@ -29,6 +30,8 @@ const Homefilter = ({ data, setDashboard, dashboard, setDashboardId }) => {
       );
     }
   };
+
+  const debounce = () => debuncerReturn(onSearch, 500);
 
   const onSort = (type) => {
     let value = data.sort(function (a, b) {
@@ -61,7 +64,7 @@ const Homefilter = ({ data, setDashboard, dashboard, setDashboardId }) => {
               type="text"
               className="form-control h-40"
               placeholder="Search Dashboard"
-              onChange={(e) => onSearch(e)}
+              onChange={debounce()}
             />
             <span>
               <img src={Search} alt="Search Icon" />

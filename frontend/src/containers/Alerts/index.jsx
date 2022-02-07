@@ -17,6 +17,8 @@ import AlertFilter from '../../components/AlertFilter';
 
 import { getAllAlerts } from '../../redux/actions';
 
+import { BASE_URL } from '../../utils/url-helper';
+
 import Fuse from 'fuse.js';
 import store from '../../redux/store';
 import Noalert from '../../components/Noalert';
@@ -235,10 +237,18 @@ const Alerts = () => {
         {/* common heading and options */}
         <div className="heading-option">
           <div className="heading-title">
-            <Link to="" className="alert-linked">
-              <h1>Alerts</h1>
-              <img src={Alertnotification} alt="alert-notification" />
-            </Link>
+            {alertList && alertList.length !== 0 ? (
+              <a
+                href={`${BASE_URL}/api/digest`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="alert-linked">
+                <h1>Alerts</h1>
+                <img src={Alertnotification} alt="alert-notification" />
+              </a>
+            ) : (
+              <h3>Alerts</h3>
+            )}
           </div>
 
           <div className="alert-option-button">

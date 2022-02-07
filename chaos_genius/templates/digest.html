@@ -88,16 +88,16 @@
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
                                             Dimension
                                         </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle desc">
                                             Value
                                         </th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
                                             Expected Value
                                         </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle desc">
                                             Severity Score
                                         </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle desc">
                                             Timestamp
                                         </th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
@@ -282,14 +282,6 @@
         justify-content: flex-start;
         /* align-items: baseline; */
     }
-
-    .dataTable-sorter.asc:after {
-        content: '\2191';
-        color: #0597F2;
-        position: static!important;
-        right: 0px!important;
-        opacity: 1!important;
-    }
     .dataTable-sorter.desc:after {
         content: '\2193';
         color: #0597F2;
@@ -403,27 +395,11 @@
         dataTableAnomaly.dateOnlyColIndex = 10;
         dataTableAnomaly.columns().hide([dataTableAnomaly.emailColIndex, dataTableAnomaly.channelColIndex, dataTableAnomaly.dateOnlyColIndex]);
 
-        dataTableAnomaly.on('datatable.sort', function(column, direction) {
-            if(column === 3 || column === 4 || column === 5) {
-                if(direction === 'asc') {
-                    if(dataTableAnomaly.head.children[0].children[column].getElementsByTagName('a')[0].classList.contains('desc')) {
-                        dataTableAnomaly.head.children[0].children[column].getElementsByTagName('a')[0].classList.remove('desc')
-                        dataTableAnomaly.head.children[0].children[column].getElementsByTagName('a')[0].classList.add('asc');
-                    }else if(!dataTableAnomaly.head.children[0].children[column].getElementsByTagName('a')[0].classList.contains('asc')) {
-                        dataTableAnomaly.head.children[0].children[column].getElementsByTagName('a')[0].classList.add('asc');
-                    }
-                }
-                if(direction === 'desc') {
-                    if(dataTableAnomaly.head.children[0].children[column].getElementsByTagName('a')[0].classList.contains('asc')) {
-                        dataTableAnomaly.head.children[0].children[column].getElementsByTagName('a')[0].classList.remove('asc')
-                        dataTableAnomaly.head.children[0].children[column].getElementsByTagName('a')[0].classList.add('desc');
-                    }else if(!dataTableAnomaly.head.children[0].children[column].getElementsByTagName('a')[0].classList.contains('desc')) {
-                        dataTableAnomaly.head.children[0].children[column].getElementsByTagName('a')[0].classList.add('desc');
-                    }
-                }
-            }
+        dataTableAnomaly.on('datatable.init', function(args) {
+            dataTableAnomaly.head.getElementsByTagName('th')[3].getElementsByTagName('a')[0].classList.add('desc');
+            dataTableAnomaly.head.getElementsByTagName('th')[5].getElementsByTagName('a')[0].classList.add('desc');
+            dataTableAnomaly.head.getElementsByTagName('th')[6].getElementsByTagName('a')[0].classList.add('desc');
         });
-
         const dataEvent = [
             {% for triggered_alert in event_alerts_data %}
             [

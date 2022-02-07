@@ -46,42 +46,6 @@ const AddFaq = () => {
               <label>KPI Validation</label>
             </a>
           </li>
-          <li>
-            <a
-              href="https://docs.chaosgenius.io/docs/kpi_explorer/adding-kpis#add-a-kpi"
-              target="_blank"
-              rel="noopener noreferrer">
-              {' '}
-              <label>Add a KPI</label>
-            </a>
-          </li>
-          <li>
-            <a
-              href="https://docs.chaosgenius.io/docs/kpi_explorer/adding-kpis#table-vs-custom-query-kpis"
-              target="_blank"
-              rel="noopener noreferrer">
-              {' '}
-              <label>Table vs Custom Query KPIs</label>
-            </a>
-          </li>
-          <li>
-            <a
-              href="https://docs.chaosgenius.io/docs/kpi_explorer/adding-kpis#kpi-parameters"
-              target="_blank"
-              rel="noopener noreferrer">
-              {' '}
-              <label>KPI Parameters</label>
-            </a>
-          </li>
-          <li>
-            <a
-              href="https://docs.chaosgenius.io/docs/kpi_explorer/adding-kpis#kpi-validation"
-              target="_blank"
-              rel="noopener noreferrer">
-              {' '}
-              <label>KPI Validation</label>
-            </a>
-          </li>
         </ul>
       </div>
       <div className="faq__wrapper-content">

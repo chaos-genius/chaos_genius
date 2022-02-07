@@ -90,7 +90,7 @@ def alert_digest_daily_scheduler():
 
     if (
         (scheduled_time_exact - timedelta(minutes=5))
-        < current_time
+        <= current_time
         < (scheduled_time_exact + timedelta(minutes=5))
     ):
         logger.info("Triggering daily digests.")

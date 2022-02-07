@@ -204,7 +204,7 @@ services:
       - chaosgenius-db
 
   chaosgenius-worker-alerts:
-    container_name: chaosgenius-  lerts
+    container_name: chaosgenius-worker-alerts
     image: chaosgenius/chaosgenius-server:latest
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
     environment:

@@ -3,7 +3,10 @@ import {
   ONBOARD_ORGANIZATION_REQUEST,
   ONBOARD_ORGANIZATION_SUCCESS,
   ONBOARD_ORGANIZATION_FAILURE,
-  ONBOARD_ORGANIZATION_UPDATE_SUCCESS
+  ONBOARD_ORGANIZATION_UPDATE_SUCCESS,
+  SAVE_REPORT_SETTINGTIME_FAILURE,
+  SAVE_REPORT_SETTINGTIME_REQUEST,
+  SAVE_REPORT_SETTINGTIME_SUCCESS
 } from './ActionConstants';
 
 import {
@@ -18,6 +21,24 @@ import { postRequest, putRequest } from '../../utils/http-helper';
 export const getOnboardingOrgnaizationStatusRequested = () => {
   return {
     type: ONBOARD_ORGANIZATION_REQUEST
+  };
+};
+
+export const saveReportSettingTimeRequested = () => {
+  return {
+    type: SAVE_REPORT_SETTINGTIME_REQUEST
+  };
+};
+
+export const saveReportSettingTimeFailure = () => {
+  return {
+    type: SAVE_REPORT_SETTINGTIME_FAILURE
+  };
+};
+
+export const saveReportSettingTimeSuccess = () => {
+  return {
+    type: SAVE_REPORT_SETTINGTIME_SUCCESS
   };
 };
 
@@ -87,7 +108,7 @@ export const onboardingOrganisationStatus = () => {
 
 export const onboardOrganisationUpdate = (payload) => {
   return async (dispatch) => {
-    dispatch(getOnboardingOrgnaizationStatusRequested);
+    dispatch(getOnboardingOrgnaizationStatusRequested());
     const { data, error, status } = await putRequest({
       url: ORGANIZATION_UPDATE_URL,
       data: JSON.stringify(payload),
@@ -102,6 +123,35 @@ export const onboardOrganisationUpdate = (payload) => {
       dispatch(getOnboardingOrgnaizationStatusFailure());
     } else if (data && status === 200) {
       dispatch(onboardingOrganisationStatus());
+    }
+  };
+};
+
+export const saveReportSettingTime = (payload) => {
+  return async (dispatch) => {
+    dispatch(saveReportSettingTimeRequested());
+    const { data, error, status } = await postRequest({
+      url: ALERT_EMAIL_URL,
+      data: {
+        config_name: 'alert_digest_settings',
+        config_settings: {
+          active: true,
+          daily_digest: true,
+          weekly_digest: false,
+          scheduled_time: payload
+        }
+      },
+      headers: {
+        'Content-Type': 'application/json;charset=UTF-8',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true
+      },
+      noAuth: true
+    });
+    if (error) {
+      dispatch(saveReportSettingTimeFailure());
+    } else if (data && status === 200) {
+      dispatch(saveReportSettingTimeSuccess());
     }
   };
 };

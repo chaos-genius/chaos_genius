@@ -1,14 +1,22 @@
 import React, { useState } from 'react';
 import moment from 'moment';
+import { useDispatch } from 'react-redux';
 
 import TimePicker from 'rc-time-picker';
 import 'rc-time-picker/assets/index.css';
 
+import { saveReportSettingTime } from '../../redux/actions/Organisation';
+
 const ReportSettings = () => {
+  const dispatch = useDispatch();
   const [schedule, setSchedule] = useState(moment());
 
   const handleValueChange = (data) => {
     setSchedule(data ? data.format('HH:mm:00') : '');
+  };
+
+  const onReportSettingsSave = (e) => {
+    dispatch(saveReportSettingTime(moment(schedule, 'HH:mm')?.format('HH:mm')));
   };
 
   return (
@@ -33,7 +41,9 @@ const ReportSettings = () => {
             <span>Cancel</span>
           </button>
 
-          <button className="btn black-button">
+          <button
+            className="btn black-button"
+            onClick={(e) => onReportSettingsSave()}>
             <div className="btn-content">
               <span>Save Changes</span>
             </div>

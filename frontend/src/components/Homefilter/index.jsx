@@ -102,7 +102,9 @@ const Homefilter = ({ data, setDashboard, dashboard, setDashboardId }) => {
                     setDashboardId(item.id);
                   }}>
                   <div className="filter-tooltipcontent">
-                    {CustomTooltip(item.name)}
+                    <label className="name-tooltip">
+                      {CustomTooltip(item.name)}
+                    </label>
                   </div>
                   <span>{item?.kpis.length}</span>
                 </li>

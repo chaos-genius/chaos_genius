@@ -1,6 +1,5 @@
 """Provides AnomalyDetectionController to compute Anomaly Detection."""
 
-from chaos_genius.databases.models.kpi_model import Kpi
 import logging
 from datetime import date, datetime, timedelta
 from typing import Optional
@@ -18,12 +17,13 @@ from chaos_genius.core.anomaly.utils import (
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.core.utils.end_date import load_input_data_end_date
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, db
+from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.settings import (
+    MAX_ANOMALY_SLACK_DAYS,
     MAX_FILTER_SUBGROUPS_ANOMALY,
     MAX_SUBDIM_CARDINALITY,
     MIN_DATA_IN_SUBGROUP,
     MULTIDIM_ANALYSIS_FOR_ANOMALY,
-    MAX_ANOMALY_SLACK_DAYS,
 )
 
 logger = logging.getLogger(__name__)
@@ -221,6 +221,8 @@ class AnomalyDetectionController(object):
                 logger.warn(
                     f"skipping {dim}, cardinality over {MAX_SUBDIM_CARDINALITY}"
                 )
+            elif input_data[dim].dtype != "object":
+                logger.warn(f"skipping {dim}, non-string value found")
             else:
                 valid_subdims.append(dim)
 
@@ -436,7 +438,9 @@ class AnomalyDetectionController(object):
         try:
             agg = self.kpi_info["aggregation"]
             dq_list = ["max", "count", "mean"] if agg != "mean" else ["max", "count"]
-            is_categorical_metric = 1 if input_data[self.kpi_info["metric"]].dtypes == "object" else 0
+            is_categorical_metric = (
+                1 if input_data[self.kpi_info["metric"]].dtypes == "object" else 0
+            )
             if agg == "count" and is_categorical_metric:
                 dq_list = []
         except Exception as e:
@@ -462,17 +466,13 @@ class AnomalyDetectionController(object):
         if flag:
             if self._task_id is not None:
                 checkpoint_success(
-                    self._task_id,
-                    self.kpi_info["id"],
-                    "Anomaly",
-                    checkpoint
+                    self._task_id, self.kpi_info["id"], "Anomaly", checkpoint
                 )
             logger.info(
-                "(Task: %s, KPI: %d)"
-                " Anomaly - %s - Success",
+                "(Task: %s, KPI: %d)" " Anomaly - %s - Success",
                 str(self._task_id),
                 self.kpi_info["id"],
-                checkpoint
+                checkpoint,
             )
 
     def _checkpoint_failure(self, checkpoint: str, e: Exception, flag=True):
@@ -486,12 +486,11 @@ class AnomalyDetectionController(object):
                     e,
                 )
             logger.exception(
-                "(Task: %s, KPI: %d) "
-                "Anomaly - %s - Exception occured.",
+                "(Task: %s, KPI: %d) " "Anomaly - %s - Exception occured.",
                 str(self._task_id),
                 self.kpi_info["id"],
                 checkpoint,
-                exc_info=e
+                exc_info=e,
             )
 
     @staticmethod

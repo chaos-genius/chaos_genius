@@ -81,7 +81,7 @@ const Homefilter = ({ data, setDashboard, dashboard, setDashboardId }) => {
             <ul className="dropdown-menu">
               <li onClick={() => onSort('alpha')}>Alphabetical</li>
               <li onClick={() => onSort('recent')}>Recently Modified</li>
-              <li onClick={() => onSort('kpi')}>No of KPI’s</li>
+              <li onClick={() => onSort('kpi')}>No of KPIs</li>
             </ul>
           </div>
         </div>
@@ -102,7 +102,9 @@ const Homefilter = ({ data, setDashboard, dashboard, setDashboardId }) => {
                     setDashboardId(item.id);
                   }}>
                   <div className="filter-tooltipcontent">
-                    {CustomTooltip(item.name)}
+                    <label className="name-tooltip">
+                      {CustomTooltip(item.name)}
+                    </label>
                   </div>
                   <span>{item?.kpis.length}</span>
                 </li>

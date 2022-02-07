@@ -86,8 +86,6 @@ services:
       - SENTRY_DSN=${SENTRY_DSN}
       - CHAOSGENIUS_ENTERPRISE_EDITION_KEY=${CHAOSGENIUS_ENTERPRISE_EDITION_KEY}
       - CHAOSGENIUS_WEBAPP_URL=${CHAOSGENIUS_WEBAPP_URL}
-    ports:
-      - "5000:5000"
 
   chaosgenius-webapp:
     container_name: chaosgenius-webapp
@@ -121,14 +119,10 @@ services:
     volumes:
       - ./docker/cg-db-setup:/docker-entrypoint-initdb.d/
       - cg-db:/var/lib/postgresql/data
-    ports:
-      - 5433:5432
 
   chaosgenius-redis:
     container_name: chaosgenius-redis
     image: "redis:6.2-alpine"
-    ports:
-      - 6379:6379
     
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler
@@ -337,8 +331,6 @@ services:
       - RESOURCE_CPU_LIMIT=${RESOURCE_CPU_LIMIT}
       - RESOURCE_MEMORY_REQUEST=${RESOURCE_MEMORY_REQUEST}
       - RESOURCE_MEMORY_LIMIT=${RESOURCE_MEMORY_LIMIT}
-    ports:
-      - 8001:8001
     volumes:
       - workspace:${WORKSPACE_ROOT}
       - data:${CONFIG_ROOT}
@@ -348,8 +340,6 @@ services:
     logging: *default-logging
     container_name: airbyte-webapp
     restart: unless-stopped
-    ports:
-      - 8000:80
     environment:
       - AIRBYTE_ROLE=${AIRBYTE_ROLE:-}
       - AIRBYTE_VERSION=${VERSION}
@@ -365,8 +355,6 @@ services:
     logging: *default-logging
     container_name: airbyte-temporal
     restart: unless-stopped
-    ports:
-      - 7233:7233
     environment:
       - DB=postgresql
       - DB_PORT=${DATABASE_PORT}

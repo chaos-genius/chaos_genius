@@ -182,7 +182,7 @@ const Dashboardcards = ({ dashboarddata, setChange }) => {
 
                   <div className="body-card">
                     <div className="body-content">
-                      <span>No of KPI’s</span>
+                      <span>No of KPIs</span>
                       <h5>{dashboard?.kpis?.length}</h5>
                     </div>
                     <div className="body-content created-on-content">

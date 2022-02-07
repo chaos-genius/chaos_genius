@@ -323,13 +323,13 @@ const Kpihome = () => {
                               {CustomTooltip(item.name, true)}
                             </h3>
                           </div>
-                          <div className="kpi-content kpi-current">
-                            <label>{item?.display_value_current}</label>
-                            <HumanReadableNumbers number={item.current} />
-                          </div>
                           <div className="kpi-content">
                             <label>{item?.display_value_prev}</label>
                             <HumanReadableNumbers number={item.prev} />
+                          </div>
+                          <div className="kpi-content kpi-current">
+                            <label>{item?.display_value_current}</label>
+                            <HumanReadableNumbers number={item.current} />
                           </div>
                           <div className="kpi-content">
                             <label>Change</label>

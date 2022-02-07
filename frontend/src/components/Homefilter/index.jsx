@@ -81,7 +81,7 @@ const Homefilter = ({ data, setDashboard, dashboard, setDashboardId }) => {
             <ul className="dropdown-menu">
               <li onClick={() => onSort('alpha')}>Alphabetical</li>
               <li onClick={() => onSort('recent')}>Recently Modified</li>
-              <li onClick={() => onSort('kpi')}>No of KPI’s</li>
+              <li onClick={() => onSort('kpi')}>No of KPIs</li>
             </ul>
           </div>
         </div>

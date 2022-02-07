@@ -153,6 +153,12 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
       getAllLinechart();
       if (dimension.value === 'singledimension') {
         dispatchGetAllDashboardDimension();
+      } else if (dimension.value === 'multidimension') {
+        dispatch(
+          getDashboardRcaAnalysis(kpi, {
+            timeline: monthWeek.value
+          })
+        );
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -124,9 +124,6 @@ class AlertDigestController:
         )
 
         template = env.get_template(template)
-        rendered_template = template.render(**kwargs)
-        with open("temp_email.html", "wt") as f:
-            f.write(rendered_template)
         test = send_static_alert_email(
             recipient_emails, subject, template.render(**kwargs), None, files
         )

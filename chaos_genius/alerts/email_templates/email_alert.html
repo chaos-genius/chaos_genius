@@ -2,8 +2,8 @@
 
 {% block head %}
 <style>
-.digest-container {
-    color: #F6F5F5;
+.alert-container {
+    color: #F6F5F5 !important;
 }
 
 .btn {
@@ -33,12 +33,11 @@
 
 <hr />
 
-<div class="digest-container">
+<div class="alert-container">
 
 <h3>Summary</h3>
 
 <h4><span style="font-weight: 400;">KPI Name: </span>{{ kpi_name }}</h4>
-<h4><span style="font-weight: 400;">Alert Frequency: </span>{{ alert_frequency }}</h4>
 
 <ul>
     <li>Total alerts generated (overall KPI): <strong>{{ overall_count }}</strong></li>

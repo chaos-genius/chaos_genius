@@ -3,7 +3,7 @@
 // Sidebar
 .sidebar-menu {
   width: 90px;
-  height: 100vh;
+  height: calc(100vh - 70px);
   background-color: $black_variation-2;
   align-items: center;
   display: flex;
@@ -15,6 +15,7 @@
     flex-direction: column;
     height: 100%;
     padding-top: 44px;
+    justify-content: space-between;
     ul {
       list-style-type: none;
       padding: 0px;
@@ -79,10 +80,10 @@
           margin-top: 10px;
         }
       }
-      &:nth-child(2) {
-        margin-top: 260px;
-        margin-bottom: 36px;
-      }
+      // &:nth-child(2) {
+      //   margin-top: 260px;
+      //   margin-bottom: 36px;
+      // }
     }
   }
   .common-watermark {

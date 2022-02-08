@@ -90,17 +90,12 @@ const Sidebar = () => {
             </Link>
           </li>
         </ul>
-        <ul>
-          <li className="common-watermark">
-            <span>Version {versionSettingData && versionSettingData.main}</span>
-          </li>
-        </ul>
       </div>
-      {/* <ul>
+      <ul>
         <li className="common-watermark">
           <span>Version {versionSettingData && versionSettingData.main}</span>
         </li>
-      </ul> */}
+      </ul>
     </div>
   );
 };

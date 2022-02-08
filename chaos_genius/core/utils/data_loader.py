@@ -85,7 +85,7 @@ class DataLoader:
         start_date_str = self.start_date.strftime("%Y-%m-%d")
         end_date_str = self.end_date.strftime("%Y-%m-%d")
         start_query = f"{dt_col_str} >= '{start_date_str}'"
-        end_query = f"{dt_col_str} < '{end_date_str}'"
+        end_query = f"{dt_col_str} <= '{end_date_str}'"
 
         return f" where {start_query} and {end_query} "
 

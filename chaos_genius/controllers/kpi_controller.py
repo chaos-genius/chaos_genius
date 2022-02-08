@@ -62,7 +62,7 @@ def run_anomaly_for_kpi(
         logger.info("Selecting end date.")
         # by default we always calculate for n-1
         if end_date is None:
-            end_date = datetime.today().date() - timedelta(days=(DAYS_OFFSET_FOR_ANALTYICS - 1))
+            end_date = datetime.today().date() - timedelta(days=(DAYS_OFFSET_FOR_ANALTYICS))
 
         # Check if n-1 data is available or not then try for n-2
         if not _is_data_present_for_end_date(kpi_info, end_date):
@@ -87,7 +87,7 @@ def run_anomaly_for_kpi(
 def _get_end_date_for_rca_kpi(kpi_info: dict, end_date: date = None) -> date:
     # by default we always calculate for n-1
     if end_date is None:
-        end_date = datetime.today().date() - timedelta(days=(DAYS_OFFSET_FOR_ANALTYICS - 1))
+        end_date = datetime.today().date() - timedelta(days=(DAYS_OFFSET_FOR_ANALTYICS))
 
     count = 0
     while not _is_data_present_for_end_date(kpi_info, end_date):

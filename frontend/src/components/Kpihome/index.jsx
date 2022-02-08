@@ -64,6 +64,7 @@ const Kpihome = () => {
 
   const [search, setSearch] = useState('');
   const [kpiHomeData, setKpiHomeData] = useState(homeKpiData);
+  const [kpiHomeloading, setKpiHomeLoading] = useState(homeKpiLoading);
   const [dashboard, setDashboard] = useState();
   const [timeCutOptions, setTimeCutOptions] = useState([]);
 
@@ -151,10 +152,17 @@ const Kpihome = () => {
     if (search !== '') {
       searchKpi();
     } else {
-      setKpiHomeData(homeKpiData);
+      if (homeKpiData !== [] && homeKpiLoading === false) {
+        setKpiHomeData(homeKpiData);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, homeKpiData]);
+
+  useEffect(() => {
+    setKpiHomeLoading(homeKpiLoading);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [homeKpiLoading]);
 
   const searchKpi = () => {
     if (search !== '') {
@@ -309,7 +317,7 @@ const Kpihome = () => {
                 />
               )}
             </div>
-            {!homeKpiLoading ? (
+            {!kpiHomeloading ? (
               kpiHomeData && kpiHomeData.length !== 0 ? (
                 <div className="graph-section">
                   {kpiHomeData.map((item) => {

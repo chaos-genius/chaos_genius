@@ -11,7 +11,7 @@ from chaos_genius.alerts.base_alerts import FREQUENCY_DICT
 from chaos_genius.alerts.constants import ALERT_DATE_FORMAT, ALERT_DATETIME_FORMAT, ALERT_READABLE_DATETIME_FORMAT
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import alert_digest_slack_formatted
-from chaos_genius.alerts.utils import webapp_url_prefix
+from chaos_genius.alerts.utils import count_anomalies, save_anomaly_point_formatting, top_anomalies, webapp_url_prefix
 from chaos_genius.controllers.config_controller import get_config_object
 from chaos_genius.controllers.digest_controller import get_alert_kpi_configurations
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
@@ -93,9 +93,9 @@ class AlertDigestController:
 
         triggered_alerts = [triggered_alert_dict[id_].__dict__ for id_ in triggered_alert_ids]
         points = _all_anomaly_points(triggered_alerts)
-        top_anomalies = _top_10_anomalies(points)
-        overall_count, subdim_count = _count_alerts(points)
-        _save_anomaly_point_formatting(points)
+        top_anomalies_ = top_anomalies(points)
+        overall_count, subdim_count = count_anomalies(points)
+        save_anomaly_point_formatting(points)
 
         test = self.send_template_email(
             "digest_template.html",
@@ -112,7 +112,7 @@ class AlertDigestController:
             subdim_count=subdim_count,
             alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
             kpi_link_prefix=f"{webapp_url_prefix()}#/dashboard/0/anomaly",
-            top_anomalies=top_anomalies,
+            top_anomalies=top_anomalies_,
         )
 
     def send_template_email(self, template, recipient_emails, subject, files, **kwargs):
@@ -135,13 +135,12 @@ class AlertDigestController:
 
     def send_slack_digests(self, triggered_alerts):
         """Sends a slack alert containing a summary of triggered alerts."""
-        column_names = ["alert_name", "kpi_name", "created_at"]
         triggered_alerts = [alert.__dict__ for alert in triggered_alerts]
 
         points = _all_anomaly_points(triggered_alerts)
-        top10 = _top_10_anomalies(points)
-        overall_count, subdim_count = _count_alerts(points)
-        _save_anomaly_point_formatting(points)
+        top10 = top_anomalies(points)
+        overall_count, subdim_count = count_anomalies(points)
+        save_anomaly_point_formatting(points)
 
         test = alert_digest_slack_formatted(
             self.frequency,
@@ -171,39 +170,6 @@ def _all_anomaly_points(triggered_alerts: List[Dict]) -> List[Dict]:
         for alert in triggered_alerts
         for point in alert["alert_metadata"]["alert_data"]
     ]
-
-
-def _top_10_anomalies(points: List[Dict]) -> List[Dict]:
-    return heapq.nlargest(
-        10,
-        points,
-        key=lambda point: point["severity"]
-    )
-
-
-def _count_alerts(points: List[Dict]) -> Tuple[int, int]:
-    """Returns a count of overall anomalies and subdim anomalies."""
-    total = len(points)
-    overall = sum(1 for point in points if point["Dimension"] == "Overall KPI")
-    subdims = total - overall
-    return overall, subdims
-
-
-def _save_anomaly_point_formatting(points: List[Dict]):
-    """Adds formatted fields to each point, to be used in digest templates."""
-    for point in points:
-        dt = datetime.datetime.strptime(point["data_datetime"], ALERT_DATETIME_FORMAT)
-        date = dt.strftime(ALERT_READABLE_DATETIME_FORMAT)
-        point["formatted_date"] = date
-
-        change_percent = point["percentage_change"]
-        change_message = "-"
-        if isinstance(change_percent, (int, float)):
-            if change_percent > 0:
-                change_message = f"+{change_percent}%"
-            else:
-                change_message = f"{change_percent}%"
-        point["change_message"] = change_message
 
 
 def check_and_trigger_digest(frequency: str):

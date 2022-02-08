@@ -25,6 +25,7 @@ from chaos_genius.alerts.anomaly_alert_config import (
     ANOMALY_ALERT_COLUMN_NAMES,
     ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS
 )
+from chaos_genius.alerts.utils import count_anomalies, save_anomaly_point_formatting, top_anomalies, webapp_url_prefix
 from chaos_genius.core.rca.rca_utils.string_helpers import convert_query_string_to_user_string
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from tabulate import tabulate
@@ -638,7 +639,7 @@ class AnomalyAlertController:
             kpi_obj = Kpi.query.filter(Kpi.active == True, Kpi.id == kpi_id).first()
 
             if kpi_obj is None:
-                logger.info(f"No KPI exists for Alert ID - {self.alert_info['id']}")
+                logger.error(f"No KPI exists for Alert ID - {self.alert_info['id']}")
                 return False
 
             kpi_name = getattr(kpi_obj, 'name')
@@ -656,13 +657,13 @@ class AnomalyAlertController:
             self.format_alert_data(overall_data_email_body)
 
             column_names = ANOMALY_ALERT_COLUMN_NAMES
-            anomaly_data = pd.DataFrame(overall_data, columns=column_names)
+            overall_data_ = pd.DataFrame(overall_data, columns=column_names)
             files = []
-            if not anomaly_data.empty:
+            if not overall_data_.empty:
                 file_detail = {}
                 file_detail["fname"] = "data.csv"
                 with io.StringIO() as buffer:
-                    anomaly_data.to_csv(buffer, encoding="utf-8")
+                    overall_data_.to_csv(buffer, encoding="utf-8")
                     file_detail["fdata"] = buffer.getvalue()
                 files = [file_detail]
 
@@ -670,18 +671,31 @@ class AnomalyAlertController:
             weekly_digest = self.alert_info.get("weekly_digest", False)
 
             if not (daily_digest or weekly_digest):
-                test = self.send_template_email('email_alert.html',
-                                                recipient_emails,
-                                                subject,
-                                                files,
-                                                column_names=column_names,
-                                                data=overall_data_email_body,
-                                                alert_message=alert_message,
-                                                kpi_name=kpi_name,
-                                                alert_frequency=self.alert_info['alert_frequency'].capitalize(),
-                                                preview_text="Anomaly Alert",
-                                                alert_name=self.alert_info.get("alert_name")
-                                            )
+                points = deepcopy(
+                    [anomaly_point.as_dict for anomaly_point in anomaly_data]
+                )
+                self.format_alert_data(points)
+                save_anomaly_point_formatting(points)
+                top_anomalies_ = top_anomalies(points, 5)
+                overall_count, subdim_count = count_anomalies(points)
+
+                test = self.send_template_email(
+                    "email_alert.html",
+                    recipient_emails,
+                    subject,
+                    files,
+                    column_names=column_names,
+                    top_anomalies=top_anomalies_,
+                    alert_message=alert_message,
+                    kpi_name=kpi_name,
+                    alert_frequency=self.alert_info['alert_frequency'].capitalize(),
+                    preview_text="Anomaly Alert",
+                    alert_name=self.alert_info.get("alert_name"),
+                    kpi_link=f"{webapp_url_prefix()}#/dashboard/0/anomaly/{kpi_id}",
+                    alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
+                    overall_count=overall_count,
+                    subdim_count=subdim_count,
+                )
                 logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
             #self.remove_attributes_from_anomaly_data(overall_data, ["nl_message"])
             # TODO: fix this circular import

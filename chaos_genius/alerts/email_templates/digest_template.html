@@ -58,7 +58,6 @@
 <ul>
     {% for point in top_anomalies %}
     <li>
-        <!-- TODO: color coding for change and severity -->
         <strong><a class="kpi-link" href="{{ kpi_link_prefix }}/{{ point["kpi_id"] }}">{{point["kpi_name"]}} ({{point["Dimension"]}})</strong></a>
         changed to <strong>{{point["y"]}}</strong>
         {% if point["percentage_change"] is string %}

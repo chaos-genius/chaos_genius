@@ -1,58 +1,83 @@
 {% extends "layout.html" %}
 
+{% block head %}
+<style>
+.digest-container {
+    color: #F6F5F5;
+}
+
+.btn {
+    appearance: button;
+    cursor: pointer;
+    border-radius: 10px;
+    border-width: 0;
+    background-color: #60CA9A;
+    color: black !important;
+    height: 2rem;
+    line-height: 2rem;
+    padding: 0 1rem;
+    margin-bottom: 1rem;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.kpi-link {
+    color: #60CA9A !important;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 
-<b>
-  <h2 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">{{ alert_name
-    }}</h2>
-</b>
-<hr style="width:100%" , size="2" , color=#F6F5F5>
+<h2 style="margin-bottom: 15px; color: #F6F5F5">{{ alert_name }}</h2>
 
-<h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">KPI Name: {{
-  kpi_name }} </h3>
-<h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Alert
-  Frequency: {{ alert_frequency }}</h3>
-<br>
-<h2 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Alert Message
-</h2>
-<h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">{{
-  alert_message }}</h3>
-<br>
+<hr />
 
-<h2 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Anomaly Details
-</h2>
-{% if data|length > 0 %}
-    <table style="border-collapse: collapse;border-spacing: 15px; color: #F6F5F5;text-align: left; padding: 10px;">
-      <tr style="border:1px solid #8A8A8A ; border-color: #8A8A8A;">
-          {% for column in column_names %}
-          <th style="border: 1px solid #8A8A8A ; padding: 10px;">{{column}}</th>
-          {% endfor %}
-      </tr>
-      {% for item in data %}
-          <tr style="border:1px solid #8A8A8A">
-              {% for column in column_names %}
-              {% if column == 'Change' %}
-                {% if item[column][0]== 'I' %}
-                <td style="color: #F6F5F5;border: 1px solid #8A8A8A ; padding: 10px;">{{item[column][:13]}}
-                  <span style="color: green">{{item[column][13:]}}</span></td>
-                {% endif %}
-                {% if item[column][0]=='D' %}
-                <td style="color: #F6F5F5;border: 1px solid #8A8A8A ; padding: 10px;">{{item[column][:13]}}
-                  <span style="color: red">{{item[column][13:]}}</span></td>
-                {% endif %}
-                {% if item[column][0]=='N' %}
-                <td style="color: #F6F5F5;border: 1px solid #8A8A8A ; padding: 10px;">{{item[column]}}</td>
-                {% endif %}
-                {% if item[column][0]=='-' %}
-                <td style="color: #F6F5F5;border: 1px solid #8A8A8A ; padding: 10px;">{{item[column]}}</td>
-                {% endif %}
-              {% endif %}
-              {% if column !='Change' %}
-              <td style="color: #F6F5F5;border: 1px solid #8A8A8A ; padding: 10px;">{{item[column]}}</td>
-              {% endif %}
-              {% endfor %}
-          </tr>
-      {% endfor %}
-    </table>
-{% endif %}
+<div class="digest-container">
+
+<h3>Summary</h3>
+
+<h4>KPI Name: {{ kpi_name }}</h4>
+<h4>Alert Frequency: {{ alert_frequency }}</h4>
+
+<ul>
+    <li>Total alerts generated (overall KPI): {{ overall_count }}</li>
+    <li>Total alerts generated (including subdimensions): {{ overall_count + subdim_count }}</li>
+</ul>
+
+<h3>Alert Message</h3>
+
+<div>
+{{ alert_message }}
+</div>
+
+<a class="btn" href={{ kpi_link }}>View KPI</a>
+<a class="btn" href={{ alert_dashboard_link }}>Alerts Dashboard</a>
+
+<hr />
+
+<h3>Top Anomalies</h3>
+<ul>
+    {% for point in top_anomalies %}
+    <li>
+        <strong><a class="kpi-link" href="{{ kpi_link_prefix }}/{{ point["kpi_id"] }}">{{point["kpi_name"]}} ({{point["Dimension"]}})</strong></a>
+        changed to <strong>{{point["y"]}}</strong>
+        {% if point["percentage_change"] is string %}
+        (<span><strong>{{ point["change_message"] }}</strong></span>)
+        {% elif point["percentage_change"] > 0 %}
+        (<span style="color: green;"><strong>{{ point["change_message"] }}</strong></span>)
+        {% elif point["percentage_change"] < 0 %}
+        (<span style="color: red;"><strong>{{ point["change_message"] }}</strong></span>)
+        {% else %}
+        (<span><strong>{{ point["change_message"] }}</strong></span>)
+        {% endif %}
+        on {{ point["formatted_date"] }}
+        (expected: <strong>{{point["yhat_lower"]}}</strong> - <strong>{{point["yhat_upper"]}}</strong>,
+        severity:
+        <strong>{{point["severity"]}}</strong>)
+    </li>
+    {% endfor %}
+</ul>
+
+</div>
 {% endblock %}

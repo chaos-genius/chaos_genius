@@ -34,7 +34,9 @@
         <!-- Tabs -->
     <ul id="tabs" class="inline-flex pt-2 px-1 w-full border-b">
         <li class="bg-white active-text px-4 py-2 border-active -mb-px"><a id="default-tab" href="#anomaly-alerts">Anomaly Alerts</a></li>
+        {% if EVENT_ALERTS_ENABLED %}
         <li class="px-4 py-2"><a href="#event-alerts">Event Alerts</a></li>
+        {% endif %}
     </ul>
 
         <div class="search-container">
@@ -123,6 +125,7 @@
             </div>
         </div>
 
+        {% if EVENT_ALERTS_ENABLED %}
         <div id="event-alerts" class="hidden">
             <div class="flex flex-col">
                 <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -159,6 +162,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
 
     <style>
@@ -381,6 +385,8 @@
             {% endfor %}
         ];
 
+        const dataTables = [];
+
         const dataTableAnomaly = new simpleDatatables.DataTable("#tasktable-anomaly", {
             data: {
                 data: dataAnomaly,
@@ -403,6 +409,9 @@
             dataTableAnomaly.head.getElementsByTagName('th')[dataTableAnomaly.severityColIndex].getElementsByTagName('a')[0].classList.add('desc');
             dataTableAnomaly.head.getElementsByTagName('th')[dataTableAnomaly.timeStampColIndex].getElementsByTagName('a')[0].classList.add('desc');
         });
+        dataTables.push(dataTableAnomaly);
+
+        {% if EVENT_ALERTS_ENABLED %}
         const dataEvent = [
             {% for triggered_alert in event_alerts_data %}
             [
@@ -429,8 +438,9 @@
         dataTableEvent.emailColIndex = 5;
         dataTableEvent.channelColIndex = 4;
         dataTableEvent.columns().hide([dataTableEvent.emailColIndex, dataTableEvent.channelColIndex]);
+        dataTables.push(dataTableEvent);
+        {% endif %}
 
-        const dataTables = [dataTableAnomaly, dataTableEvent];
         let currentTable = dataTables[0];
     </script>
 

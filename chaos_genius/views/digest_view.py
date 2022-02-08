@@ -5,6 +5,7 @@ import logging
 from flask import Blueprint, render_template, request
 
 from chaos_genius.controllers.digest_controller import get_digest_view_data
+from chaos_genius.settings import EVENT_ALERTS_ENABLED
 
 blueprint = Blueprint("digest", __name__, static_folder="../static")
 logger = logging.getLogger(__name__)
@@ -32,4 +33,5 @@ def task_monitor_view():
         repr=repr,
         list=list,
         len=len,
+        EVENT_ALERTS_ENABLED=EVENT_ALERTS_ENABLED,
     )

@@ -88,6 +88,8 @@ def alert_digest_daily_scheduler():
         minute=int(scheduled_time[1])
     )
 
+    # TODO: store last sent time in DB for robustness
+    #  There may be edge cases where this can trigger twice
     if (
         (scheduled_time_exact - timedelta(minutes=5))
         <= current_time

@@ -27,7 +27,7 @@ def anomaly_alert_slack(kpi_name, alert_name, kpi_id, alert_message, points, ove
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": f'{alert_name} ({datetime.datetime.strptime(curr_date, ALERT_DATE_FORMAT)})',
+                    "text": f'{alert_name} ({curr_date.strftime(ALERT_DATE_FORMAT)})',
                     "emoji": True,
                 },
             },

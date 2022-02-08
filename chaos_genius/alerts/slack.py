@@ -178,7 +178,7 @@ def _format_slack_anomalies(top10: List[dict], kpi_name=None, include_kpi_link=T
                 f'|{point["kpi_name"]} (*{point["Dimension"]}*)>'
             )
         else:
-            kpi_name_link = f'{kpi_name}(point["Dimension"])'
+            kpi_name_link = f'{kpi_name}({point["Dimension"]})'
 
         date = point.get("formatted_date")
 

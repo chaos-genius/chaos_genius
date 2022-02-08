@@ -3,7 +3,7 @@
 // Sidebar
 .sidebar-menu {
   width: 90px;
-  height: 100vh;
+  height: calc(100vh - 70px);
   background-color: $black_variation-2;
   align-items: center;
   display: flex;
@@ -13,10 +13,9 @@
   .sidebar-options {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     height: 100%;
     padding-top: 44px;
-    padding-bottom: 24px;
+    justify-content: space-between;
     ul {
       list-style-type: none;
       padding: 0px;
@@ -85,7 +84,7 @@
   }
   .common-watermark {
     text-align: center;
-    padding-bottom: 20px;
+    padding-bottom: 24px;
     span {
       color: #bdbdbd;
       font-style: italic;

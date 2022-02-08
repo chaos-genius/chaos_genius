@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import Optional, List
 
 from slack_sdk.webhook import WebhookClient
 
@@ -46,15 +46,30 @@ def anomaly_alert_slack(kpi_name, alert_name, kpi_id, alert_message, points, ove
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"- Total alerts generated (Overall KPI): *{overall_count}*\n"
-                            f"- Total alerts generated (including subdimenions): *{subdim_count + overall_count}*\n"
+                    "text": f"KPI name: *{kpi_name}*\n"
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"**Alert Message** : {alert_message}"
+                    "text": f"- Total alerts generated (Overall KPI): *{overall_count}*\n"
+                            f"- Total alerts generated (including subdimenions): *{subdim_count + overall_count}*\n"
+                }
+            },
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Alert Message",
+                    "emoji": True,
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"{alert_message}\n"
                 }
             },
             {
@@ -67,14 +82,9 @@ def anomaly_alert_slack(kpi_name, alert_name, kpi_id, alert_message, points, ove
                             "text": "View KPI"
                         },
                         "url": f"{webapp_url_prefix()}#/dashboard/0/deepdrills/{kpi_id}",
-                        "action_id": "alert_dashboard",
+                        "action_id": "kpi_link",
                         "style": "primary",
-                    }
-                ]
-            },
-            {
-                "type": "actions",
-                "elements": [
+                    },
                     {
                         "type": "button",
                         "text": {
@@ -102,11 +112,15 @@ def anomaly_alert_slack(kpi_name, alert_name, kpi_id, alert_message, points, ove
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": _format_slack_anomalies(points, kpi_name),
+                    "text": _format_slack_anomalies(points, include_kpi_name=False),
                 }
             },
         ],
     )
+
+    if response.body != "ok":
+        print(response.body)
+
     return response.body
 
 
@@ -153,14 +167,18 @@ def event_alert_slack(alert_name, alert_frequency, alert_message , alert_overvie
     return response.body
 
 
-def _format_slack_anomalies(top10: List[dict]) -> str:
+def _format_slack_anomalies(top10: List[dict], include_kpi_name=True) -> str:
     out = ""
 
     for point in top10:
-        kpi_name_link = (
-            f'<{webapp_url_prefix()}#/dashboard/0/anomaly/{point["kpi_id"]}'
-            f'|{point["kpi_name"]} (*{point["Dimension"]}*)>'
-        )
+
+        if include_kpi_name:
+            kpi_name_link = (
+                f'<{webapp_url_prefix()}#/dashboard/0/anomaly/{point["kpi_id"]}'
+                f'|{point["kpi_name"]} (*{point["Dimension"]}*)>'
+            )
+        else:
+            kpi_name_link = point["Dimension"]
 
         date = point.get("formatted_date")
 

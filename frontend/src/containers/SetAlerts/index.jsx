@@ -1,9 +1,8 @@
 import React from 'react';
 
 import { Link, useHistory } from 'react-router-dom';
-
+import { env } from '../../env';
 import Plus from '../../assets/images/plus.svg';
-//import DisablePlus from '../../assets/images/disableplus.svg';
 import EventAlert from '../../assets/images/alerts/eventalert.svg';
 import KpiAlert from '../../assets/images/alerts/kpialert.svg';
 import rightarrow from '../../assets/images/rightarrow.svg';
@@ -12,6 +11,8 @@ import './setalerts.scss';
 
 const SetAlerts = () => {
   const history = useHistory();
+  const EVENT_ALERT_FLAG = env.REACT_APP_EVENT_ALERT;
+
   return (
     <>
       <div className="heading-option alert-heading">
@@ -50,7 +51,7 @@ const SetAlerts = () => {
               {/* added disable button */}
               <button
                 className="btn black-button"
-                disabled={true}
+                disabled={EVENT_ALERT_FLAG === 'false' ? true : false}
                 onClick={() => history.push('/alerts/new/event-alert')}>
                 <svg
                   width="16"
@@ -83,7 +84,7 @@ const SetAlerts = () => {
                 <span>New Alert</span>
               </button>
             </div>
-            <h5>Soon</h5>
+            {EVENT_ALERT_FLAG === 'false' && <h5>Soon</h5>}
           </div>
           <div className="alerts-card">
             <img src={KpiAlert} alt="Kpi Alert" />

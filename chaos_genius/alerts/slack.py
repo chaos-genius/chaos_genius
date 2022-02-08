@@ -27,7 +27,7 @@ def anomaly_alert_slack(kpi_name, alert_name, kpi_id, alert_message, points, ove
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": f"{alert_name}",
+                    "text": f'{alert_name} ({points[0].get("formatted_date")})',
                     "emoji": True,
                 },
             },
@@ -178,7 +178,7 @@ def _format_slack_anomalies(top10: List[dict], kpi_name=None, include_kpi_link=T
                 f'|{point["kpi_name"]} (*{point["Dimension"]}*)>'
             )
         else:
-            kpi_name_link = f'{kpi_name}({point["Dimension"]})'
+            kpi_name_link = f'{kpi_name} ({point["Dimension"]})'
 
         date = point.get("formatted_date")
 

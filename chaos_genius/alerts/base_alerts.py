@@ -26,6 +26,7 @@ from chaos_genius.alerts.anomaly_alert_config import (
     ANOMALY_ALERT_COLUMN_NAMES,
     ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS
 )
+from chaos_genius.alerts.constants import ALERT_DATE_FORMAT
 from chaos_genius.alerts.utils import count_anomalies, save_anomaly_point_formatting, top_anomalies, webapp_url_prefix
 from chaos_genius.core.rca.rca_utils.string_helpers import convert_query_string_to_user_string
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -633,7 +634,7 @@ class AnomalyAlertController:
         recipient_emails = alert_channel_conf.get("email", [])
 
         if recipient_emails:
-            subject = f"{self.alert_info['alert_name']} - Chaos Genius Alert❗"
+            subject = f"{self.alert_info['alert_name']} - Chaos Genius Alert ({self.now.strftime('%b %d')})❗"
             alert_message = self.alert_info["alert_message"]
 
             kpi_id = self.alert_info["kpi"]
@@ -697,6 +698,7 @@ class AnomalyAlertController:
                     alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
                     overall_count=overall_count,
                     subdim_count=subdim_count,
+                    formatted_date=self.now.strftime(ALERT_DATE_FORMAT),
                 )
                 logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
             #self.remove_attributes_from_anomaly_data(overall_data, ["nl_message"])

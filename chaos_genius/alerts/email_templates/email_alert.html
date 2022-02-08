@@ -9,7 +9,7 @@
 .btn {
     appearance: button;
     cursor: pointer;
-    border-radius: 10px;
+    border-radius: 5px;
     border-width: 0;
     background-color: #60CA9A;
     color: black !important;
@@ -29,11 +29,11 @@
 
 {% block content %}
 
-<h2 style="margin-bottom: 15px; color: #F6F5F5">{{ alert_name }}</h2>
+<h2 style="margin-bottom: 15px; color: #F6F5F5">{{ alert_name }} ({{ formatted_date }})</h2>
 
 <hr />
 
-<div class="alert-container">
+<div class="alert-container" style="color: #F6F5F5 !important;">
 
 <h3>Summary</h3>
 
@@ -59,14 +59,15 @@
 <ul>
     {% for point in top_anomalies %}
     <li>
-        <strong>{{point["Dimension"]}}</strong>
-        changed to <strong>{{point["y"]}}</strong>
+        <strong>{{kpi_name}} ({{point["Dimension"]}})</strong>
+        <span style="color: lightgrey;">changed to
+        <strong>{{point["y"]}}</strong>
         {% if point["percentage_change"] is string %}
         (<span><strong>{{ point["change_message"] }}</strong></span>)
         {% elif point["percentage_change"] > 0 %}
-        (<span style="color: green;"><strong>{{ point["change_message"] }}</strong></span>)
+        <span style="color: green;">({{ point["change_message"] }})</span>
         {% elif point["percentage_change"] < 0 %}
-        (<span style="color: red;"><strong>{{ point["change_message"] }}</strong></span>)
+        <span style="color: red;">({{ point["change_message"] }})</span>
         {% else %}
         (<span><strong>{{ point["change_message"] }}</strong></span>)
         {% endif %}
@@ -74,6 +75,7 @@
         (expected: <strong>{{point["yhat_lower"]}}</strong> - <strong>{{point["yhat_upper"]}}</strong>,
         severity:
         <strong>{{point["severity"]}}</strong>)
+        </span>
     </li>
     {% endfor %}
 </ul>

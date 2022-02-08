@@ -81,7 +81,7 @@ def anomaly_alert_slack(kpi_name, alert_name, kpi_id, alert_message, points, ove
                             "type": "plain_text",
                             "text": "View KPI"
                         },
-                        "url": f"{webapp_url_prefix()}#/dashboard/0/deepdrills/{kpi_id}",
+                        "url": f"{webapp_url_prefix()}#/dashboard/0/anomaly/{kpi_id}",
                         "action_id": "kpi_link",
                         "style": "primary",
                     },

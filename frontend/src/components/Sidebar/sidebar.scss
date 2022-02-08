@@ -13,10 +13,8 @@
   .sidebar-options {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     height: 100%;
     padding-top: 44px;
-    padding-bottom: 24px;
     ul {
       list-style-type: none;
       padding: 0px;
@@ -81,11 +79,15 @@
           margin-top: 10px;
         }
       }
+      &:nth-child(2) {
+        margin-top: 260px;
+        margin-bottom: 30px;
+      }
     }
   }
   .common-watermark {
     text-align: center;
-    padding-bottom: 20px;
+    padding-bottom: 24px;
     span {
       color: #bdbdbd;
       font-style: italic;

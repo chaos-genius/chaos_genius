@@ -37,17 +37,17 @@
 
 <h3>Summary</h3>
 
-<h4>KPI Name: {{ kpi_name }}</h4>
-<h4>Alert Frequency: {{ alert_frequency }}</h4>
+<h4><span style="font-weight: 400;">KPI Name: </span>{{ kpi_name }}</h4>
+<h4><span style="font-weight: 400;">Alert Frequency: </span>{{ alert_frequency }}</h4>
 
 <ul>
-    <li>Total alerts generated (overall KPI): {{ overall_count }}</li>
-    <li>Total alerts generated (including subdimensions): {{ overall_count + subdim_count }}</li>
+    <li>Total alerts generated (overall KPI): <strong>{{ overall_count }}</strong></li>
+    <li>Total alerts generated (including subdimensions): <strong>{{ overall_count + subdim_count }}</strong></li>
 </ul>
 
 <h3>Alert Message</h3>
 
-<div>
+<div style="margin-bottom: 1rem;">
 {{ alert_message }}
 </div>
 
@@ -60,7 +60,7 @@
 <ul>
     {% for point in top_anomalies %}
     <li>
-        <strong><a class="kpi-link" href="{{ kpi_link_prefix }}/{{ point["kpi_id"] }}">{{point["kpi_name"]}} ({{point["Dimension"]}})</strong></a>
+        <strong>{{point["Dimension"]}}</strong>
         changed to <strong>{{point["y"]}}</strong>
         {% if point["percentage_change"] is string %}
         (<span><strong>{{ point["change_message"] }}</strong></span>)

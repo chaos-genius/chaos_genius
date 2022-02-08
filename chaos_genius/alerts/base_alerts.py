@@ -675,6 +675,7 @@ class AnomalyAlertController:
                 points = deepcopy(
                     [anomaly_point.as_dict for anomaly_point in anomaly_data]
                 )
+                _format_anomaly_points(points)
                 self.format_alert_data(points)
                 save_anomaly_point_formatting(points)
                 top_anomalies_ = top_anomalies(points, 5)
@@ -805,6 +806,16 @@ class StaticKpiAlertController:
 
     def check_and_prepare_alert(self):
         pass
+
+
+def _format_anomaly_points(points: List[dict]):
+    for anomaly_point in points:
+        anomaly_point["series_type"] = "Overall KPI" if anomaly_point.get("anomaly_type") == "overall" else anomaly_point["series_type"]
+        for key, value in anomaly_point.items():
+            if key in ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS:
+                anomaly_point[key] = round(value, 2)
+        if anomaly_point["series_type"] != "Overall KPI":
+            anomaly_point["series_type"] = convert_query_string_to_user_string(anomaly_point["series_type"])
 
 
 def find_percentage_change(

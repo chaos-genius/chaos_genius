@@ -344,7 +344,7 @@
                   "{{ point['Value'] }}",
                   "{{ point['Expected Value'] }}",
                   `{% if point['Severity Score'] >= 65 %}
-                        <span style='color:#E53935;font-weight: light' class="severity"> <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" style="display: inline!important;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <span style='color:#FF2C1F;font-weight: light' class="severity"> <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" style="display: inline!important;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 </svg>
                     {% elif point['Severity Score'] >= 25 %}
@@ -371,7 +371,7 @@
                   {% elif point['nl_message'].startswith("Increased") %}
                     "{{ point['nl_message'][:len('Increased by')] }} <span style=\"color: rgb(96, 202, 154); font-weight: 600;\">{{point['nl_message'][len('Increased by'):]}}</span>",
                   {% elif point['nl_message'].startswith("Decreased") %}
-                    "{{ point['nl_message'][:len('Decreased by')] }} <span style=\"color: rgb(233, 101, 96); font-weight: 600;\">{{point['nl_message'][len('Decreased by'):]}}</span>",
+                    "{{ point['nl_message'][:len('Decreased by')] }} <span style=\"color: #FF2C1F; font-weight: 600;\">{{point['nl_message'][len('Decreased by'):]}}</span>",
                   {% else %}
                     "{{ point['nl_message'] }}",
                   {% endif %}

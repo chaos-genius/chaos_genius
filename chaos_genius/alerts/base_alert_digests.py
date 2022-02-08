@@ -17,9 +17,9 @@ from chaos_genius.controllers.config_controller import get_config_object
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
-from chaos_genius.settings import ALERT_DIGEST_ENABLED, CHAOSGENIUS_WEBAPP_URL
+from chaos_genius.settings import CHAOSGENIUS_WEBAPP_URL
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 ALERT_ATTRIBUTES_MAPPER = {"daily": "daily_digest", "weekly": "weekly_digest"}
 
@@ -195,14 +195,24 @@ def check_and_trigger_digest(frequency: str):
         bool: status of the alert digest trigger
     """
 
-    # TODO: take this from `get_config_object` for "alert_digest_settings"
-    # For now, we will be using global env vars to set this
-
-    if not ALERT_DIGEST_ENABLED:
-        raise Exception("Alert Digests are not enabled.")
-
     if frequency not in ALERT_ATTRIBUTES_MAPPER.keys():
-        raise Exception(f"Alert Digest frequency is not valid. Got: {frequency}.")
+        msg = f"Alert Digest frequency is not valid. Got: {frequency}."
+        logger.error(msg)
+        raise Exception(msg)
+
+    digest_config = get_config_object("alert_digest_settings")
+
+    if digest_config is None:
+        msg = "Alert digests have not been enabled."
+        logger.error(msg)
+        raise Exception(msg)
+
+    digest_config_settings: dict = digest_config.config_setting
+
+    if not digest_config_settings.get(frequency):
+        msg = f"Digests with frequency {frequency} have not been enabled."
+        logger.info(msg)
+        raise Exception(msg)
 
     digest_obj = AlertDigestController(frequency)
     digest_obj.prepare_digests()

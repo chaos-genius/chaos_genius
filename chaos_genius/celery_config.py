@@ -2,8 +2,6 @@ from datetime import timedelta
 
 from celery.schedules import crontab, schedule
 
-from chaos_genius.settings import ALERT_DIGEST_DAILY_TIME, ALERT_DIGEST_ENABLED
-
 CELERY_IMPORTS = ("chaos_genius.jobs")
 CELERY_TASK_RESULT_EXPIRES = 30
 CELERY_TIMEZONE = "UTC"
@@ -22,6 +20,11 @@ CELERYBEAT_SCHEDULE = {
         'task': 'chaos_genius.jobs.alert_tasks.check_event_alerts',
         'schedule': crontab(hour="3", minute="0"), # Daily: at 3am
         'args': ('daily',)
+    },
+    "alert-digest-daily-scheduler": {
+        "task": "chaos_genius.jobs.alert_tasks.alert_digest_daily_scheduler",
+        "schedule": schedule(timedelta(minutes=10)),
+        "args": ()
     },
     # 'anomaly-task-every-minute': {
     #     'task': 'chaos_genius.jobs.anomaly_tasks.add_together',
@@ -50,14 +53,6 @@ CELERYBEAT_SCHEDULE = {
     #     'args': ('every_15_minute',)
     # }
 }
-if ALERT_DIGEST_ENABLED:
-    # TODO: this will only work for static time defined in settings.py.
-    # For user configurable digest schedule time, this needs to be changed.
-    CELERYBEAT_SCHEDULE["alert-digest-daily"] = {
-        "task": "chaos_genius.jobs.alert_tasks.alert_digest_daily",
-        "schedule": crontab(hour=ALERT_DIGEST_DAILY_TIME[0], minute=ALERT_DIGEST_DAILY_TIME[1]),
-        "args": (),
-    }
 
 CELERY_ROUTES = {
     "chaos_genius.jobs.anomaly_tasks.*": {"queue": "anomaly-rca"},

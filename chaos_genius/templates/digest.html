@@ -393,12 +393,15 @@
         dataTableAnomaly.emailColIndex = 7;
         dataTableAnomaly.channelColIndex = 8;
         dataTableAnomaly.dateOnlyColIndex = 10;
+        dataTableAnomaly.valueColIndex = 3;
+        dataTableAnomaly.severityColIndex = 5;
+        dataTableAnomaly.timeStampColIndex = 6;
         dataTableAnomaly.columns().hide([dataTableAnomaly.emailColIndex, dataTableAnomaly.channelColIndex, dataTableAnomaly.dateOnlyColIndex]);
 
         dataTableAnomaly.on('datatable.init', function(args) {
-            dataTableAnomaly.head.getElementsByTagName('th')[3].getElementsByTagName('a')[0].classList.add('desc');
-            dataTableAnomaly.head.getElementsByTagName('th')[5].getElementsByTagName('a')[0].classList.add('desc');
-            dataTableAnomaly.head.getElementsByTagName('th')[6].getElementsByTagName('a')[0].classList.add('desc');
+            dataTableAnomaly.head.getElementsByTagName('th')[3].getElementsByTagName('a')[dataTableAnomaly.valueColIndex].classList.add('desc');
+            dataTableAnomaly.head.getElementsByTagName('th')[5].getElementsByTagName('a')[dataTableAnomaly.severityColIndex].classList.add('desc');
+            dataTableAnomaly.head.getElementsByTagName('th')[6].getElementsByTagName('a')[dataTableAnomaly.timeStampColIndex].classList.add('desc');
         });
         const dataEvent = [
             {% for triggered_alert in event_alerts_data %}

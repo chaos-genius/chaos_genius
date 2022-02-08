@@ -399,9 +399,9 @@
         dataTableAnomaly.columns().hide([dataTableAnomaly.emailColIndex, dataTableAnomaly.channelColIndex, dataTableAnomaly.dateOnlyColIndex]);
 
         dataTableAnomaly.on('datatable.init', function(args) {
-            dataTableAnomaly.head.getElementsByTagName('th')[3].getElementsByTagName('a')[dataTableAnomaly.valueColIndex].classList.add('desc');
-            dataTableAnomaly.head.getElementsByTagName('th')[5].getElementsByTagName('a')[dataTableAnomaly.severityColIndex].classList.add('desc');
-            dataTableAnomaly.head.getElementsByTagName('th')[6].getElementsByTagName('a')[dataTableAnomaly.timeStampColIndex].classList.add('desc');
+            dataTableAnomaly.head.getElementsByTagName('th')[dataTableAnomaly.valueColIndex].getElementsByTagName('a')[0].classList.add('desc');
+            dataTableAnomaly.head.getElementsByTagName('th')[dataTableAnomaly.severityColIndex].getElementsByTagName('a')[0].classList.add('desc');
+            dataTableAnomaly.head.getElementsByTagName('th')[dataTableAnomaly.timeStampColIndex].getElementsByTagName('a')[0].classList.add('desc');
         });
         const dataEvent = [
             {% for triggered_alert in event_alerts_data %}

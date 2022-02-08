@@ -18,7 +18,8 @@ from chaos_genius.databases.models.kpi_model import Kpi
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.alerts.email import send_static_alert_email
-from chaos_genius.alerts.slack import anomaly_alert_slack_formatted, event_alert_slack
+from chaos_genius.alerts.slack import anomaly_alert_slack, event_alert_slack
+from chaos_genius.alerts.utils import count_anomalies, top_anomalies
 from chaos_genius.alerts.anomaly_alert_config import (
     ANOMALY_TABLE_COLUMN_NAMES_MAPPER,
     IGNORE_COLUMNS_ANOMALY_TABLE,
@@ -748,11 +749,12 @@ class AnomalyAlertController:
         kpi_name = getattr(kpi_obj, "name")
         data_source_name = getattr(data_source_obj, "name")
         alert_name = self.alert_info.get("alert_name")
+        alert_message = self.alert_info["alert_message"]
 
         overall_data, subdim_data = self.get_overall_subdim_data(anomaly_data)
 
         overall_data_alert_body = deepcopy([overall_data[0]]) if len(overall_data) > 0 else []
-        len_subdim = min(10, len(subdim_data))
+        len_subdim = min(5, len(subdim_data))
         subdim_data_alert_body = deepcopy(subdim_data[0:len_subdim]) if len(subdim_data) > 0 else []
 
         overall_data.extend(subdim_data)
@@ -761,22 +763,23 @@ class AnomalyAlertController:
         self.format_alert_data(overall_data)
         self.format_alert_data(overall_data_alert_body)
 
-        column_names = ANOMALY_ALERT_COLUMN_NAMES
-        anomaly_data = pd.DataFrame(overall_data_alert_body, columns=column_names)
-
         daily_digest = self.alert_info.get("daily_digest", False)
         weekly_digest = self.alert_info.get("weekly_digest", False)
 
         test = "failed"
         if not (daily_digest or weekly_digest):
-            table_data = tabulate(anomaly_data, tablefmt="fancy_grid", headers="keys")
-            table_data = "```" + table_data + "```"
-            test = anomaly_alert_slack_formatted(
-                    alert_name,
-                    kpi_name,
-                    data_source_name,
-                    table_data
-                )
+            points = top_anomalies(overall_data_alert_body, 5)
+            overall_count, subdim_count = count_anomalies(points)
+
+            test = anomaly_alert_slack(
+                kpi_name,
+                alert_name,
+                kpi_id,
+                alert_message,
+                points,
+                overall_count,
+                subdim_count
+            )
 
         if test == "ok":
             logger.info(

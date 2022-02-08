@@ -100,11 +100,13 @@ class AlertDigestController:
         test = self.send_template_email(
             "digest_template.html",
             [recipient],
-            f"Daily Alert Digest ({self.curr_time.strftime(ALERT_DATE_FORMAT)})",
+            f"Daily Alert Digest {self.curr_time.strftime(ALERT_DATE_FORMAT)}",
             [],
             column_names=["alert_name", "kpi_name", "created_at", "link"],
             preview_text="Alert Digest",
             getattr=getattr,
+            isinstance=isinstance,
+            str=str,
             formatted_date=self.curr_time.strftime(ALERT_DATE_FORMAT),
             overall_count=overall_count,
             subdim_count=subdim_count,
@@ -198,9 +200,9 @@ def _save_anomaly_point_formatting(points: List[Dict]):
         change_message = "-"
         if isinstance(change_percent, (int, float)):
             if change_percent > 0:
-                change_message = f"up {change_percent}%"
+                change_message = f"+{change_percent}%"
             else:
-                change_message = f"down {change_percent}%"
+                change_message = f"{change_percent}%"
         point["change_message"] = change_message
 
 

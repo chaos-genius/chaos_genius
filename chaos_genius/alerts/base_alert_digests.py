@@ -1,22 +1,22 @@
 import datetime
+import heapq
 import logging
 import os
+from collections import defaultdict
+from typing import Dict, List, Tuple
 
-import pandas as pd
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from tabulate import tabulate
 
 from chaos_genius.alerts.base_alerts import FREQUENCY_DICT
+from chaos_genius.alerts.constants import ALERT_DATE_FORMAT, ALERT_DATETIME_FORMAT, ALERT_READABLE_DATETIME_FORMAT
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import alert_digest_slack_formatted
-from chaos_genius.controllers.digest_controller import get_alert_kpi_configurations
+from chaos_genius.alerts.utils import count_anomalies, save_anomaly_point_formatting, top_anomalies, webapp_url_prefix
 from chaos_genius.controllers.config_controller import get_config_object
-from chaos_genius.databases.models.alert_model import Alert
-from chaos_genius.databases.models.kpi_model import Kpi
+from chaos_genius.controllers.digest_controller import get_alert_kpi_configurations
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
-from chaos_genius.settings import CHAOSGENIUS_WEBAPP_URL
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 ALERT_ATTRIBUTES_MAPPER = {"daily": "daily_digest", "weekly": "weekly_digest"}
 
@@ -47,11 +47,12 @@ class AlertDigestController:
 
         for alert in data:
             alert_conf_id = alert.alert_conf_id
-            alert_conf = self.alert_config_cache.get(alert_conf_id, None)
+            alert_conf = self.alert_config_cache.get(alert_conf_id)
 
-            kpi_id = alert_conf.get("kpi", None)
+            kpi_id = alert_conf.get("kpi")
             kpi = self.kpi_cache.get(kpi_id) if kpi_id is not None else None
 
+            alert.kpi_id = kpi_id
             alert.kpi_name = kpi.get("name") if kpi is not None else "Doesn't Exist"
             alert.alert_name = alert_conf.get("alert_name")
             alert.alert_channel = alert_conf.get("alert_channel")
@@ -59,7 +60,7 @@ class AlertDigestController:
             if not isinstance(alert_conf.get("alert_channel_conf"), dict):
                 alert.alert_channel_conf = None
             else:
-                alert.alert_channel_conf = alert_conf.get("alert_channel_conf").get(
+                alert.alert_channel_conf = alert_conf.get("alert_channel_conf", {}).get(
                     alert.alert_channel, None
                 )
 
@@ -76,20 +77,12 @@ class AlertDigestController:
             slack_status = self.send_slack_digests(slack_digests)
 
     def segregate_email_digests(self, email_digests):
-
-        user_triggered_alerts = dict()
-
+        user_triggered_alerts = defaultdict(set)
         for alert in email_digests:
             for user in alert.alert_channel_conf:
-                if user not in user_triggered_alerts.keys():
-                    user_triggered_alerts[user] = set()
-
                 user_triggered_alerts[user].add(alert.id)
 
-        triggered_alert_dict = dict()
-        for alert in email_digests:
-            triggered_alert_dict[alert.id] = alert
-
+        triggered_alert_dict = {alert.id: alert for alert in email_digests}
         for recipient in user_triggered_alerts.keys():
             self.send_alert_digest(
                 recipient, user_triggered_alerts[recipient], triggered_alert_dict
@@ -98,29 +91,28 @@ class AlertDigestController:
     def send_alert_digest(self, recipient, triggered_alert_ids, triggered_alert_dict):
         data = []
 
-        for id_ in triggered_alert_ids:
-            data.append(triggered_alert_dict.get(id_))
-            if not CHAOSGENIUS_WEBAPP_URL:
-                data[-1].link = "Webapp URL not setup"
-                continue
-
-            forward_slash = "/" if not CHAOSGENIUS_WEBAPP_URL[-1] == "/" else ""
-            data[
-                -1
-            ].link = f"{CHAOSGENIUS_WEBAPP_URL}{forward_slash}api/digest?id={id_}"
-
-        data_len = min(len(data), 10)
-        data = data if data_len == 0 else data[0:data_len]
+        triggered_alerts = [triggered_alert_dict[id_].__dict__ for id_ in triggered_alert_ids]
+        points = _all_anomaly_points(triggered_alerts)
+        top_anomalies_ = top_anomalies(points)
+        overall_count, subdim_count = count_anomalies(points)
+        save_anomaly_point_formatting(points)
 
         test = self.send_template_email(
             "digest_template.html",
             [recipient],
-            "The very first alert digest",
+            f"Daily Alert Digest {self.curr_time.strftime(ALERT_DATE_FORMAT)}",
             [],
             column_names=["alert_name", "kpi_name", "created_at", "link"],
-            data=data,
             preview_text="Alert Digest",
             getattr=getattr,
+            isinstance=isinstance,
+            str=str,
+            formatted_date=self.curr_time.strftime(ALERT_DATE_FORMAT),
+            overall_count=overall_count,
+            subdim_count=subdim_count,
+            alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
+            kpi_link_prefix=f"{webapp_url_prefix()}#/dashboard/0/anomaly",
+            top_anomalies=top_anomalies_,
         )
 
     def send_template_email(self, template, recipient_emails, subject, files, **kwargs):
@@ -138,23 +130,43 @@ class AlertDigestController:
 
         return test
 
-    def send_slack_digests(self, slack_digests):
-        """Sends a slack alert containing a summary of triggered alerts"""
+    def send_slack_digests(self, triggered_alerts):
+        """Sends a slack alert containing a summary of triggered alerts."""
+        triggered_alerts = [alert.__dict__ for alert in triggered_alerts]
 
-        column_names = ["alert_name", "kpi_name", "created_at"]
-        slack_digests = [alert.__dict__ for alert in slack_digests]
-        data = pd.DataFrame(slack_digests, columns=column_names)
-        table_data = tabulate(data, tablefmt="fancy_grid", headers="keys")
-        table_data = "```" + table_data + "```"
-        test = alert_digest_slack_formatted(self.frequency, table_data)
+        points = _all_anomaly_points(triggered_alerts)
+        top10 = top_anomalies(points)
+        overall_count, subdim_count = count_anomalies(points)
+        save_anomaly_point_formatting(points)
+
+        test = alert_digest_slack_formatted(
+            self.frequency,
+            self.curr_time,
+            top10,
+            overall_count,
+            subdim_count
+        )
 
         if test == "ok":
-            logger.info(f"The slack alert digest was successfully sent")
+            logger.info("The slack alert digest was successfully sent")
         else:
-            logger.info(f"The slack alert digest has not been sent")
+            logger.info("The slack alert digest has not been sent")
 
         message = f"Status for slack alert digest: {test}"
         return message
+
+
+def _all_anomaly_points(triggered_alerts: List[Dict]) -> List[Dict]:
+    return [
+        dict(
+            point,
+            kpi_name=alert["kpi_name"],
+            alert_name=alert["alert_name"],
+            kpi_id=alert["kpi_id"]
+        )
+        for alert in triggered_alerts
+        for point in alert["alert_metadata"]["alert_data"]
+    ]
 
 
 def check_and_trigger_digest(frequency: str):
@@ -170,17 +182,24 @@ def check_and_trigger_digest(frequency: str):
         bool: status of the alert digest trigger
     """
 
-    digest_config_settings = get_config_object("alert_digest_settings")
-
-    if digest_config_settings is None:
-        raise Exception("Alert Digests havent been configured yet")
-
     if frequency not in ALERT_ATTRIBUTES_MAPPER.keys():
-        raise Exception("Alert Digest frequency is incorrect")
+        msg = f"Alert Digest frequency is not valid. Got: {frequency}."
+        logger.error(msg)
+        raise Exception(msg)
 
-    digest_freq = ALERT_ATTRIBUTES_MAPPER[frequency]
-    if not getattr(digest_config_settings, digest_freq):
-        raise Exception("Alert Digests havent been configured yet")
+    digest_config = get_config_object("alert_digest_settings")
+
+    if digest_config is None:
+        msg = "Alert digests have not been enabled."
+        logger.error(msg)
+        raise Exception(msg)
+
+    digest_config_settings: dict = digest_config.config_setting
+
+    if not digest_config_settings.get(frequency):
+        msg = f"Digests with frequency {frequency} have not been enabled."
+        logger.info(msg)
+        raise Exception(msg)
 
     digest_obj = AlertDigestController(frequency)
     digest_obj.prepare_digests()

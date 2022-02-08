@@ -110,3 +110,6 @@ SOURCE_STRIPE = _make_bool(os.getenv("SOURCE_STRIPE", default=False))
 SOURCE_GOOGLE_ADS = _make_bool(os.getenv("SOURCE_GOOGLE_ADS", default=False))
 SOURCE_FACEBOOK_ADS = _make_bool(os.getenv("SOURCE_FACEBOOK_ADS", default=False))
 SOURCE_BING_ADS = _make_bool(os.getenv("SOURCE_BING_ADS", default=False))
+
+"""Alert Configuration"""
+EVENT_ALERTS_ENABLED = _make_bool(os.getenv("REACT_APP_EVENT_ALERT", default=False))

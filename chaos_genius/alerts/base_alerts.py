@@ -769,7 +769,13 @@ class AnomalyAlertController:
 
         test = "failed"
         if not (daily_digest or weekly_digest):
-            points = top_anomalies(overall_data_alert_body, 5)
+            points = deepcopy(
+                    [anomaly_point.as_dict for anomaly_point in anomaly_data]
+                )
+            _format_anomaly_points(points)
+            self.format_alert_data(points)
+            save_anomaly_point_formatting(points)
+            top_anomalies_ = top_anomalies(points, 5)
             overall_count, subdim_count = count_anomalies(points)
 
             test = anomaly_alert_slack(
@@ -777,7 +783,7 @@ class AnomalyAlertController:
                 alert_name,
                 kpi_id,
                 alert_message,
-                points,
+                top_anomalies_,
                 overall_count,
                 subdim_count
             )

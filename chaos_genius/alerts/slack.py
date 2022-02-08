@@ -27,7 +27,7 @@ def anomaly_alert_slack(kpi_name, alert_name, kpi_id, alert_message, points, ove
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": f"{alert_name} - KPI({kpi_name})",
+                    "text": f"{alert_name}",
                     "emoji": True,
                 },
             },
@@ -51,6 +51,28 @@ def anomaly_alert_slack(kpi_name, alert_name, kpi_id, alert_message, points, ove
                 }
             },
             {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"**Alert Message** : {alert_message}"
+                }
+            },
+            {
+                "type": "actions",
+                "elements": [
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "View KPI"
+                        },
+                        "url": f"{webapp_url_prefix()}#/dashboard/0/deepdrills/{kpi_id}",
+                        "action_id": "alert_dashboard",
+                        "style": "primary",
+                    }
+                ]
+            },
+            {
                 "type": "actions",
                 "elements": [
                     {
@@ -66,46 +88,13 @@ def anomaly_alert_slack(kpi_name, alert_name, kpi_id, alert_message, points, ove
                 ]
             },
             {
-                "type": "actions",
-                "elements": [
-                    {
-                        "type": "button",
-                        "text": {
-                            "type": "plain_text",
-                            "text": "KPI"
-                        },
-                        "url": f"{webapp_url_prefix()}#/dashboard/0/deepdrills/{kpi_id}",
-                        "action_id": "alert_dashboard",
-                        "style": "primary",
-                    }
-                ]
-            },
-            {
                 "type": "divider",
             },
             {
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": "Alert Message",
-                    "emoji": True,
-                },
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": alert_message
-                }
-            },
-            {
-                "type": "divider",
-            },
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": "Top 5 anomalies",
+                    "text": "Top anomalies",
                     "emoji": True,
                 },
             },
@@ -164,18 +153,16 @@ def event_alert_slack(alert_name, alert_frequency, alert_message , alert_overvie
     return response.body
 
 
-def _format_slack_anomalies(top10: List[dict], kpi_name=None) -> str:
+def _format_slack_anomalies(top10: List[dict]) -> str:
     out = ""
 
     for point in top10:
-        if not point.get("kpi_name"):
-            point["kpi_name"] = kpi_name
         kpi_name_link = (
             f'<{webapp_url_prefix()}#/dashboard/0/anomaly/{point["kpi_id"]}'
             f'|{point["kpi_name"]} (*{point["Dimension"]}*)>'
         )
 
-        date = point.get("formatted_date") if point.get("formatted_date") is not None else point.get("Time of Occurrence") 
+        date = point.get("formatted_date")
 
         threshold_message = f'expected: *{point["yhat_lower"]} - {point["yhat_upper"]}*'
         change_message = point["change_message"]

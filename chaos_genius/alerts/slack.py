@@ -17,7 +17,7 @@ def get_webhook_client():
         return None
 
 
-def anomaly_alert_slack(kpi_name, alert_name, kpi_id, alert_message, points, overall_count, subdim_count):
+def anomaly_alert_slack(kpi_name, alert_name, kpi_id, alert_message, points, overall_count, subdim_count, curr_date=None):
     client = get_webhook_client()
     if not client:
         raise Exception("Slack not configured properly.")
@@ -27,7 +27,7 @@ def anomaly_alert_slack(kpi_name, alert_name, kpi_id, alert_message, points, ove
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": f'{alert_name} ({points[0].get("formatted_date")})',
+                    "text": f'{alert_name} ({datetime.datetime.strptime(curr_date, ALERT_DATE_FORMAT)})',
                     "emoji": True,
                 },
             },

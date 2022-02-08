@@ -785,7 +785,8 @@ class AnomalyAlertController:
                 alert_message,
                 top_anomalies_,
                 overall_count,
-                subdim_count
+                subdim_count,
+                curr_date=datetime.datetime.now()
             )
 
         if test == "ok":

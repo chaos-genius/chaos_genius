@@ -39,14 +39,17 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  align-items: center;
   width: 100%;
+  flex-wrap: wrap;
+  &.event-alert-send-setting {
+    flex-direction: column;
+  }
   .form-check {
+    width: 48%;
     background: $white;
-    height: 48px;
     display: flex;
-    justify-content: center;
     align-items: center;
+
     label {
       margin-left: 10px;
       font-weight: $font-weight-400;
@@ -63,5 +66,10 @@
     .form-check-input {
       margin-top: 0px;
     }
+  }
+}
+.form-group-label-margin {
+  label {
+    margin-bottom: 0px;
   }
 }

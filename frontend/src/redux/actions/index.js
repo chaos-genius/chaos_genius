@@ -68,7 +68,9 @@ import {
 import {
   onboardingOrganisationStatus,
   onboardOrganisation,
-  onboardOrganisationUpdate
+  onboardOrganisationUpdate,
+  getReportSettingTime,
+  saveReportSettingTime
 } from './Organisation';
 import { getDashboardConfig } from './Config';
 import { getGlobalSetting } from './GlobalSetting';
@@ -133,5 +135,7 @@ export {
   getGlobalSetting,
   kpiAlertDeleteById,
   getTimeCuts,
-  getVersionSetting
+  getVersionSetting,
+  getReportSettingTime,
+  saveReportSettingTime
 };

@@ -71,7 +71,7 @@ def send_email(recipient_emails, message, count=0):
     try:
         if DEBUG:
             # TODO: Remove this
-            toaddr = ["manas@chaosgenius.io"]
+            toaddr = ["no-reply@chaosgenius.io"]
         else:
             toaddr = recipient_emails
 

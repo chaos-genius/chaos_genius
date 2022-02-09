@@ -107,7 +107,6 @@ class AlertDigestController:
             getattr=getattr,
             isinstance=isinstance,
             str=str,
-            formatted_date=self.curr_time.strftime(ALERT_DATE_FORMAT),
             overall_count=overall_count,
             subdim_count=subdim_count,
             alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
@@ -141,7 +140,6 @@ class AlertDigestController:
 
         test = alert_digest_slack_formatted(
             self.frequency,
-            self.curr_time,
             top10,
             overall_count,
             subdim_count

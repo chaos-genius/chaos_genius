@@ -3,15 +3,47 @@ import moment from 'moment';
 import { useDispatch, useSelector } from 'react-redux';
 
 import TimePicker from 'rc-time-picker';
+import { useToast } from 'react-toast-wnm';
 import 'rc-time-picker/assets/index.css';
 
 import { saveReportSettingTime } from '../../redux/actions';
+import { CustomContent, CustomActions } from '../../utils/toast-helper';
 
 const ReportSettings = () => {
+  const toast = useToast();
+  const customToast = (data) => {
+    const { type, header, description } = data;
+    toast({
+      autoDismiss: true,
+      enableAnimation: true,
+      delay: type === 'success' ? '5000' : '30000',
+      backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
+      borderRadius: '6px',
+      color: '#222222',
+      position: 'bottom-right',
+      minWidth: '240px',
+      width: 'auto',
+      boxShadow: '4px 6px 32px -2px rgba(226, 226, 234, 0.24)',
+      padding: '17px 14px',
+      height: 'auto',
+      border: type === 'success' ? '1px solid #60ca9a' : '1px solid #FEF6F5',
+      type: type,
+      actions: <CustomActions />,
+      content: (
+        <CustomContent
+          header={header}
+          description={description}
+          failed={type === 'success' ? false : true}
+        />
+      )
+    });
+  };
+
   const dispatch = useDispatch();
 
-  const { reportSettingTime } = useSelector((state) => state.organisation);
-  console.log(reportSettingTime);
+  const { reportSettingTime, reportSettingTimeStatus } = useSelector(
+    (state) => state.organisation
+  );
   const [schedule, setSchedule] = useState(reportSettingTime);
 
   useEffect(() => {
@@ -19,6 +51,20 @@ const ReportSettings = () => {
       setSchedule(reportSettingTime);
     }
   }, [reportSettingTime]);
+
+  useEffect(() => {
+    if (reportSettingTimeStatus === 'success') {
+      customToast({
+        type: 'success',
+        header: 'Reporting time set successfully.'
+      });
+    } else if (reportSettingTimeStatus === 'failure') {
+      customToast({
+        type: 'error',
+        header: 'Unable to set time.'
+      });
+    }
+  }, [reportSettingTimeStatus]);
 
   const handleValueChange = (data) => {
     setSchedule(data ? data.format('HH:mm:00') : '');
@@ -31,7 +77,7 @@ const ReportSettings = () => {
   return (
     <>
       <div className="heading">
-        <p>Reports</p>
+        <p>Alerts Report</p>
       </div>
       <div className="settings-form-container">
         <div className="form-group">

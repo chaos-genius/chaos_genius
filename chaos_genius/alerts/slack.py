@@ -209,7 +209,7 @@ def alert_digest_slack_formatted(
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": f"{frequency.title()} Alert Digest ({curr_time.strftime(ALERT_DATE_FORMAT)})",
+                    "text": f"{frequency.title()} Alerts Report ({curr_time.strftime(ALERT_DATE_FORMAT)})",
                     "emoji": True,
                 },
             },

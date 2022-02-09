@@ -196,7 +196,7 @@ def check_and_trigger_digest(frequency: str):
 
     digest_config_settings: dict = digest_config.config_setting
 
-    if not digest_config_settings.get(frequency):
+    if not digest_config_settings.get(ALERT_ATTRIBUTES_MAPPER[frequency]):
         msg = f"Digests with frequency {frequency} have not been enabled."
         logger.info(msg)
         raise Exception(msg)

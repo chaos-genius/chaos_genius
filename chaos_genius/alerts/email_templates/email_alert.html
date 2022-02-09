@@ -65,7 +65,7 @@
         {% if point["percentage_change"] is string %}
         (<span><strong>{{ point["change_message"] }}</strong></span>)
         {% elif point["percentage_change"] > 0 %}
-        <span style="color: green;">({{ point["change_message"] }})</span>
+        <span style="color: lightgreen;">({{ point["change_message"] }})</span>
         {% elif point["percentage_change"] < 0 %}
         <span style="color: red;">({{ point["change_message"] }})</span>
         {% else %}

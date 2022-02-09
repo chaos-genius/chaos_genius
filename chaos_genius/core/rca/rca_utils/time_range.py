@@ -15,10 +15,11 @@ def get_dates_for_last_30_days(
     The first tuple contains t-60, t-30.
     The second tuple contains t-30, t.
     """
-    start_date = end_date - timedelta(days=60)
-    mid_date = end_date - timedelta(days=30)
+    rca_start_date = end_date - timedelta(days=30)
+    base_end_date = rca_start_date - timedelta(days=1)
+    base_start_date = base_end_date - timedelta(days=30)
 
-    return (start_date, mid_date), (mid_date, end_date)
+    return (base_start_date, base_end_date), (rca_start_date, end_date)
 
 
 def get_dates_for_last_7_days(
@@ -29,10 +30,11 @@ def get_dates_for_last_7_days(
     The first tuple contains t-14, t-7.
     The second tuple contains t-7, t.
     """
-    start_date = end_date - timedelta(days=14)
-    mid_date = end_date - timedelta(days=7)
+    rca_start_date = end_date - timedelta(days=7)
+    base_end_date = rca_start_date - timedelta(days=1)
+    base_start_date = base_end_date - timedelta(days=7)
 
-    return (start_date, mid_date), (mid_date, end_date)
+    return (base_start_date, base_end_date), (rca_start_date, end_date)
 
 
 def get_dates_for_previous_day(
@@ -43,10 +45,9 @@ def get_dates_for_previous_day(
     The first tuple contains t-2, t-1.
     The second tuple contains t-1, t.
     """
-    start_date = end_date - timedelta(days=2)
-    mid_date = end_date - timedelta(days=1)
+    start_date = end_date - timedelta(days=1)
 
-    return (start_date, mid_date), (mid_date, end_date)
+    return (start_date, start_date), (end_date, end_date)
 
 
 def get_dates_for_month_on_month(

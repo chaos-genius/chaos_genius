@@ -84,12 +84,8 @@ def anomaly_single_kpi(kpi_id, end_date=None):
         kpi.scheduler_params = update_scheduler_params("anomaly_status", "completed")
         _checkpoint_success("Anomaly complete")
         try:
-            # Right now, the anomaly use '< end_date' for fetching the data
-            # and inserting in the db, hence we are checking any data point
-            # for last day.
-            # TODO: Add this timedelta variable in some constant file in core
-            updated_time = anomaly_end_date - timedelta(days=1)
-            _, errors = trigger_anomaly_alerts_for_kpi(kpi, updated_time)
+            # anomaly_end_date is same as the last date (of data in DB)
+            _, errors = trigger_anomaly_alerts_for_kpi(kpi, anomaly_end_date)
             if not errors:
                 logger.info(f"Triggered the alerts for KPI {kpi_id}.")
                 _checkpoint_success("Alert trigger")

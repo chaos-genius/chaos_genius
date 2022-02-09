@@ -27,7 +27,7 @@ def anomaly_alert_slack(kpi_name, alert_name, kpi_id, alert_message, points, ove
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": f'{alert_name} ({curr_date.strftime(ALERT_DATE_FORMAT)})',
+                    "text": f'{alert_name}',
                     "emoji": True,
                 },
             },
@@ -209,7 +209,7 @@ def alert_digest_slack_formatted(
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": f"{frequency.title()} Alert Digest ({curr_time.strftime(ALERT_DATE_FORMAT)})",
+                    "text": f"{frequency.title()} Alert Digest",
                     "emoji": True,
                 },
             },

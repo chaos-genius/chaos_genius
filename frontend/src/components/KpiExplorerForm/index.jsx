@@ -848,7 +848,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
 
   if (kpiFormLoading) {
     return (
-      <div className="load kpiloader">
+      <div className="load">
         <div className="preload"></div>
       </div>
     );
@@ -863,469 +863,423 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           <div className="load ">
             <div className="preload"></div>
           </div>
-        ) : null}
-        <div className="form-group">
-          <label>KPI Name *</label>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Name of your KPI"
-            required
-            name="name"
-            value={formdata.kpiname}
-            disabled={data[2] === 'edit' ? editableStatus('name') : false}
-            onChange={(e) => {
-              setFormdata({ ...formdata, kpiname: e.target.value });
-              setEditedFormData({
-                ...editedFormData,
-                [e.target.name]: e.target.value
-              });
-              setErrorMsg((prev) => {
-                return {
-                  ...prev,
-                  kpiname: false
-                };
-              });
-            }}
-          />
-          {errorMsg.kpiname === true ? (
-            <div className="connection__fail">
-              <p>Enter KPI Name</p>
-            </div>
-          ) : null}
-        </div>
-        <div className="form-group">
-          <label>Select Data Source*</label>
-          <Select
-            options={option.datasource}
-            classNamePrefix="selectcategory"
-            placeholder="Select Data Source"
-            value={
-              option.datasource &&
-              option.datasource.find((opt) => {
-                if (opt.id === formdata.datasource) {
-                  return opt;
-                }
-                return null;
-              })
-            }
-            isDisabled={
-              data[2] === 'edit' ? editableStatus('data_source') : false
-            }
-            components={{ SingleValue: customSingleValue }}
-            onChange={(e) => formOption(e)}
-          />
-          {errorMsg.datasource === true ? (
-            <div className="connection__fail">
-              <p>Select Data Source</p>
-            </div>
-          ) : null}
-        </div>
-        <div className="form-group">
-          <label>Select Dataset Type*</label>
-          <Select
-            value={dataset}
-            options={datasettype}
-            classNamePrefix="selectcategory"
-            placeholder="Select Dataset Type"
-            onChange={(e) => handleDataset(e)}
-            isDisabled={data[2] === 'edit' ? editableStatus('kpi_type') : false}
-            isOptionSelected
-          />
-          {errorMsg.dataset === true ? (
-            <div className="connection__fail">
-              <p>Select Dataset Type</p>
-            </div>
-          ) : null}
-        </div>
-        {dataset.value === 'query' ? (
-          // for of for query
+        ) : (
           <>
-            <div className="form-group query-form">
-              <label>Query *</label>
-              <textarea
-                value={formdata.query !== '' ? formdata.query : ''}
-                disabled={
-                  data[2] === 'edit' ? editableStatus('kpi_query') : false
-                }
-                placeholder="Enter Query"
+            <div className="form-group">
+              <label>KPI Name *</label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Name of your KPI"
+                required
+                name="name"
+                value={formdata.kpiname}
+                disabled={data[2] === 'edit' ? editableStatus('name') : false}
                 onChange={(e) => {
-                  setFormdata({ ...formdata, query: e.target.value });
+                  setFormdata({ ...formdata, kpiname: e.target.value });
+                  setEditedFormData({
+                    ...editedFormData,
+                    [e.target.name]: e.target.value
+                  });
                   setErrorMsg((prev) => {
                     return {
                       ...prev,
-                      query: false
+                      kpiname: false
                     };
                   });
-                }}></textarea>
-              {errorMsg.query === true ? (
-                <div className="connection__fail query_fail">
-                  <p>Enter Query</p>
+                }}
+              />
+              {errorMsg.kpiname === true ? (
+                <div className="connection__fail">
+                  <p>Enter KPI Name</p>
                 </div>
               ) : null}
-              <div className="test-query-connection">
-                <div className="test-query" onClick={() => onTestQuery()}>
-                  <span>
-                    <img src={Play} alt="Play" />
-                    Test Query
-                  </span>
-                </div>
-                <div>
-                  {testQueryData && testQueryData?.msg === 'success' && (
-                    <div className="connection__success">
-                      <p>
-                        <img src={Success} alt="Success" />
-                        Test Connection Success
-                      </p>
-                    </div>
-                  )}
-                  {testQueryData && testQueryData?.msg === 'failed' && (
-                    <div className="connection__fail">
-                      <p>
-                        <img src={Fail} alt="Failed" />
-                        Test Connection Failed
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
             </div>
-          </> // end of for query
-        ) : (
-          <>
-            {dataSourceHasSchema && (
+            <div className="form-group">
+              <label>Select Data Source*</label>
+              <Select
+                options={option.datasource}
+                classNamePrefix="selectcategory"
+                placeholder="Select Data Source"
+                value={
+                  option.datasource &&
+                  option.datasource.find((opt) => {
+                    if (opt.id === formdata.datasource) {
+                      return opt;
+                    }
+                    return null;
+                  })
+                }
+                isDisabled={
+                  data[2] === 'edit' ? editableStatus('data_source') : false
+                }
+                components={{ SingleValue: customSingleValue }}
+                onChange={(e) => formOption(e)}
+              />
+              {errorMsg.datasource === true ? (
+                <div className="connection__fail">
+                  <p>Select Data Source</p>
+                </div>
+              ) : null}
+            </div>
+            <div className="form-group">
+              <label>Select Dataset Type*</label>
+              <Select
+                value={dataset}
+                options={datasettype}
+                classNamePrefix="selectcategory"
+                placeholder="Select Dataset Type"
+                onChange={(e) => handleDataset(e)}
+                isDisabled={
+                  data[2] === 'edit' ? editableStatus('kpi_type') : false
+                }
+                isOptionSelected
+              />
+              {errorMsg.dataset === true ? (
+                <div className="connection__fail">
+                  <p>Select Dataset Type</p>
+                </div>
+              ) : null}
+            </div>
+            {dataset.value === 'query' ? (
+              // for of for query
+              <>
+                <div className="form-group query-form">
+                  <label>Query *</label>
+                  <textarea
+                    value={formdata.query !== '' ? formdata.query : ''}
+                    disabled={
+                      data[2] === 'edit' ? editableStatus('kpi_query') : false
+                    }
+                    placeholder="Enter Query"
+                    onChange={(e) => {
+                      setFormdata({ ...formdata, query: e.target.value });
+                      setErrorMsg((prev) => {
+                        return {
+                          ...prev,
+                          query: false
+                        };
+                      });
+                    }}></textarea>
+                  {errorMsg.query === true ? (
+                    <div className="connection__fail query_fail">
+                      <p>Enter Query</p>
+                    </div>
+                  ) : null}
+                  <div className="test-query-connection">
+                    <div className="test-query" onClick={() => onTestQuery()}>
+                      <span>
+                        <img src={Play} alt="Play" />
+                        Test Query
+                      </span>
+                    </div>
+                    <div>
+                      {testQueryData && testQueryData?.msg === 'success' && (
+                        <div className="connection__success">
+                          <p>
+                            <img src={Success} alt="Success" />
+                            Test Connection Success
+                          </p>
+                        </div>
+                      )}
+                      {testQueryData && testQueryData?.msg === 'failed' && (
+                        <div className="connection__fail">
+                          <p>
+                            <img src={Fail} alt="Failed" />
+                            Test Connection Failed
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </> // end of for query
+            ) : (
+              <>
+                {dataSourceHasSchema && (
+                  <div className="form-group">
+                    <label>Schema Name *</label>
+                    <Select
+                      options={option.schemaOption}
+                      value={
+                        formdata.schemaName !== '' && {
+                          label: formdata.schemaName,
+                          value: formdata.schemaName
+                        }
+                      }
+                      isDisabled={
+                        data[2] === 'edit'
+                          ? editableStatus('schema_name')
+                          : false
+                      }
+                      classNamePrefix="selectcategory"
+                      placeholder="Select Schema Name"
+                      onChange={(e) => schemaName(e)}
+                    />
+
+                    {errorMsg.tablename === true ? (
+                      <div className="connection__fail">
+                        <p>Select Schema Name</p>
+                      </div>
+                    ) : null}
+                  </div>
+                )}
+
+                <div className="form-group">
+                  <label>Table Name *</label>
+                  <Select
+                    options={option.tableoption}
+                    value={
+                      formdata.tablename !== '' && {
+                        label: formdata.tablename,
+                        value: formdata.tablename
+                      }
+                    }
+                    isDisabled={
+                      data[2] === 'edit' ? editableStatus('table_name') : false
+                    }
+                    classNamePrefix="selectcategory"
+                    placeholder="Select Table"
+                    onChange={(e) => tableName(e)}
+                  />
+
+                  {errorMsg.tablename === true ? (
+                    <div className="connection__fail">
+                      <p>Select Table Name</p>
+                    </div>
+                  ) : null}
+                </div>
+              </>
+            )}
+            <>
               <div className="form-group">
-                <label>Schema Name *</label>
+                <label>Metric Columns *</label>
                 <Select
-                  options={option.schemaOption}
+                  options={
+                    option.metricOption && option.metricOption.length !== 0
+                      ? option.metricOption
+                      : []
+                  }
                   value={
-                    formdata.schemaName !== '' && {
-                      label: formdata.schemaName,
-                      value: formdata.schemaName
+                    formdata.metriccolumns !== '' && {
+                      label: formdata.metriccolumns,
+                      value: formdata.metriccolumns
                     }
                   }
                   isDisabled={
-                    data[2] === 'edit' ? editableStatus('schema_name') : false
+                    data[2] === 'edit' ? editableStatus('metric') : false
                   }
                   classNamePrefix="selectcategory"
-                  placeholder="Select Schema Name"
-                  onChange={(e) => schemaName(e)}
-                />
-
-                {errorMsg.tablename === true ? (
-                  <div className="connection__fail">
-                    <p>Select Schema Name</p>
-                  </div>
-                ) : null}
-              </div>
-            )}
-
-            <div className="form-group">
-              <label>Table Name *</label>
-              <Select
-                options={option.tableoption}
-                value={
-                  formdata.tablename !== '' && {
-                    label: formdata.tablename,
-                    value: formdata.tablename
-                  }
-                }
-                isDisabled={
-                  data[2] === 'edit' ? editableStatus('table_name') : false
-                }
-                classNamePrefix="selectcategory"
-                placeholder="Select Table"
-                onChange={(e) => tableName(e)}
-              />
-
-              {errorMsg.tablename === true ? (
-                <div className="connection__fail">
-                  <p>Select Table Name</p>
-                </div>
-              ) : null}
-            </div>
-          </>
-        )}
-        <>
-          <div className="form-group">
-            <label>Metric Columns *</label>
-            <Select
-              options={
-                option.metricOption && option.metricOption.length !== 0
-                  ? option.metricOption
-                  : []
-              }
-              value={
-                formdata.metriccolumns !== '' && {
-                  label: formdata.metriccolumns,
-                  value: formdata.metriccolumns
-                }
-              }
-              isDisabled={data[2] === 'edit' ? editableStatus('metric') : false}
-              classNamePrefix="selectcategory"
-              placeholder="Select Metric Columns"
-              onChange={(e) => {
-                setFormdata({ ...formdata, metriccolumns: e.value });
-
-                setErrorMsg((prev) => {
-                  return {
-                    ...prev,
-                    metriccolumns: false
-                  };
-                });
-              }}
-            />
-            {errorMsg.metriccolumns === true ? (
-              <div className="connection__fail">
-                <p>Select Metric Columns</p>
-              </div>
-            ) : null}
-          </div>
-          <div className="form-group">
-            <label>Aggregate by *</label>
-            <Select
-              options={aggregate}
-              value={
-                formdata.aggregate !== ''
-                  ? {
-                      label: formdata.aggregate,
-                      value: formdata.aggregate
-                    }
-                  : null
-              }
-              isDisabled={
-                data[2] === 'edit' ? editableStatus('aggregation') : false
-              }
-              classNamePrefix="selectcategory"
-              placeholder="Select Aggregate by"
-              onChange={(e) => {
-                setFormdata({ ...formdata, aggregate: e.value });
-                setErrorMsg((prev) => {
-                  return {
-                    ...prev,
-                    aggregate: false
-                  };
-                });
-              }}
-            />
-            {errorMsg.aggregate === true ? (
-              <div className="connection__fail">
-                <p>Select Aggregate</p>
-              </div>
-            ) : null}
-          </div>
-          <div className="form-group">
-            <label>Datetime Columns *</label>
-
-            <Select
-              options={
-                option.metricOption && option.metricOption.length !== 0
-                  ? option.metricOption
-                  : []
-              }
-              value={
-                formdata.datetimecolumns !== '' && {
-                  label: formdata.datetimecolumns,
-                  value: formdata.datetimecolumns
-                }
-              }
-              isDisabled={
-                data[2] === 'edit' ? editableStatus('datetime_column') : false
-              }
-              classNamePrefix="selectcategory"
-              placeholder="Select Datetime Columns"
-              onChange={(e) => {
-                setFormdata({ ...formdata, datetimecolumns: e.value });
-                setErrorMsg((prev) => {
-                  return {
-                    ...prev,
-                    datetimecolumns: false
-                  };
-                });
-              }}
-            />
-            {errorMsg.datetimecolumns === true ? (
-              <div className="connection__fail">
-                <p>Select Date Time Columns</p>
-              </div>
-            ) : null}
-          </div>
-
-          <div className="form-group">
-            <label>Dimensions </label>
-            <Select
-              closeMenuOnSelect={false}
-              blurInputOnSelect={false}
-              value={
-                formdata.dimensions.length !== 0
-                  ? formdata.dimensions.map((el) => {
-                      return {
-                        label: el,
-                        value: el
-                      };
-                    })
-                  : []
-              }
-              isMulti
-              options={
-                option.metricOption && option.metricOption.length !== 0
-                  ? option.metricOption
-                  : []
-              }
-              isDisabled={
-                data[2] === 'edit' ? editableStatus('dimensions') : false
-              }
-              classNamePrefix="selectcategory"
-              placeholder={
-                formdata.dimensions.length === 0 && data[2] === 'edit'
-                  ? ''
-                  : 'Select Dimensions'
-              }
-              menuPlacement="top"
-              onChange={(e) => {
-                setFormdata({
-                  ...formdata,
-                  dimensions: e.map((el) => el.value)
-                });
-                setOption({ ...option, datetime_column: e.value });
-                setErrorMsg((prev) => {
-                  return {
-                    ...prev,
-                    dimension: false
-                  };
-                });
-              }}
-            />
-            <div className="channel-tip">
-              <p>
-                Select dimensions for enabling sub-dimensional analysis & drill
-                downs
-              </p>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Dashboard *</label>
-            <Select
-              closeMenuOnSelect={false}
-              blurInputOnSelect={false}
-              isMulti
-              options={option.dashboard}
-              classNamePrefix="selectcategory"
-              placeholder={
-                formdata.dashboardNameList.length === 0 && data[2] === 'edit'
-                  ? ''
-                  : 'Select'
-              }
-              menuPlacement="top"
-              value={
-                formdata.dashboardNameList.length !== 0
-                  ? formdata.dashboardNameList
-                  : []
-              }
-              isDisabled={
-                data[2] === 'edit' ? editableStatus('dashboards') : false
-              }
-              onChange={(e) => {
-                var arr = [];
-                e.length !== 0
-                  ? e.forEach((data) => {
-                      if (data.value === 'newdashboard') {
-                        setIsOpen(true);
-                      } else if (data.value !== 'newdashboard') {
-                        arr.push(data);
-                        setEditedFormData({
-                          ...editedFormData,
-                          dashboards: arr.map((el) => el.value)
-                        });
-                        setFormdata({
-                          ...formdata,
-                          dashboardNameList: arr
-                        });
-                      }
-                    })
-                  : onEditData(e, 'dashboards');
-
-                setErrorMsg((prev) => {
-                  return {
-                    ...prev,
-                    dashboardNameList: false
-                  };
-                });
-              }}
-            />
-            {errorMsg.dashboardNameList === true ? (
-              <div className="connection__fail">
-                <p>Select Dashboard</p>
-              </div>
-            ) : null}
-          </div>
-          <div className="form-action">
-            <button
-              className={
-                kpiSubmitLoading || kpiUpdateLoading
-                  ? 'btn black-button btn-loading'
-                  : 'btn black-button'
-              }
-              onClick={() => {
-                handleSubmit();
-              }}>
-              <div className="btn-spinner">
-                <div className="spinner-border" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-                <span>Loading...</span>
-              </div>
-              <div className="btn-content">
-                {data[2] === 'edit' ? (
-                  <span>Save Changes</span>
-                ) : (
-                  <span>Add KPI</span>
-                )}
-              </div>
-            </button>
-          </div>
-        </>
-        <Modal
-          isOpen={isOpen}
-          shouldCloseOnOverlayClick={false}
-          portalClassName="dashboardmodal">
-          <div className="modal-close">
-            <img src={Close} alt="Close" onClick={closeModal} />
-          </div>
-          <div className="modal-head">
-            <h3>Create New Dashboard</h3>
-          </div>
-          <div className="modal-body">
-            <div className="modal-contents">
-              <div className="form-group">
-                <label>Dashboard Name *</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Dashboard Name"
+                  placeholder="Select Metric Columns"
                   onChange={(e) => {
-                    setErrorMsg({ ...errorMsg, dashboardName: false });
-                    setFormdata({ ...formdata, dashboardName: e.target.value });
+                    setFormdata({ ...formdata, metriccolumns: e.value });
+
+                    setErrorMsg((prev) => {
+                      return {
+                        ...prev,
+                        metriccolumns: false
+                      };
+                    });
                   }}
                 />
-                {errorMsg.dashboardName === true ? (
+                {errorMsg.metriccolumns === true ? (
                   <div className="connection__fail">
-                    <p>Enter Dashboard Name</p>
+                    <p>Select Metric Columns</p>
                   </div>
                 ) : null}
               </div>
-              <div className="next-step-navigate">
-                <button className="btn white-button" onClick={closeModal}>
-                  <span>Cancel</span>
-                </button>
+              <div className="form-group">
+                <label>Aggregate by *</label>
+                <Select
+                  options={aggregate}
+                  value={
+                    formdata.aggregate !== ''
+                      ? {
+                          label: formdata.aggregate,
+                          value: formdata.aggregate
+                        }
+                      : null
+                  }
+                  isDisabled={
+                    data[2] === 'edit' ? editableStatus('aggregation') : false
+                  }
+                  classNamePrefix="selectcategory"
+                  placeholder="Select Aggregate by"
+                  onChange={(e) => {
+                    setFormdata({ ...formdata, aggregate: e.value });
+                    setErrorMsg((prev) => {
+                      return {
+                        ...prev,
+                        aggregate: false
+                      };
+                    });
+                  }}
+                />
+                {errorMsg.aggregate === true ? (
+                  <div className="connection__fail">
+                    <p>Select Aggregate</p>
+                  </div>
+                ) : null}
+              </div>
+              <div className="form-group">
+                <label>Datetime Columns *</label>
+
+                <Select
+                  options={
+                    option.metricOption && option.metricOption.length !== 0
+                      ? option.metricOption
+                      : []
+                  }
+                  value={
+                    formdata.datetimecolumns !== '' && {
+                      label: formdata.datetimecolumns,
+                      value: formdata.datetimecolumns
+                    }
+                  }
+                  isDisabled={
+                    data[2] === 'edit'
+                      ? editableStatus('datetime_column')
+                      : false
+                  }
+                  classNamePrefix="selectcategory"
+                  placeholder="Select Datetime Columns"
+                  onChange={(e) => {
+                    setFormdata({ ...formdata, datetimecolumns: e.value });
+                    setErrorMsg((prev) => {
+                      return {
+                        ...prev,
+                        datetimecolumns: false
+                      };
+                    });
+                  }}
+                />
+                {errorMsg.datetimecolumns === true ? (
+                  <div className="connection__fail">
+                    <p>Select Date Time Columns</p>
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="form-group">
+                <label>Dimensions </label>
+                <Select
+                  closeMenuOnSelect={false}
+                  blurInputOnSelect={false}
+                  value={
+                    formdata.dimensions.length !== 0
+                      ? formdata.dimensions.map((el) => {
+                          return {
+                            label: el,
+                            value: el
+                          };
+                        })
+                      : []
+                  }
+                  isMulti
+                  options={
+                    option.metricOption && option.metricOption.length !== 0
+                      ? option.metricOption
+                      : []
+                  }
+                  isDisabled={
+                    data[2] === 'edit' ? editableStatus('dimensions') : false
+                  }
+                  classNamePrefix="selectcategory"
+                  placeholder={
+                    formdata.dimensions.length === 0 && data[2] === 'edit'
+                      ? ''
+                      : 'Select Dimensions'
+                  }
+                  menuPlacement="top"
+                  onChange={(e) => {
+                    setFormdata({
+                      ...formdata,
+                      dimensions: e.map((el) => el.value)
+                    });
+                    setOption({ ...option, datetime_column: e.value });
+                    setErrorMsg((prev) => {
+                      return {
+                        ...prev,
+                        dimension: false
+                      };
+                    });
+                  }}
+                />
+                <div className="channel-tip">
+                  <p>
+                    Select dimensions for enabling sub-dimensional analysis &
+                    drill downs
+                  </p>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Dashboard *</label>
+                <Select
+                  closeMenuOnSelect={false}
+                  blurInputOnSelect={false}
+                  isMulti
+                  options={option.dashboard}
+                  classNamePrefix="selectcategory"
+                  placeholder={
+                    formdata.dashboardNameList.length === 0 &&
+                    data[2] === 'edit'
+                      ? ''
+                      : 'Select'
+                  }
+                  menuPlacement="top"
+                  value={
+                    formdata.dashboardNameList.length !== 0
+                      ? formdata.dashboardNameList
+                      : []
+                  }
+                  isDisabled={
+                    data[2] === 'edit' ? editableStatus('dashboards') : false
+                  }
+                  onChange={(e) => {
+                    var arr = [];
+                    e.length !== 0
+                      ? e.forEach((data) => {
+                          if (data.value === 'newdashboard') {
+                            setIsOpen(true);
+                          } else if (data.value !== 'newdashboard') {
+                            arr.push(data);
+                            setEditedFormData({
+                              ...editedFormData,
+                              dashboards: arr.map((el) => el.value)
+                            });
+                            setFormdata({
+                              ...formdata,
+                              dashboardNameList: arr
+                            });
+                          }
+                        })
+                      : onEditData(e, 'dashboards');
+
+                    setErrorMsg((prev) => {
+                      return {
+                        ...prev,
+                        dashboardNameList: false
+                      };
+                    });
+                  }}
+                />
+                {errorMsg.dashboardNameList === true ? (
+                  <div className="connection__fail">
+                    <p>Select Dashboard</p>
+                  </div>
+                ) : null}
+              </div>
+              <div className="form-action">
                 <button
                   className={
-                    createDashboardLoading
+                    kpiSubmitLoading || kpiUpdateLoading
                       ? 'btn black-button btn-loading'
                       : 'btn black-button'
                   }
-                  onClick={dashboardSubmit}>
+                  onClick={() => {
+                    handleSubmit();
+                  }}>
                   <div className="btn-spinner">
                     <div className="spinner-border" role="status">
                       <span className="visually-hidden">Loading...</span>
@@ -1333,13 +1287,74 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                     <span>Loading...</span>
                   </div>
                   <div className="btn-content">
-                    <span>Create</span>
+                    {data[2] === 'edit' ? (
+                      <span>Save Changes</span>
+                    ) : (
+                      <span>Add KPI</span>
+                    )}
                   </div>
                 </button>
               </div>
-            </div>
-          </div>
-        </Modal>
+            </>
+            <Modal
+              isOpen={isOpen}
+              shouldCloseOnOverlayClick={false}
+              portalClassName="dashboardmodal">
+              <div className="modal-close">
+                <img src={Close} alt="Close" onClick={closeModal} />
+              </div>
+              <div className="modal-head">
+                <h3>Create New Dashboard</h3>
+              </div>
+              <div className="modal-body">
+                <div className="modal-contents">
+                  <div className="form-group">
+                    <label>Dashboard Name *</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Dashboard Name"
+                      onChange={(e) => {
+                        setErrorMsg({ ...errorMsg, dashboardName: false });
+                        setFormdata({
+                          ...formdata,
+                          dashboardName: e.target.value
+                        });
+                      }}
+                    />
+                    {errorMsg.dashboardName === true ? (
+                      <div className="connection__fail">
+                        <p>Enter Dashboard Name</p>
+                      </div>
+                    ) : null}
+                  </div>
+                  <div className="next-step-navigate">
+                    <button className="btn white-button" onClick={closeModal}>
+                      <span>Cancel</span>
+                    </button>
+                    <button
+                      className={
+                        createDashboardLoading
+                          ? 'btn black-button btn-loading'
+                          : 'btn black-button'
+                      }
+                      onClick={dashboardSubmit}>
+                      <div className="btn-spinner">
+                        <div className="spinner-border" role="status">
+                          <span className="visually-hidden">Loading...</span>
+                        </div>
+                        <span>Loading...</span>
+                      </div>
+                      <div className="btn-content">
+                        <span>Create</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </Modal>
+          </>
+        )}
       </>
     );
   }

@@ -848,7 +848,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
 
   if (kpiFormLoading) {
     return (
-      <div className="load ">
+      <div className="load kpiloader">
         <div className="preload"></div>
       </div>
     );

@@ -798,6 +798,9 @@ a:hover {
     margin: 48px 0px;
     width: 100%;
   }
+  &.kpiloader {
+    position: relative;
+  }
 }
 .preload {
   // margin-top: 17%;

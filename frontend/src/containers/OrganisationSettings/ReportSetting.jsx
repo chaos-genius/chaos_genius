@@ -64,6 +64,7 @@ const ReportSettings = () => {
         header: 'Unable to set time.'
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reportSettingTimeStatus]);
 
   const handleValueChange = (data) => {

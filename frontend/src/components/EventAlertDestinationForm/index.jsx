@@ -207,6 +207,15 @@ const EventAlertDestinationForm = ({
     }
   };
 
+  const handleDigestClick = (e) => {
+    setAlertFormData((prev) => {
+      return {
+        ...prev,
+        daily_digest: e.target.value === 'true' //converting string to boolean
+      };
+    });
+  };
+
   const onSubmit = () => {
     var obj = { ...error };
     if (alertFormData.alert_channel === '') {
@@ -393,8 +402,15 @@ const EventAlertDestinationForm = ({
               type="radio"
               id="individualalert"
               name="alert"
+              value={false}
+              checked={alertFormData.daily_digest === false ? true : false}
+              onClick={(e) => handleDigestClick(e)}
             />
-            <label className="form-check-label active" for="individualalert">
+            <label
+              className={`form-check-label ${
+                alertFormData.daily_digest === false ? 'active' : ''
+              } `}
+              for="individualalert">
               individual alert
             </label>
           </div>
@@ -404,9 +420,14 @@ const EventAlertDestinationForm = ({
               type="radio"
               id="consolidatedalertsreport"
               name="alert"
+              value={true}
+              checked={alertFormData.daily_digest === false ? false : true}
+              onClick={(e) => handleDigestClick(e)}
             />
             <label
-              className={'form-check-label'}
+              className={`form-check-label ${
+                alertFormData.daily_digest === false ? '' : 'active'
+              } `}
               for="consolidatedalertsreport">
               consolidated alerts report
             </label>

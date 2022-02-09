@@ -144,7 +144,12 @@ const EventAlertForm = ({
         alert_message: kpiAlertEditData?.alert_message,
         alert_frequency: kpiAlertEditData?.alert_frequency,
         alert_channel: kpiAlertEditData?.alert_channel,
-        alert_channel_conf: kpiAlertEditData?.alert_channel_conf
+        alert_channel_conf: kpiAlertEditData?.alert_channel_conf,
+        daily_digest:
+          kpiAlertEditData?.daily_digest !== undefined &&
+          kpiAlertEditData?.daily_digest !== null
+            ? kpiAlertEditData?.daily_digest
+            : false
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

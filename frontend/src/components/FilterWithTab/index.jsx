@@ -59,6 +59,19 @@ const DashboardFilter = ({ kpi, data, setActive, tabs, dashboard }) => {
     }
   };
 
+  const handleClick = (item) => {
+    if (item.id.toString() !== kpi.toString()) {
+      store.dispatch(RESET_AGGREGATION);
+      store.dispatch(RESET_LINECHART);
+      store.dispatch({ type: 'RESET_DASHBOARD_RCA' });
+      dispatch(anomalySetting(item.id));
+      store.dispatch(RESET);
+      store.dispatch(RESET_DATA);
+      setActive(item.name);
+      history.push(`/dashboard/${dashboard}/${tabs}/${item.id}`);
+    }
+  };
+
   const debounce = (func) => debuncerReturn(func, 500);
 
   return (
@@ -87,16 +100,7 @@ const DashboardFilter = ({ kpi, data, setActive, tabs, dashboard }) => {
                   className={
                     kpi.toString() === item.id.toString() ? 'active' : ''
                   }
-                  onClick={() => {
-                    store.dispatch(RESET_AGGREGATION);
-                    store.dispatch(RESET_LINECHART);
-                    store.dispatch({ type: 'RESET_DASHBOARD_RCA' });
-                    dispatch(anomalySetting(item.id));
-                    store.dispatch(RESET);
-                    store.dispatch(RESET_DATA);
-                    setActive(item.name);
-                    history.push(`/dashboard/${dashboard}/${tabs}/${item.id}`);
-                  }}>
+                  onClick={() => handleClick(item)}>
                   <div className="filter-tooltipcontent">
                     <label className="name-tooltip">
                       {CustomTooltip(item.name)}

@@ -508,9 +508,6 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
                               <li
                                 className="previous-step"
                                 onClick={() => {
-                                  store.dispatch({
-                                    type: 'RESET_DASHBOARD_RCA'
-                                  });
                                   SetSingleDimensionData(
                                     singleDimensionData - 3
                                   );
@@ -553,9 +550,6 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
                                     : ''
                                 }
                                 onClick={() => {
-                                  store.dispatch({
-                                    type: 'RESET_DASHBOARD_RCA'
-                                  });
                                   SetSingleDimensionData(
                                     singleDimensionData + 3
                                   );

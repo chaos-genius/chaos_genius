@@ -89,8 +89,6 @@ class AlertDigestController:
             )
 
     def send_alert_digest(self, recipient, triggered_alert_ids, triggered_alert_dict):
-        data = []
-
         triggered_alerts = [triggered_alert_dict[id_].__dict__ for id_ in triggered_alert_ids]
         points = _all_anomaly_points(triggered_alerts)
         top_anomalies_ = top_anomalies(points)
@@ -107,7 +105,6 @@ class AlertDigestController:
             getattr=getattr,
             isinstance=isinstance,
             str=str,
-            formatted_date=self.curr_time.strftime(ALERT_DATE_FORMAT),
             overall_count=overall_count,
             subdim_count=subdim_count,
             alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
@@ -141,7 +138,6 @@ class AlertDigestController:
 
         test = alert_digest_slack_formatted(
             self.frequency,
-            self.curr_time,
             top10,
             overall_count,
             subdim_count

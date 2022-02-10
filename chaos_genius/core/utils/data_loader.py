@@ -66,7 +66,10 @@ class DataLoader:
             start_date = end_date - timedelta(days=days_before)
 
         self.start_date = start_date
-        self.end_date = end_date
+        # when we do date <= "6 Feb 2022", we get data till "6 Feb 2022 00:00:00"
+        # (inclusive), but we need data till "7 Feb 2022 00:00:00" (exclusive)
+        # so we add one day here and make our query date < "7 Feb 2022"
+        self.end_date = end_date + timedelta(days=1)
 
         self.connection_info = DataSource.get_by_id(
             kpi_info["data_source"]
@@ -85,7 +88,7 @@ class DataLoader:
         start_date_str = self.start_date.strftime("%Y-%m-%d")
         end_date_str = self.end_date.strftime("%Y-%m-%d")
         start_query = f"{dt_col_str} >= '{start_date_str}'"
-        end_query = f"{dt_col_str} <= '{end_date_str}'"
+        end_query = f"{dt_col_str} < '{end_date_str}'"
 
         return f" where {start_query} and {end_query} "
 

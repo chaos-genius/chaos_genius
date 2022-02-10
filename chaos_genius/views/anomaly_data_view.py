@@ -24,6 +24,7 @@ from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 from chaos_genius.core.rca.rca_utils.string_helpers import (
     convert_query_string_to_user_string,
 )
+from chaos_genius.utils.datetime_helper import get_date_string_with_tz
 
 
 blueprint = Blueprint("anomaly_data", __name__)
@@ -60,6 +61,8 @@ def kpi_anomaly_detection(kpi_id):
         }
         data["chart_data"]["title"] = kpi_info["name"]
         current_app.logger.info(f"Anomaly DD Retrieval Completed for KPI ID: {kpi_id}")
+
+        end_date = get_date_string_with_tz(end_date)
 
     except:  # noqa: E722
         current_app.logger.error("Error in Anomaly Overall Retrieval", exc_info=1)
@@ -98,6 +101,8 @@ def kpi_anomaly_drilldown(kpi_id):
             subdim_graphs.append(anom_data)
         current_app.logger.info(f"Anomaly DD Retrieval Completed for KPI ID: {kpi_id}")
 
+        end_date = get_date_string_with_tz(end_date)
+
     except:  # noqa: E722
         current_app.logger.error("Error in Anomaly DD Retrieval", exc_info=1)
 
@@ -128,6 +133,8 @@ def kpi_anomaly_data_quality(kpi_id):
                 data.append(anom_data)
 
         current_app.logger.info(f"Anomaly DQ Retrieval Completed for KPI ID: {kpi_id}")
+
+        end_date = get_date_string_with_tz(end_date)
 
     except:  # noqa: E722
         current_app.logger.error("Error in Anomaly DQ Retrieval: {err}", exc_info=1)
@@ -188,6 +195,8 @@ def kpi_subdim_anomaly(kpi_id):
             anom_data["x_axis_limits"] = graph_xlims
             subdim_graphs.append(anom_data)
         current_app.logger.info(f"Subdimension Anomaly Retrieval Completed for KPI ID: {kpi_id}")
+
+        end_date = get_date_string_with_tz(end_date)
 
     except:  # noqa: E722
         current_app.logger.error("Error in Subdimension Anomaly Retrieval", exc_info=1)

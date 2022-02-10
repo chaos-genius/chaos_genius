@@ -12,6 +12,7 @@ from typing import Union
 from dotenv import load_dotenv
 
 from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
+from chaos_genius.core.utils.constants import SUPPORTED_TIMEZONES
 from chaos_genius.utils.utils import latest_git_commit_hash
 
 load_dotenv(".env")  # loads environment variables from .env
@@ -80,6 +81,9 @@ DEEPDRILLS_ENABLED_TIME_RANGES = list(map(lambda x: x.strip(), DEEPDRILLS_ENABLE
 for enabled_time_range in DEEPDRILLS_ENABLED_TIME_RANGES:
     if enabled_time_range not in TIME_RANGES_BY_KEY.keys():
         raise ValueError(f"Values in DEEPDRILLS_ENABLED_TIME_RANGES must be one of {', '.join(TIME_RANGES_BY_KEY.keys())}. Got: {enabled_time_range}.")
+TIMEZONE = os.getenv('TIMEZONE', default='UTC')
+if TIMEZONE not in SUPPORTED_TIMEZONES.keys():
+    raise ValueError(f"Value of REPORTING_TIMEZONE must be one of {', '.join(SUPPORTED_TIMEZONES.keys())}. Got: {TIMEZONE}.")
 
 SENTRY_DSN = os.getenv('SENTRY_DSN')
 

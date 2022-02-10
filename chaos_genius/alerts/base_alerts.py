@@ -531,7 +531,14 @@ class AnomalyAlertController:
     def _save_nl_message_hourly_freq(self, anomaly_data: List[dict], kpi: Kpi):
         """Saves change message for every point, for a hourly frequency KPI."""
         data = dict()
-        for point in anomaly_data:
+        total_anomaly_data = AnomalyDataOutput.query.filter(
+                                AnomalyDataOutput.kpi_id == self.alert_info["kpi"],
+                                AnomalyDataOutput.anomaly_type.in_(["overall", "subdim"]),
+                                AnomalyDataOutput.data_datetime >= self.anomaly_end_date,
+                            ).all()
+        total_anomaly_data = [anomaly_point.as_dict for anomaly_point in total_anomaly_data]
+        
+        for point in total_anomaly_data:
             if point["data_datetime"].hour not in data.keys():
                 data[point["data_datetime"].hour] = []
             data[point["data_datetime"].hour].append(point)

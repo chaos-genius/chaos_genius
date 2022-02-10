@@ -159,7 +159,7 @@ const Anomalygraph = ({ drilldown }) => {
             s =
               s +
               '<br>Datetime: <b>' +
-              formatDateTime(this.x, true, true, true) +
+              formatDateTime(this.x, true, true) +
               '</b>';
             return s;
           }

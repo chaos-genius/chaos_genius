@@ -30,6 +30,11 @@ export const hierarchial = (state = initialState, action) => {
         hierarchialLoading: false
       };
     }
+    case 'RESET_HIERARCHIAL_DATA': {
+      return {
+        ...initialState
+      };
+    }
     default:
       return state;
   }

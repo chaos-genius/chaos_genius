@@ -7,6 +7,7 @@ from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
 from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.utils.datetime_helper import (
+    convert_datetime_to_timestamp,
     get_date_string_with_tz,
     get_rca_date_from_string,
 )
@@ -112,7 +113,7 @@ def kpi_line_data(kpi_id):
 
         final_data = data_point.data
         for row in final_data:
-            row["date"] = get_date_string_with_tz(
+            row["date"] = convert_datetime_to_timestamp(
                 get_rca_date_from_string(row["date"])
             )
     except Exception as err:  # noqa: B902

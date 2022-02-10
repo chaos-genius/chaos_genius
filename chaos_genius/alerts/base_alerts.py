@@ -537,6 +537,11 @@ class AnomalyAlertController:
                                 AnomalyDataOutput.data_datetime >= self.anomaly_end_date,
                             ).all()
         total_anomaly_data = [anomaly_point.as_dict for anomaly_point in total_anomaly_data]
+        for point in total_anomaly_data:
+            if point.get("anomaly_type") != "overall":
+                point["series_type"] = convert_query_string_to_user_string(point["series_type"])
+            else:
+                point["series_type"] = "Overall KPI"
         
         for point in total_anomaly_data:
             if point["data_datetime"].hour not in data.keys():

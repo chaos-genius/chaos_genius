@@ -27,6 +27,8 @@ import { useToast } from 'react-toast-wnm';
 
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
 
+import { getLocalStorage } from '../../utils/storage-helper';
+
 import Edit from '../../assets/images/disable-edit.svg';
 
 const Analystics = ({ kpi, setAnalystics, onboarding }) => {
@@ -58,6 +60,8 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [edit, setEdit] = useState('');
   const [schedule, setSchedule] = useState(moment());
+
+  const globalSetting = getLocalStorage('GlobalSetting');
 
   const [error, setError] = useState({
     anomaly_period: '',
@@ -690,6 +694,12 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
               {edit &&
                 editableStatus('scheduler_params_time') === 'sensitive' &&
                 editAndSaveButton('schedule')}
+            </div>
+            <div className="channel-tip">
+              <p>
+                Note: The time set above must be in your server timezone{' '}
+                {`(${globalSetting?.timezone})`}
+              </p>
             </div>
           </div>
           <div className="form-group">

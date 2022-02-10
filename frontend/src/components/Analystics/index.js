@@ -28,7 +28,6 @@ import { useToast } from 'react-toast-wnm';
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
 
 import { getLocalStorage } from '../../utils/storage-helper';
-
 import Edit from '../../assets/images/disable-edit.svg';
 
 const Analystics = ({ kpi, setAnalystics, onboarding }) => {

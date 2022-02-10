@@ -1,6 +1,6 @@
 """Provides helper functions related to datetime operations."""
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 from chaos_genius.core.utils.constants import SUPPORTED_TIMEZONES
 from chaos_genius.settings import TIMEZONE
@@ -21,3 +21,12 @@ def get_date_string_with_tz(date_value) -> str:
     tz_offset = SUPPORTED_TIMEZONES[TIMEZONE]
     main_str = date_value.strftime("%d %b %Y") + f" {TIMEZONE}"
     return f"{main_str} ({tz_offset})" if tz_offset != "" else main_str
+
+
+def convert_datetime_to_timestamp(date_value) -> int:
+    """Convert datetime to timestamp."""
+    if isinstance(date_value, date):
+        date_value = datetime(
+            year=date_value.year, month=date_value.month, day=date_value.day
+        )
+    return int(date_value.timestamp()) * 1000

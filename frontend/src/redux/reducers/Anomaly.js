@@ -126,7 +126,8 @@ export const anomaly = (state = initialState, action) => {
     case 'RESET_DRILL': {
       return {
         ...state,
-        anomalyDrilldownData: ''
+        anomalyDrilldownData: '',
+        anomalyDrilldownError: false
       };
     }
 

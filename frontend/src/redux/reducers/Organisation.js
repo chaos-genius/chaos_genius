@@ -22,7 +22,8 @@ const initialState = {
   getreportSettingTimeSuccess: false,
   getreportSettingTimeFailure: false,
   getreportSettingTimeRequest: false,
-  reportSettingTime: ''
+  reportSettingTime: '',
+  reportSettingTimeStatus: ''
 };
 
 export const organisation = (state = initialState, action) => {
@@ -62,21 +63,26 @@ export const organisation = (state = initialState, action) => {
     case SAVE_REPORT_SETTINGTIME_REQUEST: {
       return {
         ...state,
-        reportSettingTimeRequested: true
+        reportSettingTimeRequested: true,
+        reportSettingTimeFailure: false,
+        reportSettingTimeSuccess: false,
+        reportSettingTimeStatus: ''
       };
     }
     case SAVE_REPORT_SETTINGTIME_FAILURE: {
       return {
         ...state,
         reportSettingTimeRequested: false,
-        reportSettingTimeFailure: true
+        reportSettingTimeFailure: true,
+        reportSettingTimeStatus: action.data.status
       };
     }
     case SAVE_REPORT_SETTINGTIME_SUCCESS: {
       return {
         ...state,
         reportSettingTimeSuccess: true,
-        reportSettingTime: action.data.data
+        reportSettingTime: action.data.data,
+        reportSettingTimeStatus: action.data.status
       };
     }
 
@@ -104,6 +110,16 @@ export const organisation = (state = initialState, action) => {
         getreportSettingTimeSuccess: true,
         getreportSettingTimeRequest: false,
         reportSettingTime: action.data?.config_setting?.scheduled_time
+      };
+    }
+
+    case 'CLEAR_REPORTING': {
+      return {
+        ...state,
+        reportSettingTimeStatus: '',
+        reportSettingTimeFailure: false,
+        reportSettingTimeRequested: false,
+        reportSettingTimeSuccess: false
       };
     }
 

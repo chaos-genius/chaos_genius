@@ -172,9 +172,11 @@ export const saveReportSettingTime = (payload) => {
       noAuth: true
     });
     if (error) {
-      dispatch(saveReportSettingTimeFailure());
+      dispatch(saveReportSettingTimeFailure({ status: 'failure' }));
     } else if (data && status === 200) {
-      dispatch(saveReportSettingTimeSuccess({ data: payload }));
+      dispatch(
+        saveReportSettingTimeSuccess({ data: payload, status: data.status })
+      );
     }
   };
 };

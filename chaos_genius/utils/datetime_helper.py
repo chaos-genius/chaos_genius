@@ -18,4 +18,6 @@ def get_rca_date_from_string(date_value):
 
 def get_date_string_with_tz(date_value) -> str:
     """Get date string with timezone."""
-    return date_value.strftime("%d %b %Y") + f" {TIMEZONE} ({SUPPORTED_TIMEZONES[TIMEZONE]})"
+    tz_offset = SUPPORTED_TIMEZONES[TIMEZONE]
+    main_str = date_value.strftime("%d %b %Y") + f" {TIMEZONE}"
+    return f"{main_str} ({tz_offset})" if tz_offset != "" else main_str

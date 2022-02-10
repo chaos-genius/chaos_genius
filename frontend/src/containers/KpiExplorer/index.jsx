@@ -169,7 +169,7 @@ const KpiExplorer = () => {
           </div>
         </div>
 
-        {kpiExplorerData && kpiExplorerData.length === 0 ? (
+        {kpiExplorerList && kpiExplorerList.length === 0 ? (
           <div className="empty-dashboard-container">
             <EmptyKPI />
           </div>

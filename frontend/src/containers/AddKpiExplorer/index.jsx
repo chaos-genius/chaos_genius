@@ -49,7 +49,7 @@ const AddKpiExplorer = () => {
       </div>
       {/* add DataSource form */}
       <div className="add-kpi-wrapper">
-        <div className="add-form-container">
+        <div className="add-form-container kpi-form-container">
           <KpiExplorerForm id={data[3]} />
         </div>
         <div>

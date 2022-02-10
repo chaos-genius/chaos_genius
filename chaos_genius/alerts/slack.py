@@ -208,7 +208,7 @@ def alert_digest_slack_formatted(
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": f"{frequency.title()} Alert Digest",
+                    "text": f"{frequency.title()} Alerts Report",
                     "emoji": True,
                 },
             },

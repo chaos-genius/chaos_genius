@@ -3,7 +3,7 @@
 {% block head %}
 <style>
 .digest-container {
-    color: #F6F5F5;
+    color: #F6F5F5 !important;
 }
 
 .btn {
@@ -23,15 +23,6 @@
 
 .kpi-link {
     color: white !important;
-}
-
-.content {
-    max-width: 900px !important;
-}
-
-.container {
-    max-width: 900px !important;
-    width: initial !important;
 }
 </style>
 {% endblock %}
@@ -59,20 +50,22 @@
     {% for point in top_anomalies %}
     <li>
         <strong><a class="kpi-link" href="{{ kpi_link_prefix }}/{{ point["kpi_id"] }}">{{point["kpi_name"]}} ({{point["Dimension"]}})</strong></a>
-        changed to <strong>{{point["y"]}}</strong>
+        <span style="color: lightgrey;">
+            changed to <strong>{{point["y"]}}</strong>
         {% if point["percentage_change"] is string %}
-        (<span><strong>{{ point["change_message"] }}</strong></span>)
+        (<span>{{ point["change_message"] }}</span>)
         {% elif point["percentage_change"] > 0 %}
-        (<span style="color: green;"><strong>{{ point["change_message"] }}</strong></span>)
+        (<span style="color: lightgreen;">{{ point["change_message"] }}</span>)
         {% elif point["percentage_change"] < 0 %}
-        (<span style="color: red;"><strong>{{ point["change_message"] }}</strong></span>)
+        (<span style="color: red;">{{ point["change_message"] }}</span>)
         {% else %}
-        (<span><strong>{{ point["change_message"] }}</strong></span>)
+        (<span>{{ point["change_message"] }}</span>)
         {% endif %}
         on {{ point["formatted_date"] }}
         (expected: <strong>{{point["yhat_lower"]}}</strong> - <strong>{{point["yhat_upper"]}}</strong>,
         severity:
         <strong>{{point["severity"]}}</strong>)
+        </span>
     </li>
     {% endfor %}
 </ul>

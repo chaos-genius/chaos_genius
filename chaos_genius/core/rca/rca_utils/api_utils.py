@@ -1,12 +1,15 @@
 """Utility functions for RCA API endpoints."""
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from typing import List
 
 from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
 from chaos_genius.databases.models.rca_data_model import RcaData
-from chaos_genius.utils.datetime_helper import get_date_string_with_tz, get_rca_date_from_string
+from chaos_genius.utils.datetime_helper import (
+    get_date_string_with_tz,
+    get_rca_date_from_string,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -109,7 +112,9 @@ def kpi_line_data(kpi_id):
 
         final_data = data_point.data
         for row in final_data:
-            row["date"] = get_date_string_with_tz(get_rca_date_from_string(row["date"]))
+            row["date"] = get_date_string_with_tz(
+                get_rca_date_from_string(row["date"])
+            )
     except Exception as err:  # noqa: B902
         logger.error(f"Error in KPI Line data retrieval: {err}", exc_info=1)
         status = "error"

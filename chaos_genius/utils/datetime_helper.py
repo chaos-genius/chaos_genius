@@ -18,4 +18,7 @@ def get_rca_date_from_string(date_value):
 
 def get_date_string_with_tz(date_value) -> str:
     """Get date string with timezone."""
-    return date_value.strftime("%d %b %Y") + f" {TIMEZONE} ({SUPPORTED_TIMEZONES[TIMEZONE]})"
+    return (
+        date_value.strftime("%d %b %Y")
+        + f" {TIMEZONE} ({SUPPORTED_TIMEZONES[TIMEZONE]})"
+    )

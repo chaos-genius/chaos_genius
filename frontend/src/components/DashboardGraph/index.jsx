@@ -352,6 +352,22 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
           enabled: true,
           padding: 5
         },
+        tooltip: {
+          crosshairs: true,
+          shared: true,
+          valueSuffix: null,
+          formatter: function () {
+            const tooltipStr = `<b>Datetime: </b>${formatDateTime(
+              this.x,
+              true,
+              true
+            )}<br> <b>${monthWeek.grp1_name}: </b>${Highcharts.numberFormat(
+              this.y,
+              2
+            )}`;
+            return tooltipStr;
+          }
+        },
         yAxis: {
           type: 'value',
           step: 1,
@@ -396,12 +412,9 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
                   <p>
                     Last updated:{' '}
                     <span>
-                      {formatDateTime(
-                        aggregationData?.analysis_date,
-                        true,
-                        false,
-                        true
-                      ) || '-'}
+                      {aggregationData?.analysis_date
+                        ? aggregationData?.analysis_date
+                        : '-'}
                     </span>
                   </p>
                 </div>

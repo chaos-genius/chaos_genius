@@ -8,9 +8,12 @@ import 'rc-time-picker/assets/index.css';
 
 import { saveReportSettingTime } from '../../redux/actions';
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
+import { getLocalStorage } from '../../utils/storage-helper';
 
 const ReportSettings = () => {
   const toast = useToast();
+  const globalSetting = getLocalStorage('GlobalSetting');
+
   const customToast = (data) => {
     const { type, header, description } = data;
     toast({
@@ -91,6 +94,12 @@ const ReportSettings = () => {
             showSecond={false}
             value={schedule && moment(schedule, 'HH:mm')}
           />
+          <div className="channel-tip">
+            <p>
+              Note: The time set above must be in your server timezone{' '}
+              {`(${globalSetting?.timezone})`}
+            </p>
+          </div>
         </div>{' '}
         <div className="organization-button-container">
           <button className="btn white-button" disabled>

@@ -28,6 +28,9 @@ const RESET_AGGREGATION = {
 const RESET_LINECHART = {
   type: 'RESET_LINECHART'
 };
+const RESET_HIERARCHIAL_DATA = {
+  type: 'RESET_HIERARCHIAL_DATA'
+};
 const DashboardFilter = ({ kpi, data, setActive, tabs, dashboard }) => {
   const history = useHistory();
   const dispatch = useDispatch();
@@ -63,6 +66,7 @@ const DashboardFilter = ({ kpi, data, setActive, tabs, dashboard }) => {
     if (item.id.toString() !== kpi.toString()) {
       store.dispatch(RESET_AGGREGATION);
       store.dispatch(RESET_LINECHART);
+      store.dispatch(RESET_HIERARCHIAL_DATA);
       store.dispatch({ type: 'RESET_DASHBOARD_RCA' });
       dispatch(anomalySetting(item.id));
       store.dispatch(RESET);

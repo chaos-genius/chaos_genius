@@ -697,8 +697,7 @@ class AnomalyAlertController:
                     kpi_link=f"{webapp_url_prefix()}#/dashboard/0/anomaly/{kpi_id}",
                     alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
                     overall_count=overall_count,
-                    subdim_count=subdim_count,
-                    formatted_date=self.now.strftime(ALERT_DATE_FORMAT),
+                    subdim_count=subdim_count
                 )
                 logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
             #self.remove_attributes_from_anomaly_data(overall_data, ["nl_message"])
@@ -787,8 +786,7 @@ class AnomalyAlertController:
                 alert_message,
                 top_anomalies_,
                 overall_count,
-                subdim_count,
-                curr_date=datetime.datetime.now()
+                subdim_count
             )
 
         if test == "ok":

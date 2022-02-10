@@ -10,6 +10,7 @@ import {
   getReportSettingTime
 } from '../../redux/actions';
 import ReportSettings from './ReportSetting';
+import store from '../../redux/store';
 
 const OrganisationSettings = () => {
   const [tabSwitch, setTabSwitch] = useState({ account: true, metrics: false });
@@ -54,12 +55,13 @@ const OrganisationSettings = () => {
               <img src={GreenArrow} alt="Arrow" />
             </li>
             <li
-              onClick={(e) =>
-                setTabSwitch({ account: false, metrics: false, reports: true })
-              }
+              onClick={(e) => {
+                store.dispatch({ type: 'CLEAR_REPORTING' });
+                setTabSwitch({ account: false, metrics: false, reports: true });
+              }}
               key={uuidv4()}
               className={tabSwitch.reports ? 'active' : ''}>
-              Reports
+              Alerts Report
               <img src={GreenArrow} alt="Arrow" />
             </li>
           </ul>

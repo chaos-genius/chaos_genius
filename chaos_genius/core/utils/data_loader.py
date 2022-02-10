@@ -66,6 +66,9 @@ class DataLoader:
             start_date = end_date - timedelta(days=days_before)
 
         self.start_date = start_date
+        # when we do date <= "6 Feb 2022", we get data till "6 Feb 2022 00:00:00"
+        # (inclusive), but we need data till "7 Feb 2022 00:00:00" (exclusive)
+        # so we add one day here and make our query date < "7 Feb 2022"
         self.end_date = end_date + timedelta(days=1)
 
         self.connection_info = DataSource.get_by_id(

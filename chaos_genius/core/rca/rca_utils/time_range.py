@@ -12,7 +12,7 @@ def get_dates_for_last_30_days(
 ) -> Tuple[Tuple[date, date], Tuple[date, date]]:
     """Returns dates for running RCA on the last 30 days.
 
-    The first tuple contains t-60, t-30.
+    The first tuple contains t-61, t-31.
     The second tuple contains t-30, t.
     """
     rca_start_date = end_date - timedelta(days=30)
@@ -27,7 +27,7 @@ def get_dates_for_last_7_days(
 ) -> Tuple[Tuple[date, date], Tuple[date, date]]:
     """Returns dates for running RCA on the last 7 days.
 
-    The first tuple contains t-14, t-7.
+    The first tuple contains t-15, t-8.
     The second tuple contains t-7, t.
     """
     rca_start_date = end_date - timedelta(days=7)
@@ -42,8 +42,8 @@ def get_dates_for_previous_day(
 ) -> Tuple[Tuple[date, date], Tuple[date, date]]:
     """Returns dates for running RCA on the previous day.
 
-    The first tuple contains t-2, t-1.
-    The second tuple contains t-1, t.
+    The first tuple contains t-1, t-1.
+    The second tuple contains t, t.
     """
     start_date = end_date - timedelta(days=1)
 

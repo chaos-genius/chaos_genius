@@ -362,7 +362,7 @@ def find_percentage_change(curr_val, prev_val):
 
 def get_anomaly_count(kpi_id, timeline):
 
-    curr_date = datetime.now()
+    curr_date = datetime.now().date()
     (_, _), (sd, _) = TIME_RANGES_BY_KEY[timeline]["function"](curr_date)
 
     # TODO: Add the series type filter

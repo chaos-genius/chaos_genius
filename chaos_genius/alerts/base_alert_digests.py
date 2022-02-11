@@ -98,7 +98,7 @@ class AlertDigestController:
         test = self.send_template_email(
             "digest_template.html",
             [recipient],
-            f"Daily Alerts Report ({self.curr_time.strftime(ALERT_DATE_FORMAT)})",
+            f"Daily Alerts Report ({self.curr_time.strftime(ALERT_DATE_FORMAT)}) - Chaos Genius Alert❗",
             [],
             column_names=["alert_name", "kpi_name", "created_at", "link"],
             preview_text="",

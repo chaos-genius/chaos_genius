@@ -9,6 +9,17 @@ import {
   KPIEXPLORERFIELDSUCCESS,
   KPIEXPLORERFIELDFAILURE,
   KPIEXPLORERSUBMITSUCCESS,
+  TABLELISTONSCHEMASUCCESS,
+  TABLELISTONSCHEMAREQUEST,
+  TABLELISTONSCHEMAFAILURE,
+  SCHEMAAVAILABILITYSUCCESS,
+  SCHEMAAVAILABILITYFAILURE,
+  GETALLSCHEMALISTFAILURE,
+  SCHEMALISTSUCCESS,
+  SCHEMALISTREQUEST,
+  TABLEINFODATASUCCESS,
+  TABLEINFODATAREQUEST,
+  TABLEINFODATAFAILURE,
   KPIEXPLORERSUBMITREQUEST,
   KPIEXPLORERSUBMITFAILURE,
   TESTQUERYSUCCESS,
@@ -25,7 +36,8 @@ import {
   KPIEDITDATAFAILURE,
   KPIUPDATEREQUEST,
   KPIUPDATESUCCESS,
-  KPIUPDATEFAILURE
+  KPIUPDATEFAILURE,
+  SCHEMAAVAILABILTYREQUEST
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -36,8 +48,18 @@ const initialState = {
   kpiFormLoading: true,
   kpiFormError: false,
   kpiField: [],
-  kpiFieldLoading: true,
+  kpiFieldLoading: false,
+  dataSourceHasSchema: false,
+  schemaNamesList: [],
   kpiFieldError: false,
+  schemaAvailabilityLoading: false,
+  schemaAvailabilityError: false,
+  schemaListLoading: false,
+  schemaListError: false,
+  tableListOnSchemaLoading: false,
+  tableListOnSchema: [],
+  tableInfoLoading: false,
+  tableInfoData: [],
   kpiSubmit: [],
   kpiSubmitLoading: false,
   kpiSubmitError: false,
@@ -112,10 +134,101 @@ export const kpiExplorer = (state = initialState, action) => {
       };
     }
     case KPIEXPLORERFIELDSUCCESS: {
-      return { ...state, kpiFieldLoading: false, kpiField: action.data };
+      return {
+        ...state,
+        kpiFieldLoading: false,
+        kpiField: action.data,
+        tableListOnSchema: []
+      };
+    }
+    case SCHEMAAVAILABILITYSUCCESS: {
+      return {
+        ...state,
+        schemaAvailabilityLoading: false,
+        dataSourceHasSchema: action.data.available.schema
+      };
+    }
+    case TABLEINFODATAREQUEST: {
+      return {
+        ...state,
+        tableInfoData: [],
+        tableInfoLoading: true
+      };
+    }
+    case TABLEINFODATASUCCESS: {
+      return {
+        ...state,
+        tableInfoLoading: false,
+        tableInfoData: action.data
+      };
+    }
+    case TABLEINFODATAFAILURE: {
+      return {
+        ...state,
+        tableInfoLoading: false
+      };
+    }
+    case TABLELISTONSCHEMAREQUEST: {
+      return {
+        ...state,
+        tableListOnSchema: [],
+        tableListOnSchemaLoading: true
+      };
+    }
+    case TABLELISTONSCHEMASUCCESS: {
+      return {
+        ...state,
+        tableListOnSchemaLoading: false,
+        tableListOnSchema: action.data
+      };
+    }
+    case TABLELISTONSCHEMAFAILURE: {
+      return {
+        ...state,
+        tableListOnSchemaLoading: false
+      };
+    }
+    case SCHEMALISTSUCCESS: {
+      return {
+        ...state,
+        schemaListLoading: false,
+        schemaNamesList: action.data
+      };
+    }
+    case SCHEMALISTREQUEST: {
+      return {
+        ...state,
+        kpiField: [],
+        tableListOnSchema: [],
+        schemaListLoading: true
+      };
     }
     case KPIEXPLORERFIELDFAILURE: {
       return { ...state, kpiFieldLoading: false, kpiFieldError: true };
+    }
+    case SCHEMAAVAILABILTYREQUEST: {
+      return {
+        ...state,
+        schemaNamesList: [],
+        tableListOnSchema: [],
+        dataSourceHasSchema: false,
+        schemaAvailabilityLoading: true,
+        schemaAvailabilityError: false
+      };
+    }
+    case SCHEMAAVAILABILITYFAILURE: {
+      return {
+        ...state,
+        schemaAvailabilityLoading: false,
+        schemaAvailabilityError: true
+      };
+    }
+    case GETALLSCHEMALISTFAILURE: {
+      return {
+        ...state,
+        schemaListLoading: false,
+        schemaListError: true
+      };
     }
     case KPIEXPLORERSUBMITREQUEST: {
       return { ...state, kpiSubmitLoading: true, kpiSubmitError: false };
@@ -151,6 +264,7 @@ export const kpiExplorer = (state = initialState, action) => {
     case KPIFORMEDITREQUEST_META_INFO: {
       return {
         ...state,
+        dataSourceHasSchema: false,
         kpiMetaInfoLoading: true
       };
     }

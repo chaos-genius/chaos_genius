@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 
-import Tooltip from 'react-tooltip-lite';
 import Search from '../../assets/images/search.svg';
 import GreenArrow from '../../assets/images/green-arrow.svg';
 
 import Fuse from 'fuse.js';
 
 import { v4 as uuidv4 } from 'uuid';
+import { useParams } from 'react-router-dom';
+import { CustomTooltip } from '../../utils/tooltip-helper';
+import { debuncerReturn } from '../../utils/simple-debouncer';
 
 const FilterAnalystics = ({ kpi, setKpi, data, onboarding }) => {
   const [listData, setListData] = useState(data);
   const [searchData, setSearchData] = useState(data);
+  const dashboard = useParams().dashboard;
 
   useEffect(() => {
     if (data) {
@@ -36,10 +39,17 @@ const FilterAnalystics = ({ kpi, setKpi, data, onboarding }) => {
       setListData(searchData);
     }
   };
+
+  const debounce = (func) => debuncerReturn(func, 500);
+
   const handleClick = (item) => {
     setKpi(item.id);
     if (!onboarding) {
-      window.history.pushState('', '', `/#/kpi/settings/${item.id}`);
+      window.history.pushState(
+        '',
+        '',
+        `/#/dashboard/${dashboard}/settings/${item.id}`
+      );
     }
   };
   return (
@@ -51,7 +61,7 @@ const FilterAnalystics = ({ kpi, setKpi, data, onboarding }) => {
             type="text"
             className="form-control h-40"
             placeholder="Search KPI"
-            onChange={(e) => onSearch(e)}
+            onChange={debounce(onSearch)}
           />
           <span>
             <img src={Search} alt="Search Icon" />
@@ -72,12 +82,9 @@ const FilterAnalystics = ({ kpi, setKpi, data, onboarding }) => {
                     handleClick(item);
                   }}>
                   <div className="filter-tooltipcontent">
-                    <Tooltip
-                      className="tooltip-name"
-                      direction="right"
-                      content={<span> {item.name}</span>}>
-                      <label className="name-tooltip">{item.name}</label>
-                    </Tooltip>
+                    <label className="name-tooltip">
+                      {CustomTooltip(item.name)}
+                    </label>
                   </div>
                   <img src={GreenArrow} alt="Arrow" />
                 </li>

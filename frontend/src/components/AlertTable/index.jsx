@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Tooltip from 'react-tooltip-lite';
 import Modal from 'react-modal';
 import { useDispatch } from 'react-redux';
 
@@ -25,6 +24,7 @@ import {
   kpiAlertEnable,
   kpiAlertDeleteById
 } from '../../redux/actions';
+import { CustomTooltip } from '../../utils/tooltip-helper';
 
 const RESET_ENABLE_DISABLE_DATA = {
   type: 'RESET_ENABLE_DISABLE_DATA'
@@ -57,6 +57,10 @@ const AlertTable = ({ alertData, alertSearch }) => {
 
   const onChecking = (alert) => {
     store.dispatch(RESET_ENABLE_DISABLE_DATA);
+    store.dispatch({
+      type: 'CHANGING_ALERT',
+      data: { id: alert?.id, toggle: alert?.active }
+    });
     if (alert.active === true) {
       onDisable(alert.id);
     } else if (alert.active === false) {
@@ -95,12 +99,7 @@ const AlertTable = ({ alertData, alertSearch }) => {
                 return (
                   <tr>
                     <td className="name-tooltip">
-                      <Tooltip
-                        className="tooltip-name"
-                        direction="right"
-                        content={<span>{alert.alert_name || '-'}</span>}>
-                        <span>{alert.alert_name || '-'}</span>
-                      </Tooltip>
+                      <span>{CustomTooltip(alert.alert_name)}</span>
                     </td>
 
                     <td className="date-column-formated">

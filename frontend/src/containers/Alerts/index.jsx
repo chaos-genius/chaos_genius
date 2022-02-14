@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useToast } from 'react-toast-wnm';
+import Alertnotification from '../../assets/images/alerts/alert-notify.svg';
 
 import Plus from '../../assets/images/plus.svg';
 import Frame from '../../assets/images/table/channelconfig.svg';
@@ -16,6 +17,8 @@ import AlertFilter from '../../components/AlertFilter';
 
 import { getAllAlerts } from '../../redux/actions';
 
+import { BASE_URL } from '../../utils/url-helper';
+
 import Fuse from 'fuse.js';
 import store from '../../redux/store';
 import Noalert from '../../components/Noalert';
@@ -27,17 +30,23 @@ const RESET_ENABLE_DISABLE_DATA = {
   type: 'RESET_ENABLE_DISABLE_DATA'
 };
 
-const RESET_DELETE_DATA ={
-  type:'RESET_DELETE_DATA'
-}
+const RESET_DELETE_DATA = {
+  type: 'RESET_DELETE_DATA'
+};
 
 const Alerts = () => {
   const dispatch = useDispatch();
 
   const toast = useToast();
 
-  const { alertLoading, alertList, kpiAlertEnableData, kpiAlertDisableData,kpiAlertDeleteData } =
-    useSelector((state) => state.alert);
+  const {
+    alertLoading,
+    alertList,
+    kpiAlertEnableData,
+    kpiAlertDisableData,
+    kpiAlertDeleteData,
+    changingAlert
+  } = useSelector((state) => state.alert);
 
   const [alertData, setAlertData] = useState(alertList);
   const [alertSearch, setAlertSearch] = useState('');
@@ -62,23 +71,38 @@ const Alerts = () => {
   }, [alertSearch, alertList]);
 
   useEffect(() => {
+    if (changingAlert !== undefined) {
+      if (alertList) {
+        const alert = alertList.findIndex((item) => {
+          return item.id === changingAlert?.id;
+        });
+        if (alert >= 0) {
+          alertList[alert].active = !changingAlert.toggle;
+        }
+      }
+    }
+    setAlertData(alertList);
+    store.dispatch({ type: 'RESET_CHANGING_ALERT' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [changingAlert]);
+
+  useEffect(() => {
     if (kpiAlertDisableData && kpiAlertDisableData.status === 'success') {
       // setIsOpen(false);
-      setData((prev) => !prev);
-
       customToast({
         type: 'success',
         header: 'Successfully Disabled'
       });
-    } else if (kpiAlertDisableData && kpiAlertDisableData.status === 'failure') {
+    } else if (
+      kpiAlertDisableData &&
+      kpiAlertDisableData.status === 'failure'
+    ) {
       customToast({
         type: 'error',
         header: 'Failed to disable selected alert',
         description: kpiAlertDisableData.message
       });
     } else if (kpiAlertEnableData && kpiAlertEnableData.status === 'success') {
-      setData((prev) => !prev);
-
       customToast({
         type: 'success',
         header: 'Successfully Enabled'
@@ -89,13 +113,13 @@ const Alerts = () => {
         header: 'Failed to enable selected alert',
         description: kpiAlertEnableData.message
       });
-    } else if(kpiAlertDeleteData && kpiAlertDeleteData.status === 'success') {
+    } else if (kpiAlertDeleteData && kpiAlertDeleteData.status === 'success') {
       setData((prev) => !prev);
       customToast({
         type: 'success',
         header: 'Successfully Deleted'
       });
-    }else if(kpiAlertDeleteData && kpiAlertDeleteData.status === 'failure'){
+    } else if (kpiAlertDeleteData && kpiAlertDeleteData.status === 'failure') {
       customToast({
         type: 'error',
         header: 'Failed to delete selected alert',
@@ -213,7 +237,18 @@ const Alerts = () => {
         {/* common heading and options */}
         <div className="heading-option">
           <div className="heading-title">
-            <h3>Alerts</h3>
+            {alertList && alertList.length !== 0 ? (
+              <a
+                href={`${BASE_URL}/api/digest`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="alert-linked">
+                <h1>Alerts</h1>
+                <img src={Alertnotification} alt="alert-notification" />
+              </a>
+            ) : (
+              <h3>Alerts</h3>
+            )}
           </div>
 
           <div className="alert-option-button">

@@ -3,22 +3,25 @@ import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import highchartsMore from 'highcharts/highcharts-more';
+import { HRNumbers } from '../../utils/Formatting/Numbers/humanReadableNumberFormatter';
 import { getTimezone, formatDateTime } from '../../utils/date-helper';
 
 highchartsMore(Highcharts);
 Highcharts.setOptions({
   time: {
-      timezone: getTimezone()
+    timezone: getTimezone()
   }
 });
 
-const Anomalygraph = ({ key, drilldown }) => {
+const Anomalygraph = ({ drilldown }) => {
   const [chartdata, setChartData] = useState([]);
 
   useEffect(() => {
     renderChart();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  //TODO: Create Single component to use this method instead of duplicating it.
   const findAnomalyZones = (intervals, values) => {
     let validColor = '#60CA9A',
       anomalyColor = '#EB5756';
@@ -44,8 +47,13 @@ const Anomalygraph = ({ key, drilldown }) => {
       }
 
       // Push prev zone if colors should be different
+      // and there is some slope between prev and current
       // Update prev zone
-      if (prev != null && prev.color !== zone.color) {
+      if (
+        prev != null &&
+        prev.color !== zone.color &&
+        prev.value !== value[0]
+      ) {
         const interIdx = anomalyType === 1 ? 2 : 1;
         let { m: m1, b: b1 } = findSlopeAndYIntercept(
           [intervals[i - 1][0], intervals[i - 1][interIdx]],
@@ -54,7 +62,7 @@ const Anomalygraph = ({ key, drilldown }) => {
         let { m: m2, b: b2 } = findSlopeAndYIntercept(values[i - 1], value);
         let { x } = findIntersection(m1, b1, m2, b2);
 
-        prev.value = x;
+        prev.value = parseInt(x);
         zones.push(prev);
       }
       prev = zone;
@@ -110,11 +118,16 @@ const Anomalygraph = ({ key, drilldown }) => {
             text: graphData.x_axis_label
           },
           min: graphData.x_axis_limits[0] * 1000,
-          max: graphData.x_axis_limits[1] * 1000,
+          max: graphData.x_axis_limits[1] * 1000
         },
         yAxis: {
           title: {
             text: graphData.y_axis_label
+          },
+          labels: {
+            formatter: function () {
+              return HRNumbers.toHumanString(this.value);
+            }
           }
         },
         time: {
@@ -137,7 +150,11 @@ const Anomalygraph = ({ key, drilldown }) => {
               ' - ' +
               intervals[2] +
               '</b>';
-            s = s + '<br>Value: <b>' + this.y + '</b>';
+            s =
+              s +
+              '<br>Value: <b>' +
+              Highcharts.numberFormat(this.y, 2) +
+              '</b>';
             s = s + '<br>Severity: <b>' + severity_score[1] + '</b>';
             s =
               s +
@@ -216,7 +233,11 @@ const Anomalygraph = ({ key, drilldown }) => {
   return (
     <>
       {chartdata && (
-        <HighchartsReact containerProps={{className: 'chartContainer'}} highcharts={Highcharts} options={chartdata} />
+        <HighchartsReact
+          containerProps={{ className: 'chartContainer' }}
+          highcharts={Highcharts}
+          options={chartdata}
+        />
       )}
     </>
   );

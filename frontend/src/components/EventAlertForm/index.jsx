@@ -144,7 +144,12 @@ const EventAlertForm = ({
         alert_message: kpiAlertEditData?.alert_message,
         alert_frequency: kpiAlertEditData?.alert_frequency,
         alert_channel: kpiAlertEditData?.alert_channel,
-        alert_channel_conf: kpiAlertEditData?.alert_channel_conf
+        alert_channel_conf: kpiAlertEditData?.alert_channel_conf,
+        daily_digest:
+          kpiAlertEditData?.daily_digest !== undefined &&
+          kpiAlertEditData?.daily_digest !== null
+            ? kpiAlertEditData?.daily_digest
+            : false
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -469,7 +474,7 @@ const EventAlertForm = ({
           )}
         </div>
 
-        <div className="form-group">
+        <div className="form-group form-group-label-margin">
           <label>Alert Settings *</label>
           <div className="editable-field">
             <div className="alert-setting">
@@ -573,6 +578,42 @@ const EventAlertForm = ({
                   }
                   for="alwayssend">
                   Always Send
+                </label>
+              </div>
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  id="missingDataAlert"
+                  name="alert"
+                  disabled={
+                    path[2] === 'edit'
+                      ? editableStatus('alert_settings') === 'editable'
+                        ? false
+                        : editableStatus('alert_settings') === 'sensitive'
+                        ? enabled.alert_settings
+                        : true
+                      : false
+                  }
+                  checked={
+                    alertFormData.alert_settings === 'missing_data_alert'
+                  }
+                  onChange={(e) => {
+                    setError({ ...error, alert_settings: '' });
+                    setAlertFormData({
+                      ...alertFormData,
+                      alert_settings: 'missing_data_alert'
+                    });
+                  }}
+                />
+                <label
+                  className={
+                    alertFormData.alert_settings === 'missing_data_alert'
+                      ? 'form-check-label active'
+                      : 'form-check-label'
+                  }
+                  for="missingDataAlert">
+                  Missing Data
                 </label>
               </div>
             </div>

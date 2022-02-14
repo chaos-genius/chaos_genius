@@ -43,10 +43,6 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 13px;
-
-    .css-2b097c-container {
-      width: 250px;
-    }
     .selectcategory__control {
       background: $grey_variation-2;
       border-radius: 6px;
@@ -106,13 +102,10 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding-bottom: 23px;
     .common-graph {
-      width: 49%;
+      width: 100%;
       min-height: 333px;
-      border: 1px solid $grey_variation-4;
       box-sizing: border-box;
-      border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -121,12 +114,31 @@
       }
     }
   }
+  .preload {
+    position: static !important;
+  }
+  .dashboard-aggregate-section {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    height: 118px;
+    padding-bottom: 15px;
+    .aggregate-card-container {
+      width: 100%;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      flex-direction: row;
+      justify-content: center;
+    }
+  }
   .dashboard-header-wrapper {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid rgba(34, 34, 34, 0.12);
+    cursor: pointer;
     .dashboard-header {
       h3 {
         font-weight: $font-weight-600;
@@ -217,4 +229,14 @@
 }
 .previous-step {
   transform: rotate(180deg);
+}
+
+.selectcategory__menu-list::-webkit-scrollbar {
+  overflow-y: scroll !important;
+  width: 7px !important;
+}
+.selectcategory__menu-list::-webkit-scrollbar-thumb {
+  background: rgba(87, 87, 90, 0.8);
+  border-radius: 4px;
+  width: 5px;
 }

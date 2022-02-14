@@ -14,18 +14,13 @@ from chaos_genius.controllers.task_monitor import (
     checkpoint_initial,
     checkpoint_success,
 )
+
+from chaos_genius.controllers.kpi_controller import get_anomaly_kpis, get_active_kpis
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.extensions import celery as celery_ext
 
 celery = cast(Celery, celery_ext.celery)
 logger = get_task_logger(__name__)
-
-
-# @celery.task
-# def add_together(a, b):
-#     print(a + b)
-#     print("It works...xD")
-#     # return a + b
 
 
 def update_scheduler_params(key: str, value: str):
@@ -149,9 +144,7 @@ def rca_single_kpi(kpi_id: int):
 
 @celery.task
 def anomaly_kpi():
-    kpis = Kpi.query.distinct("kpi_id").filter(
-        (Kpi.run_anomaly == True) & (Kpi.active == True)
-    )
+    kpis = get_anomaly_kpis()
     task_group = []
     for kpi in kpis:
         print(f"Starting anomaly task for KPI: {kpi.id}")
@@ -222,16 +215,10 @@ def ready_rca_task(kpi_id: int):
 # TODO: Need to add logic for running RCA after KPI setup.
 @celery.task
 def anomaly_scheduler():
-    # find KPIs
-    kpis: Kpi = Kpi.query.distinct("kpi_id").filter(
-        (Kpi.active == True) & (Kpi.is_static == False)
-    )
 
     task_group = []
-
+    kpis = get_active_kpis()
     for kpi in kpis:
-        kpi: Kpi
-
         # if anomaly isn't setup yet, we still run RCA at     tR + 24 hours
         # if anomaly is setup, we run both anomaly and RCA at tA + 24 hours
 

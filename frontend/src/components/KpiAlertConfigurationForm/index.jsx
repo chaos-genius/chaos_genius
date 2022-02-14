@@ -142,7 +142,12 @@ const KpiAlertConfigurationForm = ({
         alert_message: kpiAlertEditData?.alert_message,
         alert_frequency: kpiAlertEditData?.alert_frequency,
         alert_channel: kpiAlertEditData?.alert_channel,
-        alert_channel_conf: kpiAlertEditData?.alert_channel_conf
+        alert_channel_conf: kpiAlertEditData?.alert_channel_conf,
+        daily_digest:
+          kpiAlertEditData?.daily_digest !== undefined &&
+          kpiAlertEditData?.daily_digest !== null
+            ? kpiAlertEditData?.daily_digest
+            : false
       });
       setValue(
         kpiAlertEditData ? [kpiAlertEditData?.severity_cutoff_score] : [1]
@@ -373,17 +378,6 @@ const KpiAlertConfigurationForm = ({
                 </div>
               )}
             </div>
-            {/* <div
-            className={type === 'static' ? 'alerts-type active' : 'alerts-type'}
-            onClick={() => setType('static')}>
-            <img src={Static} alt="Static" className="alert-image" />
-            <img
-              src={StaticActive}
-              alt="Static"
-              className="alert-image-active"
-            />
-            <span>Static</span>
-          </div> */}
           </div>
         </div>
         <div className="form-group">

@@ -52,17 +52,9 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
   useEffect(() => {
     if (sidebarList && sidebarList.length !== 0 && onboarding) {
       setKpi(sidebarList[0]?.id);
-
-      // if (!onboarding) {
-      //   window.history.pushState(
-      //     '',
-      //     '',
-      //     `/#/kpi/settings/${sidebarList[0]?.id}`
-      //   );
-      // }
     } else if (sidebarList && sidebarList.length !== 0) {
       setBreadCrumbs(
-        sidebarList[0]?.dashboards.find(
+        sidebarList?.dashboards?.find(
           (item) => item.id.toString() === dashboardId.toString()
         )?.name
       );
@@ -112,7 +104,7 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
             <div
               className="backnavigation"
               onClick={() => store.dispatch(SETTING_RESET)}>
-              <Link to={`/dashboard/${dashboardId}/deepdrills`}>
+              <Link to={`/dashboard/${dashboardId}/deepdrills/${kpiId}`}>
                 <img src={rightarrow} alt="Back" />
                 <span>Settings</span>
               </Link>
@@ -126,7 +118,7 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
               <FilterAnalystics
                 kpi={kpi}
                 setKpi={setKpi}
-                data={sidebarList}
+                data={sidebarList?.data}
                 onboarding={onboarding}
               />
             )}

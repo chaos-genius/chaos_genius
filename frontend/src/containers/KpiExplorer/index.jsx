@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -15,6 +15,7 @@ import './kpiexplorer.scss';
 import { getAllKpiExplorer } from '../../redux/actions';
 
 import store from '../../redux/store';
+import EmptyKPI from '../../components/EmptyKPI';
 
 const KPI_RESET = {
   type: 'KPI_RESET'
@@ -27,14 +28,19 @@ const SETTING_RESET = {
 const KpiExplorer = () => {
   const dispatch = useDispatch();
 
+  const location = useLocation();
+
+  const query = new URLSearchParams(location.search);
+
   const [kpiSearch, setKpiSearch] = useState('');
   const [data, setData] = useState(false);
   const [kpiFilter, setKpiFilter] = useState([]);
   const [dashboardFilter, setDashboardFilter] = useState([]);
-  const [dashboardSearch, setDashboardSearch] = useState('');
+  const [filterData, setFilterData] = useState([]);
   const { isLoading, kpiExplorerList } = useSelector(
     (state) => state.kpiExplorer
   );
+
   const [kpiExplorerData, setKpiExplorerData] = useState(kpiExplorerList);
 
   useEffect(() => {
@@ -49,44 +55,31 @@ const KpiExplorer = () => {
   };
 
   useEffect(() => {
-    if (kpiSearch !== '') {
-      searchDataSource();
-    } else if (kpiExplorerList) {
-      setKpiExplorerData(kpiExplorerList);
+    if (query.getAll('datasourcetype').length !== 0 && kpiExplorerList) {
+      setKpiFilter(query.getAll('datasourcetype'));
+    } else if (query.getAll('dashboard').length !== 0 && kpiExplorerList) {
+      setDashboardFilter(query.getAll('dashboard'));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpiSearch, kpiExplorerList]);
+  }, [kpiExplorerList]);
 
   useEffect(() => {
-    if (dashboardSearch !== '') {
-      searchDashboardName();
+    if (kpiSearch !== '') {
+      searchDataSource();
+    } else if (filterData && filterData.length !== 0) {
+      setKpiExplorerData(filterData);
     } else if (kpiExplorerList) {
       setKpiExplorerData(kpiExplorerList);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dashboardSearch]);
-
-  const searchDashboardName = () => {
-    const options = {
-      keys: ['dashboards.name']
-    };
-
-    const fuse = new Fuse(kpiExplorerList, options);
-
-    const result = fuse.search(dashboardSearch);
-    setKpiExplorerData(
-      result.map((item) => {
-        return item.item;
-      })
-    );
-  };
+  }, [kpiSearch, kpiExplorerList, filterData]);
 
   const searchDataSource = () => {
     const options = {
-      keys: ['name', 'connection_type']
+      keys: ['name', 'dashboards.name']
     };
 
-    const fuse = new Fuse(kpiExplorerList, options);
+    const fuse = new Fuse(kpiExplorerData, options);
 
     const result = fuse.search(kpiSearch);
     setKpiExplorerData(
@@ -100,54 +93,54 @@ const KpiExplorer = () => {
     const fetchFilter = () => {
       var arr = [];
       if (kpiFilter.length === 0 && dashboardFilter.length === 0) {
-        setKpiExplorerData(kpiExplorerList);
+        setFilterData(kpiExplorerList);
       } else if (kpiFilter.length !== 0 && dashboardFilter.length === 0) {
         kpiFilter &&
           kpiFilter.forEach((data) => {
-            kpiExplorerList.forEach((list) => {
-              if (
-                list.data_source.connection_type.toLowerCase() ===
-                data.toLowerCase()
-              ) {
-                arr.push(list);
-              }
-            });
-          });
-        setKpiExplorerData(arr);
-      } else if (dashboardFilter.length !== 0 && kpiFilter.length === 0) {
-        dashboardFilter &&
-          dashboardFilter.forEach((data) => {
-            kpiExplorerList.forEach((list) => {
-              list.dashboards.forEach((value) => {
-                if (data === value.name) {
+            kpiExplorerList &&
+              kpiExplorerList.forEach((list) => {
+                if (
+                  list.data_source.connection_type.toLowerCase() ===
+                  data.toLowerCase()
+                ) {
                   arr.push(list);
                 }
               });
-            });
           });
-        setKpiExplorerData(arr);
+        setFilterData(arr);
+      } else if (dashboardFilter.length !== 0 && kpiFilter.length === 0) {
+        dashboardFilter &&
+          dashboardFilter.forEach((data) => {
+            kpiExplorerList &&
+              kpiExplorerList.forEach((list) => {
+                list.dashboards.forEach((value) => {
+                  if (data.toString() === value.id.toString()) {
+                    arr.push(list);
+                  }
+                });
+              });
+          });
+        setFilterData(arr);
       } else if (dashboardFilter.length !== 0 && kpiFilter.length !== 0) {
         dashboardFilter &&
           dashboardFilter.forEach((dashboard) => {
             kpiFilter &&
               kpiFilter.forEach((kpi) => {
-                kpiExplorerList.forEach((list) => {
-                  if (
-                    list.data_source.connection_type.toLowerCase() ===
-                    kpi.toLowerCase()
-                  ) {
-                    arr.push(list);
-                  } else {
+                kpiExplorerList &&
+                  kpiExplorerList.forEach((list) => {
                     list.dashboards.forEach((value) => {
-                      if (value.name === dashboard) {
+                      if (
+                        list.data_source.connection_type.toLowerCase() ===
+                          kpi.toLowerCase() &&
+                        value.id.toString() === dashboard.toString()
+                      ) {
                         arr.push(list);
                       }
                     });
-                  }
-                });
+                  });
               });
           });
-        setKpiExplorerData(arr);
+        setFilterData(arr);
       }
     };
     fetchFilter();
@@ -176,28 +169,36 @@ const KpiExplorer = () => {
           </div>
         </div>
 
-        {/* explore wrapper */}
-        <div className="explore-wrapper">
-          {/* filter section */}
-          <div className="filter-section">
-            <Filter
-              setKpiSearch={setKpiSearch}
-              setKpiFilter={setKpiFilter}
-              kpiList={kpiExplorerList}
-              setDashboardFilter={setDashboardFilter}
-              setDashboardNameSearch={setDashboardSearch}
-            />
+        {kpiExplorerData && kpiExplorerData.length === 0 ? (
+          <div className="empty-dashboard-container">
+            <EmptyKPI />
           </div>
-          {/* table section */}
-          <div className="table-section">
-            <KPITable
-              kpiData={kpiExplorerData}
-              kpiSearch={kpiSearch}
-              changeData={setData}
-              kpiLoading={isLoading}
-            />
-          </div>
-        </div>
+        ) : (
+          <>
+            {/* explore wrapper */}
+            <div className="explore-wrapper">
+              {/* filter section */}
+              <div className="filter-section">
+                <Filter
+                  setKpiSearch={setKpiSearch}
+                  setKpiFilter={setKpiFilter}
+                  kpiList={kpiExplorerList}
+                  setDashboardFilter={setDashboardFilter}
+                  kpi={true}
+                />
+              </div>
+              {/* table section */}
+              <div className="table-section">
+                <KPITable
+                  kpiData={kpiExplorerData}
+                  kpiSearch={kpiSearch}
+                  changeData={setData}
+                  kpiLoading={isLoading}
+                />
+              </div>
+            </div>
+          </>
+        )}
       </>
     );
   }

@@ -1,3 +1,4 @@
 frontend
 .env
 docker
+.venv

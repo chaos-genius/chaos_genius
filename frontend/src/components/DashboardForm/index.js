@@ -19,7 +19,6 @@ import {
 // import ModalPopUp from '../Modal';
 
 const DashboardForm = ({ setText, setModal, onboarding }) => {
-  // const [modal, setModal] = useState('false');
   const dispatch = useDispatch();
 
   const toast = useToast();
@@ -123,8 +122,7 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
       history.push('/dashboard');
       customToast({
         type: 'success',
-        header: 'Dashboard Created successfully',
-        description: createDashboard.message
+        header: 'Dashboard added successfully'
       });
     } else if (
       createDashboard &&
@@ -134,7 +132,7 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
     ) {
       customToast({
         type: 'failure',
-        header: 'Failed to create dashboard',
+        header: 'Failed to add dashboard',
         description: createDashboard.message
       });
     }
@@ -147,8 +145,7 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
       setModal(true);
       customToast({
         type: 'success',
-        header: 'Dashboard Created successfully',
-        description: createDashboard.message
+        header: 'Dashboard added successfully'
       });
     } else if (
       createDashboard &&
@@ -157,7 +154,7 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
     ) {
       customToast({
         type: 'failure',
-        header: 'Failed to create dashboard',
+        header: 'Failed to add dashboard',
         description: createDashboard.message
       });
     }
@@ -168,8 +165,7 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
     if (updateDashboard && updateDashboard.status === 'success') {
       customToast({
         type: 'success',
-        header: 'Successfully dashboard updated',
-        description: updateDashboard.message
+        header: 'Dashboard updated successfully'
       });
     } else if (updateDashboard && updateDashboard.status === 'failure') {
       customToast({
@@ -190,15 +186,7 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
         };
       });
     }
-    if (formData.kpi.length === 0) {
-      setErrorMsg((prev) => {
-        return {
-          ...prev,
-          kpi: true
-        };
-      });
-    }
-    if (formData.dashboardname && formData.kpi) {
+    if (formData.dashboardname !== '') {
       if (path[2] === 'edit') {
         const payload = {
           dashboard_id: dashboardId,
@@ -272,13 +260,12 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
           />
         </div> */}
         <div className="form-group">
-          <label>KPI *</label>
+          <label>KPI </label>
           <Select
             isMulti
             options={kpiOption}
             classNamePrefix="selectcategory"
             placeholder="Select"
-            menuPlacement="top"
             value={
               formData.kpi.length !== 0
                 ? formData.kpi.map((el) => {

@@ -10,7 +10,7 @@ from chaos_genius.core.anomaly.utils import bound_between, get_timedelta
 
 logger = logging.getLogger(__name__)
 
-ZSCORE_UPPER_BOUND = 2.5
+ZSCORE_UPPER_BOUND = 3
 
 
 class ProcessAnomalyDetection:
@@ -83,11 +83,8 @@ class ProcessAnomalyDetection:
         """
         model = self._get_model()
 
-        logger.debug(f"Running Prediction for {self.series}-{self.subgroup}")
-        pred_series = self._predict(model)
-
-        logger.debug(f"Detecting severity for {self.series}-{self.subgroup}")
-        anomaly_df = self._detect_severity(self._detect_anomalies(pred_series))
+        logger.debug(f"Running Prediction and Detecting Severity for {self.series}-{self.subgroup}")
+        anomaly_df = self._predict(model)
 
         self._save_model(model)
 
@@ -99,7 +96,7 @@ class ProcessAnomalyDetection:
 
         input_data = self.input_data
 
-        pred_series = pd.DataFrame(columns=["dt", "y", "yhat_lower", "yhat_upper"])
+        pred_series = pd.DataFrame(columns=["dt", "y", "yhat_lower", "yhat_upper", "anomaly", "severity"])
 
         input_last_date = input_data["dt"].iloc[-1]
         input_first_date = input_data["dt"].iloc[0]
@@ -211,9 +208,12 @@ class ProcessAnomalyDetection:
         return pred_series
 
     def _detect_severity(self, anomaly_prediction):
-        std_dev = anomaly_prediction["y"].mean()
+        std_dev = anomaly_prediction["y"].std()
 
         anomaly_prediction["severity"] = 0
+        if std_dev == 0:
+            return anomaly_prediction
+
         anomaly_prediction["severity"] = anomaly_prediction.apply(
             lambda x: self._compute_severity(x, std_dev), axis=1
         )
@@ -223,7 +223,7 @@ class ProcessAnomalyDetection:
     def _compute_severity(self, row, std_dev):
         # TODO: Create docstring for these comments
         if row["anomaly"] == 0:
-            # No anomaly. Severity is 0 ;)
+            # No anomaly. Severity is 0
             return 0
         elif row["anomaly"] == 1:
             # Check num deviations from upper bound of CI
@@ -232,7 +232,7 @@ class ProcessAnomalyDetection:
             # Check num deviations from lower bound of CI
             zscore = (row["y"] - row["yhat_lower"]) / std_dev
 
-        # Scale zscore where 4 scales to 100; -4 scales to -100
+        # Map zscore of 0-3 to 0-100
         severity = zscore * 100 / ZSCORE_UPPER_BOUND
         severity = abs(severity)
 

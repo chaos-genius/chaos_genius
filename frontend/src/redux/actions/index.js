@@ -13,6 +13,10 @@ import {
   getAllKpiExplorer,
   getAllKpiExplorerForm,
   getAllKpiExplorerField,
+  getSchemaAvailability,
+  getSchemaNamelist,
+  getTableListOnSchema,
+  getTableinfoData,
   getAllKpiExplorerSubmit,
   getTestQuery,
   kpiDisable,
@@ -29,6 +33,8 @@ import {
 import { getOnboardingStatus, getHomeKpi } from './Onboarding';
 import { getDashboardLinechart } from './LineChart';
 import { getDashboardSidebar } from './Sidebarlist';
+import { getTimeCuts } from './TimeCuts';
+import { getVersionSetting } from './VersionControl';
 import {
   getAllAlertEmail,
   getChannelStatus,
@@ -62,7 +68,9 @@ import {
 import {
   onboardingOrganisationStatus,
   onboardOrganisation,
-  onboardOrganisationUpdate
+  onboardOrganisationUpdate,
+  getReportSettingTime,
+  saveReportSettingTime
 } from './Organisation';
 import { getDashboardConfig } from './Config';
 import { getGlobalSetting } from './GlobalSetting';
@@ -75,6 +83,10 @@ export {
   getAllKpiExplorer,
   getAllKpiExplorerForm,
   getAllKpiExplorerField,
+  getSchemaAvailability,
+  getSchemaNamelist,
+  getTableinfoData,
+  getTableListOnSchema,
   getAllKpiExplorerSubmit,
   getDashboardSidebar,
   getDashboardAggregation,
@@ -121,5 +133,9 @@ export {
   onboardOrganisationUpdate,
   getDashboardConfig,
   getGlobalSetting,
-  kpiAlertDeleteById
+  kpiAlertDeleteById,
+  getTimeCuts,
+  getVersionSetting,
+  getReportSettingTime,
+  saveReportSettingTime
 };

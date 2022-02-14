@@ -9,6 +9,7 @@ from chaos_genius.controllers.dashboard_controller import (
     edit_dashboard_kpis,
     get_dashboard_list as get_active_dashboard_list,
 )
+from chaos_genius.utils.modules_utils import is_enterprise_edition
 
 
 blueprint = Blueprint("dashboard", __name__)
@@ -18,6 +19,11 @@ blueprint = Blueprint("dashboard", __name__)
 def create_new_dashboard():
     status, message = "", ""
     mapper_list_dict = []
+    if not is_enterprise_edition():
+        return jsonify({
+            "status": "error",
+            "message": "This feature is only available in the enterprise edition."
+        }), 403
     try:
         payload = request.get_json()
         dashboard_name = payload.get("dashboard_name")
@@ -57,6 +63,11 @@ def edit_dashboard():
         return jsonify({
             "status": "failure",
             "message": "Dashboard id is required"
+        })
+    if int(dashboard_id) == 0:
+        return jsonify({
+            "status": "failure",
+            "message": "Dashboard 'All' cannot be edited"
         })
     dashboard_name = payload.get("dashboard_name")
     kpi_list = payload.get("kpi_list", [])
@@ -111,8 +122,18 @@ def get_dashboard():
 @blueprint.route("/delete", methods=["POST"])
 def delete_dashboard():
     status, message = "", ""
+    dashboard_id = request.args.get("dashboard_id")
+    if int(dashboard_id) == 0:
+        return jsonify({
+            "status": "failure",
+            "message": "Dashboard 'All' cannot be deleted"
+        })
+    if not is_enterprise_edition():
+        return jsonify({
+            "status": "failure",
+            "message": "This feature is only available in the enterprise edition."
+        }), 403
     try:
-        dashboard_id = request.args.get("dashboard_id")
         dashboard = get_dashboard_by_id(dashboard_id)
         if dashboard is not None:
             dashboard.active = False

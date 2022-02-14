@@ -17,11 +17,16 @@ export const attachParams = (relativeUrl, params) => {
 export const DASHBOARD_URL = `${BASE_URL}/api/dashboard`;
 export const KPI_URL = `${BASE_URL}/api/kpi`;
 export const KPI_RELATIVE_URL = `/api/kpi`;
+export const RCA_RELATIVE_URL = `/api/rca`;
 export const CONNECTION_URL = `${BASE_URL}/api/connection`;
 export const CONNECTION_TYPE = `${BASE_URL}/api/connection/types`;
 export const CREATE_DATASOURCE = `${BASE_URL}/api/connection/create`;
 export const TEST_CONNECTION = `${BASE_URL}/api/connection/test`;
 export const KPI_FORM_OPTION_URL = `${BASE_URL}/api/connection/metadata`;
+export const ADD_KPI_GET_AVAILABILITY = `${BASE_URL}/api/connection/get-availability`;
+export const KPI_LIST_SCHEMA = `${BASE_URL}/api/connection/list-schema`;
+export const KPI_TABLE_LIST_ON_SCHEMA = `${BASE_URL}/api/connection/get-table-list`;
+export const KPI_TABLE_INFO_DATA = `${BASE_URL}/api/connection/table-info`;
 export const DELETE_DATASOURCE = `${BASE_URL}/api/connection/delete`;
 export const DASHBOARD_SIDEBAR_URL = `${BASE_URL}/api/kpi`;
 //export const DASHBOARD_DIMENSION = `${BASE_URL}/api/kpi//get-dimensions`;
@@ -48,3 +53,6 @@ export const DASHBOARD_UPDATE_URL = `${BASE_URL}/api/dashboard/edit`;
 export const ORGANIZATION_UPDATE_URL = `${BASE_URL}/api/config/update`;
 export const GLOBAL_SETTING_URL = `${BASE_URL}/api/config/global-config`;
 export const TASK_MANAGER_API_STATUS_URL = `${BASE_URL}/api/status`;
+
+export const TIME_CUTS_URL = `${BASE_URL}/api/kpi/get-timecuts-list`;
+export const VERSION_SETTING_URL = `${BASE_URL}/api/meta/version`;

@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Tuple, Union
 
 import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
-from pandas.core.dtypes.common import is_string_dtype as is_string
 
 from chaos_genius.core.rca.root_cause_analysis import SUPPORTED_AGGREGATIONS
 from chaos_genius.core.utils.data_loader import DataLoader
@@ -25,7 +24,9 @@ def validate_kpi(kpi_info: Dict[str, Any]) -> Tuple[bool, str]:
     :rtype: Tuple[bool, str]
     """
     try:
-        df = DataLoader(kpi_info, tail=KPI_VALIDATION_TAIL_SIZE, validation=True).get_data()
+        df = DataLoader(
+            kpi_info, tail=KPI_VALIDATION_TAIL_SIZE, validation=True
+        ).get_data()
         logger.info(f"Created df with {len(df)} rows for validation")
     except Exception as e:  # noqa: B902
         logger.error("Unable to load data for KPI validation", exc_info=1)
@@ -37,8 +38,6 @@ def validate_kpi(kpi_info: Dict[str, Any]) -> Tuple[bool, str]:
         kpi_column_name=kpi_info["metric"],
         agg_type=kpi_info["aggregation"],
         date_column_name=kpi_info["datetime_column"],
-        date_format=kpi_info.get("date_format"),
-        unix_unit=kpi_info.get("unix_unit"),
     )
 
 
@@ -48,8 +47,6 @@ def _validate_kpi_from_df(
     kpi_column_name: str,
     agg_type: str,
     date_column_name: str,
-    date_format: str = None,
-    unix_unit: str = None,
     debug: bool = False,
 ) -> Tuple[bool, str]:
     """Invoke each validation check and break if there's a falsy check.
@@ -64,11 +61,6 @@ def _validate_kpi_from_df(
     :type agg_type: str
     :param date_column_name: Name of the date column
     :type date_column_name: str
-    :param date_format: Specified strftime to parse, defaults to None
-    :type date_format: str, optional
-    :param unix_unit: The time unit if specified date column is in Unix format,
-    defaults to None
-    :type unix_unit: str, optional
     :param debug: Bool for using debug mode with extra print statements at each
     validation, defaults to False
     :type debug: bool, optional
@@ -101,39 +93,44 @@ def _validate_kpi_from_df(
     validations = [
         {
             "debug_str": "Check #2: Validate column fits agg type",
-            "status": _validate_agg_type_fits_column(
+            "status": lambda: _validate_agg_type_fits_column(
                 df, column_name=kpi_column_name, agg_type=agg_type
             ),
         },
         {
             "debug_str": "Check #3: Validate kpi not datetime",
-            "status": _validate_kpi_not_datetime(
-                df, kpi_column_name=kpi_column_name, date_column_name=date_column_name
+            "status": lambda: _validate_kpi_not_datetime(
+                df,
+                kpi_column_name=kpi_column_name,
+                date_column_name=date_column_name,
             ),
         },
         {
             "debug_str": "Check #4: Validate date column is parseable",
-            "status": _validate_date_column_is_parseable(
-                df,
-                date_column_name=date_column_name,
-                date_format=date_format,
-                unix_unit=unix_unit,
+            "status": lambda: _validate_date_column_is_parseable(
+                df, date_column_name=date_column_name
             ),
         },
         {
-            "debug_str": "Check #5: Validate dimensions",
-            "status": _validate_dimensions(kpi_info),
+            "debug_str": "Check #5: Validate date column is tz-naive",
+            "status": lambda: _validate_date_column_is_tz_naive(
+                df, date_column_name=date_column_name
+            ),
+        },
+        {
+            "debug_str": "Check #6: Validate dimensions",
+            "status": lambda: _validate_dimensions(kpi_info),
         },
         {
             "debug_str": (
-                "Check #6: Validate KPI has no more than "
+                "Check #7: Validate KPI has no more than "
                 f"{MAX_ROWS_FOR_DEEPDRILLS} rows"
             ),
-            "status": _validate_for_maximum_kpi_size(kpi_info),
+            "status": lambda: _validate_for_maximum_kpi_size(kpi_info),
         },
     ]
     for validation in validations:
-        status_bool, status_msg = validation["status"]
+        status_bool, status_msg = validation["status"]()
         logger.info(validation["debug_str"])
         logger.info(", ".join(map(str, [status_bool, status_msg])))
         if not status_bool:
@@ -158,8 +155,8 @@ def _column_exists(
     """
     # Lambda function templates to create string output
     valid_str = "Accepted!"
-    single_col_str = '"{}" was not found as a column in the table!'
-    multi_col_str = "{} were not found as columns in the table!"
+    single_col_str = '"{}" was not found as a column in the table.'
+    multi_col_str = "{} were not found as columns in the table."
 
     # column_name is a string. Single column to check
     if isinstance(column_name, str):
@@ -197,14 +194,14 @@ def _validate_agg_type_fits_column(
         return (
             False,
             f'"{agg_type}" aggregation is not supported. '
-            f'Supported aggregations are {", ".join(SUPPORTED_AGGREGATIONS)}',
+            f'Supported aggregations are {", ".join(SUPPORTED_AGGREGATIONS)}.',
         )
 
-    # Check if trying to use a numerical aggregation on a categorical column.
+    # Check if trying to use a numerical aggregation on a non-numerical column.
     if str(df[column_name].dtype) == "object" and agg_type != "count":
         return (
             False,
-            f'"{column_name}" column is categorical. Quantitative data is '
+            f'"{column_name}" column is non-numerical. Quantitative data is '
             f"required to perform {agg_type} aggregation.",
         )
 
@@ -226,15 +223,15 @@ def _validate_kpi_not_datetime(
     :rtype: Tuple[bool, str]
     """
     status = kpi_column_name != date_column_name
-    message = "Accepted!" if status else "KPI column cannot be the date column"
+    message = (
+        "Accepted!" if status else "KPI column cannot be the date column."
+    )
     return status, message
 
 
 def _validate_date_column_is_parseable(
     df: pd.core.frame.DataFrame,
     date_column_name: str,
-    date_format: str = None,
-    unix_unit: str = None,
 ) -> Tuple[bool, str]:
     """Validate if specified date column is parseable.
 
@@ -242,70 +239,43 @@ def _validate_date_column_is_parseable(
     :type df: pd.core.frame.DataFrame
     :param date_column_name: Name of the date column
     :type date_column_name: str
-    :param date_format: Specified strftime to parse, defaults to None
-    :type date_format: str, optional
-    :param unix_unit: The time unit if specified date column is in Unix format,
-    defaults to None
-    :type unix_unit: str, optional
     :return: returns a tuple with the status as a bool and a status message
     :rtype: Tuple[bool, str]
     """
-    # has to be datetime or string only then proceed else exit
-    if not is_datetime(df[date_column_name]) and not is_string(df[date_column_name]):
+    # has to be datetime only then proceed else exit
+    if not is_datetime(df[date_column_name]):
         invalid_type_err_msg = (
             "The datetime column is of the type"
-            f" {df[date_column_name].dtype}, acceptable types are string and datetime"
+            f" {df[date_column_name].dtype}, use 'cast' to convert to datetime."
         )
         return False, invalid_type_err_msg
 
-    valid_str = "Accepted!"
-    # Exit early if date column is a datetime object.
-    if is_datetime(df[date_column_name]):
-        return True, valid_str
+    return True, "Accepted!"
 
-    generic_err_msg = (
-        f'Unable to parse "{date_column_name}" column. '
-        + "Check that your date column is formatted properly "
-        + "and consistely."
-    )
-    out_of_bounds_msg = (
-        f'Timestamps in "{date_column_name}" were out of '
-        + "bounds. Check that your date column is formatted "
-        + "properly and consistely."
-    )
 
-    if unix_unit:
-        # If a unix_unit is specified, it will try to convert with this unit
-        try:
-            pd.to_datetime(
-                df[date_column_name], unit=unix_unit, infer_datetime_format=True
-            )
-        except pd.errors.OutOfBoundsDatetime:
-            return False, out_of_bounds_msg
-        except Exception:  # noqa: B902
-            return False, f"{generic_err_msg}"
-    elif date_format:
-        # If a date_format is specified, it will try to convert with it
-        try:
-            pd.to_datetime(
-                df[date_column_name], format=date_format, infer_datetime_format=True
-            )
-        except pd.errors.OutOfBoundsDatetime:
-            return False, out_of_bounds_msg
-        except Exception:  # noqa: B902
-            return False, f"{generic_err_msg}"
-    else:
-        # If neither date_format or unix_unit
-        # let pandas do its best to infer datetime format.
-        try:
-            pd.to_datetime(df[date_column_name], infer_datetime_format=True)
-        except pd.errors.OutOfBoundsDatetime:
-            return False, out_of_bounds_msg
-        except Exception:  # noqa: B902
-            return False, f"{generic_err_msg}"
+def _validate_date_column_is_tz_naive(
+    df: pd.core.frame.DataFrame,
+    date_column_name: str,
+) -> Tuple[bool, str]:
+    """Validate if specified date column is tz-naive.
 
-    # datetime column is parseable if code reaches here.
-    return True, valid_str
+    :param df: A pandas DataFrame
+    :type df: pd.core.frame.DataFrame
+    :param date_column_name: Name of the date column
+    :type date_column_name: str
+    :return: returns a tuple with the status as a bool and a status message
+    :rtype: Tuple[bool, str]
+    """
+    date_col = df[date_column_name]
+    all_tz_naive = date_col.apply(lambda t: t.tz is None).all()
+    if not all_tz_naive:
+        invalid_type_err_msg = (
+            "The datetime column has timezone aware data,"
+            " use 'cast' to convert to timezone naive."
+        )
+        return False, invalid_type_err_msg
+
+    return True, "Accepted!"
 
 
 def _validate_for_maximum_kpi_size(
@@ -320,7 +290,9 @@ def _validate_for_maximum_kpi_size(
     try:
         num_rows = DataLoader(kpi_info, days_before=60).get_count()
     except Exception as e:  # noqa: B902
-        logger.error("Unable to load data for KPI validation of max size", exc_info=1)
+        logger.error(
+            "Unable to load data for KPI validation of max size", exc_info=1
+        )
         return False, "Could not load data. Error: " + str(e)
 
     if num_rows <= MAX_ROWS_FOR_DEEPDRILLS:
@@ -336,17 +308,16 @@ def _validate_for_maximum_kpi_size(
 
 def _validate_dimensions(kpi_info: dict) -> Tuple[bool, str]:
     """Validate if dimensions are valid."""
-
     metric_col = kpi_info.get("metric")
     date_col = kpi_info.get("datetime_column")
 
     dimensions = kpi_info.get("dimensions")
 
     if metric_col in dimensions:
-        return False, "Metric column cannot be in dimensions"
+        return False, "Metric column cannot be in dimensions."
 
     if date_col in dimensions:
-        return False, "Date column cannot be in dimensions"
+        return False, "Date column cannot be in dimensions."
 
     return True, "Accepted!"
 
@@ -362,6 +333,6 @@ def _validate_no_duplicate_column_names(df: pd.DataFrame) -> Tuple[bool, str]:
     seen = set()
     dupes = [col for col in df.columns if col in seen or seen.add(col)]
     if dupes:
-        return False, f"Duplicate column names found - {', '.join(dupes)}"
+        return False, f"Duplicate column names found - {', '.join(dupes)}."
 
     return True, "Accepted!"

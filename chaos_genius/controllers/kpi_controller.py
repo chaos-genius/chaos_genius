@@ -1,7 +1,7 @@
 import logging
 import typing
 from datetime import date, datetime, timedelta
-from typing import Optional, Union
+from typing import Optional, Union, Iterator
 
 from flask import current_app  # noqa: F401
 
@@ -11,7 +11,10 @@ from chaos_genius.core.rca.rca_controller import RootCauseAnalysisController
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.databases.models.kpi_model import Kpi
 
-from chaos_genius.settings import MAX_DEEPDRILLS_SLACK_DAYS
+from chaos_genius.settings import (
+    MAX_DEEPDRILLS_SLACK_DAYS,
+    DAYS_OFFSET_FOR_ANALTYICS,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -19,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 def _is_data_present_for_end_date(
     kpi_info: dict,
-    end_date: datetime = None
+    end_date: date = None
 ) -> bool:
     df_count = DataLoader(kpi_info, end_date=end_date, days_before=1).get_count()
     return df_count != 0
@@ -47,7 +50,7 @@ def get_kpi_data_from_id(n: int) -> dict:
 
 def run_anomaly_for_kpi(
     kpi_id: int,
-    end_date: datetime = None,
+    end_date: date = None,
     task_id: Optional[int] = None
 ) -> Union["typing.Literal[False]", date]:
 
@@ -59,15 +62,12 @@ def run_anomaly_for_kpi(
         logger.info("Selecting end date.")
         # by default we always calculate for n-1
         if end_date is None:
-            end_date = datetime.today().date() - timedelta(days=1)
+            end_date = datetime.today().date() - timedelta(days=(DAYS_OFFSET_FOR_ANALTYICS))
 
         # Check if n-1 data is available or not then try for n-2
         if not _is_data_present_for_end_date(kpi_info, end_date):
             end_date = end_date - timedelta(days=1)
             logger.info("Decreasing end date by 1.")
-
-        if type(end_date) == datetime:
-            end_date = end_date.date()
 
         logger.info(f"End date is {end_date}.")
 
@@ -87,7 +87,7 @@ def run_anomaly_for_kpi(
 def _get_end_date_for_rca_kpi(kpi_info: dict, end_date: date = None) -> date:
     # by default we always calculate for n-1
     if end_date is None:
-        end_date = datetime.today().date() - timedelta(days=1)
+        end_date = datetime.today().date() - timedelta(days=(DAYS_OFFSET_FOR_ANALTYICS))
 
     count = 0
     while not _is_data_present_for_end_date(kpi_info, end_date):
@@ -142,3 +142,19 @@ def run_rca_for_kpi(kpi_id: int, end_date: date = None, task_id: Optional[int] =
         checkpoint_success(task_id, kpi_id, "DeepDrills", "DeepDrills complete")
 
     return True
+
+
+def get_anomaly_kpis() -> Iterator[Kpi]:
+    """Returns a list of all KPIs for which anomaly needs to run."""
+    kpis = Kpi.query.distinct("kpi_id").filter(
+        (Kpi.run_anomaly == True) & (Kpi.active == True)
+    )
+    return kpis
+
+
+def get_active_kpis() -> Iterator[Kpi]:
+    """Returns a list of all active KPIs."""
+    kpis = Kpi.query.distinct("kpi_id").filter(
+        (Kpi.active == True) & (Kpi.is_static == False)
+    )
+    return kpis

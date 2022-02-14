@@ -8,7 +8,7 @@ Werkzeug==2.0.0
 click>=7.0
 flask-cors==3.0.10 # TODO: Remove the CORS
 colorama==0.4.4
-celery==5.1.2
+celery==5.2.2
 redis==3.5.3
 
 # Database
@@ -25,12 +25,13 @@ Flask-Migrate==2.7.0
 
 # Alert
 slack-sdk==3.8.0
+tabulate==0.8.9
 
 # Data Analysis
 matplotlib==3.4.2
-numpy==1.20.3
+numpy==1.21.0
+numpyencoder==0.3.0
 pandas==1.2.4
-ipython==7.24.0
 pystan==2.19.1.1
 altair==4.1.0
 statsmodels==0.12.2
@@ -51,6 +52,7 @@ Flask-Static-Digest==0.2.1
 # Auth
 Flask-Login==0.5.0
 Flask-Bcrypt==0.7.1
+cryptography==3.4.8
 
 # Caching
 Flask-Caching>=1.7.2

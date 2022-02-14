@@ -1,10 +1,14 @@
 #!/bin/bash
 
-while ! timeout 1 bash -c "echo > /dev/tcp/server/8001"; do   
-  sleep 1
-done
 flask db upgrade
-flask integration-connector
+
+if $AIRBYTE_ENABLED; then
+  while ! timeout 1 bash -c "echo > /dev/tcp/server/8001"; do   
+    sleep 1
+  done
+  flask integration-connector
+fi
+
 echo '
    ________                        ______           _               
   / ____/ /_  ____ _____  _____   / ____/__  ____  (_)_  _______    
@@ -13,4 +17,4 @@ echo '
 \____/_/ /_/\__,_/\____/____/   \____/\___/_/ /_/_/\__,_/____/      
                                                                     
 '
-gunicorn -w 4 run:app --bind 0.0.0.0:5000
+gunicorn -w 4 -t 120 run:app --bind 0.0.0.0:5000

@@ -5,6 +5,9 @@ x-logging: &default-logging
     max-size: "100m"
     max-file: "5"
   driver: json-file
+x-version:
+  &chaosgenius-version
+  CHAOSGENIUS_VERSION_POSTFIX=latest-compose
 
 services:
   chaosgenius-init:
@@ -42,6 +45,7 @@ services:
       - chaosgenius-db
       - server
     environment:
+      - *chaosgenius-version
       - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
@@ -69,13 +73,20 @@ services:
       - MAX_SUBDIM_CARDINALITY=${MAX_SUBDIM_CARDINALITY}
       - TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN=${TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN}
       - MIN_DATA_IN_SUBGROUP=${MIN_DATA_IN_SUBGROUP}
+      - TOP_SUBDIMENSIONS_FOR_ANOMALY=${TOP_SUBDIMENSIONS_FOR_ANOMALY}
       - MAX_ROWS_FOR_DEEPDRILLS=${MAX_ROWS_FOR_DEEPDRILLS}
       - MAX_FILTER_SUBGROUPS_ANOMALY=${MAX_FILTER_SUBGROUPS_ANOMALY}
       - MAX_DEEPDRILLS_SLACK_DAYS=${MAX_DEEPDRILLS_SLACK_DAYS}
       - MAX_ANOMALY_SLACK_DAYS=${MAX_ANOMALY_SLACK_DAYS}
+      - DAYS_OFFSET_FOR_ANALTYICS=${DAYS_OFFSET_FOR_ANALTYICS}
+      - DEEPDRILLS_HTABLE_MAX_PARENTS=${DEEPDRILLS_HTABLE_MAX_PARENTS}
+      - DEEPDRILLS_HTABLE_MAX_CHILDREN=${DEEPDRILLS_HTABLE_MAX_CHILDREN}
+      - DEEPDRILLS_HTABLE_MAX_DEPTH=${DEEPDRILLS_HTABLE_MAX_DEPTH}
+      - DEEPDRILLS_ENABLED_TIME_RANGES=${DEEPDRILLS_ENABLED_TIME_RANGES}
+      - REACT_APP_EVENT_ALERT=${REACT_APP_EVENT_ALERT}
       - SENTRY_DSN=${SENTRY_DSN}
-    ports:
-      - "5000:5000"
+      - CHAOSGENIUS_ENTERPRISE_EDITION_KEY=${CHAOSGENIUS_ENTERPRISE_EDITION_KEY}
+      - CHAOSGENIUS_WEBAPP_URL=${CHAOSGENIUS_WEBAPP_URL}
 
   chaosgenius-webapp:
     container_name: chaosgenius-webapp
@@ -90,6 +101,7 @@ services:
     environment:
       - REACT_APP_BASE_URL=${REACT_APP_BASE_URL}
       - REACT_APP_DISABLE_TELEMETRY=${REACT_APP_DISABLE_TELEMETRY}
+      - REACT_APP_EVENT_ALERT=${REACT_APP_EVENT_ALERT}
     depends_on:
       - chaosgenius-server
 
@@ -109,14 +121,10 @@ services:
     volumes:
       - ./docker/cg-db-setup:/docker-entrypoint-initdb.d/
       - cg-db:/var/lib/postgresql/data
-    ports:
-      - 5433:5432
 
   chaosgenius-redis:
     container_name: chaosgenius-redis
     image: "redis:6.2-alpine"
-    ports:
-      - 6379:6379
     
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler
@@ -145,7 +153,10 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - REACT_APP_EVENT_ALERT=${REACT_APP_EVENT_ALERT}
       - SENTRY_DSN=${SENTRY_DSN}
+      - CHAOSGENIUS_ENTERPRISE_EDITION_KEY=${CHAOSGENIUS_ENTERPRISE_EDITION_KEY}
+      - CHAOSGENIUS_WEBAPP_URL=${CHAOSGENIUS_WEBAPP_URL}
     depends_on:
       - chaosgenius-redis
   
@@ -180,11 +191,20 @@ services:
       - MAX_SUBDIM_CARDINALITY=${MAX_SUBDIM_CARDINALITY}
       - TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN=${TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN}
       - MIN_DATA_IN_SUBGROUP=${MIN_DATA_IN_SUBGROUP}
+      - TOP_SUBDIMENSIONS_FOR_ANOMALY=${TOP_SUBDIMENSIONS_FOR_ANOMALY}
       - MAX_ROWS_FOR_DEEPDRILLS=${MAX_ROWS_FOR_DEEPDRILLS}
       - MAX_FILTER_SUBGROUPS_ANOMALY=${MAX_FILTER_SUBGROUPS_ANOMALY}
       - MAX_DEEPDRILLS_SLACK_DAYS=${MAX_DEEPDRILLS_SLACK_DAYS}
       - MAX_ANOMALY_SLACK_DAYS=${MAX_ANOMALY_SLACK_DAYS}
+      - DAYS_OFFSET_FOR_ANALTYICS=${DAYS_OFFSET_FOR_ANALTYICS}
+      - DEEPDRILLS_HTABLE_MAX_PARENTS=${DEEPDRILLS_HTABLE_MAX_PARENTS}
+      - DEEPDRILLS_HTABLE_MAX_CHILDREN=${DEEPDRILLS_HTABLE_MAX_CHILDREN}
+      - DEEPDRILLS_HTABLE_MAX_DEPTH=${DEEPDRILLS_HTABLE_MAX_DEPTH}
+      - DEEPDRILLS_ENABLED_TIME_RANGES=${DEEPDRILLS_ENABLED_TIME_RANGES}
+      - REACT_APP_EVENT_ALERT=${REACT_APP_EVENT_ALERT}
       - SENTRY_DSN=${SENTRY_DSN}
+      - CHAOSGENIUS_ENTERPRISE_EDITION_KEY=${CHAOSGENIUS_ENTERPRISE_EDITION_KEY}
+      - CHAOSGENIUS_WEBAPP_URL=${CHAOSGENIUS_WEBAPP_URL}
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db
@@ -216,7 +236,10 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - REACT_APP_EVENT_ALERT=${REACT_APP_EVENT_ALERT}
       - SENTRY_DSN=${SENTRY_DSN}
+      - CHAOSGENIUS_ENTERPRISE_EDITION_KEY=${CHAOSGENIUS_ENTERPRISE_EDITION_KEY}
+      - CHAOSGENIUS_WEBAPP_URL=${CHAOSGENIUS_WEBAPP_URL}
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db
@@ -316,8 +339,6 @@ services:
       - RESOURCE_CPU_LIMIT=${RESOURCE_CPU_LIMIT}
       - RESOURCE_MEMORY_REQUEST=${RESOURCE_MEMORY_REQUEST}
       - RESOURCE_MEMORY_LIMIT=${RESOURCE_MEMORY_LIMIT}
-    ports:
-      - 8001:8001
     volumes:
       - workspace:${WORKSPACE_ROOT}
       - data:${CONFIG_ROOT}
@@ -327,8 +348,6 @@ services:
     logging: *default-logging
     container_name: airbyte-webapp
     restart: unless-stopped
-    ports:
-      - 8000:80
     environment:
       - AIRBYTE_ROLE=${AIRBYTE_ROLE:-}
       - AIRBYTE_VERSION=${VERSION}
@@ -344,8 +363,6 @@ services:
     logging: *default-logging
     container_name: airbyte-temporal
     restart: unless-stopped
-    ports:
-      - 7233:7233
     environment:
       - DB=postgresql
       - DB_PORT=${DATABASE_PORT}

@@ -5,6 +5,9 @@ x-logging: &default-logging
     max-size: "100m"
     max-file: "5"
   driver: json-file
+x-version:
+  &chaosgenius-version
+  CHAOSGENIUS_VERSION_POSTFIX=stable-compose
 
 services:
   chaosgenius-init:
@@ -34,7 +37,7 @@ services:
 
   chaosgenius-server:
     container_name: chaosgenius-server
-    image: chaosgenius/chaosgenius-server:0.2.0
+    image: chaosgenius/chaosgenius-server:0.3.0
     command: sh setup/run-backend-docker.sh
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -42,6 +45,7 @@ services:
       - chaosgenius-db
       - server
     environment:
+      - *chaosgenius-version
       - IN_DOCKER=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
@@ -69,17 +73,26 @@ services:
       - MAX_SUBDIM_CARDINALITY=${MAX_SUBDIM_CARDINALITY}
       - TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN=${TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN}
       - MIN_DATA_IN_SUBGROUP=${MIN_DATA_IN_SUBGROUP}
+      - TOP_SUBDIMENSIONS_FOR_ANOMALY=${TOP_SUBDIMENSIONS_FOR_ANOMALY}
       - MAX_ROWS_FOR_DEEPDRILLS=${MAX_ROWS_FOR_DEEPDRILLS}
       - MAX_FILTER_SUBGROUPS_ANOMALY=${MAX_FILTER_SUBGROUPS_ANOMALY}
       - MAX_DEEPDRILLS_SLACK_DAYS=${MAX_DEEPDRILLS_SLACK_DAYS}
       - MAX_ANOMALY_SLACK_DAYS=${MAX_ANOMALY_SLACK_DAYS}
+      - DAYS_OFFSET_FOR_ANALTYICS=${DAYS_OFFSET_FOR_ANALTYICS}
+      - DEEPDRILLS_HTABLE_MAX_PARENTS=${DEEPDRILLS_HTABLE_MAX_PARENTS}
+      - DEEPDRILLS_HTABLE_MAX_CHILDREN=${DEEPDRILLS_HTABLE_MAX_CHILDREN}
+      - DEEPDRILLS_HTABLE_MAX_DEPTH=${DEEPDRILLS_HTABLE_MAX_DEPTH}
+      - DEEPDRILLS_ENABLED_TIME_RANGES=${DEEPDRILLS_ENABLED_TIME_RANGES}
+      - REACT_APP_EVENT_ALERT=${REACT_APP_EVENT_ALERT}
       - SENTRY_DSN=${SENTRY_DSN}
+      - CHAOSGENIUS_ENTERPRISE_EDITION_KEY=${CHAOSGENIUS_ENTERPRISE_EDITION_KEY}
+      - CHAOSGENIUS_WEBAPP_URL=${CHAOSGENIUS_WEBAPP_URL}
     ports:
       - "5000:5000"
 
   chaosgenius-webapp:
     container_name: chaosgenius-webapp
-    image: chaosgenius/chaosgenius-webapp:0.2.0
+    image: chaosgenius/chaosgenius-webapp:0.3.0
     command: >
       sh -c "npx react-inject-env set -d ./ &&
              nginx -g 'daemon off;'"
@@ -90,6 +103,7 @@ services:
     environment:
       - REACT_APP_BASE_URL=${REACT_APP_BASE_URL}
       - REACT_APP_DISABLE_TELEMETRY=${REACT_APP_DISABLE_TELEMETRY}
+      - REACT_APP_EVENT_ALERT=${REACT_APP_EVENT_ALERT}
     depends_on:
       - chaosgenius-server
 
@@ -120,7 +134,7 @@ services:
     
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler
-    image: chaosgenius/chaosgenius-server:0.2.0
+    image: chaosgenius/chaosgenius-server:0.3.0
     command: celery -A run.celery beat --loglevel=DEBUG
     environment:
       - IN_DOCKER=True
@@ -145,13 +159,16 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - REACT_APP_EVENT_ALERT=${REACT_APP_EVENT_ALERT}
       - SENTRY_DSN=${SENTRY_DSN}
+      - CHAOSGENIUS_ENTERPRISE_EDITION_KEY=${CHAOSGENIUS_ENTERPRISE_EDITION_KEY}
+      - CHAOSGENIUS_WEBAPP_URL=${CHAOSGENIUS_WEBAPP_URL}
     depends_on:
       - chaosgenius-redis
   
   chaosgenius-worker-analytics:
     container_name: chaosgenius-worker-analytics
-    image: chaosgenius/chaosgenius-server:0.2.0
+    image: chaosgenius/chaosgenius-server:0.3.0
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
     environment:
       - IN_DOCKER=True
@@ -180,18 +197,27 @@ services:
       - MAX_SUBDIM_CARDINALITY=${MAX_SUBDIM_CARDINALITY}
       - TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN=${TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN}
       - MIN_DATA_IN_SUBGROUP=${MIN_DATA_IN_SUBGROUP}
+      - TOP_SUBDIMENSIONS_FOR_ANOMALY=${TOP_SUBDIMENSIONS_FOR_ANOMALY}
       - MAX_ROWS_FOR_DEEPDRILLS=${MAX_ROWS_FOR_DEEPDRILLS}
       - MAX_FILTER_SUBGROUPS_ANOMALY=${MAX_FILTER_SUBGROUPS_ANOMALY}
       - MAX_DEEPDRILLS_SLACK_DAYS=${MAX_DEEPDRILLS_SLACK_DAYS}
       - MAX_ANOMALY_SLACK_DAYS=${MAX_ANOMALY_SLACK_DAYS}
+      - DAYS_OFFSET_FOR_ANALTYICS=${DAYS_OFFSET_FOR_ANALTYICS}
+      - DEEPDRILLS_HTABLE_MAX_PARENTS=${DEEPDRILLS_HTABLE_MAX_PARENTS}
+      - DEEPDRILLS_HTABLE_MAX_CHILDREN=${DEEPDRILLS_HTABLE_MAX_CHILDREN}
+      - DEEPDRILLS_HTABLE_MAX_DEPTH=${DEEPDRILLS_HTABLE_MAX_DEPTH}
+      - DEEPDRILLS_ENABLED_TIME_RANGES=${DEEPDRILLS_ENABLED_TIME_RANGES}
+      - REACT_APP_EVENT_ALERT=${REACT_APP_EVENT_ALERT}
       - SENTRY_DSN=${SENTRY_DSN}
+      - CHAOSGENIUS_ENTERPRISE_EDITION_KEY=${CHAOSGENIUS_ENTERPRISE_EDITION_KEY}
+      - CHAOSGENIUS_WEBAPP_URL=${CHAOSGENIUS_WEBAPP_URL}
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db
 
   chaosgenius-worker-alerts:
     container_name: chaosgenius-worker-alerts
-    image: chaosgenius/chaosgenius-server:0.2.0
+    image: chaosgenius/chaosgenius-server:0.3.0
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
     environment:
       - IN_DOCKER=True
@@ -216,7 +242,10 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - REACT_APP_EVENT_ALERT=${REACT_APP_EVENT_ALERT}
       - SENTRY_DSN=${SENTRY_DSN}
+      - CHAOSGENIUS_ENTERPRISE_EDITION_KEY=${CHAOSGENIUS_ENTERPRISE_EDITION_KEY}
+      - CHAOSGENIUS_WEBAPP_URL=${CHAOSGENIUS_WEBAPP_URL}
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db

@@ -1,24 +1,30 @@
 """Provides a controller class for performing RCA."""
 
 import json
-from datetime import datetime, date, timedelta
 import logging
-from typing import Tuple, Optional
+from datetime import date, datetime
+from typing import Optional, Tuple
 
 import numpy as np
 import pandas as pd
+from numpyencoder import NumpyEncoder
 
+from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
 from chaos_genius.core.rca.constants import (
     LINE_DATA_TIMESTAMP_FORMAT,
-    STATIC_END_DATA_FORMAT,
-    TIMELINE_NUM_DAYS_MAP,
-    TIMELINES,
+    TIME_RANGES_BY_KEY,
 )
 from chaos_genius.core.rca.root_cause_analysis import RootCauseAnalysis
 from chaos_genius.core.utils.data_loader import DataLoader
+from chaos_genius.core.utils.end_date import load_input_data_end_date
 from chaos_genius.core.utils.round import round_series
 from chaos_genius.databases.models.rca_data_model import RcaData, db
-from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
+from chaos_genius.settings import (
+    DEEPDRILLS_ENABLED_TIME_RANGES,
+    DEEPDRILLS_HTABLE_MAX_CHILDREN,
+    DEEPDRILLS_HTABLE_MAX_DEPTH,
+    DEEPDRILLS_HTABLE_MAX_PARENTS,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +32,12 @@ logger = logging.getLogger(__name__)
 class RootCauseAnalysisController:
     """RCA Controller class. Used to perform RCA analysis with Celery."""
 
-    def __init__(self, kpi_info: dict, end_date: date = None, task_id: Optional[int] = None):
+    def __init__(
+        self,
+        kpi_info: dict,
+        end_date: date = None,
+        task_id: Optional[int] = None,
+    ):
         """Initialize the controller.
 
         :param kpi_info: KPI information as a dictionary
@@ -40,58 +51,67 @@ class RootCauseAnalysisController:
         logger.info(f"RCA Controller initialized with KPI: {kpi_info['id']}")
         self.kpi_info = kpi_info
 
-        if end_date is None and self.kpi_info["is_static"]:
-            end_date = self.kpi_info["static_params"].get("end_date")
-            if end_date is not None:
-                end_date = datetime.strptime(end_date, STATIC_END_DATA_FORMAT)
-
-        if end_date is None:
-            end_date = datetime.today()
-
-        if type(end_date) == datetime:
-            end_date = end_date.date()
-
-        logger.info(f"RCA Controller end date: {end_date}")
-
-        self.end_date = end_date
+        self.end_date = load_input_data_end_date(kpi_info, end_date)
+        logger.info(f"RCA Controller end date: {self.end_date}")
 
         self.metric = kpi_info["metric"]
         self.dimensions = kpi_info["dimensions"]
         self.dt_col = kpi_info["datetime_column"]
         self.agg = kpi_info["aggregation"]
 
-        self.num_dim_combs = list(range(1, min(4, len(kpi_info["dimensions"]) + 1)))
+        self.num_dim_combs = list(
+            range(1, min(4, len(kpi_info["dimensions"]) + 1))
+        )
 
         self._task_id = task_id
 
     def _load_data(
-        self, timeline: str = "mom"
+        self, timeline: str = "last_30_days"
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Load data for performing RCA.
 
-        :param timeline: timeline to load data for, defaults to "mom"
+        :param timeline: timeline to load data for, defaults to "last_30_days"
         :type timeline: str, optional
         :return: tuple with baseline data and rca data for
         :rtype: Tuple[pd.DataFrame, pd.DataFrame]
         """
+        # TODO: Write data loader which can cache data and pull from cache
+        (prev_start_date, prev_end_date), (
+            curr_start_date,
+            curr_end_date,
+        ) = TIME_RANGES_BY_KEY[timeline]["function"](self.end_date)
 
-        num_days = TIMELINE_NUM_DAYS_MAP[timeline]
-
-        df = DataLoader(
+        base_df = DataLoader(
             self.kpi_info,
-            end_date=pd.to_datetime(self.end_date),
-            days_before=num_days*2
-        ).get_data()
+            end_date=prev_end_date,
+            start_date=prev_start_date,
+        ).get_data(return_empty=True)
 
-        mid_date = pd.to_datetime(self.end_date - timedelta(days=num_days))
-        base_df = df[df[self.dt_col] < mid_date]
-        rca_df = df[df[self.dt_col] >= mid_date]
+        rca_df = DataLoader(
+            self.kpi_info,
+            end_date=curr_end_date,
+            start_date=curr_start_date,
+        ).get_data(return_empty=True)
+
+        if base_df.empty and rca_df.empty:
+            raise ValueError(
+                f"No data to perform RCA on for timeline: {timeline}."
+            )
+
+        if rca_df.empty:
+            rca_df = pd.DataFrame(data=[], columns=base_df.columns)
+        elif base_df.empty:
+            base_df = pd.DataFrame(data=[], columns=rca_df.columns)
 
         logger.info(f"Loaded {len(base_df)}, {len(rca_df)} rows of data")
         return base_df, rca_df
 
     def _output_to_row(
-        self, data_type: str, data: dict, timeline: str = "mom", dimension: str = None
+        self,
+        data_type: str,
+        data: dict,
+        timeline: str = "last_30_days",
+        dimension: str = None,
     ) -> dict:
         """Output RCA data to a standardized dictionary.
 
@@ -99,7 +119,7 @@ class RootCauseAnalysisController:
         :type data_type: str
         :param data: rca data to store
         :type data: dict
-        :param timeline: timeline used for calculation, defaults to "mom"
+        :param timeline: timeline used for calculation, defaults to "last_30_days"
         :type timeline: str, optional
         :param dimension: dimension on which data is computed, defaults to None
         :type dimension: str, optional
@@ -112,20 +132,23 @@ class RootCauseAnalysisController:
             "data_type": data_type,
             "timeline": timeline,
             "dimension": dimension,
-            "data": json.dumps(data),
+            "data": json.dumps(data, cls=NumpyEncoder),
         }
 
-    def _get_line_data(self, timeline: str = "mom") -> dict:
+    def _get_line_data(self, days: int = 60) -> dict:
         """Get line data for KPI.
 
-        :param timeline: timeline to get data format, defaults to "mom"
-        :type timeline: str, optional
+        :param days: number of days to get data for, defaults to 60
+        :type days: int, optional
         :return: dictionary with line data
         :rtype: dict
         """
         rca_df = DataLoader(
-            self.kpi_info, self.end_date, days_before=TIMELINE_NUM_DAYS_MAP[timeline]
+            self.kpi_info,
+            end_date=self.end_date,
+            days_before=days,
         ).get_data()
+
         rca_df = (
             rca_df.resample("D", on=self.dt_col)
             .agg({self.metric: self.agg})
@@ -137,7 +160,9 @@ class RootCauseAnalysisController:
             LINE_DATA_TIMESTAMP_FORMAT
         )
 
-        rca_df = rca_df.rename(columns={self.dt_col: "date", self.metric: "value"})
+        rca_df = rca_df.rename(
+            columns={self.dt_col: "date", self.metric: "value"}
+        )
         rca_df["value"] = round_series(rca_df["value"])
 
         logger.debug(f"Line data has {len(rca_df)} rows.")
@@ -170,9 +195,8 @@ class RootCauseAnalysisController:
         :return: dictionary with aggregations for KPI
         :rtype: dict
         """
-        panel_metrics = rca.get_panel_metrics()
 
-        return {"panel_metrics": panel_metrics, "line_chart_data": [], "insights": []}
+        return rca.get_panel_metrics()
 
     def _process_rca_output(self, impact_table: dict) -> dict:
         """Process output of RCA for UI friendly output.
@@ -200,7 +224,10 @@ class RootCauseAnalysisController:
         return df.to_dict(orient="records")
 
     def _get_rca(
-        self, rca: RootCauseAnalysis, dimension: str = None, timeline: str = "mom"
+        self,
+        rca: RootCauseAnalysis,
+        dimension: str = None,
+        timeline: str = "last_30_days",
     ) -> dict:
         """Get RCA output for specific dimension.
 
@@ -208,7 +235,7 @@ class RootCauseAnalysisController:
         :type rca: RootCauseAnalysis
         :param dimension: dimension to compute for, defaults to None
         :type dimension: str, optional
-        :param timeline: dimension to compute for, defaults to "mom"
+        :param timeline: dimension to compute for, defaults to "last_30_days"
         :type timeline: str, optional
         :return: rca dictionary
         :rtype: dict
@@ -232,7 +259,10 @@ class RootCauseAnalysisController:
         }
 
     def _get_htable(
-        self, rca: RootCauseAnalysis, dimension: str, timeline: str = "mom"
+        self,
+        rca: RootCauseAnalysis,
+        dimension: str,
+        timeline: str = "last_30_days",
     ) -> dict:
         """Get hierarchical table output for specific dimension.
 
@@ -240,12 +270,17 @@ class RootCauseAnalysisController:
         :type rca: RootCauseAnalysis
         :param dimension: dimension to compute for
         :type dimension: str
-        :param timeline: dimension to compute for, defaults to "mom"
+        :param timeline: dimension to compute for, defaults to "last_30_days"
         :type timeline: str, optional
         :return: hierarchical table data
         :rtype: dict
         """
-        htable = rca.get_hierarchical_table(dimension)
+        htable = rca.get_hierarchical_table(
+            dimension,
+            max_depth=DEEPDRILLS_HTABLE_MAX_DEPTH,
+            max_children=DEEPDRILLS_HTABLE_MAX_CHILDREN,
+            max_parents=DEEPDRILLS_HTABLE_MAX_PARENTS,
+        )
         impact_table_col_map = rca.get_impact_column_map(timeline)
         return {
             "data_table": self._process_rca_output(htable),
@@ -261,11 +296,10 @@ class RootCauseAnalysisController:
                 checkpoint,
             )
         logger.info(
-            "(Task: %s, KPI: %d)"
-            " DeepDrills - %s - Success",
+            "(Task: %s, KPI: %d)" " DeepDrills - %s - Success",
             str(self._task_id),
             self.kpi_info["id"],
-            checkpoint
+            checkpoint,
         )
 
     def _checkpoint_failure(self, checkpoint: str, e: Exception):
@@ -278,12 +312,11 @@ class RootCauseAnalysisController:
                 e,
             )
         logger.exception(
-            "(Task: %s, KPI: %d) "
-            "DeepDrills - %s - Exception occured.",
+            "(Task: %s, KPI: %d) " "DeepDrills - %s - Exception occured.",
             str(self._task_id),
             self.kpi_info["id"],
             checkpoint,
-            exc_info=e
+            exc_info=e,
         )
 
     def compute(self):
@@ -301,14 +334,16 @@ class RootCauseAnalysisController:
             raise e
         logger.info("Line Data for KPI completed.")
 
-        for timeline in TIMELINES:
+        for timeline in DEEPDRILLS_ENABLED_TIME_RANGES:
             logger.info(f"Running RCA for timeline: {timeline}.")
             try:
                 rca = self._load_rca_obj(timeline)
                 self._checkpoint_success(f"{timeline} Data Loader")
             except Exception as e:
                 rca = None
-                logger.error(f"Error loading RCA for timeline [{timeline}]: {e}")
+                logger.error(
+                    f"Error loading RCA for timeline [{timeline}]: {e}"
+                )
                 self._checkpoint_failure(f"{timeline} Data Loader", e)
 
             if rca is None:
@@ -324,14 +359,17 @@ class RootCauseAnalysisController:
 
             except Exception as e:
                 logger.error(
-                    f"Error in agg for {timeline}. Skipping timeline.", exc_info=1
+                    f"Error in agg for {timeline}. Skipping timeline.",
+                    exc_info=1,
                 )
                 self._checkpoint_failure(f"{timeline} Card Metrics", e)
                 continue
 
             # Do not calculate further if no dimensions are present
             if not self.kpi_info.get("dimensions"):
-                logger.info(f"No dimensions in KPI ID: {kpi_id}. Skipping DeepDrills.")
+                logger.info(
+                    f"No dimensions in KPI ID: {kpi_id}. Skipping DeepDrills."
+                )
                 self._checkpoint_success(f"{timeline} DeepDrills Calculation")
                 continue
 
@@ -341,26 +379,42 @@ class RootCauseAnalysisController:
                     logger.info(f"Computing RCA for dimension: {dim}")
                     try:
                         rca_data = self._get_rca(rca, dim, timeline)
-                        output.append(self._output_to_row("rca", rca_data, timeline, dim))
+                        output.append(
+                            self._output_to_row("rca", rca_data, timeline, dim)
+                        )
                     except Exception as e:  # noqa E722
-                        logger.error(f"Error in RCA for {timeline, dim}", exc_info=1)
+                        logger.error(
+                            f"Error in RCA for {timeline, dim}", exc_info=1
+                        )
                         raise e
 
                     if dim is not None:
-                        logger.info(f"Computing Hierarchical table for dimension: {dim}")
+                        logger.info(
+                            f"Computing Hierarchical table for dimension: {dim}"
+                        )
                         try:
                             htable_data = self._get_htable(rca, dim, timeline)
                             output.append(
-                                self._output_to_row("htable", htable_data, timeline, dim)
+                                self._output_to_row(
+                                    "htable", htable_data, timeline, dim
+                                )
                             )
                         except Exception as e:  # noqa E722
-                            logger.error(f"Error in htable for {timeline, dim}", exc_info=1)
+                            logger.error(
+                                f"Error in htable for {timeline, dim}",
+                                exc_info=1,
+                            )
                             raise e
 
                 self._checkpoint_success(f"{timeline} DeepDrills Calculation")
             except Exception as e:
-                logger.error(f"Error in DeepDrills Calculation for {timeline}", exc_info=1)
-                self._checkpoint_failure(f"{timeline} DeepDrills Calculation", e)
+                logger.error(
+                    f"Error in DeepDrills Calculation for {timeline}",
+                    exc_info=1,
+                )
+                self._checkpoint_failure(
+                    f"{timeline} DeepDrills Calculation", e
+                )
 
         # don't store if there is only the line data
         if len(output) < 2:
@@ -371,7 +425,10 @@ class RootCauseAnalysisController:
             output = pd.DataFrame(output)
             output["created_at"] = datetime.now()
             output.to_sql(
-                RcaData.__tablename__, db.engine, if_exists="append", index=False
+                RcaData.__tablename__,
+                db.engine,
+                if_exists="append",
+                index=False,
             )
             self._checkpoint_success("Output Storage")
         except Exception as e:  # noqa E722

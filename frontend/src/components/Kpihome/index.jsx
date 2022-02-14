@@ -144,6 +144,7 @@ const Kpihome = () => {
     store.dispatch({
       type: 'RESET_LINECHART'
     });
+    store.dispatch({ type: 'RESET_HIERARCHIAL_DATA' });
     store.dispatch({ type: 'RESET_DASHBOARD_RCA' });
   };
 

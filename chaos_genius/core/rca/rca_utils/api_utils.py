@@ -1,12 +1,16 @@
 """Utility functions for RCA API endpoints."""
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from typing import List
 
 from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
 from chaos_genius.databases.models.rca_data_model import RcaData
-from chaos_genius.utils.datetime_helper import get_epoch_timestamp, get_rca_timestamp
+from chaos_genius.utils.datetime_helper import (
+    convert_datetime_to_timestamp,
+    get_date_string_with_tz,
+    get_rca_date_from_string,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +56,7 @@ def kpi_aggregation(kpi_id, timeline="last_30_days"):
                         "value": data_point.data["perc_change"],
                     },
                 ],
-                "analysis_date": get_epoch_timestamp(analysis_date),
+                "analysis_date": get_date_string_with_tz(analysis_date),
                 "timecuts_date": get_timecuts_dates(analysis_date, timeline),
             }
         else:
@@ -109,7 +113,9 @@ def kpi_line_data(kpi_id):
 
         final_data = data_point.data
         for row in final_data:
-            row["date"] = get_epoch_timestamp(get_rca_timestamp(row["date"]))
+            row["date"] = convert_datetime_to_timestamp(
+                get_rca_date_from_string(row["date"])
+            )
     except Exception as err:  # noqa: B902
         logger.error(f"Error in KPI Line data retrieval: {err}", exc_info=1)
         status = "error"
@@ -140,7 +146,7 @@ def rca_analysis(kpi_id, timeline="last_30_days", dimension=None):
 
         if data_point:
             final_data = data_point.data
-            final_data["analysis_date"] = get_epoch_timestamp(
+            final_data["analysis_date"] = get_date_string_with_tz(
                 get_analysis_date(kpi_id, end_date)
             )
         else:
@@ -184,7 +190,9 @@ def rca_hierarchical_data(kpi_id, timeline="last_30_days", dimension=None):
 
         if data_point:
             final_data = data_point.data
-            final_data["analysis_date"] = get_analysis_date(kpi_id, end_date)
+            final_data["analysis_date"] = get_date_string_with_tz(
+                get_analysis_date(kpi_id, end_date)
+            )
         else:
             raise ValueError("No data found.")
     except Exception as err:  # noqa: B902
@@ -223,7 +231,7 @@ def get_analysis_date(kpi_id: int, end_date: date) -> date:
     )
     final_data = data_point.data if data_point else []
     analysis_date = final_data[-1]["date"]
-    return get_rca_timestamp(analysis_date)
+    return get_rca_date_from_string(analysis_date)
 
 
 def get_timecuts_dates(analysis_date: date, timeline: str) -> List:

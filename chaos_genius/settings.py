@@ -12,6 +12,7 @@ from typing import Union
 from dotenv import load_dotenv
 
 from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
+from chaos_genius.core.utils.constants import SUPPORTED_TIMEZONES
 from chaos_genius.utils.utils import latest_git_commit_hash
 
 load_dotenv(".env")  # loads environment variables from .env
@@ -81,6 +82,9 @@ DEEPDRILLS_ENABLED_TIME_RANGES = list(map(lambda x: x.strip(), DEEPDRILLS_ENABLE
 for enabled_time_range in DEEPDRILLS_ENABLED_TIME_RANGES:
     if enabled_time_range not in TIME_RANGES_BY_KEY.keys():
         raise ValueError(f"Values in DEEPDRILLS_ENABLED_TIME_RANGES must be one of {', '.join(TIME_RANGES_BY_KEY.keys())}. Got: {enabled_time_range}.")
+TIMEZONE = os.getenv('TIMEZONE', default='UTC')
+if TIMEZONE not in SUPPORTED_TIMEZONES:
+    raise ValueError(f"Value of TIMEZONE must be one of {', '.join(SUPPORTED_TIMEZONES)}. Got: {TIMEZONE}.")
 
 SENTRY_DSN = os.getenv('SENTRY_DSN')
 
@@ -89,7 +93,7 @@ IN_DOCKER = _make_bool(os.getenv('IN_DOCKER', default=False))
 TASK_CHECKPOINT_LIMIT: int = int(os.getenv("TASK_CHECKPOINT_LIMIT", 1000))
 """Number of last checkpoints to retrieve in Task Monitor"""
 
-CHAOSGENIUS_VERSION_MAIN = os.getenv("CHAOSGENIUS_VERSION_MAIN", "0.3.0")
+CHAOSGENIUS_VERSION_MAIN = os.getenv("CHAOSGENIUS_VERSION_MAIN", "0.4.0")
 """ChaosGenius version - semver part only"""
 CHAOSGENIUS_VERSION_POSTFIX = os.getenv("CHAOSGENIUS_VERSION_POSTFIX", "git")
 """ChaosGenius version - postfix to identify deployment"""

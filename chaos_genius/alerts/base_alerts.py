@@ -531,31 +531,27 @@ class AnomalyAlertController:
     def _save_nl_message_hourly_freq(self, anomaly_data: List[dict], kpi: Kpi):
         """Saves change message for every point, for a hourly frequency KPI."""
         data = dict()
-        for point in anomaly_data:
+        time_diff = datetime.timedelta(days=1, hours=0, minutes=0)
+
+        # TODO: fix circular import
+        from chaos_genius.controllers.digest_controller import get_previous_data
+        prev_day_data = get_previous_data(kpi.id, self.anomaly_end_date, time_diff)
+        prev_day_data = [anomaly_point.as_dict for anomaly_point in prev_day_data]
+
+        for point in prev_day_data:
+            if point.get("anomaly_type") != "overall":
+                point["series_type"] = convert_query_string_to_user_string(point["series_type"])
+            else:
+                point["series_type"] = "Overall KPI"
+        
+        for point in prev_day_data:
             if point["data_datetime"].hour not in data.keys():
                 data[point["data_datetime"].hour] = []
             data[point["data_datetime"].hour].append(point)
 
-        anomaly_data_cache = dict()
-
         for point in anomaly_data:
-            lower_bound = point["data_datetime"] - datetime.timedelta(days=0, hours=1, minutes=0)
-            hour_val = lower_bound.hour
-
-            required_data = None
-            if hour_val != 23 and hour_val in data.keys():
-                required_data = data.get(hour_val)
-            elif hour_val == 23 and hour_val in anomaly_data_cache.keys():
-                required_data = anomaly_data_cache.get(hour_val)
-            else:
-                time_diff = datetime.timedelta(days=0, hours=1, minutes=0)
-                # TODO: fix circular import
-                from chaos_genius.controllers.digest_controller import get_previous_data
-                required_data = get_previous_data(kpi.id, point["data_datetime"], time_diff)
-                required_data = [anomaly_point.as_dict for anomaly_point in required_data]
-                anomaly_data_cache[hour_val] = required_data
-
-            intended_point = self._find_point(point, required_data)
+            hour_val = point["data_datetime"].hour
+            intended_point = self._find_point(point, data.get(hour_val, []))
             if intended_point is None:
                 # previous point wasn't found
                 point["percentage_change"] = "–"
@@ -697,8 +693,7 @@ class AnomalyAlertController:
                     kpi_link=f"{webapp_url_prefix()}#/dashboard/0/anomaly/{kpi_id}",
                     alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
                     overall_count=overall_count,
-                    subdim_count=subdim_count,
-                    formatted_date=self.now.strftime(ALERT_DATE_FORMAT),
+                    subdim_count=subdim_count
                 )
                 logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
             #self.remove_attributes_from_anomaly_data(overall_data, ["nl_message"])
@@ -787,8 +782,7 @@ class AnomalyAlertController:
                 alert_message,
                 top_anomalies_,
                 overall_count,
-                subdim_count,
-                curr_date=datetime.datetime.now()
+                subdim_count
             )
 
         if test == "ok":

@@ -35,7 +35,6 @@ from chaos_genius.controllers.dashboard_controller import (
     enable_mapper_for_kpi_ids
 )
 from chaos_genius.settings import DEEPDRILLS_ENABLED_TIME_RANGES
-from chaos_genius.utils.datetime_helper import get_rca_timestamp, get_epoch_timestamp
 from chaos_genius.core.rca.rca_utils.api_utils import (
     kpi_line_data,
     kpi_aggregation,
@@ -363,7 +362,7 @@ def find_percentage_change(curr_val, prev_val):
 
 def get_anomaly_count(kpi_id, timeline):
 
-    curr_date = datetime.now()
+    curr_date = datetime.now().date()
     (_, _), (sd, _) = TIME_RANGES_BY_KEY[timeline]["function"](curr_date)
 
     # TODO: Add the series type filter

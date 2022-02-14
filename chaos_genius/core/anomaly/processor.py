@@ -74,7 +74,6 @@ class ProcessAnomalyDetection:
         self.slack = slack
         self.min_number_of_days = min_number_of_days
 
-
     def predict(self) -> pd.DataFrame:
         """Run the prediction for anomalies.
 
@@ -100,7 +99,6 @@ class ProcessAnomalyDetection:
 
         input_last_date = input_data["dt"].iloc[-1]
         input_first_date = input_data["dt"].iloc[0]
-        max_period = get_timedelta(self.freq, self.period)
 
         logger.info(f"Prediction data stats for {self.series}-{self.subgroup}", extra={
             "period": self.period,
@@ -124,71 +122,84 @@ class ProcessAnomalyDetection:
                     )
 
                     prediction["y"] = input_data["y"]
-                    pred_series = prediction
+                    prediction_with_severity = self._detect_severity(self._detect_anomalies(prediction))
+                    pred_series = prediction_with_severity
                 else:
                     logger.warning(
                         f"Insufficient slack for {self.series}-{self.subgroup}")
-            if self.min_number_of_days != 0:
+            else:
                 pred_df = input_data[
                     (input_data['dt'] <= input_data['dt'].max() -
                         get_timedelta(self.freq, self.min_number_of_days))
                 ]
-                pred_series = model.predict(
+                prediction = model.predict(
                     pred_df,
                     self.sensitivity,
                     self.freq,
                     pred_df=pred_df
                 )
-                pred_series['y'] = pred_df['y']
-                daily_train = self._day_by_day(input_data, model, self.min_number_of_days)
+                prediction['y'] = pred_df['y']
+                prediction_with_severity = self._detect_severity(self._detect_anomalies(prediction))
+                daily_train_with_severity = self._day_by_day_predict(input_data, model, self.min_number_of_days)
                 pred_series = pd.concat(
                     [
-                        pred_series,
-                        daily_train
+                        prediction_with_severity,
+                        daily_train_with_severity
                     ]
                 )
 
         else:
-            pred_series = self._day_by_day(self.input_data, model)
+            prediction_with_severity = self._day_by_day_predict(self.input_data, model)
+            pred_series = prediction_with_severity
 
         return pred_series
 
-    def _day_by_day(
+    def _day_by_day_predict(
         self,
         input_data: pd.DataFrame,
         model: AnomalyModel,
         days_to_train: int = None
     ) -> pd.DataFrame:
-    
+
         pred_series = pd.DataFrame(
-            columns=["dt", "y", "yhat_lower", "yhat_upper"])
+            columns=["dt", "y", "yhat_lower", "yhat_upper", "anomaly", "severity"])
+
         input_first_date = input_data["dt"].iloc[0]
         input_last_date = input_data["dt"].iloc[-1]
         max_period = get_timedelta(self.freq, self.period)
-        last_date = input_last_date - get_timedelta(self.freq, days_to_train - 1) \
-            if days_to_train is not None else self.last_date
+
+        if days_to_train is not None:
+            last_date = input_last_date - get_timedelta(self.freq, days_to_train - 1)
+        else:
+            last_date = self.last_date + datetime.timedelta(**FREQUENCY_DELTA[self.freq])
+
         while last_date <= input_last_date:
             curr_period = last_date - input_first_date
+
             if curr_period >= max_period and days_to_train is None:
                 df = input_data[
                     (input_data["dt"] >= last_date - max_period)
                     & (input_data["dt"] <= last_date)
                 ]
+
                 prediction = model.predict(
                     df.iloc[:-1], self.sensitivity, self.freq
                 )
-                to_append = prediction.iloc[-1].copy()
-                to_append.loc["y"] = df.iloc[-1]["y"]
+                prediction["y"] = df["y"].to_list()
+                prediction_with_severity = self._detect_severity(self._detect_anomalies(prediction))
+                to_append = prediction_with_severity.iloc[-1].copy()
 
                 pred_series = pred_series.append(
                     to_append, ignore_index=True)
-            if curr_period < max_period and days_to_train is not None:
+
+            elif curr_period < max_period and days_to_train is not None:
                 df = input_data[input_data['dt'] <= last_date]
                 prediction = model.predict(
                     df.iloc[:-1], self.sensitivity, self.freq
                 )
-                to_append = prediction.iloc[-1].copy()
-                to_append.loc["y"] = df.iloc[-1]["y"]
+                prediction["y"] = df["y"].to_list()
+                prediction_with_severity = self._detect_severity(self._detect_anomalies(prediction))
+                to_append = prediction_with_severity.iloc[-1].copy()
 
                 pred_series = pred_series.append(
                     to_append, ignore_index=True

@@ -12,7 +12,7 @@ updates:
       - "pip dependencies"
     reviewers:
       - "varunp2k"
-    open-pull-request-limit: 0
+    open-pull-requests-limit: 10
 
   - package-ecosystem: "npm"
     directory: "/"
@@ -22,7 +22,7 @@ updates:
     # Labels on pull requests for security and version updates
     labels:
       - "npm dependencies"
-    open-pull-request-limit: 0
+    open-pull-requests-limit: 0
 
   # - package-ecosystem: "docker"
   #   directory: "/"

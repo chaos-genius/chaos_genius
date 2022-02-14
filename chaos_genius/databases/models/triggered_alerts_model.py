@@ -16,7 +16,7 @@ class TriggeredAlerts(PkModel):
     alert_type = Column(db.String(80), nullable=False) # Event Alert, KPI Alert
     is_sent = Column(db.Boolean(), default=True, nullable=False, server_default=sqlalchemy.sql.expression.literal(True))
     alert_metadata = Column(JSONB, default=lambda: {})
-    created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow) #timestamp at which alert was sent
+    created_at = Column(db.DateTime, nullable=False, default=dt.datetime.utcnow, index=True) #timestamp at which alert was sent
 
     def __init__(self, **kwargs):
         """Create instance."""

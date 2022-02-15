@@ -1,7 +1,7 @@
 @import '../../assets/styles/variable.scss';
 
 .faq-section {
-  width: 280px;
+  width: 360px;
   padding-top: 16px;
   .faq {
     &__wrapper-content {
@@ -52,5 +52,12 @@
         }
       }
     }
+  }
+  h3 {
+    font-weight: $font-weight-400;
+    font-size: 16px;
+    line-height: $line-height-24;
+    color: $black_variation-2;
+    margin-bottom: 6px;
   }
 }

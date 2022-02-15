@@ -24,7 +24,7 @@ const AddFaq = () => {
   };
   const faqList = [
     {
-      subheading: 'large Data Sets',
+      subheading: 'Large Data Sets',
       content: [
         {
           href: '',

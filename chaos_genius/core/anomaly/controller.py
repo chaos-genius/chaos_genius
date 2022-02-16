@@ -185,6 +185,7 @@ class AnomalyDetectionController(object):
         query_list = []
         for comb in raw_combinations:
             if type(comb) == str:
+                comb = comb.translate(str.maketrans({'"': '\\"'}))
                 unjoined_query = [f'`{col_names[0]}` == "{comb}"']
             elif type(comb) == tuple:
                 unjoined_query = [

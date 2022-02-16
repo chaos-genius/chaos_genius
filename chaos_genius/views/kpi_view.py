@@ -87,7 +87,7 @@ def kpi():
         new_kpi.save(commit=True)
 
         # Add the dashboard id 0 to the kpi
-        dashboard_list = data.get("dashboard", []) + [0]
+        dashboard_list = data.get("dashboards", []) + [0]
         dashboard_list = list(set(dashboard_list))
         mapper_obj_list = create_dashboard_kpi_mapper(dashboard_list, [new_kpi.id])
 

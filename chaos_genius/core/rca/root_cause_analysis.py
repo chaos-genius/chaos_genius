@@ -512,6 +512,7 @@ class RootCauseAnalysis:
         """
         g1 = self._grp1_df[self._metric]
         g2 = self._grp2_df[self._metric]
+        # set aggregations to 0 if data is empty
         g1_agg = g1.agg(self._agg) if len(g1) > 0 else 0
         g2_agg = g2.agg(self._agg) if len(g2) > 0 else 0
         impact = g2_agg - g1_agg

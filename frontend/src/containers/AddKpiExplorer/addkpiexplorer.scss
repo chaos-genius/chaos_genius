@@ -1,0 +1,12 @@
+.add-kpi-wrapper {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  .add-form-container {
+    margin: 0;
+    margin-right: 72px;
+    &.kpi-form-container {
+      min-height: 100vh;
+    }
+  }
+}

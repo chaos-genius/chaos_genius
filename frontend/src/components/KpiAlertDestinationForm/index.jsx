@@ -134,7 +134,7 @@ const KpiAlertDestinationForm = ({
     } else if (createKpiAlertData && createKpiAlertData.status === 'failure') {
       customToast({
         type: 'error',
-        header: 'Failed to create KPI',
+        header: 'Failed to create alert',
         description: createKpiAlertData.message
       });
     }
@@ -228,6 +228,15 @@ const KpiAlertDestinationForm = ({
         };
       });
     }
+  };
+
+  const handleDigestClick = (e) => {
+    setAlertFormData((prev) => {
+      return {
+        ...prev,
+        daily_digest: e.target.value === 'true' //converting string to boolean
+      };
+    });
   };
 
   const customToast = (data) => {
@@ -382,17 +391,48 @@ const KpiAlertDestinationForm = ({
       ) : (
         ''
       )}
-      {/* commented add another channel*/}
-      {/* {anotherChannel && addChannel()}
-      {anotherChannel === false && (
-        <div className="add-options-wrapper options-spacing">
-          <div className="add-options" onClick={() => setAnotherChannel(true)}>
-            <label>+ Add Another Channel</label>
+      <div className="form-group form-group-label-margin">
+        <label>Send As *</label>
+
+        <div className="alert-setting event-alert-send-setting">
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="radio"
+              id="individualalert"
+              name="alert"
+              value={false}
+              checked={alertFormData.daily_digest === false ? true : false}
+              onClick={(e) => handleDigestClick(e)}
+            />
+            <label
+              className={`form-check-label ${
+                alertFormData.daily_digest === false ? 'active' : ''
+              } `}
+              for="individualalert">
+              individual alert
+            </label>
+          </div>
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="radio"
+              id="consolidatedalertsreport"
+              name="alert"
+              value={true}
+              checked={alertFormData.daily_digest === false ? false : true}
+              onClick={(e) => handleDigestClick(e)}
+            />
+            <label
+              className={`form-check-label ${
+                alertFormData.daily_digest === false ? '' : 'active'
+              } `}
+              for="consolidatedalertsreport">
+              consolidated alerts report
+            </label>
           </div>
         </div>
-      )} */}
-      {/*Add empty space div*/}
-      <div className="add-options-wrapper options-spacing"></div>
+      </div>
       <div className="form-action alerts-button">
         <button className="btn white-button" onClick={() => onBack()}>
           <span>Back</span>

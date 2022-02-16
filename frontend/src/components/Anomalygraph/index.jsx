@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import highchartsMore from 'highcharts/highcharts-more';
+import { HRNumbers } from '../../utils/Formatting/Numbers/humanReadableNumberFormatter';
 import { getTimezone, formatDateTime } from '../../utils/date-helper';
 
 highchartsMore(Highcharts);
@@ -122,6 +123,11 @@ const Anomalygraph = ({ drilldown }) => {
         yAxis: {
           title: {
             text: graphData.y_axis_label
+          },
+          labels: {
+            formatter: function () {
+              return HRNumbers.toHumanString(this.value);
+            }
           }
         },
         time: {
@@ -144,12 +150,16 @@ const Anomalygraph = ({ drilldown }) => {
               ' - ' +
               intervals[2] +
               '</b>';
-            s = s + '<br>Value: <b>' + this.y + '</b>';
+            s =
+              s +
+              '<br>Value: <b>' +
+              Highcharts.numberFormat(this.y, 2) +
+              '</b>';
             s = s + '<br>Severity: <b>' + severity_score[1] + '</b>';
             s =
               s +
               '<br>Datetime: <b>' +
-              formatDateTime(this.x, true, true, true) +
+              formatDateTime(this.x, true, true) +
               '</b>';
             return s;
           }

@@ -41,6 +41,7 @@ import {
 } from '../actions/ActionConstants';
 
 const initialState = {
+  changingAlert: undefined,
   emailLoading: false,
   emailData: [],
   emailError: false,
@@ -78,8 +79,8 @@ const initialState = {
   kpiAlertEnableData: [],
   kpiAlertEnableError: false,
   kpiAlertDeleteLoading: false,
-  kpiAlertDeleteData:[],
-  kpiAlertDeleteError:false
+  kpiAlertDeleteData: [],
+  kpiAlertDeleteError: false
 };
 export const alert = (state = initialState, action) => {
   switch (action.type) {
@@ -326,25 +327,25 @@ export const alert = (state = initialState, action) => {
         kpiAlertEnableError: true
       };
     }
-    case KPIALERTDELETEREQUEST:{
-      return{
-        kpiAlertDeleteLoading:true,
-        kpiAlertDeleteError:false
-      }
+    case KPIALERTDELETEREQUEST: {
+      return {
+        kpiAlertDeleteLoading: true,
+        kpiAlertDeleteError: false
+      };
     }
-    case KPIALERTDELETERESPONSE:{
-      return{
+    case KPIALERTDELETERESPONSE: {
+      return {
         ...state,
         kpiAlertDeleteLoading: false,
         kpiAlertDeleteData: action.data,
         kpiAlertEnableError: false
-      }
+      };
     }
-    case KPIALERTDELETEFAILURE:{
-      return{
-        kpiAlertDeleteLoading:false,
-        kpiAlertDeleteError:true
-      }
+    case KPIALERTDELETEFAILURE: {
+      return {
+        kpiAlertDeleteLoading: false,
+        kpiAlertDeleteError: true
+      };
     }
     case 'RESET_EMAIL_DATA': {
       return {
@@ -373,13 +374,22 @@ export const alert = (state = initialState, action) => {
       };
     }
 
-    case 'RESET_DELETE_DATA' : {
+    case 'RESET_DELETE_DATA': {
       return {
         ...state,
-        kpiAlertDeleteData:[]
-      }
+        kpiAlertDeleteData: []
+      };
     }
 
+    case 'CHANGING_ALERT': {
+      return { ...state, changingAlert: action.data };
+    }
+    case 'RESET_CHANGING_ALERT': {
+      return {
+        ...state,
+        changingAlert: undefined
+      };
+    }
     default:
       return state;
   }

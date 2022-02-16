@@ -17,7 +17,7 @@ def get_alert_list(frequency: str = None, as_obj: bool = False):
     """
     filters = [Alert.alert_status == True]
     if frequency:
-        filters.append([Alert.alert_frequency == frequency])
+        filters.extend([Alert.alert_frequency == frequency])
     data = Alert.query.filter(*filters).order_by(Alert.id.desc()).all()
     if as_obj:
         results = data

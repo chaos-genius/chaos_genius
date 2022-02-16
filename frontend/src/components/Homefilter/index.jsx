@@ -1,15 +1,15 @@
 import React from 'react';
 
-import Tooltip from 'react-tooltip-lite';
-
 import Search from '../../assets/images/search.svg';
 import Dropdown from '../../assets/images/dropdownlist.svg';
 import Fuse from 'fuse.js';
 import './homefilter.scss';
 import { useState } from 'react';
 import { formatDateTime } from '../../utils/date-helper';
+import { CustomTooltip } from '../../utils/tooltip-helper';
+import { debuncerReturn } from '../../utils/simple-debouncer';
 
-const Homefilter = ({ data, setDashboard, dashboard }) => {
+const Homefilter = ({ data, setDashboard, dashboard, setDashboardId }) => {
   const [filterData, setFilterData] = useState(data);
 
   const onSearch = (event) => {
@@ -31,16 +31,20 @@ const Homefilter = ({ data, setDashboard, dashboard }) => {
     }
   };
 
+  const debounce = () => debuncerReturn(onSearch, 500);
+
   const onSort = (type) => {
     let value = data.sort(function (a, b) {
       if (type === 'alpha') {
         return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
       } else if (type === 'recent') {
-        return formatDateTime(b.created_at) - formatDateTime(a.created_at);
+        return (
+          formatDateTime(b.last_modified) - formatDateTime(a.last_modified)
+        );
       } else if (type === 'kpi') {
-        return a.kpis.length < b.kpis.length
+        return a.kpis.length > b.kpis.length
           ? -1
-          : a.kpis.length > b.kpis.length
+          : a.kpis.length < b.kpis.length
           ? 1
           : 0;
       } else {
@@ -60,7 +64,7 @@ const Homefilter = ({ data, setDashboard, dashboard }) => {
               type="text"
               className="form-control h-40"
               placeholder="Search Dashboard"
-              onChange={(e) => onSearch(e)}
+              onChange={debounce()}
             />
             <span>
               <img src={Search} alt="Search Icon" />
@@ -77,7 +81,7 @@ const Homefilter = ({ data, setDashboard, dashboard }) => {
             <ul className="dropdown-menu">
               <li onClick={() => onSort('alpha')}>Alphabetical</li>
               <li onClick={() => onSort('recent')}>Recently Modified</li>
-              <li onClick={() => onSort('kpi')}>No of KPI’s</li>
+              <li onClick={() => onSort('kpi')}>No of KPIs</li>
             </ul>
           </div>
         </div>
@@ -89,17 +93,18 @@ const Homefilter = ({ data, setDashboard, dashboard }) => {
             filterData.map((item) => {
               return (
                 <li
-                  className={dashboard === item.id ? 'active' : ''}
+                  key={item.id}
+                  className={
+                    dashboard.toString() === item.id.toString() ? 'active' : ''
+                  }
                   onClick={() => {
                     setDashboard(item.id);
+                    setDashboardId(item.id);
                   }}>
                   <div className="filter-tooltipcontent">
-                    <Tooltip
-                      className="tooltip-name"
-                      direction="right"
-                      content={<span> {item.name}</span>}>
-                      <label className="name-tooltip">{item.name}</label>
-                    </Tooltip>
+                    <label className="name-tooltip">
+                      {CustomTooltip(item.name)}
+                    </label>
                   </div>
                   <span>{item?.kpis.length}</span>
                 </li>

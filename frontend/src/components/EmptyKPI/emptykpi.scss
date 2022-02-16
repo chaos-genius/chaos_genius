@@ -1,0 +1,101 @@
+@import '../../assets/styles/variable.scss';
+
+.empty-kpi-card {
+  background: $white;
+  box-shadow: 4px 6px 32px -2px rgba(226, 226, 226, 0.24);
+  border-radius: 12px;
+  width: 664px;
+  padding: 40px 32px 40px 32px;
+  h2 {
+    font-weight: $font-weight-600;
+    font-size: $font-size-24;
+    line-height: $line-height-20;
+    letter-spacing: $letter-spacing;
+    color: $black_variation-2;
+    margin-bottom: 16px;
+  }
+  a {
+    cursor: pointer;
+    color: $blue;
+    &:hover {
+      color: $blue;
+    }
+  }
+  p {
+    font-weight: $font-weight-400;
+    font-size: $font-size-16;
+    line-height: $line-height-24;
+    letter-spacing: $letter-spacing;
+    color: $grey_variation-3;
+    margin-bottom: 32px;
+  }
+  .empty-kpi-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    h4 {
+      font-weight: $font-weight-600;
+      font-size: $font-size-20;
+      line-height: $line-height-20;
+      text-align: center;
+      letter-spacing: $letter-spacing;
+      color: $black_variation-2;
+    }
+    a {
+      font-weight: $font-weight-400;
+      font-size: $font-size-12;
+      line-height: $line-height-14;
+      color: $green;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      img {
+        margin-right: 9px;
+      }
+      &:hover {
+        color: $green;
+      }
+    }
+  }
+  h5 {
+    font-weight: $font-weight-400;
+    font-size: $font-size-16;
+    line-height: $line-height-24;
+    letter-spacing: $letter-spacing;
+    color: $grey_variation-3;
+    label {
+      color: $blue;
+    }
+  }
+  .video-container {
+    width: 600px;
+    height: 320px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 32px;
+    iframe {
+      width: 100%;
+      height: 100%;
+    }
+    .video-wrapper {
+      .ytp-large-play-button {
+        border-radius: 100% !important;
+        svg {
+          border-radius: 100% !important;
+          fill: $white !important;
+        }
+      }
+    }
+  }
+  .html5-video-player {
+    .ytp-cued-thumbnail-overlay {
+      .ytp-button {
+        border-radius: 100% !important;
+        svg {
+          fill: $white !important;
+        }
+      }
+    }
+  }
+}

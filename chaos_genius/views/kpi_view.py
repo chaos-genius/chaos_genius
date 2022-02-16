@@ -34,13 +34,12 @@ from chaos_genius.controllers.dashboard_controller import (
     edit_kpi_dashboards,
     enable_mapper_for_kpi_ids
 )
-from chaos_genius.utils.datetime_helper import get_rca_timestamp, get_epoch_timestamp
-
-TIME_DICT = {
-    "mom": {"expansion": "month", "time_delta": timedelta(days=30, hours=0, minutes=0)},
-    "wow": {"expansion": "week", "time_delta": timedelta(days=7, hours=0, minutes=0)},
-    "dod": {"expansion": "day", "time_delta": timedelta(days=1, hours=0, minutes=0)},
-}
+from chaos_genius.settings import DEEPDRILLS_ENABLED_TIME_RANGES
+from chaos_genius.core.rca.rca_utils.api_utils import (
+    kpi_line_data,
+    kpi_aggregation,
+)
+from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
 
 blueprint = Blueprint("api_kpi", __name__)
 logger = logging.getLogger(__name__)
@@ -88,7 +87,7 @@ def kpi():
         new_kpi.save(commit=True)
 
         # Add the dashboard id 0 to the kpi
-        dashboard_list = data.get("dashboard", []) + [0]
+        dashboard_list = data.get("dashboards", []) + [0]
         dashboard_list = list(set(dashboard_list))
         mapper_obj_list = create_dashboard_kpi_mapper(dashboard_list, [new_kpi.id])
 
@@ -170,7 +169,7 @@ def get_all_kpis():
     """returning all kpis"""
 
     status, message = "success", ""
-    timeline = request.args.get("timeline", "wow")
+    timeline = request.args.get("timeline", "last_7_days")
     dashboard_id = request.args.get("dashboard_id")
 
     try:
@@ -190,28 +189,43 @@ def get_all_kpis():
         metrics = ["name", "metric", "id"]
         for kpi in results:
             info = {key: getattr(kpi, key) for key in metrics}
-            aggregation_type = kpi.aggregation
-            aggregate_data = kpi_aggregation(kpi.id, timeline)
-            info["prev"] = round_number(
-                aggregate_data.get("panel_metrics", {}).get("grp1_metrics", {}).get(aggregation_type, 0)
-            )
-            info["current"] = round_number(
-                aggregate_data.get("panel_metrics", {}).get("grp2_metrics", {}).get(aggregation_type, 0)
-            )
-            info["change"] = round_number(info["current"] - info["prev"])
+            _, _, aggregate_data = kpi_aggregation(kpi.id, timeline)
+            info["prev"] = aggregate_data["aggregation"][0]["value"]
+            info["current"] = aggregate_data["aggregation"][1]["value"]
+            info["change"] = aggregate_data["aggregation"][2]["value"]
+            info["percentage_change"] = aggregate_data["aggregation"][3]["value"]
 
-            info["timeline"] = TIME_DICT[timeline]["expansion"]
+            info["display_value_prev"] = TIME_RANGES_BY_KEY[timeline]["last_period_name"]
+            info["display_value_current"] = TIME_RANGES_BY_KEY[timeline]["current_period_name"]
             info["anomaly_count"] = get_anomaly_count(kpi.id, timeline)
-            info["graph_data"] = kpi_line_data(kpi.id)
-            info["percentage_change"] = find_percentage_change(
-                info["current"], info["prev"]
-            )
+            _, _, info["graph_data"] = kpi_line_data(kpi.id)
             ret.append(info)
+
+    except Exception as e:  # noqa: E722
+        status = "failure"
+        message = str(e)
+        logger.error(message, exc_info=True)
+
+    return jsonify({"data": ret, "message": message, "status": status})
+
+
+@blueprint.route("/get-timecuts-list", methods=["GET"])
+def get_timecuts_list():
+    """Returns all active timecuts."""
+    status, message = "success", ""
+    ret = {}
+    try:
+        enabled_cuts = [
+            {**{k: v for k, v in value.items() if k != "function"}, "id": key}
+            for key, value in TIME_RANGES_BY_KEY.items()
+            if key in DEEPDRILLS_ENABLED_TIME_RANGES
+        ]
+        ret = enabled_cuts
+        message = "All timecuts fetched succesfully."
     except Exception as e:
         status = "failure"
         message = str(e)
         logger.error(message)
-
     return jsonify({"data": ret, "message": message, "status": status})
 
 
@@ -261,59 +275,6 @@ def kpi_get_dimensions(kpi_id):
     except Exception as err:
         logger.info(f"Error Found: {err}")
     return jsonify({"dimensions": dimensions, "msg": ""})
-
-
-@blueprint.route("/<int:kpi_id>/kpi-aggregations", methods=["GET"])
-def kpi_get_aggregation(kpi_id):
-    data = []
-    try:
-        timeline = request.args.get("timeline")
-        data = kpi_aggregation(kpi_id, timeline)
-    except Exception as err:
-        logger.info(f"Error Found: {err}")
-    return jsonify({"data": data, "msg": ""})
-
-
-@blueprint.route("/<int:kpi_id>/kpi-line-data", methods=["GET"])
-def kpi_get_line_data(kpi_id):
-    data = []
-    try:
-        data = kpi_line_data(kpi_id)
-        for _row in data:
-            date_timstamp = get_rca_timestamp(_row["date"])
-            _row["date"] = get_epoch_timestamp(date_timstamp)
-        formatted_date = data
-    except Exception as err:
-        logger.info(f"Error Found: {err}")
-    return jsonify({"data": formatted_date, "msg": ""})
-
-
-@blueprint.route("/<int:kpi_id>/rca-analysis", methods=["GET"])
-def kpi_rca_analysis(kpi_id):
-    logger.info(f"RCA Analysis Started for KPI ID: {kpi_id}")
-    data = []
-    try:
-        timeline = request.args.get("timeline")
-        dimension = request.args.get("dimension", None)
-        data = rca_analysis(kpi_id, timeline, dimension)
-    except Exception as err:
-        logger.info(f"Error Found: {err}")
-    logger.info("RCA Analysis Done")
-    return jsonify({"data": data, "msg": ""})
-
-
-@blueprint.route("/<int:kpi_id>/rca-hierarchical-data", methods=["GET"])
-def kpi_rca_hierarchical_data(kpi_id):
-    logger.info(f"RCA Analysis Started for KPI ID: {kpi_id}")
-    data = []
-    try:
-        timeline = request.args.get("timeline")
-        dimension = request.args.get("dimension", None)
-        data = rca_hierarchical_data(kpi_id, timeline, dimension)
-    except Exception as err:
-        logger.info(f"Error Found: {err}")
-    logger.info("RCA Analysis Done")
-    return jsonify({"data": data, "msg": ""})
 
 
 @blueprint.route("/meta-info", methods=["GET"])
@@ -389,148 +350,6 @@ def trigger_analytics(kpi_id):
     return jsonify({"message": "RCA and Anomaly triggered successfully"})
 
 
-@cache.memoize()
-def kpi_aggregation(kpi_id, timeline="mom"):
-    try:
-        kpi_info = get_kpi_data_from_id(kpi_id)
-        end_date = get_rca_output_end_date(kpi_info)
-
-        data_point = (
-            RcaData.query.filter(
-                (RcaData.kpi_id == kpi_id)
-                & (RcaData.data_type == "agg")
-                & (RcaData.timeline == timeline)
-                & (RcaData.end_date <= end_date)
-            )
-            .order_by(RcaData.created_at.desc())
-            .first()
-        )
-
-        if data_point:
-            final_data = data_point.data
-            final_data["analysis_date"] = get_analysis_date(kpi_id, end_date)
-        else:
-            final_data = {
-                "panel_metrics": {},
-                "line_chart_data": [],
-                "insights": [],
-                "analysis_date": "",
-            }
-    except Exception as err:
-        logger.error(f"Error in KPI aggregation retrieval: {err}", exc_info=1)
-    return final_data
-
-
-@cache.memoize()
-def kpi_line_data(kpi_id):
-    try:
-        kpi_info = get_kpi_data_from_id(kpi_id)
-        end_date = get_rca_output_end_date(kpi_info)
-
-        data_point = (
-            RcaData.query.filter(
-                (RcaData.kpi_id == kpi_id)
-                & (RcaData.data_type == "line")
-                & (RcaData.end_date <= end_date)
-            )
-            .order_by(RcaData.created_at.desc())
-            .first()
-        )
-
-        final_data = data_point.data if data_point else []
-    except Exception as err:
-        logger.error(f"Error in KPI Line data retrieval: {err}", exc_info=1)
-    return final_data
-
-
-@cache.memoize()
-def rca_analysis(kpi_id, timeline="mom", dimension=None):
-    try:
-        kpi_info = get_kpi_data_from_id(kpi_id)
-        end_date = get_rca_output_end_date(kpi_info)
-
-        data_point = (
-            RcaData.query.filter(
-                (RcaData.kpi_id == kpi_id)
-                & (RcaData.data_type == "rca")
-                & (RcaData.timeline == timeline)
-                & (RcaData.end_date <= end_date)
-                & (RcaData.dimension == dimension)
-            )
-            .order_by(RcaData.created_at.desc())
-            .first()
-        )
-
-        if data_point:
-            final_data = data_point.data
-            final_data["analysis_date"] = get_analysis_date(kpi_id, end_date)
-        else:
-            final_data = {
-                "chart": {"chart_data": [], "y_axis_lim": [], "chart_table": []},
-                "data_table": [],
-                "analysis_date": "",
-            }
-    except Exception as err:
-        logger.error(f"Error in RCA Analysis retrieval: {err}", exc_info=1)
-    return final_data
-
-
-@cache.memoize()
-def rca_hierarchical_data(kpi_id, timeline="mom", dimension=None):
-    try:
-        kpi_info = get_kpi_data_from_id(kpi_id)
-        end_date = get_rca_output_end_date(kpi_info)
-
-        data_point = (
-            RcaData.query.filter(
-                (RcaData.kpi_id == kpi_id)
-                & (RcaData.data_type == "htable")
-                & (RcaData.timeline == timeline)
-                & (RcaData.end_date <= end_date)
-                & (RcaData.dimension == dimension)
-            )
-            .order_by(RcaData.created_at.desc())
-            .first()
-        )
-
-        if data_point:
-            final_data = data_point.data
-            final_data["analysis_date"] = get_analysis_date(kpi_id, end_date)
-        else:
-            final_data = {"data_table": [], "analysis_date": ""}
-    except Exception as err:
-        logger.error(f"Error in RCA hierarchical table retrieval: {err}", exc_info=1)
-    return final_data
-
-
-def get_rca_output_end_date(kpi_info: dict) -> date:
-    end_date = None
-
-    if kpi_info["is_static"]:
-        end_date = kpi_info["static_params"].get("end_date")
-
-    if end_date is None:
-        return datetime.today().date()
-    else:
-        return datetime.strptime(end_date, "%Y-%m-%d").date()
-
-
-def get_analysis_date(kpi_id: int, end_date: date) -> int:
-    data_point = (
-        RcaData.query.filter(
-            (RcaData.kpi_id == kpi_id)
-            & (RcaData.data_type == "line")
-            & (RcaData.end_date <= end_date)
-        )
-        .order_by(RcaData.created_at.desc())
-        .first()
-    )
-    final_data = data_point.data if data_point else []
-    analysis_date = final_data[-1]["date"]
-    analysis_timestamp = get_rca_timestamp(analysis_date)
-    return get_epoch_timestamp(analysis_timestamp)
-
-
 def find_percentage_change(curr_val, prev_val):
 
     if prev_val == 0:
@@ -543,15 +362,15 @@ def find_percentage_change(curr_val, prev_val):
 
 def get_anomaly_count(kpi_id, timeline):
 
-    curr_date = datetime.now()
-    lower_time_dt = curr_date - TIME_DICT[timeline]["time_delta"]
+    curr_date = datetime.now().date()
+    (_, _), (sd, _) = TIME_RANGES_BY_KEY[timeline]["function"](curr_date)
 
     # TODO: Add the series type filter
     anomaly_data = AnomalyDataOutput.query.filter(
         AnomalyDataOutput.kpi_id == kpi_id,
         AnomalyDataOutput.anomaly_type == "overall",
         AnomalyDataOutput.is_anomaly == 1,
-        AnomalyDataOutput.data_datetime >= lower_time_dt,
+        AnomalyDataOutput.data_datetime >= sd,
     ).all()
 
     return len(anomaly_data)

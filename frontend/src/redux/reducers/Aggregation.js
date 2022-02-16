@@ -30,6 +30,11 @@ export const aggregation = (state = initialState, action) => {
         aggregationError: true
       };
     }
+    case 'RESET_AGGREGATION': {
+      return {
+        ...initialState
+      };
+    }
     default:
       return state;
   }

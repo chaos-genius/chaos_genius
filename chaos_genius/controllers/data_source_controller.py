@@ -1,6 +1,7 @@
 from collections import defaultdict
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.extensions import integration_connector as connector
+from chaos_genius.settings import AIRBYTE_ENABLED
 from chaos_genius.third_party.integration_server_config import (
     SOURCE_WHITELIST_AND_TYPE
 )
@@ -70,6 +71,11 @@ def test_data_source(payload: dict) -> dict:
         dict: status of the connection
     """
     is_third_party = SOURCE_WHITELIST_AND_TYPE[payload["sourceDefinitionId"]]
+    if is_third_party and not AIRBYTE_ENABLED:
+        return {
+            "message": "Airbyte is not enabled. Please enable Airbyte to test the third party connection",
+            "status": "failed"
+        }
     if is_third_party:
         connector_client = connector.connection
         for _property in ["connection_type", "sourceId", "workspaceId", "name", "sourceName"]:
@@ -94,11 +100,11 @@ def update_third_party(payload):
         dict: status of the connection
     """
     is_third_party = SOURCE_WHITELIST_AND_TYPE[payload["sourceDefinitionId"]]
+    connection_status = {}
     if is_third_party:
-        connector_client = connector.connection
-        for _property in ["sourceDefinitionId", "workspaceId", "sourceName", "connection_type"]:
-            payload.pop(_property, None)
-        connection_status = connector_client.update_source(payload)
-    else:
-        connection_status = {}
+        if AIRBYTE_ENABLED:
+            connector_client = connector.connection
+            for _property in ["sourceDefinitionId", "workspaceId", "sourceName", "connection_type"]:
+                payload.pop(_property, None)
+            connection_status = connector_client.update_source(payload)
     return connection_status

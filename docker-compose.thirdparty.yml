@@ -12,7 +12,7 @@ x-version:
 services:
   chaosgenius-init:
     container_name: chaosgenius-init
-    image: docker:0.4.0
+    image: docker:20.10
     command: >
       sh -c "apk update && 
              apk upgrade && 

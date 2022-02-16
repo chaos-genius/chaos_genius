@@ -26,7 +26,7 @@ const EmptyKPI = () => {
       <div className="video-container">
         <iframe
           className="video-wrapper"
-          src="https://www.youtube.com/embed/Z-kbVFh1zB8"
+          src="https://www.youtube.com/embed/iF6qg29IfqU"
           title="ChaosGenius - The Open-Source Business Observability Platform"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

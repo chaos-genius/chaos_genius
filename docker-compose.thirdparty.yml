@@ -123,6 +123,8 @@ services:
     volumes:
       - ./docker/cg-db-setup:/docker-entrypoint-initdb.d/
       - cg-db:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
 
   chaosgenius-redis:
     container_name: chaosgenius-redis
@@ -273,6 +275,7 @@ services:
     environment:
       - POSTGRES_USER=${DATABASE_USER}
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - DOCKER_NETWORK=${DOCKER_NETWORK}
     volumes:
       - db:/var/lib/postgresql/data
   scheduler:
@@ -311,6 +314,7 @@ services:
       - RESOURCE_MEMORY_LIMIT=${RESOURCE_MEMORY_LIMIT}
       - MAX_SYNC_JOB_ATTEMPTS=${MAX_SYNC_JOB_ATTEMPTS}
       - MAX_SYNC_TIMEOUT_DAYS=${MAX_SYNC_TIMEOUT_DAYS}
+      - DOCKER_NETWORK=${DOCKER_NETWORK}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - workspace:${WORKSPACE_ROOT}
@@ -346,6 +350,7 @@ services:
       - RESOURCE_CPU_LIMIT=${RESOURCE_CPU_LIMIT}
       - RESOURCE_MEMORY_REQUEST=${RESOURCE_MEMORY_REQUEST}
       - RESOURCE_MEMORY_LIMIT=${RESOURCE_MEMORY_LIMIT}
+      - DOCKER_NETWORK=${DOCKER_NETWORK}
     volumes:
       - workspace:${WORKSPACE_ROOT}
       - data:${CONFIG_ROOT}
@@ -365,6 +370,7 @@ services:
       - OPENREPLAY=${OPENREPLAY:-}
       - TRACKING_STRATEGY=${TRACKING_STRATEGY}
       - INTERNAL_API_HOST=${INTERNAL_API_HOST}
+      - DOCKER_NETWORK=${DOCKER_NETWORK}
   airbyte-temporal:
     image: temporalio/auto-setup:1.7.0
     logging: *default-logging
@@ -378,6 +384,7 @@ services:
       - POSTGRES_SEEDS=${DATABASE_HOST}
       - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml
       - LOG_LEVEL=${LOG_LEVEL}
+      - DOCKER_NETWORK=${DOCKER_NETWORK}
     volumes:
       - ./temporal/dynamicconfig:/etc/temporal/config/dynamicconfig
 
@@ -390,3 +397,7 @@ volumes:
     name: ${DB_DOCKER_MOUNT}
   cg-db:
     name: ${CG_DB_DOCKER_MOUNT}
+
+networks:
+  default:
+    name: chaos_genius_default

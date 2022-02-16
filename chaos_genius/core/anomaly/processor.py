@@ -221,6 +221,14 @@ class ProcessAnomalyDetection:
     def _detect_severity(self, anomaly_prediction):
         std_dev = anomaly_prediction["y"].std()
 
+        logger.info(f"Severity stats for {self.series}-{self.subgroup}", extra={
+            "Start/End Date": list([anomaly_prediction["dt"][0], anomaly_prediction["dt"].iloc[-1]]),
+            "Start/End Value": list([anomaly_prediction["y"][0], anomaly_prediction["y"].iloc[-1]]),
+            "len": list([len(anomaly_prediction["y"]), len(anomaly_prediction["y"])]),
+            "std_dev": std_dev,
+            "period": self.period,
+        })
+
         anomaly_prediction["severity"] = 0
         if std_dev == 0:
             return anomaly_prediction
@@ -245,6 +253,16 @@ class ProcessAnomalyDetection:
 
         # Map zscore of 0-3 to 0-100
         severity = zscore * 100 / ZSCORE_UPPER_BOUND
+        logger.info("Severity Score Info: ", extra={
+            "Anomaly" : row["anomaly"],
+            "Date" : row["dt"],
+            "Value": row["y"],
+            "std_dev": std_dev,
+            "Upper Bound": row["yhat_upper"],
+            "Lower Bound": row["yhat_lower"],
+            "zscore" : zscore,
+            "Severity": severity
+        })
         severity = abs(severity)
 
         # Bound between min and max score

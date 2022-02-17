@@ -326,7 +326,7 @@ const Kpihome = () => {
                       item.change !== undefined && item.change !== null ? (
                         <HumanReadableNumbers number={item.change} />
                       ) : (
-                        '-'
+                        <span className="empty-data-span">-</span>
                       );
                     const percChangeView =
                       item.percentage_change !== undefined &&
@@ -348,29 +348,6 @@ const Kpihome = () => {
                       ) : (
                         <span className="empty-data-span">-</span>
                       );
-                    // const percChangeView =
-                    //   item.change !== undefined &&
-                    //   item.change !== null ? (
-                    //     <>
-                    //       <HumanReadableNumbers number={item.change} />
-
-                    //       <label
-                    //         className={
-                    //           +item.percentage_change > 0
-                    //             ? 'high-change'
-                    //             : 'low-change'
-                    //         }>
-                    //         {+item.percentage_change > 0 ? (
-                    //           <img src={Up} alt="High" />
-                    //         ) : (
-                    //           <img src={Down} alt="Low" />
-                    //         )}
-                    //         {`${item.percentage_change}%`}
-                    //       </label>
-                    //     </>
-                    //   ) : (
-                    //     '-'
-                    //   );
                     return (
                       <Link
                         to={`/dashboard/${dashboard}/deepdrills/${item.id}`}

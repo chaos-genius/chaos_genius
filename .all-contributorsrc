@@ -242,6 +242,18 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "ChartistDev",
+      "name": "ChartistDev",
+      "avatar_url": "https://avatars.githubusercontent.com/u/50948001?v=4",
+      "profile": "https://github.com/ChartistDev",
+      "contributions": [
+        "code",
+        "design",
+        "bug",
+        "review"
+      ]
     }
   ],
   "contributorsPerLine": 7,

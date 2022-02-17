@@ -322,29 +322,55 @@ const Kpihome = () => {
               kpiHomeData && kpiHomeData.length !== 0 ? (
                 <div className="graph-section">
                   {kpiHomeData.map((item) => {
+                    const changeView =
+                      item.change !== undefined && item.change !== null ? (
+                        <HumanReadableNumbers number={item.change} />
+                      ) : (
+                        '-'
+                      );
                     const percChangeView =
                       item.percentage_change !== undefined &&
                       item.percentage_change !== null &&
                       isNumber(item.percentage_change) ? (
-                        <>
-                          <HumanReadableNumbers number={item.change} />
-                          <label
-                            className={
-                              +item.percentage_change > 0
-                                ? 'high-change'
-                                : 'low-change'
-                            }>
-                            {+item.percentage_change > 0 ? (
-                              <img src={Up} alt="High" />
-                            ) : (
-                              <img src={Down} alt="Low" />
-                            )}
-                            {`${item.percentage_change}%`}
-                          </label>
-                        </>
+                        <label
+                          className={
+                            +item.percentage_change > 0
+                              ? 'high-change'
+                              : 'low-change'
+                          }>
+                          {+item.percentage_change > 0 ? (
+                            <img src={Up} alt="High" />
+                          ) : (
+                            <img src={Down} alt="Low" />
+                          )}
+                          {`${item.percentage_change}%`}
+                        </label>
                       ) : (
-                        '-'
+                        <span className="empty-data-span">-</span>
                       );
+                    // const percChangeView =
+                    //   item.change !== undefined &&
+                    //   item.change !== null ? (
+                    //     <>
+                    //       <HumanReadableNumbers number={item.change} />
+
+                    //       <label
+                    //         className={
+                    //           +item.percentage_change > 0
+                    //             ? 'high-change'
+                    //             : 'low-change'
+                    //         }>
+                    //         {+item.percentage_change > 0 ? (
+                    //           <img src={Up} alt="High" />
+                    //         ) : (
+                    //           <img src={Down} alt="Low" />
+                    //         )}
+                    //         {`${item.percentage_change}%`}
+                    //       </label>
+                    //     </>
+                    //   ) : (
+                    //     '-'
+                    //   );
                     return (
                       <Link
                         to={`/dashboard/${dashboard}/deepdrills/${item.id}`}
@@ -365,7 +391,12 @@ const Kpihome = () => {
                           </div>
                           <div className="kpi-content">
                             <label>Change</label>
-                            <span>{percChangeView}</span>
+                            <span>
+                              <>
+                                {changeView}
+                                {percChangeView}
+                              </>
+                            </span>
                           </div>
 
                           <div className=" kpi-content kpi-graph ">

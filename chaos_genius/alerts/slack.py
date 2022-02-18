@@ -182,7 +182,7 @@ def _format_slack_anomalies(top10: List[dict], kpi_name=None, include_kpi_link=T
 
         date = point.get("formatted_date")
 
-        threshold_message = f'expected: *{point["yhat_lower"]} - {point["yhat_upper"]}*'
+        threshold_message = f'expected: *{point["yhat_lower"]} to {point["yhat_upper"]}*'
         change_message = point["change_message"]
 
         out += f'- *{kpi_name_link}* changed to ' \

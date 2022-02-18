@@ -596,7 +596,7 @@ class AnomalyAlertController:
         for anomaly_point in data:
             lower = anomaly_point.get("yhat_lower")
             upper = anomaly_point.get("yhat_upper")
-            anomaly_point["Expected Value"] = f"{lower} - {upper}"
+            anomaly_point["Expected Value"] = f"{lower} to {upper}"
 
             # round off severity for better representation
             anomaly_point["severity"] = round(anomaly_point["severity"])

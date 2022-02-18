@@ -24,7 +24,7 @@ sqlalchemy-redshift==0.8.6
 Flask-Migrate==2.7.0
 
 # Alert
-slack-sdk==3.8.0
+slack-sdk==3.15.0
 tabulate==0.8.9
 
 # Data Analysis

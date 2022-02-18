@@ -1,4 +1,4 @@
-# Chaos Genius 🔮 (Private Access)
+# Chaos Genius 🔮
 ![CG Header](https://github.com/chaos-genius/.github/blob/main/github-cover.png)
 
 

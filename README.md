@@ -1,15 +1,21 @@
-# Chaos Genius 🔮
-![CG Header](https://github.com/chaos-genius/.github/blob/main/github-cover.png)
+![CG Header](https://raw.githubusercontent.com/chaos-genius/.github/main/github-cover.png)
 
-
+<p align="center">
+<a href="https://docs.chaosgenius.io"><img src="https://img.shields.io/badge/-documentation-informational?style=flat-square" alt="Documentation link badge"></a>
+<a href="https://www.chaosgenius.io/"><img src="https://img.shields.io/badge/-website-blueviolet?style=flat-square" alt="Website link badge"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-24-orange.svg?style=flat-square)](#contributors-)
+<a href="#contributors-"><img src="https://img.shields.io/badge/all_contributors-24-orange.svg?style=flat-square" alt="All Contributors"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
-[![Documentation](https://img.shields.io/badge/-documentation-informational?style=flat-square)](https://docs.chaosgenius.io)
-[![Website](https://img.shields.io/badge/-website-blueviolet?style=flat-square)](https://www.chaosgenius.io/)
-[![Tests status](https://github.com/chaos-genius/chaos_genius/actions/workflows/python-test.yml/badge.svg)](https://github.com/chaos-genius/chaos_genius/actions/workflows/python-test.yml)
+</p>
 
-Chaos Genius is an **open-source business observability platform**.
+<p align="center">
+<a href="https://github.com/chaos-genius/chaos_genius/actions/workflows/python-test.yml"><img src="https://github.com/chaos-genius/chaos_genius/actions/workflows/python-test.yml/badge.svg" alt="Test status"></a>
+<a href="https://github.com/chaos-genius/chaos_genius/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/chaos-genius/chaos_genius" alt="License"></a>
+<a href="https://github.com/chaos-genius/chaos_genius/releases"><img src="https://img.shields.io/github/v/release/chaos-genius/chaos_genius" alt="Latest release"></a>
+<iframe src="https://ghbtns.com/github-btn.html?user=chaos-genius&repo=chaos_genius&type=star&count=true" frameborder="0" scrolling="0" width="150" height="20" title="GitHub"></iframe>
+</p>
+
+<h3 align="center">An open-source business observability platform</h3>
 
 ## What can Chaos Genius do?
 

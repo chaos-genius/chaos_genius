@@ -348,6 +348,21 @@ const Kpihome = () => {
                       ) : (
                         <span className="empty-data-span">-</span>
                       );
+
+                    const fullView =
+                      item.change !== undefined &&
+                      item.change !== null &&
+                      isNumber(item.change) ? (
+                        <>
+                          {changeView}
+                          {percChangeView}
+                        </>
+                      ) : (
+                        <>
+                          <span className="empty-data-span">-</span>
+                        </>
+                      );
+
                     return (
                       <Link
                         to={`/dashboard/${dashboard}/deepdrills/${item.id}`}
@@ -368,12 +383,7 @@ const Kpihome = () => {
                           </div>
                           <div className="kpi-content">
                             <label>Change</label>
-                            <span>
-                              <>
-                                {changeView}
-                                {percChangeView}
-                              </>
-                            </span>
+                            <span>{fullView}</span>
                           </div>
 
                           <div className=" kpi-content kpi-graph ">

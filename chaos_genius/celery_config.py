@@ -21,6 +21,11 @@ CELERYBEAT_SCHEDULE = {
         'schedule': crontab(hour="3", minute="0"), # Daily: at 3am
         'args': ('daily',)
     },
+    "alert-digest-daily-scheduler": {
+        "task": "chaos_genius.jobs.alert_tasks.alert_digest_daily_scheduler",
+        "schedule": schedule(timedelta(minutes=10)),
+        "args": ()
+    },
     # 'anomaly-task-every-minute': {
     #     'task': 'chaos_genius.jobs.anomaly_tasks.add_together',
     #     'schedule': crontab(minute="*"), # Every minutes

@@ -34,7 +34,7 @@ export const config = (state = initialState, action) => {
     }
     case 'RESET_CONFIG': {
       return {
-        configData: []
+        ...initialState
       };
     }
     default:

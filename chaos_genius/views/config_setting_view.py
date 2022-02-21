@@ -7,7 +7,7 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.alerts.slack import trigger_overall_kpi_stats
 from chaos_genius.utils.datetime_helper import get_server_timezone
 from chaos_genius.utils.modules_utils import is_enterprise_edition
-from chaos_genius.views.kpi_view import kpi_aggregation
+from chaos_genius.core.rca.rca_utils.api_utils import kpi_aggregation
 from chaos_genius.databases.models.config_setting_model import ConfigSetting
 from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 from chaos_genius.controllers.config_controller import (
@@ -103,7 +103,7 @@ def set_config():
     if request.is_json:
         data = request.get_json()
         config_name = data.get("config_name")
-        if config_name not in ["email", "slack", "organisation_settings"]:
+        if config_name not in ["email", "slack", "organisation_settings", "alert_digest_settings"]:
             return jsonify({
                 "status": "not_found",
                 "message": "Config doesn't exist"
@@ -119,7 +119,8 @@ def set_config():
                 for module in config_settings.keys():
                     updated_config_settings[module].update(config_settings[module])
             else:
-                updated_config_settings.update(data.get("config_settings", {}))
+                updated_config_settings.update(data.get("config_settings", {})) #this will work for all email, slack and alert_digest_settings
+
         if not updated_config_settings:
             updated_config_settings = config_settings
         new_config = create_config_object(config_name, updated_config_settings)
@@ -155,8 +156,8 @@ def test_alert():
         data = request.get_json()
         kpi_info = Kpi.get_by_id(data["kpiId"]).as_dict
         connection_info = DataSource.get_by_id(kpi_info["data_source"]).as_dict
-        kpi_aggregation_stats = kpi_aggregation(
-            kpi_info, connection_info, "wow"
+        _, _, kpi_aggregation_stats = kpi_aggregation(
+            kpi_info, connection_info, "last_7_days"
         )
         overall_stats = {
             "current": kpi_aggregation_stats["panel_metrics"]["grp2_metrics"],

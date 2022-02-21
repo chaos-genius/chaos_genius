@@ -16,6 +16,7 @@ import Sidebar from '../components/Sidebar';
 import {
   getConnectionType,
   getGlobalSetting,
+  getVersionSetting,
   onboardingOrganisationStatus
 } from '../redux/actions';
 
@@ -25,6 +26,7 @@ import posthog from 'posthog-js';
 import ServerError from '../containers/ServerError';
 import { saveLocalStorage } from '../utils/storage-helper';
 
+let timeout = undefined;
 const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
   const dispatch = useDispatch();
   const history = useHistory();
@@ -69,11 +71,16 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organisationData]);
 
-  useEffect(() => {
+  const reload = () => {
     dispatchGetConnectionType();
     dispatch(getGlobalSetting());
+    dispatch(getVersionSetting());
     dispatch(getOnboardingStatus());
     dispatch(onboardingOrganisationStatus());
+  };
+
+  useEffect(() => {
+    reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -113,6 +120,12 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
       </div>
     );
   } else if (error === 502 || error === 503 || error === 504) {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(() => {
+      reload();
+    }, 15000);
     return <ServerError />;
   }
 
@@ -123,9 +136,9 @@ const PrivateRouteWithSidebar = ({ component: Component, ...rest }) => {
         <>
           <connectionContext.Provider value={stateValue}>
             <div className="container-wrapper">
+              <Navbar />
               <Sidebar />
               <main>
-                <Navbar />
                 <div className="body-container">
                   <Component {...props} />
                 </div>

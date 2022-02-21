@@ -52,7 +52,7 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
   const onNavigate = () => {
     if (text === 'kpi') {
       store.dispatch(KPI_RESET);
-      history.push('/onboarding/3');
+      history.push('/dashboard');
     } else if (text === 'datasource') {
       store.dispatch(RESET_ACTION);
       history.push('/onboarding/2');
@@ -116,7 +116,7 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
             <button className="btn black-button" onClick={() => onNavigate()}>
               <span>
                 {text === 'kpi'
-                  ? ' Create Dashboard'
+                  ? 'Activate Analytics'
                   : text === 'datasource'
                   ? 'Add KPI'
                   : text === 'activateanalytics'

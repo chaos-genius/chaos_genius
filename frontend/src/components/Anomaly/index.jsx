@@ -12,6 +12,7 @@ import Noresult from '../Noresult';
 import AnomalyEmptyState from '../AnomalyEmptyState';
 import EmptyAnomalyDrilldown from '../EmptyDrillDown';
 import { formatDateTime, getTimezone } from '../../utils/date-helper';
+import { HRNumbers } from '../../utils/Formatting/Numbers/humanReadableNumberFormatter';
 import './anomaly.scss';
 
 import {
@@ -21,6 +22,7 @@ import {
 } from '../../redux/actions';
 import store from '../../redux/store';
 import SubdimensionEmpty from '../SubdimensionEmpty';
+import EmptyDataQualityAnomaly from '../EmptyDataQualityAnomaly';
 
 highchartsMore(Highcharts);
 Highcharts.setOptions({
@@ -89,10 +91,12 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
       }
     } else if (kpiTab === 'Sub-dimensions') {
       setSubDimloading(false);
-      if (anomalyDetectionData && anomalyDetectionData?.data?.length) {
-        subDimesionList = anomalyDetectionData.data.map((anomaly) => (
-          <Anomalygraph key={`dl-${anomaly.title}`} drilldown={anomaly} />
-        ));
+      if (anomalyDetectionData) {
+        subDimesionList =
+          anomalyDetectionData?.data?.length &&
+          anomalyDetectionData?.data?.map((anomaly) => (
+            <Anomalygraph key={`dl-${anomaly.title}`} drilldown={anomaly} />
+          ));
         setSubDimList(subDimesionList);
       }
     }
@@ -119,6 +123,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
       return '';
     });
   }
+
   useEffect(() => {
     if (anomalystatus && anomalystatus?.is_anomaly_setup === false) {
       history.push(`/dashboard/${dashboard}/settings/${kpi}`);
@@ -152,6 +157,11 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
         yAxis: {
           title: {
             text: graphData.y_axis_label
+          },
+          labels: {
+            formatter: function () {
+              return HRNumbers.toHumanString(this.value);
+            }
           }
         },
         tooltip: {
@@ -171,12 +181,16 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
               ' - ' +
               intervals[2] +
               '</b>';
-            s = s + '<br>Value: <b>' + this.y + '</b>';
+            s =
+              s +
+              '<br>Value: <b>' +
+              Highcharts.numberFormat(this.y, 2) +
+              '</b>';
             s = s + '<br>Severity: <b>' + severity_score[1] + '</b>';
             s =
               s +
               '<br>Datetime: <b>' +
-              formatDateTime(this.x, true, true, true) +
+              formatDateTime(this.x, true, true) +
               '</b>';
             return s;
           }
@@ -391,12 +405,9 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                       <p>
                         Last updated:{' '}
                         <span>
-                          {formatDateTime(
-                            anomalyDetectionData?.anomaly_end_date,
-                            true,
-                            false,
-                            true
-                          ) || '-'}
+                          {anomalyDetectionData?.anomaly_end_date
+                            ? anomalyDetectionData?.anomaly_end_date
+                            : '-'}
                         </span>
                       </p>
                     </div>
@@ -502,14 +513,26 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                     </div>
                   </div>
                   {dataQualityCollapse ? (
-                    <div
-                      className={
-                        dataQualityCollapse
-                          ? 'dashboard-container'
-                          : 'dashboard-container drilldown-disable'
-                      }>
-                      {dataQualityList}
-                    </div>
+                    <>
+                      {anomalyQualityData !== '' &&
+                      dataQualityList &&
+                      dataQualityList.length !== 0 ? (
+                        <div
+                          className={
+                            dataQualityCollapse
+                              ? 'dashboard-container'
+                              : 'dashboard-container drilldown-disable'
+                          }>
+                          {dataQualityList}
+                        </div>
+                      ) : (
+                        anomalyQualityData !== '' && (
+                          <div className="anomaly-drilldown-empty">
+                            <EmptyDataQualityAnomaly />
+                          </div>
+                        )
+                      )}
+                    </>
                   ) : null}
                 </div>
               ) : null}

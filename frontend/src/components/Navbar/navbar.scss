@@ -3,20 +3,28 @@
 .header-section {
   position: fixed;
   top: 0px;
-  width: calc(100% - 90px);
+  width: 100%;
   background-color: $white;
   height: 70px;
   z-index: 99;
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: flex-end;
-  padding-right: 24px;
+  justify-content: space-between;
+  .sidebar-logo {
+    padding-left: 29px;
+    width: 177px;
+    height: 32px img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
   .dropdown {
     cursor: pointer;
     .navbar-dropdown-menu {
       width: auto;
-      margin: auto -35px !important;
+      left: -80px !important;
       top: 0px !important;
       img {
         margin-right: 8px;
@@ -54,8 +62,9 @@
       display: flex;
       flex-direction: row;
       align-items: center;
+      padding-right: 24px;
       .user-avatar {
-        margin-right: 10px;
+        margin-right: 4px;
         width: 39px;
         height: 39px;
         border: 1px solid transparent;
@@ -77,7 +86,7 @@
           img {
             width: 12px;
             height: 12px;
-            margin-left: 6px;
+            margin-left: 16px;
           }
         }
         p {

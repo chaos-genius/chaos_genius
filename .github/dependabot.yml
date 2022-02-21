@@ -1,0 +1,31 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    # Raise pull requests for version updates
+    # to pip against the `develop` branch
+    target-branch: "develop"
+    # Labels on pull requests for version updates only
+    labels:
+      - "pip dependencies"
+    reviewers:
+      - "varunp2k"
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    target-branch: "develop"
+    # Labels on pull requests for security and version updates
+    labels:
+      - "npm dependencies"
+    open-pull-requests-limit: 0
+
+  # - package-ecosystem: "docker"
+  #   directory: "/"
+  #   schedule: "weekly"
+  #   target-branch: "develop"
+  #   open-pull-request-limit: 0

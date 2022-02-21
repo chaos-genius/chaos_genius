@@ -1,9 +1,11 @@
 import React from 'react';
+import AddFaq from '../../components/KpiFaq';
 
 import { Link, useHistory } from 'react-router-dom';
 
 import rightarrow from '../../assets/images/rightarrow.svg';
 import KpiExplorerForm from '../../components/KpiExplorerForm';
+import './addkpiexplorer.scss';
 
 const AddKpiExplorer = () => {
   const history = useHistory();
@@ -46,8 +48,13 @@ const AddKpiExplorer = () => {
         </div>
       </div>
       {/* add DataSource form */}
-      <div className="add-form-container">
-        <KpiExplorerForm id={data[3]} />
+      <div className="add-kpi-wrapper">
+        <div className="add-form-container kpi-form-container">
+          <KpiExplorerForm id={data[3]} />
+        </div>
+        <div>
+          <AddFaq />
+        </div>
       </div>
     </>
   );

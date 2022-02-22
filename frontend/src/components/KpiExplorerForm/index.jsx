@@ -855,11 +855,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   } else {
     return (
       <>
-        {kpiFieldLoading ||
-        schemaListLoading ||
-        schemaAvailabilityLoading ||
-        tableListOnSchemaLoading ||
-        tableInfoLoading ? (
+        {kpiFieldLoading ? (
           <div className="load ">
             <div className="preload"></div>
           </div>
@@ -1012,6 +1008,14 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                           ? editableStatus('schema_name')
                           : false
                       }
+                      noOptionsMessage={() => {
+                        return schemaListLoading ||
+                          schemaAvailabilityLoading ||
+                          tableListOnSchemaLoading ||
+                          tableInfoLoading
+                          ? 'Loading...'
+                          : 'No Options';
+                      }}
                       classNamePrefix="selectcategory"
                       placeholder="Select Schema Name"
                       onChange={(e) => schemaName(e)}
@@ -1035,6 +1039,11 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                         value: formdata.tablename
                       }
                     }
+                    noOptionsMessage={() => {
+                      return tableListOnSchemaLoading || tableInfoLoading
+                        ? 'Loading...'
+                        : 'No Options';
+                    }}
                     isDisabled={
                       data[2] === 'edit' ? editableStatus('table_name') : false
                     }
@@ -1071,6 +1080,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                   }
                   classNamePrefix="selectcategory"
                   placeholder="Select Metric Columns"
+                  noOptionsMessage={() => {
+                    return tableInfoLoading ? 'Loading...' : 'No Options';
+                  }}
                   onChange={(e) => {
                     setFormdata({ ...formdata, metriccolumns: e.value });
 
@@ -1100,6 +1112,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                         }
                       : null
                   }
+                  noOptionsMessage={() => {
+                    return tableInfoLoading ? 'Loading...' : 'No Options';
+                  }}
                   isDisabled={
                     data[2] === 'edit' ? editableStatus('aggregation') : false
                   }
@@ -1136,6 +1151,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                       value: formdata.datetimecolumns
                     }
                   }
+                  noOptionsMessage={() => {
+                    return tableInfoLoading ? 'Loading...' : 'No Options';
+                  }}
                   isDisabled={
                     data[2] === 'edit'
                       ? editableStatus('datetime_column')
@@ -1175,6 +1193,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                         })
                       : []
                   }
+                  noOptionsMessage={() => {
+                    return tableInfoLoading ? 'Loading...' : 'No Options';
+                  }}
                   isMulti
                   options={
                     option.metricOption && option.metricOption.length !== 0

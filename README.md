@@ -61,19 +61,16 @@ Follow this [Quick Start guide](https://docs.chaosgenius.io/docs/Quick_Start/pre
 
 ## 🧰 Key Features
 
-**DeepDrills** - Multidimensional drill-downs & waterfall analysis to identify the top drivers of change in a KPI across multiple dimensions.
+### DeepDrills
+Using Chaos Genius, users can identify the key drivers of change in their defined metrics (e.g. Sales) across a large number of high cardinality dimensions (e.g. CountryID, ProductID, BrandID, Device_type).
+- Techniques: Statistical Filtering, A* like path based search to deal with combinatorial explosion
 
 <!-- TODO: add an image or illustration here -->
 
-**Anomaly Detection** - Modular anomaly detection toolkit for monitoring high-dimensional time series with ability to select from different models. Anomaly investigation across multiple dimensions and data quality metrics like volume, max, mean and missing data.
+### Anomaly Detection
 
-<!-- TODO: add an image or illustration here -->
-
-**Smart Alerts** - No more alert fatigue from static alerts. Self-learning thresholds to reduce false positives. Configurations to setup alert frequency & severity. Choose from multiple destinations like Slack, Email and other channels for your team.
-
-<!-- TODO: add an image or illustration here -->
-
-**Integrations** - Modular architecture to enable multiple data sources including databases, data warehouses and multiple third party connectors like Stripe, Shopify, Zendesk, Google Analytics, and many others.
+Modular anomaly detection toolkit for monitoring high-dimensional time series with ability to select from different models. Tackle variations caused by seasonality, trends and holidays in the time series data.
+- Models: Prophet, EWMA, EWSTD, Neural Prophet, ARIMA (coming soon)
 
 <!-- TODO: add an image or illustration here -->
 

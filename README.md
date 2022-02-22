@@ -32,9 +32,9 @@ Chaos Genius comes with a UI that offers simple point-and-click functionality fo
 
 The key use-cases for Chaos Genius include **Business & Data Metrics Monitoring & Alerting**.
 
-For more, check out our Demo.
+<!--For more, check out our Demo.-->
 
-![A small demo of Chaos Genius](https://chaosgenius-public.s3.amazonaws.com/test-cg-1-small.gif)
+<!--![A small demo of Chaos Genius](https://chaosgenius-public.s3.amazonaws.com/test-cg-1-small.gif)-->
 
 
 <!-- ## Architecture

@@ -22,29 +22,17 @@
 
 <h3 align="center">Open source analytics engine to detect & diagnose the root-cause of outliers in <br/> high-dimensional business & system metrics</h3>
 
-## What can Chaos Genius do?
+## 🔮 What is Chaos Genius?
 
-Chaos Genius enables businesses to monitor thousands of KPIs, across multiple data sources, and perform automated root cause analysis for any deviation in the KPIs. This can help teams reduce their Mean-Time-To-Detect (MTTD) and Mean-Time-To-Resolve (MTTR) for any issues in their business and system KPIs. 
+Chaos Genius is an open source analytics engine to help humans detect & diagnose the root-cause of outliers and change in high-dimensional business & system metrics.
 
-## How is Chaos Genius different?
+Using Chaos Genius, users can segment large datasets by key performance metrics (e.g. Daily Active Users, Cloud Costs, Failure Rates) and setup drill-downs for explanations of change or anomalies across important dimensions (e.g., countryID, DeviceID, ProductID, DayofWeek).
 
-Standard BI dashboards enable data visualization to track how select metrics are trending. However, diagnosing why a particular metric or KPI has changed, remains a woefully manual process involving slicing & dicing the data, coordination with multiple teams in an organisation to identify related events and monitoring externalities. 
-
-With Chaos Genius, we aim to automate the diagnosis and root-cause-analysis for deviations in different business and system KPIs at scale. 
+The key use-cases for Chaos Genius include **business & data quality metrics monitoring & alerting**.
 
 Find detailed [Documentation](https://docs.chaosgenius.io/docs/introduction) here!
 
 ![A small demo of Chaos Genius](https://chaosgenius-public.s3.amazonaws.com/test-cg-1-small.gif)
-
-## :white_check_mark: Key Use-Cases
-
-**Business KPI Observability**  - metrics such as Sign Ups, Payment Gateway Failures, Fraud Detection, Ad Spend, Campaign Performance, DAUs, Retention, Engagement and many others. 
-
-**Data Quality KPI Observability** - metrics such as Data Volume, Freshness, Max, Mean, Median, Min, Missing Data, Null Count and many others. 
-
-**Systems KPI Observability** - metrics such as Cloud Costs, Cloud Failure, Infra performance and many others. 
-
-**IOT/Device KPI Observability** - metrics such as performance, data volumes, uptime and many others. 
 
 
 ## 🧰 Key Features

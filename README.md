@@ -32,6 +32,8 @@ Chaos Genius comes with a UI that offers simple point-and-click functionality fo
 
 The key use-cases for Chaos Genius include **Business & Data Metrics Monitoring & Alerting**.
 
+[See more on our website. ](https://chaosgenius.io/)
+
 <!--For more, check out our Demo.-->
 
 <!--![A small demo of Chaos Genius](https://chaosgenius-public.s3.amazonaws.com/test-cg-1-small.gif)-->
@@ -57,11 +59,11 @@ docker-compose up
 
 Visit [http://localhost:8080](http://localhost:8080/)
 
-Follow this [Quick Start guide](https://docs.chaosgenius.io/docs/Quick_Start/prereqs) for more details including how to connect a data source, define your first KPI and configure anomaly detection.
+Follow this [Quick Start guide](https://docs.chaosgenius.io/docs/Quick_Start/prereqs) or read our [Documentation](https://docs.chaosgenius.io/docs/introduction) for more details.
 
 ## 🧰 Key Features
 
-### DeepDrills
+### Automated DeepDrills
 Using Chaos Genius, users can identify the key drivers of change in their defined metrics (e.g. Sales) across a large number of high cardinality dimensions (e.g. CountryID, ProductID, BrandID, Device_type).
 - Techniques: Statistical Filtering, A* like path based search to deal with combinatorial explosion
 
@@ -74,10 +76,11 @@ Modular anomaly detection toolkit for monitoring high-dimensional time series wi
 
 <!-- TODO: add an image or illustration here -->
 
-[See more on our website. ](https://chaosgenius.io/)
 
+### Smart Alerts
 
-
+<!-- TODO: add an image or illustration here -->
+    
 ## :seedling: Community
 
 For any help, discussions and suggestions feel free to reach out to the Chaos Genius team and the community here:
@@ -93,27 +96,25 @@ For any help, discussions and suggestions feel free to reach out to the Chaos Ge
 
 ## 🚦 Roadmap
 
-Our goal is to make Chaos Genius production ready for all organisations irrespective of their data infrasturcture, data sources and scale requirements. With that in mind we have created a [roadmap](https://docs.chaosgenius.io/docs/roadmap/) for Chaos Genius. If you see something missing or wish to make suggestions, please drop us a line on our community Slack or raise an issue.
+Our goal is to make Chaos Genius production ready for all organisations irrespective of their data infrasturcture, data sources and scale requirements. With that in mind we have created a [roadmap](https://docs.chaosgenius.io/docs/roadmap/) for Chaos Genius. If you see something missing or wish to make suggestions, please drop us a line on our [Community Slack](https://join.slack.com/t/chaosgenius/shared_invite/zt-140042uac-rrm~xbx9o_aydi6PTmp_Mg) or raise an issue.
 
 
 
 ## 🐛 Contributing 
 
-Want to contribute? Visit our Github repo and get started with:
+Want to contribute? Get started with:
 
--   Try Chaos Genius and share your feedback.
-
+-   Show us some love - Give us a :star2:!
+    
 -   Submit an issue.
 
 -   Share a part of the documentation that you find difficult to follow.
 
 -   [Translate our Readme](https://github.com/chaos-genius/chaos_genius/blob/main/README.md).
 
--   Show us some love - Give us a star!
+-   Create a pull request. Here's a [list of issues](https://github.com/chaos-genius/chaos_genius/issues) to start with. Please review our [contribution guidelines](https://github.com/chaos-genius/chaos_genius/blob/main/CONTRIBUTING.md) before opening a pull request. Thank you for contributing!
 
--   Create a pull request. Here's a [list of issues](https://github.com/chaos-genius/chaos_genius/issues) to start with.
 
-Please review our [contribution guidelines](https://github.com/chaos-genius/chaos_genius/blob/main/CONTRIBUTING.md) before opening a pull request. Thank you for contributing!
 
 ## Contributors ✨
 

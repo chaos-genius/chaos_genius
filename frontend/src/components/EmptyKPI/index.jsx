@@ -33,8 +33,14 @@ const EmptyKPI = () => {
           allowfullscreen></iframe>
       </div>
       <h5>
-        Have any questions? Here’s the Troubleshoot guide for you or feel free
-        to ping us on our Community Slack!
+        Have any questions? Here’s the{' '}
+        <a
+          href="https://docs.chaosgenius.io/docs/Troubleshooting/tips"
+          target="_blank"
+          rel="noopener noreferrer">
+          Troubleshoot guide{' '}
+        </a>
+        for you or feel free to ping us on our Community Slack!
       </h5>
     </div>
   );

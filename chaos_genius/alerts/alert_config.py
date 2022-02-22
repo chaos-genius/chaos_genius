@@ -6,31 +6,25 @@ EMAIL_CONFIGS_EXPOSE = {
     "port": True,
     "sender_email": True,
     "server": True,
-    "username": False
+    "username": False,
 }
 
-SLACK_CONFIGS_EXPOSE = {
-    "webhook_url": False,
-    "channel_name": True
-}
+SLACK_CONFIGS_EXPOSE = {"webhook_url": False, "channel_name": True}
 
-ORGANISATION_SETTINGS_EXPOSE = {
-    "account": True,
-    "metrics": True
-}
+ORGANISATION_SETTINGS_EXPOSE = {"account": True, "metrics": True}
 
 ALERT_DIGEST_SETTINGS_EXPOSE = {
     "active": True,
     "daily_digest": True,
     "scheduled_time": True,
-    "weekly_digest": True
+    "weekly_digest": True,
 }
 
 helper_objects = {
     "email": EMAIL_CONFIGS_EXPOSE,
     "slack": SLACK_CONFIGS_EXPOSE,
     "organisation_settings": ORGANISATION_SETTINGS_EXPOSE,
-    "alert_digest_settings": ALERT_DIGEST_SETTINGS_EXPOSE
+    "alert_digest_settings": ALERT_DIGEST_SETTINGS_EXPOSE,
 }
 
 # TODO: Duplicate logic in the alert_cofig model too

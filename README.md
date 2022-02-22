@@ -87,7 +87,7 @@ For any help, discussions and suggestions feel free to reach out to the Chaos Ge
 
 -   [GitHub](https://github.com/chaos-genius/.github) (report bugs, contribute, follow roadmap)
 
--   Slack (discuss with the community and Chaos Genius team)
+-   [Slack](https://join.slack.com/t/chaosgenius/shared_invite/zt-140042uac-rrm~xbx9o_aydi6PTmp_Mg) (discuss with the community and Chaos Genius team)
 
 -   [Book Office Hours](https://calendly.com/chaosgenius/30min) (set up time with the Chaos Genius team for any questions or help with setup)
 

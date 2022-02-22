@@ -81,7 +81,7 @@ Modular anomaly detection toolkit for monitoring high-dimensional time series wi
 
 <!-- TODO: add an image or illustration here -->
     
-## :seedling: Community
+## :earth_americas: Community
 
 For any help, discussions and suggestions feel free to reach out to the Chaos Genius team and the community here:
 

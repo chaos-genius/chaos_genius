@@ -57,7 +57,7 @@ docker-compose up
 
 Visit [http://localhost:8080](http://localhost:8080/)
 
-Follow this [quick start guide](https://docs.chaosgenius.io/docs/Quick_Start/prereqs) for more details including how to connect a data source, define your first KPI and configure anomaly detection.
+Follow this [Quick Start guide](https://docs.chaosgenius.io/docs/Quick_Start/prereqs) for more details including how to connect a data source, define your first KPI and configure anomaly detection.
 
 ## 🧰 Key Features
 

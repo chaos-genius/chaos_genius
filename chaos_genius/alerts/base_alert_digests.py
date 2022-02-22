@@ -8,10 +8,19 @@ from typing import Dict, List, Tuple
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from chaos_genius.alerts.base_alerts import FREQUENCY_DICT
-from chaos_genius.alerts.constants import ALERT_DATE_FORMAT, ALERT_DATETIME_FORMAT, ALERT_READABLE_DATETIME_FORMAT
+from chaos_genius.alerts.constants import (
+    ALERT_DATE_FORMAT,
+    ALERT_DATETIME_FORMAT,
+    ALERT_READABLE_DATETIME_FORMAT,
+)
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import alert_digest_slack_formatted
-from chaos_genius.alerts.utils import count_anomalies, save_anomaly_point_formatting, top_anomalies, webapp_url_prefix
+from chaos_genius.alerts.utils import (
+    count_anomalies,
+    save_anomaly_point_formatting,
+    top_anomalies,
+    webapp_url_prefix,
+)
 from chaos_genius.controllers.config_controller import get_config_object
 from chaos_genius.controllers.digest_controller import get_alert_kpi_configurations
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
@@ -89,7 +98,9 @@ class AlertDigestController:
             )
 
     def send_alert_digest(self, recipient, triggered_alert_ids, triggered_alert_dict):
-        triggered_alerts = [triggered_alert_dict[id_].__dict__ for id_ in triggered_alert_ids]
+        triggered_alerts = [
+            triggered_alert_dict[id_].__dict__ for id_ in triggered_alert_ids
+        ]
         points = _all_anomaly_points(triggered_alerts)
         top_anomalies_ = top_anomalies(points)
         overall_count, subdim_count = count_anomalies(points)
@@ -137,10 +148,7 @@ class AlertDigestController:
         save_anomaly_point_formatting(points)
 
         test = alert_digest_slack_formatted(
-            self.frequency,
-            top10,
-            overall_count,
-            subdim_count
+            self.frequency, top10, overall_count, subdim_count
         )
 
         if test == "ok":
@@ -158,7 +166,7 @@ def _all_anomaly_points(triggered_alerts: List[Dict]) -> List[Dict]:
             point,
             kpi_name=alert["kpi_name"],
             alert_name=alert["alert_name"],
-            kpi_id=alert["kpi_id"]
+            kpi_id=alert["kpi_id"],
         )
         for alert in triggered_alerts
         for point in alert["alert_metadata"]["alert_data"]

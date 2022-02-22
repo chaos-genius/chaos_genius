@@ -1,6 +1,14 @@
 ![CG Header](https://raw.githubusercontent.com/chaos-genius/.github/main/github-cover.png)
 
 <p align="center">
+    <a href="https://www.chaosgenius.io/"><b>Website</b></a> •
+    <a href="https://docs.chaosgenius.io"><b>Docs</b></a> •
+    <a href="https://www.chaosgenius.io/blog/"><b>Blog</b></a> •
+    <a href="https://www.linkedin.com/company/chaosgenius/"><b>LinkedIn</b></a> •
+    <a href=""><b>Community Slack</b></a>
+</p>
+
+<p align="center">
 <a href="https://docs.chaosgenius.io"><img src="https://img.shields.io/badge/-documentation-informational?style=flat-square" alt="Documentation link badge"></a>
 <a href="https://www.chaosgenius.io/"><img src="https://img.shields.io/badge/-website-blueviolet?style=flat-square" alt="Website link badge"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->

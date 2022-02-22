@@ -19,10 +19,10 @@ def webapp_url_prefix():
     TODO: redirect to docs link showing how to setup instead of invalid URL.
     """
     if not CHAOSGENIUS_WEBAPP_URL:
-        return "Webapp URL not setup. Please setup CHAOSGENIUS_WEBAPP_URL in the environment file./"
+        return "https://docs.chaosgenius.io/docs/Troubleshooting/setting_alerts", False
 
     forward_slash = "/" if not CHAOSGENIUS_WEBAPP_URL[-1] == "/" else ""
-    return f"{CHAOSGENIUS_WEBAPP_URL}{forward_slash}"
+    return f"{CHAOSGENIUS_WEBAPP_URL}{forward_slash}", True
 
 
 def save_anomaly_point_formatting(points: List[Dict]):

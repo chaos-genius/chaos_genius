@@ -678,6 +678,10 @@ class AnomalyAlertController:
                 top_anomalies_ = top_anomalies(points, 5)
                 overall_count, subdim_count = count_anomalies(points)
 
+                url_prefix, is_env_var_setup = webapp_url_prefix()
+                alert_dashboard_link = f"{url_prefix}api/digest" if is_env_var_setup else url_prefix
+                kpi_link = f"{url_prefix}#/dashboard/0/anomaly/{kpi_id}" if is_env_var_setup else url_prefix
+
                 test = self.send_template_email(
                     "email_alert.html",
                     recipient_emails,
@@ -690,8 +694,8 @@ class AnomalyAlertController:
                     alert_frequency=self.alert_info['alert_frequency'].capitalize(),
                     preview_text="Anomaly Alert",
                     alert_name=self.alert_info.get("alert_name"),
-                    kpi_link=f"{webapp_url_prefix()}#/dashboard/0/anomaly/{kpi_id}",
-                    alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
+                    kpi_link=kpi_link,
+                    alert_dashboard_link=alert_dashboard_link,
                     overall_count=overall_count,
                     subdim_count=subdim_count
                 )

@@ -49,7 +49,11 @@
 <ul>
     {% for point in top_anomalies %}
     <li>
-        <strong><a class="kpi-link" href="{{ kpi_link_prefix }}/{{ point["kpi_id"] }}">{{point["kpi_name"]}} ({{point["Dimension"]}})</strong></a>
+        {% if is_env_var_setup %}
+            <strong><a class="kpi-link" href="{{ kpi_link_prefix }}/{{ point["kpi_id"] }}">{{point["kpi_name"]}} ({{point["Dimension"]}})</a></strong>
+        {% else %}
+            <strong><a class="kpi-link" href="{{ kpi_link_prefix }}">{{point["kpi_name"]}} ({{point["Dimension"]}})</a></strong>
+        {% endif %}
         <span style="color: lightgrey;">
             changed to <strong>{{point["y"]}}</strong>
         {% if point["percentage_change"] is string %}

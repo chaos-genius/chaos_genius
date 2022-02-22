@@ -95,6 +95,10 @@ class AlertDigestController:
         overall_count, subdim_count = count_anomalies(points)
         save_anomaly_point_formatting(points)
 
+        url_prefix, is_env_var_setup = webapp_url_prefix()
+        alert_dashboard_link = f"{url_prefix}api/digest" if is_env_var_setup else url_prefix
+        kpi_link_prefix = f"{url_prefix}#/dashboard/0/anomaly" if is_env_var_setup else url_prefix
+
         test = self.send_template_email(
             "digest_template.html",
             [recipient],
@@ -107,8 +111,9 @@ class AlertDigestController:
             str=str,
             overall_count=overall_count,
             subdim_count=subdim_count,
-            alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
-            kpi_link_prefix=f"{webapp_url_prefix()}#/dashboard/0/anomaly",
+            is_env_var_setup=is_env_var_setup,
+            alert_dashboard_link=alert_dashboard_link,
+            kpi_link_prefix=kpi_link_prefix,
             top_anomalies=top_anomalies_,
         )
 

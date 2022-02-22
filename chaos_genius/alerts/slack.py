@@ -21,6 +21,11 @@ def anomaly_alert_slack(kpi_name, alert_name, kpi_id, alert_message, points, ove
     client = get_webhook_client()
     if not client:
         raise Exception("Slack not configured properly.")
+
+    url_prefix, is_env_var_setup = webapp_url_prefix()
+    alert_dashboard_link = f"{url_prefix}api/digest" if is_env_var_setup else url_prefix
+    kpi_link = f"{url_prefix}#/dashboard/0/anomaly/{kpi_id}" if is_env_var_setup else url_prefix
+
     response = client.send(
         blocks=[
             {
@@ -81,7 +86,7 @@ def anomaly_alert_slack(kpi_name, alert_name, kpi_id, alert_message, points, ove
                             "type": "plain_text",
                             "text": "View KPI"
                         },
-                        "url": f"{webapp_url_prefix()}#/dashboard/0/anomaly/{kpi_id}",
+                        "url": kpi_link,
                         "action_id": "kpi_link",
                         "style": "primary",
                     },
@@ -91,7 +96,7 @@ def anomaly_alert_slack(kpi_name, alert_name, kpi_id, alert_message, points, ove
                             "type": "plain_text",
                             "text": "Alerts Dashboard"
                         },
-                        "url": f"{webapp_url_prefix()}api/digest",
+                        "url": alert_dashboard_link,
                         "action_id": "alert_dashboard",
                         "style": "primary",
                     }
@@ -170,13 +175,22 @@ def event_alert_slack(alert_name, alert_frequency, alert_message , alert_overvie
 def _format_slack_anomalies(top10: List[dict], kpi_name=None, include_kpi_link=True) -> str:
     out = ""
 
+    url_prefix, is_env_var_setup = webapp_url_prefix()
+    kpi_link_prefix = f"{url_prefix}#/dashboard/0/anomaly" if is_env_var_setup else url_prefix
+
     for point in top10:
 
         if include_kpi_link:
-            kpi_name_link = (
-                f'<{webapp_url_prefix()}#/dashboard/0/anomaly/{point["kpi_id"]}'
-                f'|{point["kpi_name"]} (*{point["Dimension"]}*)>'
-            )
+            if is_env_var_setup:
+                kpi_name_link = (
+                    f'<{kpi_link_prefix}/{point["kpi_id"]}'
+                    f'|{point["kpi_name"]} (*{point["Dimension"]}*)>'
+                )
+            else:
+                kpi_name_link = (
+                    f'<{kpi_link_prefix}'
+                    f'|{point["kpi_name"]} (*{point["Dimension"]}*)>'
+                )
         else:
             kpi_name_link = f'{kpi_name} ({point["Dimension"]})'
 
@@ -201,6 +215,9 @@ def alert_digest_slack_formatted(
     client = get_webhook_client()
     if not client:
         raise Exception("Slack not configured properly.")
+    
+    url_prefix, is_env_var_setup = webapp_url_prefix()
+    alert_dashboard_link = f"{url_prefix}api/digest" if is_env_var_setup else url_prefix
 
     response = client.send(
         blocks=[
@@ -240,7 +257,7 @@ def alert_digest_slack_formatted(
                             "type": "plain_text",
                             "text": "Alerts Dashboard"
                         },
-                        "url": f"{webapp_url_prefix()}api/digest",
+                        "url": alert_dashboard_link,
                         "action_id": "alert_dashboard",
                         "style": "primary",
                     }

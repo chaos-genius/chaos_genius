@@ -9,7 +9,7 @@ import Down from '../../assets/images/down.svg';
 
 import './kpihome.scss';
 
-import Highcharts from 'highcharts';
+import Highcharts, { isNumber } from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import highchartsMore from 'highcharts/highcharts-more';
 import HumanReadableNumbers from '../HumanReadableNumbers';
@@ -322,6 +322,47 @@ const Kpihome = () => {
               kpiHomeData && kpiHomeData.length !== 0 ? (
                 <div className="graph-section">
                   {kpiHomeData.map((item) => {
+                    const changeView =
+                      item.change !== undefined && item.change !== null ? (
+                        <HumanReadableNumbers number={item.change} />
+                      ) : (
+                        <span className="empty-data-span">-</span>
+                      );
+                    const percChangeView =
+                      item.percentage_change !== undefined &&
+                      item.percentage_change !== null &&
+                      isNumber(item.percentage_change) ? (
+                        <label
+                          className={
+                            +item.percentage_change > 0
+                              ? 'high-change'
+                              : 'low-change'
+                          }>
+                          {+item.percentage_change > 0 ? (
+                            <img src={Up} alt="High" />
+                          ) : (
+                            <img src={Down} alt="Low" />
+                          )}
+                          {`${item.percentage_change}%`}
+                        </label>
+                      ) : (
+                        <span className="empty-data-span">-</span>
+                      );
+
+                    const fullView =
+                      item.change !== undefined &&
+                      item.change !== null &&
+                      isNumber(item.change) ? (
+                        <>
+                          {changeView}
+                          {percChangeView}
+                        </>
+                      ) : (
+                        <>
+                          <span className="empty-data-span">-</span>
+                        </>
+                      );
+
                     return (
                       <Link
                         to={`/dashboard/${dashboard}/deepdrills/${item.id}`}
@@ -342,28 +383,7 @@ const Kpihome = () => {
                           </div>
                           <div className="kpi-content">
                             <label>Change</label>
-                            <span>
-                              {item.percentage_change !== '-' && (
-                                <>
-                                  <HumanReadableNumbers number={item.change} />
-                                  <label
-                                    className={
-                                      item.percentage_change > 0
-                                        ? 'high-change'
-                                        : 'low-change'
-                                    }>
-                                    {item.percentage_change > 0 ? (
-                                      <img src={Up} alt="High" />
-                                    ) : (
-                                      <img src={Down} alt="Low" />
-                                    )}
-                                    {item.percentage_change}
-                                    {item.percentage_change !== '-' ? '%' : ''}
-                                  </label>
-                                </>
-                              )}
-                              {item.percentage_change === '-' && <>-</>}
-                            </span>
+                            <span>{fullView}</span>
                           </div>
 
                           <div className=" kpi-content kpi-graph ">

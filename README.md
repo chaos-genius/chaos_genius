@@ -22,6 +22,8 @@
 
 <h3 align="center">Open source analytics engine to detect & diagnose the root-cause of outliers in <br/> high-dimensional business & system metrics</h3>
 
+ <br/>
+
 ## ✨ What is Chaos Genius?
 
 Chaos Genius is an open source analytics engine to help humans detect & diagnose the root-cause of outliers and change in high-dimensional business & system metrics.

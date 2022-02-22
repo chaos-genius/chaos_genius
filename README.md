@@ -166,4 +166,4 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 
 ## 📜 License
 
-Chaos Genius is licensed under the MIT license.
+Chaos Genius is licensed under the [MIT license](https://github.com/chaos-genius/chaos_genius/blob/main/LICENSE.md).

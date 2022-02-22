@@ -43,6 +43,10 @@ For more, check out our Demo.
 
 ## ⚙️ Quick Start
 
+<a href="https://docs.chaosgenius.io/docs/setup/local-setup/"><img src=".github/images/local_button_noborder.png" width="120px" /><a/>
+<a href="https://docs.chaosgenius.io/docs/setup/aws-setup/"><img src=".github/images/aws_button_noborder.png" width="120px" /><a/>
+<a href="https://docs.chaosgenius.io/docs/setup/gcp-setup/"><img src=".github/images/gcp_button_noborder.png" width="120px" /><a/>
+
 ```
 git clone https://github.com/chaos-genius/chaos_genius
 
@@ -54,12 +58,6 @@ docker-compose up
 Visit [http://localhost:8080](http://localhost:8080/)
 
 Follow this [quick start guide](https://docs.chaosgenius.io/docs/Quick_Start/prereqs) for more details including how to connect a data source, define your first KPI and configure anomaly detection.
-
-<p align="center">
-<a href="https://docs.chaosgenius.io/docs/setup/local-setup/"><img src=".github/images/local_button_noborder.png" width="150px" /><a/>
-<a href="https://docs.chaosgenius.io/docs/setup/aws-setup/"><img src=".github/images/aws_button_noborder.png" width="150px" /><a/>
-<a href="https://docs.chaosgenius.io/docs/setup/gcp-setup/"><img src=".github/images/gcp_button_noborder.png" width="150px" /><a/>
-</p>
 
 ## 🧰 Key Features
 

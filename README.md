@@ -77,7 +77,7 @@ Find detailed [Documentation](https://docs.chaosgenius.io/docs/introduction) her
 
 ![image](/img/cg-high-level-arch.png) -->
 
-## ⚙️ Quick Install
+## ⚙️ Quick Start
 
 ```
 git clone https://github.com/chaos-genius/chaos_genius
@@ -89,11 +89,17 @@ docker-compose up
 
 Visit [http://localhost:8080](http://localhost:8080/)
 
-### Quick start & support
+Follow this [quick start guide](https://docs.chaosgenius.io/docs/Quick_Start/prereqs) for more details including how to connect a data source, define your first KPI and configure anomaly detection.
 
-Follow this [Quick Start guide](https://docs.chaosgenius.io/docs/Quick_Start/Install-Chaos-Genius) showing you how to connect a data source, define your first KPI, configure Anomaly Detector on your local machine. 
+### Deploy locally
 
-If you want to schedule office hours with our team to help you get set up, please select [some time directly here.](https://calendly.com/chaosgenius/30min)
+[Setup Chaos Genius on your local system](https://docs.chaosgenius.io/docs/Setup/local-setup)
+
+### Deploy on cloud
+
+[Setup Chaos Genius on AWS EC2](https://docs.chaosgenius.io/docs/Setup/aws-setup)
+
+[Setup Chaos Genius on GCP](https://docs.chaosgenius.io/docs/Setup/gcp-setup)
 
 ## :seedling: Community
 

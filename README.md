@@ -61,7 +61,7 @@ Visit [http://localhost:8080](http://localhost:8080/)
 
 Follow this [Quick Start guide](https://docs.chaosgenius.io/docs/Quick_Start/prereqs) or read our [Documentation](https://docs.chaosgenius.io/docs/introduction) for more details.
 
-## 🧰 Key Features
+## :dizzy: Key Features
 
 ### Automated DeepDrills
 Using Chaos Genius, users can identify the key drivers of change in their defined metrics (e.g. Sales) across a large number of high cardinality dimensions (e.g. CountryID, ProductID, BrandID, Device_type).
@@ -81,7 +81,7 @@ Modular anomaly detection toolkit for monitoring high-dimensional time series wi
 
 <!-- TODO: add an image or illustration here -->
     
-## :earth_americas: Community
+## :octocat: Community
 
 For any help, discussions and suggestions feel free to reach out to the Chaos Genius team and the community here:
 
@@ -100,7 +100,7 @@ Our goal is to make Chaos Genius production ready for all organisations irrespec
 
 
 
-## 🐛 Contributing 
+## :seedling: Contributing 
 
 Want to contribute? Get started with:
 

@@ -1,14 +1,32 @@
-# Chaos Genius 🔮 (Private Access)
-![CG Header](https://github.com/chaos-genius/.github/blob/main/github-cover.png)
+![CG Header](https://raw.githubusercontent.com/chaos-genius/.github/main/github-cover.png)
 
+<p align="center">
+    <a href="https://www.chaosgenius.io/"><b>Website</b></a> •
+    <a href="https://docs.chaosgenius.io"><b>Docs</b></a> •
+    <a href="https://www.chaosgenius.io/blog/"><b>Blog</b></a> •
+    <a href="https://www.linkedin.com/company/chaosgenius/"><b>LinkedIn</b></a> •
+    <a href=""><b>Community Slack</b></a>
+</p>
 
+<p align="center">
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-23-orange.svg?style=flat-square)](#contributors-)
+<a href="#contributors-"><img src="https://img.shields.io/badge/all_contributors-24-orange.svg" alt="All Contributors"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
+<a href="https://github.com/chaos-genius/chaos_genius/actions/workflows/python-test.yml"><img src="https://github.com/chaos-genius/chaos_genius/actions/workflows/python-test.yml/badge.svg" alt="Test status"></a>
+<a href="https://github.com/chaos-genius/chaos_genius/tree/develop"><img src="https://img.shields.io/github/last-commit/chaos-genius/chaos_genius/develop" alt="Last commit"></a>
+<a href="https://github.com/chaos-genius/chaos_genius/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/chaos-genius/chaos_genius" alt="License"></a>
+<a href="https://github.com/chaos-genius/chaos_genius/releases"><img src="https://img.shields.io/github/v/release/chaos-genius/chaos_genius" alt="Latest release"></a>
+<a href="https://github.com/chaos-genius/chaos_genius"><img src="https://img.shields.io/github/stars/chaos-genius/chaos_genius" alt="Give us a star!"></a>
 
-Chaos Genius is an open-source business observability platform. Chaos Genius enables businesses to monitor thousands of KPIs, across multiple data sources, and perform automated root cause analysis for any deviation in the KPIs. 
+</p>
 
-Chaos Genius can help teams reduce their Mean-Time-To-Detect (MTTD) and Mean-Time-To-Resolve (MTTR) for any issues in their business and system KPIs. 
+<h3 align="center">Open source analytics engine to detect & diagnose the root-cause of outliers in <br/> high-dimensional business & system metrics</h3>
+
+## What can Chaos Genius do?
+
+Chaos Genius enables businesses to monitor thousands of KPIs, across multiple data sources, and perform automated root cause analysis for any deviation in the KPIs. This can help teams reduce their Mean-Time-To-Detect (MTTD) and Mean-Time-To-Resolve (MTTR) for any issues in their business and system KPIs. 
+
+## How is Chaos Genius different?
 
 Standard BI dashboards enable data visualization to track how select metrics are trending. However, diagnosing why a particular metric or KPI has changed, remains a woefully manual process involving slicing & dicing the data, coordination with multiple teams in an organisation to identify related events and monitoring externalities. 
 
@@ -16,30 +34,36 @@ With Chaos Genius, we aim to automate the diagnosis and root-cause-analysis for 
 
 Find detailed [Documentation](https://docs.chaosgenius.io/docs/introduction) here!
 
-![](https://chaosgenius-public.s3.amazonaws.com/test-cg-1-small.gif)
-
-
+![A small demo of Chaos Genius](https://chaosgenius-public.s3.amazonaws.com/test-cg-1-small.gif)
 
 ## :white_check_mark: Key Use-Cases
 
-**Business KPI Observability**  - All important business KPIs such as Sign Ups, Payment Gateway Failures, Fraud Detection, Ad Spend, Campaign Performance, DAUs, Retention, Engagement and many others. 
+**Business KPI Observability**  - metrics such as Sign Ups, Payment Gateway Failures, Fraud Detection, Ad Spend, Campaign Performance, DAUs, Retention, Engagement and many others. 
 
-**Data Quality KPI Observability** - Data quality metrics like Data Volume, Freshness, Max, Mean, Median, Min, Missing Data, Null Count and many others. 
+**Data Quality KPI Observability** - metrics such as Data Volume, Freshness, Max, Mean, Median, Min, Missing Data, Null Count and many others. 
 
-**Systems KPI Observability** - System metrics like Cloud Costs, Cloud Failure, Infra performance and many others. 
+**Systems KPI Observability** - metrics such as Cloud Costs, Cloud Failure, Infra performance and many others. 
 
-**IOT/Device KPI Observability** - Device metrics like performance, data volumes, uptime and many others. 
+**IOT/Device KPI Observability** - metrics such as performance, data volumes, uptime and many others. 
 
 
 ## 🧰 Key Features
 
-**DeepDrills** - Multidimensional drill-downs & waterfall analysis to identify the top drivers of change in a KPI across multiple dimensions. 
+**DeepDrills** - Multidimensional drill-downs & waterfall analysis to identify the top drivers of change in a KPI across multiple dimensions.
 
-**Anomaly Detection** - Modular anomaly detection toolkit for monitoring high-dimensional time series with ability to select from different models. Anomaly investigation across multiple dimensions and data quality metrics like volume, max, mean and missing data. 
+<!-- TODO: add an image or illustration here -->
+
+**Anomaly Detection** - Modular anomaly detection toolkit for monitoring high-dimensional time series with ability to select from different models. Anomaly investigation across multiple dimensions and data quality metrics like volume, max, mean and missing data.
+
+<!-- TODO: add an image or illustration here -->
 
 **Smart Alerts** - No more alert fatigue from static alerts. Self-learning thresholds to reduce false positives. Configurations to setup alert frequency & severity. Choose from multiple destinations like Slack, Email and other channels for your team.
 
+<!-- TODO: add an image or illustration here -->
+
 **Integrations** - Modular architecture to enable multiple data sources including databases, data warehouses and multiple third party connectors like Stripe, Shopify, Zendesk, Google Analytics, and many others.
+
+<!-- TODO: add an image or illustration here -->
 
 [See more on our website. ](https://chaosgenius.io/)
 
@@ -47,7 +71,7 @@ Find detailed [Documentation](https://docs.chaosgenius.io/docs/introduction) her
 
 ![image](/img/cg-high-level-arch.png) -->
 
-## ⚙️ Quick Install
+## ⚙️ Quick Start
 
 ```
 git clone https://github.com/chaos-genius/chaos_genius
@@ -57,55 +81,46 @@ cd chaos_genius
 docker-compose up
 ```
 
-Visit[  http://127.0.0.1:8080](http://localhost:8080/)
+Visit [http://localhost:8080](http://localhost:8080/)
 
-### Upgrade from earlier versions
+Follow this [quick start guide](https://docs.chaosgenius.io/docs/Quick_Start/prereqs) for more details including how to connect a data source, define your first KPI and configure anomaly detection.
 
-To update the install first make sure the docker containers are down with docker-compose down
+### Deploy locally
 
-Then update the repo & docker builds by following commands:
+[Setup Chaos Genius on your local system](https://docs.chaosgenius.io/docs/Setup/local-setup)
 
-git pull
-docker-compose pull
+### Deploy on cloud
 
-And then bring back the containers with docker-compose up
+[Setup Chaos Genius on AWS EC2](https://docs.chaosgenius.io/docs/Setup/aws-setup)
 
-### Quick start & support
-
-Follow this [Quick Start guide](https://docs.chaosgenius.io/docs/Quick_Start/Install-Chaos-Genius) showing you how to connect a data source, define your first KPI, configure Anomaly Detector on your local machine. 
-
-If you want to schedule office hours with our team to help you get set up, please select [some time directly here.](https://calendly.com/chaosgenius/30min)
+[Setup Chaos Genius on GCP](https://docs.chaosgenius.io/docs/Setup/gcp-setup)
 
 ## :seedling: Community
 
-Chaos Genius is a community driven initiative. For any help, discussions, suggestions feel free to reach out to the Chaos Genius team and the Community on either of the following channels. 
+For any help, discussions and suggestions feel free to reach out to the Chaos Genius team and the community here:
 
 -   [GitHub](https://github.com/chaos-genius/.github) (report bugs, contribute, follow roadmap)
 
--   Slack (For discussion with the Community and Chaos Genius team)
+-   Slack (discuss with the community and Chaos Genius team)
 
--   [Book Office Hours](https://calendly.com/chaosgenius/30min)(Set Up time with Chaos Genius team for any questions or help with setup)
+-   [Book Office Hours](https://calendly.com/chaosgenius/30min) (set up time with the Chaos Genius team for any questions or help with setup)
 
--   [Blog](https://chaosgenius.io/blog/) (Follow us on latest trends on Data, Machine Learning, Open Source and more)
+-   [Blog](https://chaosgenius.io/blog/) (follow us on latest trends on Data, Machine Learning, Open Source and more)
 
 
 ## 🚦 Roadmap
 
-Our goal is to make Chaos Genius production ready for all organisations irrespective of their data infrasturcture, data sources and scale requirements. With that in mind we have created the following [roadmap](https://docs.chaosgenius.io/docs/Roadmap/Roadmap) for Chaos Genius. If you see something missing or wish to make suggestions, please drop us a line on our community Slack or raise an issue.
+Our goal is to make Chaos Genius production ready for all organisations irrespective of their data infrasturcture, data sources and scale requirements. With that in mind we have created a [roadmap](https://docs.chaosgenius.io/docs/roadmap/) for Chaos Genius. If you see something missing or wish to make suggestions, please drop us a line on our community Slack or raise an issue.
 
 
 
 ## 🐛 Contributing 
 
-Here's a shout out to all our contributors.
-
 Want to contribute? Visit our Github repo and get started with:
 
 -   Try Chaos Genius and share your feedback.
 
--   Submit an issue. 
-
--   Create a pull request. Here's a [list of issues](https://github.com/chaos-genius/chaos_genius/issues) to start with.
+-   Submit an issue.
 
 -   Share a part of the documentation that you find difficult to follow.
 
@@ -113,10 +128,9 @@ Want to contribute? Visit our Github repo and get started with:
 
 -   Show us some love - Give us a star!
 
+-   Create a pull request. Here's a [list of issues](https://github.com/chaos-genius/chaos_genius/issues) to start with.
 
-## 📜 License
-
-Chaos Genius is licensed under the MIT license.
+Please review our [contribution guidelines](https://github.com/chaos-genius/chaos_genius/blob/main/CONTRIBUTING.md) before opening a pull request. Thank you for contributing!
 
 ## Contributors ✨
 
@@ -156,6 +170,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tr>
     <td align="center"><a href="https://github.com/arvind-27"><img src="https://avatars.githubusercontent.com/u/57091402?v=4?s=100" width="100px;" alt=""/><br /><sub><b>arvind-27</b></sub></a><br /><a href="#data-arvind-27" title="Data">🔣</a></td>
     <td align="center"><a href="https://joshtaylor.id.au"><img src="https://avatars.githubusercontent.com/u/225131?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Josh Taylor</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/issues?q=author%3Ajoshuataylor" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/ChartistDev"><img src="https://avatars.githubusercontent.com/u/50948001?v=4?s=100" width="100px;" alt=""/><br /><sub><b>ChartistDev</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=ChartistDev" title="Code">💻</a> <a href="#design-ChartistDev" title="Design">🎨</a> <a href="https://github.com/chaos-genius/chaos_genius/issues?q=author%3AChartistDev" title="Bug reports">🐛</a> <a href="https://github.com/chaos-genius/chaos_genius/pulls?q=is%3Apr+reviewed-by%3AChartistDev" title="Reviewed Pull Requests">👀</a></td>
   </tr>
 </table>
 
@@ -165,3 +180,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
+## 📜 License
+
+Chaos Genius is licensed under the MIT license.

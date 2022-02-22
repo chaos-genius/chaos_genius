@@ -116,7 +116,7 @@ Want to contribute? Get started with:
 
 
 
-## Contributors ✨
+## :heart: Contributors 
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 

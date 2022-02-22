@@ -9,15 +9,17 @@
 </p>
 
 <p align="center">
-<a href="https://docs.chaosgenius.io"><img src="https://img.shields.io/badge/-documentation-informational?style=flat-square" alt="Documentation link badge"></a>
-<a href="https://www.chaosgenius.io/"><img src="https://img.shields.io/badge/-website-blueviolet?style=flat-square" alt="Website link badge"></a>
+<a href="https://docs.chaosgenius.io"><img src="https://img.shields.io/badge/-documentation-informational" alt="Documentation link badge"></a>
+<a href="https://www.chaosgenius.io/"><img src="https://img.shields.io/badge/-website-blueviolet" alt="Website link badge"></a>
+<a href=""><img src="https://img.shields.io/badge/-slack-9cf" alt="Slack link badge"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img src="https://img.shields.io/badge/all_contributors-24-orange.svg?style=flat-square" alt="All Contributors"></a>
+<a href="#contributors-"><img src="https://img.shields.io/badge/all_contributors-24-orange.svg" alt="All Contributors"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 </p>
 
 <p align="center">
 <a href="https://github.com/chaos-genius/chaos_genius/actions/workflows/python-test.yml"><img src="https://github.com/chaos-genius/chaos_genius/actions/workflows/python-test.yml/badge.svg" alt="Test status"></a>
+<a href="https://github.com/chaos-genius/chaos_genius/tree/develop"><img src="https://img.shields.io/github/last-commit/chaos-genius/chaos_genius/develop" alt="Last commit"></a>
 <a href="https://github.com/chaos-genius/chaos_genius/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/chaos-genius/chaos_genius" alt="License"></a>
 <a href="https://github.com/chaos-genius/chaos_genius/releases"><img src="https://img.shields.io/github/v/release/chaos-genius/chaos_genius" alt="Latest release"></a>
 <a href="https://github.com/chaos-genius/chaos_genius"><img src="https://img.shields.io/github/stars/chaos-genius/chaos_genius" alt="Give us a star!"></a>

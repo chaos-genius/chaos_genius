@@ -63,13 +63,13 @@ Follow this [Quick Start guide](https://docs.chaosgenius.io/docs/Quick_Start/pre
 
 ## :dizzy: Key Features
 
-### Automated DeepDrills
-Using Chaos Genius, users can identify the key drivers of change in their defined metrics (e.g. Sales) across a large number of high cardinality dimensions (e.g. CountryID, ProductID, BrandID, Device_type).
+### :small_orange_diamond: Automated DeepDrills
+Identify the key drivers of change in defined metrics (e.g. Sales) across a large number of high cardinality dimensions (e.g. CountryID, ProductID, BrandID, Device_type).
 - Techniques: Statistical Filtering, A* like path based search to deal with combinatorial explosion
 
 <!-- TODO: add an image or illustration here -->
 
-### Anomaly Detection
+### :small_orange_diamond: Anomaly Detection
 
 Modular anomaly detection toolkit for monitoring high-dimensional time series with ability to select from different models. Tackle variations caused by seasonality, trends and holidays in the time series data.
 - Models: Prophet, EWMA, EWSTD, Neural Prophet, ARIMA (coming soon)
@@ -77,8 +77,10 @@ Modular anomaly detection toolkit for monitoring high-dimensional time series wi
 <!-- TODO: add an image or illustration here -->
 
 
-### Smart Alerts
+### :small_orange_diamond: Smart Alerts
 
+Actionable alerts with self-learning thresholds. Configurations to setup alert frequency & reporting to combat alert fatigue. 
+- Channels: Email, Slack, Webhooks (coming soon)
 <!-- TODO: add an image or illustration here -->
     
 ## :octocat: Community

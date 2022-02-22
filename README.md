@@ -26,16 +26,44 @@
 
 Chaos Genius is an open source analytics engine to help humans detect & diagnose the root-cause of outliers and change in high-dimensional business & system metrics.
 
-Using Chaos Genius, users can segment large datasets by key performance metrics (e.g. Daily Active Users, Cloud Costs, Failure Rates) and setup drill-downs for explanations of change or anomalies across important dimensions (e.g., countryID, DeviceID, ProductID, DayofWeek).
+Using Chaos Genius, users can segment large datasets by key performance metrics (e.g. Daily Active Users, Cloud Costs, Failure Rates) and setup drill-downs for explanations of deviation or anomalies across important dimensions (e.g., countryID, DeviceID, ProductID, DayofWeek).
 
-Chaos Genius comes with a UI that offers simple point-and-click functionality for various tasks like adding data sources, defining the key performance metrics with dimensions and setting up alerts for anamalour behavior and deviations. 
+Chaos Genius comes with a UI that offers simple point-and-click functionality for various tasks like adding data sources, defining the key performance metrics with dimensions and setting up alerts for anamalous behavior and deviations. 
 
-The key use-cases for Chaos Genius include **business & data quality metrics monitoring & alerting**.
+The key use-cases for Chaos Genius include **Business & Data Metrics Monitoring & Alerting**.
 
-Find detailed [Documentation](https://docs.chaosgenius.io/docs/introduction) here!
+For more, check out our Demo.
 
 ![A small demo of Chaos Genius](https://chaosgenius-public.s3.amazonaws.com/test-cg-1-small.gif)
 
+
+<!-- ## Architecture
+
+![image](/img/cg-high-level-arch.png) -->
+
+## ⚙️ Quick Start
+
+```
+git clone https://github.com/chaos-genius/chaos_genius
+
+cd chaos_genius
+
+docker-compose up
+```
+
+Visit [http://localhost:8080](http://localhost:8080/)
+
+Follow this [quick start guide](https://docs.chaosgenius.io/docs/Quick_Start/prereqs) for more details including how to connect a data source, define your first KPI and configure anomaly detection.
+
+<!-- ### Deploy locally
+
+[Setup Chaos Genius on your local system](https://docs.chaosgenius.io/docs/Setup/local-setup)
+
+### Deploy on cloud
+
+[Setup Chaos Genius on AWS EC2](https://docs.chaosgenius.io/docs/Setup/aws-setup)
+
+[Setup Chaos Genius on GCP](https://docs.chaosgenius.io/docs/Setup/gcp-setup) -->
 
 ## 🧰 Key Features
 
@@ -57,33 +85,7 @@ Find detailed [Documentation](https://docs.chaosgenius.io/docs/introduction) her
 
 [See more on our website. ](https://chaosgenius.io/)
 
-<!-- ## Architecture
 
-![image](/img/cg-high-level-arch.png) -->
-
-## ⚙️ Quick Start
-
-```
-git clone https://github.com/chaos-genius/chaos_genius
-
-cd chaos_genius
-
-docker-compose up
-```
-
-Visit [http://localhost:8080](http://localhost:8080/)
-
-Follow this [quick start guide](https://docs.chaosgenius.io/docs/Quick_Start/prereqs) for more details including how to connect a data source, define your first KPI and configure anomaly detection.
-
-### Deploy locally
-
-[Setup Chaos Genius on your local system](https://docs.chaosgenius.io/docs/Setup/local-setup)
-
-### Deploy on cloud
-
-[Setup Chaos Genius on AWS EC2](https://docs.chaosgenius.io/docs/Setup/aws-setup)
-
-[Setup Chaos Genius on GCP](https://docs.chaosgenius.io/docs/Setup/gcp-setup)
 
 ## :seedling: Community
 

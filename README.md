@@ -116,7 +116,7 @@ For any help, discussions and suggestions feel free to reach out to the Chaos Ge
 
 ## 🚦 Roadmap
 
-Our goal is to make Chaos Genius production ready for all organisations irrespective of their data infrasturcture, data sources and scale requirements. With that in mind we have created a [roadmap](https://docs.chaosgenius.io/docs/Roadmap/Roadmap) for Chaos Genius. If you see something missing or wish to make suggestions, please drop us a line on our community Slack or raise an issue.
+Our goal is to make Chaos Genius production ready for all organisations irrespective of their data infrasturcture, data sources and scale requirements. With that in mind we have created a [roadmap](https://docs.chaosgenius.io/docs/roadmap/) for Chaos Genius. If you see something missing or wish to make suggestions, please drop us a line on our community Slack or raise an issue.
 
 
 

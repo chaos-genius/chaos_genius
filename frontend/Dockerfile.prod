@@ -10,7 +10,7 @@ COPY . ./
 RUN npm run build
 
 # production environment
-FROM nginx:1.21.3-alpine
+FROM nginx:1.21.5-alpine
 RUN apk update && apk upgrade && apk add --update npm
 COPY --from=chaosgenius-webapp-build /app/build /usr/share/nginx/html
 COPY nginx/nginx-default.conf /etc/nginx/conf.d/default.conf

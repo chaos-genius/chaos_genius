@@ -20,7 +20,7 @@
 
 </p>
 
-<h3 align="center">An open-source business observability platform</h3>
+<h3 align="center">Open source analytics engine to detect & diagnose the root-cause of outliers in <br/> high-dimensional business & system metrics</h3>
 
 ## What can Chaos Genius do?
 

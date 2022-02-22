@@ -5,24 +5,24 @@
     <a href="https://docs.chaosgenius.io"><b>Docs</b></a> •
     <a href="https://www.chaosgenius.io/blog/"><b>Blog</b></a> •
     <a href="https://www.linkedin.com/company/chaosgenius/"><b>LinkedIn</b></a> •
-    <a href=""><b>Community Slack</b></a>
+    <a href="https://join.slack.com/t/chaosgenius/shared_invite/zt-140042uac-rrm~xbx9o_aydi6PTmp_Mg"><b>Community Slack</b></a>
 </p>
 
 <p align="center">
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 <a href="#contributors-"><img src="https://img.shields.io/badge/all_contributors-24-orange.svg" alt="All Contributors"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
-<a href="https://github.com/chaos-genius/chaos_genius/actions/workflows/python-test.yml"><img src="https://github.com/chaos-genius/chaos_genius/actions/workflows/python-test.yml/badge.svg" alt="Test status"></a>
-<a href="https://github.com/chaos-genius/chaos_genius/tree/develop"><img src="https://img.shields.io/github/last-commit/chaos-genius/chaos_genius/develop" alt="Last commit"></a>
 <a href="https://github.com/chaos-genius/chaos_genius/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/chaos-genius/chaos_genius" alt="License"></a>
 <a href="https://github.com/chaos-genius/chaos_genius/releases"><img src="https://img.shields.io/github/v/release/chaos-genius/chaos_genius" alt="Latest release"></a>
+<a href="https://github.com/chaos-genius/chaos_genius/actions/workflows/python-test.yml"><img src="https://github.com/chaos-genius/chaos_genius/actions/workflows/python-test.yml/badge.svg" alt="Test status"></a>
 <a href="https://github.com/chaos-genius/chaos_genius"><img src="https://img.shields.io/github/stars/chaos-genius/chaos_genius" alt="Give us a star!"></a>
+<a href="https://github.com/chaos-genius/chaos_genius/tree/develop"><img src="https://img.shields.io/github/last-commit/chaos-genius/chaos_genius/develop" alt="Last commit"></a>
 
 </p>
 
 <h3 align="center">Open source analytics engine to detect & diagnose the root-cause of outliers in <br/> high-dimensional business & system metrics</h3>
 
-## 🔮 What is Chaos Genius?
+## ✨ What is Chaos Genius?
 
 Chaos Genius is an open source analytics engine to help humans detect & diagnose the root-cause of outliers and change in high-dimensional business & system metrics.
 

@@ -55,15 +55,11 @@ Visit [http://localhost:8080](http://localhost:8080/)
 
 Follow this [quick start guide](https://docs.chaosgenius.io/docs/Quick_Start/prereqs) for more details including how to connect a data source, define your first KPI and configure anomaly detection.
 
-<!-- ### Deploy locally
-
-[Setup Chaos Genius on your local system](https://docs.chaosgenius.io/docs/Setup/local-setup)
-
-### Deploy on cloud
-
-[Setup Chaos Genius on AWS EC2](https://docs.chaosgenius.io/docs/Setup/aws-setup)
-
-[Setup Chaos Genius on GCP](https://docs.chaosgenius.io/docs/Setup/gcp-setup) -->
+<p align="center">
+<a href="https://docs.chaosgenius.io/docs/setup/local-setup/"><img src=".github/images/local_button_noborder.png" width="150px" /><a/>
+<a href="https://docs.chaosgenius.io/docs/setup/aws-setup/"><img src=".github/images/aws_button_noborder.png" width="150px" /><a/>
+<a href="https://docs.chaosgenius.io/docs/setup/gcp-setup/"><img src=".github/images/gcp_button_noborder.png" width="150px" /><a/>
+</p>
 
 ## 🧰 Key Features
 

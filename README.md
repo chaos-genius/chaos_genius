@@ -30,7 +30,7 @@ Chaos Genius is an open source analytics engine to help humans detect & diagnose
 
 Using Chaos Genius, users can segment large datasets by key performance metrics (e.g. Daily Active Users, Cloud Costs, Failure Rates) and setup drill-downs for explanation of deviation or anomalies across important dimensions (e.g., countryID, DeviceID, ProductID, DayofWeek).
 
-The key use-cases for Chaos Genius include **monitoring & alerting for various business and data quality metrics**.
+The key use-cases for Chaos Genius include **monitoring & alerting for various business, system and data quality metrics**.
 
 [See more on our website. ](https://chaosgenius.io/)
 

@@ -77,6 +77,9 @@ Identify the key drivers of change in defined metrics (e.g. Sales) across a larg
 
 Modular anomaly detection toolkit for monitoring high-dimensional time series with ability to select from different models. Tackle variations caused by seasonality, trends and holidays in the time series data.
 - Models: Prophet, EWMA, EWSTD, Neural Prophet, ARIMA (coming soon)
+    
+![Anomaly](https://raw.githubusercontent.com/chaos-genius/.github/main/images/AnomalyDrillDowns.png)
+
 
 <!-- TODO: add an image or illustration here -->
 

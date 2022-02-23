@@ -24,12 +24,6 @@
 
 <br/>
 
-<p align="center">
-<a href="https://docs.chaosgenius.io/docs/setup/local-setup/"><img src=".github/images/local_button_noborder.png" width="120px" /><a/>
-<a href="https://docs.chaosgenius.io/docs/setup/aws-setup/"><img src=".github/images/aws_button_noborder.png" width="120px" /><a/>
-<a href="https://docs.chaosgenius.io/docs/setup/gcp-setup/"><img src=".github/images/gcp_button_noborder.png" width="120px" /><a/>
-</p>
-
 ## ✨ What is Chaos Genius?
 
 Chaos Genius is an open source analytics engine to help humans detect & diagnose the root-cause of outliers and change in high-dimensional datasets.
@@ -51,6 +45,10 @@ Chaos Genius comes with a UI that offers simple point-and-click functionality fo
 ![image](/img/cg-high-level-arch.png) -->
 
 ## ⚙️ Quick Start
+
+<a href="https://docs.chaosgenius.io/docs/setup/local-setup/"><img src=".github/images/local_button_noborder.png" width="120px" /><a/>
+<a href="https://docs.chaosgenius.io/docs/setup/aws-setup/"><img src=".github/images/aws_button_noborder.png" width="120px" /><a/>
+<a href="https://docs.chaosgenius.io/docs/setup/gcp-setup/"><img src=".github/images/gcp_button_noborder.png" width="120px" /><a/>
 
 ```
 git clone https://github.com/chaos-genius/chaos_genius

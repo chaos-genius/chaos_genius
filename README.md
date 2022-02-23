@@ -31,7 +31,7 @@ Chaos Genius is an open source analytics engine for applying AI/ML algorithms to
 
 Using Chaos Genius, users can segment large datasets by key performance metrics (e.g. Daily Active Users, Cloud Costs, Failure Rates) and important dimensions (e.g., countryID, DeviceID, ProductID, DayofWeek) across which they want to monitor and analyse the key metrics.
 
-Chaos Genius comes with a UI that offers simple point-and-click functionality for various tasks like adding data sources, defining the key performance metrics with dimensions and setting up analytics. 
+Chaos Genius comes with a UI that offers simple point-and-click functionality for various tasks like adding data sources, defining the key performance metrics with dimensions and setting up advaned analytics. 
 
 ### Use Chaos Genius if you want: 
 - Multidimensional Drill Downs & Insights

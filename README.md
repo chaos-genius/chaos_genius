@@ -33,7 +33,7 @@ Using Chaos Genius, users can segment large datasets by key performance metrics 
 
 Chaos Genius comes with a UI that offers simple point-and-click functionality for various tasks like adding data sources, defining the key performance metrics with dimensions and setting up analytics. 
 
-### Key Use-Cases 
+### Use Chaos Genius if you want: 
 - Multidimensional Drill Downs & Insights
 - Anomaly Detection
 - Smart Alerting

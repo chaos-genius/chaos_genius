@@ -22,20 +22,23 @@
 
 <h3 align="center">Open source analytics engine to detect & diagnose the root-cause of outliers in <br/> high-dimensional business & system metrics</h3>
 
+<br/>
+
 ## ✨ What is Chaos Genius?
 
-Chaos Genius is an open source analytics engine to help humans detect & diagnose the root-cause of outliers and change in high-dimensional business & system metrics.
+Chaos Genius is an open source analytics engine to help humans detect & diagnose the root-cause of outliers and change in high-dimensional datasets.
 
-Using Chaos Genius, users can segment large datasets by key performance metrics (e.g. Daily Active Users, Cloud Costs, Failure Rates) and setup drill-downs for explanations of deviation or anomalies across important dimensions (e.g., countryID, DeviceID, ProductID, DayofWeek).
+Using Chaos Genius, users can segment large datasets by key performance metrics (e.g. Daily Active Users, Cloud Costs, Failure Rates) and setup drill-downs for explanation of deviation or anomalies across important dimensions (e.g., countryID, DeviceID, ProductID, DayofWeek).
 
+The key use-cases for Chaos Genius include **monitoring & alerting for various business, system and data quality metrics**.
+    
 Chaos Genius comes with a UI that offers simple point-and-click functionality for various tasks like adding data sources, defining the key performance metrics with dimensions and setting up alerts for anamalous behavior and deviations. 
 
-The key use-cases for Chaos Genius include **Business & Data Metrics Monitoring & Alerting**.
+[See more on our website. ](https://chaosgenius.io/)
 
-For more, check out our Demo.
+<!--For more, check out our Demo.-->
 
-![A small demo of Chaos Genius](https://chaosgenius-public.s3.amazonaws.com/test-cg-1-small.gif)
-
+<!--![A small demo of Chaos Genius](https://chaosgenius-public.s3.amazonaws.com/test-cg-1-small.gif)-->
 
 <!-- ## Architecture
 
@@ -57,37 +60,40 @@ docker-compose up
 
 Visit [http://localhost:8080](http://localhost:8080/)
 
-Follow this [quick start guide](https://docs.chaosgenius.io/docs/Quick_Start/prereqs) for more details including how to connect a data source, define your first KPI and configure anomaly detection.
+Follow this [Quick Start guide](https://docs.chaosgenius.io/docs/Quick_Start/prereqs) or read our [Documentation](https://docs.chaosgenius.io/docs/introduction) for more details.
 
-## 🧰 Key Features
+## :dizzy: Key Features
 
-**DeepDrills** - Multidimensional drill-downs & waterfall analysis to identify the top drivers of change in a KPI across multiple dimensions.
+### :small_orange_diamond: Automated DeepDrills
 
-<!-- TODO: add an image or illustration here -->
+Identify the key drivers of change in defined metrics (e.g. Sales) across a large number of high cardinality dimensions (e.g. CountryID, ProductID, BrandID, Device_type).
+- Techniques: Statistical Filtering, A* like path based search to deal with combinatorial explosion
 
-**Anomaly Detection** - Modular anomaly detection toolkit for monitoring high-dimensional time series with ability to select from different models. Anomaly investigation across multiple dimensions and data quality metrics like volume, max, mean and missing data.
-
-<!-- TODO: add an image or illustration here -->
-
-**Smart Alerts** - No more alert fatigue from static alerts. Self-learning thresholds to reduce false positives. Configurations to setup alert frequency & severity. Choose from multiple destinations like Slack, Email and other channels for your team.
+![DD](https://raw.githubusercontent.com/chaos-genius/.github/main/images/DeepDrills.png)
 
 <!-- TODO: add an image or illustration here -->
 
-**Integrations** - Modular architecture to enable multiple data sources including databases, data warehouses and multiple third party connectors like Stripe, Shopify, Zendesk, Google Analytics, and many others.
+### :small_orange_diamond: Anomaly Detection
+
+Modular anomaly detection toolkit for monitoring high-dimensional time series with ability to select from different models. Tackle variations caused by seasonality, trends and holidays in the time series data.
+- Models: Prophet, EWMA, EWSTD, Neural Prophet, ARIMA (coming soon)
 
 <!-- TODO: add an image or illustration here -->
 
-[See more on our website. ](https://chaosgenius.io/)
 
+### :small_orange_diamond: Smart Alerts
 
-
-## :seedling: Community
+Actionable alerts with self-learning thresholds. Configurations to setup alert frequency & reporting to combat alert fatigue. 
+- Channels: Email, Slack, Webhooks (coming soon)
+<!-- TODO: add an image or illustration here -->
+    
+## :octocat: Community
 
 For any help, discussions and suggestions feel free to reach out to the Chaos Genius team and the community here:
 
 -   [GitHub](https://github.com/chaos-genius/.github) (report bugs, contribute, follow roadmap)
 
--   Slack (discuss with the community and Chaos Genius team)
+-   [Slack](https://join.slack.com/t/chaosgenius/shared_invite/zt-140042uac-rrm~xbx9o_aydi6PTmp_Mg) (discuss with the community and Chaos Genius team)
 
 -   [Book Office Hours](https://calendly.com/chaosgenius/30min) (set up time with the Chaos Genius team for any questions or help with setup)
 
@@ -96,29 +102,27 @@ For any help, discussions and suggestions feel free to reach out to the Chaos Ge
 
 ## 🚦 Roadmap
 
-Our goal is to make Chaos Genius production ready for all organisations irrespective of their data infrasturcture, data sources and scale requirements. With that in mind we have created a [roadmap](https://docs.chaosgenius.io/docs/roadmap/) for Chaos Genius. If you see something missing or wish to make suggestions, please drop us a line on our community Slack or raise an issue.
+Our goal is to make Chaos Genius production ready for all organisations irrespective of their data infrasturcture, data sources and scale requirements. With that in mind we have created a [roadmap](https://docs.chaosgenius.io/docs/roadmap/) for Chaos Genius. If you see something missing or wish to make suggestions, please drop us a line on our [Community Slack](https://join.slack.com/t/chaosgenius/shared_invite/zt-140042uac-rrm~xbx9o_aydi6PTmp_Mg) or raise an issue.
 
 
 
-## 🐛 Contributing 
+## :seedling: Contributing 
 
-Want to contribute? Visit our Github repo and get started with:
+Want to contribute? Get started with:
 
--   Try Chaos Genius and share your feedback.
-
+-   Show us some love - Give us a :star2:!
+    
 -   Submit an issue.
 
 -   Share a part of the documentation that you find difficult to follow.
 
 -   [Translate our Readme](https://github.com/chaos-genius/chaos_genius/blob/main/README.md).
 
--   Show us some love - Give us a star!
+-   Create a pull request. Here's a [list of issues](https://github.com/chaos-genius/chaos_genius/issues) to start with. Please review our [contribution guidelines](https://github.com/chaos-genius/chaos_genius/blob/main/CONTRIBUTING.md) before opening a pull request. Thank you for contributing!
 
--   Create a pull request. Here's a [list of issues](https://github.com/chaos-genius/chaos_genius/issues) to start with.
 
-Please review our [contribution guidelines](https://github.com/chaos-genius/chaos_genius/blob/main/CONTRIBUTING.md) before opening a pull request. Thank you for contributing!
 
-## Contributors ✨
+## :heart: Contributors 
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
@@ -169,4 +173,4 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 
 ## 📜 License
 
-Chaos Genius is licensed under the MIT license.
+Chaos Genius is licensed under the [MIT license](https://github.com/chaos-genius/chaos_genius/blob/main/LICENSE.md).

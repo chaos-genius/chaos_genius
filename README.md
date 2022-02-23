@@ -20,19 +20,31 @@
 
 </p>
 
-<h3 align="center">Open source analytics engine to detect & diagnose the root-cause of outliers in <br/> high-dimensional business & system metrics</h3>
+<h3 align="center">Open-source analytics engine for applying AI/ML algorithms to monitor and analyse <br/> high-dimensionality business & system metrics.  </h3>
 
 <br/>
 
 ## ✨ What is Chaos Genius?
 
-Chaos Genius is an open source analytics engine to help humans detect & diagnose the root-cause of outliers and change in high-dimensional datasets.
 
-Using Chaos Genius, users can segment large datasets by key performance metrics (e.g. Daily Active Users, Cloud Costs, Failure Rates) and setup drill-downs for explanation of deviation or anomalies across important dimensions (e.g., countryID, DeviceID, ProductID, DayofWeek).
+Chaos Genius is an open source analytics engine for applying AI/ML algorithms to monitor and analyse high-dimensionality business & system metrics at scale. 
 
-The key use-cases for Chaos Genius include **monitoring & alerting for various business, system and data quality metrics**.
-    
-Chaos Genius comes with a UI that offers simple point-and-click functionality for various tasks like adding data sources, defining the key performance metrics with dimensions and setting up alerts for anamalous behavior and deviations. 
+Using Chaos Genius, users can segment large datasets by key performance metrics (e.g. Daily Active Users, Cloud Costs, Failure Rates) and important dimensions (e.g., countryID, DeviceID, ProductID, DayofWeek) across which they want to monitor and analyse the key metrics.
+
+Chaos Genius comes with a UI that offers simple point-and-click functionality for various tasks like adding data sources, defining the key performance metrics with dimensions and setting up analytics. 
+
+The key use-cases for Chaos Genius include: 
+- Multidimensional Drill Downs & Insights
+- Anomaly Detection
+- Smart Alerting
+- Seasonality Detection*
+- Automated Root Cause Analysis*
+- Forecasting*
+- What-If Analysis*
+
+**in Short and Medium-term Roadmap*
+
+
 
 [See more on our website. ](https://chaosgenius.io/)
 
@@ -64,9 +76,9 @@ Follow this [Quick Start guide](https://docs.chaosgenius.io/docs/Quick_Start/pre
 
 ## :dizzy: Key Features
 
-### 1. Automated DeepDrills
+### 1. Automated DeepDrills 
 
-Identify the key drivers of change in defined metrics (e.g. Sales) across a large number of high cardinality dimensions (e.g. CountryID, ProductID, BrandID, Device_type).
+Generate multidimensional drilldowns to identify the key drivers of change in defined metrics (e.g. Sales) across a large number of high cardinality dimensions (e.g. CountryID, ProductID, BrandID, Device_type).
 - Techniques: Statistical Filtering, A* like path based search to deal with combinatorial explosion
 
 ![DD](https://raw.githubusercontent.com/chaos-genius/.github/main/images/DeepDrills.png)

@@ -1,36 +1,44 @@
+import datetime
+import io
 import logging
 import os
-import io
-from typing import Optional, List, Tuple, Union
-import pandas as pd
 import time
-import datetime
-from datetime import date
 from copy import deepcopy
-from chaos_genius.utils.io_helper import is_file_exists
-from chaos_genius.core.utils.round import round_number
-from chaos_genius.databases.models.data_source_model import DataSource
-from chaos_genius.databases.models.alert_model import Alert
-from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
-from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
-from chaos_genius.databases.models.kpi_model import Kpi
+from datetime import date
+from typing import List, Optional, Tuple, Union
+
+import pandas as pd
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+from tabulate import tabulate
+
+from chaos_genius.alerts.anomaly_alert_config import (
+    ANOMALY_ALERT_COLUMN_NAMES,
+    ANOMALY_TABLE_COLUMN_NAMES_MAPPER,
+    ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS,
+    IGNORE_COLUMNS_ANOMALY_TABLE,
+)
+from chaos_genius.alerts.constants import ALERT_DATE_FORMAT
+from chaos_genius.alerts.email import send_static_alert_email
+from chaos_genius.alerts.slack import anomaly_alert_slack, event_alert_slack
+from chaos_genius.alerts.utils import (
+    count_anomalies,
+    save_anomaly_point_formatting,
+    top_anomalies,
+    webapp_url_prefix,
+)
 
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.connectors import get_sqla_db_conn
-from chaos_genius.alerts.email import send_static_alert_email
-from chaos_genius.alerts.slack import anomaly_alert_slack, event_alert_slack
-from chaos_genius.alerts.utils import count_anomalies, top_anomalies
-from chaos_genius.alerts.anomaly_alert_config import (
-    ANOMALY_TABLE_COLUMN_NAMES_MAPPER,
-    IGNORE_COLUMNS_ANOMALY_TABLE,
-    ANOMALY_ALERT_COLUMN_NAMES,
-    ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS
+from chaos_genius.core.rca.rca_utils.string_helpers import (
+    convert_query_string_to_user_string,
 )
-from chaos_genius.alerts.constants import ALERT_DATE_FORMAT
-from chaos_genius.alerts.utils import count_anomalies, save_anomaly_point_formatting, top_anomalies, webapp_url_prefix
-from chaos_genius.core.rca.rca_utils.string_helpers import convert_query_string_to_user_string
-from jinja2 import Environment, FileSystemLoader, select_autoescape
-from tabulate import tabulate
+from chaos_genius.core.utils.round import round_number
+from chaos_genius.databases.models.alert_model import Alert
+from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
+from chaos_genius.databases.models.data_source_model import DataSource
+from chaos_genius.databases.models.kpi_model import Kpi
+from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
+from chaos_genius.utils.io_helper import is_file_exists
 
 logger = logging.getLogger()
 
@@ -144,23 +152,22 @@ class StaticEventAlertController:
 
         if alert_data is None:
             return outcome
-        
+
         alert_metadata = {
-                            "alert_frequency": self.alert_info["alert_frequency"],
-                            "alert_data": alert_data,
-                        }    
+            "alert_frequency": self.alert_info["alert_frequency"],
+            "alert_data": alert_data,
+        }
 
         triggered_alert = TriggeredAlerts(
-                            alert_conf_id=self.alert_info["id"],
-                            alert_type="Event Alert",
-                            is_sent=outcome,
-                            created_at=datetime.datetime.now(),
-                            alert_metadata=alert_metadata       
-                        )
+            alert_conf_id=self.alert_info["id"],
+            alert_type="Event Alert",
+            is_sent=outcome,
+            created_at=datetime.datetime.now(),
+            alert_metadata=alert_metadata,
+        )
 
         triggered_alert.update(commit=True)
         return outcome
-
 
     @staticmethod
     def test_new_entry(new_df, old_df):
@@ -333,9 +340,7 @@ class StaticEventAlertController:
             )
 
         message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
-        logger.info(
-            message
-        )
+        logger.info(message)
 
         test = test == "ok"
         alert_data = list(change_df.T.astype(str).to_dict().values())
@@ -365,7 +370,7 @@ class StaticEventAlertController:
             alert_name=self.alert_info["alert_name"],
             alert_frequency=self.alert_info["alert_frequency"],
             alert_message=self.alert_info["alert_message"],
-            alert_overview=''
+            alert_overview="",
         )
 
         if test == "ok":
@@ -378,12 +383,11 @@ class StaticEventAlertController:
             )
 
         message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
-        logger.info(
-            message
-        )
+        logger.info(message)
 
         test = test == "ok"
         return test, []
+
 
 class AnomalyAlertController:
     def __init__(self, alert_info, anomaly_end_date=None):
@@ -423,12 +427,12 @@ class AnomalyAlertController:
 
         # TODO: Add the series type filter for query optimisation
         anomaly_data = AnomalyDataOutput.query.filter(
-                                            AnomalyDataOutput.kpi_id == kpi_id,
-                                            AnomalyDataOutput.anomaly_type.in_(["overall", "subdim"]),
-                                            AnomalyDataOutput.is_anomaly.in_([1,-1]),
-                                            AnomalyDataOutput.data_datetime >= self.anomaly_end_date,
-                                            AnomalyDataOutput.severity >= self.alert_info["severity_cutoff_score"]
-                                        ).all()
+            AnomalyDataOutput.kpi_id == kpi_id,
+            AnomalyDataOutput.anomaly_type.in_(["overall", "subdim"]),
+            AnomalyDataOutput.is_anomaly.in_([1, -1]),
+            AnomalyDataOutput.data_datetime >= self.anomaly_end_date,
+            AnomalyDataOutput.severity >= self.alert_info["severity_cutoff_score"],
+        ).all()
 
         if len(anomaly_data) == 0:
             logger.info(f"No anomaly exists (Alert ID - {alert_id})")
@@ -439,48 +443,67 @@ class AnomalyAlertController:
         if self.alert_info["alert_channel"] == "email":
             outcome, alert_data = self.send_alert_email(anomaly_data)
         elif self.alert_info["alert_channel"] == "slack":
-            outcome, alert_data =  self.send_slack_alert(anomaly_data)
-        
+            outcome, alert_data = self.send_slack_alert(anomaly_data)
+
         if alert_data is None:
             return outcome
-        
+
         alert_metadata = {
-                            "alert_frequency": self.alert_info["alert_frequency"],
-                            "alert_data": alert_data,
-                            "end_date": str(self.anomaly_end_date),
-                            "severity_cutoff_score": self.alert_info["severity_cutoff_score"],
-                            "kpi": self.alert_info["kpi"]
-                        }    
+            "alert_frequency": self.alert_info["alert_frequency"],
+            "alert_data": alert_data,
+            "end_date": str(self.anomaly_end_date),
+            "severity_cutoff_score": self.alert_info["severity_cutoff_score"],
+            "kpi": self.alert_info["kpi"],
+        }
 
         triggered_alert = TriggeredAlerts(
-                            alert_conf_id=self.alert_info["id"],
-                            alert_type="KPI Alert",
-                            is_sent=outcome,
-                            created_at=datetime.datetime.now(),
-                            alert_metadata=alert_metadata       
-                        )
+            alert_conf_id=self.alert_info["id"],
+            alert_type="KPI Alert",
+            is_sent=outcome,
+            created_at=datetime.datetime.now(),
+            alert_metadata=alert_metadata,
+        )
 
         triggered_alert.update(commit=True)
-        logger.info(
-                f"The triggered alert data was successfully stored"
-            )
+        logger.info(f"The triggered alert data was successfully stored")
         return outcome
 
     def get_overall_subdim_data(self, anomaly_data):
 
         anomaly_data = [anomaly_point.as_dict for anomaly_point in anomaly_data]
-        anomaly_data = [{key: value for key, value in anomaly_point.items() if key not in IGNORE_COLUMNS_ANOMALY_TABLE} for anomaly_point in anomaly_data]
+        anomaly_data = [
+            {
+                key: value
+                for key, value in anomaly_point.items()
+                if key not in IGNORE_COLUMNS_ANOMALY_TABLE
+            }
+            for anomaly_point in anomaly_data
+        ]
 
         for anomaly_point in anomaly_data:
-            anomaly_point["series_type"] = "Overall KPI" if anomaly_point.get("anomaly_type") == "overall" else anomaly_point["series_type"]
+            anomaly_point["series_type"] = (
+                "Overall KPI"
+                if anomaly_point.get("anomaly_type") == "overall"
+                else anomaly_point["series_type"]
+            )
             for key, value in anomaly_point.items():
                 if key in ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS:
                     anomaly_point[key] = round(value, 2)
             if anomaly_point["series_type"] != "Overall KPI":
-                anomaly_point["series_type"] = convert_query_string_to_user_string(anomaly_point["series_type"])
+                anomaly_point["series_type"] = convert_query_string_to_user_string(
+                    anomaly_point["series_type"]
+                )
 
-        overall_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "overall"]
-        subdim_data = [anomaly_point for anomaly_point in anomaly_data if anomaly_point.get("anomaly_type") == "subdim"]
+        overall_data = [
+            anomaly_point
+            for anomaly_point in anomaly_data
+            if anomaly_point.get("anomaly_type") == "overall"
+        ]
+        subdim_data = [
+            anomaly_point
+            for anomaly_point in anomaly_data
+            if anomaly_point.get("anomaly_type") == "subdim"
+        ]
         overall_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
         subdim_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
 
@@ -501,13 +524,16 @@ class AnomalyAlertController:
 
         # TODO: fix circular import
         from chaos_genius.controllers.digest_controller import get_previous_data
+
         prev_day_data = get_previous_data(kpi.id, self.anomaly_end_date, time_diff)
 
         prev_day_data = [anomaly_point.as_dict for anomaly_point in prev_day_data]
 
         for point in prev_day_data:
             if point.get("anomaly_type") != "overall":
-                point["series_type"] = convert_query_string_to_user_string(point["series_type"])
+                point["series_type"] = convert_query_string_to_user_string(
+                    point["series_type"]
+                )
             else:
                 point["series_type"] = "Overall KPI"
 
@@ -524,9 +550,13 @@ class AnomalyAlertController:
                 # previous point was 0
                 point["percentage_change"] = "–"
             else:
-                point["percentage_change"] = find_percentage_change(point["y"], intended_point["y"])
+                point["percentage_change"] = find_percentage_change(
+                    point["y"], intended_point["y"]
+                )
 
-            point["nl_message"] = change_message_from_percent(point["percentage_change"])
+            point["nl_message"] = change_message_from_percent(
+                point["percentage_change"]
+            )
 
     def _save_nl_message_hourly_freq(self, anomaly_data: List[dict], kpi: Kpi):
         """Saves change message for every point, for a hourly frequency KPI."""
@@ -535,15 +565,18 @@ class AnomalyAlertController:
 
         # TODO: fix circular import
         from chaos_genius.controllers.digest_controller import get_previous_data
+
         prev_day_data = get_previous_data(kpi.id, self.anomaly_end_date, time_diff)
         prev_day_data = [anomaly_point.as_dict for anomaly_point in prev_day_data]
 
         for point in prev_day_data:
             if point.get("anomaly_type") != "overall":
-                point["series_type"] = convert_query_string_to_user_string(point["series_type"])
+                point["series_type"] = convert_query_string_to_user_string(
+                    point["series_type"]
+                )
             else:
                 point["series_type"] = "Overall KPI"
-        
+
         for point in prev_day_data:
             if point["data_datetime"].hour not in data.keys():
                 data[point["data_datetime"].hour] = []
@@ -562,9 +595,13 @@ class AnomalyAlertController:
                 # previous point was 0
                 point["percentage_change"] = "–"
             else:
-                point["percentage_change"] = find_percentage_change(point["y"], intended_point["y"])
+                point["percentage_change"] = find_percentage_change(
+                    point["y"], intended_point["y"]
+                )
 
-            point["nl_message"] = change_message_from_percent(point["percentage_change"])
+            point["nl_message"] = change_message_from_percent(
+                point["percentage_change"]
+            )
 
     def save_nl_message(self, anomaly_data: List[dict]):
         """Constructs and saves change message for every point."""
@@ -605,14 +642,18 @@ class AnomalyAlertController:
             for key, value in ANOMALY_TABLE_COLUMN_NAMES_MAPPER.items():
                 anomaly_point[value] = anomaly_point[key]
 
-            my_time = time.strptime(str(anomaly_point["Time of Occurrence"]),  "%Y-%m-%d %H:%M:%S")
+            my_time = time.strptime(
+                str(anomaly_point["Time of Occurrence"]), "%Y-%m-%d %H:%M:%S"
+            )
             timestamp = time.mktime(my_time)
             date_time = datetime.datetime.fromtimestamp(timestamp)
             new_time = date_time.strftime("%b %d %Y %H:%M:%S")
             anomaly_point["Time of Occurrence"] = new_time
             anomaly_point["data_datetime"] = str(anomaly_point["data_datetime"])
 
-    def _remove_attributes_from_anomaly_points(self, anomaly_data: List[dict], list_attributes: List[str]):
+    def _remove_attributes_from_anomaly_points(
+        self, anomaly_data: List[dict], list_attributes: List[str]
+    ):
         for attr in list_attributes:
             for point in anomaly_data:
                 delattr(point, attr)
@@ -640,13 +681,17 @@ class AnomalyAlertController:
                 logger.error(f"No KPI exists for Alert ID - {self.alert_info['id']}")
                 return False
 
-            kpi_name = getattr(kpi_obj, 'name')
+            kpi_name = getattr(kpi_obj, "name")
 
             overall_data, subdim_data = self.get_overall_subdim_data(anomaly_data)
 
-            overall_data_email_body = deepcopy([overall_data[0]]) if len(overall_data) > 0 else []
+            overall_data_email_body = (
+                deepcopy([overall_data[0]]) if len(overall_data) > 0 else []
+            )
             len_subdim = min(10, len(subdim_data))
-            subdim_data_email_body = deepcopy(subdim_data[0:len_subdim]) if len(subdim_data) > 0 else []
+            subdim_data_email_body = (
+                deepcopy(subdim_data[0:len_subdim]) if len(subdim_data) > 0 else []
+            )
 
             overall_data.extend(subdim_data)
             overall_data_email_body.extend(subdim_data_email_body)
@@ -687,18 +732,21 @@ class AnomalyAlertController:
                     top_anomalies=top_anomalies_,
                     alert_message=alert_message,
                     kpi_name=kpi_name,
-                    alert_frequency=self.alert_info['alert_frequency'].capitalize(),
+                    alert_frequency=self.alert_info["alert_frequency"].capitalize(),
                     preview_text="Anomaly Alert",
                     alert_name=self.alert_info.get("alert_name"),
                     kpi_link=f"{webapp_url_prefix()}#/dashboard/0/anomaly/{kpi_id}",
                     alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
                     overall_count=overall_count,
-                    subdim_count=subdim_count
+                    subdim_count=subdim_count,
                 )
                 logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
-            #self.remove_attributes_from_anomaly_data(overall_data, ["nl_message"])
+            # self.remove_attributes_from_anomaly_data(overall_data, ["nl_message"])
             # TODO: fix this circular import
-            from chaos_genius.controllers.digest_controller import structure_anomaly_data_for_digests
+            from chaos_genius.controllers.digest_controller import (
+                structure_anomaly_data_for_digests,
+            )
+
             anomaly_data = structure_anomaly_data_for_digests(overall_data)
             return False, anomaly_data
         else:
@@ -715,7 +763,9 @@ class AnomalyAlertController:
         )
 
         template = env.get_template(template)
-        test = send_static_alert_email(recipient_emails, subject, template.render(**kwargs), self.alert_info, files)
+        test = send_static_alert_email(
+            recipient_emails, subject, template.render(**kwargs), self.alert_info, files
+        )
         if test == True:
             logger.info(
                 f"The email for Alert ID - {self.alert_info['id']} was successfully sent"
@@ -736,12 +786,13 @@ class AnomalyAlertController:
             return False, None
 
         data_source_obj = DataSource.query.filter(
-                                            DataSource.id == self.alert_info["data_source"],
-                                            DataSource.active == True
-                                        ).first()
-        
+            DataSource.id == self.alert_info["data_source"], DataSource.active == True
+        ).first()
+
         if data_source_obj is None:
-            logger.info(f"The data source provided for Alert ID - {self.alert_info['id']} does not exist")
+            logger.info(
+                f"The data source provided for Alert ID - {self.alert_info['id']} does not exist"
+            )
             return False, None
 
         kpi_name = getattr(kpi_obj, "name")
@@ -751,9 +802,13 @@ class AnomalyAlertController:
 
         overall_data, subdim_data = self.get_overall_subdim_data(anomaly_data)
 
-        overall_data_alert_body = deepcopy([overall_data[0]]) if len(overall_data) > 0 else []
+        overall_data_alert_body = (
+            deepcopy([overall_data[0]]) if len(overall_data) > 0 else []
+        )
         len_subdim = min(5, len(subdim_data))
-        subdim_data_alert_body = deepcopy(subdim_data[0:len_subdim]) if len(subdim_data) > 0 else []
+        subdim_data_alert_body = (
+            deepcopy(subdim_data[0:len_subdim]) if len(subdim_data) > 0 else []
+        )
 
         overall_data.extend(subdim_data)
         overall_data_alert_body.extend(subdim_data_alert_body)
@@ -766,9 +821,7 @@ class AnomalyAlertController:
 
         test = "failed"
         if not (daily_digest or weekly_digest):
-            points = deepcopy(
-                    [anomaly_point.as_dict for anomaly_point in anomaly_data]
-                )
+            points = deepcopy([anomaly_point.as_dict for anomaly_point in anomaly_data])
             _format_anomaly_points(points)
             self.format_alert_data(points)
             save_anomaly_point_formatting(points)
@@ -782,7 +835,7 @@ class AnomalyAlertController:
                 alert_message,
                 top_anomalies_,
                 overall_count,
-                subdim_count
+                subdim_count,
             )
 
         if test == "ok":
@@ -796,9 +849,12 @@ class AnomalyAlertController:
 
         message = f"Status for KPI ID - {self.alert_info['kpi']}: {test}"
         test = test == "ok"
-        #self.remove_attributes_from_anomaly_data(overall_data, ["nl_message"])
+        # self.remove_attributes_from_anomaly_data(overall_data, ["nl_message"])
         # TODO: fix this circular import
-        from chaos_genius.controllers.digest_controller import structure_anomaly_data_for_digests
+        from chaos_genius.controllers.digest_controller import (
+            structure_anomaly_data_for_digests,
+        )
+
         anomaly_data = structure_anomaly_data_for_digests(overall_data)
         return test, anomaly_data
 
@@ -813,17 +869,22 @@ class StaticKpiAlertController:
 
 def _format_anomaly_points(points: List[dict]):
     for anomaly_point in points:
-        anomaly_point["series_type"] = "Overall KPI" if anomaly_point.get("anomaly_type") == "overall" else anomaly_point["series_type"]
+        anomaly_point["series_type"] = (
+            "Overall KPI"
+            if anomaly_point.get("anomaly_type") == "overall"
+            else anomaly_point["series_type"]
+        )
         for key, value in anomaly_point.items():
             if key in ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS:
                 anomaly_point[key] = round(value, 2)
         if anomaly_point["series_type"] != "Overall KPI":
-            anomaly_point["series_type"] = convert_query_string_to_user_string(anomaly_point["series_type"])
+            anomaly_point["series_type"] = convert_query_string_to_user_string(
+                anomaly_point["series_type"]
+            )
 
 
 def find_percentage_change(
-    curr_val: Union[int, float],
-    prev_val: Union[int, float]
+    curr_val: Union[int, float], prev_val: Union[int, float]
 ) -> Union[int, float, str]:
     """Calculates percentage change between previous and current value."""
     if prev_val == 0:
@@ -850,6 +911,7 @@ def change_message_from_percent(percent_change: Union[str, int, float]) -> str:
         return f"Increased by ({percent_change}%)"
     else:
         return f"Decreased by ({percent_change}%)"
+
 
 def check_and_trigger_alert(alert_id):
     """Check the alert and trigger the notification if found

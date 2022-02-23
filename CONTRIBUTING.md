@@ -31,10 +31,18 @@ Follow these steps if you want to make a code contribution to Chaos Genius.
     - Wait for one of the maintainers to confirm and provide more details on it (if required).
 1. Clone the repository (you will need to create a [fork](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) if you're an external contributor).
     ```
-    git clone https://github.com/chaos-genius/chaos_genius.git
+    git clone https://github.com/chaos-genius/chaos_genius.git # for internal contributor
+    ```
+    or 
+    
+    ```
+    git clone https://github.com/<your-github-username>/chaos_genius.git # for external contributors
+    ```
+    then 
+    ```
     cd chaos_genius
     ```
-1. Create a new [branch](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-and-deleting-branches-within-your-repository)
+1. Create a new [branch](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-and-deleting-branches-within-your-repository) from `develop` branch
     - If you're an internal contributor, the branch must be named appropriately. Use `feature/` or `fix/` prefix as needed. An example of a good branch name is `feature/add-prophet-model`.
 1. See [Development Workflow](#development-workflow) for setting up Chaos Genius locally and testing your changes.
 1. Commit your changes while following the [commit guidelines](#git-commit-messages).

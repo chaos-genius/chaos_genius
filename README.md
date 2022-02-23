@@ -88,7 +88,7 @@ Generate multidimensional drilldowns to identify the key drivers of change in de
 ### 2. Anomaly Detection
 
 Modular anomaly detection toolkit for monitoring high-dimensional time series with ability to select from different models. Tackle variations caused by seasonality, trends and holidays in the time series data.
-- Models: Prophet, EWMA, EWSTD, Neural Prophet, ARIMA (coming soon)
+- Models: Prophet, EWMA, EWSTD, Neural Prophet, Greykite
     
 ![Anomaly](https://raw.githubusercontent.com/chaos-genius/.github/main/images/AnomalyDrillDowns.png)
 
@@ -99,7 +99,7 @@ Modular anomaly detection toolkit for monitoring high-dimensional time series wi
 ### 3. Smart Alerts
 
 Actionable alerts with self-learning thresholds. Configurations to setup alert frequency & reporting to combat alert fatigue. 
-- Channels: Email, Slack, Webhooks (coming soon)
+- Channels: Email, Slack
 <!-- TODO: add an image or illustration here -->
     
 ## :octocat: Community

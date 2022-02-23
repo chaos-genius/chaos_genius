@@ -144,7 +144,12 @@ const EventAlertForm = ({
         alert_message: kpiAlertEditData?.alert_message,
         alert_frequency: kpiAlertEditData?.alert_frequency,
         alert_channel: kpiAlertEditData?.alert_channel,
-        alert_channel_conf: kpiAlertEditData?.alert_channel_conf
+        alert_channel_conf: kpiAlertEditData?.alert_channel_conf,
+        daily_digest:
+          kpiAlertEditData?.daily_digest !== undefined &&
+          kpiAlertEditData?.daily_digest !== null
+            ? kpiAlertEditData?.daily_digest
+            : false
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -469,7 +474,7 @@ const EventAlertForm = ({
           )}
         </div>
 
-        <div className="form-group">
+        <div className="form-group form-group-label-margin">
           <label>Alert Settings *</label>
           <div className="editable-field">
             <div className="alert-setting">
@@ -590,7 +595,9 @@ const EventAlertForm = ({
                         : true
                       : false
                   }
-                  checked={alertFormData.alert_settings === 'missing_data_alert'}
+                  checked={
+                    alertFormData.alert_settings === 'missing_data_alert'
+                  }
                   onChange={(e) => {
                     setError({ ...error, alert_settings: '' });
                     setAlertFormData({
@@ -609,7 +616,6 @@ const EventAlertForm = ({
                   Missing Data
                 </label>
               </div>
-
             </div>
             {path[2] === 'edit' &&
               editableStatus('alert_settings') === 'sensitive' &&

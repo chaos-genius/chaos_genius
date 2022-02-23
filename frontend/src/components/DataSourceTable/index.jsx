@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from 'react';
 
 import { Link } from 'react-router-dom';
 import Modal from 'react-modal';
-import Tooltip from 'react-tooltip-lite';
 import Noresult from '../Noresult';
 
 import Edit from '../../assets/images/edit.svg';
@@ -30,6 +29,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 import { useToast } from 'react-toast-wnm';
 import { connectionContext } from '../context';
+import { CustomTooltip } from '../../utils/tooltip-helper';
 
 const DataSourceTable = ({ tableData, changeData, search }) => {
   const dispatch = useDispatch();
@@ -141,12 +141,7 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
                 return (
                   <tr key={uuidv4()}>
                     <td className="name-tooltip">
-                      <Tooltip
-                        className="tooltip-name"
-                        direction="right"
-                        content={<span>{datasource.name}</span>}>
-                        <span>{datasource.name}</span>
-                      </Tooltip>
+                      <span>{CustomTooltip(datasource.name)}</span>
                     </td>
                     <td>
                       <div

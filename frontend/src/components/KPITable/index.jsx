@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 
 import { Link } from 'react-router-dom';
-import Tooltip from 'react-tooltip-lite';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -30,6 +29,7 @@ import { useToast } from 'react-toast-wnm';
 
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
 import { connectionContext } from '../context';
+import { CustomTooltip } from '../../utils/tooltip-helper';
 
 const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
   const connectionType = useContext(connectionContext);
@@ -147,12 +147,7 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
                     return (
                       <tr key={uuidv4()}>
                         <td className="name-tooltip">
-                          <Tooltip
-                            className="tooltip-name"
-                            direction="right"
-                            content={<span>{kpi.name}</span>}>
-                            <span>{kpi.name}</span>
-                          </Tooltip>
+                          <span>{CustomTooltip(kpi.name)}</span>
                         </td>
                         <td>
                           {kpi?.dashboards.length !== 0 ? (

@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
 
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 
 import Select from 'react-select';
-import Tooltip from 'react-tooltip-lite';
 import Search from '../../assets/images/search.svg';
 import Up from '../../assets/images/up.svg';
 import Down from '../../assets/images/down.svg';
 
 import './kpihome.scss';
 
-import Highcharts from 'highcharts';
+import Highcharts, { isNumber } from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import highchartsMore from 'highcharts/highcharts-more';
 import HumanReadableNumbers from '../HumanReadableNumbers';
@@ -22,12 +21,22 @@ import Noresult from '../Noresult';
 import Homefilter from '../Homefilter';
 
 import { formatDateTime, getTimezone } from '../../utils/date-helper';
-import { getDashboard } from '../../redux/actions';
+import { HRNumbers } from '../../utils/Formatting/Numbers/humanReadableNumberFormatter';
+import { getDashboard, getTimeCuts } from '../../redux/actions';
+import { CustomTooltip } from '../../utils/tooltip-helper';
 
 import store from '../../redux/store';
+import { debuncerReturn } from '../../utils/simple-debouncer';
 
 const RESET_ACTION = {
   type: 'RESET_KPI_HOME_DATA'
+};
+
+const customStyles = {
+  container: (provided) => ({
+    ...provided,
+    width: 180
+  })
 };
 
 highchartsMore(Highcharts);
@@ -37,29 +46,17 @@ Highcharts.setOptions({
   }
 });
 
-const data = [
-  {
-    value: 'mom',
-    label: 'Current Month on Last Month'
-  },
-  {
-    value: 'wow',
-    label: 'Current Week on Last Week'
-  },
-  {
-    value: 'dod',
-    label: 'Current Day on Last Day'
-  }
-];
-
 const Kpihome = () => {
   const dispatch = useDispatch();
 
   const history = useHistory();
 
+  const [dashboardId, setDashboardId] = useState(useParams()?.id);
+
   const { homeKpiData, homeKpiLoading } = useSelector(
     (state) => state.onboarding
   );
+  const { timeCutsData } = useSelector((state) => state.TimeCuts);
 
   const { dashboardListLoading, dashboardList } = useSelector((state) => {
     return state.DashboardHome;
@@ -67,45 +64,106 @@ const Kpihome = () => {
 
   const [search, setSearch] = useState('');
   const [kpiHomeData, setKpiHomeData] = useState(homeKpiData);
-  const [dashboard, setDashboard] = useState(dashboardList[0]?.id);
+  const [kpiHomeloading, setKpiHomeLoading] = useState(homeKpiLoading);
+  const [dashboard, setDashboard] = useState();
+  const [timeCutOptions, setTimeCutOptions] = useState([]);
 
-  const [timeline, setTimeLine] = useState({
-    value: 'mom',
-    label: 'Current Month on Last Month'
-  });
+  const [timeline, setTimeLine] = useState({});
 
   useEffect(() => {
-    store.dispatch(RESET_ACTION);
+    if (dashboardId === undefined) {
+      setDashboardId('0');
+    }
+    history.push(`/${dashboardId}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dashboardId]);
+
+  useEffect(() => {
     dispatch(getDashboard());
+    dispatch(getTimeCuts());
   }, [dispatch]);
 
   useEffect(() => {
-    if (dashboardList && dashboardList.length !== 0) {
-      setDashboard(dashboardList[0]?.id);
+    if (
+      dashboardList &&
+      dashboardList.length !== 0 &&
+      dashboardId !== undefined
+    ) {
+      setDashboard(dashboardId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dashboardList]);
 
-  useEffect(() => {
-    if (![null, undefined, ''].includes(dashboard)) {
-      getHomeList();
+  const getAllTimeCutOptions = (data) => {
+    let res = [];
+    if (data && data.length) {
+      for (const dataKey of data) {
+        res.push({
+          value: `${dataKey?.id}`,
+          label: dataKey?.display_name,
+          grp2_name: dataKey?.current_period_name,
+          grp1_name: dataKey?.last_period_name
+        });
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dashboard, timeline]);
-
-  const getHomeList = () => {
-    store.dispatch(RESET_ACTION);
-    dispatch(getHomeKpi({ timeline: timeline.value, dashboard_id: dashboard }));
+    setTimeCutOptions(res);
   };
 
   useEffect(() => {
+    const timeCut = {
+      label: timeCutsData[0]?.display_name,
+      value: `${timeCutsData[0]?.id}`,
+      grp2_name: timeCutsData[0]?.current_period_name,
+      grp1_name: timeCutsData[0]?.last_period_name
+    };
+    if (timeCutsData && timeCutsData.length) {
+      setTimeLine(timeCut);
+      store.dispatch({ type: 'ACTIVE_TIMECUT', data: timeCut });
+      getAllTimeCutOptions(timeCutsData);
+    }
+  }, [timeCutsData]);
+
+  useEffect(() => {
+    if (![null, undefined, ''].includes(dashboard) && timeline.value) {
+      getHomeList();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dashboard, timeline.value]);
+
+  const getHomeList = () => {
+    store.dispatch(RESET_ACTION);
+    dispatch(
+      getHomeKpi({ timeline: timeline.value, dashboard_id: dashboardId })
+    );
+  };
+
+  const clearDashboardDetails = () => {
+    store.dispatch({
+      type: 'RESET_AGGREGATION'
+    });
+    store.dispatch({
+      type: 'RESET_LINECHART'
+    });
+    store.dispatch({ type: 'RESET_HIERARCHIAL_DATA' });
+    store.dispatch({ type: 'RESET_DASHBOARD_RCA' });
+  };
+
+  useEffect(() => {
+    clearDashboardDetails();
     if (search !== '') {
       searchKpi();
     } else {
-      setKpiHomeData(homeKpiData);
+      if (homeKpiData !== [] && homeKpiLoading === false) {
+        setKpiHomeData(homeKpiData);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, homeKpiData]);
+
+  useEffect(() => {
+    setKpiHomeLoading(homeKpiLoading);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [homeKpiLoading]);
 
   const searchKpi = () => {
     if (search !== '') {
@@ -161,6 +219,11 @@ const Kpihome = () => {
         yAxis: {
           step: 1,
           title: '',
+          labels: {
+            formatter: function () {
+              return HRNumbers.toHumanString(this.value);
+            }
+          },
           gridLineWidth: 0,
           lineWidth: 1
         },
@@ -196,7 +259,12 @@ const Kpihome = () => {
     }
   };
 
-  if (homeKpiLoading || dashboardListLoading) {
+  const implementSearch = (e) => {
+    setSearch(e.target.value);
+  };
+  const debounce = () => debuncerReturn(implementSearch, 500);
+
+  if (dashboardListLoading) {
     return (
       <div className="load loader-page">
         <div className="preload"></div>
@@ -215,18 +283,25 @@ const Kpihome = () => {
                 type="text"
                 className="form-control h-40"
                 placeholder="Search KPI"
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={debounce()}
               />
               <span>
                 <img src={Search} alt="Search Icon" />
               </span>
             </div>
             <Select
-              options={data}
+              options={timeCutOptions}
+              styles={customStyles}
               classNamePrefix="selectcategory"
               placeholder="Current week on last week"
               value={timeline}
-              onChange={(e) => setTimeLine(e)}
+              onChange={(e) => {
+                store.dispatch({
+                  type: 'ACTIVE_TIMECUT',
+                  data: e
+                });
+                setTimeLine(e);
+              }}
               isSearchable={false}
             />
           </div>
@@ -234,106 +309,121 @@ const Kpihome = () => {
         <div className="homepage-setup-card-wrapper">
           <div className="explore-wrapper home-explore-wrapper">
             <div className="filter-section">
-              <Homefilter
-                data={dashboardList}
-                setDashboard={setDashboard}
-                dashboard={dashboard}
-              />
+              {dashboardId !== undefined && (
+                <Homefilter
+                  data={dashboardList}
+                  setDashboard={setDashboard}
+                  dashboard={dashboardId}
+                  setDashboardId={setDashboardId}
+                />
+              )}
             </div>
-            {kpiHomeData && kpiHomeData.length !== 0 ? (
-              <div className="graph-section">
-                {kpiHomeData.map((item) => {
-                  return (
-                    <Link to={`/dashboard/${dashboard}/deepdrills/${item.id}`}>
-                      <div className="kpi-card" key={item.id}>
-                        <div className="kpi-content kpi-content-label">
-                          <h3 className="name-tooltip">
-                            <Tooltip
-                              className="tooltip-name"
-                              direction="left"
-                              content={<span> {item.name}</span>}>
-                              {item.name}
-                            </Tooltip>
-                          </h3>
-                        </div>
-                        <div className="kpi-content kpi-current">
-                          <label>
-                            {timeline.value === 'wow'
-                              ? 'This Week'
-                              : timeline.value === 'mom'
-                              ? 'This Month'
-                              : 'This Day'}
-                          </label>
-                          <HumanReadableNumbers number={item.current} />
-                        </div>
-                        <div className="kpi-content">
-                          <label>
-                            {timeline.value === 'wow'
-                              ? 'Previous Week'
-                              : timeline.value === 'mom'
-                              ? 'Previous Month'
-                              : 'Previous Day'}
-                          </label>
-                          <HumanReadableNumbers number={item.prev} />
-                        </div>
-                        <div className="kpi-content">
-                          <label>Change</label>
-                          <span>
-                            {item.percentage_change !== '--' && (
-                              <>
-                                <HumanReadableNumbers number={item.change} />
-                                <label
-                                  className={
-                                    item.percentage_change > 0
-                                      ? 'high-change'
-                                      : 'low-change'
-                                  }>
-                                  {item.percentage_change > 0 ? (
-                                    <img src={Up} alt="High" />
-                                  ) : (
-                                    <img src={Down} alt="Low" />
-                                  )}
-                                  {item.percentage_change}
-                                  {item.percentage_change !== '--' ? '%' : ''}
-                                </label>
-                              </>
-                            )}
-                            {item.percentage_change === '--' && <>-</>}
-                          </span>
-                        </div>
-
-                        <div className=" kpi-content kpi-graph ">
-                          {item.graph_data && item.graph_data.length !== 0 && (
-                            <HighchartsReact
-                              className="sparkline-graph"
-                              highcharts={Highcharts}
-                              options={lineChart(item.graph_data)}
-                            />
-                          )}
-                        </div>
-                        <div
-                          className="kpi-content kpi-details"
-                          onClick={() =>
-                            history.push(
-                              `/dashboard/${dashboard}/deepdrills/${item.id}`
-                            )
+            {!kpiHomeloading ? (
+              kpiHomeData && kpiHomeData.length !== 0 ? (
+                <div className="graph-section">
+                  {kpiHomeData.map((item) => {
+                    const changeView =
+                      item.change !== undefined && item.change !== null ? (
+                        <HumanReadableNumbers number={item.change} />
+                      ) : (
+                        <span className="empty-data-span">-</span>
+                      );
+                    const percChangeView =
+                      item.percentage_change !== undefined &&
+                      item.percentage_change !== null &&
+                      isNumber(item.percentage_change) ? (
+                        <label
+                          className={
+                            +item.percentage_change > 0
+                              ? 'high-change'
+                              : 'low-change'
                           }>
-                          Details
+                          {+item.percentage_change > 0 ? (
+                            <img src={Up} alt="High" />
+                          ) : (
+                            <img src={Down} alt="Low" />
+                          )}
+                          {`${item.percentage_change}%`}
+                        </label>
+                      ) : (
+                        <span className="empty-data-span">-</span>
+                      );
+
+                    const fullView =
+                      item.change !== undefined &&
+                      item.change !== null &&
+                      isNumber(item.change) ? (
+                        <>
+                          {changeView}
+                          {percChangeView}
+                        </>
+                      ) : (
+                        <>
+                          <span className="empty-data-span">-</span>
+                        </>
+                      );
+
+                    return (
+                      <Link
+                        to={`/dashboard/${dashboard}/deepdrills/${item.id}`}
+                        key={item.id}>
+                        <div className="kpi-card" key={item.id}>
+                          <div className="kpi-content kpi-content-label">
+                            <h3 className="name-tooltip">
+                              {CustomTooltip(item.name, true)}
+                            </h3>
+                          </div>
+                          <div className="kpi-content">
+                            <label>{item?.display_value_prev}</label>
+                            <HumanReadableNumbers number={item.prev} />
+                          </div>
+                          <div className="kpi-content kpi-current">
+                            <label>{item?.display_value_current}</label>
+                            <HumanReadableNumbers number={item.current} />
+                          </div>
+                          <div className="kpi-content">
+                            <label>Change</label>
+                            <span>{fullView}</span>
+                          </div>
+
+                          <div className=" kpi-content kpi-graph ">
+                            {item.graph_data &&
+                              item.graph_data.length !== 0 && (
+                                <HighchartsReact
+                                  className="sparkline-graph"
+                                  highcharts={Highcharts}
+                                  options={lineChart(item.graph_data)}
+                                />
+                              )}
+                          </div>
+                          <div
+                            className="kpi-content kpi-details"
+                            onClick={() =>
+                              history.push(
+                                `/dashboard/${dashboard}/deepdrills/${item.id}`
+                              )
+                            }>
+                            Details
+                          </div>
                         </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            ) : (
-              kpiHomeData !== '' && (
-                <div className="home-card-section">
-                  <div className="no-data-kpihome">
-                    <Noresult text={search} title={'KPI'} />
-                  </div>
+                      </Link>
+                    );
+                  })}
                 </div>
+              ) : (
+                kpiHomeData.length === 0 && (
+                  <div className="home-card-section">
+                    <div className="no-data-kpihome">
+                      <Noresult text={search} title={'KPI'} />
+                    </div>
+                  </div>
+                )
               )
-            )}{' '}
+            ) : (
+              <div className="home-data-load home-data-loader-page">
+                <div className="preload"></div>
+              </div>
+            )}
           </div>
         </div>
       </>

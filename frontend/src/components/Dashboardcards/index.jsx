@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import Modal from 'react-modal';
-import Tooltip from 'react-tooltip-lite';
 import More from '../../assets/images/more.svg';
 import Moreactive from '../../assets/images/more-active.svg';
 import Edit from '../../assets/images/edit.svg';
@@ -22,6 +21,8 @@ import { useToast } from 'react-toast-wnm';
 
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
 import { getLocalStorage } from '../../utils/storage-helper';
+import { CustomTooltip } from '../../utils/tooltip-helper';
+import store from '../../redux/store';
 
 const Dashboardcards = ({ dashboarddata, setChange }) => {
   const dispatch = useDispatch();
@@ -72,6 +73,23 @@ const Dashboardcards = ({ dashboarddata, setChange }) => {
   };
 
   useEffect(() => {
+    store.dispatch({ type: 'RESET_DASHBOARD_RCA' });
+    store.dispatch({
+      type: 'RESET_AGGREGATION'
+    });
+    store.dispatch({
+      type: 'RESET_LINECHART'
+    });
+    store.dispatch({ type: 'RESET_HIERARCHIAL_DATA' });
+    store.dispatch({
+      type: 'RESET_DATA'
+    });
+    store.dispatch({
+      type: 'RESET_CONFIG'
+    });
+  }, []);
+
+  useEffect(() => {
     if (dashboardDelete && dashboardDelete.status === 'success') {
       customToast({
         type: 'success',
@@ -103,12 +121,7 @@ const Dashboardcards = ({ dashboarddata, setChange }) => {
                   <div className="header-card">
                     <div className="header-content">
                       <h3 className="name-tooltip">
-                        <Tooltip
-                          className="tooltip-name"
-                          direction="right"
-                          content={<span> {dashboard.name}</span>}>
-                          {dashboard.name}
-                        </Tooltip>
+                        {CustomTooltip(dashboard.name)}
                       </h3>
                     </div>
                     <div className="more-dropdown dropstart">
@@ -170,7 +183,7 @@ const Dashboardcards = ({ dashboarddata, setChange }) => {
 
                   <div className="body-card">
                     <div className="body-content">
-                      <span>No of KPI’s</span>
+                      <span>No of KPIs</span>
                       <h5>{dashboard?.kpis?.length}</h5>
                     </div>
                     <div className="body-content created-on-content">

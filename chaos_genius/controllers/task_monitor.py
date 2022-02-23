@@ -1,7 +1,7 @@
 """Utilities for logging and monitoring tasks."""
 
 import traceback
-from typing import List, Optional, cast
+from typing import List, Optional
 
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
@@ -168,11 +168,21 @@ def get_checkpoints(
             .all()
         )
 
+    valid_tasks = tasks
+
     if kpi_info:
         subtasks_cache = {}
         total_tasks_cache = {}
+
+        valid_tasks: List[Task] = []
+
         for task in tasks:
-            kpi = cast(Kpi, Kpi.get_by_id(task.kpi_id))
+            kpi: Kpi | None = Kpi.get_by_id(task.kpi_id)
+
+            if kpi is None:
+                continue
+
+            valid_tasks.append(task)
 
             task.kpi_name = kpi.name
 
@@ -214,4 +224,4 @@ def get_checkpoints(
                 subtasks_cache[task.task_id][0] += 1
                 task.total_subtasks = total_tasks_cache[key]
 
-    return tasks
+    return valid_tasks

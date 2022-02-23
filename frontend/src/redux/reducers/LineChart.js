@@ -27,6 +27,11 @@ export const lineChart = (state = initialState, action) => {
         linechartError: true
       };
     }
+    case 'RESET_LINECHART': {
+      return {
+        ...initialState
+      };
+    }
     default:
       return state;
   }

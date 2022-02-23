@@ -11,8 +11,8 @@ const initialState = {
   onboardingList: [],
   isLoading: true,
   error: '',
-  homeKpiData: '',
-  homeKpiLoading: false,
+  homeKpiData: [],
+  homeKpiLoading: true,
   homeKpiError: false
 };
 
@@ -28,6 +28,7 @@ export const onboarding = (state = initialState, action) => {
       return {
         ...state,
         isLoading: false,
+        error: '',
         onboardingList: action.data
       };
     }
@@ -61,7 +62,9 @@ export const onboarding = (state = initialState, action) => {
     case 'RESET_KPI_HOME_DATA':
       return {
         ...state,
-        homeKpiData: ''
+        homeKpiData: [],
+        homeKpiLoading: true,
+        homeKpiError: false
       };
 
     default:

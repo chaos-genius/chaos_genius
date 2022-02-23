@@ -40,9 +40,19 @@
       // width: 60%;
       padding-left: 40px;
       padding-bottom: 72px;
+      .organization-button-container {
+        display: flex;
+        flex-direction: row;
+        width: 280px;
+        justify-content: flex-end;
+        .white-button {
+          margin-right: 16px;
+          min-width: 80px;
+        }
+      }
       .form-group {
         width: 440px;
-        height: 48px;
+        height: 100%;
         label {
           padding-left: 2px;
           font-weight: $font-weight-400;
@@ -61,6 +71,10 @@
             color: $black_variation-2;
             font-family: $font-family-inter;
           }
+        }
+        .time-picker {
+          width: 280px;
+          min-height: 48px;
         }
       }
       p {
@@ -89,8 +103,6 @@
         letter-spacing: 0.2px;
       }
     }
-
-    
 
     .form-switch {
       margin-top: 20px;

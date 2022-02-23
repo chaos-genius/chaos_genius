@@ -16,6 +16,7 @@ export const attachParams = (relativeUrl, params) => {
 export const DASHBOARD_URL = `${BASE_URL}/api/dashboard`;
 export const KPI_URL = `${BASE_URL}/api/kpi`;
 export const KPI_RELATIVE_URL = `/api/kpi`;
+export const RCA_RELATIVE_URL = `/api/rca`;
 export const CONNECTION_URL = `${BASE_URL}/api/connection`;
 export const CONNECTION_TYPE = `${BASE_URL}/api/connection/types`;
 export const CREATE_DATASOURCE = `${BASE_URL}/api/connection/create`;
@@ -68,3 +69,5 @@ export const checkBlackList = (url) => {
     ? true
     : false;
 };
+export const TIME_CUTS_URL = `${BASE_URL}/api/kpi/get-timecuts-list`;
+export const VERSION_SETTING_URL = `${BASE_URL}/api/meta/version`;

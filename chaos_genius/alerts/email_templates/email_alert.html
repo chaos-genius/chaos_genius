@@ -1,40 +1,84 @@
 {% extends "layout.html" %}
 
+{% block head %}
+<style>
+.alert-container {
+    color: #F6F5F5 !important;
+}
+
+.btn {
+    appearance: button;
+    cursor: pointer;
+    border-radius: 5px;
+    border-width: 0;
+    background-color: #60CA9A;
+    color: black !important;
+    height: 2rem;
+    line-height: 2rem;
+    padding: 0 1rem;
+    margin-bottom: 1rem;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.kpi-link {
+    color: #60CA9A !important;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 
-<b>
-  <h2 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">{{ alert_name
-    }}</h2>
-</b>
-<hr style="width:100%" , size="2" , color=#F6F5F5>
+<h2 style="margin-bottom: 15px; color: #F6F5F5">{{ alert_name }}</h2>
 
-<h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">KPI Name: {{
-  kpi_name }} </h3>
-<h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Alert
-  Frequency: {{ alert_frequency }}</h3>
-<br>
-<h2 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Alert Message
-</h2>
-<h3 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">{{
-  alert_message }}</h3>
-<br>
+<hr />
 
-<h2 style="font-family: sans-serif; font-weight: normal; margin: 0; Margin-bottom: 15px; color: #F6F5F5">Anomaly Details
-</h2>
-{% if data|length > 0 %}
-    <table style="border-collapse: collapse;border-spacing: 15px; color: #F6F5F5;text-align: left; padding: 10px;">
-      <tr style="border:1px solid #8A8A8A ; border-color: #8A8A8A;">
-          {% for column in column_names %}
-          <th style="border: 1px solid #8A8A8A ; padding: 10px;">{{column}}</th>
-          {% endfor %}
-      </tr>
-      {% for item in data %}
-          <tr style="border:1px solid #8A8A8A">
-              {% for column in column_names %}
-              <td style="color: #F6F5F5;border: 1px solid #8A8A8A ; padding: 10px;">{{item[column]}}</td>
-              {% endfor %}
-          </tr>
-      {% endfor %}
-    </table>
-{% endif %}
+<div class="alert-container" style="color: #F6F5F5 !important;">
+
+<h3>Summary</h3>
+
+<h4><span style="font-weight: 400;">KPI Name: </span>{{ kpi_name }}</h4>
+
+<ul>
+    <li>Total alerts generated (overall KPI): <strong>{{ overall_count }}</strong></li>
+    <li>Total alerts generated (including subdimensions): <strong>{{ overall_count + subdim_count }}</strong></li>
+</ul>
+
+<h3>Alert Message</h3>
+
+<div style="margin-bottom: 1rem;">
+{{ alert_message }}
+</div>
+
+<a class="btn" href={{ kpi_link }}>View KPI</a>
+<a class="btn" href={{ alert_dashboard_link }}>Alerts Dashboard</a>
+
+<hr />
+
+<h3>Top Anomalies</h3>
+<ul>
+    {% for point in top_anomalies %}
+    <li>
+        <strong>{{kpi_name}} ({{point["Dimension"]}})</strong>
+        <span style="color: lightgrey;">changed to
+        <strong>{{point["y"]}}</strong>
+        {% if point["percentage_change"] is string %}
+        (<span><strong>{{ point["change_message"] }}</strong></span>)
+        {% elif point["percentage_change"] > 0 %}
+        <span style="color: lightgreen;">({{ point["change_message"] }})</span>
+        {% elif point["percentage_change"] < 0 %}
+        <span style="color: red;">({{ point["change_message"] }})</span>
+        {% else %}
+        (<span><strong>{{ point["change_message"] }}</strong></span>)
+        {% endif %}
+        on {{ point["formatted_date"] }}
+        (expected: <strong>{{point["yhat_lower"]}}</strong> to <strong>{{point["yhat_upper"]}}</strong>,
+        severity:
+        <strong>{{point["severity"]}}</strong>)
+        </span>
+    </li>
+    {% endfor %}
+</ul>
+
+</div>
 {% endblock %}

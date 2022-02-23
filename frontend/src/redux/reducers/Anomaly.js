@@ -17,7 +17,7 @@ const initialState = {
   anomalyDetectionLoading: true,
   anomalyDetectionData: '',
   anomalyDetectionError: false,
-  anomalyQualityData: [],
+  anomalyQualityData: '',
   anomalyQualityDataLoading: true,
   anomalyQualityDataError: false,
   anomalyDrilldownLoading: true,
@@ -120,13 +120,14 @@ export const anomaly = (state = initialState, action) => {
       return {
         ...state,
         anomalyDrilldownData: '',
-        anomalyQualityData: []
+        anomalyQualityData: ''
       };
     }
     case 'RESET_DRILL': {
       return {
         ...state,
-        anomalyDrilldownData: ''
+        anomalyDrilldownData: '',
+        anomalyDrilldownError: false
       };
     }
 

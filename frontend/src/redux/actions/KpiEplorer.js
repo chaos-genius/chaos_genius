@@ -9,16 +9,21 @@ import {
   KPIEXPLORERFIELDSUCCESS,
   KPIEXPLORERFIELDFAILURE,
   TABLELISTONSCHEMASUCCESS,
+  TABLELISTONSCHEMAREQUEST,
+  TABLELISTONSCHEMAFAILURE,
   KPIEXPLORERSUBMITREQUEST,
   KPIEXPLORERSUBMITSUCCESS,
   KPIEXPLORERSUBMITFAILURE,
   TESTQUERYREQUEST,
+  TABLEINFODATAREQUEST,
   TABLEINFODATASUCCESS,
+  TABLEINFODATAFAILURE,
   TESTQUERYFAILURE,
   SCHEMAAVAILABILITYSUCCESS,
   SCHEMAAVAILABILITYFAILURE,
   GETALLSCHEMALISTFAILURE,
   SCHEMALISTSUCCESS,
+  SCHEMALISTREQUEST,
   TESTQUERYSUCCESS,
   KPIDISABLEREQUEST,
   KPIDISABLEFAILURE,
@@ -31,7 +36,8 @@ import {
   KPIEDITDATAFAILURE,
   KPIUPDATEREQUEST,
   KPIUPDATESUCCESS,
-  KPIUPDATEFAILURE
+  KPIUPDATEFAILURE,
+  SCHEMAAVAILABILTYREQUEST
 } from './ActionConstants';
 
 import {
@@ -127,6 +133,18 @@ export const getAllKpiExplorerFormFailure = () => {
   };
 };
 
+export const getTableInfoDataRequested = () => {
+  return {
+    type: TABLEINFODATAREQUEST
+  };
+};
+
+export const getTableInfoDataFailure = () => {
+  return {
+    type: TABLEINFODATAFAILURE
+  };
+};
+
 export const getAllKpiExplorerForm = () => {
   return async (dispatch) => {
     dispatch(getAllKpiExplorerFormRequested());
@@ -172,6 +190,30 @@ export const getAllKpiExplorerFieldSuccess = (response) => {
   };
 };
 
+export const getSchemaAvailabilityRequested = () => {
+  return {
+    type: SCHEMAAVAILABILTYREQUEST
+  };
+};
+
+export const getSchemaListRequested = () => {
+  return {
+    type: SCHEMALISTREQUEST
+  };
+};
+
+export const getTableListOnSchemaRequested = () => {
+  return {
+    type: TABLELISTONSCHEMAREQUEST
+  };
+};
+
+export const getTableListOnSchemaFailure = () => {
+  return {
+    type: TABLELISTONSCHEMAFAILURE
+  };
+};
+
 export const getAllKpiExplorerField = (option) => {
   return async (dispatch) => {
     dispatch(getAllKpiExplorerFieldRequested());
@@ -190,6 +232,7 @@ export const getAllKpiExplorerField = (option) => {
 
 export const getSchemaAvailability = (option) => {
   return async (dispatch) => {
+    dispatch(getSchemaAvailabilityRequested());
     const { data, error, status } = await postRequest({
       url: ADD_KPI_GET_AVAILABILITY,
       data: { datasource_id: option.data_source_id }
@@ -211,6 +254,7 @@ export const getSchemaAvailability = (option) => {
 
 export const getSchemaNamelist = (option) => {
   return async (dispatch) => {
+    dispatch(getSchemaListRequested());
     const { data, error, status } = await postRequest({
       url: KPI_LIST_SCHEMA,
       data: { datasource_id: option.data_source_id }
@@ -225,12 +269,13 @@ export const getSchemaNamelist = (option) => {
 
 export const getTableinfoData = (option) => {
   return async (dispatch) => {
+    dispatch(getTableInfoDataRequested());
     const { data, error, status } = await postRequest({
       url: KPI_TABLE_INFO_DATA,
       data: option
     });
     if (error) {
-      dispatch(getAllKpiExplorerFieldFailure()); //TODO: Change this to corresponding failure
+      dispatch(getTableInfoDataFailure());
     } else if (data && status === 200) {
       dispatch(getTableInfoDataSuccess(data));
     }
@@ -239,12 +284,13 @@ export const getTableinfoData = (option) => {
 
 export const getTableListOnSchema = (option) => {
   return async (dispatch) => {
+    dispatch(getTableListOnSchemaRequested());
     const { data, error, status } = await postRequest({
       url: KPI_TABLE_LIST_ON_SCHEMA,
       data: option
     });
     if (error) {
-      dispatch(getAllKpiExplorerFieldFailure()); //TODO: Change this to corresponding failure
+      dispatch(getTableListOnSchemaFailure());
     } else if (data && status === 200) {
       dispatch(getAllTableListonSchemaSuccess(data));
     }

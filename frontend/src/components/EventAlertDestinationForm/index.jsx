@@ -207,6 +207,15 @@ const EventAlertDestinationForm = ({
     }
   };
 
+  const handleDigestClick = (e) => {
+    setAlertFormData((prev) => {
+      return {
+        ...prev,
+        daily_digest: e.target.value === 'true' //converting string to boolean
+      };
+    });
+  };
+
   const onSubmit = () => {
     var obj = { ...error };
     if (alertFormData.alert_channel === '') {
@@ -383,8 +392,49 @@ const EventAlertDestinationForm = ({
         ''
       )}
       {/* commented add another channel*/}
+      <div className="form-group form-group-label-margin">
+        <label>Send As *</label>
+
+        <div className="alert-setting event-alert-send-setting">
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="radio"
+              id="individualalert"
+              name="alert"
+              value={false}
+              checked={alertFormData.daily_digest === false ? true : false}
+              onClick={(e) => handleDigestClick(e)}
+            />
+            <label
+              className={`form-check-label ${
+                alertFormData.daily_digest === false ? 'active' : ''
+              } `}
+              for="individualalert">
+              individual alert
+            </label>
+          </div>
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="radio"
+              id="consolidatedalertsreport"
+              name="alert"
+              value={true}
+              checked={alertFormData.daily_digest === false ? false : true}
+              onClick={(e) => handleDigestClick(e)}
+            />
+            <label
+              className={`form-check-label ${
+                alertFormData.daily_digest === false ? '' : 'active'
+              } `}
+              for="consolidatedalertsreport">
+              consolidated alerts report
+            </label>
+          </div>
+        </div>
+      </div>
       {/*Add empty space div*/}
-      <div className="add-options-wrapper options-spacing"></div>
       <div className="form-action alerts-button">
         <button className="btn white-button" onClick={() => onBack()}>
           <span>Back</span>

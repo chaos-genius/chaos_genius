@@ -8,6 +8,7 @@ from subprocess import call
 import click
 from flask.cli import with_appcontext
 
+from chaos_genius.settings import AIRBYTE_ENABLED
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.join(HERE, os.pardir)
@@ -75,12 +76,15 @@ def integration_connector():
     click.echo(f"Third Party Setup: Third Party setup started.")
 
     from chaos_genius.third_party.integration_client import init_integration_server
-    status = init_integration_server()
 
-    if status:
-        click.echo(f"Third Party Setup: Connector initialised successfully.")
+    if AIRBYTE_ENABLED:
+        status = init_integration_server()
+        if status:
+            click.echo("Third Party Setup: Connector initialised successfully.")
+        else:
+            click.echo("Third Party Setup: Connector initialisation failed.")
     else:
-        click.echo(f"Third Party Setup: Connector initialisation failed.")
+        click.echo("Third Party Setup: Connector is disabled in the env file.")
 
 
 @click.command()
@@ -130,6 +134,16 @@ def run_alert(id):
     from chaos_genius.alerts.base_alerts import check_and_trigger_alert
     status = check_and_trigger_alert(id)
     click.echo(f"Completed the alert check for ID: {id}.")
+
+@click.command()
+@with_appcontext
+@click.option("-f", "--frequency", required=True, type=str, help="Trigger Alert Digest for provided frequency.")
+def run_digest(frequency):
+    """Trigger alert digests"""
+    click.echo(f"Starting the digest check")
+    from chaos_genius.alerts.base_alert_digests import check_and_trigger_digest
+    test = check_and_trigger_digest(frequency)
+    click.echo(f"The digest check has ended")
 
 
 @click.command()

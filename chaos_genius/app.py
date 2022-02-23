@@ -22,6 +22,8 @@ from chaos_genius.views import (
     alert_view,
     dashboard_view,
     status_view,
+    digest_view,
+    rca_view,
 )
 from chaos_genius.extensions import (
     bcrypt,
@@ -34,6 +36,7 @@ from chaos_genius.extensions import (
     integration_connector,
     celery
 )
+from chaos_genius.settings import AIRBYTE_ENABLED
 
 
 def create_app(config_object="chaos_genius.settings"):
@@ -63,7 +66,8 @@ def register_extensions(app):
     # login_manager.init_app(app)
     migrate.init_app(app, db)
     flask_static_digest.init_app(app)
-    integration_connector.init_app(app)
+    if AIRBYTE_ENABLED:
+        integration_connector.init_app(app)
     celery.init_app(app)
     return None
 
@@ -80,6 +84,8 @@ def register_blueprints(app):
     app.register_blueprint(dashboard_view.blueprint, url_prefix='/api/dashboard')
     app.register_blueprint(status_view.blueprint, url_prefix='/api/status')
     app.register_blueprint(meta_view.blueprint, url_prefix='/api/meta')
+    app.register_blueprint(digest_view.blueprint, url_prefix='/api/digest')
+    app.register_blueprint(rca_view.blueprint, url_prefix='/api/rca')
     return None
 
 
@@ -137,3 +143,4 @@ def register_commands(app):
     app.cli.add_command(commands.reinstall_db)
     app.cli.add_command(commands.insert_demo_data)
     app.cli.add_command(commands.run_anomaly_rca_scheduler)
+    app.cli.add_command(commands.run_digest)

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import Search from '../../assets/images/search.svg';
+import { debuncerReturn } from '../../utils/simple-debouncer';
 
 const AlertFilter = ({
   setAlertSearch,
@@ -14,6 +15,8 @@ const AlertFilter = ({
   const onSearch = (e) => {
     setAlertSearch(e.target.value);
   };
+
+  const debounce = (func) => debuncerReturn(func, 500);
 
   useEffect(() => {
     setAlertFilter(checked);
@@ -58,7 +61,7 @@ const AlertFilter = ({
             type="text"
             className="form-control h-40"
             placeholder="Search Alert"
-            onChange={(e) => onSearch(e)}
+            onChange={debounce(onSearch)}
           />
           <span>
             <img src={Search} alt="Search Icon" />

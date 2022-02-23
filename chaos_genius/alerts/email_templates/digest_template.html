@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+.digest-container {
+    color: #F6F5F5 !important;
+}
+
+.btn {
+    appearance: button;
+    cursor: pointer;
+    border-radius: 10px;
+    border-width: 0;
+    background-color: #60CA9A;
+    color: black !important;
+    height: 2rem;
+    line-height: 2rem;
+    padding: 0 1rem;
+    margin-bottom: 1rem;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.kpi-link {
+    color: white !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<h2 style="margin-bottom: 15px; color: #F6F5F5">Daily Alert Digest</h2>
+
+<hr />
+
+<div class="digest-container">
+
+<h3>Summary</h3>
+<ul>
+    <li>Total alerts generated (overall KPI): {{ overall_count }}</li>
+    <li>Total alerts generated (including subdimensions): {{ overall_count + subdim_count }}</li>
+</ul>
+
+<a class="btn" href={{ alert_dashboard_link }}>Alerts Dashboard</a>
+
+<hr />
+
+<h3>Top 10 Anomalies</h3>
+<ul>
+    {% for point in top_anomalies %}
+    <li>
+        <strong><a class="kpi-link" href="{{ kpi_link_prefix }}/{{ point["kpi_id"] }}">{{point["kpi_name"]}} ({{point["Dimension"]}})</strong></a>
+        <span style="color: lightgrey;">
+            changed to <strong>{{point["y"]}}</strong>
+        {% if point["percentage_change"] is string %}
+        (<span>{{ point["change_message"] }}</span>)
+        {% elif point["percentage_change"] > 0 %}
+        (<span style="color: lightgreen;">{{ point["change_message"] }}</span>)
+        {% elif point["percentage_change"] < 0 %}
+        (<span style="color: red;">{{ point["change_message"] }}</span>)
+        {% else %}
+        (<span>{{ point["change_message"] }}</span>)
+        {% endif %}
+        on {{ point["formatted_date"] }}
+        (expected: <strong>{{point["yhat_lower"]}}</strong> to <strong>{{point["yhat_upper"]}}</strong>,
+        severity:
+        <strong>{{point["severity"]}}</strong>)
+        </span>
+    </li>
+    {% endfor %}
+</ul>
+
+</div>
+
+{% endblock %}

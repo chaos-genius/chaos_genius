@@ -1,7 +1,6 @@
 """Provides RootCauseAnalysis class for computing RCA."""
 
 import warnings
-from collections import OrderedDict
 from itertools import combinations
 from math import isclose
 from textwrap import wrap
@@ -11,6 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
 from chaos_genius.core.rca.rca_utils.string_helpers import (
     convert_df_dims_to_query_strings,
     convert_query_string_to_user_string,
@@ -78,7 +78,9 @@ class RootCauseAnalysis:
             if len(set(num_dim_combs)) != len(num_dim_combs):
                 raise ValueError(f"n {num_dim_combs} has duplicates.")
             if len(num_dim_combs) > 4:
-                warnings.warn("Passing more than 4 values for n will take a while.")
+                warnings.warn(
+                    "Passing more than 4 values for n will take a while."
+                )
         self._num_dim_combs_to_consider = num_dim_combs
 
         self._impact_table = None
@@ -99,7 +101,10 @@ class RootCauseAnalysis:
 
         # sort by absolute impact values
         impact_table = impact_table.sort_values(
-            by="impact", ascending=False, key=lambda x: x.abs(), ignore_index=True
+            by="impact",
+            ascending=False,
+            key=lambda x: x.abs(),
+            ignore_index=True,
         )
 
         # add query string
@@ -152,14 +157,20 @@ class RootCauseAnalysis:
 
         # getting subgroups for waterfall
         best_subgroups = get_best_subgroups_using_superset_algo(
-            impact_table, self._max_waterfall_columns, self._max_subgroups_considered
+            impact_table,
+            self._max_waterfall_columns,
+            self._max_subgroups_considered,
         )
-        best_subgroups = best_subgroups[best_subgroups["ignored"] == False]  # noqa E712
+        best_subgroups = best_subgroups[
+            best_subgroups["ignored"] == False  # noqa E712
+        ]
         best_subgroups = best_subgroups.merge(
             impact_table[["string", "impact"]], how="inner", on="string"
         )
         best_subgroups["impact_non_overlap"] = best_subgroups["impact"]
-        best_subgroups.rename(columns={"impact": "impact_full_group"}, inplace=True)
+        best_subgroups.rename(
+            columns={"impact": "impact_full_group"}, inplace=True
+        )
         best_subgroups[["indices_in_group", "non_overlap_indices"]] = 0
 
         # calculate overlap values
@@ -186,9 +197,9 @@ class RootCauseAnalysis:
         ]
 
         for col in non_cat_cols.index:
-            binned_values = pd.qcut(self._full_df[col], 4, duplicates="drop").astype(
-                str
-            )
+            binned_values = pd.qcut(
+                self._full_df[col], 4, duplicates="drop"
+            ).astype(str)
             self._full_df[col] = binned_values
 
         self._grp1_df = self._full_df.loc[self._grp1_df.index]
@@ -202,7 +213,9 @@ class RootCauseAnalysis:
         """
         list_subgroups = []
         for i in self._num_dim_combs_to_consider:
-            list_subgroups_of_level = list(map(list, combinations(self._dims, i)))
+            list_subgroups_of_level = list(
+                map(list, combinations(self._dims, i))
+            )
             list_subgroups.extend(list_subgroups_of_level)
         return list_subgroups
 
@@ -226,10 +239,14 @@ class RootCauseAnalysis:
         agg_list = [self._agg, "count"] if self._agg != "count" else ["count"]
 
         grp1_df = (
-            self._grp1_df.groupby(dim_comb)[self._metric].agg(agg_list).reset_index()
+            self._grp1_df.groupby(dim_comb)[self._metric]
+            .agg(agg_list)
+            .reset_index()
         )
         grp2_df = (
-            self._grp2_df.groupby(dim_comb)[self._metric].agg(agg_list).reset_index()
+            self._grp2_df.groupby(dim_comb)[self._metric]
+            .agg(agg_list)
+            .reset_index()
         )
 
         combined_df = grp1_df.merge(
@@ -241,7 +258,9 @@ class RootCauseAnalysis:
             count_name = "count" + suffix
 
             if self._agg == "mean":
-                value_numerator = combined_df[agg_name] * combined_df[count_name]
+                value_numerator = (
+                    combined_df[agg_name] * combined_df[count_name]
+                )
                 value_denominator = combined_df[count_name].sum() + EPSILON
                 value = value_numerator / value_denominator
             elif self._agg in ["sum", "count"]:
@@ -256,12 +275,14 @@ class RootCauseAnalysis:
             elif i == 1:
                 combined_df["size" + suffix] /= len(self._grp2_df) + EPSILON
 
-        combined_df["val_g1"], combined_df["size_g1"] = self._calculate_subgroup_values(
-            combined_df, "_g1"
-        )
-        combined_df["val_g2"], combined_df["size_g2"] = self._calculate_subgroup_values(
-            combined_df, "_g2"
-        )
+        (
+            combined_df["val_g1"],
+            combined_df["size_g1"],
+        ) = self._calculate_subgroup_values(combined_df, "_g1")
+        (
+            combined_df["val_g2"],
+            combined_df["size_g2"],
+        ) = self._calculate_subgroup_values(combined_df, "_g2")
 
         combined_df["impact"] = combined_df["val_g2"] - combined_df["val_g1"]
 
@@ -297,8 +318,12 @@ class RootCauseAnalysis:
                     query = " and ".join(combo)
                     d1_combo = set(self._grp1_df.query(query).index)
                     d2_combo = set(self._grp2_df.query(query).index)
-                    overlap_points_d1 = d1_idxs.intersection(d1_combo) - all_indices
-                    overlap_points_d2 = d2_idxs.intersection(d2_combo) - all_indices
+                    overlap_points_d1 = (
+                        d1_idxs.intersection(d1_combo) - all_indices
+                    )
+                    overlap_points_d2 = (
+                        d2_idxs.intersection(d2_combo) - all_indices
+                    )
 
                     overlap_indices_count += len(overlap_points_d1) + len(
                         overlap_points_d2
@@ -333,7 +358,9 @@ class RootCauseAnalysis:
 
                     subgroups_df_output.loc[
                         curr_loc, "impact_non_overlap"
-                    ] = subgroups_df_output.loc[curr_loc, "impact_non_overlap"] - (
+                    ] = subgroups_df_output.loc[
+                        curr_loc, "impact_non_overlap"
+                    ] - (
                         overlap_impact * len(combo) / (len(combo) + 1)
                     )
 
@@ -341,9 +368,9 @@ class RootCauseAnalysis:
                         overlap_points_d2
                     )
 
-            subgroups_df_output.loc[curr_loc, "indices_in_group"] = len(d1_idxs) + len(
-                d2_idxs
-            )
+            subgroups_df_output.loc[curr_loc, "indices_in_group"] = len(
+                d1_idxs
+            ) + len(d2_idxs)
 
             subgroups_df_output.loc[curr_loc, "non_overlap_indices"] = (
                 len(d1_idxs) + len(d2_idxs) - overlap_indices_count
@@ -381,19 +408,26 @@ class RootCauseAnalysis:
                 for i in waterfall_df["string"].values.tolist()
             ],
         ]
-        col_values = [d1_agg, *waterfall_df["impact_non_overlap"].values.tolist()]
+        col_values = [
+            d1_agg,
+            *waterfall_df["impact_non_overlap"].values.tolist(),
+        ]
         col_names_for_mpl.append("end")
         col_values.append(d2_agg)
 
         y_axis_lims = get_waterfall_ylims(
-            pd.DataFrame(data={self._metric: col_values}, index=col_names_for_mpl),
+            pd.DataFrame(
+                data={self._metric: col_values}, index=col_names_for_mpl
+            ),
             self._metric,
         )
 
         if plot_in_mpl:
             print("plot")
             waterfall_plot_mpl(
-                pd.DataFrame(data={self._metric: col_values}, index=col_names_for_mpl),
+                pd.DataFrame(
+                    data={self._metric: col_values}, index=col_names_for_mpl
+                ),
                 self._metric,
                 y_axis_lims,
             )
@@ -401,7 +435,7 @@ class RootCauseAnalysis:
 
         # Calculate steps for each subgroup
         col_values = (
-            col_values[0:1]
+            col_values[:1]
             + [sum(col_values[: i + 1]) for i in range(1, len(col_values) - 1)]
             + col_values[-1:]
         )
@@ -420,7 +454,9 @@ class RootCauseAnalysis:
 
         js_df["color"] = [
             "#FA5252" if val <= 0 else "#05A677"
-            for val in [0] + waterfall_df["impact_non_overlap"].values.tolist() + [0]
+            for val in [0]
+            + waterfall_df["impact_non_overlap"].values.tolist()
+            + [0]
         ]
 
         js_df.loc[[0, len(js_df) - 1], ["open", "color"]] = [
@@ -457,7 +493,9 @@ class RootCauseAnalysis:
 
         if single_dim is None:
             if self._waterfall_table is None or recalc:
-                self._waterfall_table = self._initialize_waterfall_table(single_dim)
+                self._waterfall_table = self._initialize_waterfall_table(
+                    single_dim
+                )
             best_subgroups = self._waterfall_table.copy()
         else:
             best_subgroups = self._initialize_waterfall_table(single_dim)
@@ -466,64 +504,39 @@ class RootCauseAnalysis:
 
         return best_subgroups
 
-    def get_panel_metrics(self) -> "OrderedDict[str, List[float]]":
+    def get_panel_metrics(self) -> Dict[str, float]:
         """Return panel metrics for the KPI.
 
-        :return: ordered dictionary with metrics
-        :rtype: OrderedDict[str, List[float]]
+        :return: Dictionary with metrics
+        :rtype: Dict[str, float]
         """
-        panel_metrics = []
-        for data in [self._grp1_df, self._grp2_df]:
-            len_data = len(data[self._metric])
-            out_dict = OrderedDict()
-            try:
-                # numerical data
-                if not self._metric_is_cat:
-                    out_dict = OrderedDict(
-                        {
-                            "mean": data[self._metric].mean().item(),
-                            "min": data[self._metric].min().item(),
-                            "median": data[self._metric].median().item(),
-                            "max": data[self._metric].max().item(),
-                            "sum": data[self._metric].sum().item(),
-                            "count": len_data,
-                            "null_count": len_data - data[self._metric].count().item(),
-                        }
-                    )
-                # categorical data
-                else:
-                    out_dict = OrderedDict(
-                        {
-                            "count": len_data,
-                            "null_count": len_data - data[self._metric].count().item(),
-                        }
-                    )
-                out_dict.move_to_end(self._agg, last=False)
-            except Exception:  # noqa: B902
-                pass
-            panel_metrics.append(out_dict)
-
-        d1_metrics, d2_metrics = panel_metrics
+        g1 = self._grp1_df[self._metric]
+        g2 = self._grp2_df[self._metric]
+        # set aggregations to 0 if data is empty
+        g1_agg = g1.agg(self._agg) if len(g1) > 0 else 0
+        g2_agg = g2.agg(self._agg) if len(g2) > 0 else 0
+        impact = g2_agg - g1_agg
+        perc_diff = (impact / g1_agg) * 100 if g1_agg != 0 else np.inf
 
         panel_metrics = {
-            "grp1_metrics": {k: round_number(v) for k, v in d1_metrics.items()},
-            "grp2_metrics": {k: round_number(v) for k, v in d2_metrics.items()},
-            "impact": OrderedDict(),
+            "group1_value": round_number(g1_agg),
+            "group2_value": round_number(g2_agg),
+            "difference": round_number(impact),
+            "perc_change": round_number(perc_diff)
+            if not np.isinf(perc_diff)
+            else "inf",
         }
 
-        for metric in panel_metrics["grp1_metrics"].keys():
-            metric_impact = d2_metrics[metric] - d1_metrics[metric]
-            panel_metrics["impact"][metric] = round_number(metric_impact)
-
         # Check for None or NaN values in output
-        for overall_key, value_dict in panel_metrics.items():
-            for key, value in value_dict.items():
-                if value is None or pd.isna(value):
-                    raise ValueError(f"{key} in {overall_key} is {value} (either None or NaN)")
+        for k, v in panel_metrics.items():
+            if v is None or pd.isna(v):
+                raise ValueError(f"{k} with value: {v} is either None or NaN")
 
         return panel_metrics
 
-    def get_impact_rows(self, single_dim: str = None) -> List[Dict[str, object]]:
+    def get_impact_rows(
+        self, single_dim: str = None
+    ) -> List[Dict[str, object]]:
         """Return impact dataframe as a list.
 
         :param single_dim: dimension to use, defaults to None
@@ -547,34 +560,33 @@ class RootCauseAnalysis:
         )
 
         # Check for any nan values in impact values and raise ValueError if found
-        self._check_nan(impact_table, f"Impact table for dimension {single_dim}")
+        self._check_nan(
+            impact_table, f"Impact table for dimension {single_dim}"
+        )
 
         return round_df(impact_table).to_dict("records")
 
-    def get_impact_column_map(self, timeline: str = "mom") -> List[Dict[str, str]]:
+    def get_impact_column_map(
+        self, timeline: str = "last_30_days"
+    ) -> List[Dict[str, str]]:
         """Return a mapping of column names to values for UI.
 
-        :param timeline: timeline to use, defaults to "mom"
+        :param timeline: timeline to use, defaults to "last_30_days"
         :type timeline: str, optional
         :return: List of mappings
         :rtype: List[Dict[str, str]]
         """
-        timestr = ""
-        if timeline == "mom":
-            timestr = "Month"
-        elif timeline == "wow":
-            timestr = "Week"
-        elif timeline == "dod":
-            timestr = "Day"
+        prev_timestr = TIME_RANGES_BY_KEY[timeline]["last_period_name"]
+        curr_timestr = TIME_RANGES_BY_KEY[timeline]["current_period_name"]
 
         mapping = [
             ("subgroup", "Subgroup Name"),
-            ("g1_agg", f"Last {timestr} Value"),
-            ("g1_count", f"Last {timestr} Count (#)"),
-            ("g1_size", f"Last {timestr} Size (%)"),
-            ("g2_agg", f"Current {timestr} Value"),
-            ("g2_count", f"Current {timestr} Count (#)"),
-            ("g2_size", f"Current {timestr} Size (%)"),
+            ("g1_agg", f"{prev_timestr} Value"),
+            ("g1_count", f"{prev_timestr} Count (#)"),
+            ("g1_size", f"{prev_timestr} Size (%)"),
+            ("g2_agg", f"{curr_timestr} Value"),
+            ("g2_count", f"{curr_timestr} Count (#)"),
+            ("g2_size", f"{curr_timestr} Size (%)"),
             ("impact", "Impact"),
         ]
 
@@ -607,7 +619,9 @@ class RootCauseAnalysis:
         )
 
         # Check for any nan values in best subgroups and raise ValueError if found
-        self._check_nan(best_subgroups, f"Waterfall table for dimension {single_dim}")
+        self._check_nan(
+            best_subgroups, f"Waterfall table for dimension {single_dim}"
+        )
 
         return round_df(best_subgroups).to_dict("records")
 
@@ -648,7 +662,9 @@ class RootCauseAnalysis:
         )
 
         # Check for any nan values in waterfall df and raise ValueError if found
-        self._check_nan(waterfall_df, f"Waterfall chart for dimension {single_dim}")
+        self._check_nan(
+            waterfall_df, f"Waterfall chart for dimension {single_dim}"
+        )
 
         return (
             round_df(waterfall_df).to_dict("records"),
@@ -697,10 +713,13 @@ class RootCauseAnalysis:
                 children = impact_table
                 for filter_string in filters:
                     children = children[
-                        children["string"].str.contains(filter_string, regex=False)
+                        children["string"].str.contains(
+                            filter_string, regex=False
+                        )
                     ]
                 children = children[
-                    children[other_dims].isna().sum(axis=1) == len(other_dims) - depth
+                    children[other_dims].isna().sum(axis=1)
+                    == len(other_dims) - depth
                 ]
                 children = children.iloc[:max_children]
                 children["depth"] = depth + 1
@@ -709,7 +728,9 @@ class RootCauseAnalysis:
 
         output_table.drop(self._dims, axis=1, inplace=True)
 
-        output_table = output_table.reset_index().rename(columns={"index": "id"})
+        output_table = output_table.reset_index().rename(
+            columns={"index": "id"}
+        )
 
         output_table["string"] = output_table["string"].apply(
             convert_query_string_to_user_string
@@ -718,16 +739,15 @@ class RootCauseAnalysis:
         # Check for any nan values in output table and raise ValueError if found
         self._check_nan(
             output_table.drop("parentId", axis=1),
-            f"Hierarchical table for dimension {single_dim}"
+            f"Hierarchical table for dimension {single_dim}",
         )
 
         return round_df(output_table).to_dict("records")
 
     def _check_nan(self, df: pd.DataFrame, message: str) -> None:
         """Check if NaN values in dataframe."""
-
         nan_df = df.isna().sum()
         nan_dict: dict = nan_df[nan_df > 0].to_dict()
 
-        if len(nan_dict) != 0:
+        if nan_dict:
             raise ValueError(f"{message} contains NaN values. {nan_dict}")

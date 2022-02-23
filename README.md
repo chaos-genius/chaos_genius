@@ -67,7 +67,7 @@ Follow this [Quick Start guide](https://docs.chaosgenius.io/docs/Quick_Start/pre
 ## :dizzy: Key Features
 
 ### :small_orange_diamond: Automated DeepDrills
-![DD](https://raw.githubusercontent.com/chaos-genius/.github/main/images/DeepDrills%20Single%20Chart.png)
+![DD](https://raw.githubusercontent.com/chaos-genius/.github/main/images/DeepDrills.png)
 
 Identify the key drivers of change in defined metrics (e.g. Sales) across a large number of high cardinality dimensions (e.g. CountryID, ProductID, BrandID, Device_type).
 - Techniques: Statistical Filtering, A* like path based search to deal with combinatorial explosion

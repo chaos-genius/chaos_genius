@@ -22,7 +22,13 @@
 
 <h3 align="center">Open source analytics engine to detect & diagnose the root-cause of outliers in <br/> high-dimensional business & system metrics</h3>
 
- <br/>
+<br/>
+
+<p align="center">
+<a href="https://docs.chaosgenius.io/docs/setup/local-setup/"><img src=".github/images/local_button_noborder.png" width="120px" /><a/>
+<a href="https://docs.chaosgenius.io/docs/setup/aws-setup/"><img src=".github/images/aws_button_noborder.png" width="120px" /><a/>
+<a href="https://docs.chaosgenius.io/docs/setup/gcp-setup/"><img src=".github/images/gcp_button_noborder.png" width="120px" /><a/>
+</p>
 
 ## ✨ What is Chaos Genius?
 
@@ -31,6 +37,8 @@ Chaos Genius is an open source analytics engine to help humans detect & diagnose
 Using Chaos Genius, users can segment large datasets by key performance metrics (e.g. Daily Active Users, Cloud Costs, Failure Rates) and setup drill-downs for explanation of deviation or anomalies across important dimensions (e.g., countryID, DeviceID, ProductID, DayofWeek).
 
 The key use-cases for Chaos Genius include **monitoring & alerting for various business, system and data quality metrics**.
+    
+Chaos Genius comes with a UI that offers simple point-and-click functionality for various tasks like adding data sources, defining the key performance metrics with dimensions and setting up alerts for anamalous behavior and deviations. 
 
 [See more on our website. ](https://chaosgenius.io/)
 
@@ -38,19 +46,11 @@ The key use-cases for Chaos Genius include **monitoring & alerting for various b
 
 <!--![A small demo of Chaos Genius](https://chaosgenius-public.s3.amazonaws.com/test-cg-1-small.gif)-->
 
-
 <!-- ## Architecture
 
 ![image](/img/cg-high-level-arch.png) -->
 
 ## ⚙️ Quick Start
-
-Chaos Genius comes with a UI that offers simple point-and-click functionality for various tasks like adding data sources, defining the key performance metrics with dimensions and setting up alerts for anamalous behavior and deviations. 
-
-
-<a href="https://docs.chaosgenius.io/docs/setup/local-setup/"><img src=".github/images/local_button_noborder.png" width="120px" /><a/>
-<a href="https://docs.chaosgenius.io/docs/setup/aws-setup/"><img src=".github/images/aws_button_noborder.png" width="120px" /><a/>
-<a href="https://docs.chaosgenius.io/docs/setup/gcp-setup/"><img src=".github/images/gcp_button_noborder.png" width="120px" /><a/>
 
 ```
 git clone https://github.com/chaos-genius/chaos_genius

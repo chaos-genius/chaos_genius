@@ -1,4 +1,4 @@
-![CG Header](https://raw.githubusercontent.com/chaos-genius/.github/main/github-cover.png)
+![CG Header](https://raw.githubusercontent.com/chaos-genius/.github/main/images/CG-banner.png)
 
 <p align="center">
     <a href="https://www.chaosgenius.io/"><b>Website</b></a> •

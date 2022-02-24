@@ -44,11 +44,7 @@ def save_anomaly_point_formatting(points: List[Dict]):
 
 def top_anomalies(points: List[Dict], n=10) -> List[Dict]:
     """Returns top n anomalies according to severity."""
-    return heapq.nlargest(
-        n,
-        points,
-        key=lambda point: point["severity"]
-    )
+    return heapq.nlargest(n, points, key=lambda point: point["severity"])
 
 
 def count_anomalies(points: List[Dict]) -> Tuple[int, int]:

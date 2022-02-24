@@ -7,9 +7,31 @@ import pandas as pd
 
 # TODO: Update docstrings to sphinx format
 
+# Added a string translation to ensure we escape double quotes correctly.
+# Replaces all '"' with '\"'
+_string_transformation_for_query = str.maketrans({'"': '\\"'})
 
-def _parse_single_col_for_query_string(col: str, value: str) -> str:
+
+def get_query_from_col_and_value(col: str, value: str) -> str:
+    """Convery given col and value into a query string."""
+    value = value.translate(_string_transformation_for_query)
     return f'`{col}`=="{value}"'
+
+
+def get_query_from_cols_and_values(col_names, raw_combinations):
+    """Convert given col names and combinates into query strings."""
+    # TODO: Write tests for this.
+    query_list = []
+    for comb in raw_combinations:
+        if type(comb) == str:
+            unjoined_query = [get_query_from_col_and_value(col_names[0], comb]
+        elif type(comb) == tuple:
+            unjoined_query = [
+                get_query_from_col_and_value(col_names[i], comb[i] for i in range(len(comb))
+            ]
+        query_string = " and ".join(unjoined_query)
+        query_list.append(query_string)
+    return query_list
 
 
 def convert_df_dims_to_query_strings(inp: pd.DataFrame) -> str:
@@ -24,7 +46,7 @@ def convert_df_dims_to_query_strings(inp: pd.DataFrame) -> str:
     for col in inp.index.sort_values():
         val = inp[col]
         if val is not np.nan:
-            query_string_lists.append(_parse_single_col_for_query_string(col, val))
+            query_string_lists.append(get_query_from_col_and_value(col, val))
     return " and ".join(query_string_lists)
 
 

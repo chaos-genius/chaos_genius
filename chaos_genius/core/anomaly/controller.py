@@ -16,6 +16,7 @@ from chaos_genius.core.anomaly.utils import (
 )
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.core.utils.end_date import load_input_data_end_date
+from chaos_genius.core.utils.string_helpers import get_query_from_cols_and_values
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, db
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.settings import (
@@ -232,7 +233,7 @@ class AnomalyDetectionController(object):
         for dim_list in dim_comb:
             grouped_dims = input_data.groupby(dim_list)
             subgroup_raw = list(grouped_dims.groups.keys())
-            subgroup_querified = self._querify(dim_list, subgroup_raw)
+            subgroup_querified = get_query_from_cols_and_values(dim_list, subgroup_raw)
             group_list.extend(subgroup_querified)
         return group_list
 

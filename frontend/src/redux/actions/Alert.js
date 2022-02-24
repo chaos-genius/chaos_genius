@@ -76,23 +76,35 @@ export const getAlertEmailSuccess = (response) => {
   };
 };
 
-export const getAllAlertEmail = (details) => {
-  return async (dispatch) => {
-    dispatch(getAlertEmailRequest());
-    const { data, error, status } = await postRequest({
-      url: ALERT_EMAIL_URL,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      data: JSON.stringify(details),
-      noAuth: true
-    });
-    if (error) {
-      dispatch(getAlertEmailFailure());
-    } else if (data && status === 200) {
-      dispatch(getAlertEmailSuccess(data));
+export const getAllAlertEmail = (details, customToast) => {
+  if (env.REACT_APP_IS_DEMO === 'true') {
+    if (customToast) {
+      customToast({
+        type: 'error',
+        header: 'This is a demo version'
+      });
     }
-  };
+    return {
+      type: 'default'
+    };
+  } else {
+    return async (dispatch) => {
+      dispatch(getAlertEmailRequest());
+      const { data, error, status } = await postRequest({
+        url: ALERT_EMAIL_URL,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: JSON.stringify(details),
+        noAuth: true
+      });
+      if (error) {
+        dispatch(getAlertEmailFailure());
+      } else if (data && status === 200) {
+        dispatch(getAlertEmailSuccess(data));
+      }
+    };
+  }
 };
 
 export const getChannelStatusRequest = () => {

@@ -66,4 +66,6 @@ DEMO_ENDPOINT_WHITELIST = ["alert.alert_meta_info",
                         "public.static",
                         "static",
                         "status.static",
-                        "status.task_monitor_view"]
+                        "status.task_monitor_view",
+                        "api_kpi.get_timecuts_list"]
+

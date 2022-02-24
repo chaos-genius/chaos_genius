@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from chaos_genius.core.rca.rca_utils.string_helpers import (
+from chaos_genius.core.utils.string_helpers import (
     convert_df_dims_to_query_strings,
     convert_query_string_to_user_string,
 )

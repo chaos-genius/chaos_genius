@@ -21,7 +21,7 @@ from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 
-from chaos_genius.core.rca.rca_utils.string_helpers import (
+from chaos_genius.core.utils.string_helpers import (
     convert_query_string_to_user_string,
 )
 from chaos_genius.utils.datetime_helper import get_date_string_with_tz

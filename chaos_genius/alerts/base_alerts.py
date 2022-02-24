@@ -28,7 +28,7 @@ from chaos_genius.alerts.anomaly_alert_config import (
 )
 from chaos_genius.alerts.constants import ALERT_DATE_FORMAT
 from chaos_genius.alerts.utils import count_anomalies, save_anomaly_point_formatting, top_anomalies, webapp_url_prefix
-from chaos_genius.core.rca.rca_utils.string_helpers import convert_query_string_to_user_string
+from chaos_genius.core.utils.string_helpers import convert_query_string_to_user_string
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from tabulate import tabulate
 

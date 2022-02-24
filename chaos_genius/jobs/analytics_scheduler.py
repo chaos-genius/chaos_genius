@@ -123,7 +123,7 @@ class AnalyticsScheduler:
 
         return res
 
-    @celery.task
+    # @celery.task
     def scheduler(self):
 
         for kpi in self._active_kpis():
@@ -142,3 +142,9 @@ class AnalyticsScheduler:
             )
 
         return self._run_task_group()
+
+
+@celery.task
+def scheduler_wrapper():
+    scheduler_instantiate = AnalyticsScheduler()
+    scheduler_instantiate.scheduler()

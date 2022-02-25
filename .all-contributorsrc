@@ -255,6 +255,16 @@
         "bug",
         "review"
       ]
+    },
+    {
+      "login": "rjdp",
+      "name": "Rajdeep Sharma",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7734938?v=4",
+      "profile": "https://buggydebugger.com/",
+      "contributions": [
+        "code",
+        "review"
+      ]
     }
   ],
   "contributorsPerLine": 7,

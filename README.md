@@ -20,14 +20,14 @@
 
 </p>
 
-<h3 align="center">Open-source analytics engine for applying AI and ML to monitor and analyse <br/> high-dimensionality business & system metrics.  </h3>
+<h3 align="center">ML powered analytics engine for business metrics analyses like outlier detection and root cause analysis.</h3>
 
 <br/>
 
 ## ✨ What is Chaos Genius?
 
 
-Chaos Genius is an open source analytics engine for applying AI and ML to monitor and analyse business & system metrics across a large number of dimensions. 
+Chaos Genius is an open source ML powered analytics engine for business metrics analyses like outlier detection and root cause analysis. 
 
 Using Chaos Genius, users can segment large datasets by key performance metrics (e.g. Daily Active Users, Cloud Costs, Failure Rates) and important dimensions (e.g., countryID, DeviceID, ProductID, DayofWeek) across which they want to monitor and analyse the key metrics.
 

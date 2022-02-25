@@ -48,7 +48,7 @@ Chaos Genius comes with a UI that offers simple point-and-click functionality fo
 
 [See more on our website. ](https://chaosgenius.io/)
 
-To try it out, check out our [Demo.] (https://demo-github.chaosgenius.io/#/0) 
+To try it out, check out our [Demo.](https://demo-github.chaosgenius.io/#/0) 
 
 <!--![A small demo of Chaos Genius](https://chaosgenius-public.s3.amazonaws.com/test-cg-1-small.gif)-->
 

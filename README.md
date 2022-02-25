@@ -31,10 +31,8 @@ Chaos Genius is an open source ML powered analytics engine for like outlier dete
 
 Using Chaos Genius, users can segment large datasets by key performance metrics (e.g. Daily Active Users, Cloud Costs, Failure Rates) and important dimensions (e.g., countryID, DeviceID, ProductID, DayofWeek) across which they want to monitor and analyse the key metrics.
 
-Chaos Genius comes with a UI that offers simple point-and-click functionality for various tasks like adding data sources, defining the key performance metrics with dimensions and setting up advaned analytics. 
+<!--Chaos Genius comes with a UI that offers simple point-and-click functionality for various tasks like adding data sources, defining the key performance metrics with dimensions and setting up advaned analytics. -->
 
-### Demo
-To try it out, check out our [Demo.](https://demo-github.chaosgenius.io/#/0) 
 
 ### Use Chaos Genius if you want: 
 - Multidimensional Drill Downs & Insights
@@ -47,9 +45,10 @@ To try it out, check out our [Demo.](https://demo-github.chaosgenius.io/#/0)
 
 **in Short and Medium-term Roadmap*
 
+### Demo
+To try it out, check out our [Demo.](https://demo-github.chaosgenius.io/#/0) 
 
-
-[See more on our website. ](https://chaosgenius.io/)
+<!--[See more on our website. ](https://chaosgenius.io/)-->
 
 
 

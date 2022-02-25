@@ -19,7 +19,7 @@ load_dotenv(".env")  # loads environment variables from .env
 
 """
 load the environment variables from the .env.local files
-and overide the variables
+and override the variables
 Here is the order of precedence:
 .env.local > os.environ > .env
 """

@@ -105,7 +105,7 @@ Actionable alerts with self-learning thresholds. Configurations to setup alert f
 - Channels: Email, Slack
 <!-- TODO: add an image or illustration here -->
     
-![Alerting](https://raw.githubusercontent.com/chaos-genius/.github/main/images/Alerting.png)
+![Alerting](https://raw.githubusercontent.com/chaos-genius/.github/main/images/Alerting-Dark.png)
 
 ## :octocat: Community
 

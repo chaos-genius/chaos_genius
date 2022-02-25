@@ -19,24 +19,43 @@ class AnalyticsScheduler:
     def __init__(self):
         """[summary]"""
         self.task_group = []
+        # schedule hourly KPIs after the 10th minute of every hour
+        self.hourly_schedule_run_minute = 10
 
     def _get_scheduled_time(self, kpi: Kpi):
 
         # get scheduler_params, will be None if it's not set
         scheduler_params = kpi.scheduler_params
-
+        schedule_frequency = scheduler_params["scheduler_frequency"]
         scheduled_time = datetime.now()
-        scheduled_time = scheduled_time.replace(hour=11, minute=0, second=0)
+
+        if schedule_frequency == "H":
+            scheduled_time = scheduled_time.replace(
+                minute=self.hourly_schedule_run_minute, second=0
+            )
+        elif schedule_frequency == "D":
+            scheduled_time = scheduled_time.replace(hour=11, minute=0, second=0)
+        
         if scheduler_params is not None and "time" in scheduler_params:
             # HH:MM:SS
             # this is tA
-            hour, minute, second = map(int, scheduler_params["time"].split(":"))
+            if schedule_frequency == "D":
+                hour, minute, second = map(int, scheduler_params["time"].split(":"))
 
-            scheduled_time = datetime.now()
-            # today's date, but at HH:MM:SS
-            scheduled_time = scheduled_time.replace(
-                hour=hour, minute=minute, second=second
-            )
+                scheduled_time = datetime.now()
+                # today's date, but at HH:MM:SS
+                scheduled_time = scheduled_time.replace(
+                    hour=hour, minute=minute, second=second
+                )
+                
+            elif schedule_frequency == "H":
+                hour, minute, second = map(int, scheduler_params["time"].split(":"))
+
+                scheduled_time = datetime.now()
+                # today's date and hour but at MM:SS
+                scheduled_time = scheduled_time.replace(
+                    minute=self.hourly_schedule_run_minute, second=0
+                )
         else:
             # today's date, but at rca time (tR) or at kpi creation time
             scheduled_time = datetime.now()
@@ -80,6 +99,15 @@ class AnalyticsScheduler:
 
         # TODO: make rca time column and eliminate duplicate RCA run
         scheduler_params = kpi.scheduler_params
+        if scheduler_params is not None and scheduler_params['scheduler_frequency'] == "H":
+            hour, minute, second = map(int, scheduler_params["time"].split(":"))
+            scheduled_time = scheduled_time.replace(
+                hour=hour, minute=minute, second=second
+            )
+        
+        # import pprint
+        # pprint.pprint(scheduled_time)
+        
         rca_already_run = (
             scheduler_params is not None
             and "last_scheduled_time_rca" in scheduler_params
@@ -124,7 +152,7 @@ class AnalyticsScheduler:
         return res
 
     # @celery.task
-    def scheduler(self):
+    def schedule(self):
 
         for kpi in self._active_kpis():
             # if anomaly isn't setup yet, we still run RCA at     tR + 24 hours
@@ -137,7 +165,7 @@ class AnalyticsScheduler:
 
             to_run_rca = self._to_run_rca(kpi, scheduled_time, to_run_anomaly)
 
-            self._add_tasks_to_queue(
+            self._add_tasks_to_group(
                 kpi, to_run_anomaly, to_run_rca, current_time, scheduled_time
             )
 
@@ -146,5 +174,5 @@ class AnalyticsScheduler:
 
 @celery.task
 def scheduler_wrapper():
-    scheduler_instantiate = AnalyticsScheduler()
-    scheduler_instantiate.scheduler()
+    scheduler = AnalyticsScheduler()
+    scheduler.schedule()

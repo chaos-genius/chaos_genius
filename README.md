@@ -33,6 +33,9 @@ Using Chaos Genius, users can segment large datasets by key performance metrics 
 
 Chaos Genius comes with a UI that offers simple point-and-click functionality for various tasks like adding data sources, defining the key performance metrics with dimensions and setting up advaned analytics. 
 
+### Demo
+To try it out, check out our [Demo.](https://demo-github.chaosgenius.io/#/0) 
+
 ### Use Chaos Genius if you want: 
 - Multidimensional Drill Downs & Insights
 - Anomaly Detection
@@ -48,7 +51,7 @@ Chaos Genius comes with a UI that offers simple point-and-click functionality fo
 
 [See more on our website. ](https://chaosgenius.io/)
 
-To try it out, check out our [Demo.](https://demo-github.chaosgenius.io/#/0) 
+
 
 <!--![A small demo of Chaos Genius](https://chaosgenius-public.s3.amazonaws.com/test-cg-1-small.gif)-->
 

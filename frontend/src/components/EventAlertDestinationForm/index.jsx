@@ -31,6 +31,10 @@ const RESET_ACTION = {
   type: 'RESET_ALERT_DATA_Data'
 };
 
+const RESET_QUERY_DATA = {
+  type: 'EVENT_ALERT_QUERY_RESET'
+};
+
 const customSingleValue = ({ data }) => (
   <div className="input-select">
     <div className="input-select__single-value">
@@ -97,6 +101,7 @@ const EventAlertDestinationForm = ({
 
   const onBack = () => {
     store.dispatch(RESET_ACTION);
+    store.dispatch(RESET_QUERY_DATA);
     setEventSteps(1);
   };
 

@@ -98,6 +98,7 @@ class AnalyticsScheduler:
 
         # TODO: make rca time column and eliminate duplicate RCA run
         scheduler_params = kpi.scheduler_params
+
         if (
             scheduler_params is not None
             and "scheduler_frequency" in scheduler_params
@@ -108,16 +109,22 @@ class AnalyticsScheduler:
                 hour=hour, minute=minute, second=second
             )
 
-        # import pprint
-        # pprint.pprint(scheduled_time)
-
         rca_already_run = (
             scheduler_params is not None
             and "last_scheduled_time_rca" in scheduler_params
             and datetime.fromisoformat(scheduler_params["last_scheduled_time_rca"])
-            > scheduled_time
         )
-        return to_run_anomaly or (not rca_already_run)
+
+        hour, minute, second = map(int, scheduler_params["rca_time"].split(":"))
+        daily_rca_time = datetime.now().replace(hour=hour, minute=minute, second=second)
+
+        to_run_rca = not (
+            datetime.fromisoformat(
+                scheduler_params["last_scheduled_time_rca"] > daily_rca_time
+            )
+        )
+
+        return to_run_rca or (not rca_already_run)
 
     def _active_kpis(self):
         kpis: Iterable[Kpi] = Kpi.query.distinct("kpi_id").filter(

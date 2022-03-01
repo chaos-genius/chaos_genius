@@ -5,10 +5,22 @@ import heapq
 from typing import Dict, List, Tuple, Union
 
 from chaos_genius.alerts.constants import (
+    ANOMALY_ALERT_COLUMN_NAMES,
+    ANOMALY_TABLE_COLUMN_NAMES_MAPPER,
+    ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS,
+    IGNORE_COLUMNS_ANOMALY_TABLE,
+    FREQUENCY_DICT,
+    ALERT_DATE_FORMAT,
     ALERT_DATETIME_FORMAT,
-    ALERT_READABLE_DATETIME_FORMAT,
+    ALERT_READABLE_DATETIME_FORMAT
 )
+
 from chaos_genius.settings import CHAOSGENIUS_WEBAPP_URL
+from chaos_genius.core.utils.round import round_number
+
+from chaos_genius.core.rca.rca_utils.string_helpers import (
+    convert_query_string_to_user_string,
+)
 
 
 def webapp_url_prefix():
@@ -74,7 +86,7 @@ def change_message_from_percent(percent_change: Union[str, int, float]) -> str:
         return f"Decreased by ({percent_change}%)"
 
 
-def _format_anomaly_points(points: List[dict]):
+def format_anomaly_points(points: List[dict]):
     for anomaly_point in points:
         anomaly_point["series_type"] = (
             "Overall KPI"

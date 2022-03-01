@@ -11,13 +11,14 @@ import pandas as pd
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from tabulate import tabulate
 
-from chaos_genius.alerts.anomaly_alert_config import (
+from chaos_genius.alerts.constants import (
     ANOMALY_ALERT_COLUMN_NAMES,
     ANOMALY_TABLE_COLUMN_NAMES_MAPPER,
     ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS,
     IGNORE_COLUMNS_ANOMALY_TABLE,
+    ALERT_DATE_FORMAT,
 )
-from chaos_genius.alerts.constants import ALERT_DATE_FORMAT
+
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import anomaly_alert_slack, event_alert_slack
 from chaos_genius.alerts.utils import (
@@ -42,14 +43,6 @@ from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
 from chaos_genius.utils.io_helper import is_file_exists
 
 logger = logging.getLogger()
-
-FREQUENCY_DICT = {
-    "weekly": datetime.timedelta(days=7, hours=0, minutes=0),
-    "daily": datetime.timedelta(days=1, hours=0, minutes=0),
-    "hourly": datetime.timedelta(days=0, hours=1, minutes=0),
-    "every_15_minute": datetime.timedelta(days=0, hours=0, minutes=15),
-    "every_minute": datetime.timedelta(days=0, hours=0, minutes=1),
-}
 
 
 class StaticEventAlertController:

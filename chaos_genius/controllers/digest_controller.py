@@ -2,7 +2,7 @@ import datetime
 from collections import defaultdict
 from typing import DefaultDict, List
 
-from chaos_genius.alerts.base_alerts import change_message_from_percent
+from chaos_genius.alerts.utils import change_message_from_percent
 from chaos_genius.alerts.constants import ALERT_DATE_FORMAT, ALERT_DATETIME_FORMAT
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi

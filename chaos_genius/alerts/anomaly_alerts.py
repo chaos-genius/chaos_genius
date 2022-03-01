@@ -11,21 +11,26 @@ import pandas as pd
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from tabulate import tabulate
 
-from chaos_genius.alerts.anomaly_alert_config import (
+from chaos_genius.alerts.constants import (
     ANOMALY_ALERT_COLUMN_NAMES,
     ANOMALY_TABLE_COLUMN_NAMES_MAPPER,
     ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS,
     IGNORE_COLUMNS_ANOMALY_TABLE,
+    FREQUENCY_DICT,
+    ALERT_DATE_FORMAT
 )
-from chaos_genius.alerts.constants import ALERT_DATE_FORMAT
+
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import anomaly_alert_slack, event_alert_slack
 from chaos_genius.alerts.utils import (
     change_message_from_percent,
     count_anomalies,
+    format_anomaly_points,
     save_anomaly_point_formatting,
     top_anomalies,
     webapp_url_prefix,
+    find_percentage_change,
+    format_anomaly_points
 )
 
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
@@ -42,14 +47,6 @@ from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
 from chaos_genius.utils.io_helper import is_file_exists
 
 logger = logging.getLogger()
-
-FREQUENCY_DICT = {
-    "weekly": datetime.timedelta(days=7, hours=0, minutes=0),
-    "daily": datetime.timedelta(days=1, hours=0, minutes=0),
-    "hourly": datetime.timedelta(days=0, hours=1, minutes=0),
-    "every_15_minute": datetime.timedelta(days=0, hours=0, minutes=15),
-    "every_minute": datetime.timedelta(days=0, hours=0, minutes=1),
-}
 
 
 class AnomalyAlertController:
@@ -380,7 +377,7 @@ class AnomalyAlertController:
                 points = deepcopy(
                     [anomaly_point.as_dict for anomaly_point in anomaly_data]
                 )
-                _format_anomaly_points(points)
+                format_anomaly_points(points)
                 self.format_alert_data(points)
                 save_anomaly_point_formatting(points)
                 top_anomalies_ = top_anomalies(points, 5)
@@ -485,7 +482,7 @@ class AnomalyAlertController:
         test = "failed"
         if not (daily_digest or weekly_digest):
             points = deepcopy([anomaly_point.as_dict for anomaly_point in anomaly_data])
-            _format_anomaly_points(points)
+            format_anomaly_points(points)
             self.format_alert_data(points)
             save_anomaly_point_formatting(points)
             top_anomalies_ = top_anomalies(points, 5)

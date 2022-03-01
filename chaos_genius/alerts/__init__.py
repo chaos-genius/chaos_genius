@@ -1,3 +1,17 @@
+from typing import List, Optional, Tuple, Union
+from datetime import date
+import logging
+
+from chaos_genius.databases.models.alert_model import Alert
+from chaos_genius.databases.models.kpi_model import Kpi
+from chaos_genius.databases.models.data_source_model import DataSource
+
+from chaos_genius.alerts.event_alerts import StaticEventAlertController
+from chaos_genius.alerts.anomaly_alerts import AnomalyAlertController
+from chaos_genius.alerts.static_kpi_alerts import StaticKpiAlertController
+
+logger = logging.getLogger()
+
 def check_and_trigger_alert(alert_id):
     """Check the alert and trigger the notification if found
 

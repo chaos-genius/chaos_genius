@@ -131,7 +131,7 @@ def run_rca(kpi, end_date):
 def run_alert(id):
     """Check and perform the alert operation for provided Alert ID."""
     click.echo(f"Starting the alert check for ID: {id}.")
-    from chaos_genius.alerts.base_alerts import check_and_trigger_alert
+    from chaos_genius.alerts import check_and_trigger_alert
     status = check_and_trigger_alert(id)
     click.echo(f"Completed the alert check for ID: {id}.")
 

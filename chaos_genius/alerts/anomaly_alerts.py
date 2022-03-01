@@ -17,7 +17,8 @@ from chaos_genius.alerts.constants import (
     ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS,
     IGNORE_COLUMNS_ANOMALY_TABLE,
     FREQUENCY_DICT,
-    ALERT_DATE_FORMAT
+    ALERT_DATE_FORMAT,
+    OVERALL_KPI_SERIES_TYPE_REPR,
 )
 
 from chaos_genius.alerts.email import send_static_alert_email
@@ -142,14 +143,14 @@ class AnomalyAlertController:
 
         for anomaly_point in anomaly_data:
             anomaly_point["series_type"] = (
-                "Overall KPI"
+                OVERALL_KPI_SERIES_TYPE_REPR
                 if anomaly_point.get("anomaly_type") == "overall"
                 else anomaly_point["series_type"]
             )
             for key, value in anomaly_point.items():
                 if key in ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS:
                     anomaly_point[key] = round(value, 2)
-            if anomaly_point["series_type"] != "Overall KPI":
+            if anomaly_point["series_type"] != OVERALL_KPI_SERIES_TYPE_REPR:
                 anomaly_point["series_type"] = convert_query_string_to_user_string(
                     anomaly_point["series_type"]
                 )
@@ -195,7 +196,7 @@ class AnomalyAlertController:
                     point["series_type"]
                 )
             else:
-                point["series_type"] = "Overall KPI"
+                point["series_type"] = OVERALL_KPI_SERIES_TYPE_REPR
 
         for point in anomaly_data:
             intended_point = self._find_point(point, prev_day_data)
@@ -235,7 +236,7 @@ class AnomalyAlertController:
                     point["series_type"]
                 )
             else:
-                point["series_type"] = "Overall KPI"
+                point["series_type"] = OVERALL_KPI_SERIES_TYPE_REPR
 
         for point in prev_day_data:
             if point["data_datetime"].hour not in data.keys():

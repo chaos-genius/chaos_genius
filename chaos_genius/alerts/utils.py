@@ -12,7 +12,8 @@ from chaos_genius.alerts.constants import (
     FREQUENCY_DICT,
     ALERT_DATE_FORMAT,
     ALERT_DATETIME_FORMAT,
-    ALERT_READABLE_DATETIME_FORMAT
+    ALERT_READABLE_DATETIME_FORMAT,
+    OVERALL_KPI_SERIES_TYPE_REPR
 )
 
 from chaos_genius.settings import CHAOSGENIUS_WEBAPP_URL
@@ -62,7 +63,7 @@ def top_anomalies(points: List[Dict], n=10) -> List[Dict]:
 def count_anomalies(points: List[Dict]) -> Tuple[int, int]:
     """Returns a count of overall anomalies and subdim anomalies."""
     total = len(points)
-    overall = sum(1 for point in points if point["Dimension"] == "Overall KPI")
+    overall = sum(1 for point in points if point["Dimension"] == OVERALL_KPI_SERIES_TYPE_REPR)
     subdims = total - overall
     return overall, subdims
 
@@ -89,14 +90,14 @@ def change_message_from_percent(percent_change: Union[str, int, float]) -> str:
 def format_anomaly_points(points: List[dict]):
     for anomaly_point in points:
         anomaly_point["series_type"] = (
-            "Overall KPI"
+            OVERALL_KPI_SERIES_TYPE_REPR
             if anomaly_point.get("anomaly_type") == "overall"
             else anomaly_point["series_type"]
         )
         for key, value in anomaly_point.items():
             if key in ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS:
                 anomaly_point[key] = round(value, 2)
-        if anomaly_point["series_type"] != "Overall KPI":
+        if anomaly_point["series_type"] != OVERALL_KPI_SERIES_TYPE_REPR:
             anomaly_point["series_type"] = convert_query_string_to_user_string(
                 anomaly_point["series_type"]
             )

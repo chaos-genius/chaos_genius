@@ -36,3 +36,5 @@ FREQUENCY_DICT = {
     "every_15_minute": datetime.timedelta(days=0, hours=0, minutes=15),
     "every_minute": datetime.timedelta(days=0, hours=0, minutes=1),
 }
+
+OVERALL_KPI_SERIES_TYPE_REPR = "Overall KPI"

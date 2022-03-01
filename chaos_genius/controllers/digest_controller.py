@@ -3,7 +3,11 @@ from collections import defaultdict
 from typing import DefaultDict, List
 
 from chaos_genius.alerts.utils import change_message_from_percent
-from chaos_genius.alerts.constants import ALERT_DATE_FORMAT, ALERT_DATETIME_FORMAT
+from chaos_genius.alerts.constants import ( 
+    ALERT_DATE_FORMAT, 
+    ALERT_DATETIME_FORMAT,
+    OVERALL_KPI_SERIES_TYPE_REPR
+)
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
@@ -87,7 +91,7 @@ def _filter_anomaly_alerts(
         for alert in anomaly_alerts_data:
             alert.alert_metadata["alert_data"] = list(
                 filter(
-                    lambda point: point["Dimension"] == "Overall KPI",
+                    lambda point: point["Dimension"] == OVERALL_KPI_SERIES_TYPE_REPR,
                     alert.alert_metadata["alert_data"],
                 )
             )
@@ -98,7 +102,7 @@ def _filter_anomaly_alerts(
             max_subdims = 20
 
             for point in alert.alert_metadata["alert_data"]:
-                if point["Dimension"] != "Overall KPI":
+                if point["Dimension"] != OVERALL_KPI_SERIES_TYPE_REPR:
                     counts[point["data_datetime"]] += 1
                     if counts[point["data_datetime"]] > max_subdims:
                         continue

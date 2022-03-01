@@ -36,9 +36,7 @@ class AnalyticsScheduler:
         if time_field in scheduler_params:
             hour, minute, second = map(int, scheduler_params[time_field].split(":"))
             scheduled_time = scheduled_time.replace(
-                hour=hour,
-                minute=minute,
-                second=second
+                hour=hour, minute=minute, second=second
             )
         else:
             creation_time = kpi.created_at
@@ -62,12 +60,12 @@ class AnalyticsScheduler:
         scheduled_time = datetime.now()
 
         # consider time_field only if it's present and has only MM:SS
-        if time_field in scheduler_params and len(scheduler_params[time_field].split(":")) == 2:
+        if (
+            time_field in scheduler_params
+            and len(scheduler_params[time_field].split(":")) == 2
+        ):
             minute, second = map(int, scheduler_params[time_field].split(":"))
-            scheduled_time = scheduled_time.replace(
-                minute=minute,
-                second=second
-            )
+            scheduled_time = scheduled_time.replace(minute=minute, second=second)
         else:
             scheduled_time = scheduled_time.replace(
                 minute=self.hourly_schedule_run_minute,
@@ -100,15 +98,19 @@ class AnalyticsScheduler:
 
         # TODO: make rca time column and eliminate duplicate RCA run
         scheduler_params = kpi.scheduler_params
-        if scheduler_params is not None and "scheduler_frequency" in scheduler_params and scheduler_params['scheduler_frequency'] == "H":
+        if (
+            scheduler_params is not None
+            and "scheduler_frequency" in scheduler_params
+            and scheduler_params["scheduler_frequency"] == "H"
+        ):
             hour, minute, second = map(int, scheduler_params["time"].split(":"))
             scheduled_time = scheduled_time.replace(
                 hour=hour, minute=minute, second=second
             )
-        
+
         # import pprint
         # pprint.pprint(scheduled_time)
-        
+
         rca_already_run = (
             scheduler_params is not None
             and "last_scheduled_time_rca" in scheduler_params
@@ -173,10 +175,16 @@ class AnalyticsScheduler:
             to_run_anomaly = self._to_run_anomaly(kpi, anomaly_scheduled_time)
 
             deepdrills_scheduled_time = self._get_scheduled_time_daily(kpi, "rca_time")
-            to_run_rca = self._to_run_rca(kpi, deepdrills_scheduled_time, to_run_anomaly)
+            to_run_rca = self._to_run_rca(
+                kpi, deepdrills_scheduled_time, to_run_anomaly
+            )
 
-            self._add_task_to_group(kpi, to_run_anomaly, current_time, anomaly_scheduled_time, "anomaly")
-            self._add_task_to_group(kpi, to_run_rca, current_time, deepdrills_scheduled_time, "deepdrills")
+            self._add_task_to_group(
+                kpi, to_run_anomaly, current_time, anomaly_scheduled_time, "anomaly"
+            )
+            self._add_task_to_group(
+                kpi, to_run_rca, current_time, deepdrills_scheduled_time, "deepdrills"
+            )
 
         return self._run_task_group()
 

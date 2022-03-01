@@ -8,7 +8,7 @@ from celery.app.base import Celery
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.extensions import celery as celery_ext
 
-from .anomaly_tasks import ready_anomaly_task, ready_rca_task
+from .anomaly_tasks import ready_anomaly_task, ready_rca_task, update_scheduler_params
 
 celery = cast(Celery, celery_ext.celery)
 
@@ -98,6 +98,9 @@ class AnalyticsScheduler:
 
         # TODO: make rca time column and eliminate duplicate RCA run
         scheduler_params = kpi.scheduler_params
+        if "rca_time" not in scheduler_params:
+            scheduler_params["rca_time"] = scheduler_params["last_scheduled_time_rca"].split("T")[-1]
+            update_scheduler_params("rca_time", scheduler_params["rca_time"])
 
         if (
             scheduler_params is not None

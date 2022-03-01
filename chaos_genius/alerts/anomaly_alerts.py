@@ -19,6 +19,7 @@ from chaos_genius.alerts.constants import (
     FREQUENCY_DICT,
     ALERT_DATE_FORMAT,
     OVERALL_KPI_SERIES_TYPE_REPR,
+    ALERT_DATETIME_FORMAT
 )
 
 from chaos_genius.alerts.email import send_static_alert_email
@@ -112,7 +113,7 @@ class AnomalyAlertController:
         alert_metadata = {
             "alert_frequency": self.alert_info["alert_frequency"],
             "alert_data": alert_data,
-            "end_date": str(self.anomaly_end_date),
+            "end_date": self.anomaly_end_date.strftime(ALERT_DATETIME_FORMAT),
             "severity_cutoff_score": self.alert_info["severity_cutoff_score"],
             "kpi": self.alert_info["kpi"],
         }
@@ -304,13 +305,13 @@ class AnomalyAlertController:
                 anomaly_point[value] = anomaly_point[key]
 
             my_time = time.strptime(
-                str(anomaly_point["Time of Occurrence"]), "%Y-%m-%d %H:%M:%S"
+                anomaly_point["Time of Occurrence"].strftime(ALERT_DATETIME_FORMAT), ALERT_DATETIME_FORMAT
             )
             timestamp = time.mktime(my_time)
             date_time = datetime.datetime.fromtimestamp(timestamp)
             new_time = date_time.strftime("%b %d %Y %H:%M:%S")
             anomaly_point["Time of Occurrence"] = new_time
-            anomaly_point["data_datetime"] = str(anomaly_point["data_datetime"])
+            anomaly_point["data_datetime"] = anomaly_point["data_datetime"].strftime(ALERT_DATETIME_FORMAT)
 
     def _remove_attributes_from_anomaly_points(
         self, anomaly_data: List[dict], list_attributes: List[str]

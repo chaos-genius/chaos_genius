@@ -445,18 +445,7 @@ class AnomalyAlertController:
             logger.info(f"No KPI exists for Alert ID - {self.alert_info['id']}")
             return False, None
 
-        data_source_obj = DataSource.query.filter(
-            DataSource.id == self.alert_info["data_source"], DataSource.active == True
-        ).first()
-
-        if data_source_obj is None:
-            logger.info(
-                f"The data source provided for Alert ID - {self.alert_info['id']} does not exist"
-            )
-            return False, None
-
         kpi_name = getattr(kpi_obj, "name")
-        data_source_name = getattr(data_source_obj, "name")
         alert_name = self.alert_info.get("alert_name")
         alert_message = self.alert_info["alert_message"]
 

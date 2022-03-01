@@ -1,6 +1,6 @@
 """Analytics Scheduler"""
 from datetime import datetime
-from typing import Iterable, cast
+from typing import Dict, Iterable, Literal, Union, cast
 
 from celery import group
 from celery.app.base import Celery
@@ -22,57 +22,58 @@ class AnalyticsScheduler:
         # schedule hourly KPIs after the 10th minute of every hour
         self.hourly_schedule_run_minute = 10
 
-    def _get_scheduled_time(self, kpi: Kpi):
+    def _get_scheduled_time_daily(self, kpi: Kpi, time_field: str = "time"):
+        """Calculate scheduled time for a daily run.
 
-        # get scheduler_params, will be None if it's not set
-        scheduler_params = kpi.scheduler_params
-        schedule_frequency = scheduler_params.get("scheduler_frequency", "D")
+        `time_field` is the field in scheduler_params which contains the
+        scheduled time. KPI creation time will be considered if this is not
+        set.
+        """
+        scheduler_params: Dict[str, str] = kpi.scheduler_params or {}
+
         scheduled_time = datetime.now()
 
-        if schedule_frequency == "H":
+        if time_field in scheduler_params:
+            hour, minute, second = map(int, scheduler_params[time_field].split(":"))
             scheduled_time = scheduled_time.replace(
-                minute=self.hourly_schedule_run_minute, second=0
+                hour=hour,
+                minute=minute,
+                second=second
             )
-        elif schedule_frequency == "D":
-            scheduled_time = scheduled_time.replace(hour=11, minute=0, second=0)
-        
-        if scheduler_params is not None and "time" in scheduler_params:
-            # HH:MM:SS
-            # this is tA
-            if schedule_frequency == "D":
-                hour, minute, second = map(int, scheduler_params["time"].split(":"))
-
-                scheduled_time = datetime.now()
-                # today's date, but at HH:MM:SS
-                scheduled_time = scheduled_time.replace(
-                    hour=hour, minute=minute, second=second
-                )
-                
-            elif schedule_frequency == "H":
-                hour, minute, second = map(int, scheduler_params["time"].split(":"))
-
-                scheduled_time = datetime.now()
-                # today's date and hour but at MM:SS
-                scheduled_time = scheduled_time.replace(
-                    minute=self.hourly_schedule_run_minute, second=0
-                )
         else:
-            # today's date, but at rca time (tR) or at kpi creation time
-            scheduled_time = datetime.now()
-            # this is tR
-            if scheduler_params is not None and "rca_time" in scheduler_params:
-                hour, minute, second = map(int, scheduler_params["rca_time"].split(":"))
-                scheduled_time = scheduled_time.replace(
-                    hour=hour, minute=minute, second=second
-                )
-            else:
-                # this is kpi creation time
-                canon_time = kpi.created_at
-                scheduled_time = scheduled_time.replace(
-                    hour=canon_time.hour,
-                    minute=canon_time.minute,
-                    second=canon_time.second,
-                )
+            creation_time = kpi.created_at
+            scheduled_time = scheduled_time.replace(
+                hour=creation_time.hour,
+                minute=creation_time.minute,
+                second=creation_time.second,
+            )
+
+        return scheduled_time
+
+    def _get_scheduled_time_hourly(self, kpi: Kpi, time_field: str = "time"):
+        """Calculate scheduled time for an hourly run.
+
+        `time_field` is the field in scheduler_params which contains the
+        scheduled time. This will be considered only if it's present and
+        has only MM:SS.
+        """
+        scheduler_params: Dict[str, str] = kpi.scheduler_params or {}
+
+        scheduled_time = datetime.now()
+
+        # consider time_field only if it's present and has only MM:SS
+        if time_field in scheduler_params and len(scheduler_params[time_field].split(":")) == 2:
+            minute, second = map(int, scheduler_params[time_field].split(":"))
+            scheduled_time = scheduled_time.replace(
+                minute=minute,
+                second=second
+            )
+        else:
+            scheduled_time = scheduled_time.replace(
+                minute=self.hourly_schedule_run_minute,
+                second=0,
+            )
+
         return scheduled_time
 
     def _to_run_anomaly(self, kpi: Kpi, scheduled_time: datetime) -> bool:
@@ -122,21 +123,21 @@ class AnalyticsScheduler:
         )
         return kpis
 
-    def _add_tasks_to_group(
+    def _add_task_to_group(
         self,
         kpi: Kpi,
-        to_run_anomaly: bool,
-        to_run_rca: bool,
+        to_run: bool,
         current_time: datetime,
         scheduled_time: datetime,
+        kind: Literal["anomaly", "deepdrills"],  # anomaly or deepdrills
     ):
-        if current_time > scheduled_time and (to_run_rca or to_run_anomaly):
+        if current_time > scheduled_time and to_run:
 
-            if to_run_anomaly:
+            if kind == "anomaly":
                 print(f"Scheduling anomaly for KPI: {kpi.id}")
                 self.task_group.append(ready_anomaly_task(kpi.id))
 
-            if to_run_rca:
+            elif kind == "deepdrills":
                 print(f"Scheduling RCA for KPI: {kpi.id}")
                 self.task_group.append(ready_rca_task(kpi.id))
 
@@ -158,16 +159,24 @@ class AnalyticsScheduler:
             # if anomaly isn't setup yet, we still run RCA at     tR + 24 hours
             # if anomaly is setup, we run both anomaly and RCA at tA + 24 hours
 
-            scheduled_time = self._get_scheduled_time(kpi)
+            # get scheduler_params, will be None if it's not set
+            scheduler_params: Dict[str, str] = kpi.scheduler_params or {}
+            schedule_frequency = scheduler_params.get("scheduler_frequency", "D")
+
             current_time = datetime.now()
 
-            to_run_anomaly = self._to_run_anomaly(kpi, scheduled_time)
+            if schedule_frequency == "H":
+                anomaly_scheduled_time = self._get_scheduled_time_hourly(kpi)
+            else:
+                anomaly_scheduled_time = self._get_scheduled_time_daily(kpi)
 
-            to_run_rca = self._to_run_rca(kpi, scheduled_time, to_run_anomaly)
+            to_run_anomaly = self._to_run_anomaly(kpi, anomaly_scheduled_time)
 
-            self._add_tasks_to_group(
-                kpi, to_run_anomaly, to_run_rca, current_time, scheduled_time
-            )
+            deepdrills_scheduled_time = self._get_scheduled_time_daily(kpi, "rca_time")
+            to_run_rca = self._to_run_rca(kpi, deepdrills_scheduled_time, to_run_anomaly)
+
+            self._add_task_to_group(kpi, to_run_anomaly, current_time, anomaly_scheduled_time, "anomaly")
+            self._add_task_to_group(kpi, to_run_rca, current_time, deepdrills_scheduled_time, "deepdrills")
 
         return self._run_task_group()
 

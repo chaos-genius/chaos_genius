@@ -26,7 +26,7 @@ class AnalyticsScheduler:
 
         # get scheduler_params, will be None if it's not set
         scheduler_params = kpi.scheduler_params
-        schedule_frequency = scheduler_params["scheduler_frequency"]
+        schedule_frequency = scheduler_params.get("scheduler_frequency", "D")
         scheduled_time = datetime.now()
 
         if schedule_frequency == "H":
@@ -99,7 +99,7 @@ class AnalyticsScheduler:
 
         # TODO: make rca time column and eliminate duplicate RCA run
         scheduler_params = kpi.scheduler_params
-        if scheduler_params is not None and scheduler_params['scheduler_frequency'] == "H":
+        if scheduler_params is not None and "scheduler_frequency" in scheduler_params and scheduler_params['scheduler_frequency'] == "H":
             hour, minute, second = map(int, scheduler_params["time"].split(":"))
             scheduled_time = scheduled_time.replace(
                 hour=hour, minute=minute, second=second

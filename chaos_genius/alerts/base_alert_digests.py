@@ -7,11 +7,11 @@ from typing import Dict, List, Tuple
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from chaos_genius.alerts.base_alerts import FREQUENCY_DICT
 from chaos_genius.alerts.constants import (
     ALERT_DATE_FORMAT,
     ALERT_DATETIME_FORMAT,
     ALERT_READABLE_DATETIME_FORMAT,
+    FREQUENCY_DICT,
 )
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import alert_digest_slack_formatted

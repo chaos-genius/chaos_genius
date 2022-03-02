@@ -2,9 +2,9 @@
 from datetime import datetime
 from typing import Dict, Iterable, Literal, Union, cast
 
-from sqlalchemy.orm.attributes import flag_modified
 from celery import group
 from celery.app.base import Celery
+from sqlalchemy.orm.attributes import flag_modified
 
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.extensions import celery as celery_ext
@@ -107,8 +107,8 @@ class AnalyticsScheduler:
 
         if rca_already_run:
             to_run_rca = not (
-                datetime.fromisoformat(
-                    scheduler_params["last_scheduled_time_rca"]) > scheduled_time
+                datetime.fromisoformat(scheduler_params["last_scheduled_time_rca"])
+                > scheduled_time
             )
             return to_run_rca
         else:
@@ -170,9 +170,7 @@ class AnalyticsScheduler:
             to_run_anomaly = self._to_run_anomaly(kpi, anomaly_scheduled_time)
 
             deepdrills_scheduled_time = self._get_scheduled_time_daily(kpi, "rca_time")
-            to_run_rca = self._to_run_rca(
-                kpi, deepdrills_scheduled_time
-            )
+            to_run_rca = self._to_run_rca(kpi, deepdrills_scheduled_time)
 
             self._add_task_to_group(
                 kpi, to_run_anomaly, current_time, anomaly_scheduled_time, "anomaly"

@@ -345,3 +345,7 @@ docs/yarn-error.log*
 ########### Third Party Integrations ##########
 .integrations.json
 .connectors
+
+# IDE configuration
+.idea/* # IntelliJ IDEA
+.vscode/* # Visual Studio Code

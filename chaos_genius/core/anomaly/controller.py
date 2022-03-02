@@ -91,6 +91,11 @@ class AnomalyDetectionController(object):
         """
         last_date = self._get_last_date_in_db("overall")
         period = self.kpi_info["anomaly_params"]["anomaly_period"]
+
+        # Convert period back to days for hourly data
+        if self.kpi_info["anomaly_params"]["frequency"] == "H":
+            period /= 24
+
         start_date = last_date - timedelta(days=period) if last_date else None
 
         return DataLoader(
@@ -376,8 +381,13 @@ class AnomalyDetectionController(object):
             model_name = self.kpi_info["anomaly_params"]["model_name"]
 
             # TODO: fix missing dates/values issue more robustly
-
             series_data[metric_col] = series_data[metric_col].fillna(0)
+            
+            # Fix end_date for hourly anomaly alerts
+            if self.kpi_info["scheduler_params"]["scheduler_frequency"] == "H":
+                self.end_date = self.end_date.floor(freq='H')
+                logger.info(f"End Date for Hourly Input Dataframe for KPI {self.end_date}")
+
         except Exception as e:
             self._checkpoint_failure("Overall KPI - Preprocessor", e, is_overall)
             raise e
@@ -551,7 +561,7 @@ class AnomalyDetectionController(object):
         if self.kpi_info["scheduler_params"]["scheduler_frequency"] == "H":
             logger.info(f"Creating Hourly Input Dataframe for KPI {kpi_id}")
             input_data = self._create_hourly_input_data(input_data)
-            logger.info(f"End Date for Hourly Input Dataframe for KPI {self.end_date}")
+            logger.info(f"Last Data Point for Hourly Input Dataframe for KPI {self.end_date}")
 
         logger.info(f"Loaded {len(input_data)} rows of input data.")
 

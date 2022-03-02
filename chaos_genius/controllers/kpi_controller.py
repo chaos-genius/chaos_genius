@@ -77,6 +77,10 @@ def run_anomaly_for_kpi(
         adc = AnomalyDetectionController(kpi_info, end_date, task_id=task_id)
         adc.detect()
         logger.info(f"Anomaly Detection has completed for KPI ID: {kpi_id}.")
+        
+        if kpi_info["scheduler_params"]["scheduler_frequency"] == "H":
+            end_date = adc.end_date
+            logger.info(f"End date for hourly alerts is {end_date}.")
 
     except Exception:  # noqa: B902
         logger.error(

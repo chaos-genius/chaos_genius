@@ -121,7 +121,12 @@ class AnomalyDetectionController(object):
         :rtype: pd.DataFrame
         """
         last_datetime = input_data[self.kpi_info["datetime_column"]].max()
+
+        # If last_datetime=2022-02-03 04:45:50 & offset=0, then end_date_str=2022-02-03 04:00:00
         end_date_str = last_datetime.floor(freq='H') - timedelta(hours=HOURS_OFFSET_FOR_ANALTYICS)
+
+        # If end_date_str=2022-02-03 04:00:00 then we have complete data until 4PM (not inclusive)
+        # Fetch all data <  2022-02-03 04:00:00 i.e. end_date_str
         input_data = input_data[input_data[self.kpi_info["datetime_column"]] < end_date_str]
 
         self.end_date = input_data[self.kpi_info["datetime_column"]].max()

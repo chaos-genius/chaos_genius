@@ -191,6 +191,7 @@ class AnomalyDetectionController(object):
         anomaly_output["kpi_id"] = self.kpi_info["id"]
         anomaly_output["anomaly_type"] = series
         anomaly_output["series_type"] = subgroup
+        anomaly_output["created_at"] = datetime.now()
 
         anomaly_output.to_sql(
             AnomalyDataOutput.__tablename__, db.engine, if_exists="append"

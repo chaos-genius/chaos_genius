@@ -4,12 +4,10 @@ import logging
 import os
 import time
 from copy import deepcopy
-from datetime import date
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional
 
 import pandas as pd
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from tabulate import tabulate
 
 from chaos_genius.alerts.constants import (
     ANOMALY_ALERT_COLUMN_NAMES,
@@ -17,13 +15,12 @@ from chaos_genius.alerts.constants import (
     ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS,
     IGNORE_COLUMNS_ANOMALY_TABLE,
     FREQUENCY_DICT,
-    ALERT_DATE_FORMAT,
     OVERALL_KPI_SERIES_TYPE_REPR,
     ALERT_DATETIME_FORMAT
 )
 
 from chaos_genius.alerts.email import send_static_alert_email
-from chaos_genius.alerts.slack import anomaly_alert_slack, event_alert_slack
+from chaos_genius.alerts.slack import anomaly_alert_slack
 from chaos_genius.alerts.utils import (
     change_message_from_percent,
     count_anomalies,
@@ -36,17 +33,13 @@ from chaos_genius.alerts.utils import (
 )
 
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
-from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.core.rca.rca_utils.string_helpers import (
     convert_query_string_to_user_string,
 )
-from chaos_genius.core.utils.round import round_number
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
-from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
-from chaos_genius.utils.io_helper import is_file_exists
 
 logger = logging.getLogger()
 

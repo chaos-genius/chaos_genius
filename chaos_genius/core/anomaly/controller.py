@@ -24,6 +24,7 @@ from chaos_genius.settings import (
     MAX_SUBDIM_CARDINALITY,
     MIN_DATA_IN_SUBGROUP,
     MULTIDIM_ANALYSIS_FOR_ANOMALY,
+    HOURS_OFFSET_FOR_ANALTYICS,
 )
 
 logger = logging.getLogger(__name__)
@@ -88,7 +89,6 @@ class AnomalyDetectionController(object):
         N days/hours
         :rtype: pd.DataFrame
         """
-
         last_date = self._get_last_date_in_db("overall")
         period = self.kpi_info["anomaly_params"]["anomaly_period"]
         start_date = last_date - timedelta(days=period) if last_date else None
@@ -111,6 +111,26 @@ class AnomalyDetectionController(object):
         :rtype: datetime
         """
         return get_last_date_in_db(self.kpi_info["id"], series, subgroup)
+
+    def _create_hourly_input_data(self, input_data: pd.DataFrame) -> pd.DataFrame:
+        """Return input data until the last complete hour minus the hourly_offset.
+
+        :param input_data: Loaded input dataframe
+        :type input_data: pd.DataFrame
+        :return: Dataframe for hourly anomaly
+        :rtype: pd.DataFrame
+        """
+        last_datetime = input_data[self.kpi_info["datetime_column"]].max()
+
+        # If last_datetime=2022-02-03 04:45:50 & offset=0, then end_date_str=2022-02-03 04:00:00
+        end_date_str = last_datetime.floor(freq='H') - timedelta(hours=HOURS_OFFSET_FOR_ANALTYICS)
+
+        # If end_date_str=2022-02-03 04:00:00 then we have complete data until 4PM (not inclusive)
+        # Fetch all data <  2022-02-03 04:00:00 i.e. end_date_str
+        input_data = input_data[input_data[self.kpi_info["datetime_column"]] < end_date_str]
+
+        self.end_date = input_data[self.kpi_info["datetime_column"]].max()
+        return input_data
 
     def _detect_anomaly(
         self,
@@ -176,6 +196,7 @@ class AnomalyDetectionController(object):
         anomaly_output["kpi_id"] = self.kpi_info["id"]
         anomaly_output["anomaly_type"] = series
         anomaly_output["series_type"] = subgroup
+        anomaly_output["created_at"] = datetime.now()
 
         anomaly_output.to_sql(
             AnomalyDataOutput.__tablename__, db.engine, if_exists="append"
@@ -273,7 +294,6 @@ class AnomalyDetectionController(object):
         :param subgroup: Subgroup of the KPI
         :type subgroup: str
         """
-
         is_overall = series == "overall"
 
         try:
@@ -430,7 +450,7 @@ class AnomalyDetectionController(object):
             self._checkpoint_success("Subdimensions - Anomaly Detector")
 
     def _detect_data_quality(self, input_data: pd.DataFrame) -> None:
-        """Perform anomaly detection for data quality metrics
+        """Perform anomaly detection for data quality metrics.
 
         :param input_data: Dataframe with all of the relevant KPI data
         :type input_data: pd.DataFrame
@@ -527,6 +547,12 @@ class AnomalyDetectionController(object):
             raise e
         else:
             self._checkpoint_success("Data Loader")
+
+        if self.kpi_info["scheduler_params"]["scheduler_frequency"] == "H":
+            logger.info(f"Creating Hourly Input Dataframe for KPI {kpi_id}")
+            input_data = self._create_hourly_input_data(input_data)
+            logger.info(f"End Date for Hourly Input Dataframe for KPI {self.end_date}")
+
         logger.info(f"Loaded {len(input_data)} rows of input data.")
 
         if self._to_run_overall(self.kpi_info):

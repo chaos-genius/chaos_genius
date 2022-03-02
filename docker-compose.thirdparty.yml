@@ -89,6 +89,7 @@ services:
       - SENTRY_DSN=${SENTRY_DSN}
       - CHAOSGENIUS_ENTERPRISE_EDITION_KEY=${CHAOSGENIUS_ENTERPRISE_EDITION_KEY}
       - CHAOSGENIUS_WEBAPP_URL=${CHAOSGENIUS_WEBAPP_URL}
+      - CORS_ENABLED=${CORS_ENABLED}
 
   chaosgenius-webapp:
     container_name: chaosgenius-webapp

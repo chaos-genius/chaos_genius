@@ -2,6 +2,7 @@
 from datetime import datetime
 from typing import Dict, Iterable, Literal, Union, cast
 
+from sqlalchemy.orm.attributes import flag_modified
 from celery import group
 from celery.app.base import Celery
 
@@ -91,7 +92,15 @@ class AnalyticsScheduler:
         )
         return (not anomaly_already_run) and anomaly_is_setup
 
-    def _to_run_rca(self, kpi: Kpi, scheduled_time: datetime, to_run_anomaly):
+    def _update_rca_time(self, kpi: Kpi):
+        scheduler_params = kpi.scheduler_params
+        # kpi_creation = kpi.created_at
+        scheduler_params["rca_time"] = "{kpi.created_at.hour}:{kpi.created_at.minute}:{kpi.created_at.second}"
+        update_scheduler_params("rca_time", scheduler_params["rca_time"])
+        flag_modified(kpi, "scheduler_params")
+        kpi.update(commit=True)
+
+    def _to_run_rca(self, kpi: Kpi, scheduled_time: datetime):
         # check if we have to run RCA
         # 1. if not already scheduled today
         # 2. if anomaly is scheduled, run RCA too
@@ -99,35 +108,22 @@ class AnalyticsScheduler:
         # TODO: make rca time column and eliminate duplicate RCA run
         scheduler_params = kpi.scheduler_params
         if "rca_time" not in scheduler_params:
-            scheduler_params["rca_time"] = scheduler_params["last_scheduled_time_rca"].split("T")[-1]
-            update_scheduler_params("rca_time", scheduler_params["rca_time"])
-
-        if (
-            scheduler_params is not None
-            and "scheduler_frequency" in scheduler_params
-            and scheduler_params["scheduler_frequency"] == "H"
-        ):
-            hour, minute, second = map(int, scheduler_params["time"].split(":"))
-            scheduled_time = scheduled_time.replace(
-                hour=hour, minute=minute, second=second
-            )
+            self._update_rca_time(kpi)
 
         rca_already_run = (
             scheduler_params is not None
             and "last_scheduled_time_rca" in scheduler_params
-            and datetime.fromisoformat(scheduler_params["last_scheduled_time_rca"])
         )
 
-        hour, minute, second = map(int, scheduler_params["rca_time"].split(":"))
-        daily_rca_time = datetime.now().replace(hour=hour, minute=minute, second=second)
-
-        to_run_rca = not (
-            datetime.fromisoformat(
-                scheduler_params["last_scheduled_time_rca"] > daily_rca_time
+        if rca_already_run:
+            to_run_rca = not (
+                datetime.fromisoformat(
+                    scheduler_params["last_scheduled_time_rca"] > scheduled_time
+                )
             )
-        )
-
-        return to_run_rca or (not rca_already_run)
+            return to_run_rca
+        else:
+            return True
 
     def _active_kpis(self):
         kpis: Iterable[Kpi] = Kpi.query.distinct("kpi_id").filter(

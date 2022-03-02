@@ -10,26 +10,24 @@ import pandas as pd
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from chaos_genius.alerts.constants import (
+    ALERT_DATETIME_FORMAT,
     ANOMALY_ALERT_COLUMN_NAMES,
     ANOMALY_TABLE_COLUMN_NAMES_MAPPER,
     ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS,
-    IGNORE_COLUMNS_ANOMALY_TABLE,
     FREQUENCY_DICT,
+    IGNORE_COLUMNS_ANOMALY_TABLE,
     OVERALL_KPI_SERIES_TYPE_REPR,
-    ALERT_DATETIME_FORMAT
 )
-
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import anomaly_alert_slack
 from chaos_genius.alerts.utils import (
     change_message_from_percent,
     count_anomalies,
+    find_percentage_change,
     format_anomaly_points,
     save_anomaly_point_formatting,
     top_anomalies,
     webapp_url_prefix,
-    find_percentage_change,
-    format_anomaly_points
 )
 
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
@@ -298,13 +296,16 @@ class AnomalyAlertController:
                 anomaly_point[value] = anomaly_point[key]
 
             my_time = time.strptime(
-                anomaly_point["Time of Occurrence"].strftime(ALERT_DATETIME_FORMAT), ALERT_DATETIME_FORMAT
+                anomaly_point["Time of Occurrence"].strftime(ALERT_DATETIME_FORMAT),
+                ALERT_DATETIME_FORMAT,
             )
             timestamp = time.mktime(my_time)
             date_time = datetime.datetime.fromtimestamp(timestamp)
             new_time = date_time.strftime("%b %d %Y %H:%M:%S")
             anomaly_point["Time of Occurrence"] = new_time
-            anomaly_point["data_datetime"] = anomaly_point["data_datetime"].strftime(ALERT_DATETIME_FORMAT)
+            anomaly_point["data_datetime"] = anomaly_point["data_datetime"].strftime(
+                ALERT_DATETIME_FORMAT
+            )
 
     def _remove_attributes_from_anomaly_points(
         self, anomaly_data: List[dict], list_attributes: List[str]

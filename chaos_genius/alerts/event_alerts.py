@@ -12,7 +12,6 @@ from chaos_genius.alerts.slack import event_alert_slack
 
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.connectors import get_sqla_db_conn
-
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
 from chaos_genius.utils.io_helper import is_file_exists

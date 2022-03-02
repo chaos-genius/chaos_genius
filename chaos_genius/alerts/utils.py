@@ -5,18 +5,16 @@ import heapq
 from typing import Dict, List, Tuple, Union
 
 from chaos_genius.alerts.constants import (
-    ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS,
     ALERT_DATETIME_FORMAT,
     ALERT_READABLE_DATETIME_FORMAT,
-    OVERALL_KPI_SERIES_TYPE_REPR
+    ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS,
+    OVERALL_KPI_SERIES_TYPE_REPR,
 )
-
-from chaos_genius.settings import CHAOSGENIUS_WEBAPP_URL
-from chaos_genius.core.utils.round import round_number
-
 from chaos_genius.core.rca.rca_utils.string_helpers import (
     convert_query_string_to_user_string,
 )
+from chaos_genius.core.utils.round import round_number
+from chaos_genius.settings import CHAOSGENIUS_WEBAPP_URL
 
 
 def webapp_url_prefix():
@@ -58,7 +56,9 @@ def top_anomalies(points: List[Dict], n=10) -> List[Dict]:
 def count_anomalies(points: List[Dict]) -> Tuple[int, int]:
     """Returns a count of overall anomalies and subdim anomalies."""
     total = len(points)
-    overall = sum(1 for point in points if point["Dimension"] == OVERALL_KPI_SERIES_TYPE_REPR)
+    overall = sum(
+        1 for point in points if point["Dimension"] == OVERALL_KPI_SERIES_TYPE_REPR
+    )
     subdims = total - overall
     return overall, subdims
 

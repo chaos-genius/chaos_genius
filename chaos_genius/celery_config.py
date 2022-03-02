@@ -13,7 +13,7 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERYBEAT_SCHEDULE = {
     "anomaly-scheduler": {
         "task": "chaos_genius.jobs.analytics_scheduler.scheduler_wrapper",
-        "schedule": schedule(timedelta(minute=1)),
+        "schedule": schedule(timedelta(minutes=1)),
         "args": ()
     },
     'alerts-daily': {

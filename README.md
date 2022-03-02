@@ -1,4 +1,4 @@
-![CG Header](https://raw.githubusercontent.com/chaos-genius/.github/main/github-cover.png)
+![CG Header](https://raw.githubusercontent.com/chaos-genius/.github/main/images/CG-banner.png)
 
 <p align="center">
     <a href="https://www.chaosgenius.io/"><b>Website</b></a> •
@@ -10,7 +10,7 @@
 
 <p align="center">
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img src="https://img.shields.io/badge/all_contributors-24-orange.svg" alt="All Contributors"></a>
+<a href="#contributors-"><img src="https://img.shields.io/badge/all_contributors-27-orange.svg" alt="All Contributors"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 <a href="https://github.com/chaos-genius/chaos_genius/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/chaos-genius/chaos_genius" alt="License"></a>
 <a href="https://github.com/chaos-genius/chaos_genius/releases"><img src="https://img.shields.io/github/v/release/chaos-genius/chaos_genius" alt="Latest release"></a>
@@ -20,23 +20,37 @@
 
 </p>
 
-<h3 align="center">Open source analytics engine to detect & diagnose the root-cause of outliers in <br/> high-dimensional business & system metrics</h3>
+<h3 align="center">ML powered analytics engine for outlier detection and root cause analysis</h3>
 
 <br/>
 
 ## ✨ What is Chaos Genius?
 
-Chaos Genius is an open source analytics engine to help humans detect & diagnose the root-cause of outliers and change in high-dimensional datasets.
 
-Using Chaos Genius, users can segment large datasets by key performance metrics (e.g. Daily Active Users, Cloud Costs, Failure Rates) and setup drill-downs for explanation of deviation or anomalies across important dimensions (e.g., countryID, DeviceID, ProductID, DayofWeek).
+Chaos Genius is an open source ML powered analytics engine for outlier detection and root cause analysis. Chaos Genius can be used to monitor and analyse high dimensionality business, data and system metrics at scale. 
 
-The key use-cases for Chaos Genius include **monitoring & alerting for various business, system and data quality metrics**.
-    
-Chaos Genius comes with a UI that offers simple point-and-click functionality for various tasks like adding data sources, defining the key performance metrics with dimensions and setting up alerts for anamalous behavior and deviations. 
+Using Chaos Genius, users can segment large datasets by key performance metrics (e.g. Daily Active Users, Cloud Costs, Failure Rates) and important dimensions (e.g., countryID, DeviceID, ProductID, DayofWeek) across which they want to monitor and analyse the key metrics.
 
-[See more on our website. ](https://chaosgenius.io/)
+<!--Chaos Genius comes with a UI that offers simple point-and-click functionality for various tasks like adding data sources, defining the key performance metrics with dimensions and setting up advaned analytics. -->
 
-<!--For more, check out our Demo.-->
+
+### Use Chaos Genius if you want: 
+- Multidimensional Drill Downs & Insights
+- Anomaly Detection
+- Smart Alerting
+- Seasonality Detection*
+- Automated Root Cause Analysis*
+- Forecasting*
+- What-If Analysis*
+
+**in Short and Medium-term Roadmap*
+
+### Demo
+To try it out, check out our [Demo.](https://demo-github.chaosgenius.io/#/0) 
+
+<!--[See more on our website. ](https://chaosgenius.io/)-->
+
+
 
 <!--![A small demo of Chaos Genius](https://chaosgenius-public.s3.amazonaws.com/test-cg-1-small.gif)-->
 
@@ -64,29 +78,34 @@ Follow this [Quick Start guide](https://docs.chaosgenius.io/docs/Quick_Start/pre
 
 ## :dizzy: Key Features
 
-### :small_orange_diamond: Automated DeepDrills
+### 1. Automated DeepDrills 
 
-Identify the key drivers of change in defined metrics (e.g. Sales) across a large number of high cardinality dimensions (e.g. CountryID, ProductID, BrandID, Device_type).
+Generate multidimensional drilldowns to identify the key drivers of change in defined metrics (e.g. Sales) across a large number of high cardinality dimensions (e.g. CountryID, ProductID, BrandID, Device_type).
 - Techniques: Statistical Filtering, A* like path based search to deal with combinatorial explosion
 
 ![DD](https://raw.githubusercontent.com/chaos-genius/.github/main/images/DeepDrills.png)
 
 <!-- TODO: add an image or illustration here -->
 
-### :small_orange_diamond: Anomaly Detection
+### 2. Anomaly Detection
 
 Modular anomaly detection toolkit for monitoring high-dimensional time series with ability to select from different models. Tackle variations caused by seasonality, trends and holidays in the time series data.
-- Models: Prophet, EWMA, EWSTD, Neural Prophet, ARIMA (coming soon)
+- Models: Prophet, EWMA, EWSTD, Neural Prophet, Greykite
+    
+![Anomaly](https://raw.githubusercontent.com/chaos-genius/.github/main/images/AnomalyDrillDowns.png)
+
 
 <!-- TODO: add an image or illustration here -->
 
 
-### :small_orange_diamond: Smart Alerts
+### 3. Smart Alerts
 
 Actionable alerts with self-learning thresholds. Configurations to setup alert frequency & reporting to combat alert fatigue. 
-- Channels: Email, Slack, Webhooks (coming soon)
+- Channels: Email, Slack
 <!-- TODO: add an image or illustration here -->
     
+![Alerting](https://raw.githubusercontent.com/chaos-genius/.github/main/images/Alerting-Dark.png)
+
 ## :octocat: Community
 
 For any help, discussions and suggestions feel free to reach out to the Chaos Genius team and the community here:
@@ -161,6 +180,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/arvind-27"><img src="https://avatars.githubusercontent.com/u/57091402?v=4?s=100" width="100px;" alt=""/><br /><sub><b>arvind-27</b></sub></a><br /><a href="#data-arvind-27" title="Data">🔣</a></td>
     <td align="center"><a href="https://joshtaylor.id.au"><img src="https://avatars.githubusercontent.com/u/225131?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Josh Taylor</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/issues?q=author%3Ajoshuataylor" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/ChartistDev"><img src="https://avatars.githubusercontent.com/u/50948001?v=4?s=100" width="100px;" alt=""/><br /><sub><b>ChartistDev</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=ChartistDev" title="Code">💻</a> <a href="#design-ChartistDev" title="Design">🎨</a> <a href="https://github.com/chaos-genius/chaos_genius/issues?q=author%3AChartistDev" title="Bug reports">🐛</a> <a href="https://github.com/chaos-genius/chaos_genius/pulls?q=is%3Apr+reviewed-by%3AChartistDev" title="Reviewed Pull Requests">👀</a></td>
+    <td align="center"><a href="https://buggydebugger.com/"><img src="https://avatars.githubusercontent.com/u/7734938?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Rajdeep Sharma</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=rjdp" title="Code">💻</a> <a href="https://github.com/chaos-genius/chaos_genius/pulls?q=is%3Apr+reviewed-by%3Arjdp" title="Reviewed Pull Requests">👀</a></td>
+    <td align="center"><a href="https://github.com/balakumar9493"><img src="https://avatars.githubusercontent.com/u/98518511?v=4?s=100" width="100px;" alt=""/><br /><sub><b>balakumar9493</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=balakumar9493" title="Code">💻</a> <a href="#design-balakumar9493" title="Design">🎨</a></td>
+    <td align="center"><a href="https://bandism.net/"><img src="https://avatars.githubusercontent.com/u/22633385?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ikko Ashimine</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=eltociear" title="Code">💻</a></td>
   </tr>
 </table>
 

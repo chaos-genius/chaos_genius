@@ -1,0 +1,3 @@
+# exclude frontend code from repo stats
+# TODO: exclude only large/generated files, or move frontend to another repo
+frontend/src/**/* linguist-vendored

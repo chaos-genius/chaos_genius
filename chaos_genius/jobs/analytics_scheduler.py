@@ -1,27 +1,38 @@
-"""Analytics Scheduler"""
+"""Analytics Scheduler."""
 from datetime import datetime
-from typing import Dict, Iterable, Literal, Union, cast
+from typing import Dict, Iterable, Literal, cast
 
 from celery import group
 from celery.app.base import Celery
-from sqlalchemy.orm.attributes import flag_modified
 
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.extensions import celery as celery_ext
 
-from .anomaly_tasks import ready_anomaly_task, ready_rca_task, update_scheduler_params
+from .anomaly_tasks import ready_anomaly_task, ready_rca_task
 
 celery = cast(Celery, celery_ext.celery)
 
 
+# schedule hourly KPIs after the 10th minute of every hour
+HOURLY_SCHEDULE_RUN_MINUTE = 10
+
+
 class AnalyticsScheduler:
-    """Handles scheduling of all analytics related tasks"""
+    """Handles scheduling of all analytics related tasks.
+
+    Anomaly is run daily or hourly based on the configuration:
+    - Daily: anomaly is run at given scheduled time (`time` field in
+             `scheduler_params`)
+    - Hourly: anomaly is run at fixed minute (HOURLY_SCHEDULE_RUN_MINUTE)
+
+    DeepDrills is run only daily. By default, this is run at the KPI
+    creation time every day. The time can be overridden using the
+    `rca_time` field in `scheduler_params`.
+    """
 
     def __init__(self):
-        """[summary]"""
+        """Initializes the scheduler with an empty task group."""
         self.task_group = []
-        # schedule hourly KPIs after the 10th minute of every hour
-        self.hourly_schedule_run_minute = 10
 
     def _get_scheduled_time_daily(self, kpi: Kpi, time_field: str = "time"):
         """Calculate scheduled time for a daily run.
@@ -69,7 +80,7 @@ class AnalyticsScheduler:
             scheduled_time = scheduled_time.replace(minute=minute, second=second)
         else:
             scheduled_time = scheduled_time.replace(
-                minute=self.hourly_schedule_run_minute,
+                minute=HOURLY_SCHEDULE_RUN_MINUTE,
                 second=0,
             )
 
@@ -94,25 +105,18 @@ class AnalyticsScheduler:
 
     def _to_run_rca(self, kpi: Kpi, scheduled_time: datetime):
         # check if we have to run RCA
-        # 1. if not already scheduled today
-        # 2. if anomaly is scheduled, run RCA too
+        # - if not already run today
 
-        # TODO: make rca time column and eliminate duplicate RCA run
         scheduler_params = kpi.scheduler_params
 
         rca_already_run = (
             scheduler_params is not None
             and "last_scheduled_time_rca" in scheduler_params
+            and datetime.fromisoformat(scheduler_params["last_scheduled_time_rca"])
+            > scheduled_time
         )
 
-        if rca_already_run:
-            to_run_rca = not (
-                datetime.fromisoformat(scheduler_params["last_scheduled_time_rca"])
-                > scheduled_time
-            )
-            return to_run_rca
-        else:
-            return True
+        return not rca_already_run
 
     def _active_kpis(self):
         kpis: Iterable[Kpi] = Kpi.query.distinct("kpi_id").filter(
@@ -149,13 +153,12 @@ class AnalyticsScheduler:
 
         return res
 
-    # @celery.task
     def schedule(self):
+        """Schedules pending analytics tasks.
 
+        Must be run only once on one instance of the class.
+        """
         for kpi in self._active_kpis():
-            # if anomaly isn't setup yet, we still run RCA at     tR + 24 hours
-            # if anomaly is setup, we run both anomaly and RCA at tA + 24 hours
-
             # get scheduler_params, will be None if it's not set
             scheduler_params: Dict[str, str] = kpi.scheduler_params or {}
             schedule_frequency = scheduler_params.get("scheduler_frequency", "D")
@@ -184,5 +187,6 @@ class AnalyticsScheduler:
 
 @celery.task
 def scheduler_wrapper():
+    """Runs the analytics scheduler."""
     scheduler = AnalyticsScheduler()
     scheduler.schedule()

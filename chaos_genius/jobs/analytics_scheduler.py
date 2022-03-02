@@ -92,14 +92,6 @@ class AnalyticsScheduler:
         )
         return (not anomaly_already_run) and anomaly_is_setup
 
-    def _update_rca_time(self, kpi: Kpi):
-        scheduler_params = kpi.scheduler_params
-        # kpi_creation = kpi.created_at
-        scheduler_params["rca_time"] = "{kpi.created_at.hour}:{kpi.created_at.minute}:{kpi.created_at.second}"
-        update_scheduler_params("rca_time", scheduler_params["rca_time"])
-        flag_modified(kpi, "scheduler_params")
-        kpi.update(commit=True)
-
     def _to_run_rca(self, kpi: Kpi, scheduled_time: datetime):
         # check if we have to run RCA
         # 1. if not already scheduled today
@@ -107,8 +99,6 @@ class AnalyticsScheduler:
 
         # TODO: make rca time column and eliminate duplicate RCA run
         scheduler_params = kpi.scheduler_params
-        if "rca_time" not in scheduler_params:
-            self._update_rca_time(kpi)
 
         rca_already_run = (
             scheduler_params is not None

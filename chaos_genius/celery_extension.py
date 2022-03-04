@@ -8,7 +8,7 @@ class CeleryExtension(object):
 
     def __init__(self, app=None):
         """Initialise the Celery Extension"""
-        self.celery = Celery()
+        self.celery = None
         self.app = app
         if app is not None:
             self.init_app(app)

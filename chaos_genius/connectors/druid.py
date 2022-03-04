@@ -45,6 +45,16 @@ class Druid(BaseDb):
             message = str(err_msg)
         return status, message
 
+    def get_columns(self, use_table, use_schema=None):
+        db_columns = self.inspector.get_columns(table_name=use_table, schema=use_schema)
+        for i in range(len(db_columns)):
+            if db_columns[i]["default"] is None:
+                db_columns[i]["default"] = "None"
+
+            db_columns[i]['type'] = str(db_columns[i]['type'])
+        return db_columns
+
+
     def run_query(self, query, as_df=True):
         engine = self.get_db_engine()
         if as_df == True:

@@ -1,4 +1,4 @@
-"""Tests for RCA utilities."""
+"""Tests for utilities related to strings."""
 
 import pandas as pd
 

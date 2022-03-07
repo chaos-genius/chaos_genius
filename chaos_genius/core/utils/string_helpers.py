@@ -14,6 +14,7 @@ _string_transformation_for_query = str.maketrans({'"': '\\"'})
 
 def get_query_from_col_and_value(col: str, value: str) -> str:
     """Convert given col and value into a query string."""
+    col = col.translate(_string_transformation_for_query)
     value = value.translate(_string_transformation_for_query)
     return f'`{col}`=="{value}"'
 

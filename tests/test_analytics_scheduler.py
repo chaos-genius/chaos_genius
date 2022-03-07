@@ -38,16 +38,8 @@ test_kpi = Kpi(
     },
 )
 
-# 1. scheduler params exist(KPI already run), return scheduled time
-def test_get_scheduled_time_11():
-    scheduler = AnalyticsScheduler()
-    scheduled_time = scheduler._get_scheduled_time_daily(test_kpi)
-    assert (
-        scheduled_time.date() == datetime.now().date()
-        and scheduled_time.hour == 11
-        and scheduled_time.minute == 00
-    )
 
+DATETIME_FMT = "%Y-%m-%d %H:%M:%S"
 
 now = datetime.now()
 
@@ -57,6 +49,7 @@ now_min = make_2_digit(now.minute)
 now_sec = make_2_digit(now.second)
 now_hr = make_2_digit(now.hour)
 now_date = str(now.date())
+
 
 test_cases_get_scheduled_time_hourly = [
     ("10:12", f"{now_date} {now_hr}:10:12"),
@@ -74,19 +67,19 @@ test_cases_get_scheduled_time_hourly = [
 
 
 @pytest.mark.parametrize("time,expected", test_cases_get_scheduled_time_hourly)
-def test_get_scheduled_time_hourly(time, expected):
-    kpi = deepcopy(test_kpi)
+def test_get_scheduled_time_hourly(monkeypatch, time, expected):
     if time:
-        kpi.scheduler_params["time"] = time
+        monkeypatch.setitem(test_kpi.scheduler_params, "time", time)
     else:
-        del kpi.scheduler_params["time"]
+        monkeypatch.delitem(test_kpi.scheduler_params, "time", raising=True)
     scheduler = AnalyticsScheduler()
-    assert scheduler._get_scheduled_time_hourly(kpi).strftime(DT_FMT) == expected
+    assert (
+        scheduler._get_scheduled_time_hourly(test_kpi).strftime(DATETIME_FMT)
+        == expected
+    )
 
 
-DT_FMT = "%Y-%m-%d %H:%M:%S"
-
-# TODO : rca_time
+# Not testing _get_scheduled_time_daily with 2nd param as "rca_time" since its just a name change
 test_cases_get_scheduled_time_daily = [
     ("", now, f"{now_date} {now_hr}:{now_min}:{now_sec}"),
     ("", now - timedelta(days=1), f"{now_date} {now_hr}:{now_min}:{now_sec}"),
@@ -130,15 +123,16 @@ test_cases_get_scheduled_time_daily = [
 @pytest.mark.parametrize(
     "time,created_at,expected", test_cases_get_scheduled_time_daily
 )
-def test_get_scheduled_time_daily(time, created_at, expected):
-    kpi = deepcopy(test_kpi)
-    kpi.created_at = created_at
+def test_get_scheduled_time_daily(monkeypatch, time, created_at, expected):
+    monkeypatch.setattr(test_kpi, "created_at", created_at)
     if time:
-        kpi.scheduler_params["time"] = time
+        monkeypatch.setitem(test_kpi.scheduler_params, "time", time)
     else:
-        del kpi.scheduler_params["time"]
+        monkeypatch.delitem(test_kpi.scheduler_params, "time", raising=True)
     scheduler = AnalyticsScheduler()
-    assert scheduler._get_scheduled_time_daily(kpi).strftime(DT_FMT) == expected
+    assert (
+        scheduler._get_scheduled_time_daily(test_kpi).strftime(DATETIME_FMT) == expected
+    )
 
 
 test_cases_test_to_run_anomaly = [
@@ -208,14 +202,13 @@ test_cases_test_to_run_anomaly = [
 @pytest.mark.parametrize(
     "kpi_params,scheduled_time,expected", test_cases_test_to_run_anomaly
 )
-def test_to_run_anomaly(kpi_params, scheduled_time, expected):
-    kpi = deepcopy(test_kpi)
+def test_to_run_anomaly(monkeypatch, kpi_params, scheduled_time, expected):
     for key in kpi_params:
-        setattr(kpi, key, kpi_params[key])
+        monkeypatch.setattr(test_kpi, key, kpi_params[key])
     scheduler = AnalyticsScheduler()
-    scheduled_time = datetime.strptime(scheduled_time, DT_FMT)
+    scheduled_time = datetime.strptime(scheduled_time, DATETIME_FMT)
 
-    assert scheduler._to_run_anomaly(kpi, scheduled_time) == expected
+    assert scheduler._to_run_anomaly(test_kpi, scheduled_time) == expected
 
 
 test_cases_test_to_run_rca = [
@@ -305,10 +298,12 @@ test_cases_test_to_run_rca = [
 @pytest.mark.parametrize(
     "kpi_params,scheduled_time,expected", test_cases_test_to_run_rca
 )
-def test_to_run_rca(kpi_params, scheduled_time, expected):
-    kpi = deepcopy(test_kpi)
+def test_to_run_rca(monkeypatch, kpi_params, scheduled_time, expected):
     for key in kpi_params:
-        setattr(kpi, key, kpi_params[key])
+        monkeypatch.setattr(test_kpi, key, kpi_params[key])
     scheduler = AnalyticsScheduler()
-    scheduled_time = datetime.strptime(scheduled_time, DT_FMT)
-    assert scheduler._to_run_rca(kpi, scheduled_time) == expected
+    scheduled_time = datetime.strptime(scheduled_time, DATETIME_FMT)
+    assert scheduler._to_run_rca(test_kpi, scheduled_time) == expected
+
+
+## make human readable // docstrings .. mention why rca_time not teste

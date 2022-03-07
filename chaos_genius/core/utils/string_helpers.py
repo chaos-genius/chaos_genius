@@ -19,7 +19,7 @@ def get_query_from_col_and_value(col: str, value: str) -> str:
 
 
 def get_query_from_cols_and_values(col_names, raw_combinations):
-    """Convert given col names and combinates into query strings."""
+    """Convert given col names and combinations into query strings."""
     # TODO: Write tests for this.
     query_list = []
     for comb in raw_combinations:

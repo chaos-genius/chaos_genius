@@ -24,10 +24,10 @@ def get_query_from_cols_and_values(col_names, raw_combinations):
     query_list = []
     for comb in raw_combinations:
         if type(comb) == str:
-            unjoined_query = [get_query_from_col_and_value(col_names[0], comb]
+            unjoined_query = [get_query_from_col_and_value(col_names[0], comb)]
         elif type(comb) == tuple:
             unjoined_query = [
-                get_query_from_col_and_value(col_names[i], comb[i] for i in range(len(comb))
+                get_query_from_col_and_value(col_names[i], comb[i]) for i in range(len(comb))
             ]
         query_string = " and ".join(unjoined_query)
         query_list.append(query_string)

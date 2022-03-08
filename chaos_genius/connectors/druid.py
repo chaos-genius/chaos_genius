@@ -17,9 +17,13 @@ class Druid(BaseDb):
         port = int(db_info.get("port"))
         username = db_info.get("username")
         password = db_info.get("password")
-        if not(host and port and username and password):
-            raise NotImplementedError("Database Credential not found for Postgresql.")
-        self.sqlalchemy_db_uri = f"druid://{username}:{password}@{host}:{port}/druid/v2/sql/"
+        if not(host and port):
+            raise NotImplementedError("Database Credential not found for Druid.")
+
+        if not(username and password):
+            self.sqlalchemy_db_uri = f"druid://{host}:{port}/druid/v2/sql/"
+        else:
+            self.sqlalchemy_db_uri = f"druid://{username}:{password}@{host}:{port}/druid/v2/sql/"
         return self.sqlalchemy_db_uri
 
     def get_db_engine(self):

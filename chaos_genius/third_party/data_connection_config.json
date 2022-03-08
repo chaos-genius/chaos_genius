@@ -819,9 +819,7 @@
             },
             "required": [
                 "host",
-                "port",
-                "username",
-                "password"
+                "port"
             ],
             "title": "Druid Source Spec",
             "type": "object"

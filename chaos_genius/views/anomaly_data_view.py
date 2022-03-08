@@ -976,7 +976,7 @@ def get_anomaly_params_dict(kpi: Kpi):
         anomaly_params_db["anomaly_period"] = anomaly_params_db["period"]
     if "ts_frequency" in anomaly_params_db and "frequency" not in anomaly_params_db:
         anomaly_params_db["frequency"] = anomaly_params_db["ts_frequency"]
-
+        
     anomaly_params.update(
         {k: v for k, v in anomaly_params_db.items() if k in ANOMALY_PARAM_FIELDS}
     )
@@ -989,8 +989,9 @@ def get_anomaly_params_dict(kpi: Kpi):
         anomaly_params["scheduler_params_time"] = scheduler_params_db.get(
             "time", DEFAULT_ANOMALY_PARAMS["scheduler_params_time"]
         )
-        if kpi_dict["scheduler_frequency"] == "H":
-            anomaly_params["scheduler_params_time"] = anomaly_params["scheduler_params_time"].split(":")[1]
+
+    sensitivity_mapping_dict = {"high":"High","low":"Low","medium":"Medium"}
+    anomaly_params["sensitivity"] = sensitivity_mapping_dict[anomaly_params["sensitivity"]]
 
     return anomaly_params
 

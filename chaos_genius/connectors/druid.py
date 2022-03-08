@@ -7,6 +7,14 @@ from .connector_utils import merge_dataframe_chunks
 class Druid(BaseDb):
     db_name = "druid"
     test_db_query = "SELECT 1"
+    druid_internal_tables = ["COLUMNS",
+                             "SCHEMATA",
+                             "TABLES",
+                             "segments",
+                             "server_segments",
+                             "servers",
+                             "supervisors",
+                             "tasks"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -48,6 +56,11 @@ class Druid(BaseDb):
             status = False
             message = str(err_msg)
         return status, message
+
+    def get_tables(self, use_schema=None):
+        all_tables = self.inspector.get_table_names(schema=use_schema)
+        filtered_tables = [table for table in all_tables if table not in self.druid_internal_tables]
+        return filtered_tables
 
     def get_columns(self, use_table, use_schema=None):
         db_columns = self.inspector.get_columns(table_name=use_table, schema=use_schema)

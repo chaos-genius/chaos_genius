@@ -5,7 +5,7 @@ import time
 from typing import Any, Dict, List, Optional, Tuple, cast
 
 from flask import Blueprint, current_app, jsonify, request
-from sqlalchemy import func
+from sqlalchemy import func, delete
 import pandas as pd
 from sqlalchemy.orm.attributes import flag_modified
 from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
@@ -337,6 +337,22 @@ def anomaly_settings_status(kpi_id):
     current_app.logger.info(f"Anomaly settings retrieved for kpi: {kpi_id}")
     return jsonify(response)
 
+@blueprint.route("/<int:kpi_id>/retrain", methods=["POST","GET"])
+def kpi_anomaly_retraining(kpi_id):
+    # TODO: Move the deletion into KPI controller file
+    # delete all data in anomaly output table
+    delete_kpi_query = delete(AnomalyDataOutput).where(AnomalyDataOutput.kpi_id == kpi_id)
+    db.session.execute(delete_kpi_query)
+    db.session.commit()
+    print("Entering RETRAINING")
+    # add anomaly to queue
+    from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task
+    anomaly_task = ready_anomaly_task(kpi_id)
+    if anomaly_task is not None:
+        anomaly_task.apply_async()
+        return jsonify({"msg" : f"re-training started for KPI: {kpi_id}"})
+    else:
+        return jsonify({"msg" : f"re-training failed for KPI: {kpi_id}, KPI id is None"})
 
 def fill_graph_data(row, graph_data):
     """Fills graph_data with intervals, values, and predicted_values for

@@ -344,15 +344,16 @@ def kpi_anomaly_retraining(kpi_id):
     delete_kpi_query = delete(AnomalyDataOutput).where(AnomalyDataOutput.kpi_id == kpi_id)
     db.session.execute(delete_kpi_query)
     db.session.commit()
-    print("Entering RETRAINING")
+
     # add anomaly to queue
     from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task
     anomaly_task = ready_anomaly_task(kpi_id)
     if anomaly_task is not None:
         anomaly_task.apply_async()
-        return jsonify({"msg" : f"re-training started for KPI: {kpi_id}"})
+        current_app.logger.info(f"Retraining started for KPI ID: {kpi_id}")
+        return jsonify({"msg" : f"retraining started for KPI: {kpi_id}"})
     else:
-        return jsonify({"msg" : f"re-training failed for KPI: {kpi_id}, KPI id is None"})
+        return jsonify({"msg" : f"retraining failed for KPI: {kpi_id}, KPI id is None"})
 
 def fill_graph_data(row, graph_data):
     """Fills graph_data with intervals, values, and predicted_values for

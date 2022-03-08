@@ -3,9 +3,10 @@
 from datetime import date, datetime, timedelta
 import time
 from typing import Any, Dict, List, Optional, Tuple, cast
-
+import dateutil
 from flask import Blueprint, current_app, jsonify, request
-from sqlalchemy import func
+from itsdangerous import json
+from sqlalchemy import func, delete
 import pandas as pd
 from sqlalchemy.orm.attributes import flag_modified
 from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
@@ -208,6 +209,21 @@ def kpi_subdim_anomaly(kpi_id):
 def kpi_anomaly_params_meta():
     # TODO: Move this dict into the corresponding data model
     return jsonify(ANOMALY_PARAMS_META)
+
+@blueprint.route("/<int:kpi_id>/re-train", methods=["GET"])
+def kpi_anomaly_retraining(kpi_id):
+    # delete all data in anomaly output table
+    delete_kpi_query = delete(AnomalyDataOutput).where(AnomalyDataOutput.kpi_id == kpi_id)
+    db.session.execute(delete_kpi_query)
+    db.session.commit()
+    # add anomaly to queue
+    from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task
+    anomaly_task = ready_anomaly_task(kpi_id)
+    if anomaly_task is not None:
+        anomaly_task.apply_async()
+        return jsonify({"msg" : f"re-training started for KPI: {kpi_id}"})
+    else:
+        return jsonify({"msg" : f"re-training failed for KPI: {kpi_id}"})
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-params", methods=["POST", "GET"])
@@ -532,6 +548,8 @@ def get_anomaly_output_end_date(kpi_info: dict) -> datetime:
     return end_date.to_pydatetime()
 
 
+        
+    
 # --- anomaly params meta information --- #
 ANOMALY_PARAMS_META = {
     "name": "anomaly_params",
@@ -971,10 +989,12 @@ def get_anomaly_params_dict(kpi: Kpi):
         anomaly_params["scheduler_params_time"] = scheduler_params_db.get(
             "time", DEFAULT_ANOMALY_PARAMS["scheduler_params_time"]
         )
+        if kpi_dict["scheduler_frequency"] == "H":
+            anomaly_params["scheduler_params_time"] = anomaly_params["scheduler_params_time"].split(":")[1]
 
     return anomaly_params
 
-
+  
 def validate_scheduled_time(time):
     if not isinstance(time, str):
         return f"time must be a string. Got: {type(time).__name__}", time

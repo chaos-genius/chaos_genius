@@ -4,10 +4,13 @@ from datetime import date, datetime, timedelta
 import logging
 import random
 import string
+import pytz
 
 import pandas as pd
 from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.databases.models.data_source_model import DataSource
+from chaos_genius.settings import TIMEZONE
+from chaos_genius.core.utils.constants import SUPPORTED_TIMEZONES
 
 
 _SQL_IDENTIFIERS = {
@@ -85,12 +88,30 @@ class DataLoader:
     def _build_date_filter(self):
         dt_col_str = self._get_id_string(self.dt_col)
 
+        is_offset_negative = "-" in SUPPORTED_TIMEZONES[TIMEZONE]
+
+        if is_offset_negative:
+            self.start_date = self.start_date - timedelta(days=1)
+            self.end_date = self.end_date - timedelta(days=1)
+
         start_date_str = self.start_date.strftime("%Y-%m-%d")
         end_date_str = self.end_date.strftime("%Y-%m-%d")
         start_query = f"{dt_col_str} >= '{start_date_str}'"
         end_query = f"{dt_col_str} < '{end_date_str}'"
 
         return f" where {start_query} and {end_query} "
+
+    def _get_tz_from_offset(self, utc_offset_str):
+        utc_offset_str = utc_offset_str or "GMT+00:00"
+        utc_offset_hrs, utc_offset_mins = int(utc_offset_str[3:6]), int(utc_offset_str[7:])
+        utc_offset = timedelta(hours=utc_offset_hrs, minutes=utc_offset_mins)
+        now = datetime.now(pytz.utc)
+        all_timezones_for_offset = {
+            tz.zone
+            for tz in map(pytz.timezone, pytz.all_timezones_set)
+            if now.astimezone(tz).utcoffset() == utc_offset
+        }
+        return all_timezones_for_offset.pop()
 
     def _get_table_name(self):
         if self.kpi_info["kpi_type"] != "table":
@@ -152,6 +173,8 @@ class DataLoader:
 
     def _preprocess_df(self, df):
         df[self.dt_col] = pd.to_datetime(df[self.dt_col])
+        current_tz = self._get_tz_from_offset(SUPPORTED_TIMEZONES[TIMEZONE])
+        df[self.dt_col] = df[self.dt_col].dt.tz_convert(current_tz).dt.tz_localize(None)
 
     def get_count(self) -> int:
         """Return count of rows in KPI data."""

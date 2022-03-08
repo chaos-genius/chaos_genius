@@ -6,7 +6,12 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_series_equal
 
-from chaos_genius.core.anomaly.utils import bound_between, get_timedelta, fill_data, date_time_checker
+from chaos_genius.core.anomaly.utils import (
+    bound_between,
+    get_timedelta,
+    fill_data,
+    date_time_checker,
+)
 
 
 @pytest.mark.parametrize(
@@ -52,7 +57,7 @@ testdata_time_checker = [
     ),
     (
         "tests/test_data/input_hourly_data.csv",
-        datetime(2022, 1, 15, 23, 0 , 0),
+        datetime(2022, 1, 15, 23, 0, 0),
         "dt",
         "H",
         False,
@@ -68,7 +73,7 @@ testdata_time_checker = [
 
 
 @pytest.mark.parametrize(
-    "input_data_str,datetime_obj,dt_col,frequency,expected",
+    "input_data_str, datetime_obj, dt_col, frequency, expected",
     testdata_time_checker,
     ids=["daily_false", "daily_true", "hourly_false", "hourly_true"],
 )
@@ -97,7 +102,11 @@ testdata_fill_data = [
     testdata_fill_data,
     ids=["daily"],
 )
-def test_fill_data(input_data_str, dt_col, metric_col, last_date, period, end_date, frequency, expected):
+def test_fill_data(
+    input_data_str, dt_col, metric_col, last_date, period, end_date, frequency, expected
+):
     input_data = load_input_data(input_data_str)
-    output = fill_data(input_data, dt_col, metric_col, last_date, period, end_date, frequency)
+    output = fill_data(
+        input_data, dt_col, metric_col, last_date, period, end_date, frequency
+    )
     assert_series_equal(output.iloc[-1], expected, check_names=False)

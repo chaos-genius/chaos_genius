@@ -20,7 +20,7 @@
 
 </p>
 
-<h3 align="center">ML powered analytics engine for outlier/anomaly detection and root cause analysis</h3>
+<h3 align="center">ML powered analytics engine for outlier detection and root cause analysis</h3>
 
 <br/>
 

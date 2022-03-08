@@ -63,15 +63,24 @@ def test_anomaly_multiple_entries(
 
 testdata_detect_anomalies = [
     (
-        pd.DataFrame([[10766, 24711.63, 11880.44, 0]], columns=["y", "yhat_upper", "yhat_lower", "anomaly"]),
+        pd.DataFrame(
+            [[10766, 24711.63, 11880.44, 0]],
+            columns=["y", "yhat_upper", "yhat_lower", "anomaly"],
+        ),
         -1,
     ),
     (
-        pd.DataFrame([[32791, 24711.63, 11880.44, 0]], columns=["y", "yhat_upper", "yhat_lower", "anomaly"]),
+        pd.DataFrame(
+            [[32791, 24711.63, 11880.44, 0]],
+            columns=["y", "yhat_upper", "yhat_lower", "anomaly"],
+        ),
         1,
     ),
     (
-        pd.DataFrame([[15234, 24711.63, 11880.44, 0]], columns=["y", "yhat_upper", "yhat_lower", "anomaly"]),
+        pd.DataFrame(
+            [[15234, 24711.63, 11880.44, 0]],
+            columns=["y", "yhat_upper", "yhat_lower", "anomaly"],
+        ),
         0,
     ),
 ]

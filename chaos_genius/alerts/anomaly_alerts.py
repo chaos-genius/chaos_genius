@@ -375,7 +375,9 @@ class AnomalyAlertController:
                 )
                 format_anomaly_points(points)
                 self.format_alert_data(points)
-                save_anomaly_point_formatting(points, kpi_obj.scheduler_params.get("scheduler_frequency"))
+                save_anomaly_point_formatting(
+                    points, kpi_obj.scheduler_params.get("scheduler_frequency")
+                )
                 top_anomalies_ = top_anomalies(points, 5)
                 overall_count, subdim_count = count_anomalies(points)
 
@@ -469,7 +471,9 @@ class AnomalyAlertController:
             points = deepcopy([anomaly_point.as_dict for anomaly_point in anomaly_data])
             format_anomaly_points(points)
             self.format_alert_data(points)
-            save_anomaly_point_formatting(points, kpi_obj.scheduler_params.get("scheduler_frequency"))
+            save_anomaly_point_formatting(
+                points, kpi_obj.scheduler_params.get("scheduler_frequency")
+            )
             top_anomalies_ = top_anomalies(points, 5)
             overall_count, subdim_count = count_anomalies(points)
 

@@ -11,6 +11,7 @@ from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.settings import TIMEZONE
 from chaos_genius.core.utils.constants import SUPPORTED_TIMEZONES
+from chaos_genius.core.utils.utils import randomword
 
 
 _SQL_IDENTIFIERS = {
@@ -19,12 +20,6 @@ _SQL_IDENTIFIERS = {
 }
 
 logger = logging.getLogger(__name__)
-
-
-def _randomword(length: int) -> str:
-    """Return a random word of specified length."""
-    letters = string.ascii_lowercase
-    return "".join(random.choice(letters) for _ in range(length))
 
 
 class DataLoader:

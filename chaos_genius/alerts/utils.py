@@ -37,11 +37,8 @@ def save_anomaly_point_formatting(points: List[Dict], scheduler_frequency: str =
     for point in points:
         dt = datetime.datetime.strptime(point["data_datetime"], ALERT_DATETIME_FORMAT)
 
-        if scheduler_frequency is None:
-            dt_format = ALERT_READABLE_DATETIME_FORMAT
-        elif scheduler_frequency == "H":
-            dt_format = ALERT_READABLE_DATETIME_FORMAT
-        else:
+        dt_format = ALERT_READABLE_DATETIME_FORMAT
+        if scheduler_frequency is not None and scheduler_frequency == "D":
             dt_format = ALERT_READABLE_DATE_FORMAT
 
         date = dt.strftime(dt_format)

@@ -6,6 +6,7 @@ from typing import Dict, List, Tuple, Union
 
 from chaos_genius.alerts.constants import (
     ALERT_DATETIME_FORMAT,
+    ALERT_READABLE_DATE_FORMAT,
     ALERT_READABLE_DATETIME_FORMAT,
     ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS,
     OVERALL_KPI_SERIES_TYPE_REPR,
@@ -31,11 +32,19 @@ def webapp_url_prefix():
     return f"{CHAOSGENIUS_WEBAPP_URL}{forward_slash}"
 
 
-def save_anomaly_point_formatting(points: List[Dict]):
+def save_anomaly_point_formatting(points: List[Dict], model_frequency: str = None):
     """Adds formatted fields to each point, to be used in alert templates."""
     for point in points:
         dt = datetime.datetime.strptime(point["data_datetime"], ALERT_DATETIME_FORMAT)
-        date = dt.strftime(ALERT_READABLE_DATETIME_FORMAT)
+
+        if model_frequency is None:
+            dt_format = ALERT_READABLE_DATETIME_FORMAT
+        elif model_frequency in ("h", "H", "Hourly", "hourly"):
+            dt_format = ALERT_READABLE_DATETIME_FORMAT
+        else:
+            dt_format = ALERT_READABLE_DATE_FORMAT
+
+        date = dt.strftime(dt_format)
         point["formatted_date"] = date
 
         change_percent = point["percentage_change"]

@@ -76,15 +76,15 @@ def change_message_from_percent(percent_change: Union[str, int, float]) -> str:
     """Creates a change message from given percentage change.
 
     percent_change will be:
-        - "-" in case the last data point was missing
+        - "–" in case the last data point was missing or both the points had values 0
         - 0 (int) in case there was no change
         - positive value (int/float) in case there was an increase
         - negative value (int/float) in case there was a decrease
     """
     if isinstance(percent_change, str):
-        return "-"
+        return percent_change
     elif percent_change == 0:
-        return "No change (-)"
+        return "No change (–)"
     elif percent_change > 0:
         return f"Increased by ({percent_change}%)"
     else:

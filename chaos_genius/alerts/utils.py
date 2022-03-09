@@ -32,13 +32,13 @@ def webapp_url_prefix():
     return f"{CHAOSGENIUS_WEBAPP_URL}{forward_slash}"
 
 
-def save_anomaly_point_formatting(points: List[Dict], scheduler_frequency: str = None):
+def save_anomaly_point_formatting(points: List[Dict], frequency: str = None):
     """Adds formatted fields to each point, to be used in alert templates."""
     for point in points:
         dt = datetime.datetime.strptime(point["data_datetime"], ALERT_DATETIME_FORMAT)
 
         dt_format = ALERT_READABLE_DATETIME_FORMAT
-        if scheduler_frequency is not None and scheduler_frequency == "D":
+        if frequency is not None and frequency == "D":
             dt_format = ALERT_READABLE_DATE_FORMAT
 
         date = dt.strftime(dt_format)

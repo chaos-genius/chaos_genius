@@ -9,8 +9,8 @@ from pandas.testing import assert_series_equal
 from chaos_genius.core.anomaly.utils import (
     bound_between,
     get_timedelta,
-    fill_data,
     date_time_checker,
+    fill_data,
 )
 
 
@@ -78,7 +78,7 @@ testdata_time_checker = [
     ids=["daily_false", "daily_true", "hourly_false", "hourly_true"],
 )
 def test_date_time_checker(input_data_str, datetime_obj, dt_col, frequency, expected):
-    "Tests if datetime_obj is not present in the input dataframe"
+    """Tests if datetime_obj is not present in the input dataframe."""
     input_data = load_input_data(input_data_str)
     assert date_time_checker(input_data, datetime_obj, dt_col, frequency) == expected
 

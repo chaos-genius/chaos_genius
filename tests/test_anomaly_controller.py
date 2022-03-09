@@ -95,6 +95,7 @@ testdata_detect_anomaly = [
 ]
 
 
+# Tests Anomaly Prediction on both daily and hourly data.
 @pytest.mark.parametrize(
     "kpi_info,model_name,input_data_str,last_date,series,subgroup,frequency,expected",
     testdata_detect_anomaly,

@@ -45,7 +45,7 @@ def save_anomaly_point_formatting(points: List[Dict], frequency: str = None):
         point["formatted_date"] = date
 
         change_percent = point["percentage_change"]
-        change_message = "-"
+        change_message = change_percent
         if isinstance(change_percent, (int, float)):
             if change_percent > 0:
                 change_message = f"+{change_percent}%"

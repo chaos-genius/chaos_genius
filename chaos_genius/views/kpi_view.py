@@ -70,11 +70,11 @@ def kpi():
                 data["kpi_query"] = data["kpi_query"][:-1]
 
             date_col = data_con.run_query(
-                f"select {data['datetime_column']} from ({data['kpi_query']}) {randomword(10)} limit 1;"
+                f"select {data['datetime_column']} from ({data['kpi_query']}) {randomword(10)} limit 1"
             )[data["datetime_column"]]
         else:
             date_col = data_con.run_query(
-                f"select {data['datetime_column']} from {data['table_name']} limit 1;"
+                f"select {data['datetime_column']} from {data['table_name']} limit 1"
             )[data["datetime_column"]]
 
         date_col = pd.to_datetime(date_col)

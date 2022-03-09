@@ -3,9 +3,10 @@
 from datetime import date, datetime, timedelta
 import time
 from typing import Any, Dict, List, Optional, Tuple, cast
-
+import dateutil
 from flask import Blueprint, current_app, jsonify, request
-from sqlalchemy import func
+from itsdangerous import json
+from sqlalchemy import func, delete
 import pandas as pd
 from sqlalchemy.orm.attributes import flag_modified
 from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
@@ -30,7 +31,7 @@ from chaos_genius.utils.datetime_helper import get_date_string_with_tz
 blueprint = Blueprint("anomaly_data", __name__)
 
 
-@blueprint.route("/", methods=["GET"]) # TODO: Remove this
+@blueprint.route("/", methods=["GET"])  # TODO: Remove this
 @blueprint.route("", methods=["GET"])
 def list_anomaly_data():
     # FIXME: Update home route
@@ -156,12 +157,12 @@ def kpi_subdim_anomaly(kpi_id):
         graph_xlims = get_anomaly_graph_x_lims(end_date, period, hourly)
         if hourly:
             # Use a 24 hour window to find peak severity per subdim and rank in descending order
-            start_date = end_date-timedelta(hours=23)
+            start_date = end_date - timedelta(hours=23)
             query = (
                 db.session.query(
-                    AnomalyDataOutput.series_type,
-                    func.max(AnomalyDataOutput.severity)
-                ).filter(
+                    AnomalyDataOutput.series_type, func.max(AnomalyDataOutput.severity)
+                )
+                .filter(
                     (AnomalyDataOutput.kpi_id == kpi_id)
                     & (AnomalyDataOutput.data_datetime >= start_date)
                     & (AnomalyDataOutput.data_datetime <= end_date)
@@ -194,7 +195,9 @@ def kpi_subdim_anomaly(kpi_id):
             )
             anom_data["x_axis_limits"] = graph_xlims
             subdim_graphs.append(anom_data)
-        current_app.logger.info(f"Subdimension Anomaly Retrieval Completed for KPI ID: {kpi_id}")
+        current_app.logger.info(
+            f"Subdimension Anomaly Retrieval Completed for KPI ID: {kpi_id}"
+        )
 
         end_date = get_date_string_with_tz(end_date)
 
@@ -208,6 +211,25 @@ def kpi_subdim_anomaly(kpi_id):
 def kpi_anomaly_params_meta():
     # TODO: Move this dict into the corresponding data model
     return jsonify(ANOMALY_PARAMS_META)
+
+
+@blueprint.route("/<int:kpi_id>/re-train", methods=["GET"])
+def kpi_anomaly_retraining(kpi_id):
+    # delete all data in anomaly output table
+    delete_kpi_query = delete(AnomalyDataOutput).where(
+        AnomalyDataOutput.kpi_id == kpi_id
+    )
+    db.session.execute(delete_kpi_query)
+    db.session.commit()
+    # add anomaly to queue
+    from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task
+
+    anomaly_task = ready_anomaly_task(kpi_id)
+    if anomaly_task is not None:
+        anomaly_task.apply_async()
+        return jsonify({"msg": f"re-training started for KPI: {kpi_id}"})
+    else:
+        return jsonify({"msg": f"re-training failed for KPI: {kpi_id}"})
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-params", methods=["POST", "GET"])
@@ -971,6 +993,11 @@ def get_anomaly_params_dict(kpi: Kpi):
         anomaly_params["scheduler_params_time"] = scheduler_params_db.get(
             "time", DEFAULT_ANOMALY_PARAMS["scheduler_params_time"]
         )
+
+    sensitivity_mapping_dict = {"high": "High", "low": "Low", "medium": "Medium"}
+    anomaly_params["sensitivity"] = sensitivity_mapping_dict[
+        anomaly_params["sensitivity"]
+    ]
 
     return anomaly_params
 

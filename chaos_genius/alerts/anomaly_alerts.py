@@ -196,12 +196,12 @@ class AnomalyAlertController:
             if intended_point is None:
                 # previous point wasn't found
                 point["percentage_change"] = "–"
-            elif intended_point["y"] == point["y"]:
+            elif point["y"] == 0 and intended_point["y"] == point["y"]:
                 # previous data was same as current
-                point["percentage_change"] = 0
+                point["percentage_change"] = "–"
             elif intended_point["y"] == 0:
                 # previous point was 0
-                point["percentage_change"] = "–"
+                point["percentage_change"] = "inf"
             else:
                 point["percentage_change"] = find_percentage_change(
                     point["y"], intended_point["y"]

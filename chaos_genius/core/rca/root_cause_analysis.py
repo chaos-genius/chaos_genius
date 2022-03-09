@@ -433,8 +433,8 @@ class RootCauseAnalysis:
                 d1_agg = self._grp1_df[self._preaggregated_count_col].sum()
                 d2_agg = self._grp2_df[self._preaggregated_count_col].sum()
             elif self._agg == "sum":
-                d1_agg = self._grp1_df[self._preaggregated_sum_col].sum()
-                d2_agg = self._grp2_df[self._preaggregated_sum_col].sum()
+                d1_agg = self._grp1_df[self._metric].sum()
+                d2_agg = self._grp2_df[self._metric].sum()
             else:
                 raise ValueError(
                     f"Unsupported aggregation {self._agg} for preaggregated data."

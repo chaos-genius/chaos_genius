@@ -4,8 +4,11 @@ from datetime import date, datetime, timedelta
 import time
 from typing import Any, Dict, List, Optional, Tuple, cast
 import dateutil
+from dateutil import parser
 from flask import Blueprint, current_app, jsonify, request
+from grpc import server
 from itsdangerous import json
+from pytz import timezone
 from sqlalchemy import func, delete
 import pandas as pd
 from sqlalchemy.orm.attributes import flag_modified
@@ -25,8 +28,7 @@ from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 from chaos_genius.core.rca.rca_utils.string_helpers import (
     convert_query_string_to_user_string,
 )
-from chaos_genius.utils.datetime_helper import get_date_string_with_tz
-
+from chaos_genius.utils.datetime_helper import get_date_string_with_tz, get_server_timezone
 
 blueprint = Blueprint("anomaly_data", __name__)
 
@@ -358,6 +360,15 @@ def anomaly_settings_status(kpi_id):
 
     current_app.logger.info(f"Anomaly settings retrieved for kpi: {kpi_id}")
     return jsonify(response)
+
+@blueprint.route("/<int:kpi_id>/last_run_anomaly", methods=["GET","POST"])
+def get_last_run_time_anomaly(kpi_id):
+    kpi_info = get_kpi_data_from_id(kpi_id)
+    tz_naive = parser.parse(kpi_info["scheduler_params"]["last_scheduled_time_anomaly"])
+    server_tz = get_server_timezone()
+    tz_aware = tz_naive.replace(tzinfo=server_tz)
+    return jsonify({"last_scheduled_time_anomaly" : tz_aware})
+        
 
 
 def fill_graph_data(row, graph_data):

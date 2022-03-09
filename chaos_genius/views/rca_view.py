@@ -10,6 +10,11 @@ from chaos_genius.core.rca.rca_utils.api_utils import (
     rca_analysis,
     rca_hierarchical_data,
 )
+from dateutil import parser
+from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
+from chaos_genius.utils.datetime_helper import get_server_timezone
+from chaos_genius.core.utils.constants import SUPPORTED_TIMEZONES
+from chaos_genius.settings import TIMEZONE
 
 blueprint = Blueprint("api_rca", __name__)
 logger = logging.getLogger(__name__)
@@ -83,3 +88,19 @@ def kpi_rca_hierarchical_data(kpi_id):
         status = "error"
         message = str(err)
     return jsonify({"status": status, "message": message, "data": data})
+
+@blueprint.route("/<int:kpi_id>/last_run_anomaly", methods=["GET","POST"])
+def get_last_run_time_anomaly(kpi_id):
+    kpi_info = get_kpi_data_from_id(kpi_id)
+    tz_naive = parser.parse(kpi_info["scheduler_params"]["last_scheduled_time_anomaly"])
+    server_tz = get_server_timezone()
+    tz_aware = tz_naive.replace(tzinfo=server_tz)
+    date_string = tz_aware.strftime("%d %b %Y")
+    
+    
+    tz_offset = server_tz
+    main_str = date_value.strftime("%d %b %Y") + f" {TIMEZONE}"
+    return f"{main_str} ({tz_offset})" if tz_offset != "" else main_str
+
+    
+    return jsonify({"last_scheduled_time_anomaly" : tz_aware})

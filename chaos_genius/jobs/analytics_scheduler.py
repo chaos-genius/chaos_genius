@@ -13,6 +13,7 @@ from .anomaly_tasks import ready_anomaly_task, ready_rca_task
 celery = cast(Celery, celery_ext.celery)
 
 
+
 # schedule hourly KPIs after the 10th minute of every hour
 HOURLY_SCHEDULE_RUN_MINUTE = 10
 
@@ -71,12 +72,10 @@ class AnalyticsScheduler:
 
         scheduled_time = datetime.now()
 
-        # consider time_field only if it's present and has only MM:SS
         if (
             time_field in scheduler_params
-            and len(scheduler_params[time_field].split(":")) == 2
         ):
-            minute, second = map(int, scheduler_params[time_field].split(":"))
+            _, minute, second = map(int, scheduler_params[time_field].split(":"))
             scheduled_time = scheduled_time.replace(minute=minute, second=second)
         else:
             scheduled_time = scheduled_time.replace(

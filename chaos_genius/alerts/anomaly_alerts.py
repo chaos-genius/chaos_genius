@@ -201,7 +201,8 @@ class AnomalyAlertController:
                 point["percentage_change"] = "–"
             elif intended_point["y"] == 0:
                 # previous point was 0
-                point["percentage_change"] = "inf"
+                sign_ = "+" if point["y"] > 0 else "-"
+                point["percentage_change"] = sign_ + "inf"
             else:
                 point["percentage_change"] = find_percentage_change(
                     point["y"], intended_point["y"]
@@ -246,7 +247,8 @@ class AnomalyAlertController:
                 point["percentage_change"] = "–"
             elif intended_point["y"] == 0:
                 # previous point was 0
-                point["percentage_change"] = "inf"
+                sign_ = "+" if point["y"] > 0 else "-"
+                point["percentage_change"] = sign_ + "inf"
             else:
                 point["percentage_change"] = find_percentage_change(
                     point["y"], intended_point["y"]

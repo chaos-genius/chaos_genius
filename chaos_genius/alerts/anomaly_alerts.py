@@ -196,12 +196,13 @@ class AnomalyAlertController:
             if intended_point is None:
                 # previous point wasn't found
                 point["percentage_change"] = "–"
-            elif intended_point["y"] == point["y"]:
+            elif point["y"] == 0 and intended_point["y"] == point["y"]:
                 # previous data was same as current
-                point["percentage_change"] = 0
+                point["percentage_change"] = "–"
             elif intended_point["y"] == 0:
                 # previous point was 0
-                point["percentage_change"] = "–"
+                sign_ = "+" if point["y"] > 0 else "-"
+                point["percentage_change"] = sign_ + "inf"
             else:
                 point["percentage_change"] = find_percentage_change(
                     point["y"], intended_point["y"]
@@ -241,12 +242,13 @@ class AnomalyAlertController:
             if intended_point is None:
                 # previous point wasn't found
                 point["percentage_change"] = "–"
-            elif intended_point["y"] == point["y"]:
+            elif point["y"] == 0 and intended_point["y"] == point["y"]:
                 # previous data was same as current
-                point["percentage_change"] = 0
+                point["percentage_change"] = "–"
             elif intended_point["y"] == 0:
                 # previous point was 0
-                point["percentage_change"] = "–"
+                sign_ = "+" if point["y"] > 0 else "-"
+                point["percentage_change"] = sign_ + "inf"
             else:
                 point["percentage_change"] = find_percentage_change(
                     point["y"], intended_point["y"]
@@ -378,7 +380,9 @@ class AnomalyAlertController:
                 )
                 format_anomaly_points(points)
                 self.format_alert_data(points)
-                save_anomaly_point_formatting(points)
+                save_anomaly_point_formatting(
+                    points, kpi_obj.anomaly_params.get("frequency")
+                )
                 top_anomalies_ = top_anomalies(points, 5)
                 overall_count, subdim_count = count_anomalies(points)
 
@@ -398,6 +402,7 @@ class AnomalyAlertController:
                     alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
                     overall_count=overall_count,
                     subdim_count=subdim_count,
+                    str=str
                 )
                 logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
             # self.remove_attributes_from_anomaly_data(overall_data, ["nl_message"])
@@ -472,7 +477,9 @@ class AnomalyAlertController:
             points = deepcopy([anomaly_point.as_dict for anomaly_point in anomaly_data])
             format_anomaly_points(points)
             self.format_alert_data(points)
-            save_anomaly_point_formatting(points)
+            save_anomaly_point_formatting(
+                points, kpi_obj.anomaly_params.get("frequency")
+            )
             top_anomalies_ = top_anomalies(points, 5)
             overall_count, subdim_count = count_anomalies(points)
 

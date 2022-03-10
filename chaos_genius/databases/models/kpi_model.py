@@ -24,6 +24,7 @@ class Kpi(PkModel):
     datetime_column = Column(db.Text(), nullable=False)
     filters = Column(db.JSON)
     dimensions = Column(db.JSON)
+    timezone_aware = Column(db.Boolean(), nullable=False, default=False)
 
     run_anomaly = Column(db.Boolean(), default=True)
     anomaly_params = Column(db.JSON)
@@ -59,6 +60,7 @@ class Kpi(PkModel):
             "aggregation": self.aggregation,
             "datetime_column": self.datetime_column,
             "dimensions": self.dimensions,
+            "timezone_aware": self.timezone_aware,
             "run_anomaly": self.run_anomaly,
             "anomaly_params": self.anomaly_params,
             "scheduler_params": self.scheduler_params,
@@ -85,6 +87,7 @@ class Kpi(PkModel):
             "datetime_column": self.datetime_column,
             "filters": self.filters,
             "dimensions": self.dimensions,
+            "timezone_aware": self.timezone_aware,
             "run_anomaly": self.run_anomaly,
             "anomaly_params": self.anomaly_params,
             "scheduler_params": self.scheduler_params,
@@ -153,6 +156,11 @@ class Kpi(PkModel):
                 },
                 {
                     "name": "dimensions",
+                    "is_editable": False,
+                    "is_sensitive": False,
+                },
+                {
+                    "name": "timezone_aware",
                     "is_editable": False,
                     "is_sensitive": False,
                 },

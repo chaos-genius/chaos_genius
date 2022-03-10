@@ -3,7 +3,8 @@ SCHEMAS_AVAILABLE = {
     "MySQL": False,
     "Redshift": True,
     "BigQuery": False,
-    "Snowflake": True   
+    "Snowflake": True,
+    "Druid": False
 }
 
 TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY = {
@@ -28,6 +29,11 @@ TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY = {
         "materialized_views": True
     },
     "Snowflake": {
+        "tables": True,
+        "views": True,
+        "materialized_views": True
+    },
+    "Druid": {
         "tables": True,
         "views": True,
         "materialized_views": True

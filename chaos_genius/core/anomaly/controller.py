@@ -17,6 +17,7 @@ from chaos_genius.core.anomaly.utils import (
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.core.utils.end_date import load_input_data_end_date
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, db
+from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.settings import (
     MAX_ANOMALY_SLACK_DAYS,
@@ -79,6 +80,13 @@ class AnomalyDetectionController(object):
             self.kpi_info["anomaly_params"]["anomaly_period"] = period
 
         self._task_id = task_id
+
+        # TODO: Make this connection type agnostic.
+        conn_type = DataSource.get_by_id(
+            kpi_info["data_source"]
+        ).as_dict["connection_type"]
+        self._preaggregated = conn_type == "Druid"
+        self._preaggregated_count_col = "count"
 
         logger.info(f"Anomaly controller initialized for KPI ID: {kpi_info['id']}")
 
@@ -269,9 +277,16 @@ class AnomalyDetectionController(object):
         :return: List of subgroups
         :rtype: list
         """
-        grouped_input_data = input_data.groupby(self.kpi_info["dimensions"]).agg(
-            {self.kpi_info["metric"]: "count"}
-        )
+        if self._preaggregated:
+            grouped_input_data = input_data.groupby(
+                self.kpi_info["dimensions"]
+            ).agg({self._preaggregated_count_col: "sum"}).rename(
+                columns={self._preaggregated_count_col: self.kpi_info["metric"]}
+            )
+        else:
+            grouped_input_data = input_data.groupby(
+                self.kpi_info["dimensions"]
+            ).agg({self.kpi_info["metric"]: "count"})
 
         filtered_subgroups = []
 
@@ -315,8 +330,10 @@ class AnomalyDetectionController(object):
             logger.info(f"Last date in db for {series}-{subgroup} is {last_date}")
 
             logger.info(f"Formatting input data for {series}-{subgroup}")
+
+            relevant_cols = [dt_col, metric_col, self._preaggregated_count_col] if self._preaggregated else [dt_col, metric_col]
             if series == "dq":
-                temp_input_data = input_data[[dt_col, metric_col]]
+                temp_input_data = input_data[relevant_cols]
                 temp_input_data = fill_data(
                     temp_input_data,
                     dt_col,
@@ -325,40 +342,77 @@ class AnomalyDetectionController(object):
                     period,
                     self.end_date,
                     freq,
+                    self._preaggregated_count_col if self._preaggregated else None,
                 )
 
                 if subgroup == "missing":
                     series_data = get_dq_missing_data(
-                        temp_input_data, dt_col, metric_col, RESAMPLE_FREQUENCY[freq]
+                        temp_input_data,
+                        dt_col,
+                        metric_col,
+                        RESAMPLE_FREQUENCY[freq],
+                        self._preaggregated_count_col if self._preaggregated else None
                     )
 
+                else:
+                    if self._preaggregated and subgroup == "count":
+                        series_data = (
+                            temp_input_data.set_index(dt_col)
+                            .resample(RESAMPLE_FREQUENCY[freq])
+                            .agg({self._preaggregated_count_col: "sum"})
+                            .rename(columns={
+                                self._preaggregated_count_col: metric_col
+                            })
+                        )
+                    else:
+                        series_data = (
+                            temp_input_data.set_index(dt_col)
+                            .resample(RESAMPLE_FREQUENCY[freq])
+                            .agg({metric_col: subgroup})
+                        )
+
+            elif series == "subdim":
+                temp_input_data = input_data.query(subgroup)[relevant_cols]
+                temp_input_data = fill_data(
+                    temp_input_data,
+                    dt_col,
+                    metric_col,
+                    last_date,
+                    period,
+                    self.end_date,
+                    freq,
+                    self._preaggregated_count_col if self._preaggregated else None,
+                )
+
+                if self._preaggregated:
+                    if agg == "count":
+                        series_data = (
+                            temp_input_data.set_index(dt_col)
+                            .resample(RESAMPLE_FREQUENCY[freq])
+                            .agg({self._preaggregated_count_col: "sum"})
+                            .rename(columns={
+                                self._preaggregated_count_col: metric_col
+                            })
+                        )
+                    elif agg == "sum":
+                        series_data = (
+                            temp_input_data.set_index(dt_col)
+                            .resample(RESAMPLE_FREQUENCY[freq])
+                            .agg({metric_col: "sum"})
+                        )
+                    else:
+                        raise ValueError(
+                            f"Unsupported aggregation {agg} for preaggregated data."
+                        )
                 else:
                     series_data = (
                         temp_input_data.set_index(dt_col)
                         .resample(RESAMPLE_FREQUENCY[freq])
-                        .agg({metric_col: subgroup})
+                        .agg({metric_col: agg})
                     )
 
-            elif series == "subdim":
-                temp_input_data = input_data.query(subgroup)[[dt_col, metric_col]]
-                temp_input_data = fill_data(
-                    temp_input_data,
-                    dt_col,
-                    metric_col,
-                    last_date,
-                    period,
-                    self.end_date,
-                    freq,
-                )
-
-                series_data = (
-                    temp_input_data.set_index(dt_col)
-                    .resample(RESAMPLE_FREQUENCY[freq])
-                    .agg({metric_col: agg})
-                )
-
             elif series == "overall":
-                temp_input_data = input_data[[dt_col, metric_col]]
+                temp_input_data = input_data[relevant_cols]
                 temp_input_data = fill_data(
                     temp_input_data,
                     dt_col,
@@ -367,13 +421,35 @@ class AnomalyDetectionController(object):
                     period,
                     self.end_date,
                     freq,
+                    self._preaggregated_count_col if self._preaggregated else None,
                 )
 
-                series_data = (
-                    temp_input_data.set_index(dt_col)
-                    .resample(RESAMPLE_FREQUENCY[freq])
-                    .agg({metric_col: agg})
-                )
+                if self._preaggregated:
+                    if agg == "count":
+                        series_data = (
+                            temp_input_data.set_index(dt_col)
+                            .resample(RESAMPLE_FREQUENCY[freq])
+                            .agg({self._preaggregated_count_col: "sum"})
+                            .rename(columns={
+                                self._preaggregated_count_col: metric_col
+                            })
+                        )
+                    elif agg == "sum":
+                        series_data = (
+                            temp_input_data.set_index(dt_col)
+                            .resample(RESAMPLE_FREQUENCY[freq])
+                            .agg({metric_col: "sum"})
+                        )
+                    else:
+                        raise ValueError(
+                            f"Unsupported aggregation {agg} for preaggregated data."
+                        )
+                else:
+                    series_data = (
+                        temp_input_data.set_index(dt_col)
+                        .resample(RESAMPLE_FREQUENCY[freq])
+                        .agg({metric_col: agg})
+                    )
 
             else:
                 raise ValueError(f"series {series} not in ['dq', 'subdim', 'overall']")
@@ -467,7 +543,11 @@ class AnomalyDetectionController(object):
         """
         try:
             agg = self.kpi_info["aggregation"]
-            dq_list = ["max", "count", "mean"] if agg != "mean" else ["max", "count"]
+
+            if self._preaggregated:
+                dq_list = ["count"]
+            else:
+                dq_list = ["max", "count", "mean"] if agg != "mean" else ["max", "count"]
             is_categorical_metric = (
                 1 if input_data[self.kpi_info["metric"]].dtypes == "object" else 0
             )

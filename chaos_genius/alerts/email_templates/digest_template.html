@@ -52,11 +52,11 @@
         <strong><a class="kpi-link" href="{{ kpi_link_prefix }}/{{ point["kpi_id"] }}">{{point["kpi_name"]}} ({{point["Dimension"]}})</strong></a>
         <span style="color: lightgrey;">
             changed to <strong>{{point["y"]}}</strong>
-        {% if point["percentage_change"] is string %}
+        {% if point["percentage_change"] is string and "inf" not in point["percentage_change"] %}
         (<span>{{ point["change_message"] }}</span>)
-        {% elif point["percentage_change"] > 0 %}
+        {% elif "+inf" in str(point["percentage_change"]) or point["percentage_change"] > 0 %}
         (<span style="color: lightgreen;">{{ point["change_message"] }}</span>)
-        {% elif point["percentage_change"] < 0 %}
+        {% elif "-inf" in str(point["percentage_change"]) or point["percentage_change"] < 0 %}
         (<span style="color: red;">{{ point["change_message"] }}</span>)
         {% else %}
         (<span>{{ point["change_message"] }}</span>)

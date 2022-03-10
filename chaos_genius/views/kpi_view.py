@@ -69,16 +69,9 @@ def kpi():
             if data["kpi_query"][-1] == ";":
                 data["kpi_query"] = data["kpi_query"][:-1]
 
-            date_col = data_con.run_query(
-                f"select {data['datetime_column']} from ({data['kpi_query']}) {randomword(10)} limit 1"
-            )[data["datetime_column"]]
-        else:
-            date_col = data_con.run_query(
-                f"select {data['datetime_column']} from {data['table_name']} limit 1"
-            )[data["datetime_column"]]
-
-        date_col = pd.to_datetime(date_col)
-        timezone_aware = date_col[0].tz is not None
+        # TODO: make this more general.
+        #       query data to figure out if it's tz-aware.
+        timezone_aware = data_source["connection_type"] == "Druid"
 
         new_kpi = Kpi(
             name=data.get("name"),

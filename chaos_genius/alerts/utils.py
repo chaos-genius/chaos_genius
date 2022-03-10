@@ -6,6 +6,7 @@ from typing import Dict, List, Tuple, Union
 
 from chaos_genius.alerts.constants import (
     ALERT_DATETIME_FORMAT,
+    ALERT_READABLE_DATE_FORMAT,
     ALERT_READABLE_DATETIME_FORMAT,
     ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS,
     OVERALL_KPI_SERIES_TYPE_REPR,
@@ -31,15 +32,20 @@ def webapp_url_prefix():
     return f"{CHAOSGENIUS_WEBAPP_URL}{forward_slash}"
 
 
-def save_anomaly_point_formatting(points: List[Dict]):
+def save_anomaly_point_formatting(points: List[Dict], frequency: str = None):
     """Adds formatted fields to each point, to be used in alert templates."""
     for point in points:
         dt = datetime.datetime.strptime(point["data_datetime"], ALERT_DATETIME_FORMAT)
-        date = dt.strftime(ALERT_READABLE_DATETIME_FORMAT)
+
+        dt_format = ALERT_READABLE_DATETIME_FORMAT
+        if frequency is not None and frequency == "D":
+            dt_format = ALERT_READABLE_DATE_FORMAT
+
+        date = dt.strftime(dt_format)
         point["formatted_date"] = date
 
         change_percent = point["percentage_change"]
-        change_message = "-"
+        change_message = change_percent
         if isinstance(change_percent, (int, float)):
             if change_percent > 0:
                 change_message = f"+{change_percent}%"
@@ -67,15 +73,15 @@ def change_message_from_percent(percent_change: Union[str, int, float]) -> str:
     """Creates a change message from given percentage change.
 
     percent_change will be:
-        - "-" in case the last data point was missing
+        - "–" in case the last data point was missing or both the points had values 0
         - 0 (int) in case there was no change
         - positive value (int/float) in case there was an increase
         - negative value (int/float) in case there was a decrease
     """
     if isinstance(percent_change, str):
-        return "-"
+        return percent_change
     elif percent_change == 0:
-        return "No change (-)"
+        return "No change (–)"
     elif percent_change > 0:
         return f"Increased by ({percent_change}%)"
     else:

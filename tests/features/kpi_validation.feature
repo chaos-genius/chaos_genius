@@ -83,7 +83,8 @@ Feature: KPI Validation
     Scenario: date/time column is a date string
         Given a newly added KPI and its DataFrame
         When the date/time column is a date string
-        Then validation should pass
+        Then validation should fail
+        And error message should be "The datetime column is of the type object, use 'cast' to convert to datetime."
 
     Scenario: date/time column is some categorical string
         Given a newly added KPI and its DataFrame
@@ -114,10 +115,18 @@ Feature: KPI Validation
     Scenario: date/time column is timezone-aware
         Given a newly added KPI and its DataFrame
         When date/time column is a timezone-aware timestamp
+        Then validation should fail
+        And error message should be "The datetime column has timezone aware data, use 'cast' to convert to timezone naive."
+
+    Scenario: date/time column is timezone-aware for a Druid KPI
+        Given a newly added KPI and its DataFrame
+        When the KPI is from a Druid data source
+        When date/time column is a timezone-aware timestamp
         Then validation should pass
 
     # ISO 8601 datetime string with timezone
     Scenario: date/time column is timezone-aware but in string format
         Given a newly added KPI and its DataFrame
         When date/time column is a timezone-aware timestamp but in string format
-        Then validation should pass
+        Then validation should fail
+        And error message should be "The datetime column is of the type object, use 'cast' to convert to datetime."

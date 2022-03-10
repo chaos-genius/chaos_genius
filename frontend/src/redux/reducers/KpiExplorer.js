@@ -37,7 +37,8 @@ import {
   KPIUPDATEREQUEST,
   KPIUPDATESUCCESS,
   KPIUPDATEFAILURE,
-  SCHEMAAVAILABILTYREQUEST
+  SCHEMAAVAILABILTYREQUEST,
+  SUPPORTEDAGGSUCCESS
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -77,7 +78,8 @@ const initialState = {
   kpiEditDataError: false,
   kpiUpdateLoading: false,
   kpiUpdateData: [],
-  kpiUpdateError: false
+  kpiUpdateError: false,
+  supportedAgg: []
 };
 
 export const kpiExplorer = (state = initialState, action) => {
@@ -322,6 +324,12 @@ export const kpiExplorer = (state = initialState, action) => {
         ...state,
         kpiUpdateLoading: false,
         kpiUpdateError: true
+      };
+    }
+    case SUPPORTEDAGGSUCCESS: {
+      return {
+        ...state,
+        supportedAgg: action.data
       };
     }
     case 'KPI_RESET': {

@@ -41,12 +41,6 @@ const datasettype = [
   }
 ];
 
-const aggregate = [
-  { value: 'mean', label: 'Mean' },
-  { value: 'count', label: 'Count' },
-  { value: 'sum', label: 'Sum' }
-];
-
 const customSingleValue = ({ data }) => (
   <div className="input-select">
     <div className="input-select__single-value">
@@ -75,6 +69,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     datetime_column: '',
     dashboard: ''
   });
+
+  const [aggregate, setAggregate] = useState([]);
 
   const [formdata, setFormdata] = useState({
     kpiname: '',
@@ -140,7 +136,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     kpiMetaInfoData,
     kpiEditData,
     kpiUpdateLoading,
-    kpiUpdateData
+    kpiUpdateData,
+    supportedAgg
   } = useSelector((state) => state.kpiExplorer);
 
   const { dashboardList } = useSelector((state) => state.DashboardHome);
@@ -152,8 +149,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   useEffect(() => {
     dispatchGetAllKpiExplorerForm();
     dispatchGetAllDashboard();
+    dispatch(getEditMetaInfo());
     if (data[2] === 'edit') {
-      dispatch(getEditMetaInfo());
       dispatch(getKpibyId(kpiId));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -825,6 +822,35 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       setIsOpen(false);
     }
   }, [createDashboard]);
+
+  useEffect(() => {
+    let filterList = [];
+    if (kpiMetaInfoData && kpiMetaInfoData.fields) {
+      const options = kpiMetaInfoData?.fields.find((field) => {
+        return field.name === 'aggregation';
+      })?.options;
+
+      for (let i = 0; i < options.length; i++) {
+        for (let j = 0; j < supportedAgg.length; j++) {
+          if (options[i].value === supportedAgg[j]) {
+            filterList.push(options[i]);
+          }
+        }
+      }
+      setAggregate(filterList);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supportedAgg]);
+
+  useEffect(() => {
+    if (kpiMetaInfoData && kpiMetaInfoData.fields) {
+      const options = kpiMetaInfoData?.fields.find((field) => {
+        return field.name === 'aggregation';
+      })?.options;
+      setAggregate(options);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kpiMetaInfoData]);
 
   const editableStatus = (type) => {
     var status = false;

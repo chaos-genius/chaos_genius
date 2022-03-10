@@ -322,12 +322,9 @@ def anomaly_settings_status(kpi_id):
 
     response["is_anomaly_setup"] = kpi.anomaly_params is not None
 
-    rca_data = RcaData.query.filter(RcaData.kpi_id == kpi_id).all()
-    if len(rca_data) == 0:
-        is_precomputed = False
-    else:
-        is_precomputed = True
-    response["is_rca_precomputed"] = is_precomputed
+    num_rca_data = RcaData.query.filter(RcaData.kpi_id == kpi_id).count()
+    
+    response["is_rca_precomputed"] = num_rca_data != 0
 
     anomaly_data = AnomalyDataOutput.query.filter(
         (AnomalyDataOutput.kpi_id == kpi_id) & (AnomalyDataOutput.anomaly_type == "overall")

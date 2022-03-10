@@ -240,3 +240,14 @@
   border-radius: 4px;
   width: 5px;
 }
+.time-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 35px;
+}
+.time-stamp {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 14px;
+}

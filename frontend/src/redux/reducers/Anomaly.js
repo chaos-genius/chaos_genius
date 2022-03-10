@@ -10,7 +10,10 @@ import {
   ANOMALYDRILLDOWNFAILURE,
   ANOMALYSETTINGREQUEST,
   ANOMALYSETTINGSUCCESS,
-  ANOMALYSETTINGFAILURE
+  ANOMALYSETTINGFAILURE,
+  RETRAINFAILURE,
+  RETRAINREQUEST,
+  RETRAINSUCCESS
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -25,7 +28,8 @@ const initialState = {
   anomalyDrilldownError: false,
   anomalySettingLoading: false,
   anomalySettingData: '',
-  anomalySettingError: false
+  anomalySettingError: false,
+  retrain: false
 };
 
 export const anomaly = (state = initialState, action) => {
@@ -116,11 +120,30 @@ export const anomaly = (state = initialState, action) => {
         anomalySettingData: []
       };
     }
+    case RETRAINREQUEST: {
+      return {
+        ...state,
+        retrain: false
+      };
+    }
+    case RETRAINSUCCESS: {
+      return {
+        ...state,
+        retrain: true
+      };
+    }
+    case RETRAINFAILURE: {
+      return {
+        ...state,
+        retrain: false
+      };
+    }
     case 'RESET': {
       return {
         ...state,
         anomalyDrilldownData: '',
-        anomalyQualityData: ''
+        anomalyQualityData: '',
+        retrain: false
       };
     }
     case 'RESET_DRILL': {

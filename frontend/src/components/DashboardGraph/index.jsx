@@ -408,15 +408,27 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
           <div className="dashboard-layout dashboard-layout-change">
             <div className="dashboard-container">
               <div className="dashboard-subcategory">
-                <div className="time-stamp">
-                  <p>
-                    Last updated:{' '}
-                    <span>
-                      {aggregationData?.analysis_date
-                        ? aggregationData?.analysis_date
-                        : '-'}
-                    </span>
-                  </p>
+                <div className="time-container">
+                  <div className="time-stamp">
+                    <p>
+                      Last Data Entry:{' '}
+                      <span>
+                        {aggregationData?.analysis_date
+                          ? aggregationData?.analysis_date
+                          : '-'}
+                      </span>
+                    </p>
+                  </div>
+                  <div className="time-stamp">
+                    <p>
+                      Last Scan:{' '}
+                      <span>
+                        {aggregationData?.analysis_date
+                          ? aggregationData?.analysis_date
+                          : '-'}
+                      </span>
+                    </p>
+                  </div>
                 </div>
                 <Select
                   value={monthWeek}

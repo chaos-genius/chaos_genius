@@ -112,12 +112,6 @@ def _validate_kpi_from_df(
             ),
         },
         {
-            "debug_str": "Check #5: Validate date column is tz-naive",
-            "status": lambda: _validate_date_column_is_tz_naive(
-                df, date_column_name=date_column_name
-            ),
-        },
-        {
             "debug_str": "Check #6: Validate dimensions",
             "status": lambda: _validate_dimensions(kpi_info),
         },
@@ -243,35 +237,11 @@ def _validate_date_column_is_parseable(
     :rtype: Tuple[bool, str]
     """
     # has to be datetime only then proceed else exit
-    if not is_datetime(df[date_column_name]):
+    parsed_df = pd.to_datetime(df[date_column_name], errors="ignore")
+    if not is_datetime(parsed_df):
         invalid_type_err_msg = (
             "The datetime column is of the type"
             f" {df[date_column_name].dtype}, use 'cast' to convert to datetime."
-        )
-        return False, invalid_type_err_msg
-
-    return True, "Accepted!"
-
-
-def _validate_date_column_is_tz_naive(
-    df: pd.core.frame.DataFrame,
-    date_column_name: str,
-) -> Tuple[bool, str]:
-    """Validate if specified date column is tz-naive.
-
-    :param df: A pandas DataFrame
-    :type df: pd.core.frame.DataFrame
-    :param date_column_name: Name of the date column
-    :type date_column_name: str
-    :return: returns a tuple with the status as a bool and a status message
-    :rtype: Tuple[bool, str]
-    """
-    date_col = df[date_column_name]
-    all_tz_naive = date_col.apply(lambda t: t.tz is None).all()
-    if not all_tz_naive:
-        invalid_type_err_msg = (
-            "The datetime column has timezone aware data,"
-            " use 'cast' to convert to timezone naive."
         )
         return False, invalid_type_err_msg
 

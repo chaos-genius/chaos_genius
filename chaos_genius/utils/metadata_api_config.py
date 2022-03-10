@@ -4,7 +4,7 @@ SCHEMAS_AVAILABLE = {
     "Redshift": True,
     "BigQuery": False,
     "Snowflake": True,
-    "Druid": False 
+    "Druid": False
 }
 
 TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY = {

@@ -1,7 +1,11 @@
 from datetime import datetime, timedelta
 
 from chaos_genius.databases.models.kpi_model import Kpi
+from chaos_genius.app import create_app
+
+app = create_app()
 from chaos_genius.jobs.analytics_scheduler import AnalyticsScheduler
+
 
 from copy import deepcopy
 
@@ -52,22 +56,24 @@ now_date = str(now.date())
 
 
 test_cases_get_scheduled_time_hourly = [
-    ("10:12", f"{now_date} {now_hr}:10:12"),
-    ("00:59", f"{now_date} {now_hr}:00:59"),
-    ("23:59", f"{now_date} {now_hr}:23:59"),
-    ("00:59", f"{now_date} {now_hr}:00:59"),
-    ("07:21", f"{now_date} {now_hr}:07:21"),
-    ("00:00", f"{now_date} {now_hr}:00:00"),
+    # Not time in scheduler params
     ("", f"{now_date} {now_hr}:10:00"),
-    ("11:15:56", f"{now_date} {now_hr}:10:00"),
-    ("23:15:56", f"{now_date} {now_hr}:10:00"),
-    ("00:11:56", f"{now_date} {now_hr}:10:00"),
-    ("08:45:56", f"{now_date} {now_hr}:10:00"),
+    # different times in 24 hrs provided in time param
+    ("11:15:59", f"{now_date} {now_hr}:15:59"),
+    ("23:15:01", f"{now_date} {now_hr}:15:01"),
+    ("00:11:56", f"{now_date} {now_hr}:11:56"),
+    ("08:45:23", f"{now_date} {now_hr}:45:23"),
+    ("08:00:00", f"{now_date} {now_hr}:00:00"),
 ]
 
 
 @pytest.mark.parametrize("time,expected", test_cases_get_scheduled_time_hourly)
 def test_get_scheduled_time_hourly(monkeypatch, time, expected):
+    """
+    monkeypatch takes global test_kpi object and transforms according to the current test case
+    in a way that global test_kpi is used as a template but all changes made to it are limited
+    to the scope of test case
+    """
     if time:
         monkeypatch.setitem(test_kpi.scheduler_params, "time", time)
     else:
@@ -81,6 +87,7 @@ def test_get_scheduled_time_hourly(monkeypatch, time, expected):
 
 # Not testing _get_scheduled_time_daily with 2nd param as "rca_time" since its just a name change
 test_cases_get_scheduled_time_daily = [
+    # time not present in scheduler params
     ("", now, f"{now_date} {now_hr}:{now_min}:{now_sec}"),
     ("", now - timedelta(days=1), f"{now_date} {now_hr}:{now_min}:{now_sec}"),
     ("", now - timedelta(days=800), f"{now_date} {now_hr}:{now_min}:{now_sec}"),
@@ -99,6 +106,7 @@ test_cases_get_scheduled_time_daily = [
         now - timedelta(seconds=35, days=3),
         f"{now_date} 00:01:02",
     ),
+    # time present in scheduler params
     ("05:10:19", now, f"{now_date} 05:10:19"),
     ("23:59:59", now - timedelta(days=1), f"{now_date} 23:59:59"),
     ("12:12:01", now - timedelta(days=800), f"{now_date} 12:12:01"),
@@ -304,6 +312,3 @@ def test_to_run_rca(monkeypatch, kpi_params, scheduled_time, expected):
     scheduler = AnalyticsScheduler()
     scheduled_time = datetime.strptime(scheduled_time, DATETIME_FMT)
     assert scheduler._to_run_rca(test_kpi, scheduled_time) == expected
-
-
-## make human readable // docstrings .. mention why rca_time not teste

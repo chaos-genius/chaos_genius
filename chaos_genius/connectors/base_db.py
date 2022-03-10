@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy import text
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text, exc as sqlalchemy_exc

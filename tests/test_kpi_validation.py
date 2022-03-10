@@ -42,6 +42,7 @@ def new_kpi_df():  # noqa: D103
         [
             [
                 "2021-12-21",
+                "2022-03-10T14:34:12+05:30",
                 1,
                 "a",
                 "q",
@@ -53,6 +54,7 @@ def new_kpi_df():  # noqa: D103
             ],
             [
                 "2021-12-22",
+                "2022-02-10T14:34:12+05:30",
                 2,
                 "b",
                 "w",
@@ -64,6 +66,7 @@ def new_kpi_df():  # noqa: D103
             ],
             [
                 "2021-12-23",
+                "2022-01-10T14:34:12+05:30",
                 3,
                 "c",
                 "e",
@@ -75,6 +78,7 @@ def new_kpi_df():  # noqa: D103
             ],
             [
                 "2021-12-24",
+                "2021-12-10T14:34:12+05:30",
                 4,
                 "d",
                 "r",
@@ -87,6 +91,7 @@ def new_kpi_df():  # noqa: D103
         ],
         columns=[
             "date_col",
+            "datetime_timezone_aware",
             "metric_col",
             "dim1",
             "dim2",
@@ -97,7 +102,12 @@ def new_kpi_df():  # noqa: D103
             "unix_time",
         ],
     )
+    # another col which is date but in string form
+    df["date_col_str"] = df["date_col"]
     df["date_col"] = pd.to_datetime(df["date_col"])
+    # another col which is tz-ware timestamp but in string form
+    df["datetime_timezone_aware_str"] = df["datetime_timezone_aware"]
+    df["datetime_timezone_aware"] = pd.to_datetime(df["datetime_timezone_aware"])
     return kpi, df
 
 
@@ -213,6 +223,13 @@ def test_date_col_is_float():  # noqa: D103
 
 
 @scenario(
+    "features/kpi_validation.feature", "date/time column is a date string"
+)
+def test_date_col_is_date_str():  # noqa: D103
+    pass
+
+
+@scenario(
     "features/kpi_validation.feature", "date/time column is some categorical string"
 )
 def test_date_col_is_cat():  # noqa: D103
@@ -240,6 +257,22 @@ def test_date_weird():  # noqa: D103
     "date/time column has unix timestamp",
 )
 def test_date_unix():  # noqa: D103
+    pass
+
+
+@scenario(
+    "features/kpi_validation.feature",
+    "date/time column is timezone-aware",
+)
+def test_datetime_timezone_aware():  # noqa: D103
+    pass
+
+
+@scenario(
+    "features/kpi_validation.feature",
+    "date/time column is timezone-aware but in string format",
+)
+def test_datetime_timezone_aware_str():  # noqa: D103
     pass
 
 
@@ -387,6 +420,18 @@ def date_col_is_float(new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch):  # noq
 
 
 @when(
+    "the date/time column is a date string",
+    target_fixture="new_kpi_df",
+)
+def date_col_is_date_str(new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch):  # noqa: D103
+    kpi, df = new_kpi_df
+
+    monkeypatch.setattr(kpi, "datetime_column", "date_col_str")
+
+    return kpi, df
+
+
+@when(
     "the date/time column is a categorical string",
     target_fixture="new_kpi_df",
 )
@@ -433,5 +478,37 @@ def date_unix(new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch):  # noqa: D103
     kpi, df = new_kpi_df
 
     monkeypatch.setattr(kpi, "datetime_column", "unix_time")
+
+    return kpi, df
+
+
+@when(
+    "date/time column is a timezone-aware timestamp",
+    target_fixture="new_kpi_df",
+)
+def datetime_timezone_aware(  # noqa: D103
+    new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch
+):
+    kpi: Kpi
+    df: pd.DataFrame
+    kpi, df = new_kpi_df
+
+    monkeypatch.setattr(kpi, "datetime_column", "datetime_timezone_aware")
+
+    return kpi, df
+
+
+@when(
+    "date/time column is a timezone-aware timestamp but in string format",
+    target_fixture="new_kpi_df",
+)
+def datetime_timezone_aware_str(  # noqa: D103
+    new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch
+):
+    kpi: Kpi
+    df: pd.DataFrame
+    kpi, df = new_kpi_df
+
+    monkeypatch.setattr(kpi, "datetime_column", "datetime_timezone_aware_str")
 
     return kpi, df

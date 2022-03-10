@@ -79,6 +79,12 @@ Feature: KPI Validation
         Then validation should fail
         And error message should be "The datetime column is of the type float64, use 'cast' to convert to datetime."
 
+    # ISO 8601 date string
+    Scenario: date/time column is a date string
+        Given a newly added KPI and its DataFrame
+        When the date/time column is a date string
+        Then validation should pass
+
     Scenario: date/time column is some categorical string
         Given a newly added KPI and its DataFrame
         When the date/time column is a categorical string
@@ -104,3 +110,14 @@ Feature: KPI Validation
         When date/time column has integer unix timestamp
         Then validation should fail
         And error message should be "The datetime column is of the type int64, use 'cast' to convert to datetime."
+
+    Scenario: date/time column is timezone-aware
+        Given a newly added KPI and its DataFrame
+        When date/time column is a timezone-aware timestamp
+        Then validation should pass
+
+    # ISO 8601 datetime string with timezone
+    Scenario: date/time column is timezone-aware but in string format
+        Given a newly added KPI and its DataFrame
+        When date/time column is a timezone-aware timestamp but in string format
+        Then validation should pass

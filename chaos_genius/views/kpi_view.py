@@ -96,7 +96,7 @@ def kpi():
             timezone_aware=timezone_aware,
         )
         # Perform KPI Validation
-        status, message = validate_kpi(new_kpi.as_dict)
+        status, message = validate_kpi(new_kpi.as_dict, data_source)
         if status is not True:
             return jsonify(
                 {"error": message, "status": "failure", "is_critical": "true"}

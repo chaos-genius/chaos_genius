@@ -165,3 +165,8 @@ def get_active_kpis() -> Iterator[Kpi]:
         (Kpi.active == True) & (Kpi.is_static == False)
     )
     return kpis
+
+
+# def delete_data(kpi, query):
+#     db.session.execute(query)
+#     db.session.commit()

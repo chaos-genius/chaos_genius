@@ -8,7 +8,6 @@ from pandas.api.types import is_datetime64_any_dtype as is_datetime
 
 from chaos_genius.core.rca.root_cause_analysis import SUPPORTED_AGGREGATIONS
 from chaos_genius.core.utils.data_loader import DataLoader
-from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.settings import MAX_ROWS_FOR_DEEPDRILLS
 
 KPI_VALIDATION_TAIL_SIZE = 1000
@@ -16,11 +15,13 @@ KPI_VALIDATION_TAIL_SIZE = 1000
 logger = logging.getLogger(__name__)
 
 
-def validate_kpi(kpi_info: Dict[str, Any], datasource: DataSource) -> Tuple[bool, str]:
+def validate_kpi(kpi_info: Dict[str, Any], data_source: Dict[str, Any]) -> Tuple[bool, str]:
     """Load data for KPI and invoke all validation checks.
 
     :param kpi_info: Dictionary with all params for the KPI
     :type kpi_info: Dict[str, Any]
+    :param data_source: Dictionary describing the data source
+    :type data_source: Dict[str, Any]
     :return: Returns a tuple with the status as a bool and a status message
     :rtype: Tuple[bool, str]
     """
@@ -33,7 +34,7 @@ def validate_kpi(kpi_info: Dict[str, Any], datasource: DataSource) -> Tuple[bool
         logger.error("Unable to load data for KPI validation", exc_info=1)
         return False, "Could not load data. Error: " + str(e)
 
-    supports_tz_aware = datasource.connection_type == "Druid"
+    supports_tz_aware = data_source["connection_type"] == "Druid"
 
     return _validate_kpi_from_df(
         df,

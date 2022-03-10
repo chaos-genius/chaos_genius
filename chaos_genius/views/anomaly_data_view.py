@@ -332,7 +332,7 @@ def anomaly_settings_status(kpi_id):
     anomaly_data = AnomalyDataOutput.query.filter(
         AnomalyDataOutput.kpi_id == kpi_id & (AnomalyDataOutput.anomaly_type == "overall")
     ).count()
-    response["is_anomaly_precomputed"] = len(anomaly_data) != 0
+    response["is_anomaly_precomputed"] = anomaly_data != 0
 
     current_app.logger.info(f"Anomaly settings retrieved for kpi: {kpi_id}")
     return jsonify(response)

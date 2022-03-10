@@ -1,12 +1,15 @@
 """Tests Anomaly Controller Functions."""
 
+from dataclasses import dataclass
 from datetime import datetime
 
 import pandas as pd
 import pytest
+from _pytest.monkeypatch import MonkeyPatch
 from pandas.testing import assert_frame_equal
 
 from chaos_genius.core.anomaly.controller import AnomalyDetectionController
+from chaos_genius.databases.models.data_source_model import DataSource
 
 
 def load_input_data(file_name):
@@ -102,6 +105,7 @@ testdata_detect_anomaly = [
     ids=["daily", "hourly"],
 )
 def test_detect_anomaly(
+    monkeypatch: MonkeyPatch,
     kpi_info,
     model_name,
     input_data_str,
@@ -112,6 +116,20 @@ def test_detect_anomaly(
     expected,
 ):
     """Tests calculation for prediction."""
+    data_source = {
+        "connection_type": "Postgres",
+        "id": 1
+    }
+
+    @dataclass
+    class TestDataSource:
+        as_dict: dict
+
+    def get_data_source(*args, **kwargs):
+        return TestDataSource(data_source)
+
+    monkeypatch.setattr(DataSource, "get_by_id", get_data_source)
+
     input_data = load_input_data(input_data_str)
     adc = AnomalyDetectionController(kpi_info, datetime(2022, 1, 16))
     pred_series = adc._detect_anomaly(

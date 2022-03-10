@@ -71,12 +71,8 @@ class AnalyticsScheduler:
 
         scheduled_time = datetime.now()
 
-        # consider time_field only if it's present and has only MM:SS
-        if (
-            time_field in scheduler_params
-            and len(scheduler_params[time_field].split(":")) == 2
-        ):
-            minute, second = map(int, scheduler_params[time_field].split(":"))
+        if time_field in scheduler_params:
+            _, minute, second = map(int, scheduler_params[time_field].split(":"))
             scheduled_time = scheduled_time.replace(minute=minute, second=second)
         else:
             scheduled_time = scheduled_time.replace(

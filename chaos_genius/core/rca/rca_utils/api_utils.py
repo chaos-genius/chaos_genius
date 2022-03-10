@@ -8,7 +8,8 @@ from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
 from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.utils.datetime_helper import (
     convert_datetime_to_timestamp,
-    get_date_string_with_tz,
+    get_datetime_string_with_tz,
+    get_lastscan_string_with_tz,
     get_rca_date_from_string,
 )
 
@@ -56,8 +57,11 @@ def kpi_aggregation(kpi_id, timeline="last_30_days"):
                         "value": data_point.data["perc_change"],
                     },
                 ],
-                "analysis_date": get_date_string_with_tz(analysis_date),
+                "analysis_date": get_datetime_string_with_tz(analysis_date),
                 "timecuts_date": get_timecuts_dates(analysis_date, timeline),
+                "last_run_time_rca": get_lastscan_string_with_tz(
+                    kpi_info["scheduler_params"]["last_scheduled_time_rca"]
+                ),
             }
         else:
             raise ValueError("No data found")
@@ -146,7 +150,7 @@ def rca_analysis(kpi_id, timeline="last_30_days", dimension=None):
 
         if data_point:
             final_data = data_point.data
-            final_data["analysis_date"] = get_date_string_with_tz(
+            final_data["analysis_date"] = get_datetime_string_with_tz(
                 get_analysis_date(kpi_id, end_date)
             )
         else:
@@ -190,7 +194,7 @@ def rca_hierarchical_data(kpi_id, timeline="last_30_days", dimension=None):
 
         if data_point:
             final_data = data_point.data
-            final_data["analysis_date"] = get_date_string_with_tz(
+            final_data["analysis_date"] = get_datetime_string_with_tz(
                 get_analysis_date(kpi_id, end_date)
             )
         else:

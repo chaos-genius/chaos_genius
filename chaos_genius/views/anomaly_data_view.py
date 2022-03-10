@@ -340,6 +340,7 @@ def anomaly_settings_status(kpi_id):
         )
 
     response = DEFAULT_STATUS.copy()
+    response["kpi_id"] = kpi_id
 
     if kpi.scheduler_params is not None:
         response.update(
@@ -706,6 +707,7 @@ DEFAULT_STATUS: Dict[str, Any] = {
     "last_scheduled_time_anomaly": None,
     "last_scheduled_time_rca": None,
     "rca_status": None,
+    "kpi_id": None,
 }
 
 

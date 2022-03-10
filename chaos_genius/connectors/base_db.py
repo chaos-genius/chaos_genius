@@ -52,7 +52,7 @@ class BaseDb:
                 table_dictionary_info["table_comment"] = self.get_table_comment(db_table, use_schema=schema)
                 table_dictionary[db_table] = table_dictionary_info
             except sqlalchemy_exc.ResourceClosedError as e:
-                logger.warn(f"get_columns failed", tabled_name=db_table)
+                logger.warn(f"get_columns failed for table: {db_table}")
                 
         schema_dict["tables"] = table_dictionary
         if get_sequences:

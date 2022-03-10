@@ -3,9 +3,8 @@
 from datetime import date, datetime, timedelta
 import time
 from typing import Any, Dict, List, Optional, Tuple, cast
-import dateutil
+
 from flask import Blueprint, current_app, jsonify, request
-from itsdangerous import json
 from sqlalchemy import func, delete
 import pandas as pd
 from sqlalchemy.orm.attributes import flag_modified
@@ -29,7 +28,6 @@ from chaos_genius.utils.datetime_helper import (
     get_datetime_string_with_tz,
     get_lastscan_string_with_tz,
 )
-
 
 
 blueprint = Blueprint("anomaly_data", __name__)
@@ -161,7 +159,7 @@ def kpi_subdim_anomaly(kpi_id):
             start_date = end_date - timedelta(hours=23)
             query = (
                 db.session.query(
-                    AnomalyDataOutput.series_type, 
+                    AnomalyDataOutput.series_type,
                     func.max(AnomalyDataOutput.severity),
                 )
                 .filter(
@@ -218,25 +216,6 @@ def kpi_subdim_anomaly(kpi_id):
 def kpi_anomaly_params_meta():
     # TODO: Move this dict into the corresponding data model
     return jsonify(ANOMALY_PARAMS_META)
-
-
-@blueprint.route("/<int:kpi_id>/re-train", methods=["GET"])
-def kpi_anomaly_retraining(kpi_id):
-    # delete all data in anomaly output table
-    delete_kpi_query = delete(AnomalyDataOutput).where(
-        AnomalyDataOutput.kpi_id == kpi_id
-    )
-    db.session.execute(delete_kpi_query)
-    db.session.commit()
-    # add anomaly to queue
-    from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task
-
-    anomaly_task = ready_anomaly_task(kpi_id)
-    if anomaly_task is not None:
-        anomaly_task.apply_async()
-        return jsonify({"msg": f"re-training started for KPI: {kpi_id}"})
-    else:
-        return jsonify({"msg": f"re-training failed for KPI: {kpi_id}"})
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-params", methods=["POST", "GET"])
@@ -351,20 +330,36 @@ def anomaly_settings_status(kpi_id):
 
     response["is_anomaly_setup"] = kpi.anomaly_params is not None
 
-    rca_data = RcaData.query.filter(RcaData.kpi_id == kpi_id).all()
-    if len(rca_data) == 0:
-        is_precomputed = False
-    else:
-        is_precomputed = True
-    response["is_rca_precomputed"] = is_precomputed
+    num_rca_data = RcaData.query.filter(RcaData.kpi_id == kpi_id).count()
+
+    response["is_rca_precomputed"] = num_rca_data != 0
 
     anomaly_data = AnomalyDataOutput.query.filter(
-        AnomalyDataOutput.kpi_id == kpi_id
-    ).all()
-    response["is_anomaly_precomputed"] = len(anomaly_data) != 0
+        (AnomalyDataOutput.kpi_id == kpi_id) & (AnomalyDataOutput.anomaly_type == "overall")
+    ).count()
+    response["is_anomaly_precomputed"] = anomaly_data != 0
 
     current_app.logger.info(f"Anomaly settings retrieved for kpi: {kpi_id}")
     return jsonify(response)
+
+
+@blueprint.route("/<int:kpi_id>/retrain", methods=["POST", "GET"])
+def kpi_anomaly_retraining(kpi_id):
+    # TODO: Move the deletion into KPI controller file
+    # delete all data in anomaly output table
+    delete_kpi_query = delete(AnomalyDataOutput).where(AnomalyDataOutput.kpi_id == kpi_id)
+    db.session.execute(delete_kpi_query)
+    db.session.commit()
+
+    # add anomaly to queue
+    from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task
+    anomaly_task = ready_anomaly_task(kpi_id)
+    if anomaly_task is not None:
+        anomaly_task.apply_async()
+        current_app.logger.info(f"Retraining started for KPI ID: {kpi_id}")
+        return jsonify({"msg" : f"retraining started for KPI: {kpi_id}"})
+    else:
+        return jsonify({"msg" : f"retraining failed for KPI: {kpi_id}, KPI id is None"})
 
 
 def fill_graph_data(row, graph_data):
@@ -1000,11 +995,6 @@ def get_anomaly_params_dict(kpi: Kpi):
         anomaly_params["scheduler_params_time"] = scheduler_params_db.get(
             "time", DEFAULT_ANOMALY_PARAMS["scheduler_params_time"]
         )
-
-    sensitivity_mapping_dict = {"high": "High", "low": "Low", "medium": "Medium"}
-    anomaly_params["sensitivity"] = sensitivity_mapping_dict[
-        anomaly_params["sensitivity"]
-    ]
 
     return anomaly_params
 

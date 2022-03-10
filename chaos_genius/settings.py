@@ -19,7 +19,7 @@ load_dotenv(".env")  # loads environment variables from .env
 
 """
 load the environment variables from the .env.local files
-and overide the variables
+and override the variables
 Here is the order of precedence:
 .env.local > os.environ > .env
 """
@@ -92,7 +92,7 @@ IN_DOCKER = _make_bool(os.getenv('IN_DOCKER', default=False))
 TASK_CHECKPOINT_LIMIT: int = int(os.getenv("TASK_CHECKPOINT_LIMIT", 1000))
 """Number of last checkpoints to retrieve in Task Monitor"""
 
-CHAOSGENIUS_VERSION_MAIN = os.getenv("CHAOSGENIUS_VERSION_MAIN", "0.4.0")
+CHAOSGENIUS_VERSION_MAIN = os.getenv("CHAOSGENIUS_VERSION_MAIN", "0.4.1")
 """ChaosGenius version - semver part only"""
 CHAOSGENIUS_VERSION_POSTFIX = os.getenv("CHAOSGENIUS_VERSION_POSTFIX", "git")
 """ChaosGenius version - postfix to identify deployment"""

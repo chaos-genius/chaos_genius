@@ -627,6 +627,10 @@ ANOMALY_PARAMS_META = {
                     "value": "D",
                     "name": "Daily",
                 },
+                {
+                    "value": "H",
+                    "name": "Hourly",
+                },
             ],
         },
     ],
@@ -748,7 +752,7 @@ def validate_partial_anomaly_params(
         frequency = anomaly_params["scheduler_frequency"]
 
         err, anomaly_params = validate_frequency(
-            frequency, "scheduler_frequency", {"D"}
+            frequency, "scheduler_frequency", {"D", "H"}
         )
 
         if err != "":

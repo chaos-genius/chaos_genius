@@ -4,6 +4,7 @@
   ],
   "imageSize": 100,
   "commit": false,
+  "badgeTemplate": "<a href=\"#contributors-\"><img src=\"https://img.shields.io/badge/all_contributors-<%= contributors.length %>-orange.svg\" alt=\"All Contributors\"></a>",
   "contributors": [
     {
       "login": "pshrimal21",
@@ -241,6 +242,47 @@
       "profile": "https://joshtaylor.id.au",
       "contributions": [
         "bug"
+      ]
+    },
+    {
+      "login": "ChartistDev",
+      "name": "ChartistDev",
+      "avatar_url": "https://avatars.githubusercontent.com/u/50948001?v=4",
+      "profile": "https://github.com/ChartistDev",
+      "contributions": [
+        "code",
+        "design",
+        "bug",
+        "review"
+      ]
+    },
+    {
+      "login": "rjdp",
+      "name": "Rajdeep Sharma",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7734938?v=4",
+      "profile": "https://buggydebugger.com/",
+      "contributions": [
+        "code",
+        "review"
+      ]
+    },
+    {
+      "login": "balakumar9493",
+      "name": "balakumar9493",
+      "avatar_url": "https://avatars.githubusercontent.com/u/98518511?v=4",
+      "profile": "https://github.com/balakumar9493",
+      "contributions": [
+        "code",
+        "design"
+      ]
+    },
+    {
+      "login": "eltociear",
+      "name": "Ikko Ashimine",
+      "avatar_url": "https://avatars.githubusercontent.com/u/22633385?v=4",
+      "profile": "https://bandism.net/",
+      "contributions": [
+        "code"
       ]
     }
   ],

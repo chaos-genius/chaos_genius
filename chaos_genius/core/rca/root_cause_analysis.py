@@ -510,9 +510,11 @@ class RootCauseAnalysis:
         :return: Dictionary with metrics
         :rtype: Dict[str, float]
         """
-
-        g1_agg = self._grp1_df[self._metric].agg(self._agg)
-        g2_agg = self._grp2_df[self._metric].agg(self._agg)
+        g1 = self._grp1_df[self._metric]
+        g2 = self._grp2_df[self._metric]
+        # set aggregations to 0 if data is empty
+        g1_agg = g1.agg(self._agg) if len(g1) > 0 else 0
+        g2_agg = g2.agg(self._agg) if len(g2) > 0 else 0
         impact = g2_agg - g1_agg
         perc_diff = (impact / g1_agg) * 100 if g1_agg != 0 else np.inf
 

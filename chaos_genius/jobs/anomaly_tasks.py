@@ -8,7 +8,7 @@ from sqlalchemy import func
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.sql.functions import coalesce
 
-from chaos_genius.alerts.base_alerts import trigger_anomaly_alerts_for_kpi
+from chaos_genius.alerts import trigger_anomaly_alerts_for_kpi
 from chaos_genius.controllers.task_monitor import (
     checkpoint_failure,
     checkpoint_initial,

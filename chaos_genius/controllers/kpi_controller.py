@@ -24,7 +24,7 @@ def _is_data_present_for_end_date(
     kpi_info: dict,
     end_date: date = None
 ) -> bool:
-    df_count = DataLoader(kpi_info, end_date=end_date, days_before=1).get_count()
+    df_count = DataLoader(kpi_info, end_date=end_date, days_before=0).get_count()
     return df_count != 0
 
 

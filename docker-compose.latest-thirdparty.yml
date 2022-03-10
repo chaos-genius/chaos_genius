@@ -7,12 +7,12 @@ x-logging: &default-logging
   driver: json-file
 x-version:
   &chaosgenius-version
-  CHAOSGENIUS_VERSION_POSTFIX=stable-thirdparty-compose
+  CHAOSGENIUS_VERSION_POSTFIX=latest-thirdparty-compose
 
 services:
   chaosgenius-init:
     container_name: chaosgenius-init
-    image: docker:20.10
+    image: docker:latest
     command: >
       sh -c "apk update && 
              apk upgrade && 
@@ -37,7 +37,7 @@ services:
 
   chaosgenius-server:
     container_name: chaosgenius-server
-    image: chaosgenius/chaosgenius-server:0.4.1
+    image: chaosgenius/chaosgenius-server:latest
     command: sh setup/run-backend-docker.sh
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -92,7 +92,7 @@ services:
 
   chaosgenius-webapp:
     container_name: chaosgenius-webapp
-    image: chaosgenius/chaosgenius-webapp:0.4.1
+    image: chaosgenius/chaosgenius-webapp:latest
     command: >
       sh -c "npx react-inject-env set -d ./ &&
              nginx -g 'daemon off;'"
@@ -132,7 +132,7 @@ services:
     
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler
-    image: chaosgenius/chaosgenius-server:0.4.1
+    image: chaosgenius/chaosgenius-server:latest
     command: celery -A run.celery beat --loglevel=DEBUG
     environment:
       - IN_DOCKER=True
@@ -167,7 +167,7 @@ services:
   
   chaosgenius-worker-analytics:
     container_name: chaosgenius-worker-analytics
-    image: chaosgenius/chaosgenius-server:0.4.1
+    image: chaosgenius/chaosgenius-server:latest
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
     environment:
       - IN_DOCKER=True
@@ -218,7 +218,7 @@ services:
 
   chaosgenius-worker-alerts:
     container_name: chaosgenius-worker-alerts
-    image: chaosgenius/chaosgenius-server:0.4.1
+    image: chaosgenius/chaosgenius-server:latest
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
     environment:
       - IN_DOCKER=True

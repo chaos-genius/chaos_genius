@@ -10,10 +10,8 @@ from chaos_genius.alerts.constants import (
     ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS,
     OVERALL_KPI_SERIES_TYPE_REPR,
 )
-from chaos_genius.core.rca.rca_utils.string_helpers import (
-    convert_query_string_to_user_string,
-)
 from chaos_genius.core.utils.round import round_number
+from chaos_genius.core.utils.string_helpers import convert_query_string_to_user_string
 from chaos_genius.settings import CHAOSGENIUS_WEBAPP_URL
 
 

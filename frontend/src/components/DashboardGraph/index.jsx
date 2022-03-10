@@ -423,8 +423,8 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
                     <p>
                       Last Scan:{' '}
                       <span>
-                        {aggregationData?.analysis_date
-                          ? aggregationData?.analysis_date
+                        {aggregationData?.last_run_time_rca
+                          ? aggregationData?.last_run_time_rca
                           : '-'}
                       </span>
                     </p>

@@ -153,6 +153,11 @@ export const anomaly = (state = initialState, action) => {
         anomalyDrilldownError: false
       };
     }
+    case 'RESET_ANOMALY': {
+      return {
+        ...initialState
+      };
+    }
 
     default:
       return state;

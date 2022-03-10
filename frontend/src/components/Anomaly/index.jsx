@@ -50,6 +50,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
   const [subDimList, setSubDimList] = useState([]);
   const [drilldownCollapse, setDrilldownCollapse] = useState(false);
   const [dataQualityCollapse, setDataQualityCollapse] = useState(false);
+  const [anomalStatusInfo, setAnomalyStatusInfo] = useState(false);
   const [kpiTab, setKPITab] = useState('Overall KPI');
 
   const idRef = useRef(0);
@@ -78,6 +79,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
     } else {
       setRetrainOn(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [retrain]);
 
   useEffect(() => {
@@ -143,6 +145,17 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
     if (anomalystatus && anomalystatus?.is_anomaly_setup === false) {
       history.push(`/dashboard/${dashboard}/settings/${kpi}`);
     }
+    if (
+      anomalystatus &&
+      anomalystatus?.is_anomaly_precomputed !== true &&
+      anomalystatus !== ''
+    ) {
+      setAnomalyStatusInfo(true);
+    }
+    // if (anomalystatus?.is_anomaly_precomputed === true) {
+    //   store.dispatch(RESET_ACTION);
+    //   getAnomaly(kpiTab);
+    // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anomalystatus]);
 
@@ -407,10 +420,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
 
   return (
     <>
-      {retrainOn === true ||
-      (anomalystatus &&
-        anomalystatus?.is_anomaly_precomputed !== true &&
-        anomalystatus !== '') ? (
+      {retrainOn === true || anomalStatusInfo === true ? (
         <div className="dashboard-layout setup-layout-empty">
           <AnomalyEmptyState />
         </div>
@@ -436,8 +446,8 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                         <p>
                           Last Scan:{' '}
                           <span>
-                            {anomalyDetectionData?.anomaly_end_date
-                              ? anomalyDetectionData?.anomaly_end_date
+                            {anomalyDetectionData?.last_run_time_anomaly
+                              ? anomalyDetectionData?.last_run_time_anomaly
                               : '-'}
                           </span>
                         </p>

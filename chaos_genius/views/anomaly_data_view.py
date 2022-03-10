@@ -66,12 +66,21 @@ def kpi_anomaly_detection(kpi_id):
         current_app.logger.info(f"Anomaly DD Retrieval Completed for KPI ID: {kpi_id}")
 
         end_date = get_datetime_string_with_tz(end_date, hourly)
-        anomaly_last_scan = get_lastscan_string_with_tz(kpi_info["scheduler_params"]["last_scheduled_time_anomaly"])
+        anomaly_last_scan = get_lastscan_string_with_tz(
+            kpi_info["scheduler_params"]["last_scheduled_time_anomaly"]
+        )
 
     except:  # noqa: E722
         current_app.logger.error("Error in Anomaly Overall Retrieval", exc_info=1)
 
-    return jsonify({"data": data, "msg": "", "anomaly_end_date": end_date, "last_run_time_anomaly": anomaly_last_scan})
+    return jsonify(
+        {
+            "data": data,
+            "msg": "",
+            "anomaly_end_date": end_date,
+            "last_run_time_anomaly": anomaly_last_scan,
+        }
+    )
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-drilldown", methods=["GET"])
@@ -204,12 +213,21 @@ def kpi_subdim_anomaly(kpi_id):
             f"Subdimension Anomaly Retrieval Completed for KPI ID: {kpi_id}"
         )
 
-        anomaly_last_scan = get_lastscan_string_with_tz(kpi_info["scheduler_params"]["last_scheduled_time_anomaly"])
+        anomaly_last_scan = get_lastscan_string_with_tz(
+            kpi_info["scheduler_params"]["last_scheduled_time_anomaly"]
+        )
 
     except:  # noqa: E722
         current_app.logger.error("Error in Subdimension Anomaly Retrieval", exc_info=1)
 
-    return jsonify({"data": subdim_graphs, "msg": "", "anomaly_end_date": end_date_str, "last_run_time_anomaly": anomaly_last_scan})
+    return jsonify(
+        {
+            "data": subdim_graphs,
+            "msg": "",
+            "anomaly_end_date": end_date_str,
+            "last_run_time_anomaly": anomaly_last_scan,
+        }
+    )
 
 
 @blueprint.route("/anomaly-params/meta-info", methods=["GET"])

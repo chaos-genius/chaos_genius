@@ -437,6 +437,27 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
       </div>
     );
   } else {
+    const noteForTimePicker = enabled.scheduler_frequency ? (
+      modalFrequency.label === 'Daily' ? (
+        <p>
+          Note: The time set above must be in your server timezone{' '}
+          {`(${globalSetting?.timezone})`}
+        </p>
+      ) : (
+        <p>
+          Note: Enter schedule (mm) for anomaly scan to be performed every hour
+        </p>
+      )
+    ) : sensitiveData?.scheduler_frequency.label === 'Daily' ? (
+      <p>
+        Note: The time set above must be in your server timezone{' '}
+        {`(${globalSetting?.timezone})`}
+      </p>
+    ) : (
+      <p>
+        Note: Enter schedule (mm) for anomaly scan to be performed every hour
+      </p>
+    );
     return (
       <>
         <div className="dashboard-subheader">
@@ -734,12 +755,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                 editableStatus('scheduler_params_time') === 'sensitive' &&
                 editAndSaveButton('schedule')}
             </div>
-            <div className="channel-tip">
-              <p>
-                Note: The time set above must be in your server timezone{' '}
-                {`(${globalSetting?.timezone})`}
-              </p>
-            </div>
+            <div className="channel-tip">{noteForTimePicker}</div>
           </div>
           <div className="form-action analystics-button">
             <button

@@ -63,6 +63,7 @@ SOURCE_WHITELIST_AND_TYPE = {
     "bfd1ddf8-ae8a-4620-b1d7-55597d2ba08c": False,  # Google BigQuery
     "e2d65910-8c8b-40a1-ae7d-ee2416b2bfa2": False,  # Snowflake
     "e87ffa8e-a3b5-f69c-9076-6011339de1f6": False,  # Redshift
+    "5B45DB62-303C-4E70-92DA-419D3CDBD506": False,  # Druid
     # "29b409d9-30a5-4cc8-ad50-886eb846fea3", # Quickbooks
 }
 
@@ -108,6 +109,13 @@ DATABASE_CONFIG_MAPPER = {
         "username": "username",
         "password": "password",
         "db_type": "redshift"
+    },
+    "5B45DB62-303C-4E70-92DA-419D3CDBD506": {
+        "host": "host",
+        "port": "port",
+        "username": "username",
+        "password": "password",
+        "db_type": "druid"
     }
 }
 

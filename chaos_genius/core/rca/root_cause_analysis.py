@@ -37,6 +37,8 @@ class RootCauseAnalysis:
         metric: str,
         num_dim_combs: List[int] = None,
         agg: str = "mean",
+        preaggregated: bool = False,
+        preaggregated_count_col: str = "count",
     ) -> None:
         """Initialize the RCA class.
 
@@ -53,6 +55,12 @@ class RootCauseAnalysis:
         :type num_dim_combs: List[int], optional
         :param agg: aggregation to use, defaults to "mean"
         :type agg: str, optional
+        :param preaggregated: whether the dataframes are preaggregated,
+        defaults to False
+        :type preaggregated: bool, optional
+        :param preaggregated_count_col: name of the column containing the
+        count of the aggregated dataframe, defaults to "count"
+        :type preaggregated_count_col: str, optional
         """
         self._grp1_df = grp1_df
         self._grp2_df = grp2_df
@@ -88,6 +96,9 @@ class RootCauseAnalysis:
 
         self._max_waterfall_columns = 5
         self._max_subgroups_considered = 100
+
+        self._preaggregated = preaggregated
+        self._preaggregated_count_col = preaggregated_count_col
 
     def _initialize_impact_table(self):
         self._create_binned_columns()
@@ -236,18 +247,50 @@ class RootCauseAnalysis:
         return value, size
 
     def _compare_subgroups(self, dim_comb: List[str]) -> pd.DataFrame:
-        agg_list = [self._agg, "count"] if self._agg != "count" else ["count"]
 
-        grp1_df = (
-            self._grp1_df.groupby(dim_comb)[self._metric]
-            .agg(agg_list)
-            .reset_index()
-        )
-        grp2_df = (
-            self._grp2_df.groupby(dim_comb)[self._metric]
-            .agg(agg_list)
-            .reset_index()
-        )
+        if self._preaggregated:
+            if self._agg == "count":
+                # if agg is count, sum across the count column
+                # to get the correct count
+                grp1_df = self._grp1_df.groupby(dim_comb)[
+                    self._preaggregated_count_col
+                ].agg(["sum"]).reset_index().rename(columns={"sum": "count"})
+                grp2_df = self._grp2_df.groupby(dim_comb)[
+                    self._preaggregated_count_col
+                ].agg(["sum"]).reset_index().rename(columns={"sum": "count"})
+            elif self._agg == "sum":
+                # if agg is sum, sum across the sum and count column
+                # to get the correct values
+                grp1_df = self._grp1_df.groupby(dim_comb)[
+                    [self._metric, self._preaggregated_count_col]
+                ].sum().reset_index().rename(columns={
+                    self._metric: "sum",
+                    self._preaggregated_count_col: "count"
+                })
+                grp2_df = self._grp2_df.groupby(dim_comb)[
+                    [self._metric, self._preaggregated_count_col]
+                ].sum().reset_index().rename(columns={
+                    self._metric: "sum",
+                    self._preaggregated_count_col: "count"
+                })
+            else:
+                raise ValueError(
+                    f"Unsupported aggregation: {self._agg} for preaggregated data."
+                )
+        else:
+            agg_list = [self._agg, "count"] if self._agg != "count" else ["count"]
+
+            grp1_df = (
+                self._grp1_df.groupby(dim_comb)[self._metric]
+                .agg(agg_list)
+                .reset_index()
+            )
+
+            grp2_df = (
+                self._grp2_df.groupby(dim_comb)[self._metric]
+                .agg(agg_list)
+                .reset_index()
+            )
 
         combined_df = grp1_df.merge(
             grp2_df, how="outer", on=dim_comb, suffixes=["_g1", "_g2"]
@@ -385,8 +428,21 @@ class RootCauseAnalysis:
         plot_in_mpl: bool,
     ) -> Tuple[Tuple[float, float], pd.DataFrame]:
 
-        d1_agg = self._grp1_df[self._metric].agg(self._agg)
-        d2_agg = self._grp2_df[self._metric].agg(self._agg)
+        if self._preaggregated:
+            if self._agg == "count":
+                d1_agg = self._grp1_df[self._preaggregated_count_col].sum()
+                d2_agg = self._grp2_df[self._preaggregated_count_col].sum()
+            elif self._agg == "sum":
+                d1_agg = self._grp1_df[self._metric].sum()
+                d2_agg = self._grp2_df[self._metric].sum()
+            else:
+                raise ValueError(
+                    f"Unsupported aggregation {self._agg} for preaggregated data."
+                )
+        else:
+            d1_agg = self._grp1_df[self._metric].agg(self._agg)
+            d2_agg = self._grp2_df[self._metric].agg(self._agg)
+
         d1_agg = 0 if pd.isna(d1_agg) else d1_agg
         d2_agg = 0 if pd.isna(d2_agg) else d2_agg
         impact = d2_agg - d1_agg
@@ -510,11 +566,24 @@ class RootCauseAnalysis:
         :return: Dictionary with metrics
         :rtype: Dict[str, float]
         """
-        g1 = self._grp1_df[self._metric]
-        g2 = self._grp2_df[self._metric]
-        # set aggregations to 0 if data is empty
-        g1_agg = g1.agg(self._agg) if len(g1) > 0 else 0
-        g2_agg = g2.agg(self._agg) if len(g2) > 0 else 0
+        if self._preaggregated:
+            if self._agg == "count":
+                g1_agg = self._grp1_df[self._preaggregated_count_col].sum()
+                g2_agg = self._grp2_df[self._preaggregated_count_col].sum()
+            elif self._agg == "sum":
+                g1_agg = self._grp1_df[self._metric].sum()
+                g2_agg = self._grp2_df[self._metric].sum()
+            else:
+                raise ValueError(
+                    f"Unsupported aggregation: {self._agg} for preaggregated data."
+                )
+        else:
+            g1 = self._grp1_df[self._metric]
+            g2 = self._grp2_df[self._metric]
+            # set aggregations to 0 if data is empty
+            g1_agg = g1.agg(self._agg) if len(g1) > 0 else 0
+            g2_agg = g2.agg(self._agg) if len(g2) > 0 else 0
+
         impact = g2_agg - g1_agg
         perc_diff = (impact / g1_agg) * 100 if g1_agg != 0 else np.inf
 

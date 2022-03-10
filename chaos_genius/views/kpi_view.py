@@ -15,9 +15,12 @@ from flask import (  # noqa: F401
     url_for,
     jsonify,
 )
+import pandas as pd
+from chaos_genius.connectors import get_sqla_db_conn
 
 from chaos_genius.core.utils.kpi_validation import validate_kpi
 from chaos_genius.core.utils.round import round_number
+from chaos_genius.core.utils.utils import randomword
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.data_source_model import DataSource
@@ -57,11 +60,25 @@ def kpi():
         data = request.get_json()
         data["dimensions"] = [] if data["dimensions"] is None else data["dimensions"]
 
+        data_source = DataSource.get_by_id(data["data_source"]).as_dict
+        data_con = get_sqla_db_conn(data_source_info=data_source)
+
         if data.get("kpi_query", "").strip():
             data["kpi_query"] = data["kpi_query"].strip()
             # remove trailing semicolon
             if data["kpi_query"][-1] == ";":
                 data["kpi_query"] = data["kpi_query"][:-1]
+
+            date_col = data_con.run_query(
+                f"select {data['datetime_column']} from ({data['kpi_query']}) {randomword(10)} limit 1"
+            )[data["datetime_column"]]
+        else:
+            date_col = data_con.run_query(
+                f"select {data['datetime_column']} from {data['table_name']} limit 1"
+            )[data["datetime_column"]]
+
+        date_col = pd.to_datetime(date_col)
+        timezone_aware = date_col[0].tz is not None
 
         new_kpi = Kpi(
             name=data.get("name"),
@@ -76,6 +93,7 @@ def kpi():
             datetime_column=data.get("datetime_column"),
             filters=data.get("filters"),
             dimensions=data.get("dimensions"),
+            timezone_aware=timezone_aware,
         )
         # Perform KPI Validation
         status, message = validate_kpi(new_kpi.as_dict)

@@ -488,7 +488,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                       <div
                         className="retrain-button"
                         onClick={() => handleRetrain()}>
-                        <img src={Refresh} alt="alert-notification" />
+                        <img src={Refresh} alt="alert-notification" />{' '}
                         <span>Retrain Model</span>
                       </div>
                     </div>

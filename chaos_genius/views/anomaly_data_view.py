@@ -25,7 +25,11 @@ from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 from chaos_genius.core.rca.rca_utils.string_helpers import (
     convert_query_string_to_user_string,
 )
-from chaos_genius.utils.datetime_helper import get_date_string_with_tz
+from chaos_genius.utils.datetime_helper import (
+    get_datetime_string_with_tz,
+    get_lastscan_string_with_tz,
+)
+
 
 
 blueprint = Blueprint("anomaly_data", __name__)
@@ -63,12 +67,13 @@ def kpi_anomaly_detection(kpi_id):
         data["chart_data"]["title"] = kpi_info["name"]
         current_app.logger.info(f"Anomaly DD Retrieval Completed for KPI ID: {kpi_id}")
 
-        end_date = get_date_string_with_tz(end_date)
+        end_date = get_datetime_string_with_tz(end_date, hourly)
+        anomaly_last_scan = get_lastscan_string_with_tz(kpi_info["scheduler_params"]["last_scheduled_time_anomaly"])
 
     except:  # noqa: E722
         current_app.logger.error("Error in Anomaly Overall Retrieval", exc_info=1)
 
-    return jsonify({"data": data, "msg": "", "anomaly_end_date": end_date})
+    return jsonify({"data": data, "msg": "", "anomaly_end_date": end_date, "last_run_time_anomaly": anomaly_last_scan})
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-drilldown", methods=["GET"])
@@ -102,12 +107,10 @@ def kpi_anomaly_drilldown(kpi_id):
             subdim_graphs.append(anom_data)
         current_app.logger.info(f"Anomaly DD Retrieval Completed for KPI ID: {kpi_id}")
 
-        end_date = get_date_string_with_tz(end_date)
-
     except:  # noqa: E722
         current_app.logger.error("Error in Anomaly DD Retrieval", exc_info=1)
 
-    return jsonify({"data": subdim_graphs, "msg": "", "anomaly_end_date": end_date})
+    return jsonify({"data": subdim_graphs, "msg": ""})
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-data-quality", methods=["GET"])
@@ -135,12 +138,10 @@ def kpi_anomaly_data_quality(kpi_id):
 
         current_app.logger.info(f"Anomaly DQ Retrieval Completed for KPI ID: {kpi_id}")
 
-        end_date = get_date_string_with_tz(end_date)
-
     except:  # noqa: E722
         current_app.logger.error("Error in Anomaly DQ Retrieval: {err}", exc_info=1)
 
-    return jsonify({"data": data, "msg": "", "anomaly_end_date": end_date})
+    return jsonify({"data": data, "msg": ""})
 
 
 @blueprint.route("/<int:kpi_id>/subdim-anomaly", methods=["GET"])
@@ -160,7 +161,8 @@ def kpi_subdim_anomaly(kpi_id):
             start_date = end_date - timedelta(hours=23)
             query = (
                 db.session.query(
-                    AnomalyDataOutput.series_type, func.max(AnomalyDataOutput.severity)
+                    AnomalyDataOutput.series_type, 
+                    func.max(AnomalyDataOutput.severity),
                 )
                 .filter(
                     (AnomalyDataOutput.kpi_id == kpi_id)
@@ -186,8 +188,13 @@ def kpi_subdim_anomaly(kpi_id):
                 .limit(TOP_SUBDIMENSIONS_FOR_ANOMALY)
             )
         results = pd.read_sql(query.statement, query.session.bind)
+
         if len(results) == 0:
+            end_date_str = ""
             current_app.logger.error("No Subdimension Anomaly Found", exc_info=1)
+        else:
+            end_date_str = get_datetime_string_with_tz(end_date, hourly)
+
         subdims = results.series_type
         for subdim in subdims:
             anom_data = get_dq_and_subdim_data(
@@ -199,12 +206,12 @@ def kpi_subdim_anomaly(kpi_id):
             f"Subdimension Anomaly Retrieval Completed for KPI ID: {kpi_id}"
         )
 
-        end_date = get_date_string_with_tz(end_date)
+        anomaly_last_scan = get_lastscan_string_with_tz(kpi_info["scheduler_params"]["last_scheduled_time_anomaly"])
 
     except:  # noqa: E722
         current_app.logger.error("Error in Subdimension Anomaly Retrieval", exc_info=1)
 
-    return jsonify({"data": subdim_graphs, "msg": "", "anomaly_end_date": end_date})
+    return jsonify({"data": subdim_graphs, "msg": "", "anomaly_end_date": end_date_str, "last_run_time_anomaly": anomaly_last_scan})
 
 
 @blueprint.route("/anomaly-params/meta-info", methods=["GET"])

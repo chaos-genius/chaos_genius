@@ -157,6 +157,16 @@ class Kpi(PkModel):
                     "name": "aggregation",
                     "is_editable": False,
                     "is_sensitive": False,
+                    "options": [{
+                        "label": "Mean",
+                        "value": "mean"
+                    }, {
+                        "label": "Sum",
+                        "value": "sum"
+                    }, {
+                        "label": "Count",
+                        "value": "count"
+                    }]
                 },
                 {
                     "name": "datetime_column",

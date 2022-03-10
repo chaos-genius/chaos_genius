@@ -1,8 +1,9 @@
 """Provides helper functions related to datetime operations."""
 
-from datetime import date, datetime, timezone, timedelta
-import pytz
+from datetime import date, datetime, timedelta, timezone
+
 import pandas as pd
+import pytz
 
 from chaos_genius.core.utils.constants import SUPPORTED_TIMEZONES
 from chaos_genius.settings import TIMEZONE
@@ -64,7 +65,9 @@ def get_lastscan_string_with_tz(datetime_value_str) -> str:
 
     datetime_value = datetime_value.tz_convert(tz=timezone_info)
     main_str = datetime_value.strftime("%d %b %Y %H:%M:%S") + f" {TIMEZONE}"
-    return f"{main_str} ({reporting_tz_offset})" if reporting_tz_offset != "" else main_str
+    return (
+        f"{main_str} ({reporting_tz_offset})" if reporting_tz_offset != "" else main_str
+    )
 
 
 def convert_datetime_to_timestamp(date_value) -> int:

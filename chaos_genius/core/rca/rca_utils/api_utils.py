@@ -59,7 +59,9 @@ def kpi_aggregation(kpi_id, timeline="last_30_days"):
                 ],
                 "analysis_date": get_datetime_string_with_tz(analysis_date),
                 "timecuts_date": get_timecuts_dates(analysis_date, timeline),
-                "last_run_time_rca": get_lastscan_string_with_tz(kpi_info["scheduler_params"]["last_scheduled_time_rca"])
+                "last_run_time_rca": get_lastscan_string_with_tz(
+                    kpi_info["scheduler_params"]["last_scheduled_time_rca"]
+                ),
             }
         else:
             raise ValueError("No data found")

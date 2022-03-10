@@ -152,10 +152,6 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
     ) {
       setAnomalyStatusInfo(true);
     }
-    // if (anomalystatus?.is_anomaly_precomputed === true) {
-    //   store.dispatch(RESET_ACTION);
-    //   getAnomaly(kpiTab);
-    // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anomalystatus]);
 
@@ -487,14 +483,16 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                       <SubdimensionEmpty />
                     </div>
                   )}
-                  <div className="retrain-button-container">
-                    <div
-                      className="retrain-button"
-                      onClick={() => handleRetrain()}>
-                      <img src={Refresh} alt="alert-notification" />
-                      <span>Retrain Model</span>
+                  {kpiTab === 'Overall KPI' && (
+                    <div className="retrain-button-container">
+                      <div
+                        className="retrain-button"
+                        onClick={() => handleRetrain()}>
+                        <img src={Refresh} alt="alert-notification" />
+                        <span>Retrain Model</span>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
               {itemList &&

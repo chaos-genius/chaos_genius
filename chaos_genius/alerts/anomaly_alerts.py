@@ -399,6 +399,7 @@ class AnomalyAlertController:
                     alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
                     overall_count=overall_count,
                     subdim_count=subdim_count,
+                    str=str
                 )
                 logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
             # self.remove_attributes_from_anomaly_data(overall_data, ["nl_message"])

@@ -9,8 +9,8 @@ from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.utils.datetime_helper import (
     convert_datetime_to_timestamp,
     get_datetime_string_with_tz,
-    get_rca_date_from_string,
     get_lastscan_string_with_tz,
+    get_rca_date_from_string,
 )
 
 logger = logging.getLogger(__name__)

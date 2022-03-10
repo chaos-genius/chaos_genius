@@ -457,6 +457,7 @@ class RootCauseAnalysisController:
                 db.engine,
                 if_exists="append",
                 index=False,
+                chunksize=5
             )
             self._checkpoint_success("Output Storage")
         except Exception as e:  # noqa E722

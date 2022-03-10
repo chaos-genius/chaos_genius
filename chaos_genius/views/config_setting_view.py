@@ -9,7 +9,6 @@ from chaos_genius.utils.datetime_helper import get_server_timezone
 from chaos_genius.utils.modules_utils import is_enterprise_edition
 from chaos_genius.core.rca.rca_utils.api_utils import kpi_aggregation
 from chaos_genius.databases.models.config_setting_model import ConfigSetting
-from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 from chaos_genius.controllers.config_controller import (
     get_modified_config_file,
     get_config_object,
@@ -208,12 +207,7 @@ def multidim_status():
     data = {}
     try:
         kpi_id = request.args.get("kpi_id")
-        multidim_status = False
-        kpi_info = get_kpi_data_from_id(kpi_id)
-        dimensions = kpi_info["dimensions"]
-        if len(dimensions)>1:
-            multidim_status = True
-        data["multidim_status"]=multidim_status
+        data["multidim_status"] = Kpi.get_multidim_status(kpi_id)
         status="success"
     except Exception as err:
         status = "failure"

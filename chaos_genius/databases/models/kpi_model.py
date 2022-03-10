@@ -6,6 +6,10 @@ from sqlalchemy.dialects.postgresql import JSONB
 
 from chaos_genius.databases.base_model import Column, PkModel, db
 
+from chaos_genius.databases.models.data_source_model import DataSource
+
+UNSUPPORTED_DATASOURCES_FOR_MULTIDIM = ["Druid"]
+
 
 class Kpi(PkModel):
     """A KPI."""
@@ -94,6 +98,19 @@ class Kpi(PkModel):
             "active": self.active,
             "created_at": self.created_at,
         }
+
+
+    @classmethod
+    def get_multidim_status(cls, id):
+        kpi_info = cls.get_by_id(id)
+        if not kpi_info or not kpi_info.data_source:
+            raise ValueError(f"KPI ID {id} not found in KPI_DATA")
+        return (
+            len(kpi_info.dimensions) > 1
+            and DataSource.get_by_id(kpi_info.data_source).connection_type
+            not in UNSUPPORTED_DATASOURCES_FOR_MULTIDIM
+        )
+
 
     @classmethod
     def meta_info(cls):

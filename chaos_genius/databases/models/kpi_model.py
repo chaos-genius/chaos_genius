@@ -98,6 +98,7 @@ class Kpi(PkModel):
             "created_at": self.created_at,
         }
 
+
     @classmethod
     def meta_info(cls):
         return {
@@ -143,6 +144,16 @@ class Kpi(PkModel):
                     "name": "aggregation",
                     "is_editable": False,
                     "is_sensitive": False,
+                    "options": [{
+                        "label": "Mean",
+                        "value": "mean"
+                    }, {
+                        "label": "Sum",
+                        "value": "sum"
+                    }, {
+                        "label": "Count",
+                        "value": "count"
+                    }]
                 },
                 {
                     "name": "datetime_column",

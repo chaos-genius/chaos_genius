@@ -488,6 +488,7 @@ def check_views_availability():
             datasource_name = getattr(ds_data, "connection_type")
             schema_exist = SCHEMAS_AVAILABLE.get(datasource_name, False)
             views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["views"]
+            supported_aggregations = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["supported_aggregations"]
             materialize_views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[
                 datasource_name
             ]["materialized_views"]
@@ -507,6 +508,7 @@ def check_views_availability():
                 "schema": schema_exist,
                 "views": views,
                 "materialize_views": materialize_views,
+                "supported_aggregations": supported_aggregations
             },
         }
     )

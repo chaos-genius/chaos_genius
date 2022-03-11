@@ -10,6 +10,8 @@ class RcaData(PkModel):
     """RCA Data"""
 
     __tablename__ = "rca_data"
+    __chunksize__ = 5
+
     kpi_id = Column(db.Integer, nullable=False)
     end_date = Column(db.DateTime, nullable=False)
     data_type = Column(db.String(80), nullable=False) # line, agg, rca, htable

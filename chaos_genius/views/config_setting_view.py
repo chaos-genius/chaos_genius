@@ -207,7 +207,8 @@ def multidim_status():
     data = {}
     try:
         kpi_id = request.args.get("kpi_id")
-        data["multidim_status"] = Kpi.get_multidim_status(kpi_id)
+        kpi = Kpi.get_by_id(kpi_id)
+        data["multidim_status"] = kpi.multidim_status
         status="success"
     except Exception as err:
         status = "failure"

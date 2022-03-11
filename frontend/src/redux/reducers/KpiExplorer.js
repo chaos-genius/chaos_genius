@@ -346,6 +346,12 @@ export const kpiExplorer = (state = initialState, action) => {
         kpiUpdateData: []
       };
     }
+    case 'EVENT_ALERT_QUERY_RESET': {
+      return {
+        ...state,
+        testQueryData: []
+      };
+    }
     default:
       return state;
   }

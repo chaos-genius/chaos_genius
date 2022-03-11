@@ -29,9 +29,11 @@ const RESET_ACTION = {
 const RESET_ENABLE_DISABLE_DATA = {
   type: 'RESET_ENABLE_DISABLE_DATA'
 };
-
 const RESET_DELETE_DATA = {
   type: 'RESET_DELETE_DATA'
+};
+const RESET_QUERY_DATA = {
+  type: 'EVENT_ALERT_QUERY_RESET'
 };
 
 const Alerts = () => {
@@ -58,6 +60,7 @@ const Alerts = () => {
     store.dispatch(RESET_ACTION);
     store.dispatch(RESET_ENABLE_DISABLE_DATA);
     store.dispatch(RESET_DELETE_DATA);
+    store.dispatch(RESET_QUERY_DATA);
     dispatch(getAllAlerts());
   }, [dispatch, data]);
 

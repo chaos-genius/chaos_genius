@@ -14,6 +14,7 @@ from chaos_genius.controllers.config_controller import (
     get_config_object,
     create_config_object,
     get_all_configurations,
+    get_multidim_status_for_kpi
 )
 from chaos_genius.databases.db_utils import chech_editable_field
 from copy import deepcopy
@@ -207,8 +208,7 @@ def multidim_status():
     data = {}
     try:
         kpi_id = request.args.get("kpi_id")
-        kpi = Kpi.get_by_id(kpi_id)
-        data["multidim_status"] = kpi.multidim_status
+        data["multidim_status"] = get_multidim_status_for_kpi(kpi_id)
         status="success"
     except Exception as err:
         status = "failure"

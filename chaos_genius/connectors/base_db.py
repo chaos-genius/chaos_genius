@@ -1,8 +1,8 @@
 import logging
 
-from sqlalchemy import text
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text, exc as sqlalchemy_exc
+from sqlalchemy import exc as sqlalchemy_exc
+from sqlalchemy import text
 
 logger = logging.getLogger(__name__)
 

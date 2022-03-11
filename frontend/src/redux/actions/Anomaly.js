@@ -13,7 +13,10 @@ import {
   ANOMALYDRILLDOWNFAILURE,
   ANOMALYSETTINGREQUEST,
   ANOMALYSETTINGSUCCESS,
-  ANOMALYSETTINGFAILURE
+  ANOMALYSETTINGFAILURE,
+  RETRAINFAILURE,
+  RETRAINREQUEST,
+  RETRAINSUCCESS
 } from './ActionConstants';
 
 export const anomalyDetectionRequest = () => {
@@ -60,6 +63,40 @@ export const anomalyDetection = (kpi, tab) => {
       dispatch(anomalyDetectionFailure());
     } else if (data && status === 200) {
       dispatch(anomalyDetectionSuccess(data));
+    }
+  };
+};
+
+export const retrainRequested = () => {
+  return {
+    type: RETRAINREQUEST
+  };
+};
+
+export const retrainSuccess = (response) => {
+  return {
+    type: RETRAINSUCCESS,
+    data: response
+  };
+};
+
+export const retrainFailure = () => {
+  return {
+    type: RETRAINFAILURE
+  };
+};
+
+export const setRetrain = (kpi) => {
+  return async (dispatch) => {
+    dispatch(retrainRequested());
+
+    const { data, error, status } = await getRequest({
+      url: `${BASE_URL}/api/anomaly-data/${kpi}/retrain`
+    });
+    if (error) {
+      dispatch(retrainFailure());
+    } else if (data && status === 200) {
+      dispatch(retrainSuccess(data));
     }
   };
 };

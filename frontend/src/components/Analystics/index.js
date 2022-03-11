@@ -137,11 +137,6 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
           .find((item) => item.name === 'sensitivity')
           .options.map((item) => {
             return { value: item.value, label: item.name };
-          }),
-        modalFrequency: metaInfoData.fields
-          .find((item) => item.name === 'scheduler_frequency')
-          .options.map((item) => {
-            return { value: item.value, label: item.name };
           })
       });
     }
@@ -212,6 +207,40 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSettingData]);
+
+  useEffect(() => {
+    if (frequency.value === 'D') {
+      setOption({
+        ...option,
+        modalFrequency: metaInfoData?.fields
+          ?.find((item) => item.name === 'scheduler_frequency')
+          .options.filter((item) => {
+            return item.value === 'D';
+          })
+          .map((item) => {
+            return { label: item.name, value: item.value };
+          })
+      });
+      if (enabled.scheduler_frequency) {
+        setModalFrequency(frequency);
+      } else {
+        setSensitiveData({
+          ...sensitiveData,
+          scheduler_frequency: frequency
+        });
+      }
+    } else {
+      setOption({
+        ...option,
+        modalFrequency: metaInfoData?.fields
+          ?.find((item) => item.name === 'scheduler_frequency')
+          .options.map((item) => {
+            return { value: item.value, label: item.name };
+          })
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [frequency]);
 
   const customToast = (data) => {
     const { type, header, description } = data;
@@ -293,35 +322,24 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     }
   };
 
-  const onSeasonalityChange = (e) => {
-    if (enabled.seasonality) {
-      if (e.target.checked) {
-        let selected = seasonality.concat(e.target.value);
-        setSeasonality(selected);
-      } else if (e.target.checked === false) {
-        setSeasonality(seasonality.filter((item) => item !== e.target.value));
-      }
-    } else {
-      if (e.target.checked) {
-        let selected = sensitiveData.seasonality.concat(e.target.value);
-        setSensitiveData({ ...sensitiveData, seasonality: selected });
-      } else if (e.target.checked === false) {
-        setSensitiveData({
-          ...sensitiveData,
-          seasonality: sensitiveData.seasonality.filter(
-            (item) => item !== e.target.value
-          )
-        });
-      }
-    }
-  };
-
   const closeModal = () => {
     setModalOpen(false);
   };
 
   const handleValueChange = (data) => {
-    setSchedule(data ? data.format('HH:mm:00') : '');
+    if (enabled.scheduler_frequency) {
+      if (modalFrequency.value === 'D') {
+        setSchedule(data ? data.format('HH:mm:00') : '');
+      } else {
+        setSchedule(data ? data.format('00:mm:00') : '');
+      }
+    } else {
+      if (sensitiveData?.scheduler_frequency?.value === 'D') {
+        setSchedule(data ? data.format('HH:mm:00') : '');
+      } else {
+        setSchedule(data ? data.format('00:mm:00') : '');
+      }
+    }
   };
 
   const onSaveInput = (name) => {
@@ -396,6 +414,22 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     );
   };
 
+  const shouldShowHour = () => {
+    if (enabled?.scheduler_frequency) {
+      if (modalFrequency.value === 'D') {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      if (sensitiveData.scheduler_frequency === 'D') {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  };
+
   if (metaInfoLoading || kpiEditLoading || anomalySettingLoading) {
     return (
       <div className="load">
@@ -403,6 +437,27 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
       </div>
     );
   } else {
+    const noteForTimePicker = enabled.scheduler_frequency ? (
+      modalFrequency.label === 'Daily' ? (
+        <p>
+          Note: The time set above must be in your server timezone{' '}
+          {`(${globalSetting?.timezone})`}
+        </p>
+      ) : (
+        <p>
+          Note: Enter schedule (mm) for anomaly scan to be performed every hour
+        </p>
+      )
+    ) : sensitiveData?.scheduler_frequency.label === 'Daily' ? (
+      <p>
+        Note: The time set above must be in your server timezone{' '}
+        {`(${globalSetting?.timezone})`}
+      </p>
+    ) : (
+      <p>
+        Note: Enter schedule (mm) for anomaly scan to be performed every hour
+      </p>
+    );
     return (
       <>
         <div className="dashboard-subheader">
@@ -670,7 +725,12 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
             )}
           </div>
           <div className="form-group">
-            <label>Schedule</label>
+            <label>
+              {enabled.scheduler_frequency
+                ? modalFrequency.label
+                : sensitiveData.scheduler_frequency.label}{' '}
+              Schedule
+            </label>
             <div className="editable-field">
               <TimePicker
                 onChange={handleValueChange}
@@ -686,6 +746,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     : false
                 }
                 focusOnOpen={true}
+                showHour={shouldShowHour()}
                 showSecond={false}
                 value={schedule && moment(schedule, 'HH:mm')}
               />
@@ -694,104 +755,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                 editableStatus('scheduler_params_time') === 'sensitive' &&
                 editAndSaveButton('schedule')}
             </div>
-            <div className="channel-tip">
-              <p>
-                Note: The time set above must be in your server timezone{' '}
-                {`(${globalSetting?.timezone})`}
-              </p>
-            </div>
-          </div>
-          <div className="form-group">
-            <label>Expected Seasonality in Data</label>
-            <div className="editable-field">
-              {' '}
-              <div className="seasonality-setting">
-                <div className="form-check check-box">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    value="M"
-                    checked={
-                      enabled.seasonality
-                        ? seasonality.includes('M')
-                        : sensitiveData.seasonality.includes('M')
-                    }
-                    name="Month"
-                    id="monthly"
-                    disabled={
-                      edit
-                        ? editableStatus('seasonality') === 'editable'
-                          ? false
-                          : editableStatus('seasonality') === 'sensitive'
-                          ? enabled.seasonality
-                          : true
-                        : false
-                    }
-                    onChange={(e) => {
-                      onSeasonalityChange(e);
-                    }}
-                  />
-                  <label htmlFor="monthly">Monthly</label>
-                </div>
-                <div className="form-check check-box">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    value="W"
-                    name="week"
-                    id="weekly"
-                    checked={
-                      enabled.seasonality
-                        ? seasonality.includes('W')
-                        : sensitiveData.seasonality.includes('W')
-                    }
-                    disabled={
-                      edit
-                        ? editableStatus('seasonality') === 'editable'
-                          ? false
-                          : editableStatus('seasonality') === 'sensitive'
-                          ? enabled.seasonality
-                          : true
-                        : false
-                    }
-                    onChange={(e) => {
-                      onSeasonalityChange(e);
-                    }}
-                  />
-                  <label htmlFor="weekly">Weekly</label>
-                </div>
-                <div className="form-check check-box">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    value="D"
-                    name="daily"
-                    id="daily"
-                    checked={
-                      enabled.seasonality
-                        ? seasonality.includes('D')
-                        : sensitiveData.seasonality.includes('D')
-                    }
-                    disabled={
-                      edit
-                        ? editableStatus('seasonality') === 'editable'
-                          ? false
-                          : editableStatus('seasonality') === 'sensitive'
-                          ? enabled.seasonality
-                          : true
-                        : false
-                    }
-                    onChange={(e) => {
-                      onSeasonalityChange(e);
-                    }}
-                  />
-                  <label htmlFor="daily">Daily</label>
-                </div>
-              </div>
-              {edit &&
-                editableStatus('seasonality') === 'sensitive' &&
-                editAndSaveButton('seasonality')}
-            </div>
+            <div className="channel-tip">{noteForTimePicker}</div>
           </div>
           <div className="form-action analystics-button">
             <button

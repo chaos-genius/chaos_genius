@@ -3,6 +3,7 @@ from typing import Tuple
 
 import pandas as pd
 import pytest
+from _pytest.monkeypatch import MonkeyPatch
 from pytest_bdd import given, parsers, scenario, then, when
 
 from chaos_genius.core.utils.data_loader import DataLoader
@@ -42,6 +43,7 @@ def new_kpi_df():  # noqa: D103
         [
             [
                 "2021-12-21",
+                "2022-03-10T14:34:12+05:30",
                 1,
                 "a",
                 "q",
@@ -53,6 +55,7 @@ def new_kpi_df():  # noqa: D103
             ],
             [
                 "2021-12-22",
+                "2022-02-10T14:34:12+05:30",
                 2,
                 "b",
                 "w",
@@ -64,6 +67,7 @@ def new_kpi_df():  # noqa: D103
             ],
             [
                 "2021-12-23",
+                "2022-01-10T14:34:12+05:30",
                 3,
                 "c",
                 "e",
@@ -75,6 +79,7 @@ def new_kpi_df():  # noqa: D103
             ],
             [
                 "2021-12-24",
+                "2021-12-10T14:34:12+05:30",
                 4,
                 "d",
                 "r",
@@ -87,6 +92,7 @@ def new_kpi_df():  # noqa: D103
         ],
         columns=[
             "date_col",
+            "datetime_timezone_aware",
             "metric_col",
             "dim1",
             "dim2",
@@ -97,15 +103,32 @@ def new_kpi_df():  # noqa: D103
             "unix_time",
         ],
     )
+    # another col which is date but in string form
+    df["date_col_str"] = df["date_col"]
     df["date_col"] = pd.to_datetime(df["date_col"])
+    # another col which is tz-ware timestamp but in string form
+    df["datetime_timezone_aware_str"] = df["datetime_timezone_aware"]
+    df["datetime_timezone_aware"] = pd.to_datetime(df["datetime_timezone_aware"])
     return kpi, df
+
+
+@pytest.fixture
+def extra_kpi_validation_data():
+    """A fixture to pass extra data to _validate_kpi_from_df.
+
+    This dict will be passed a kwarg to it.
+    """
+    return {}
 
 
 @then(
     parsers.parse("validation should {status}"), target_fixture="kpi_validation_message"
 )
 def check_kpi_validation(  # noqa: D103
-    new_kpi_df: Tuple[Kpi, pd.DataFrame], status, mock_dataloader
+    new_kpi_df: Tuple[Kpi, pd.DataFrame],
+    status,
+    mock_dataloader,
+    extra_kpi_validation_data,
 ):
     kpi, df = new_kpi_df
 
@@ -117,6 +140,7 @@ def check_kpi_validation(  # noqa: D103
         kpi_column_name=kpi_info["metric"],
         agg_type=kpi_info["aggregation"],
         date_column_name=kpi_info["datetime_column"],
+        **extra_kpi_validation_data,
     )
 
     if status == "pass":
@@ -212,6 +236,11 @@ def test_date_col_is_float():  # noqa: D103
     pass
 
 
+@scenario("features/kpi_validation.feature", "date/time column is a date string")
+def test_date_col_is_date_str():  # noqa: D103
+    pass
+
+
 @scenario(
     "features/kpi_validation.feature", "date/time column is some categorical string"
 )
@@ -240,6 +269,30 @@ def test_date_weird():  # noqa: D103
     "date/time column has unix timestamp",
 )
 def test_date_unix():  # noqa: D103
+    pass
+
+
+@scenario(
+    "features/kpi_validation.feature",
+    "date/time column is timezone-aware",
+)
+def test_datetime_timezone_aware():  # noqa: D103
+    pass
+
+
+@scenario(
+    "features/kpi_validation.feature",
+    "date/time column is timezone-aware for a Druid KPI",
+)
+def test_datetime_timezone_aware_druid():  # noqa: D103
+    pass
+
+
+@scenario(
+    "features/kpi_validation.feature",
+    "date/time column is timezone-aware but in string format",
+)
+def test_datetime_timezone_aware_str():  # noqa: D103
     pass
 
 
@@ -387,6 +440,20 @@ def date_col_is_float(new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch):  # noq
 
 
 @when(
+    "the date/time column is a date string",
+    target_fixture="new_kpi_df",
+)
+def date_col_is_date_str(  # noqa: D103
+    new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch
+):
+    kpi, df = new_kpi_df
+
+    monkeypatch.setattr(kpi, "datetime_column", "date_col_str")
+
+    return kpi, df
+
+
+@when(
     "the date/time column is a categorical string",
     target_fixture="new_kpi_df",
 )
@@ -435,3 +502,44 @@ def date_unix(new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch):  # noqa: D103
     monkeypatch.setattr(kpi, "datetime_column", "unix_time")
 
     return kpi, df
+
+
+@when(
+    "date/time column is a timezone-aware timestamp",
+    target_fixture="new_kpi_df",
+)
+def datetime_timezone_aware(  # noqa: D103
+    new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch
+):
+    kpi: Kpi
+    df: pd.DataFrame
+    kpi, df = new_kpi_df
+
+    monkeypatch.setattr(kpi, "datetime_column", "datetime_timezone_aware")
+
+    return kpi, df
+
+
+@when(
+    "date/time column is a timezone-aware timestamp but in string format",
+    target_fixture="new_kpi_df",
+)
+def datetime_timezone_aware_str(  # noqa: D103
+    new_kpi_df: Tuple[Kpi, pd.DataFrame], monkeypatch
+):
+    kpi: Kpi
+    df: pd.DataFrame
+    kpi, df = new_kpi_df
+
+    monkeypatch.setattr(kpi, "datetime_column", "datetime_timezone_aware_str")
+
+    return kpi, df
+
+
+@when("the KPI is from a Druid data source", target_fixture=extra_kpi_validation_data)
+def is_druid_kpi(  # noqa: D103
+    extra_kpi_validation_data: dict, monkeypatch: MonkeyPatch
+):
+    monkeypatch.setitem(extra_kpi_validation_data, "supports_tz_aware", True)
+
+    return extra_kpi_validation_data

@@ -37,7 +37,8 @@ import {
   KPIUPDATEREQUEST,
   KPIUPDATESUCCESS,
   KPIUPDATEFAILURE,
-  SCHEMAAVAILABILTYREQUEST
+  SCHEMAAVAILABILTYREQUEST,
+  SUPPORTEDAGGSUCCESS
 } from './ActionConstants';
 
 import {
@@ -213,6 +214,13 @@ export const getTableListOnSchemaFailure = () => {
   };
 };
 
+export const supportedAggSuccess = (response) => {
+  return {
+    type: SUPPORTEDAGGSUCCESS,
+    data: response
+  };
+};
+
 export const getAllKpiExplorerField = (option) => {
   return async (dispatch) => {
     dispatch(getAllKpiExplorerFieldRequested());
@@ -240,6 +248,9 @@ export const getSchemaAvailability = (option) => {
     if (error) {
       dispatch(getSchemaAvailabilityFailure());
     } else if (data && status === 200) {
+      if (data.available && data.available.supported_aggregations) {
+        dispatch(supportedAggSuccess(data.available.supported_aggregations));
+      }
       if (data.available && data.available.schema) {
         dispatch(getAllSchemaAvailabilitySuccess(data));
         dispatch(getSchemaNamelist(option));

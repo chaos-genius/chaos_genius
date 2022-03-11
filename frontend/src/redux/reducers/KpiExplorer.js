@@ -37,7 +37,8 @@ import {
   KPIUPDATEREQUEST,
   KPIUPDATESUCCESS,
   KPIUPDATEFAILURE,
-  SCHEMAAVAILABILTYREQUEST
+  SCHEMAAVAILABILTYREQUEST,
+  SUPPORTEDAGGSUCCESS
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -77,7 +78,8 @@ const initialState = {
   kpiEditDataError: false,
   kpiUpdateLoading: false,
   kpiUpdateData: [],
-  kpiUpdateError: false
+  kpiUpdateError: false,
+  supportedAgg: []
 };
 
 export const kpiExplorer = (state = initialState, action) => {
@@ -129,6 +131,7 @@ export const kpiExplorer = (state = initialState, action) => {
     case KPIEXPLORERFIELDREQUEST: {
       return {
         ...state,
+        kpiField: [],
         kpiFieldLoading: true,
         kpiFieldError: false
       };
@@ -324,6 +327,12 @@ export const kpiExplorer = (state = initialState, action) => {
         kpiUpdateError: true
       };
     }
+    case SUPPORTEDAGGSUCCESS: {
+      return {
+        ...state,
+        supportedAgg: action.data
+      };
+    }
     case 'KPI_RESET': {
       return {
         kpiSubmit: [],
@@ -335,6 +344,12 @@ export const kpiExplorer = (state = initialState, action) => {
         ...state,
         kpiSubmit: [],
         kpiUpdateData: []
+      };
+    }
+    case 'EVENT_ALERT_QUERY_RESET': {
+      return {
+        ...state,
+        testQueryData: []
       };
     }
     default:

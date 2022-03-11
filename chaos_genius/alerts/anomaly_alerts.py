@@ -308,6 +308,9 @@ class AnomalyAlertController:
             anomaly_point["data_datetime"] = anomaly_point["data_datetime"].strftime(
                 ALERT_DATETIME_FORMAT
             )
+            anomaly_point["created_at"] = anomaly_point["created_at"].strftime(
+                ALERT_DATETIME_FORMAT
+            )
 
     def _remove_attributes_from_anomaly_points(
         self, anomaly_data: List[dict], list_attributes: List[str]

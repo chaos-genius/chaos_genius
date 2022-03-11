@@ -212,7 +212,10 @@ class AnomalyDetectionController(object):
         anomaly_output["created_at"] = datetime.now()
 
         anomaly_output.to_sql(
-            AnomalyDataOutput.__tablename__, db.engine, if_exists="append"
+            AnomalyDataOutput.__tablename__,
+            db.engine,
+            if_exists="append",
+            chunksize=AnomalyDataOutput.__chunksize__
         )
 
     def _querify(self, col_names, raw_combinations):

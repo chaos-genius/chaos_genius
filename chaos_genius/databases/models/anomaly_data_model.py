@@ -9,6 +9,8 @@ class AnomalyDataOutput(PkModel):
     """Anomaly Data."""
 
     __tablename__ = "anomaly_data_output"
+    __chunksize__ = 5
+
     data_datetime = Column(db.DateTime, default=dt.datetime.utcnow)
     y = Column(db.Float)
     yhat_upper = Column(db.Float)

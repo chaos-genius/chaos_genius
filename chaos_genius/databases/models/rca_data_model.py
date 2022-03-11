@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """kpi model."""
 import datetime as dt
+from sqlalchemy.dialects.postgresql import JSONB
 
 from chaos_genius.databases.base_model import Column, Index, PkModel, db
 
@@ -9,12 +10,14 @@ class RcaData(PkModel):
     """RCA Data"""
 
     __tablename__ = "rca_data"
+    __chunksize__ = 5
+
     kpi_id = Column(db.Integer, nullable=False)
     end_date = Column(db.DateTime, nullable=False)
     data_type = Column(db.String(80), nullable=False) # line, agg, rca, htable
     timeline = Column(db.String(80), nullable=False)
     dimension = Column(db.Text(), nullable=True)
-    data = Column(db.JSON, nullable=True)
+    data = Column(JSONB, nullable=True)
     created_at = Column(db.DateTime, nullable=False,
                         default=dt.datetime.utcnow)
 

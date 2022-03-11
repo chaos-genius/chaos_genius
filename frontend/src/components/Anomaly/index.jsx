@@ -7,6 +7,7 @@ import HighchartsReact from 'highcharts-react-official';
 import highchartsMore from 'highcharts/highcharts-more';
 
 import Toparrow from '../../assets/images/toparrow.svg';
+import Refresh from '../../assets/images/refresh.svg';
 import Anomalygraph from '../Anomalygraph';
 import Noresult from '../Noresult';
 import AnomalyEmptyState from '../AnomalyEmptyState';
@@ -18,7 +19,8 @@ import './anomaly.scss';
 import {
   anomalyDetection,
   anomalyDrilldown,
-  getAnomalyQualityData
+  getAnomalyQualityData,
+  setRetrain
 } from '../../redux/actions';
 import store from '../../redux/store';
 import SubdimensionEmpty from '../SubdimensionEmpty';
@@ -44,9 +46,11 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
   const history = useHistory();
   const [chartData, setChartData] = useState([]);
   const [subDimLoading, setSubDimloading] = useState(true);
+  const [retrainOn, setRetrainOn] = useState(false);
   const [subDimList, setSubDimList] = useState([]);
   const [drilldownCollapse, setDrilldownCollapse] = useState(false);
   const [dataQualityCollapse, setDataQualityCollapse] = useState(false);
+  const [anomalStatusInfo, setAnomalyStatusInfo] = useState(false);
   const [kpiTab, setKPITab] = useState('Overall KPI');
 
   const idRef = useRef(0);
@@ -54,16 +58,29 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
 
   const KPITabs = [{ name: 'Overall KPI' }, { name: 'Sub-dimensions' }];
 
-  const { anomalyDetectionData, anomalyDrilldownData, anomalyQualityData } =
-    useSelector((state) => {
-      return state.anomaly;
-    });
+  const {
+    anomalyDetectionData,
+    anomalyDrilldownData,
+    anomalyQualityData,
+    retrain
+  } = useSelector((state) => {
+    return state.anomaly;
+  });
 
   useEffect(() => {
     store.dispatch(RESET_ACTION);
     getAnomaly(kpiTab);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpi]);
+
+  useEffect(() => {
+    if (retrain === true) {
+      setRetrainOn(true);
+    } else {
+      setRetrainOn(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [retrain]);
 
   useEffect(() => {
     if (isFirstRun.current) {
@@ -127,6 +144,13 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
   useEffect(() => {
     if (anomalystatus && anomalystatus?.is_anomaly_setup === false) {
       history.push(`/dashboard/${dashboard}/settings/${kpi}`);
+    }
+    if (
+      anomalystatus &&
+      anomalystatus?.is_anomaly_precomputed !== true &&
+      anomalystatus !== ''
+    ) {
+      setAnomalyStatusInfo(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anomalystatus]);
@@ -386,11 +410,13 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
     }
   };
 
+  const handleRetrain = () => {
+    dispatch(setRetrain(kpi));
+  };
+
   return (
     <>
-      {anomalystatus &&
-      anomalystatus?.is_anomaly_precomputed !== true &&
-      anomalystatus !== '' ? (
+      {retrainOn === true || anomalStatusInfo === true ? (
         <div className="dashboard-layout setup-layout-empty">
           <AnomalyEmptyState />
         </div>
@@ -401,30 +427,44 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
               <div className="dashboard-layout dashboard-layout-change">
                 <div className="dashboard-container">
                   <div className="dashboard-subcategory anomaly-subcategory">
-                    <div className="time-stamp">
-                      <p>
-                        Last updated:{' '}
-                        <span>
-                          {anomalyDetectionData?.anomaly_end_date
-                            ? anomalyDetectionData?.anomaly_end_date
-                            : '-'}
-                        </span>
-                      </p>
+                    <div className="time-container">
+                      <div className="time-stamp">
+                        <p>
+                          Last Data Entry:{' '}
+                          <span>
+                            {anomalyDetectionData?.anomaly_end_date
+                              ? anomalyDetectionData?.anomaly_end_date
+                              : '-'}
+                          </span>
+                        </p>
+                      </div>
+                      <div className="time-stamp">
+                        <p>
+                          Last Scan:{' '}
+                          <span>
+                            {anomalyDetectionData?.last_run_time_anomaly
+                              ? anomalyDetectionData?.last_run_time_anomaly
+                              : '-'}
+                          </span>
+                        </p>
+                      </div>
                     </div>
-                    <div className="option-selections">
-                      {KPITabs?.length &&
-                        KPITabs.map(function (tab, i) {
-                          return (
-                            <span
-                              onClick={() => setKPITab(tab.name)}
-                              className={
-                                tab.name === kpiTab ? 'active' : 'inactive'
-                              }
-                              key={i}>
-                              {tab.name}
-                            </span>
-                          );
-                        })}
+                    <div className="option-selections-container">
+                      <div className="option-selections">
+                        {KPITabs?.length &&
+                          KPITabs.map(function (tab, i) {
+                            return (
+                              <span
+                                onClick={() => setKPITab(tab.name)}
+                                className={
+                                  tab.name === kpiTab ? 'active' : 'inactive'
+                                }
+                                key={i}>
+                                {tab.name}
+                              </span>
+                            );
+                          })}
+                      </div>
                     </div>
                   </div>
 
@@ -441,6 +481,16 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                   ) : (
                     <div className="dashboard-layout setup-layout-empty">
                       <SubdimensionEmpty />
+                    </div>
+                  )}
+                  {kpiTab === 'Overall KPI' && (
+                    <div className="retrain-button-container">
+                      <div
+                        className="retrain-button"
+                        onClick={() => handleRetrain()}>
+                        <img src={Refresh} alt="alert-notification" />{' '}
+                        <span>Retrain Model</span>
+                      </div>
                     </div>
                   )}
                 </div>

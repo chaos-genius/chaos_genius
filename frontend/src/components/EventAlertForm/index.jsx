@@ -30,6 +30,10 @@ const alertFrequency = [
   {
     value: 'daily',
     label: 'Daily'
+  },
+  {
+    value: 'hourly',
+    label: 'Hourly'
   }
 ];
 

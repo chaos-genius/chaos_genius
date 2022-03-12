@@ -1,6 +1,10 @@
-from sqlalchemy import text
-from flask_sqlalchemy import SQLAlchemy
+import logging
 
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import exc as sqlalchemy_exc
+from sqlalchemy import text
+
+logger = logging.getLogger(__name__)
 
 class BaseDb:
     def __init__(self, *args, **kwargs):
@@ -41,11 +45,15 @@ class BaseDb:
         if tables:
             db_tables = list(set(db_tables) & set(tables))
         for db_table in db_tables:
-            table_dictionary_info = dict()
-            table_dictionary_info["table_columns"] = self.get_columns(db_table, use_schema=schema)
-            table_dictionary_info["primary_key"] = self.get_primary_key(db_table, use_schema=schema)
-            table_dictionary_info["table_comment"] = self.get_table_comment(db_table, use_schema=schema)
-            table_dictionary[db_table] = table_dictionary_info
+            try:
+                table_dictionary_info = dict()
+                table_dictionary_info["table_columns"] = self.get_columns(db_table, use_schema=schema)
+                table_dictionary_info["primary_key"] = self.get_primary_key(db_table, use_schema=schema)
+                table_dictionary_info["table_comment"] = self.get_table_comment(db_table, use_schema=schema)
+                table_dictionary[db_table] = table_dictionary_info
+            except sqlalchemy_exc.ResourceClosedError as e:
+                logger.warn(f"get_columns failed for table: {db_table}")
+                
         schema_dict["tables"] = table_dictionary
         if get_sequences:
             schema_sequences = self.get_sequences(use_schema=schema)

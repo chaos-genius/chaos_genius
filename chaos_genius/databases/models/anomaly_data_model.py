@@ -9,6 +9,8 @@ class AnomalyDataOutput(PkModel):
     """Anomaly Data."""
 
     __tablename__ = "anomaly_data_output"
+    __chunksize__ = 5
+
     data_datetime = Column(db.DateTime, default=dt.datetime.utcnow)
     y = Column(db.Float)
     yhat_upper = Column(db.Float)
@@ -20,6 +22,8 @@ class AnomalyDataOutput(PkModel):
     anomaly_type = Column(db.String(80), nullable=False)
     series_type = Column(db.String(500))
     index = Column(db.BigInteger, nullable=False)
+    created_at = Column(db.DateTime, nullable=True,
+                        default=dt.datetime.utcnow)
 
     __table_args__ = (
         Index("anomaly_data_output_query_idx", kpi_id, anomaly_type, series_type, data_datetime),
@@ -46,6 +50,7 @@ class AnomalyDataOutput(PkModel):
             "anomaly_type": self.anomaly_type,
             "series_type": self.series_type,
             "index": self.index,
+            "created_at": self.created_at,
         }
 
 # TODO: Delete model after a couple of weeks

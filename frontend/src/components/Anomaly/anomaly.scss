@@ -30,7 +30,41 @@
     }
   }
 }
-
+.time-stamp {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 14px;
+}
 .chartContainer {
   max-height: 400px;
+}
+
+.option-selections-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.time-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 38px;
+}
+.retrain-button-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  padding-top: 4px;
+  .retrain-button {
+    cursor: pointer;
+    span {
+      font-size: 14px;
+      font-weight: 500;
+      color: #0597f2;
+    }
+    img {
+      stroke: #0597f2;
+    }
+  }
 }

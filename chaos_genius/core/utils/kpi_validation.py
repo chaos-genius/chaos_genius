@@ -15,11 +15,13 @@ KPI_VALIDATION_TAIL_SIZE = 1000
 logger = logging.getLogger(__name__)
 
 
-def validate_kpi(kpi_info: Dict[str, Any]) -> Tuple[bool, str]:
+def validate_kpi(kpi_info: Dict[str, Any], data_source: Dict[str, Any]) -> Tuple[bool, str]:
     """Load data for KPI and invoke all validation checks.
 
     :param kpi_info: Dictionary with all params for the KPI
     :type kpi_info: Dict[str, Any]
+    :param data_source: Dictionary describing the data source
+    :type data_source: Dict[str, Any]
     :return: Returns a tuple with the status as a bool and a status message
     :rtype: Tuple[bool, str]
     """
@@ -32,12 +34,15 @@ def validate_kpi(kpi_info: Dict[str, Any]) -> Tuple[bool, str]:
         logger.error("Unable to load data for KPI validation", exc_info=1)
         return False, "Could not load data. Error: " + str(e)
 
+    supports_tz_aware = data_source["connection_type"] == "Druid"
+
     return _validate_kpi_from_df(
         df,
         kpi_info,
         kpi_column_name=kpi_info["metric"],
         agg_type=kpi_info["aggregation"],
         date_column_name=kpi_info["datetime_column"],
+        supports_tz_aware=supports_tz_aware,
     )
 
 
@@ -48,6 +53,7 @@ def _validate_kpi_from_df(
     agg_type: str,
     date_column_name: str,
     debug: bool = False,
+    supports_tz_aware: bool = False,
 ) -> Tuple[bool, str]:
     """Invoke each validation check and break if there's a falsy check.
 
@@ -108,14 +114,14 @@ def _validate_kpi_from_df(
         {
             "debug_str": "Check #4: Validate date column is parseable",
             "status": lambda: _validate_date_column_is_parseable(
-                df, date_column_name=date_column_name
+                df, date_column_name=date_column_name, supports_tz_aware=supports_tz_aware
             ),
         },
         {
-            "debug_str": "Check #5: Validate date column is tz-naive",
+            "debug_str": "Check #5: Validate date column is tz-naive if tz-aware not supported",
             "status": lambda: _validate_date_column_is_tz_naive(
                 df, date_column_name=date_column_name
-            ),
+            ) if not supports_tz_aware else (True, "Accepted!"),
         },
         {
             "debug_str": "Check #6: Validate dimensions",
@@ -232,6 +238,7 @@ def _validate_kpi_not_datetime(
 def _validate_date_column_is_parseable(
     df: pd.core.frame.DataFrame,
     date_column_name: str,
+    supports_tz_aware: bool,
 ) -> Tuple[bool, str]:
     """Validate if specified date column is parseable.
 
@@ -243,7 +250,16 @@ def _validate_date_column_is_parseable(
     :rtype: Tuple[bool, str]
     """
     # has to be datetime only then proceed else exit
-    if not is_datetime(df[date_column_name]):
+    if supports_tz_aware:
+        # try to parse date col
+        # TODO: ensure this parses only tz-aware data and nothing else
+        #       (str, int, float, etc.)
+        date_col = pd.to_datetime(df[date_column_name], errors="ignore")
+    else:
+        # support only datetime type (not datetime with tz, strings, etc.)
+        date_col = df[date_column_name]
+
+    if not is_datetime(date_col):
         invalid_type_err_msg = (
             "The datetime column is of the type"
             f" {df[date_column_name].dtype}, use 'cast' to convert to datetime."

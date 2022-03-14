@@ -1,7 +1,6 @@
 import datetime
 from collections import defaultdict
 from typing import DefaultDict, List
-import time
 
 from chaos_genius.alerts.utils import change_message_from_percent
 from chaos_genius.alerts.constants import ( 

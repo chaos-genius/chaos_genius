@@ -10,6 +10,8 @@ ALERT_READABLE_DATE_FORMAT = "%b %d"
 
 ALERT_READABLE_DATETIME_FORMAT = "%b %d, %I %p"
 
+DIGEST_DATETIME_FORMAT = "%b %d %Y %H:%M:%S"
+
 ANOMALY_TABLE_COLUMN_NAMES_MAPPER = {
     "series_type": "Dimension",
     "data_datetime": "Time of Occurrence",

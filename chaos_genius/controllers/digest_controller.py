@@ -6,6 +6,7 @@ from chaos_genius.alerts.utils import change_message_from_percent
 from chaos_genius.alerts.constants import ( 
     ALERT_DATE_FORMAT, 
     ALERT_DATETIME_FORMAT,
+    DIGEST_DATETIME_FORMAT,
     OVERALL_KPI_SERIES_TYPE_REPR
 )
 from chaos_genius.databases.models.alert_model import Alert
@@ -136,6 +137,13 @@ def _preprocess_anomaly_alerts(anomaly_alerts_data: list):
     _add_nl_messages_anomaly_alerts(anomaly_alerts_data)
 
 
+def _preprocess_event_alerts(event_alerts_data: list):
+    for triggered_alert in event_alerts_data:
+        new_time = triggered_alert.created_at.strftime(DIGEST_DATETIME_FORMAT)
+        triggered_alert.date_only = triggered_alert.created_at.strftime(ALERT_DATE_FORMAT)
+        triggered_alert.created_at = new_time
+
+
 def get_digest_view_data(triggered_alert_id=None, include_subdims: bool = False):
 
     curr_time = datetime.datetime.now()
@@ -156,6 +164,7 @@ def get_digest_view_data(triggered_alert_id=None, include_subdims: bool = False)
     _filter_anomaly_alerts(anomaly_alerts_data, include_subdims)
     _preprocess_anomaly_alerts(anomaly_alerts_data)
     event_alerts_data = [alert for alert in data if alert.alert_type == "Event Alert"]
+    _preprocess_event_alerts(event_alerts_data)
 
     return anomaly_alerts_data, event_alerts_data
 

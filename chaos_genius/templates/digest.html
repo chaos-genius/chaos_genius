@@ -425,6 +425,7 @@
                     "{{ email }}",
                     {% endfor %}
                 ],
+                "{{ triggered_alert.date_only }}"
             ],
             {% endfor %}
         ]
@@ -437,7 +438,8 @@
         dataTableEvent.alertColIndex = 0;
         dataTableEvent.emailColIndex = 4;
         dataTableEvent.channelColIndex = 3;
-        dataTableEvent.columns().hide([dataTableEvent.emailColIndex, dataTableEvent.channelColIndex]);
+        dataTableEvent.dateOnlyColIndex = 5;
+        dataTableEvent.columns().hide([dataTableEvent.emailColIndex, dataTableEvent.channelColIndex, dataTableEvent.dateOnlyColIndex]);
         dataTables.push(dataTableEvent);
         {% endif %}
 

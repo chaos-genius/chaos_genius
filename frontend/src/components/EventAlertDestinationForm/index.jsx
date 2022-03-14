@@ -426,6 +426,7 @@ const EventAlertDestinationForm = ({
               id="consolidatedalertsreport"
               name="alert"
               value={true}
+              disabled={true}
               checked={alertFormData.daily_digest === false ? false : true}
               onClick={(e) => handleDigestClick(e)}
             />

@@ -79,7 +79,7 @@ const KpiExplorer = () => {
       keys: ['name', 'dashboards.name']
     };
 
-    const fuse = new Fuse(kpiExplorerData, options);
+    const fuse = new Fuse(kpiExplorerList, options);
 
     const result = fuse.search(kpiSearch);
     setKpiExplorerData(

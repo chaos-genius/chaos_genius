@@ -37,7 +37,7 @@ services:
 
   chaosgenius-server:
     container_name: chaosgenius-server
-    image: chaosgenius/chaosgenius-server:0.4.1
+    image: chaosgenius/chaosgenius-server:0.5.0
     command: sh setup/run-backend-docker.sh
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -80,6 +80,7 @@ services:
       - MAX_DEEPDRILLS_SLACK_DAYS=${MAX_DEEPDRILLS_SLACK_DAYS}
       - MAX_ANOMALY_SLACK_DAYS=${MAX_ANOMALY_SLACK_DAYS}
       - DAYS_OFFSET_FOR_ANALTYICS=${DAYS_OFFSET_FOR_ANALTYICS}
+      - HOURS_OFFSET_FOR_ANALTYICS=${HOURS_OFFSET_FOR_ANALTYICS}
       - DEEPDRILLS_HTABLE_MAX_PARENTS=${DEEPDRILLS_HTABLE_MAX_PARENTS}
       - DEEPDRILLS_HTABLE_MAX_CHILDREN=${DEEPDRILLS_HTABLE_MAX_CHILDREN}
       - DEEPDRILLS_HTABLE_MAX_DEPTH=${DEEPDRILLS_HTABLE_MAX_DEPTH}
@@ -92,7 +93,7 @@ services:
 
   chaosgenius-webapp:
     container_name: chaosgenius-webapp
-    image: chaosgenius/chaosgenius-webapp:0.4.1
+    image: chaosgenius/chaosgenius-webapp:0.5.0
     command: >
       sh -c "npx react-inject-env set -d ./ &&
              nginx -g 'daemon off;'"
@@ -132,7 +133,7 @@ services:
     
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler
-    image: chaosgenius/chaosgenius-server:0.4.1
+    image: chaosgenius/chaosgenius-server:0.5.0
     command: celery -A run.celery beat --loglevel=DEBUG
     environment:
       - IN_DOCKER=True
@@ -167,7 +168,7 @@ services:
   
   chaosgenius-worker-analytics:
     container_name: chaosgenius-worker-analytics
-    image: chaosgenius/chaosgenius-server:0.4.1
+    image: chaosgenius/chaosgenius-server:0.5.0
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
     environment:
       - IN_DOCKER=True
@@ -203,6 +204,7 @@ services:
       - MAX_DEEPDRILLS_SLACK_DAYS=${MAX_DEEPDRILLS_SLACK_DAYS}
       - MAX_ANOMALY_SLACK_DAYS=${MAX_ANOMALY_SLACK_DAYS}
       - DAYS_OFFSET_FOR_ANALTYICS=${DAYS_OFFSET_FOR_ANALTYICS}
+      - HOURS_OFFSET_FOR_ANALTYICS=${HOURS_OFFSET_FOR_ANALTYICS}
       - DEEPDRILLS_HTABLE_MAX_PARENTS=${DEEPDRILLS_HTABLE_MAX_PARENTS}
       - DEEPDRILLS_HTABLE_MAX_CHILDREN=${DEEPDRILLS_HTABLE_MAX_CHILDREN}
       - DEEPDRILLS_HTABLE_MAX_DEPTH=${DEEPDRILLS_HTABLE_MAX_DEPTH}
@@ -218,7 +220,7 @@ services:
 
   chaosgenius-worker-alerts:
     container_name: chaosgenius-worker-alerts
-    image: chaosgenius/chaosgenius-server:0.4.1
+    image: chaosgenius/chaosgenius-server:0.5.0
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
     environment:
       - IN_DOCKER=True

@@ -5,7 +5,6 @@ from typing import Any
 
 import pandas as pd
 
-from chaos_genius.core.anomaly.constants import FREQUENCY_DELTA
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 
 
@@ -43,7 +42,11 @@ def get_last_date_in_db(kpi_id: int, series: str, subgroup: str = None) -> Any o
 
 
 def get_dq_missing_data(
-    input_data: pd.DataFrame, dt_col: str, metric_col: str, freq: str
+    input_data: pd.DataFrame,
+    dt_col: str,
+    metric_col: str,
+    freq: str,
+    preagg_count_col: str = None
 ) -> pd.DataFrame:
     """Generate dataframe with information on missing data.
 
@@ -55,23 +58,27 @@ def get_dq_missing_data(
     :type metric_col: str
     :param freq: frequency of data
     :type freq: str
+    :param preagg_count_col: preagg count column name, defaults to None
+    :type preagg_count_col: str, optional
     :return: dataframe with information on missing data
     :rtype: pd.DataFrame
     """
     data = input_data
 
     data[dt_col] = pd.to_datetime(data[dt_col])
+
+    col_list = [dt_col, metric_col, preagg_count_col] if preagg_count_col else [dt_col, metric_col]
     missing_data = (
         data.set_index(dt_col)
         .isna()
         .resample(freq)
         .sum()
-        .reset_index()[[dt_col, metric_col]]
+        .reset_index()[col_list]
     )
 
-    missing_data = pd.DataFrame(missing_data, columns=[dt_col, metric_col]).set_index(
-        dt_col
-    )
+    missing_data = pd.DataFrame(
+        missing_data, columns=col_list
+    ).set_index(dt_col)
 
     return missing_data
 
@@ -121,6 +128,7 @@ def fill_data(
     period: int,
     end_date: datetime,
     freq: str,
+    preagg_count_col: str = None
 ) -> pd.DataFrame:
     """Fill data from input_data.
 
@@ -138,6 +146,8 @@ def fill_data(
     :type end_date: datetime
     :param freq: frequency of data
     :type freq: str
+    :param preagg_count_col: preagg count column name, defaults to None
+    :type preagg_count_col: str, optional
     :return: filled dataframe
     :rtype: pd.DataFrame
     """
@@ -151,20 +161,34 @@ def fill_data(
         )
 
         if date_time_checker(input_data, last_date_diff_period, dt_col, freq):
-            input_data = pd.concat(
-                [
-                    pd.DataFrame({dt_col: [last_date_diff_period], metric_col: [0]}),
-                    input_data,
-                ]
-            )
+            if preagg_count_col:
+                t_df = pd.DataFrame({
+                    dt_col: [last_date_diff_period],
+                    metric_col: [0],
+                    preagg_count_col: [0]
+                })
+            else:
+                t_df = pd.DataFrame({
+                    dt_col: [last_date_diff_period],
+                    metric_col: [0]
+                })
+            input_data = pd.concat([t_df, input_data])
 
     if end_date is not None:
         end_datetime = datetime(end_date.year, end_date.month, end_date.day)
-        end_date_diff_1 = end_datetime - timedelta(**FREQUENCY_DELTA[freq])
 
-        if date_time_checker(input_data, end_date_diff_1, dt_col, freq):
-            input_data = pd.concat(
-                [input_data, pd.DataFrame({dt_col: [end_date_diff_1], metric_col: [0]})]
-            )
+        if date_time_checker(input_data, end_datetime, dt_col, freq):
+            if preagg_count_col:
+                t_df = pd.DataFrame({
+                    dt_col: [end_datetime],
+                    metric_col: [0],
+                    preagg_count_col: [0]
+                })
+            else:
+                t_df = pd.DataFrame({
+                    dt_col: [end_datetime],
+                    metric_col: [0]
+                })
+            input_data = pd.concat([input_data, t_df])
 
     return input_data

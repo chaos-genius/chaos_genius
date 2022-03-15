@@ -4,10 +4,14 @@ from datetime import date, datetime, timedelta
 import logging
 import random
 import string
+import pytz
 
 import pandas as pd
 from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.databases.models.data_source_model import DataSource
+from chaos_genius.settings import TIMEZONE
+from chaos_genius.core.utils.constants import SUPPORTED_TIMEZONES
+from chaos_genius.core.utils.utils import randomword
 
 
 _SQL_IDENTIFIERS = {
@@ -16,12 +20,6 @@ _SQL_IDENTIFIERS = {
 }
 
 logger = logging.getLogger(__name__)
-
-
-def _randomword(length: int) -> str:
-    """Return a random word of specified length."""
-    letters = string.ascii_lowercase
-    return "".join(random.choice(letters) for _ in range(length))
 
 
 class DataLoader:
@@ -87,16 +85,43 @@ class DataLoader:
 
         start_date_str = self.start_date.strftime("%Y-%m-%d")
         end_date_str = self.end_date.strftime("%Y-%m-%d")
+
+        # TODO: Write tests for tz aware date strings
+        # if we have tz aware data, we need to add tz info to data
+        if self.kpi_info.get("timezone_aware"):
+            tz_offset_string = SUPPORTED_TIMEZONES[TIMEZONE][-6:]
+            tz_offset_string = f"T00:00:00{tz_offset_string}"
+            start_date_str += tz_offset_string
+            end_date_str += tz_offset_string
+
         start_query = f"{dt_col_str} >= '{start_date_str}'"
         end_query = f"{dt_col_str} < '{end_date_str}'"
 
         return f" where {start_query} and {end_query} "
 
+    def _get_tz_from_offset_str(self, utc_offset_str="GMT+00:00"):
+        # TODO: Move to utils file
+        # TODO: Write tests for this
+        sign = -1 if utc_offset_str[-6] == "-" else 1
+        utc_offset_mins = int(utc_offset_str[-2:]) * sign
+        utc_offset_hrs = int(utc_offset_str[-5:-3]) * sign
+
+        utc_offset = timedelta(hours=utc_offset_hrs, minutes=utc_offset_mins)
+
+        timezones = pytz.all_timezones
+        for tz_name in timezones:
+            try:
+                tz = pytz.timezone(tz_name)
+                tz_offset = tz._transition_info[-1][0]
+                if utc_offset == tz_offset:
+                    return tz
+            except AttributeError:
+                pass
+        raise ValueError(f"No timezone found for offset {utc_offset_str}")
+
     def _get_table_name(self):
         if self.kpi_info["kpi_type"] != "table":
-            return f"({self.kpi_info['kpi_query']}) as " + self._get_id_string(
-                _randomword(10)
-            )
+            return f"({self.kpi_info['kpi_query']}) as {self._get_id_string(randomword(10))}"
         table_name = self._get_id_string(self.kpi_info["table_name"])
         schema_name = self.kpi_info.get("schema_name", None)
         if schema_name:
@@ -152,6 +177,18 @@ class DataLoader:
 
     def _preprocess_df(self, df):
         df[self.dt_col] = pd.to_datetime(df[self.dt_col])
+
+        if self.kpi_info.get("timezone_aware"):
+            # if tz aware data, convert to given timezone
+            # and then strip tz information
+            tz_to_convert_to = self._get_tz_from_offset_str(
+                SUPPORTED_TIMEZONES[TIMEZONE]
+            )
+            df[self.dt_col] = (
+                df[self.dt_col]
+                .dt.tz_convert(tz_to_convert_to)
+                .dt.tz_localize(None)
+            )
 
     def get_count(self) -> int:
         """Return count of rows in KPI data."""

@@ -17,3 +17,7 @@ flake8-docstrings==1.6.0
 flake8-isort==4.0.0
 isort==5.8.0
 pep8-naming==0.11.1
+
+# for auto-reloading celery workers when code changes
+watchdog[watchmedo]~=2.1.6
+

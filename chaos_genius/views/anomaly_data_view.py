@@ -5,7 +5,7 @@ import time
 from typing import Any, Dict, List, Optional, Tuple, cast
 
 from flask import Blueprint, current_app, jsonify, request
-from sqlalchemy import func
+from sqlalchemy import func, delete
 import pandas as pd
 from sqlalchemy.orm.attributes import flag_modified
 from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
@@ -24,13 +24,16 @@ from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 from chaos_genius.core.rca.rca_utils.string_helpers import (
     convert_query_string_to_user_string,
 )
-from chaos_genius.utils.datetime_helper import get_date_string_with_tz
+from chaos_genius.utils.datetime_helper import (
+    get_datetime_string_with_tz,
+    get_lastscan_string_with_tz,
+)
 
 
 blueprint = Blueprint("anomaly_data", __name__)
 
 
-@blueprint.route("/", methods=["GET"]) # TODO: Remove this
+@blueprint.route("/", methods=["GET"])  # TODO: Remove this
 @blueprint.route("", methods=["GET"])
 def list_anomaly_data():
     # FIXME: Update home route
@@ -62,12 +65,22 @@ def kpi_anomaly_detection(kpi_id):
         data["chart_data"]["title"] = kpi_info["name"]
         current_app.logger.info(f"Anomaly DD Retrieval Completed for KPI ID: {kpi_id}")
 
-        end_date = get_date_string_with_tz(end_date)
+        end_date = get_datetime_string_with_tz(end_date, hourly)
+        anomaly_last_scan = get_lastscan_string_with_tz(
+            kpi_info["scheduler_params"]["last_scheduled_time_anomaly"]
+        )
 
     except:  # noqa: E722
         current_app.logger.error("Error in Anomaly Overall Retrieval", exc_info=1)
 
-    return jsonify({"data": data, "msg": "", "anomaly_end_date": end_date})
+    return jsonify(
+        {
+            "data": data,
+            "msg": "",
+            "anomaly_end_date": end_date,
+            "last_run_time_anomaly": anomaly_last_scan,
+        }
+    )
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-drilldown", methods=["GET"])
@@ -101,12 +114,10 @@ def kpi_anomaly_drilldown(kpi_id):
             subdim_graphs.append(anom_data)
         current_app.logger.info(f"Anomaly DD Retrieval Completed for KPI ID: {kpi_id}")
 
-        end_date = get_date_string_with_tz(end_date)
-
     except:  # noqa: E722
         current_app.logger.error("Error in Anomaly DD Retrieval", exc_info=1)
 
-    return jsonify({"data": subdim_graphs, "msg": "", "anomaly_end_date": end_date})
+    return jsonify({"data": subdim_graphs, "msg": ""})
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-data-quality", methods=["GET"])
@@ -134,12 +145,10 @@ def kpi_anomaly_data_quality(kpi_id):
 
         current_app.logger.info(f"Anomaly DQ Retrieval Completed for KPI ID: {kpi_id}")
 
-        end_date = get_date_string_with_tz(end_date)
-
     except:  # noqa: E722
         current_app.logger.error("Error in Anomaly DQ Retrieval: {err}", exc_info=1)
 
-    return jsonify({"data": data, "msg": "", "anomaly_end_date": end_date})
+    return jsonify({"data": data, "msg": ""})
 
 
 @blueprint.route("/<int:kpi_id>/subdim-anomaly", methods=["GET"])
@@ -156,12 +165,13 @@ def kpi_subdim_anomaly(kpi_id):
         graph_xlims = get_anomaly_graph_x_lims(end_date, period, hourly)
         if hourly:
             # Use a 24 hour window to find peak severity per subdim and rank in descending order
-            start_date = end_date-timedelta(hours=23)
+            start_date = end_date - timedelta(hours=23)
             query = (
                 db.session.query(
                     AnomalyDataOutput.series_type,
-                    func.max(AnomalyDataOutput.severity)
-                ).filter(
+                    func.max(AnomalyDataOutput.severity),
+                )
+                .filter(
                     (AnomalyDataOutput.kpi_id == kpi_id)
                     & (AnomalyDataOutput.data_datetime >= start_date)
                     & (AnomalyDataOutput.data_datetime <= end_date)
@@ -185,8 +195,13 @@ def kpi_subdim_anomaly(kpi_id):
                 .limit(TOP_SUBDIMENSIONS_FOR_ANOMALY)
             )
         results = pd.read_sql(query.statement, query.session.bind)
+
         if len(results) == 0:
+            end_date_str = ""
             current_app.logger.error("No Subdimension Anomaly Found", exc_info=1)
+        else:
+            end_date_str = get_datetime_string_with_tz(end_date, hourly)
+
         subdims = results.series_type
         for subdim in subdims:
             anom_data = get_dq_and_subdim_data(
@@ -194,14 +209,25 @@ def kpi_subdim_anomaly(kpi_id):
             )
             anom_data["x_axis_limits"] = graph_xlims
             subdim_graphs.append(anom_data)
-        current_app.logger.info(f"Subdimension Anomaly Retrieval Completed for KPI ID: {kpi_id}")
+        current_app.logger.info(
+            f"Subdimension Anomaly Retrieval Completed for KPI ID: {kpi_id}"
+        )
 
-        end_date = get_date_string_with_tz(end_date)
+        anomaly_last_scan = get_lastscan_string_with_tz(
+            kpi_info["scheduler_params"]["last_scheduled_time_anomaly"]
+        )
 
     except:  # noqa: E722
         current_app.logger.error("Error in Subdimension Anomaly Retrieval", exc_info=1)
 
-    return jsonify({"data": subdim_graphs, "msg": "", "anomaly_end_date": end_date})
+    return jsonify(
+        {
+            "data": subdim_graphs,
+            "msg": "",
+            "anomaly_end_date": end_date_str,
+            "last_run_time_anomaly": anomaly_last_scan,
+        }
+    )
 
 
 @blueprint.route("/anomaly-params/meta-info", methods=["GET"])
@@ -314,6 +340,7 @@ def anomaly_settings_status(kpi_id):
         )
 
     response = DEFAULT_STATUS.copy()
+    response["kpi_id"] = kpi_id
 
     if kpi.scheduler_params is not None:
         response.update(
@@ -322,26 +349,41 @@ def anomaly_settings_status(kpi_id):
 
     response["is_anomaly_setup"] = kpi.anomaly_params is not None
 
-    rca_data = RcaData.query.filter(RcaData.kpi_id == kpi_id).all()
-    if len(rca_data) == 0:
-        is_precomputed = False
-    else:
-        is_precomputed = True
-    response["is_rca_precomputed"] = is_precomputed
+    num_rca_data = RcaData.query.filter(RcaData.kpi_id == kpi_id).count()
+
+    response["is_rca_precomputed"] = num_rca_data != 0
 
     anomaly_data = AnomalyDataOutput.query.filter(
-        AnomalyDataOutput.kpi_id == kpi_id
-    ).all()
-    response["is_anomaly_precomputed"] = len(anomaly_data) != 0
+        (AnomalyDataOutput.kpi_id == kpi_id) & (AnomalyDataOutput.anomaly_type == "overall")
+    ).count()
+    response["is_anomaly_precomputed"] = anomaly_data != 0
 
     current_app.logger.info(f"Anomaly settings retrieved for kpi: {kpi_id}")
     return jsonify(response)
 
 
+@blueprint.route("/<int:kpi_id>/retrain", methods=["POST", "GET"])
+def kpi_anomaly_retraining(kpi_id):
+    # TODO: Move the deletion into KPI controller file
+    # delete all data in anomaly output table
+    delete_kpi_query = delete(AnomalyDataOutput).where(AnomalyDataOutput.kpi_id == kpi_id)
+    db.session.execute(delete_kpi_query)
+    db.session.commit()
+
+    # add anomaly to queue
+    from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task
+    anomaly_task = ready_anomaly_task(kpi_id)
+    if anomaly_task is not None:
+        anomaly_task.apply_async()
+        current_app.logger.info(f"Retraining started for KPI ID: {kpi_id}")
+        return jsonify({"msg" : f"retraining started for KPI: {kpi_id}"})
+    else:
+        return jsonify({"msg" : f"retraining failed for KPI: {kpi_id}, KPI id is None"})
+
+
 def fill_graph_data(row, graph_data):
     """Fills graph_data with intervals, values, and predicted_values for
     a given row.
-
     :param row: A single row from the anomaly dataframe
     :type row: pandas.core.series.Series
     :param graph_data: Dictionary object with the current graph
@@ -499,7 +541,6 @@ def get_anomaly_output_end_date(kpi_info: dict) -> datetime:
     """Checks if the KPI has a static end date and returns it. Otherwise it tries to get
     end date of overall anomaly detection, and will finally return today's date if that
     is also not found.
-
     :return: end date for use with anomaly data output
     :rtype: datetime
     """
@@ -627,6 +668,10 @@ ANOMALY_PARAMS_META = {
                     "value": "D",
                     "name": "Daily",
                 },
+                {
+                    "value": "H",
+                    "name": "Hourly",
+                },
             ],
         },
     ],
@@ -662,6 +707,7 @@ DEFAULT_STATUS: Dict[str, Any] = {
     "last_scheduled_time_anomaly": None,
     "last_scheduled_time_rca": None,
     "rca_status": None,
+    "kpi_id": None,
 }
 
 
@@ -681,9 +727,7 @@ def validate_partial_anomaly_params(
     anomaly_params: Dict[str, Any]
 ) -> Tuple[str, Dict[str, Any]]:
     """Check if given *partial* anomaly parameters have valid keys and values.
-
     Returns an error string. Empty string "" means the params are valid.
-
     Also returns the validated anomaly_params, with some conversions applied. This is undefined
     when the anomaly_params is not valid. The passed anomaly_params is modified in-place.
     """
@@ -748,7 +792,7 @@ def validate_partial_anomaly_params(
         frequency = anomaly_params["scheduler_frequency"]
 
         err, anomaly_params = validate_frequency(
-            frequency, "scheduler_frequency", {"D"}
+            frequency, "scheduler_frequency", {"D", "H"}
         )
 
         if err != "":
@@ -848,11 +892,8 @@ def update_anomaly_params(
     kpi: Kpi, new_anomaly_params: Dict[str, Any], run_anomaly=True, check_editable=False
 ) -> Tuple[str, Kpi]:
     """Update anomaly_params for the kpi with the given *partial* *validated* anomaly parameters.
-
     The new_anomaly_params must be validated using validate_partial_anomaly_params.
-
     run_anomaly is also set to True in the Kpi table, by default.
-
     If check_editable is set to True, only the editable fields are allowed to be updated.
     """
     fields = ANOMALY_PARAM_FIELDS

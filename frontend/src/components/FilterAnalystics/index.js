@@ -28,7 +28,7 @@ const FilterAnalystics = ({ kpi, setKpi, data, onboarding }) => {
       const options = {
         keys: ['name']
       };
-      const fuse = new Fuse(listData, options);
+      const fuse = new Fuse(searchData, options);
       const result = fuse.search(e.target.value);
       setListData(
         result.map((item) => {

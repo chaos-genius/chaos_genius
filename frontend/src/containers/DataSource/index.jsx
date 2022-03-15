@@ -69,7 +69,7 @@ const DataSource = () => {
       keys: ['name', 'connection_type']
     };
 
-    const fuse = new Fuse(dataSourceData, options);
+    const fuse = new Fuse(dataSourcesList, options);
 
     const result = fuse.search(search);
     setDataSourceData(

@@ -48,7 +48,7 @@ class AnalyticsScheduler:
         if time_field in scheduler_params:
             hour, minute, second = map(int, scheduler_params[time_field].split(":"))
             scheduled_time = scheduled_time.replace(
-                hour=hour, minute=minute, second=second
+                hour=hour, minute=minute, second=second, microsecond=0
             )
         else:
             creation_time = kpi.created_at
@@ -56,6 +56,7 @@ class AnalyticsScheduler:
                 hour=creation_time.hour,
                 minute=creation_time.minute,
                 second=creation_time.second,
+                microsecond=0,
             )
 
         return scheduled_time
@@ -73,11 +74,12 @@ class AnalyticsScheduler:
 
         if time_field in scheduler_params:
             _, minute, second = map(int, scheduler_params[time_field].split(":"))
-            scheduled_time = scheduled_time.replace(minute=minute, second=second)
+            scheduled_time = scheduled_time.replace(
+                minute=minute, second=second, microsecond=0
+            )
         else:
             scheduled_time = scheduled_time.replace(
-                minute=HOURLY_SCHEDULE_RUN_MINUTE,
-                second=0,
+                minute=HOURLY_SCHEDULE_RUN_MINUTE, second=0, microsecond=0
             )
 
         return scheduled_time

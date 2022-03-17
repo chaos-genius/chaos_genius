@@ -255,6 +255,35 @@
         "bug",
         "review"
       ]
+    },
+    {
+      "login": "rjdp",
+      "name": "Rajdeep Sharma",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7734938?v=4",
+      "profile": "https://buggydebugger.com/",
+      "contributions": [
+        "code",
+        "review"
+      ]
+    },
+    {
+      "login": "balakumar9493",
+      "name": "balakumar9493",
+      "avatar_url": "https://avatars.githubusercontent.com/u/98518511?v=4",
+      "profile": "https://github.com/balakumar9493",
+      "contributions": [
+        "code",
+        "design"
+      ]
+    },
+    {
+      "login": "eltociear",
+      "name": "Ikko Ashimine",
+      "avatar_url": "https://avatars.githubusercontent.com/u/22633385?v=4",
+      "profile": "https://bandism.net/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

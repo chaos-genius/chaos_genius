@@ -30,6 +30,10 @@ const alertFrequency = [
   {
     value: 'daily',
     label: 'Daily'
+  },
+  {
+    value: 'hourly',
+    label: 'Hourly'
   }
 ];
 
@@ -50,8 +54,8 @@ const EventAlertForm = ({
   );
 
   const [option, setOption] = useState([]);
-  const [datasourceid, setDataSourceId] = useState('');
-  const [query, setQuery] = useState('');
+  const [datasourceid, setDataSourceId] = useState(undefined);
+  const [query, setQuery] = useState(undefined);
   const [selected, setSelected] = useState();
   const [error, setError] = useState({
     alert_name: '',
@@ -218,9 +222,16 @@ const EventAlertForm = ({
 
   const onTestQuery = () => {
     const payload = {
-      data_source_id: datasourceid,
+      data_source_id:
+        datasourceid !== undefined
+          ? datasourceid
+          : enabled.data_source
+          ? alertFormData.data_source
+            ? option.find((item) => alertFormData.data_source === item.id)?.id
+            : selected
+          : sensitiveData.data_source,
       from_query: true,
-      query: query
+      query: query !== undefined ? query : alertFormData?.alert_query
     };
     dispatch(getTestQuery(payload));
   };

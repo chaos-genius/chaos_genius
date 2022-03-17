@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
 import { useHistory } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
 import Search from '../../assets/images/search.svg';
 import GreenArrow from '../../assets/images/green-arrow.svg';
 
@@ -10,8 +9,6 @@ import Fuse from 'fuse.js';
 import { v4 as uuidv4 } from 'uuid';
 
 import store from '../../redux/store';
-
-import { anomalySetting } from '../../redux/actions';
 import { CustomTooltip } from '../../utils/tooltip-helper';
 import { debuncerReturn } from '../../utils/simple-debouncer';
 
@@ -33,7 +30,6 @@ const RESET_HIERARCHIAL_DATA = {
 };
 const DashboardFilter = ({ kpi, data, setActive, tabs, dashboard }) => {
   const history = useHistory();
-  const dispatch = useDispatch();
   const [listData, setListData] = useState(data);
   const [searchData, setSearchData] = useState(data);
 
@@ -50,7 +46,7 @@ const DashboardFilter = ({ kpi, data, setActive, tabs, dashboard }) => {
       const options = {
         keys: ['name']
       };
-      const fuse = new Fuse(listData, options);
+      const fuse = new Fuse(searchData, options);
       const result = fuse.search(e.target.value);
       setListData(
         result.map((item) => {
@@ -68,7 +64,7 @@ const DashboardFilter = ({ kpi, data, setActive, tabs, dashboard }) => {
       store.dispatch(RESET_LINECHART);
       store.dispatch(RESET_HIERARCHIAL_DATA);
       store.dispatch({ type: 'RESET_DASHBOARD_RCA' });
-      dispatch(anomalySetting(item.id));
+      store.dispatch({ type: 'RESET_ANOMALY' });
       store.dispatch(RESET);
       store.dispatch(RESET_DATA);
       setActive(item.name);

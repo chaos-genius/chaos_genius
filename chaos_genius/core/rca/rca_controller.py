@@ -18,6 +18,7 @@ from chaos_genius.core.rca.root_cause_analysis import RootCauseAnalysis
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.core.utils.end_date import load_input_data_end_date
 from chaos_genius.core.utils.round import round_series
+from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.rca_data_model import RcaData, db
 from chaos_genius.settings import (
     DEEPDRILLS_ENABLED_TIME_RANGES,
@@ -50,6 +51,13 @@ class RootCauseAnalysisController:
         """
         logger.info(f"RCA Controller initialized with KPI: {kpi_info['id']}")
         self.kpi_info = kpi_info
+
+        # TODO: Make this connection type agnostic.
+        conn_type = DataSource.get_by_id(
+            kpi_info["data_source"]
+        ).as_dict["connection_type"]
+        self._preaggregated = conn_type == "Druid"
+        self._preaggregated_count_col = "count"
 
         self.end_date = load_input_data_end_date(kpi_info, end_date)
         logger.info(f"RCA Controller end date: {self.end_date}")
@@ -149,9 +157,24 @@ class RootCauseAnalysisController:
             days_before=days,
         ).get_data()
 
+        if self._preaggregated:
+            if self.agg == "count":
+                agg_dict = {self._preaggregated_count_col: "sum"}
+                col_name = self._preaggregated_count_col
+            elif self.agg == "sum":
+                agg_dict = {self.metric: "sum"}
+                col_name = self.metric
+            else:
+                raise ValueError(
+                    f"Unsupported aggregation: {self.agg} for preaggregated data."
+                )
+        else:
+            agg_dict = {self.metric: self.agg}
+            col_name = self.metric
+
         rca_df = (
             rca_df.resample("D", on=self.dt_col)
-            .agg({self.metric: self.agg})
+            .agg(agg_dict)
             .fillna(0)
             .reset_index()
         )
@@ -161,7 +184,7 @@ class RootCauseAnalysisController:
         )
 
         rca_df = rca_df.rename(
-            columns={self.dt_col: "date", self.metric: "value"}
+            columns={self.dt_col: "date", col_name: "value"}
         )
         rca_df["value"] = round_series(rca_df["value"])
 
@@ -185,6 +208,8 @@ class RootCauseAnalysisController:
             metric=self.metric,
             agg=self.agg,
             num_dim_combs=self.num_dim_combs,
+            preaggregated=self._preaggregated,
+            preaggregated_count_col=self._preaggregated_count_col,
         )
 
     def _get_aggregation(self, rca: RootCauseAnalysis) -> dict:
@@ -374,7 +399,10 @@ class RootCauseAnalysisController:
                 continue
 
             try:
-                dims = [None] + self.dimensions
+                if self._preaggregated:
+                    dims = self.kpi_info["dimensions"]
+                else:
+                    dims = [None] + self.dimensions
                 for dim in dims:
                     logger.info(f"Computing RCA for dimension: {dim}")
                     try:
@@ -429,6 +457,7 @@ class RootCauseAnalysisController:
                 db.engine,
                 if_exists="append",
                 index=False,
+                chunksize=RcaData.__chunksize__
             )
             self._checkpoint_success("Output Storage")
         except Exception as e:  # noqa E722

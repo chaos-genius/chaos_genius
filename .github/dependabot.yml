@@ -12,7 +12,7 @@ updates:
       - "pip dependencies"
     reviewers:
       - "varunp2k"
-    open-pull-requests-limit: 10
+#     open-pull-requests-limit: 10
 
   - package-ecosystem: "npm"
     directory: "/"

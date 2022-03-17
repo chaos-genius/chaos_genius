@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from celery import group
 
 from chaos_genius.alerts.base_alert_digests import check_and_trigger_digest
-from chaos_genius.alerts.base_alerts import check_and_trigger_alert
+from chaos_genius.alerts import check_and_trigger_alert
 from chaos_genius.controllers.alert_controller import get_alert_list
 from chaos_genius.controllers.config_controller import get_config_object
 from chaos_genius.extensions import celery as celery_ext

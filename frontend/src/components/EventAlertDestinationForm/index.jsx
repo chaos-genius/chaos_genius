@@ -31,6 +31,10 @@ const RESET_ACTION = {
   type: 'RESET_ALERT_DATA_Data'
 };
 
+const RESET_QUERY_DATA = {
+  type: 'EVENT_ALERT_QUERY_RESET'
+};
+
 const customSingleValue = ({ data }) => (
   <div className="input-select">
     <div className="input-select__single-value">
@@ -97,6 +101,7 @@ const EventAlertDestinationForm = ({
 
   const onBack = () => {
     store.dispatch(RESET_ACTION);
+    store.dispatch(RESET_QUERY_DATA);
     setEventSteps(1);
   };
 
@@ -403,7 +408,7 @@ const EventAlertDestinationForm = ({
               id="individualalert"
               name="alert"
               value={false}
-              checked={alertFormData.daily_digest === false ? true : false}
+              checked={true}
               onClick={(e) => handleDigestClick(e)}
             />
             <label
@@ -414,13 +419,14 @@ const EventAlertDestinationForm = ({
               individual alert
             </label>
           </div>
-          <div className="form-check">
+          {/* <div className="form-check">
             <input
               className="form-check-input"
               type="radio"
               id="consolidatedalertsreport"
               name="alert"
               value={true}
+              disabled={true}
               checked={alertFormData.daily_digest === false ? false : true}
               onClick={(e) => handleDigestClick(e)}
             />
@@ -431,7 +437,7 @@ const EventAlertDestinationForm = ({
               for="consolidatedalertsreport">
               consolidated alerts report
             </label>
-          </div>
+          </div> */}
         </div>
       </div>
       {/*Add empty space div*/}

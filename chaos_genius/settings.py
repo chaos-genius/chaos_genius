@@ -19,7 +19,7 @@ load_dotenv(".env")  # loads environment variables from .env
 
 """
 load the environment variables from the .env.local files
-and overide the variables
+and override the variables
 Here is the order of precedence:
 .env.local > os.environ > .env
 """
@@ -73,6 +73,7 @@ MAX_FILTER_SUBGROUPS_ANOMALY = int(os.getenv('MAX_FILTER_SUBGROUPS_ANOMALY', def
 MAX_DEEPDRILLS_SLACK_DAYS = int(os.getenv('MAX_DEEPDRILLS_SLACK_DAYS', default=14))
 MAX_ANOMALY_SLACK_DAYS = int(os.getenv('MAX_ANOMALY_SLACK_DAYS', default=14))
 DAYS_OFFSET_FOR_ANALTYICS = int(os.getenv('DAYS_OFFSET_FOR_ANALTYICS', default=2))
+HOURS_OFFSET_FOR_ANALTYICS = int(os.getenv('HOURS_OFFSET_FOR_ANALTYICS', default=0))
 DEEPDRILLS_HTABLE_MAX_PARENTS = int(os.getenv('DEEPDRILLS_HTABLE_MAX_PARENTS', default=5))
 DEEPDRILLS_HTABLE_MAX_CHILDREN = int(os.getenv('DEEPDRILLS_HTABLE_MAX_CHILDREN', default=5))
 DEEPDRILLS_HTABLE_MAX_DEPTH = int(os.getenv('DEEPDRILLS_HTABLE_MAX_DEPTH', default=3))
@@ -92,7 +93,7 @@ IN_DOCKER = _make_bool(os.getenv('IN_DOCKER', default=False))
 TASK_CHECKPOINT_LIMIT: int = int(os.getenv("TASK_CHECKPOINT_LIMIT", 1000))
 """Number of last checkpoints to retrieve in Task Monitor"""
 
-CHAOSGENIUS_VERSION_MAIN = os.getenv("CHAOSGENIUS_VERSION_MAIN", "0.4.0")
+CHAOSGENIUS_VERSION_MAIN = os.getenv("CHAOSGENIUS_VERSION_MAIN", "0.5.0")
 """ChaosGenius version - semver part only"""
 CHAOSGENIUS_VERSION_POSTFIX = os.getenv("CHAOSGENIUS_VERSION_POSTFIX", "git")
 """ChaosGenius version - postfix to identify deployment"""

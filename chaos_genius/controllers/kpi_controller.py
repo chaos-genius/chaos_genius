@@ -24,7 +24,7 @@ def _is_data_present_for_end_date(
     kpi_info: dict,
     end_date: date = None
 ) -> bool:
-    df_count = DataLoader(kpi_info, end_date=end_date, days_before=1).get_count()
+    df_count = DataLoader(kpi_info, end_date=end_date, days_before=0).get_count()
     return df_count != 0
 
 
@@ -60,20 +60,27 @@ def run_anomaly_for_kpi(
         logger.info("Retrieved KPI information.")
 
         logger.info("Selecting end date.")
-        # by default we always calculate for n-1
-        if end_date is None:
-            end_date = datetime.today().date() - timedelta(days=(DAYS_OFFSET_FOR_ANALTYICS))
 
-        # Check if n-1 data is available or not then try for n-2
-        if not _is_data_present_for_end_date(kpi_info, end_date):
-            end_date = end_date - timedelta(days=1)
-            logger.info("Decreasing end date by 1.")
+        if end_date is None and kpi_info["scheduler_params"]["scheduler_frequency"] == "D":
+            # by default we always calculate for n-days_offset_for_analytics
+            end_date = datetime.today().date() - timedelta(days=(DAYS_OFFSET_FOR_ANALTYICS))
+            # Check if data is available or not then try for n-days_offset_for_analytics-1
+            if not _is_data_present_for_end_date(kpi_info, end_date):
+                end_date = end_date - timedelta(days=1)
+                logger.info("Decreasing end date by 1.")
+
+        elif end_date is None and kpi_info["scheduler_params"]["scheduler_frequency"] == "H":
+            end_date = datetime.today().date()
 
         logger.info(f"End date is {end_date}.")
 
         adc = AnomalyDetectionController(kpi_info, end_date, task_id=task_id)
         adc.detect()
         logger.info(f"Anomaly Detection has completed for KPI ID: {kpi_id}.")
+        
+        if kpi_info["scheduler_params"]["scheduler_frequency"] == "H":
+            end_date = adc.end_date
+            logger.info(f"End date for hourly alerts is {end_date}.")
 
     except Exception:  # noqa: B902
         logger.error(
@@ -158,3 +165,8 @@ def get_active_kpis() -> Iterator[Kpi]:
         (Kpi.active == True) & (Kpi.is_static == False)
     )
     return kpis
+
+
+# def delete_data(kpi, query):
+#     db.session.execute(query)
+#     db.session.commit()

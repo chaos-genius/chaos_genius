@@ -14,6 +14,8 @@ import AnomalyEmptyState from '../AnomalyEmptyState';
 import EmptyAnomalyDrilldown from '../EmptyDrillDown';
 import { formatDateTime, getTimezone } from '../../utils/date-helper';
 import { HRNumbers } from '../../utils/Formatting/Numbers/humanReadableNumberFormatter';
+import { useToast } from 'react-toast-wnm';
+import { CustomContent, CustomActions } from '../../utils/toast-helper';
 import './anomaly.scss';
 
 import {
@@ -42,6 +44,34 @@ const RESET = {
 };
 
 const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
+  const toast = useToast();
+  const customToast = (data) => {
+    const { type, header, description } = data;
+    toast({
+      autoDismiss: true,
+      enableAnimation: true,
+      delay: type === 'success' ? '5000' : '30000',
+      backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
+      borderRadius: '6px',
+      color: '#222222',
+      position: 'bottom-right',
+      minWidth: '240px',
+      width: 'auto',
+      boxShadow: '4px 6px 32px -2px rgba(226, 226, 234, 0.24)',
+      padding: '17px 14px',
+      height: 'auto',
+      border: type === 'success' ? '1px solid #60ca9a' : '1px solid #FEF6F5',
+      type: type,
+      actions: <CustomActions />,
+      content: (
+        <CustomContent
+          header={header}
+          description={description}
+          failed={type === 'success' ? false : true}
+        />
+      )
+    });
+  };
   const dispatch = useDispatch();
   const history = useHistory();
   const [chartData, setChartData] = useState([]);
@@ -411,7 +441,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
   };
 
   const handleRetrain = () => {
-    dispatch(setRetrain(kpi));
+    dispatch(setRetrain(kpi, customToast));
   };
 
   return (

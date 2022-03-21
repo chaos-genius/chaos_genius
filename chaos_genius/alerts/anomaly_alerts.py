@@ -29,6 +29,7 @@ from chaos_genius.alerts.utils import (
     top_anomalies,
     webapp_url_prefix,
 )
+from chaos_genius.controllers.kpi_controller import get_anomaly_data
 
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.core.rca.rca_utils.string_helpers import (
@@ -79,13 +80,14 @@ class AnomalyAlertController:
         alert.update(commit=True, last_alerted=self.now)
 
         # TODO: Add the series type filter for query optimisation
-        anomaly_data = AnomalyDataOutput.query.filter(
-            AnomalyDataOutput.kpi_id == kpi_id,
-            AnomalyDataOutput.anomaly_type.in_(["overall", "subdim"]),
-            AnomalyDataOutput.is_anomaly.in_([1, -1]),
-            AnomalyDataOutput.data_datetime >= self.anomaly_end_date,
-            AnomalyDataOutput.severity >= self.alert_info["severity_cutoff_score"],
-        ).all()
+        anomaly_data = get_anomaly_data(
+            [kpi_id],
+            anomaly_types=["subdim", "overall"],
+            anomalies_only=True,
+            start_timestamp=self.anomaly_end_date,
+            include_start_timestamp=True,
+            severity_cutoff=self.alert_info["severity_cutoff_score"],
+        )
 
         if len(anomaly_data) == 0:
             logger.info(f"No anomaly exists (Alert ID - {alert_id})")

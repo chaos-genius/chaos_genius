@@ -1,7 +1,8 @@
 import logging
 import typing
 from datetime import date, datetime, timedelta
-from typing import Optional, Union, Iterator
+from typing import Optional, Union, Iterator, List
+from xmlrpc.client import Boolean
 
 from flask import current_app  # noqa: F401
 
@@ -10,6 +11,7 @@ from chaos_genius.core.anomaly.controller import AnomalyDetectionController
 from chaos_genius.core.rca.rca_controller import RootCauseAnalysisController
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.databases.models.kpi_model import Kpi
+from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 
 from chaos_genius.settings import (
     MAX_DEEPDRILLS_SLACK_DAYS,
@@ -165,6 +167,47 @@ def get_active_kpis() -> Iterator[Kpi]:
         (Kpi.active == True) & (Kpi.is_static == False)
     )
     return kpis
+
+
+def get_anomaly_data(
+    kpi_ids: List[int],
+    anomaly_types: List[str] = None,
+    anomalies_only: bool = False,
+    start_timestamp: datetime = None,
+    include_start_timestamp: bool = True,
+    end_timestamp: datetime = None,
+    include_end_timestamp: bool = True,
+    severity_cutoff: float = None
+) -> List[AnomalyDataOutput]:
+    """Returns list of anomaly points using paramters to filter the output."""
+    filters = []
+    if kpi_ids:
+        filters.append(AnomalyDataOutput.kpi_id.in_(kpi_ids))
+
+    if anomaly_types:
+        filters.append(AnomalyDataOutput.anomaly_type.in_(anomaly_types))
+
+    if anomalies_only:
+        filters.append(AnomalyDataOutput.is_anomaly.in_([1, -1]))
+
+    if start_timestamp:
+        if include_start_timestamp:
+            filters.append(AnomalyDataOutput.data_datetime >= start_timestamp)
+        else:
+            filters.append(AnomalyDataOutput.data_datetime > start_timestamp)
+
+    if end_timestamp:
+        if include_end_timestamp:
+            filters.append(AnomalyDataOutput.data_datetime <= end_timestamp)
+        else:
+            filters.append(AnomalyDataOutput.data_datetime < end_timestamp)
+
+    if severity_cutoff:
+        filters.append(AnomalyDataOutput.severity >= severity_cutoff)
+
+    anomaly_data = AnomalyDataOutput.query.filter(*filters).all()
+
+    return anomaly_data
 
 
 # def delete_data(kpi, query):

@@ -12,7 +12,7 @@ import datasource from '../../assets/images/sidebar/datasource.svg';
 import datasourceactive from '../../assets/images/sidebar/datasource-active.svg';
 import alerts from '../../assets/images/sidebar/alerts.svg';
 import alertsactive from '../../assets/images/sidebar/alerts-active.svg';
-
+import slacklink from '../../assets/images/sidebar/slack-icon.svg';
 import './sidebar.scss';
 
 const Sidebar = () => {
@@ -88,6 +88,15 @@ const Sidebar = () => {
               <label>3</label>
               <span>Alerts</span>
             </Link>
+          </li>
+          <li className="slack-link">
+            <a
+              href="https://join.slack.com/t/chaosgenius/shared_invite/zt-140042uac-rrm~xbx9o_aydi6PTmp_Mg"
+              target="_blank"
+              rel="noopener noreferrer">
+              <img src={slacklink} alt="Slack" />
+              <span>Join Our Slack</span>
+            </a>
           </li>
         </ul>
       </div>

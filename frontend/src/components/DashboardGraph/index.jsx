@@ -370,14 +370,13 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
         },
         yAxis: {
           type: 'value',
-          step: 1,
+          title: {
+            text: 'values'
+          },
           labels: {
             formatter: function () {
               return HRNumbers.toHumanString(this.value);
             }
-          },
-          title: {
-            margin: 25
           }
         },
         plotOptions: {

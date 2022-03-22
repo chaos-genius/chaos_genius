@@ -185,6 +185,7 @@ def get_anomaly_data(
         filters.append(AnomalyDataOutput.kpi_id.in_(kpi_ids))
 
     if anomaly_types:
+        # TODO: Add the series type filter for query optimisation
         filters.append(AnomalyDataOutput.anomaly_type.in_(anomaly_types))
 
     if anomalies_only:
@@ -208,6 +209,24 @@ def get_anomaly_data(
     anomaly_data = AnomalyDataOutput.query.filter(*filters).all()
 
     return anomaly_data
+
+
+def get_last_anomaly_timestamp(
+    kpi_ids: List[int],
+    anomaly_types: List[str] = ["overall", "subdim"],
+) -> Optional[datetime]:
+    """Returns the timestamp of the latest anomaly data."""
+    results = (
+        AnomalyDataOutput.query.filter(
+            (AnomalyDataOutput.kpi_id.in_(kpi_ids))
+            & (AnomalyDataOutput.anomaly_type.in_(anomaly_types))
+        )
+        .order_by(AnomalyDataOutput.data_datetime.desc())
+        .first()
+    )
+
+    if results:
+        return results.data_datetime
 
 
 # def delete_data(kpi, query):

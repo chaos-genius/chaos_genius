@@ -29,7 +29,7 @@ from chaos_genius.alerts.utils import (
     top_anomalies,
     webapp_url_prefix,
 )
-from chaos_genius.controllers.kpi_controller import get_anomaly_data
+from chaos_genius.controllers.kpi_controller import get_anomaly_data, get_last_anomaly_timestamp
 
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.core.rca.rca_utils.string_helpers import (
@@ -79,15 +79,7 @@ class AnomalyAlertController:
             return True
         alert.update(commit=True, last_alerted=self.now)
 
-        # TODO: Add the series type filter for query optimisation
-        anomaly_data = get_anomaly_data(
-            [kpi_id],
-            anomaly_types=["subdim", "overall"],
-            anomalies_only=True,
-            start_timestamp=self.anomaly_end_date,
-            include_start_timestamp=True,
-            severity_cutoff=self.alert_info["severity_cutoff_score"],
-        )
+        anomaly_data = self._get_anomalies()
 
         if len(anomaly_data) == 0:
             logger.info(f"No anomaly exists (Alert ID - {alert_id})")
@@ -122,6 +114,33 @@ class AnomalyAlertController:
         triggered_alert.update(commit=True)
         logger.info(f"The triggered alert data was successfully stored")
         return outcome
+
+    def _get_anomalies(self) -> List[AnomalyDataOutput]:
+        last_anomaly_timestamp: Optional[datetime.datetime] = self.alert_info[
+            "last_anomaly_timestamp"
+        ]
+
+        if last_anomaly_timestamp is not None:
+            # when last_anomaly_timestamp is available
+            #   get data after last_anomaly_timestamp
+            start_timestamp = last_anomaly_timestamp
+            include_start_timestamp = False
+        else:
+            # when last_anomaly_timestamp is not available
+            #   get data of the last timestamp in anomaly table
+            start_timestamp = get_last_anomaly_timestamp([self.alert_info["kpi"]])
+            include_start_timestamp = True
+
+        anomaly_data = get_anomaly_data(
+            [self.alert_info["kpi"]],
+            anomaly_types=["subdim", "overall"],
+            anomalies_only=True,
+            start_timestamp=start_timestamp,
+            include_start_timestamp=include_start_timestamp,
+            severity_cutoff=self.alert_info["severity_cutoff_score"],
+        )
+
+        return anomaly_data
 
     def get_overall_subdim_data(self, anomaly_data):
 
@@ -404,7 +423,7 @@ class AnomalyAlertController:
                     alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
                     overall_count=overall_count,
                     subdim_count=subdim_count,
-                    str=str
+                    str=str,
                 )
                 logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
             # self.remove_attributes_from_anomaly_data(overall_data, ["nl_message"])

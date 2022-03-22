@@ -29,7 +29,10 @@ from chaos_genius.alerts.utils import (
     top_anomalies,
     webapp_url_prefix,
 )
-from chaos_genius.controllers.kpi_controller import get_anomaly_data, get_last_anomaly_timestamp
+from chaos_genius.controllers.kpi_controller import (
+    get_anomaly_data,
+    get_last_anomaly_timestamp,
+)
 
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.core.rca.rca_utils.string_helpers import (
@@ -43,10 +46,27 @@ from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
 logger = logging.getLogger()
 
 
+class AlertException(Exception):
+    pass
+
+
 class AnomalyAlertController:
     def __init__(self, alert_info, anomaly_end_date=None):
         self.alert_info = alert_info
+        self.alert_id: int = self.alert_info["id"]
+        self.kpi_id: int = self.alert_info["kpi"]
         self.now = datetime.datetime.now()
+        latest_anomaly_timestamp = get_last_anomaly_timestamp([self.kpi_id])
+
+        if latest_anomaly_timestamp is None:
+            raise AlertException(
+                "Could not get latest anomaly timestamp"
+                f"No anomaly data was found for KPI: {self.kpi_id}, "
+                f"Alert: {self.alert_id}"
+            )
+        self.latest_anomaly_timestamp = latest_anomaly_timestamp
+        logger.info("latest_anomaly_timestamp is %s", latest_anomaly_timestamp)
+
         if anomaly_end_date:
             self.anomaly_end_date = anomaly_end_date
         else:
@@ -77,12 +97,11 @@ class AnomalyAlertController:
                 f"Skipping alert with ID {self.alert_info['id']} since it was already run"
             )
             return True
-        alert.update(commit=True, last_alerted=self.now)
 
         anomaly_data = self._get_anomalies()
 
         if len(anomaly_data) == 0:
-            logger.info(f"No anomaly exists (Alert ID - {alert_id})")
+            logger.info(f"No anomaly exists (Alert: {alert_id})")
             return True
 
         logger.info(f"Alert ID {alert_id} is sent to the respective alert channel")
@@ -91,6 +110,8 @@ class AnomalyAlertController:
             outcome, alert_data = self.send_alert_email(anomaly_data)
         elif self.alert_info["alert_channel"] == "slack":
             outcome, alert_data = self.send_slack_alert(anomaly_data)
+
+        self._update_alert_metadata(alert)
 
         if alert_data is None:
             return outcome
@@ -128,19 +149,38 @@ class AnomalyAlertController:
         else:
             # when last_anomaly_timestamp is not available
             #   get data of the last timestamp in anomaly table
-            start_timestamp = get_last_anomaly_timestamp([self.alert_info["kpi"]])
+            start_timestamp = self.latest_anomaly_timestamp
             include_start_timestamp = True
 
+        logger.info(
+            f"Checking for anomalies for (KPI: {self.kpi_id}, Alert: "
+            f"{self.alert_id}) in the range - start: {start_timestamp} (included: "
+            f"{include_start_timestamp}) and end: {self.latest_anomaly_timestamp} "
+            "(included: True)"
+        )
+
         anomaly_data = get_anomaly_data(
-            [self.alert_info["kpi"]],
+            [self.kpi_id],
             anomaly_types=["subdim", "overall"],
             anomalies_only=True,
             start_timestamp=start_timestamp,
             include_start_timestamp=include_start_timestamp,
+            # only get anomaly data till latest timestamp
+            #   (ignore newer data added after alert started)
+            end_timestamp=self.latest_anomaly_timestamp,
+            include_end_timestamp=True,
             severity_cutoff=self.alert_info["severity_cutoff_score"],
         )
 
         return anomaly_data
+
+    def _update_alert_metadata(self, alert: Alert):
+        """Sets last alerted and last anomaly timestamps."""
+        alert.update(
+            commit=True,
+            last_alerted=self.now,
+            last_anomaly_timestamp=latest_anomaly_timestamp,
+        )
 
     def get_overall_subdim_data(self, anomaly_data):
 

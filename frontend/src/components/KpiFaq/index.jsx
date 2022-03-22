@@ -1,5 +1,5 @@
 import React from 'react';
-
+import slacksmall from '../../assets/images/slack-small-logo.svg';
 import './faq.scss';
 
 const AddFaq = () => {
@@ -115,6 +115,7 @@ const AddFaq = () => {
             target="_blank"
             rel="noopener noreferrer">
             Community Slack{' '}
+            <img src={slacksmall} className="in-active" alt="Slack" />
           </a>
         </p>
       </div>

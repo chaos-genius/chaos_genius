@@ -76,7 +76,7 @@ const FilterAnalystics = ({ kpi, setKpi, data, onboarding }) => {
                 <li
                   key={uuidv4()}
                   className={
-                    kpi.toString() === item.id.toString() ? 'active' : ''
+                    kpi?.toString() === item?.id?.toString() ? 'active' : ''
                   }
                   onClick={() => {
                     handleClick(item);

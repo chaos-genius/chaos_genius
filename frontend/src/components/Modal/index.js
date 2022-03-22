@@ -63,7 +63,7 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
       history.push('/onboarding/4');
     } else {
       store.dispatch(SETTING_RESET);
-      history.push('/dashboard/deepdrills');
+      history.push('/dashboard/');
     }
     setIsOpen(false);
   };
@@ -80,7 +80,7 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
       history.push('/dashboard');
     } else if (text === 'activateanalytics') {
       store.dispatch(SETTING_RESET);
-      history.push('/dashboard/deepdrills');
+      history.push('/dashboard/');
     }
   };
   return (

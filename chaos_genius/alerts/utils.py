@@ -18,6 +18,27 @@ from chaos_genius.core.utils.round import round_number
 from chaos_genius.settings import CHAOSGENIUS_WEBAPP_URL
 
 
+class AlertException(Exception):
+    """A general exception in a specific alert.
+
+    Stores and prints alert ID and KPI ID.
+    """
+    def __init__(self, message: str, alert_id: int, kpi_id: int = None):
+        """Initialize a new alert exception.
+
+        Args:
+            message: exception message.
+            alert_id: ID of alert where this originated from.
+            kpi_id: ID of KPI associated with the alert.
+        """
+        if kpi_id:
+            message = f"(KPI: {kpi_id}, Alert: {alert_id}) {message}"
+        else:
+            message = f"(Alert: {alert_id}) {message}"
+
+        super().__init__(message)
+
+
 def webapp_url_prefix():
     """Constructs webapp URL prefix with a trailing slash.
 

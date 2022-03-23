@@ -21,6 +21,7 @@ from chaos_genius.alerts.constants import (
 from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import anomaly_alert_slack
 from chaos_genius.alerts.utils import (
+    AlertException,
     change_message_from_percent,
     count_anomalies,
     find_percentage_change,
@@ -46,10 +47,6 @@ from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
 logger = logging.getLogger()
 
 
-class AlertException(Exception):
-    pass
-
-
 class AnomalyAlertController:
     def __init__(self, alert_info, anomaly_end_date=None):
         self.alert_info = alert_info
@@ -60,9 +57,9 @@ class AnomalyAlertController:
 
         if latest_anomaly_timestamp is None:
             raise AlertException(
-                "Could not get latest anomaly timestamp"
-                f"No anomaly data was found for KPI: {self.kpi_id}, "
-                f"Alert: {self.alert_id}"
+                "Could not get latest anomaly timestamp. " "No anomaly data was found.",
+                alert_id=self.alert_id,
+                kpi_id=self.kpi_id,
             )
         self.latest_anomaly_timestamp = latest_anomaly_timestamp
         logger.info("latest_anomaly_timestamp is %s", latest_anomaly_timestamp)
@@ -73,12 +70,14 @@ class AnomalyAlertController:
             self.anomaly_end_date = self.now - datetime.timedelta(days=3)
 
     def check_and_prepare_alert(self):
-        kpi_id = self.alert_info["kpi"]
         alert_id = self.alert_info["id"]
         alert: Optional[Alert] = Alert.get_by_id(self.alert_info["id"])
         if alert is None:
-            logger.info(f"Could not find alert by ID: {self.alert_info['id']}")
-            return False
+            raise AlertException(
+                "Could not find alert configuration.",
+                alert_id=self.alert_id,
+                kpi_id=self.kpi_id,
+            )
 
         check_time = FREQUENCY_DICT[self.alert_info["alert_frequency"]]
         fuzzy_interval = datetime.timedelta(
@@ -110,6 +109,12 @@ class AnomalyAlertController:
             outcome, alert_data = self.send_alert_email(anomaly_data)
         elif self.alert_info["alert_channel"] == "slack":
             outcome, alert_data = self.send_slack_alert(anomaly_data)
+        else:
+            raise AlertException(
+                f"Unknown alert channel: {self.alert_info['alert_channel']}",
+                alert_id=self.alert_id,
+                kpi_id=self.kpi_id,
+            )
 
         self._update_alert_metadata(alert)
 
@@ -133,7 +138,7 @@ class AnomalyAlertController:
         )
 
         triggered_alert.update(commit=True)
-        logger.info(f"The triggered alert data was successfully stored")
+        logger.info("The triggered alert data was successfully stored")
         return outcome
 
     def _get_anomalies(self) -> List[AnomalyDataOutput]:

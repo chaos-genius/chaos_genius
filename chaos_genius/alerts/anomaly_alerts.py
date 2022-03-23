@@ -179,7 +179,7 @@ class AnomalyAlertController:
         alert.update(
             commit=True,
             last_alerted=self.now,
-            last_anomaly_timestamp=latest_anomaly_timestamp,
+            last_anomaly_timestamp=self.latest_anomaly_timestamp,
         )
 
     def get_overall_subdim_data(self, anomaly_data):

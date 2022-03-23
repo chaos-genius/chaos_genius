@@ -14,7 +14,7 @@ from chaos_genius.controllers.config_controller import (
     get_config_object,
     create_config_object,
     get_all_configurations,
-    get_multidim_status_for_kpi
+    get_multidim_status_for_kpi,
 )
 from chaos_genius.databases.db_utils import chech_editable_field
 from copy import deepcopy
@@ -28,49 +28,47 @@ def get_onboarding_status():
     data_sources, kpis, analytics = False, False, False
     organisation_settings = False
     try:
-        data_sources = True if DataSource.query.first() is not None else False
-        kpis = True if Kpi.query.first() is not None else False
+        data_sources = (
+            True
+            if DataSource.query.filter(DataSource.active == True).first() is not None
+            else False
+        )
+        kpis = (
+            True
+            if Kpi.query.filter(Kpi.active == True).first() is not None
+            else False
+        )
         if kpis:
             kpi_list = Kpi.query.filter(
-                            Kpi.active == True,
-                            Kpi.anomaly_params != None
-                        ).all()
+                Kpi.active == True, Kpi.anomaly_params != None
+            ).all()
 
             analytics = True if len(kpi_list) > 0 else False
-        
+
         organisation_settings_value = ConfigSetting.query.filter(
-                                    ConfigSetting.name == "organisation_settings",
-                                    ConfigSetting.active == True
-                                ).all()
+            ConfigSetting.name == "organisation_settings", ConfigSetting.active == True
+        ).all()
         organisation_settings = True if len(organisation_settings_value) > 0 else False
     except Exception as err_msg:
         print(err_msg)
-    
+
     steps = [
-        {
-            "step_no": 1,
-            "step_name": "Add Data Source",
-            "step_done": data_sources
-        }, {
-            "step_no": 2,
-            "step_name": "Add KPI",
-            "step_done": kpis
-        }, {
-            "step_no": 3,
-            "step_name": "Activate Analytics",
-            "step_done": analytics
-        }
+        {"step_no": 1, "step_name": "Add Data Source", "step_done": data_sources},
+        {"step_no": 2, "step_name": "Add KPI", "step_done": kpis},
+        {"step_no": 3, "step_name": "Activate Analytics", "step_done": analytics},
     ]
     completion_precentage = int(
         len([step for step in steps if step["step_done"]]) / len(steps) * 100
     )
-    return jsonify({
-        "data": {
-            "steps": steps,
-            "completion_precentage": completion_precentage,
-            "organisation_onboarding": organisation_settings
+    return jsonify(
+        {
+            "data": {
+                "steps": steps,
+                "completion_precentage": completion_precentage,
+                "organisation_onboarding": organisation_settings,
+            }
         }
-    })
+    )
 
 
 @blueprint.route("/get-config", methods=["POST"])
@@ -81,10 +79,7 @@ def get_config():
         name = data.get("config_name")
         config_obj = get_config_object(name)
         if not config_obj:
-            return jsonify({
-                "status": "not_found",
-                "message": "Config doesn't exist"
-            })
+            return jsonify({"status": "not_found", "message": "Config doesn't exist"})
 
         config_state = get_modified_config_file(config_obj.safe_dict, name)
         return jsonify({"data": config_state, "status": "success"})
@@ -103,11 +98,13 @@ def set_config():
     if request.is_json:
         data = request.get_json()
         config_name = data.get("config_name")
-        if config_name not in ["email", "slack", "organisation_settings", "alert_digest_settings"]:
-            return jsonify({
-                "status": "not_found",
-                "message": "Config doesn't exist"
-            })
+        if config_name not in [
+            "email",
+            "slack",
+            "organisation_settings",
+            "alert_digest_settings",
+        ]:
+            return jsonify({"status": "not_found", "message": "Config doesn't exist"})
         config_obj = get_config_object(config_name)
         config_settings = data.get("config_settings", {})
         updated_config_settings = {}
@@ -119,16 +116,20 @@ def set_config():
                 for module in config_settings.keys():
                     updated_config_settings[module].update(config_settings[module])
             else:
-                updated_config_settings.update(data.get("config_settings", {})) #this will work for all email, slack and alert_digest_settings
+                updated_config_settings.update(
+                    data.get("config_settings", {})
+                )  # this will work for all email, slack and alert_digest_settings
 
         if not updated_config_settings:
             updated_config_settings = config_settings
         new_config = create_config_object(config_name, updated_config_settings)
         new_config.save(commit=True)
-        return jsonify({
-            "message": f"{config_name.capitalize()} configuration has been saved successfully.",
-            "status": "success",
-        })
+        return jsonify(
+            {
+                "message": f"{config_name.capitalize()} configuration has been saved successfully.",
+                "status": "success",
+            }
+        )
     else:
         return jsonify(
             {
@@ -143,7 +144,9 @@ def get_all_config():
     """Getting all the setting."""
     try:
         result = get_all_configurations()
-        alert_destination_result = [config for config in result if config["name"] in ("slack", "email")]
+        alert_destination_result = [
+            config for config in result if config["name"] in ("slack", "email")
+        ]
         return jsonify({"data": alert_destination_result, "status": "success"})
     except Exception as err:
         return jsonify({"message": err, "status": "failure"})
@@ -171,10 +174,9 @@ def test_alert():
             data["alertMessage"],
             overall_stats,
         )
-        return jsonify({
-            "message": "Alert has been tested successfully.",
-            "status": status
-        })
+        return jsonify(
+            {"message": "Alert has been tested successfully.", "status": status}
+        )
     else:
         return jsonify({"error": "The request payload is not in JSON format"})
 
@@ -194,9 +196,7 @@ def get_config_meta_data(config):
         results["fields"] = fields
         return jsonify({"data": results, "status": "success"})
     except Exception as err:
-        current_app.logger.info(
-            f"Error in getting meta info for Config Setting: {err}"
-        )
+        current_app.logger.info(f"Error in getting meta info for Config Setting: {err}")
         return jsonify({"message": str(err), "status": "failure"})
 
 
@@ -209,7 +209,7 @@ def multidim_status():
     try:
         kpi_id = request.args.get("kpi_id")
         data["multidim_status"] = get_multidim_status_for_kpi(kpi_id)
-        status="success"
+        status = "success"
     except Exception as err:
         status = "failure"
         current_app.logger.info(f"Error in fetching Dashboad Config Data: {err}")
@@ -232,8 +232,15 @@ def edit_config_setting():
 
                 for module in updated_settings.keys():
                     for key in updated_settings.get(module).keys():
-                        if meta_info["organisation_settings"][module][key]["is_editable"] == True:
-                            new_config_settings[module][key] = updated_settings[module][key]
+                        if (
+                            meta_info["organisation_settings"][module][key][
+                                "is_editable"
+                            ]
+                            == True
+                        ):
+                            new_config_settings[module][key] = updated_settings[module][
+                                key
+                            ]
 
                 config_obj.config_setting = new_config_settings
                 config_obj.save(commit=True)

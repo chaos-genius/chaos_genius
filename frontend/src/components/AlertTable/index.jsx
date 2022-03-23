@@ -34,7 +34,7 @@ const RESET_DELETE_DATA = {
   type: 'RESET_DELETE_DATA'
 };
 
-const AlertTable = ({ alertData, alertSearch }) => {
+const AlertTable = ({ alertData, alertSearch, customToast }) => {
   const dispatch = useDispatch();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -51,7 +51,7 @@ const AlertTable = ({ alertData, alertSearch }) => {
 
   const onDeleteConfirmation = (id) => {
     store.dispatch(RESET_DELETE_DATA);
-    dispatch(kpiAlertDeleteById(id));
+    dispatch(kpiAlertDeleteById(id, customToast));
     setIsOpen(false);
   };
 

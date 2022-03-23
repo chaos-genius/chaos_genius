@@ -517,16 +517,28 @@ export const kpiAlertDeleteSuccess = (response) => {
   };
 };
 
-export const kpiAlertDeleteById = (id) => {
-  return async (dispatch) => {
-    dispatch(kpiAlertDeleteRequest());
-    const { data, error, status } = await getRequest({
-      url: `${BASE_URL}/api/alert/${id}/delete`
-    });
-    if (error) {
-      dispatch(kpiAlertDeleteFailure());
-    } else if (data && status === 200) {
-      dispatch(kpiAlertDeleteSuccess(data));
+export const kpiAlertDeleteById = (id, customToast) => {
+  if (env.REACT_APP_IS_DEMO === 'true') {
+    if (customToast) {
+      customToast({
+        type: 'error',
+        header: 'This is a demo version'
+      });
     }
-  };
+    return {
+      type: 'default'
+    };
+  } else {
+    return async (dispatch) => {
+      dispatch(kpiAlertDeleteRequest());
+      const { data, error, status } = await getRequest({
+        url: `${BASE_URL}/api/alert/${id}/delete`
+      });
+      if (error) {
+        dispatch(kpiAlertDeleteFailure());
+      } else if (data && status === 200) {
+        dispatch(kpiAlertDeleteSuccess(data));
+      }
+    };
+  }
 };

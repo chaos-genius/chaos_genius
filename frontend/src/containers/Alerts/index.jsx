@@ -288,7 +288,11 @@ const Alerts = () => {
             </div>
             {/* table section */}
             <div className="table-section">
-              <AlertTable alertData={alertData} alertSearch={alertSearch} />
+              <AlertTable
+                alertData={alertData}
+                alertSearch={alertSearch}
+                customToast={customToast}
+              />
             </div>
           </div>
         ) : (

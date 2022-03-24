@@ -129,7 +129,11 @@ def register_hooks(app):
                     return jsonify({"status":"failure",
                                     "message":"Endpoint not accessable in demo version"})
                 else:
-                    pass
+                    if request.method not in DEMO_ENDPOINT_WHITELIST[request.endpoint]:
+                        return jsonify({"status":"failure",
+                                        "message":"Method not allowed in demo version"})
+                    else:
+                        pass
 
 
 def register_commands(app):

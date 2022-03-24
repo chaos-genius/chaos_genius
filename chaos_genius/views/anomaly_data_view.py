@@ -384,44 +384,51 @@ def kpi_anomaly_retraining(kpi_id):
 
 @blueprint.route("/<int:kpi_id>/download_anomaly_data", methods=["GET"])
 def download_anomaly_data(kpi_id):
-    data_points = get_overall_data_points(kpi_id)
-    output_csv_obj = io.StringIO()
-    csv_headers = ["data_datetime",
-                   "y",
-                   "yhat_upper",
-                   "yhat_lower",
-                   "is_anomaly",
-                   "severity",
-                   "kpi_id",
-                   "anomaly_type",
-                   "series_type",
-                   "index",
-                   "created_at"]
-    csvwriter = csv.writer(output_csv_obj, delimiter=',')
-    csvwriter.writerow(csv_headers)
-    for row in data_points:
-        attr_list = [row.data_datetime.strftime("%Y-%m-%d %H:%M:%S"),
-                        str(row.y),
-                        str(row.yhat_upper),
-                        str(row.yhat_lower),
-                        str(row.is_anomaly),
-                        str(row.severity),
-                        str(row.kpi_id),
-                        str(row.anomaly_type),
-                        str(row.series_type),
-                        str(row.index),
-                        row.created_at.strftime("%Y-%m-%d %H:%M:%S")]
-        csvwriter.writerow(attr_list)
+    try:
+        time_period = request.args.get('time_period')
+        if time_period is None:
+            raise Exception('please specify the required time_period')
+        data_points = get_overall_data_points(kpi_id,int(time_period))
+        output_csv_obj = io.StringIO()
+        csv_headers = ["data_datetime",
+                       "y",
+                       "yhat_upper",
+                       "yhat_lower",
+                       "is_anomaly",
+                       "severity",
+                       "kpi_id",
+                       "anomaly_type",
+                       "series_type",
+                       "index",
+                       "created_at"]
+        csvwriter = csv.writer(output_csv_obj, delimiter=',')
+        csvwriter.writerow(csv_headers)
+        for row in data_points:
+            attr_list = [row.data_datetime.strftime("%Y-%m-%d %H:%M:%S"),
+                            str(row.y),
+                            str(row.yhat_upper),
+                            str(row.yhat_lower),
+                            str(row.is_anomaly),
+                            str(row.severity),
+                            str(row.kpi_id),
+                            str(row.anomaly_type),
+                            str(row.series_type),
+                            str(row.index),
+                            row.created_at.strftime("%Y-%m-%d %H:%M:%S")]
+            csvwriter.writerow(attr_list)
 
-    output_csv_obj.seek(0)
-    output_csv_str = output_csv_obj.read().encode('utf-8')
-    output_csv_bytes = io.BytesIO(output_csv_str)
-    output_csv_obj.close()
+        output_csv_obj.seek(0)
+        output_csv_str = output_csv_obj.read().encode('utf-8')
+        output_csv_bytes = io.BytesIO(output_csv_str)
+        output_csv_obj.close()
 
-    return send_file(output_csv_bytes,
-                        mimetype='text/csv',
-                        attachment_filename=f'KPI-{kpi_id}-overall_kpi.csv',
-                        as_attachment=True)
+        return send_file(output_csv_bytes,
+                            mimetype='text/csv',
+                            attachment_filename=f'KPI-{kpi_id}-overall_kpi.csv',
+                            as_attachment=True)
+    except Exception as e:
+        return jsonify({'status':'failure',
+                        'message':'Downloading data failed :{}'.format(e)})
 
 def fill_graph_data(row, graph_data):
     """Fills graph_data with intervals, values, and predicted_values for
@@ -490,11 +497,9 @@ def get_overall_data_points(kpi_id, n=90):
 
     start_date = end_date - timedelta(days=n)
     start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
-    # end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
 
     data_points = AnomalyDataOutput.query.filter(
         (AnomalyDataOutput.kpi_id == kpi_id)
-        # & (AnomalyDataOutput.data_datetime <= end_date)
         & (AnomalyDataOutput.data_datetime >= start_date)
         & (AnomalyDataOutput.anomaly_type == "overall")
     ).order_by(AnomalyDataOutput.data_datetime).all()

@@ -133,7 +133,9 @@ def fetch_metadata(id, first):
     """Fetch the metadata of the given data source."""
 
     click.echo(f"Fetching the metadata for data source ID: {id}")
-    click.echo(f"Completed the metadata fetch for data source ID: {id}.")
+    from chaos_genius.controllers.data_source_metadata_controller import run_metadata_prefetch
+    status = run_metadata_prefetch(id, first)
+    click.echo(f"Completed the metadata fetch for data source ID: {id} with status: {status}.")
 
 
 @click.command()

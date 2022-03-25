@@ -47,7 +47,7 @@ def kpi_anomaly_detection(kpi_id):
         kpi_info = get_kpi_data_from_id(kpi_id)
 
         if not kpi_info["anomaly_params"]:
-            current_app.logger.info(f"No Anomaly Data Found for KPI ID: {kpi_id}")
+            current_app.logger.info(f"Anomaly settings not configured for KPI ID: {kpi_id}")
             return jsonify(
                 {
                     "data": None,

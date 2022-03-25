@@ -107,7 +107,8 @@ def data_source():
         for conn in data_sources:
             # TODO: Add the kpi_count, real sync details and sorting info
             conn_detail = conn.safe_dict
-            conn_detail["last_sync"] = datetime.now()
+            if not conn_detail["last_sync"]:
+                conn_detail["last_sync"] = conn_detail["created_at"]
             conn_detail["kpi_count"] = data_source_kpi_map.get(conn_detail["id"], 0)
             results.append(conn_detail)
         results = sorted(results, reverse=True, key=lambda x: x["id"])

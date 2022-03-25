@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import datetime
 
 from chaos_genius.databases.models.data_source_metadata_model import DataSourceMetadata
 from chaos_genius.controllers.data_source_controller import get_datasource_data_from_id
@@ -144,10 +145,12 @@ def run_metadata_prefetch(data_source_id, first_time=False):
         sync_error = True
         logger.error(err)
 
+    data_source_obj = get_datasource_data_from_id(data_source_id, as_obj=True)
     if first_time:
-        data_source_obj = get_datasource_data_from_id(data_source_id, as_obj=True)
         data_source_obj.sync_status = "Completed" if not sync_error else "Error"
-        data_source_obj.update(commit=True)
+    data_source_obj.last_sync = datetime.now()
+    data_source_obj.update(commit=True)
+
     return True if not sync_error else False
 
 

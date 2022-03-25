@@ -19,6 +19,11 @@ from chaos_genius.controllers.data_source_controller import (
     test_data_source,
     update_third_party,
 )
+from chaos_genius.controllers.data_source_metadata_controller import (
+    fetch_schema_list,
+    fetch_table_info,
+    fetch_table_list
+)
 from chaos_genius.databases.db_utils import create_sqlalchemy_uri
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.kpi_model import Kpi
@@ -527,15 +532,17 @@ def get_schema_list():
         logger.info("Listing data source schemas. ID: %s", datasource_id)
 
         if datasource_id is None:
-            message = "Datasource ID needs to be provided"
+            message = "Data Source ID needs to be provided"
         else:
             ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
             if not ds_data or not getattr(ds_data, "active"):
                 raise ValueError(
                     f"There exists no active datasource matching the provided id: {datasource_id}"
                 )
-
-            data = get_schema_names(ds_data.as_dict)
+            if ds_data.is_third_party:
+                data = get_schema_names(ds_data.as_dict)
+            else:
+                data = fetch_schema_list(ds_data.id)
             if data is None:
                 message = "Error occurred while establishing DB Connection"
                 data = []
@@ -576,7 +583,10 @@ def get_schema_tables():
             ds_name = getattr(ds_data, "connection_type")
             schema = None if SCHEMAS_AVAILABLE[ds_name] == False else schema
 
-            table_names = get_table_list(ds_data.as_dict, schema)
+            if ds_data.is_third_party:
+                table_names = get_table_list(ds_data.as_dict, schema)
+            else:
+                table_names = fetch_table_list(ds_data.id, schema)
             if table_names is None:
                 message = "Error occurred while establishing DB Connection"
                 table_names = []
@@ -667,7 +677,10 @@ def get_table_info():
 
         schema = None if SCHEMAS_AVAILABLE[ds_name] == False else schema
 
-        table_info = get_table_metadata(ds_data.as_dict, schema, table_name)
+        if ds_data.is_third_party:
+            table_info = get_table_metadata(ds_data.as_dict, schema, table_name)
+        else:
+            table_info = fetch_table_info(ds_data.id, schema, table_name)
         if table_info is None:
             raise Exception("Unable to fetch table info for the requested table")
         else:

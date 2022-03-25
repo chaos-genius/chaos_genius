@@ -13,6 +13,47 @@ from chaos_genius.connectors import (
 logger = logging.getLogger(__name__)
 
 
+def fetch_schema_list(data_source):
+    """Fetch the schema list from the metadata of the given data source."""
+    schema_list = []
+    data_source_metadata = DataSourceMetadata.query.filter(
+        DataSourceMetadata.data_source_id == data_source,
+        DataSourceMetadata.metadata_type == "schema_list",
+    ).first()
+    if data_source_metadata:
+        schema_list = data_source_metadata.metadata_info.get("schema_list", [])
+
+    return schema_list
+
+
+def fetch_table_list(data_source, schema):
+    """Fetch the table list from the metadata of the given data source and schema."""
+    table_list = []
+    data_source_metadata = DataSourceMetadata.query.filter(
+        DataSourceMetadata.data_source_id == data_source,
+        DataSourceMetadata.metadata_type == "table_list",
+        DataSourceMetadata.metadata_param == get_metadata_param_str([schema]),
+    ).first()
+    if data_source_metadata:
+        table_list = data_source_metadata.metadata_info.get("table_list", [])
+
+    return table_list
+
+
+def fetch_table_info(data_source, schema, table):
+    """Fetch the table info from the metadata of the given data source and table"""
+    schema_list = []
+    data_source_metadata = DataSourceMetadata.query.filter(
+        DataSourceMetadata.data_source_id == data_source,
+        DataSourceMetadata.metadata_type == "table_info",
+        DataSourceMetadata.metadata_param == get_metadata_param_str([schema, table]),
+    ).first()
+    if data_source_metadata:
+        schema_list = data_source_metadata.metadata_info
+
+    return schema_list
+
+
 def run_metadata_prefetch(data_source_id, first_time=False):
     """Fetch the metadata of the given data source."""
 

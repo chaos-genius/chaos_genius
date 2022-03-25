@@ -91,7 +91,10 @@ def get_schema_names(data_source_info, from_db_conn=False, db_conn=None):
         return None
 
     db_connection.init_inspector()
-    return db_connection.get_schema_names_list()
+    schema_list = db_connection.get_schema_names_list()
+    if schema_list is None:
+        schema_list = [None]
+    return schema_list
 
 
 def get_table_list(data_source_info, schema, from_db_conn=False, db_conn=None):

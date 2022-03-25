@@ -22,6 +22,7 @@ services:
       - *chaosgenius-version
       - IN_DOCKER=True
       - AIRBYTE_ENABLED=${AIRBYTE_ENABLED}
+      - REACT_APP_IS_DEMO=${REACT_APP_IS_DEMO}
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -79,6 +80,7 @@ services:
       - REACT_APP_BASE_URL=${REACT_APP_BASE_URL}
       - REACT_APP_DISABLE_TELEMETRY=${REACT_APP_DISABLE_TELEMETRY}
       - REACT_APP_EVENT_ALERT=${REACT_APP_EVENT_ALERT}
+      - REACT_APP_IS_DEMO=${REACT_APP_IS_DEMO}
     depends_on:
       - chaosgenius-server
 

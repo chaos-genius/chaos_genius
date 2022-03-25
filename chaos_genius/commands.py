@@ -127,6 +127,17 @@ def run_rca(kpi, end_date):
 
 @click.command()
 @with_appcontext
+@click.option('--id', required=True, type=int, help="Fetch the metadata of provided data source.")
+@click.option('--first', is_flag=True, default=False, help="Fetching for the first time.")
+def fetch_metadata(id, first):
+    """Fetch the metadata of the given data source."""
+
+    click.echo(f"Fetching the metadata for data source ID: {id}")
+    click.echo(f"Completed the metadata fetch for data source ID: {id}.")
+
+
+@click.command()
+@with_appcontext
 @click.option('--id', required=True, type=int, help="Perform the alert operation for provided Alert ID.")
 def run_alert(id):
     """Check and perform the alert operation for provided Alert ID."""

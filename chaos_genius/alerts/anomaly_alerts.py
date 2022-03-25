@@ -237,119 +237,95 @@ class AnomalyAlertController:
                 break
         return intended_point
 
-    def _save_nl_message_daily_freq(self, anomaly_data: List[dict], kpi: Kpi):
-        """Saves change message for every point, for a daily frequency KPI."""
-        time_diff = datetime.timedelta(days=1, hours=0, minutes=0)
-
-        # TODO: fix circular import
-        from chaos_genius.controllers.digest_controller import get_previous_data
-
-        prev_day_data = get_previous_data(kpi.id, self.anomaly_end_date, time_diff)
-
-        prev_day_data = [anomaly_point.as_dict for anomaly_point in prev_day_data]
-
-        for point in prev_day_data:
-            if point.get("anomaly_type") != "overall":
-                point["series_type"] = convert_query_string_to_user_string(
-                    point["series_type"]
-                )
-            else:
-                point["series_type"] = OVERALL_KPI_SERIES_TYPE_REPR
-
-        for point in anomaly_data:
-            intended_point = self._find_point(point, prev_day_data)
-
-            if intended_point is None:
-                # previous point wasn't found
-                point["percentage_change"] = "–"
-            elif point["y"] == 0 and intended_point["y"] == point["y"]:
-                # previous data was same as current
-                point["percentage_change"] = "–"
-            elif intended_point["y"] == 0:
-                # previous point was 0
-                sign_ = "+" if point["y"] > 0 else "-"
-                point["percentage_change"] = sign_ + "inf"
-            else:
-                point["percentage_change"] = find_percentage_change(
-                    point["y"], intended_point["y"]
-                )
-
-            point["nl_message"] = change_message_from_percent(
-                point["percentage_change"]
-            )
-
-    def _save_nl_message_hourly_freq(self, anomaly_data: List[dict], kpi: Kpi):
-        """Saves change message for every point, for a hourly frequency KPI."""
-        data = dict()
-        time_diff = datetime.timedelta(days=1, hours=0, minutes=0)
-
-        # TODO: fix circular import
-        from chaos_genius.controllers.digest_controller import get_previous_data
-
-        prev_day_data = get_previous_data(kpi.id, self.anomaly_end_date, time_diff)
-        prev_day_data = [anomaly_point.as_dict for anomaly_point in prev_day_data]
-
-        for point in prev_day_data:
-            if point.get("anomaly_type") != "overall":
-                point["series_type"] = convert_query_string_to_user_string(
-                    point["series_type"]
-                )
-            else:
-                point["series_type"] = OVERALL_KPI_SERIES_TYPE_REPR
-
-        for point in prev_day_data:
-            if point["data_datetime"].hour not in data.keys():
-                data[point["data_datetime"].hour] = []
-            data[point["data_datetime"].hour].append(point)
-
-        for point in anomaly_data:
-            hour_val = point["data_datetime"].hour
-            intended_point = self._find_point(point, data.get(hour_val, []))
-            if intended_point is None:
-                # previous point wasn't found
-                point["percentage_change"] = "–"
-            elif point["y"] == 0 and intended_point["y"] == point["y"]:
-                # previous data was same as current
-                point["percentage_change"] = "–"
-            elif intended_point["y"] == 0:
-                # previous point was 0
-                sign_ = "+" if point["y"] > 0 else "-"
-                point["percentage_change"] = sign_ + "inf"
-            else:
-                point["percentage_change"] = find_percentage_change(
-                    point["y"], intended_point["y"]
-                )
-
-            point["nl_message"] = change_message_from_percent(
-                point["percentage_change"]
-            )
-
-    def save_nl_message(self, anomaly_data: List[dict]):
+    def _save_nl_message(self, anomaly_data: List[dict]):
         """Constructs and saves change message for every point."""
-        kpi_id = self.alert_info["kpi"]
-        kpi = Kpi.get_by_id(kpi_id)
+        
+        kpi = Kpi.get_by_id(self.kpi_id)
         if kpi is None:
             for point in anomaly_data:
                 point["nl_message"] = "KPI does not exist"
             return
 
         time_series_freq = kpi.anomaly_params.get("frequency")
-        if time_series_freq is None:
+        if time_series_freq is None or time_series_freq not in ("d", "D", "Daily", "daily", "h", "H", "hourly", "Hourly"):
             for point in anomaly_data:
                 point["nl_message"] = "Time series frequency does not exist"
             return
 
-        if time_series_freq in ("d", "D", "daily", "Daily"):
-            self._save_nl_message_daily_freq(anomaly_data, kpi)
-        elif time_series_freq in ("h", "H", "hourly", "Hourly"):
-            self._save_nl_message_hourly_freq(anomaly_data, kpi)
+        time_diff = datetime.timedelta(days=1, hours=0, minutes=0)
+
+        last_anomaly_timestamp: Optional[datetime.datetime] = self.alert_info[
+            "last_anomaly_timestamp"
+        ]
+
+        if last_anomaly_timestamp is not None:
+            # when last_anomaly_timestamp is available
+            #   get data after last_anomaly_timestamp
+            start_timestamp = last_anomaly_timestamp - time_diff
+            include_start_timestamp = False
         else:
-            for point in anomaly_data:
-                point["nl_message"] = "Unsupported time series frequency"
+            # when last_anomaly_timestamp is not available
+            #   get data of the last timestamp in anomaly table
+            start_timestamp = self.latest_anomaly_timestamp - time_diff
+            include_start_timestamp = True
+
+        prev_day_data = get_anomaly_data(
+            [self.kpi_id],
+            anomaly_types=["subdim", "overall"],
+            start_timestamp=start_timestamp,
+            include_start_timestamp=include_start_timestamp,
+            # only get anomaly data till latest timestamp
+            #   (ignore newer data added after alert started)
+            end_timestamp=self.latest_anomaly_timestamp - time_diff,
+            include_end_timestamp=True,
+        )
+
+        prev_day_data = [anomaly_point.as_dict for anomaly_point in prev_day_data]
+
+        for point in prev_day_data:
+            if point.get("anomaly_type") != "overall":
+                point["series_type"] = convert_query_string_to_user_string(
+                    point["series_type"]
+                )
+            else:
+                point["series_type"] = OVERALL_KPI_SERIES_TYPE_REPR
+
+        hourly_data = dict()
+        if time_series_freq in ("h", "H", "hourly", "Hourly"):
+            for point in prev_day_data:
+                if point["data_datetime"].hour not in hourly_data.keys():
+                    hourly_data[point["data_datetime"].hour] = []
+                hourly_data[point["data_datetime"].hour].append(point)
+
+        for point in anomaly_data:
+            if time_series_freq in ("d", "D", "daily", "Daily"):
+                intended_point = self._find_point(point, prev_day_data)
+            elif time_series_freq in ("h", "H", "hourly", "Hourly"):
+                hour_val = point["data_datetime"].hour
+                intended_point = self._find_point(point, hourly_data.get(hour_val, []))
+            
+            if intended_point is None:
+                # previous point wasn't found
+                point["percentage_change"] = "–"
+            elif point["y"] == 0 and intended_point["y"] == point["y"]:
+                # previous data was same as current
+                point["percentage_change"] = "–"
+            elif intended_point["y"] == 0:
+                # previous point was 0
+                sign_ = "+" if point["y"] > 0 else "-"
+                point["percentage_change"] = sign_ + "inf"
+            else:
+                point["percentage_change"] = find_percentage_change(
+                    point["y"], intended_point["y"]
+                )
+
+            point["nl_message"] = change_message_from_percent(
+                point["percentage_change"]
+            )
 
     def format_alert_data(self, data: List[dict]):
         """Pre-processes anomaly alert data."""
-        self.save_nl_message(data)
+        self._save_nl_message(data)
 
         for anomaly_point in data:
             lower = anomaly_point.get("yhat_lower")

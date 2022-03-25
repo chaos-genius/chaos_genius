@@ -50,10 +50,10 @@ def kpi_anomaly_detection(kpi_id):
             current_app.logger.info(f"No Anomaly Data Found for KPI ID: {kpi_id}")
             return jsonify(
                 {
-                    "data": "",
+                    "data": None,
                     "msg": "",
-                    "anomaly_end_date": "",
-                    "last_run_time_anomaly": "",
+                    "anomaly_end_date": None,
+                    "last_run_time_anomaly": None,
                 }
             )
 

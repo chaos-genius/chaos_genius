@@ -9,6 +9,8 @@ import click
 from flask.cli import with_appcontext
 
 from chaos_genius.settings import AIRBYTE_ENABLED
+from chaos_genius.utils.utils import time_my_func
+
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.join(HERE, os.pardir)
@@ -129,6 +131,7 @@ def run_rca(kpi, end_date):
 @with_appcontext
 @click.option('--id', required=True, type=int, help="Fetch the metadata of provided data source.")
 @click.option('--first', is_flag=True, default=False, help="Fetching for the first time.")
+@time_my_func
 def fetch_metadata(id, first):
     """Fetch the metadata of the given data source."""
 

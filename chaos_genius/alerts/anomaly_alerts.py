@@ -121,24 +121,8 @@ class AnomalyAlertController:
         if alert_data is None:
             return outcome
 
-        alert_metadata = {
-            "alert_frequency": self.alert_info["alert_frequency"],
-            "alert_data": alert_data,
-            "end_date": self.anomaly_end_date.strftime(ALERT_DATETIME_FORMAT),
-            "severity_cutoff_score": self.alert_info["severity_cutoff_score"],
-            "kpi": self.alert_info["kpi"],
-        }
+        self._save_triggered_alerts(outcome, alert_data)
 
-        triggered_alert = TriggeredAlerts(
-            alert_conf_id=self.alert_info["id"],
-            alert_type="KPI Alert",
-            is_sent=outcome,
-            created_at=datetime.datetime.now(),
-            alert_metadata=alert_metadata,
-        )
-
-        triggered_alert.update(commit=True)
-        logger.info("The triggered alert data was successfully stored")
         return outcome
 
     def _get_anomalies(
@@ -206,6 +190,27 @@ class AnomalyAlertController:
             last_alerted=self.now,
             last_anomaly_timestamp=self.latest_anomaly_timestamp,
         )
+
+    def _save_triggered_alerts(self, outcome: bool, alert_data: List[dict]):
+        """Saves data for alert(which has been sent) in the triggered alerts table."""
+        alert_metadata = {
+            "alert_frequency": self.alert_info["alert_frequency"],
+            "alert_data": alert_data,
+            "end_date": self.anomaly_end_date.strftime(ALERT_DATETIME_FORMAT),
+            "severity_cutoff_score": self.alert_info["severity_cutoff_score"],
+            "kpi": self.alert_info["kpi"],
+        }
+
+        triggered_alert = TriggeredAlerts(
+            alert_conf_id=self.alert_info["id"],
+            alert_type="KPI Alert",
+            is_sent=outcome,
+            created_at=datetime.datetime.now(),
+            alert_metadata=alert_metadata,
+        )
+
+        triggered_alert.update(commit=True)
+        logger.info("The triggered alert data was successfully stored")
 
     def get_overall_subdim_data(self, anomaly_data):
 

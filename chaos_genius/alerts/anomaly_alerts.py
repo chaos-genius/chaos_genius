@@ -1,13 +1,11 @@
 import datetime
 import io
 import logging
-import os
 import time
 from copy import deepcopy
 from typing import List, Optional
 
 import pandas as pd
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from chaos_genius.alerts.constants import (
     ALERT_DATETIME_FORMAT,
@@ -18,7 +16,6 @@ from chaos_genius.alerts.constants import (
     IGNORE_COLUMNS_ANOMALY_TABLE,
     OVERALL_KPI_SERIES_TYPE_REPR,
 )
-from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.alerts.slack import anomaly_alert_slack
 from chaos_genius.alerts.utils import (
     AlertException,
@@ -27,6 +24,7 @@ from chaos_genius.alerts.utils import (
     find_percentage_change,
     format_anomaly_points,
     save_anomaly_point_formatting,
+    send_email_using_template,
     top_anomalies,
     webapp_url_prefix,
 )
@@ -426,11 +424,12 @@ class AnomalyAlertController:
                 top_anomalies_ = top_anomalies(points, 5)
                 overall_count, subdim_count = count_anomalies(points)
 
-                test = self.send_template_email(
+                test = send_email_using_template(
                     "email_alert.html",
                     recipient_emails,
                     subject,
                     files,
+                    self.alert_info,
                     column_names=column_names,
                     top_anomalies=top_anomalies_,
                     alert_message=alert_message,
@@ -444,6 +443,16 @@ class AnomalyAlertController:
                     subdim_count=subdim_count,
                     str=str,
                 )
+
+                if test is True:
+                    logger.info(
+                        f"The email for Alert ID - {self.alert_info['id']} was successfully sent"
+                    )
+                else:
+                    logger.info(
+                        f"The email for Alert ID - {self.alert_info['id']} has not been sent"
+                    )
+
                 logger.info(f"Status for Alert ID - {self.alert_info['id']} : {test}")
             # self.remove_attributes_from_anomaly_data(overall_data, ["nl_message"])
             # TODO: fix this circular import
@@ -458,28 +467,6 @@ class AnomalyAlertController:
                 f"No receipent email available (Alert ID - {self.alert_info['id']})"
             )
             return False, None
-
-    def send_template_email(self, template, recipient_emails, subject, files, **kwargs):
-        """Sends an email using a template."""
-        path = os.path.join(os.path.dirname(__file__), "email_templates")
-        env = Environment(
-            loader=FileSystemLoader(path), autoescape=select_autoescape(["html", "xml"])
-        )
-
-        template = env.get_template(template)
-        test = send_static_alert_email(
-            recipient_emails, subject, template.render(**kwargs), self.alert_info, files
-        )
-        if test == True:
-            logger.info(
-                f"The email for Alert ID - {self.alert_info['id']} was successfully sent"
-            )
-        else:
-            logger.info(
-                f"The email for Alert ID - {self.alert_info['id']} has not been sent"
-            )
-
-        return test
 
     def send_slack_alert(self, anomaly_data):
         kpi_id = self.alert_info["kpi"]

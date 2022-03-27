@@ -2,7 +2,10 @@
 
 import datetime
 import heapq
+import os
 from typing import Dict, List, Tuple, Union
+
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from chaos_genius.alerts.constants import (
     ALERT_DATETIME_FORMAT,
@@ -11,6 +14,7 @@ from chaos_genius.alerts.constants import (
     ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS,
     OVERALL_KPI_SERIES_TYPE_REPR,
 )
+from chaos_genius.alerts.email import send_static_alert_email
 from chaos_genius.core.rca.rca_utils.string_helpers import (
     convert_query_string_to_user_string,
 )
@@ -143,3 +147,25 @@ def find_percentage_change(
         change = curr_val - prev_val
         percentage_change = (change / prev_val) * 100
         return round_number(percentage_change)
+
+
+def send_email_using_template(
+    template: str,
+    recipient_emails: List[str],
+    subject: str,
+    files: List[dict],
+    alert_info: dict,
+    **kwargs,
+):
+    """Sends an email using a template."""
+    path = os.path.join(os.path.dirname(__file__), "email_templates")
+    env = Environment(
+        loader=FileSystemLoader(path), autoescape=select_autoescape(["html", "xml"])
+    )
+
+    template = env.get_template(template)
+    test = send_static_alert_email(
+        recipient_emails, subject, template.render(**kwargs), alert_info, files
+    )
+
+    return test

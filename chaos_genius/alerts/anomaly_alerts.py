@@ -141,7 +141,12 @@ class AnomalyAlertController:
         logger.info("The triggered alert data was successfully stored")
         return outcome
 
-    def _get_anomalies(self) -> List[AnomalyDataOutput]:
+    def _get_anomalies(
+        self,
+        time_diff: datetime = None,
+        anomalies_only: bool = True,
+        include_severity_cutoff: bool = True,
+    ) -> List[AnomalyDataOutput]:
         last_anomaly_timestamp: Optional[datetime.datetime] = self.alert_info[
             "last_anomaly_timestamp"
         ]
@@ -150,12 +155,27 @@ class AnomalyAlertController:
             # when last_anomaly_timestamp is available
             #   get data after last_anomaly_timestamp
             start_timestamp = last_anomaly_timestamp
+            if time_diff:
+                start_timestamp = start_timestamp - time_diff
             include_start_timestamp = False
         else:
             # when last_anomaly_timestamp is not available
             #   get data of the last timestamp in anomaly table
             start_timestamp = self.latest_anomaly_timestamp
+            if time_diff:
+                start_timestamp = start_timestamp - time_diff
             include_start_timestamp = True
+
+        end_timestamp = self.latest_anomaly_timestamp
+        if time_diff:
+            end_timestamp = end_timestamp - time_diff
+        include_end_timestamp = True
+
+        severity_cutoff = (
+            self.alert_info["severity_cutoff_score"]
+            if include_severity_cutoff
+            else None
+        )
 
         logger.info(
             f"Checking for anomalies for (KPI: {self.kpi_id}, Alert: "
@@ -167,14 +187,14 @@ class AnomalyAlertController:
         anomaly_data = get_anomaly_data(
             [self.kpi_id],
             anomaly_types=["subdim", "overall"],
-            anomalies_only=True,
+            anomalies_only=anomalies_only,
             start_timestamp=start_timestamp,
             include_start_timestamp=include_start_timestamp,
             # only get anomaly data till latest timestamp
             #   (ignore newer data added after alert started)
-            end_timestamp=self.latest_anomaly_timestamp,
-            include_end_timestamp=True,
-            severity_cutoff=self.alert_info["severity_cutoff_score"],
+            end_timestamp=end_timestamp,
+            include_end_timestamp=include_end_timestamp,
+            severity_cutoff=severity_cutoff,
         )
 
         return anomaly_data
@@ -239,45 +259,29 @@ class AnomalyAlertController:
 
     def _save_nl_message(self, anomaly_data: List[dict]):
         """Constructs and saves change message for every point."""
-        
         kpi = Kpi.get_by_id(self.kpi_id)
         if kpi is None:
             for point in anomaly_data:
                 point["nl_message"] = "KPI does not exist"
+
+            logger.info(f"KPI ID - {self.kpi_id} does not exist")
+
             return
 
         time_series_freq = kpi.anomaly_params.get("frequency")
-        if time_series_freq is None or time_series_freq not in ("d", "D", "Daily", "daily", "h", "H", "hourly", "Hourly"):
+        if time_series_freq is None or time_series_freq not in ("D", "H"):
             for point in anomaly_data:
-                point["nl_message"] = "Time series frequency does not exist"
+                point["nl_message"] = "Time series frequency not found or invalid"
+
+            logger.info(
+                f"Time series frequency not found or invalid for Alert {self.alert_id}"
+            )
             return
 
         time_diff = datetime.timedelta(days=1, hours=0, minutes=0)
 
-        last_anomaly_timestamp: Optional[datetime.datetime] = self.alert_info[
-            "last_anomaly_timestamp"
-        ]
-
-        if last_anomaly_timestamp is not None:
-            # when last_anomaly_timestamp is available
-            #   get data after last_anomaly_timestamp
-            start_timestamp = last_anomaly_timestamp - time_diff
-            include_start_timestamp = False
-        else:
-            # when last_anomaly_timestamp is not available
-            #   get data of the last timestamp in anomaly table
-            start_timestamp = self.latest_anomaly_timestamp - time_diff
-            include_start_timestamp = True
-
-        prev_day_data = get_anomaly_data(
-            [self.kpi_id],
-            anomaly_types=["subdim", "overall"],
-            start_timestamp=start_timestamp,
-            include_start_timestamp=include_start_timestamp,
-            # only get anomaly data till latest timestamp
-            #   (ignore newer data added after alert started)
-            end_timestamp=self.latest_anomaly_timestamp - time_diff,
-            include_end_timestamp=True,
+        prev_day_data = self._get_anomalies(
+            time_diff=time_diff, anomalies_only=False, include_severity_cutoff=False
         )
 
         prev_day_data = [anomaly_point.as_dict for anomaly_point in prev_day_data]
@@ -291,33 +295,22 @@ class AnomalyAlertController:
                 point["series_type"] = OVERALL_KPI_SERIES_TYPE_REPR
 
         hourly_data = dict()
-        if time_series_freq in ("h", "H", "hourly", "Hourly"):
+        if time_series_freq == "H":
             for point in prev_day_data:
                 if point["data_datetime"].hour not in hourly_data.keys():
                     hourly_data[point["data_datetime"].hour] = []
                 hourly_data[point["data_datetime"].hour].append(point)
 
         for point in anomaly_data:
-            if time_series_freq in ("d", "D", "daily", "Daily"):
+            if time_series_freq == "D":
                 intended_point = self._find_point(point, prev_day_data)
-            elif time_series_freq in ("h", "H", "hourly", "Hourly"):
+            else:
                 hour_val = point["data_datetime"].hour
                 intended_point = self._find_point(point, hourly_data.get(hour_val, []))
-            
-            if intended_point is None:
-                # previous point wasn't found
-                point["percentage_change"] = "–"
-            elif point["y"] == 0 and intended_point["y"] == point["y"]:
-                # previous data was same as current
-                point["percentage_change"] = "–"
-            elif intended_point["y"] == 0:
-                # previous point was 0
-                sign_ = "+" if point["y"] > 0 else "-"
-                point["percentage_change"] = sign_ + "inf"
-            else:
-                point["percentage_change"] = find_percentage_change(
-                    point["y"], intended_point["y"]
-                )
+
+            point["percentage_change"] = find_percentage_change(
+                point["y"], intended_point["y"] if intended_point else None
+            )
 
             point["nl_message"] = change_message_from_percent(
                 point["percentage_change"]

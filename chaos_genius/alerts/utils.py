@@ -129,8 +129,17 @@ def find_percentage_change(
     curr_val: Union[int, float], prev_val: Union[int, float]
 ) -> Union[int, float, str]:
     """Calculates percentage change between previous and current value."""
-    if prev_val == 0:
-        return "-"
-    change = curr_val - prev_val
-    percentage_change = (change / prev_val) * 100
-    return round_number(percentage_change)
+    if prev_val is None:
+        # previous point wasn't found
+        return "–"
+    elif curr_val == 0 and prev_val == curr_val:
+        # previous data was same as current
+        return "–"
+    elif prev_val == 0:
+        # previous point was 0
+        sign_ = "+" if curr_val > 0 else "-"
+        return sign_ + "inf"
+    else:
+        change = curr_val - prev_val
+        percentage_change = (change / prev_val) * 100
+        return round_number(percentage_change)

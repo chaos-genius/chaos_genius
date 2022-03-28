@@ -6,6 +6,8 @@ from copy import deepcopy
 from typing import List, Optional
 
 import pandas as pd
+from pydantic import validator
+from pydantic.dataclasses import dataclass
 
 from chaos_genius.alerts.constants import (
     ALERT_DATETIME_FORMAT,
@@ -43,7 +45,60 @@ from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class AnomalyPointOriginal:
+    """Representation of a point of anomaly data as received from raw anomaly data."""
+
+    y: float
+    yhat_lower: float
+    yhat_upper: float
+    anomaly: int
+    severity: float
+
+    anomaly_type: str
+    series_type: str
+
+    created_at: datetime.datetime
+    data_datetime: datetime.datetime
+
+    @property
+    def expected_value(self) -> str:
+        """Expected values represented in a string."""
+        return f"{self.yhat_lower} to {self.yhat_upper}"
+
+    @property
+    def readable_data_timestamp(self) -> str:
+        """Date timestmap as a readable string.
+
+        Also known as Time of Occurrence.
+        """
+        return self.data_datetime.strftime("%b %d %Y %H:%M:%S")
+
+    # -- pydantic specific configuration starts here --
+
+    # use custom datetime format
+    _normalize_datetimes = validator("created_at", "data_datetime", allow_reuse=True)(
+        lambda dt: datetime.datetime.strptime(dt, ALERT_DATETIME_FORMAT)
+    )
+
+    class Config:
+        """Custom pydantic configuration."""
+        json_encoders = {
+            # custom datetime format for JSON conversion
+            datetime: lambda dt: dt.strftime(ALERT_DATETIME_FORMAT),
+        }
+
+
+@dataclass
+class AnomalyPoint(AnomalyPointOriginal):
+    """Representation of a point of anomaly data as used in alerting."""
+
+    severity: int
+    percent_change: str
+    change_message: str
 
 
 class AnomalyAlertController:

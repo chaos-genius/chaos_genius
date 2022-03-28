@@ -16,25 +16,6 @@ from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from typing import Iterator
 
 
-def structure_anomaly_data_for_digests(anomaly_data):
-
-    data = dict()
-    for point in anomaly_data:
-        dt_obj = datetime.datetime.strptime(point["data_datetime"], ALERT_DATETIME_FORMAT)
-        if dt_obj.hour not in data.keys():
-            data[dt_obj.hour] = []
-        data[dt_obj.hour].append(point)
-
-    segregated_data = list(data.items())
-    segregated_data.sort(key=lambda arr: arr[0], reverse=True)
-
-    anomaly_data_formatted = []
-    for _, arr in segregated_data:
-        arr.sort(key=lambda point: point["severity"], reverse=True)
-        anomaly_data_formatted.extend(arr)
-
-    return anomaly_data_formatted
-
 def get_alert_kpi_configurations(data):
 
     alert_config_cache = dict()

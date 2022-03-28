@@ -150,7 +150,7 @@ def find_percentage_change(
 
 
 def send_email_using_template(
-    template: str,
+    template_name: str,
     recipient_emails: List[str],
     subject: str,
     files: List[dict],
@@ -163,7 +163,7 @@ def send_email_using_template(
         loader=FileSystemLoader(path), autoescape=select_autoescape(["html", "xml"])
     )
 
-    template = env.get_template(template)
+    template = env.get_template(template_name)
     test = send_static_alert_email(
         recipient_emails, subject, template.render(**kwargs), alert_info, files
     )

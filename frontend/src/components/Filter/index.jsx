@@ -210,7 +210,7 @@ const DataSourceFilter = ({
             {dashboard && dashboard.length !== 0 ? (
               dashboard.map((item) => {
                 return (
-                  <div className="form-check check-box">
+                  <div className="form-check check-box" key={item?.id}>
                     <input
                       className="form-check-input"
                       name={item.name}
@@ -242,7 +242,7 @@ const DataSourceFilter = ({
           datasourceType.length !== 0 ? (
             datasourceType.map((type) => {
               return (
-                <div className="form-check check-box">
+                <div className="form-check check-box" key={type?.id}>
                   <input
                     className="form-check-input"
                     type="checkbox"

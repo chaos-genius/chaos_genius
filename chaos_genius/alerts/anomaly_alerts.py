@@ -210,9 +210,11 @@ class AnomalyAlertController:
         triggered_alert.update(commit=True)
         logger.info("The triggered alert data was successfully stored")
 
-    def get_overall_subdim_data(self, anomaly_data):
+    def _get_formatted_anomaly_data(self, anomaly_data):
 
-        anomaly_data = [anomaly_point.as_dict for anomaly_point in anomaly_data]
+        anomaly_data = deepcopy(
+            [anomaly_point.as_dict for anomaly_point in anomaly_data]
+        )
         anomaly_data = [
             {
                 key: value
@@ -236,20 +238,7 @@ class AnomalyAlertController:
                     anomaly_point["series_type"]
                 )
 
-        overall_data = [
-            anomaly_point
-            for anomaly_point in anomaly_data
-            if anomaly_point.get("anomaly_type") == "overall"
-        ]
-        subdim_data = [
-            anomaly_point
-            for anomaly_point in anomaly_data
-            if anomaly_point.get("anomaly_type") == "subdim"
-        ]
-        overall_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
-        subdim_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
-
-        return overall_data, subdim_data
+        return anomaly_data
 
     def _find_point(self, point, prev_data):
         """Finds same type of point in previous data."""
@@ -365,7 +354,7 @@ class AnomalyAlertController:
             logger.info(
                 f"The alert channel configuration is incorrect for Alert ID - {self.alert_info['id']}"
             )
-            return False
+            return False, None
 
         recipient_emails = alert_channel_conf.get("email", [])
 
@@ -378,34 +367,21 @@ class AnomalyAlertController:
 
             if kpi_obj is None:
                 logger.error(f"No KPI exists for Alert ID - {self.alert_info['id']}")
-                return False
+                return False, None
 
             kpi_name = getattr(kpi_obj, "name")
 
-            overall_data, subdim_data = self.get_overall_subdim_data(anomaly_data)
-
-            overall_data_email_body = (
-                deepcopy([overall_data[0]]) if len(overall_data) > 0 else []
-            )
-            len_subdim = min(10, len(subdim_data))
-            subdim_data_email_body = (
-                deepcopy(subdim_data[0:len_subdim]) if len(subdim_data) > 0 else []
-            )
-
-            overall_data.extend(subdim_data)
-            overall_data_email_body.extend(subdim_data_email_body)
-
-            self.format_alert_data(overall_data)
-            self.format_alert_data(overall_data_email_body)
+            formatted_anomaly_data = self._get_formatted_anomaly_data(anomaly_data)
+            self.format_alert_data(formatted_anomaly_data)
 
             column_names = ANOMALY_ALERT_COLUMN_NAMES
-            overall_data_ = pd.DataFrame(overall_data, columns=column_names)
+            anomaly_data_df = pd.DataFrame(formatted_anomaly_data, columns=column_names)
             files = []
-            if not overall_data_.empty:
+            if not anomaly_data_df.empty:
                 file_detail = {}
                 file_detail["fname"] = "data.csv"
                 with io.StringIO() as buffer:
-                    overall_data_.to_csv(buffer, encoding="utf-8")
+                    anomaly_data_df.to_csv(buffer, encoding="utf-8")
                     file_detail["fdata"] = buffer.getvalue()
                 files = [file_detail]
 
@@ -460,8 +436,8 @@ class AnomalyAlertController:
                 structure_anomaly_data_for_digests,
             )
 
-            anomaly_data = structure_anomaly_data_for_digests(overall_data)
-            return False, anomaly_data
+            anomaly_data = structure_anomaly_data_for_digests(formatted_anomaly_data)
+            return True, anomaly_data
         else:
             logger.info(
                 f"No receipent email available (Alert ID - {self.alert_info['id']})"
@@ -480,21 +456,8 @@ class AnomalyAlertController:
         alert_name = self.alert_info.get("alert_name")
         alert_message = self.alert_info["alert_message"]
 
-        overall_data, subdim_data = self.get_overall_subdim_data(anomaly_data)
-
-        overall_data_alert_body = (
-            deepcopy([overall_data[0]]) if len(overall_data) > 0 else []
-        )
-        len_subdim = min(5, len(subdim_data))
-        subdim_data_alert_body = (
-            deepcopy(subdim_data[0:len_subdim]) if len(subdim_data) > 0 else []
-        )
-
-        overall_data.extend(subdim_data)
-        overall_data_alert_body.extend(subdim_data_alert_body)
-
-        self.format_alert_data(overall_data)
-        self.format_alert_data(overall_data_alert_body)
+        formatted_anomaly_data = self._get_formatted_anomaly_data(anomaly_data)
+        self.format_alert_data(formatted_anomaly_data)
 
         daily_digest = self.alert_info.get("daily_digest", False)
         weekly_digest = self.alert_info.get("weekly_digest", False)
@@ -537,5 +500,5 @@ class AnomalyAlertController:
             structure_anomaly_data_for_digests,
         )
 
-        anomaly_data = structure_anomaly_data_for_digests(overall_data)
+        anomaly_data = structure_anomaly_data_for_digests(formatted_anomaly_data)
         return test, anomaly_data

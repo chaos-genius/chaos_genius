@@ -229,7 +229,7 @@ def get_last_anomaly_timestamp(
         return results.data_datetime
 
 
-def get_kpi_obj(
+def get_active_kpi_from_id(
     kpi_id: int
 ) -> Optional[Kpi]:
     """Returns a kpi obj for an active Kpi using the input kpi id."""

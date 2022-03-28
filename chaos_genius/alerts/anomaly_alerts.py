@@ -33,7 +33,7 @@ from chaos_genius.alerts.utils import (
 from chaos_genius.controllers.kpi_controller import (
     get_anomaly_data,
     get_last_anomaly_timestamp,
-    get_kpi_obj,
+    get_active_kpi_from_id,
 )
 
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
@@ -308,7 +308,7 @@ class AnomalyAlertController:
 
     def _save_nl_message(self, anomaly_data: List[dict]):
         """Constructs and saves change message for every point."""
-        kpi = get_kpi_obj(self.kpi_id)
+        kpi = get_active_kpi_from_id(self.kpi_id)
         if kpi is None:
             for point in anomaly_data:
                 point["nl_message"] = "KPI does not exist"
@@ -419,7 +419,7 @@ class AnomalyAlertController:
             subject = f"{self.alert_info['alert_name']} - Chaos Genius Alert ({self.now.strftime('%b %d')})❗"
             alert_message = self.alert_info["alert_message"]
 
-            kpi_obj = get_kpi_obj(self.kpi_id)
+            kpi_obj = get_active_kpi_from_id(self.kpi_id)
 
             if kpi_obj is None:
                 logger.error(f"No KPI exists for Alert ID - {self.alert_info['id']}")
@@ -501,7 +501,7 @@ class AnomalyAlertController:
             return False, None
 
     def send_slack_alert(self, anomaly_data):
-        kpi_obj = get_kpi_obj(self.kpi_id)
+        kpi_obj = get_active_kpi_from_id(self.kpi_id)
 
         if kpi_obj is None:
             logger.info(f"No KPI exists for Alert ID - {self.alert_info['id']}")

@@ -3,6 +3,7 @@ import Down from '../../assets/images/tipsdown.svg';
 import Up from '../../assets/images/tipsup.svg';
 import '../../assets/styles/table.scss';
 import Tooltip from 'react-tooltip-lite';
+import { v4 as uuidv4 } from 'uuid';
 
 const Dashboardname = ({ data }) => {
   const [show, setShow] = useState(2);
@@ -12,7 +13,7 @@ const Dashboardname = ({ data }) => {
       {data &&
         data.length !== 0 &&
         data.slice(0, show).map((dashboard, index) => (
-          <li>
+          <li key={uuidv4()}>
             <label className="name-tooltip">
               <Tooltip
                 className="tooltip-name"

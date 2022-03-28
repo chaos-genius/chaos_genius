@@ -1,8 +1,7 @@
 import logging
 import typing
 from datetime import date, datetime, timedelta
-from typing import Optional, Union, Iterator, List
-from xmlrpc.client import Boolean
+from typing import Iterator, List, Optional, Union
 
 from flask import current_app  # noqa: F401
 
@@ -10,22 +9,14 @@ from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint
 from chaos_genius.core.anomaly.controller import AnomalyDetectionController
 from chaos_genius.core.rca.rca_controller import RootCauseAnalysisController
 from chaos_genius.core.utils.data_loader import DataLoader
-from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
-
-from chaos_genius.settings import (
-    MAX_DEEPDRILLS_SLACK_DAYS,
-    DAYS_OFFSET_FOR_ANALTYICS,
-)
-
+from chaos_genius.databases.models.kpi_model import Kpi
+from chaos_genius.settings import DAYS_OFFSET_FOR_ANALTYICS, MAX_DEEPDRILLS_SLACK_DAYS
 
 logger = logging.getLogger(__name__)
 
 
-def _is_data_present_for_end_date(
-    kpi_info: dict,
-    end_date: date = None
-) -> bool:
+def _is_data_present_for_end_date(kpi_info: dict, end_date: date = None) -> bool:
     df_count = DataLoader(kpi_info, end_date=end_date, days_before=0).get_count()
     return df_count != 0
 
@@ -51,9 +42,7 @@ def get_kpi_data_from_id(n: int) -> dict:
 
 
 def run_anomaly_for_kpi(
-    kpi_id: int,
-    end_date: date = None,
-    task_id: Optional[int] = None
+    kpi_id: int, end_date: date = None, task_id: Optional[int] = None
 ) -> Union["typing.Literal[False]", date]:
 
     try:
@@ -63,15 +52,23 @@ def run_anomaly_for_kpi(
 
         logger.info("Selecting end date.")
 
-        if end_date is None and kpi_info["scheduler_params"]["scheduler_frequency"] == "D":
+        if (
+            end_date is None
+            and kpi_info["scheduler_params"]["scheduler_frequency"] == "D"
+        ):
             # by default we always calculate for n-days_offset_for_analytics
-            end_date = datetime.today().date() - timedelta(days=(DAYS_OFFSET_FOR_ANALTYICS))
+            end_date = datetime.today().date() - timedelta(
+                days=(DAYS_OFFSET_FOR_ANALTYICS)
+            )
             # Check if data is available or not then try for n-days_offset_for_analytics-1
             if not _is_data_present_for_end_date(kpi_info, end_date):
                 end_date = end_date - timedelta(days=1)
                 logger.info("Decreasing end date by 1.")
 
-        elif end_date is None and kpi_info["scheduler_params"]["scheduler_frequency"] == "H":
+        elif (
+            end_date is None
+            and kpi_info["scheduler_params"]["scheduler_frequency"] == "H"
+        ):
             end_date = datetime.today().date()
 
         logger.info(f"End date is {end_date}.")
@@ -79,14 +76,15 @@ def run_anomaly_for_kpi(
         adc = AnomalyDetectionController(kpi_info, end_date, task_id=task_id)
         adc.detect()
         logger.info(f"Anomaly Detection has completed for KPI ID: {kpi_id}.")
-        
+
         if kpi_info["scheduler_params"]["scheduler_frequency"] == "H":
             end_date = adc.end_date
             logger.info(f"End date for hourly alerts is {end_date}.")
 
     except Exception:  # noqa: B902
         logger.error(
-            f"Anomaly Detection encountered an error for KPI ID: {kpi_id}", exc_info=True
+            f"Anomaly Detection encountered an error for KPI ID: {kpi_id}",
+            exc_info=True,
         )
         return False
 
@@ -104,12 +102,16 @@ def _get_end_date_for_rca_kpi(kpi_info: dict, end_date: date = None) -> date:
         end_date = end_date - timedelta(days=1)
         count += 1
         if count > MAX_DEEPDRILLS_SLACK_DAYS:
-            raise ValueError(f"KPI has no data for the last {MAX_DEEPDRILLS_SLACK_DAYS} days.")
+            raise ValueError(
+                f"KPI has no data for the last {MAX_DEEPDRILLS_SLACK_DAYS} days."
+            )
 
     return end_date
 
 
-def run_rca_for_kpi(kpi_id: int, end_date: date = None, task_id: Optional[int] = None) -> bool:
+def run_rca_for_kpi(
+    kpi_id: int, end_date: date = None, task_id: Optional[int] = None
+) -> bool:
     try:
         logger.info(f"Starting RCA for KPI ID: {kpi_id}.")
         kpi_info = get_kpi_data_from_id(kpi_id)
@@ -133,11 +135,13 @@ def run_rca_for_kpi(kpi_id: int, end_date: date = None, task_id: Optional[int] =
                 )
             logger.error(
                 f"(Task: {task_id}, KPI: {kpi_id}) DeepDrills - Data Loader and Validation - Exception occured.",
-                exc_info=e
+                exc_info=e,
             )
             return False
 
-        rca_controller = RootCauseAnalysisController(kpi_info, end_date, task_id=task_id)
+        rca_controller = RootCauseAnalysisController(
+            kpi_info, end_date, task_id=task_id
+        )
         rca_controller.compute()
         logger.info(f"Completed RCA for KPI ID: {kpi_id}.")
 
@@ -177,7 +181,7 @@ def get_anomaly_data(
     include_start_timestamp: bool = True,
     end_timestamp: datetime = None,
     include_end_timestamp: bool = True,
-    severity_cutoff: float = None
+    severity_cutoff: float = None,
 ) -> List[AnomalyDataOutput]:
     """Returns list of anomaly points using paramters to filter the output."""
     filters = []
@@ -229,15 +233,12 @@ def get_last_anomaly_timestamp(
         return results.data_datetime
 
 
-def get_active_kpi_from_id(
-    kpi_id: int
-) -> Optional[Kpi]:
+def get_active_kpi_from_id(kpi_id: int) -> Optional[Kpi]:
     """Returns a kpi obj for an active Kpi using the input kpi id."""
-    kpi_obj = Kpi.query.filter(
-        Kpi.active is True, Kpi.id == kpi_id
-    ).first()
+    kpi_obj = Kpi.query.filter(Kpi.active is True, Kpi.id == kpi_id).first()
 
     return kpi_obj
+
 
 # def delete_data(kpi, query):
 #     db.session.execute(query)

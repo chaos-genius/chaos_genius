@@ -137,7 +137,7 @@ def find_percentage_change(
         # previous point wasn't found
         return "–"
     elif curr_val == 0 and prev_val == curr_val:
-        # previous data was same as current
+        # previous data is same as current and both of them are 0
         return "–"
     elif prev_val == 0:
         # previous point was 0

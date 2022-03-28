@@ -42,7 +42,6 @@ from chaos_genius.core.rca.rca_utils.string_helpers import (
 )
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
-from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
 
 logger = logging.getLogger(__name__)
@@ -181,7 +180,7 @@ class AnomalyAlertController:
 
     def _get_anomalies(
         self,
-        time_diff: datetime = None,
+        time_diff: datetime.timedelta = datetime.timedelta(),
         anomalies_only: bool = True,
         include_severity_cutoff: bool = True,
     ) -> List[AnomalyDataOutput]:
@@ -192,21 +191,15 @@ class AnomalyAlertController:
         if last_anomaly_timestamp is not None:
             # when last_anomaly_timestamp is available
             #   get data after last_anomaly_timestamp
-            start_timestamp = last_anomaly_timestamp
-            if time_diff:
-                start_timestamp = start_timestamp - time_diff
+            start_timestamp = last_anomaly_timestamp - time_diff
             include_start_timestamp = False
         else:
             # when last_anomaly_timestamp is not available
             #   get data of the last timestamp in anomaly table
-            start_timestamp = self.latest_anomaly_timestamp
-            if time_diff:
-                start_timestamp = start_timestamp - time_diff
+            start_timestamp = self.latest_anomaly_timestamp - time_diff
             include_start_timestamp = True
 
-        end_timestamp = self.latest_anomaly_timestamp
-        if time_diff:
-            end_timestamp = end_timestamp - time_diff
+        end_timestamp = self.latest_anomaly_timestamp - time_diff
         include_end_timestamp = True
 
         severity_cutoff = (
@@ -313,7 +306,7 @@ class AnomalyAlertController:
             for point in anomaly_data:
                 point["nl_message"] = "KPI does not exist"
 
-            logger.info(f"KPI ID - {self.kpi_id} does not exist")
+            logger.warn(f"(KPI: {self.kpi_id}, Alert: {self.alert_id}) KPI does not exist")
 
             return
 
@@ -322,8 +315,8 @@ class AnomalyAlertController:
             for point in anomaly_data:
                 point["nl_message"] = "Time series frequency not found or invalid"
 
-            logger.info(
-                f"Time series frequency not found or invalid for Alert {self.alert_id}"
+            logger.warn(
+                f"(KPI: {self.kpi_id}, Alert: {self.alert_id}) Time series frequency not found or invalid."
             )
             return
 
@@ -353,9 +346,11 @@ class AnomalyAlertController:
         for point in anomaly_data:
             if time_series_freq == "D":
                 intended_point = self._find_point(point, prev_day_data)
-            else:
+            elif time_series_freq == "H":
                 hour_val = point["data_datetime"].hour
                 intended_point = self._find_point(point, hourly_data.get(hour_val, []))
+            else:
+                raise Exception(f"(KPI: {self.kpi_id}, Alert: {self.alert_id}) Time series frequency not found or invalid.")
 
             point["percentage_change"] = find_percentage_change(
                 point["y"], intended_point["y"] if intended_point else None

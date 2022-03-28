@@ -3,7 +3,7 @@
 import datetime
 import heapq
 import os
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -27,7 +27,7 @@ class AlertException(Exception):
 
     Stores and prints alert ID and KPI ID.
     """
-    def __init__(self, message: str, alert_id: int, kpi_id: int = None):
+    def __init__(self, message: str, alert_id: int, kpi_id: Optional[int] = None):
         """Initialize a new alert exception.
 
         Args:

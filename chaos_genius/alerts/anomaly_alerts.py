@@ -1,3 +1,4 @@
+"""Controller and helpers for KPI or Anomaly alerts."""
 import datetime
 import heapq
 import io
@@ -14,7 +15,6 @@ from chaos_genius.alerts.constants import (
     ALERT_READABLE_DATE_FORMAT,
     ALERT_READABLE_DATETIME_FORMAT,
     ANOMALY_TABLE_COLUMN_NAMES_MAPPER,
-    FREQUENCY_DICT,
     OVERALL_KPI_SERIES_TYPE_REPR,
 )
 from chaos_genius.alerts.slack import anomaly_alert_slack
@@ -196,7 +196,17 @@ class AnomalyPointFormatted(AnomalyPoint):
 
 
 class AnomalyAlertController:
-    def __init__(self, alert_info: dict, anomaly_end_date=None):
+    """Controller for KPI/anomaly alerts."""
+
+    def __init__(self, alert_info: dict):
+        """Initializes a KPI/anomaly alerts controller.
+
+        Note: an AnomalyAlertController instance must only be used for one check/trigger
+        of an alert. The same object must not be re-used.
+
+        Arguments:
+            alert_info: dict representingalert configuration
+        """
         self.alert_info = alert_info
         self.alert_id: int = self.alert_info["id"]
         self.kpi_id: int = self.alert_info["kpi"]
@@ -212,13 +222,11 @@ class AnomalyAlertController:
         self.latest_anomaly_timestamp = latest_anomaly_timestamp
         logger.info("latest_anomaly_timestamp is %s", latest_anomaly_timestamp)
 
-        if anomaly_end_date:
-            self.anomaly_end_date = anomaly_end_date
-        else:
-            self.anomaly_end_date = self.now - datetime.timedelta(days=3)
+    def check_and_send_alert(self):
+        """Determines anomalies, sends alert and stores alert data.
 
-    def check_and_prepare_alert(self):
-        alert_id = self.alert_info["id"]
+        Note: must only be called once on an instance.
+        """
         alert: Optional[Alert] = Alert.get_by_id(self.alert_info["id"])
         if alert is None:
             raise AlertException(
@@ -227,28 +235,12 @@ class AnomalyAlertController:
                 kpi_id=self.kpi_id,
             )
 
-        check_time = FREQUENCY_DICT[self.alert_info["alert_frequency"]]
-        fuzzy_interval = datetime.timedelta(
-            minutes=30
-        )  # this represents the upper bound of the time interval that an alert can fall short of the check_time hours before which it can be sent again
-        if (
-            alert.last_alerted is not None
-            and alert.last_alerted > (self.now - check_time)
-            and alert.last_alerted > ((self.now + fuzzy_interval) - check_time)
-        ):
-            # this check works in three steps
-            # 1) Verify if the last alerted value of an alert is not None
-            # 2) Verify if less than check_time hours have elapsed since the last alert was sent
-            # 3) If less than check_time hours have elapsed, check if the additonal time to complete check_time hours is greater than fuzzy_interval
-            logger.info(
-                f"Skipping alert with ID {self.alert_info['id']} since it was already run"
-            )
-            return True
-
         anomaly_data = self._get_anomalies()
 
         if len(anomaly_data) == 0:
-            logger.info(f"No anomaly exists (Alert: {alert_id})")
+            logger.info(
+                f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) no anomaly exists."
+            )
             return True
 
         formatted_anomaly_data = self._format_anomaly_data(anomaly_data)
@@ -355,7 +347,6 @@ class AnomalyAlertController:
         alert_metadata = {
             "alert_frequency": self.alert_info["alert_frequency"],
             "alert_data": jsonable_encoder(formatted_anomaly_data),
-            "end_date": self.anomaly_end_date.strftime(ALERT_DATETIME_FORMAT),
             "severity_cutoff_score": self.alert_info["severity_cutoff_score"],
             "kpi": self.alert_info["kpi"],
         }

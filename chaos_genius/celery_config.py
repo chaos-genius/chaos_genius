@@ -2,6 +2,9 @@ from datetime import timedelta
 
 from celery.schedules import crontab, schedule
 
+from chaos_genius.settings import METADATA_SYNC_TIME
+
+
 CELERY_IMPORTS = ("chaos_genius.jobs")
 CELERY_TASK_RESULT_EXPIRES = 30
 CELERY_TIMEZONE = "UTC"
@@ -31,13 +34,20 @@ CELERYBEAT_SCHEDULE = {
         "schedule": crontab(minute="0"),  # Hourly: at 0th minute
         "args": ("hourly",),
     },
+    "metadata-prefetch-daily": {
+        "task": "chaos_genius.jobs.metadata_prefetch.metadata_prefetch_daily_scheduler",
+        "schedule": crontab(hour="3", minute="0"),  # TODO: Set from env
+        "args": ("daily",),
+    }
 }
 
 CELERY_ROUTES = {
     "chaos_genius.jobs.anomaly_tasks.*": {"queue": "anomaly-rca"},
     "chaos_genius.jobs.analytics_scheduler.*": {"queue": "anomaly-rca"},
     "chaos_genius.jobs.alert_tasks.*": {"queue": "alerts"},
+    "chaos_genius.jobs.metadata_prefetch.*": {"queue": "alerts"},
 }
+
 
 # Scheduler runs every hour
 # looks at tasks in last n hour

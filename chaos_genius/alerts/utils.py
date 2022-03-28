@@ -89,9 +89,8 @@ def send_email_using_template(
     recipient_emails: List[str],
     subject: str,
     files: List[dict],
-    alert_info: dict,
     **kwargs,
-):
+) -> None:
     """Sends an email using a template."""
     path = os.path.join(os.path.dirname(__file__), "email_templates")
     env = Environment(
@@ -99,8 +98,6 @@ def send_email_using_template(
     )
 
     template = env.get_template(template_name)
-    test = send_static_alert_email(
-        recipient_emails, subject, template.render(**kwargs), alert_info, files
+    send_static_alert_email(
+        recipient_emails, subject, template.render(**kwargs), files
     )
-
-    return test

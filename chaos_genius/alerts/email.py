@@ -1,8 +1,9 @@
 import smtplib
-import traceback
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import logging
+from typing import List
 
 from chaos_genius.alerts.alert_channel_creds import get_creds
 
@@ -18,6 +19,9 @@ DEBUG = False
 
 TEMPLATE_DIR = "chaos_genius/alerts/templates"
 EMAIL_TEMPLATE_MAPPING = {"STATIC_ALERT": "static_alert.html"}
+
+
+logger = logging.getLogger(__name__)
 
 
 def init_smtp_server():
@@ -58,8 +62,8 @@ def init_smtp_server():
     return server
 
 
-def send_email(recipient_emails, message, count=0):
-    """send the email to the provided recipients
+def send_email(recipient_emails: List[str], message: MIMEMultipart, count=0):
+    """Send the email to the provided recipients.
 
     Args:
         recipient_emails (list): List of emails
@@ -77,15 +81,13 @@ def send_email(recipient_emails, message, count=0):
         server = init_smtp_server()
         server.sendmail(EMAIL_SENDER, toaddr, message.as_string())
         server.quit()
-        print("Email sent to " + ", ".join(toaddr))
+        logger.info("Email sent to " + ", ".join(toaddr))
     except smtplib.SMTPServerDisconnected:
-        print(f"Retry ({count}) for the email")
+        logger.info(f"Retry ({count}) for the email")
         if count < 3:
             send_email(recipient_emails, message, count)
         else:
-            print("Email Sending Failed after max retries")
-    except Exception:
-        print(traceback.format_exc())
+            raise Exception("Email Sending Failed after max retries")
 
 
 def initialize_env_variables():
@@ -106,49 +108,35 @@ def initialize_env_variables():
 
 
 def send_static_alert_email(
-    recipient_emails, subject, messsage_body, alert_info, files=[]
-):
-    """Send the static event alert email with the CSV attachment
+    recipient_emails: List[str], subject: str, messsage_body: str, files=[]
+) -> None:
+    """Send an alert email with the CSV attachment.
 
     Args:
         recipient_emails (list): List of emails
         subject (str): Subject of the email
         messsage_body (str): Main configurable body text
-        alert_info (dict): alert information
-        files (list, optional): List of the files with the file name and file data as base64. Defaults to [].
-
-    Returns:
-        bool: status of the email
+        files (list, optional): List of the files with the file name and file data as
+            base64. Defaults to [].
     """
-    status = False
     initialize_env_variables()
 
-    try:
-        message = MIMEMultipart()
-        message["From"] = EMAIL_SENDER
-        message["To"] = ",".join(recipient_emails)
-        message["Subject"] = subject
+    message = MIMEMultipart()
+    message["From"] = EMAIL_SENDER
+    message["To"] = ",".join(recipient_emails)
+    message["Subject"] = subject
 
-        msgAlternative = MIMEMultipart("alternative")
-        # msgText = MIMEText(parsed_template, 'html')
-        msgText = MIMEText(
-            messsage_body, "html"
-        )  # TODO: To be changed according to use
-        msgAlternative.attach(msgText)
-        message.attach(msgAlternative)
+    msg_alternative = MIMEMultipart("alternative")
+    # msgText = MIMEText(parsed_template, 'html')
+    msg_text = MIMEText(messsage_body, "html")  # TODO: To be changed according to use
+    msg_alternative.attach(msg_text)
+    message.attach(msg_alternative)
 
-        for file_detail in files:
-            fname = file_detail["fname"]
-            fdata = file_detail["fdata"]
-            attachment = MIMEApplication(fdata, fname)
-            attachment["Content-Disposition"] = 'attachment; filename="{}"'.format(
-                fname
-            )
-            message.attach(attachment)
+    for file_detail in files:
+        fname = file_detail["fname"]
+        fdata = file_detail["fdata"]
+        attachment = MIMEApplication(fdata, fname)
+        attachment["Content-Disposition"] = 'attachment; filename="{}"'.format(fname)
+        message.attach(attachment)
 
-        send_email(recipient_emails, message)
-        status = True
-    except Exception as err_msg:
-        print(err_msg)
-
-    return status
+    send_email(recipient_emails, message)

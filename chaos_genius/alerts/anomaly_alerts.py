@@ -160,12 +160,18 @@ class AnomalyPoint(AnomalyPointOriginal):
 class AnomalyPointFormatted(AnomalyPoint):
     """Anomaly point data with formatting used in templates (email, slack, etc)."""
 
+    kpi_id: int
+    kpi_name: str
+
     formatted_date: str
     formatted_change_percent: str
 
     @staticmethod
     def from_point(
-        point: AnomalyPoint, time_series_frequency: Optional[str] = None
+        point: AnomalyPoint,
+        time_series_frequency: Optional[str],
+        kpi_id: int,
+        kpi_name: str,
     ) -> "AnomalyPointFormatted":
         """Constructs a formatted point from an AnomalyPoint."""
         dt_format = ALERT_READABLE_DATETIME_FORMAT
@@ -182,6 +188,8 @@ class AnomalyPointFormatted(AnomalyPoint):
 
         return AnomalyPointFormatted(
             **point.dict(),
+            kpi_id=kpi_id,
+            kpi_name=kpi_name,
             formatted_date=formatted_date,
             formatted_change_percent=str(formatted_change_percent),
         )
@@ -245,20 +253,31 @@ class AnomalyAlertController:
 
         formatted_anomaly_data = self._format_anomaly_data(anomaly_data)
 
-        if self.alert_info["alert_channel"] == "email":
-            status = self._send_email_alert(formatted_anomaly_data)
-        elif self.alert_info["alert_channel"] == "slack":
-            status = self._send_slack_alert(formatted_anomaly_data)
-        else:
-            raise AlertException(
-                f"Unknown alert channel: {self.alert_info['alert_channel']}",
-                alert_id=self.alert_id,
-                kpi_id=self.kpi_id,
-            )
+        status = False
+        try:
+            if self._to_send_individual():
+                if self.alert_info["alert_channel"] == "email":
+                    self._send_email_alert(formatted_anomaly_data)
+                elif self.alert_info["alert_channel"] == "slack":
+                    self._send_slack_alert(formatted_anomaly_data)
+                else:
+                    raise AlertException(
+                        f"Unknown alert channel: {self.alert_info['alert_channel']}",
+                        alert_id=self.alert_id,
+                        kpi_id=self.kpi_id,
+                    )
+            else:
+                logger.info(
+                    f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) not sending "
+                    "alert as it was configured to be a digest."
+                )
 
-        self._update_alert_metadata(alert)
+            # TODO: last_anomaly_timestamp can be updated even if no anomaly exists.
+            self._update_alert_metadata(alert)
 
-        self._save_triggered_alerts(status, formatted_anomaly_data)
+            status = True
+        finally:
+            self._save_triggered_alerts(status, formatted_anomaly_data)
 
         return status
 
@@ -436,125 +455,110 @@ class AnomalyAlertController:
 
     def _get_top_anomalies_and_counts(
         self, formatted_anomaly_data: List[AnomalyPoint], kpi: Kpi
-    ) -> Tuple[List[AnomalyPoint], int, int]:
-        top_anomalies_ = deepcopy(_top_anomalies(formatted_anomaly_data, 5))
-        _format_anomaly_point_for_template(
-            top_anomalies_, kpi.anomaly_params.get("frequency")
-        )
+    ) -> Tuple[List[AnomalyPointFormatted], int, int]:
         overall_count, subdim_count = _count_anomalies(formatted_anomaly_data)
+
+        top_anomalies_ = deepcopy(_top_anomalies(formatted_anomaly_data, 5))
+        top_anomalies_ = _format_anomaly_point_for_template(top_anomalies_, kpi)
 
         return top_anomalies_, overall_count, subdim_count
 
-    def _send_email_alert(self, formatted_anomaly_data: List[AnomalyPoint]) -> bool:
-
+    def _send_email_alert(self, formatted_anomaly_data: List[AnomalyPoint]) -> None:
         alert_channel_conf = self.alert_info["alert_channel_conf"]
 
-        if type(alert_channel_conf) != dict:
-            logger.info(
-                "The alert channel configuration is incorrect for Alert ID - "
-                f"{self.alert_info['id']}"
+        if not isinstance(alert_channel_conf, dict):
+            raise AlertException(
+                f"Alert channel config was not a dict. Got: {alert_channel_conf}",
+                alert_id=self.alert_id,
+                kpi_id=self.kpi_id,
             )
-            return False
 
-        recipient_emails = alert_channel_conf.get("email", [])
+        recipient_emails = alert_channel_conf.get("email")
 
-        if recipient_emails:
-            subject = f"{self.alert_info['alert_name']} - Chaos Genius Alert "
+        if not recipient_emails:
+            raise AlertException(
+                f"No recipient emails found. Got: {recipient_emails}",
+                alert_id=self.alert_id,
+                kpi_id=self.kpi_id,
+            )
+
+        subject = (
+            f"{self.alert_info['alert_name']} - Chaos Genius Alert "
             f"({self.now.strftime('%b %d')})❗"
-            alert_message = self.alert_info["alert_message"]
+        )
+        alert_message = self.alert_info["alert_message"]
 
-            # attach CSV of anomaly data
-            files = [
-                {
-                    "fname": "data.csv",
-                    "fdata": _make_anomaly_data_csv(formatted_anomaly_data),
-                }
-            ]
+        # attach CSV of anomaly data
+        files = [
+            {
+                "fname": "data.csv",
+                "fdata": _make_anomaly_data_csv(formatted_anomaly_data),
+            }
+        ]
 
-            status = False
+        kpi = self._get_kpi()
 
-            if self._to_send_individual():
-                kpi = self._get_kpi()
+        (
+            top_anomalies_,
+            overall_count,
+            subdim_count,
+        ) = self._get_top_anomalies_and_counts(formatted_anomaly_data, kpi)
 
-                (
-                    top_anomalies_,
-                    overall_count,
-                    subdim_count,
-                ) = self._get_top_anomalies_and_counts(formatted_anomaly_data, kpi)
+        send_email_using_template(
+            "email_alert.html",
+            recipient_emails,
+            subject,
+            files,
+            top_anomalies=top_anomalies_,
+            alert_message=alert_message,
+            kpi_name=kpi.name,
+            preview_text="Anomaly Alert",
+            alert_name=self.alert_info.get("alert_name"),
+            kpi_link=f"{webapp_url_prefix()}#/dashboard/0/anomaly/" f"{self.kpi_id}",
+            alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
+            overall_count=overall_count,
+            subdim_count=subdim_count,
+            str=str,
+        )
 
-                status = send_email_using_template(
-                    "email_alert.html",
-                    recipient_emails,
-                    subject,
-                    files,
-                    self.alert_info,
-                    top_anomalies=top_anomalies_,
-                    alert_message=alert_message,
-                    kpi_name=kpi.name,
-                    preview_text="Anomaly Alert",
-                    alert_name=self.alert_info.get("alert_name"),
-                    kpi_link=f"{webapp_url_prefix()}#/dashboard/0/anomaly/"
-                    f"{self.kpi_id}",
-                    alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
-                    overall_count=overall_count,
-                    subdim_count=subdim_count,
-                    str=str,
-                )
+        logger.info(
+            f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) The email alert was "
+            "successfully sent"
+        )
 
-                if status is True:
-                    logger.info(
-                        f"The email for Alert ID - {self.alert_info['id']} was successfully sent"
-                    )
-                else:
-                    logger.info(
-                        f"The email for Alert ID - {self.alert_info['id']} has not been sent"
-                    )
-
-                logger.info(f"Status for Alert ID - {self.alert_info['id']} : {status}")
-
-            return status
-        else:
-            logger.info(
-                f"No receipent email available (Alert ID - {self.alert_info['id']})"
-            )
-            return False
-
-    def _send_slack_alert(self, formatted_anomaly_data: List[AnomalyPoint]) -> bool:
+    def _send_slack_alert(self, formatted_anomaly_data: List[AnomalyPoint]):
         alert_name = self.alert_info.get("alert_name")
         alert_message = self.alert_info["alert_message"]
 
-        status = "failed"
-        if self._to_send_individual():
-            kpi = self._get_kpi()
+        kpi = self._get_kpi()
 
-            (
-                top_anomalies_,
-                overall_count,
-                subdim_count,
-            ) = self._get_top_anomalies_and_counts(formatted_anomaly_data, kpi)
+        (
+            top_anomalies_,
+            overall_count,
+            subdim_count,
+        ) = self._get_top_anomalies_and_counts(formatted_anomaly_data, kpi)
 
-            status = anomaly_alert_slack(
-                kpi.name,
-                alert_name,
-                self.kpi_id,
-                alert_message,
-                top_anomalies_,
-                overall_count,
-                subdim_count,
-            )
+        err = anomaly_alert_slack(
+            kpi.name,
+            alert_name,
+            self.kpi_id,
+            alert_message,
+            top_anomalies_,
+            overall_count,
+            subdim_count,
+        )
 
-        if status == "ok":
+        if err == "":
             logger.info(
-                f"The slack alert for Alert ID - {self.alert_info['id']} was successfully sent"
+                f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) The slack alert was "
+                "successfully sent"
             )
         else:
-            logger.info(
-                f"The slack alert for Alert ID - {self.alert_info['id']} has not been sent"
+            raise AlertException(
+                f"Slack alert was not sent: {err}",
+                alert_id=self.alert_id,
+                kpi_id=self.kpi_id,
             )
-
-        status = status == "ok"
-
-        return status
 
 
 def _format_series_type(anomaly_type: str, series_type: str) -> str:
@@ -599,13 +603,13 @@ def _make_anomaly_data_csv(anomaly_points: List[AnomalyPoint]) -> str:
 
 
 def _format_anomaly_point_for_template(
-    points: List[AnomalyPoint], time_series_frequency: Optional[str] = None
+    points: List[AnomalyPoint], kpi: Kpi
 ) -> List[AnomalyPointFormatted]:
     """Formats fields of each point, to be used in alert templates."""
     return list(
         map(
             lambda point: AnomalyPointFormatted.from_point(
-                point, time_series_frequency
+                point, kpi.anomaly_params.get("frequency"), kpi.id, kpi.name
             ),
             points,
         )

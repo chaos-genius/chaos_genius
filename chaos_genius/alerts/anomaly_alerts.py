@@ -238,6 +238,7 @@ class AnomalyAlertController:
                     anomaly_point["series_type"]
                 )
 
+        anomaly_data.sort(key=lambda anomaly: anomaly.get("severity"), reverse=True)
         return anomaly_data
 
     def _find_point(self, point, prev_data):

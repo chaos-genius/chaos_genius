@@ -111,7 +111,7 @@ class AnomalyAlertController:
 
         if latest_anomaly_timestamp is None:
             raise AlertException(
-                "Could not get latest anomaly timestamp. " "No anomaly data was found.",
+                "Could not get latest anomaly timestamp. No anomaly data was found.",
                 alert_id=self.alert_id,
                 kpi_id=self.kpi_id,
             )
@@ -357,8 +357,11 @@ class AnomalyAlertController:
                 hour_val = point["data_datetime"].hour
                 intended_point = self._find_point(point, hourly_data.get(hour_val, []))
             else:
-                raise Exception(
-                    f"(KPI: {self.kpi_id}, Alert: {self.alert_id}) Time series frequency not found or invalid."
+                raise AlertException(
+                    "Time series frequency not found or invalid. Got: "
+                    f"{time_series_freq}",
+                    alert_id=self.alert_id,
+                    kpi_id=self.kpi_id,
                 )
 
             point["percentage_change"] = find_percentage_change(

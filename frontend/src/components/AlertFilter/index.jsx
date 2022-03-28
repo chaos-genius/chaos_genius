@@ -75,7 +75,7 @@ const AlertFilter = ({
         channelType.length !== 0 ? (
           channelType.map((type) => {
             return (
-              <div className="form-check check-box">
+              <div className="form-check check-box" key={type}>
                 <input
                   className="form-check-input"
                   type="checkbox"

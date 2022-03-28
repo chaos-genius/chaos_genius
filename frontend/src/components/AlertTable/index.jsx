@@ -97,7 +97,7 @@ const AlertTable = ({ alertData, alertSearch }) => {
           {alertData && alertData.length !== 0
             ? alertData.map((alert) => {
                 return (
-                  <tr>
+                  <tr key={alert.alert_name}>
                     <td className="name-tooltip">
                       <span>{CustomTooltip(alert.alert_name)}</span>
                     </td>

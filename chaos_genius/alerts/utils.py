@@ -130,17 +130,17 @@ def format_anomaly_points(points: List[dict]):
 
 
 def find_percentage_change(
-    curr_val: Union[int, float], prev_val: Union[int, float]
+    curr_val: Union[int, float], prev_val: Optional[Union[int, float]]
 ) -> Union[int, float, str]:
     """Calculates percentage change between previous and current value."""
     if prev_val is None:
         # previous point wasn't found
         return "–"
     elif curr_val == 0 and prev_val == curr_val:
-        # previous data is same as current and both of them are 0
+        # both current and previous value are 0
         return "–"
     elif prev_val == 0:
-        # previous point was 0
+        # previous value is 0, but current value isn't
         sign_ = "+" if curr_val > 0 else "-"
         return sign_ + "inf"
     else:

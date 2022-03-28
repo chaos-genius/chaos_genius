@@ -3,8 +3,8 @@ from typing import List, Optional
 
 from slack_sdk.webhook.client import WebhookClient
 
+import chaos_genius.alerts.anomaly_alerts as anomaly_alerts
 from chaos_genius.alerts.alert_channel_creds import get_creds
-from chaos_genius.alerts.anomaly_alerts import AnomalyPointFormatted
 from chaos_genius.alerts.utils import webapp_url_prefix
 
 logger = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ def anomaly_alert_slack(
     alert_name: str,
     kpi_id: int,
     alert_message: str,
-    points: List[AnomalyPointFormatted],
+    points: "List[anomaly_alerts.AnomalyPointFormatted]",
     overall_count: int,
     subdim_count: int,
 ) -> str:
@@ -166,7 +166,7 @@ def event_alert_slack(alert_name, alert_frequency, alert_message, alert_overview
 
 
 def _format_slack_anomalies(
-    top10: List[AnomalyPointFormatted],
+    top10: "List[anomaly_alerts.AnomalyPointFormatted]",
     kpi_name: Optional[str] = None,
     include_kpi_link: bool = True,
 ) -> str:

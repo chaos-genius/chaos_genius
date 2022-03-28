@@ -229,6 +229,16 @@ def get_last_anomaly_timestamp(
         return results.data_datetime
 
 
+def get_kpi_obj(
+    kpi_id: int
+) -> Optional[Kpi]:
+    """Returns a kpi obj for an active Kpi using the input kpi id."""
+    kpi_obj = Kpi.query.filter(
+        Kpi.active is True, Kpi.id == kpi_id
+    ).first()
+
+    return kpi_obj
+
 # def delete_data(kpi, query):
 #     db.session.execute(query)
 #     db.session.commit()

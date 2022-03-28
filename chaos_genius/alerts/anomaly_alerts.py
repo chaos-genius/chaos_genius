@@ -312,7 +312,7 @@ class AnomalyAlertController:
             severity_cutoff=severity_cutoff,
         )
 
-        parse_obj_as(List[AnomalyPointOriginal], anomaly_data)
+        return parse_obj_as(List[AnomalyPointOriginal], anomaly_data)
 
     def _update_alert_metadata(self, alert: Alert):
         """Sets last alerted and last anomaly timestamps."""

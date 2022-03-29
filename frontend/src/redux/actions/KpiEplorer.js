@@ -261,7 +261,7 @@ export const getSchemaAvailability = (option) => {
         dispatch(
           getTableListOnSchema({
             datasource_id: option.data_source_id,
-            schema: ''
+            schema: null
           })
         );
       }

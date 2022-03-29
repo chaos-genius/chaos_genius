@@ -459,7 +459,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   useEffect(() => {
     if (
       datasourceid &&
-      dataSourceHasSchema &&
       tableListOnSchemaLoading === false &&
       tableListOnSchema &&
       tableListOnSchema.table_names
@@ -609,42 +608,16 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
 
   const tableName = (e) => {
     setErrorMsg({ tablename: false });
-    if (!dataSourceHasSchema && kpiField && kpiField?.tables) {
-      var optionValueArr = [];
-      for (const [key, value] of Object.entries(kpiField.tables)) {
-        const valueData = e.value;
-        if (key === valueData) {
-          value.table_columns.forEach((data) => {
-            optionValueArr.push({
-              value: data.name,
-              label: data.name
-            });
-          });
-        }
-
-        setOption({ ...option, metricOption: optionValueArr });
-        setFormdata({
-          ...formdata,
-          tablename: valueData,
-          metriccolumns: '',
-          aggregate: '',
-          datetimecolumns: '',
-          dimensions: [],
-          dashboardNameList: []
-        });
-      }
-    } else if (dataSourceHasSchema) {
-      const valueData = e.value;
-      setFormdata({
-        ...formdata,
-        tablename: valueData,
-        metriccolumns: '',
-        aggregate: '',
-        datetimecolumns: '',
-        dimensions: []
-      });
-      dispatchGetTableInfoData(valueData);
-    }
+    const valueData = e.value;
+    setFormdata({
+      ...formdata,
+      tablename: valueData,
+      metriccolumns: '',
+      aggregate: '',
+      datetimecolumns: '',
+      dimensions: []
+    });
+    dispatchGetTableInfoData(valueData);
   };
 
   useEffect(() => {
@@ -672,7 +645,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   const dispatchGetTableInfoData = (table) => {
     const obj = {
       datasource_id: datasourceid,
-      schema: formdata.schemaName,
+      schema: dataSourceHasSchema ? formdata.schemaName : null,
       table_name: table
     };
     dispatch(getTableinfoData(obj));

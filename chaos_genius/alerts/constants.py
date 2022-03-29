@@ -21,10 +21,6 @@ ANOMALY_TABLE_COLUMN_NAMES_MAPPER = {
     "expected_value": "Expected Value",
 }
 
-IGNORE_COLUMNS_ANOMALY_TABLE = ["id", "index", "kpi_id", "is_anomaly"]
-
-ANOMALY_TABLE_COLUMNS_HOLDING_FLOATS = ["y", "yhat_upper", "yhat_lower", "severity"]
-
 FREQUENCY_DICT = {
     "weekly": datetime.timedelta(days=7, hours=0, minutes=0),
     "daily": datetime.timedelta(days=1, hours=0, minutes=0),

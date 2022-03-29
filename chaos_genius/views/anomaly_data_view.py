@@ -385,36 +385,27 @@ def kpi_anomaly_retraining(kpi_id):
 @blueprint.route("/<int:kpi_id>/download_anomaly_data", methods=["GET"])
 def download_anomaly_data(kpi_id):
     try:
-        time_period = request.args.get('time_period')
-        if time_period is None:
-            raise Exception('please specify the required time_period')
-        data_points = get_overall_data_points(kpi_id,int(time_period))
+        data_points = get_overall_data_points(kpi_id)
         output_csv_obj = io.StringIO()
-        csv_headers = ["data_datetime",
-                       "y",
-                       "yhat_upper",
-                       "yhat_lower",
-                       "is_anomaly",
+        csv_headers = ["datetime",
+                       "value",
                        "severity",
-                       "kpi_id",
-                       "anomaly_type",
+                       "upper_bound",
+                       "lower_bound",
                        "series_type",
-                       "index",
-                       "created_at"]
+                       "series_name",
+                      ]
         csvwriter = csv.writer(output_csv_obj, delimiter=',')
         csvwriter.writerow(csv_headers)
         for row in data_points:
-            attr_list = [row.data_datetime.strftime("%Y-%m-%d %H:%M:%S"),
-                            str(row.y),
-                            str(row.yhat_upper),
-                            str(row.yhat_lower),
-                            str(row.is_anomaly),
-                            str(row.severity),
-                            str(row.kpi_id),
-                            str(row.anomaly_type),
-                            str(row.series_type),
-                            str(row.index),
-                            row.created_at.strftime("%Y-%m-%d %H:%M:%S")]
+            attr_list = [row.data_datetime.strftime("%a %-d %B %H:%M:%S %Y"),
+                         str(row.y),
+                         str(row.severity),
+                         str(row.yhat_upper),
+                         str(row.yhat_lower),
+                         str(row.anomaly_type),
+                         str(row.series_type),
+                        ]
             csvwriter.writerow(attr_list)
 
         output_csv_obj.seek(0)
@@ -424,7 +415,7 @@ def download_anomaly_data(kpi_id):
 
         return send_file(output_csv_bytes,
                             mimetype='text/csv',
-                            attachment_filename=f'KPI-{kpi_id}-overall_kpi.csv',
+                            attachment_filename=f'KPI-{kpi_id}-anomaly-data.csv',
                             as_attachment=True)
     except Exception as e:
         return jsonify({'status':'failure',
@@ -490,7 +481,7 @@ def convert_to_graph_json(
 
     return graph_data
 
-def get_overall_data_points(kpi_id, n=90):
+def get_overall_data_points(kpi_id, n=60):
     kpi_info = get_kpi_data_from_id(kpi_id)
 
     end_date = get_anomaly_output_end_date(kpi_info)

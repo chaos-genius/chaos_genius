@@ -11,6 +11,10 @@ from chaos_genius.connectors import (
     get_table_info,
 )
 
+from chaos_genius.utils.metadata_api_config import TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY
+
+NON_THIRD_PARTY_DATASOURCES = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY.keys()
+
 logger = logging.getLogger(__name__)
 
 
@@ -113,6 +117,12 @@ def run_metadata_prefetch(data_source_id):
 
     data_source_obj = get_datasource_data_from_id(data_source_id, as_obj=True)
     sync_error = False
+
+    if data_source_obj.connection_type not in NON_THIRD_PARTY_DATASOURCES:
+        logger.warning(
+            f"Datasource with id: {data_source_id} is a third-party datasource"
+        )
+        return False
 
     if data_source_obj.sync_status == "In Progress":
         logger.warning(

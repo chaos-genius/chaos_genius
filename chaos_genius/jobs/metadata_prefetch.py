@@ -28,12 +28,11 @@ def metadata_prefetch_daily_scheduler():
 
 
 @celery.task
-def fetch_data_source_schema(data_source_id, first_time=False):
+def fetch_data_source_schema(data_source_id):
     """Scan schema of the data source and store that in the database.
 
     Args:
         data_source_id (int): Id of the data source.
-        first_time (bool, optional): Flag whether the metadata is being fetched for the first time. Defaults to False.
 
     Raises:
         Exception: Raise if no data source is found.
@@ -41,5 +40,5 @@ def fetch_data_source_schema(data_source_id, first_time=False):
     """
     if not data_source_id:
         raise Exception("No data source id provided")
-    status = run_metadata_prefetch(data_source_id=data_source_id, first_time=first_time)
+    status = run_metadata_prefetch(data_source_id=data_source_id)
     return status

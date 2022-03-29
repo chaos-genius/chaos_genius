@@ -5,13 +5,15 @@ from celery.schedules import crontab, schedule
 from chaos_genius.settings import METADATA_SYNC_TIME
 
 
-CELERY_IMPORTS = ("chaos_genius.jobs")
+CELERY_IMPORTS = "chaos_genius.jobs"
 CELERY_TASK_RESULT_EXPIRES = 30
 CELERY_TIMEZONE = "UTC"
 
 CELERY_ACCEPT_CONTENT = ["json", "msgpack", "yaml"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
+
+METADATA_SYNC_TIME_HRS, METADATA_SYNC_TIME_MINS = METADATA_SYNC_TIME.split(":")
 
 CELERYBEAT_SCHEDULE = {
     "anomaly-scheduler": {
@@ -36,9 +38,11 @@ CELERYBEAT_SCHEDULE = {
     },
     "metadata-prefetch-daily": {
         "task": "chaos_genius.jobs.metadata_prefetch.metadata_prefetch_daily_scheduler",
-        "schedule": crontab(hour="3", minute="0"),  # TODO: Set from env
+        "schedule": crontab(
+            hour=METADATA_SYNC_TIME_HRS, minute=METADATA_SYNC_TIME_MINS
+        ),  # TODO: Set from env
         "args": ("daily",),
-    }
+    },
 }
 
 CELERY_ROUTES = {

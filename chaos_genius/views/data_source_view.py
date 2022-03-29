@@ -47,6 +47,7 @@ from chaos_genius.utils.metadata_api_config import (
     SCHEMAS_AVAILABLE,
     TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY,
 )
+# from chaos_genius.jobs.metadata_prefetch import fetch_data_source_schema
 
 blueprint = Blueprint("api_data_source", __name__)
 
@@ -266,7 +267,9 @@ def create_data_source():
         msg = f"Connection {new_connection.name} has been created successfully."
         logger.info("Data source '%s' added successfully.", new_connection.name)
         connection_data = new_connection.safe_dict
-
+        from chaos_genius.jobs.metadata_prefetch import fetch_data_source_schema
+        logger.info("prefetching metadata for  '%s', id '%s'", new_connection.name, new_connection.id)
+        fetch_data_source_schema.delay(new_connection.id)
     except Exception as err_msg:
         msg = str(err_msg)
         logger.error("Error in creating data source: %s", err_msg, exc_info=err_msg)
@@ -316,6 +319,46 @@ def delete_data_source():
         msg = str(err_msg)
 
     return jsonify({"data": {}, "msg": msg, "status": status})
+
+
+@blueprint.route("/trigger-metadata-prefetch", methods=["POST"])
+def trigger_metadata_prefetch():
+    """Initiates Metadata prefetch for a given datasource via celery Task."""
+
+    from chaos_genius.jobs.metadata_prefetch import fetch_data_source_schema
+
+    msg, status, sync_status = "", "success", ""
+
+    try:
+        payload = request.get_json()
+
+        if type(payload) is not dict or "data_source_id" not in payload:
+            msg = "Invalid payload for metadata prefetch"
+            status = "failure"
+            logger.error("Error in trigger metadata prefetch: %s", msg)
+        else:
+            data_source_id = payload["data_source_id"]
+            data_source = DataSource.get_by_id(data_source_id)
+            if data_source and data_source.active:
+                msg = "Metadata prefetch triggered."
+                logger.info(
+                    "Trigger Metadata prefetch for Datasource: %s", data_source_id
+                )
+                fetch_data_source_schema.delay(data_source_id)
+                sync_status = "In Progress"
+            else:
+                logger.error(f"Datasource with id: {data_source_id} not found!!")
+                status = "failure"
+                msg = f"Datasource with id: {data_source_id} not found!!"
+
+    except Exception as err_msg:
+        logger.error(
+            "Error in trigger metadata prefetch: %s", err_msg, exc_info=err_msg
+        )
+        msg = str(err_msg)
+        status = "failure"
+
+    return jsonify({"msg": msg, "status": status, "sync_status": sync_status})
 
 
 @blueprint.route("/metadata", methods=["POST"])

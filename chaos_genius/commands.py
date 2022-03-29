@@ -130,14 +130,13 @@ def run_rca(kpi, end_date):
 @click.command()
 @with_appcontext
 @click.option('--id', required=True, type=int, help="Fetch the metadata of provided data source.")
-@click.option('--first', is_flag=True, default=False, help="Fetching for the first time.")
 @time_my_func
-def fetch_metadata(id, first):
+def fetch_metadata(id):
     """Fetch the metadata of the given data source."""
 
     click.echo(f"Fetching the metadata for data source ID: {id}")
     from chaos_genius.controllers.data_source_metadata_controller import run_metadata_prefetch
-    status = run_metadata_prefetch(id, first)
+    status = run_metadata_prefetch(id)
     click.echo(f"Completed the metadata fetch for data source ID: {id} with status: {status}.")
 
 

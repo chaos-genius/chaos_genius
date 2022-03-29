@@ -108,17 +108,22 @@ def delete_table_info(data_source, schema, table):
         data_source_metadata.delete(commit=True)
 
 
-def run_metadata_prefetch(data_source_id, first_time=False):
+def run_metadata_prefetch(data_source_id):
     """Fetch the metadata of the given data source."""
 
     data_source_obj = get_datasource_data_from_id(data_source_id, as_obj=True)
     sync_error = False
 
-    if first_time:
+    if data_source_obj.sync_status == "In Progress":
+        logger.warning(
+            f"Datasource with id: {data_source_id} already in Progress, skipping.."
+        )
+        return True
+
+    try:
         data_source_obj.sync_status = "In Progress"
         data_source_obj.update(commit=True)
 
-    try:
         db_connection = get_sqla_db_conn(data_source_obj.as_dict)
 
         schema_list, old_schemas_list = scan_db_and_save_schema_list(
@@ -146,8 +151,7 @@ def run_metadata_prefetch(data_source_id, first_time=False):
         logger.error(err)
 
     data_source_obj = get_datasource_data_from_id(data_source_id, as_obj=True)
-    if first_time:
-        data_source_obj.sync_status = "Completed" if not sync_error else "Error"
+    data_source_obj.sync_status = "Completed" if not sync_error else "Error"
     data_source_obj.last_sync = datetime.now()
     data_source_obj.update(commit=True)
 

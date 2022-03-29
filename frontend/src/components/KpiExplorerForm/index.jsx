@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useToast } from 'react-toast-wnm';
 import { useDispatch, useSelector } from 'react-redux';
-import Select from 'react-select';
+import Select, { components } from 'react-select';
 import Modal from 'react-modal';
 
 import Play from '../../assets/images/play-green.png';
@@ -163,6 +163,20 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
 
   const dispatchGetAllDashboard = () => {
     dispatch(getDashboard());
+  };
+
+  const dataSync = true;
+  const CustomOption = (props) => {
+    const { data, innerRef, innerProps } = props;
+    if (dataSync) {
+      return (
+        <div ref={innerRef} {...innerProps}>
+          I'm a custom link
+        </div>
+      );
+    }
+
+    return <components.Option {...props} />;
   };
 
   useEffect(() => {
@@ -938,7 +952,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               isDisabled={
                 data[2] === 'edit' ? editableStatus('data_source') : false
               }
-              components={{ SingleValue: customSingleValue }}
+              components={{
+                SingleValue: customSingleValue
+                //Option: CustomOption
+              }}
               onChange={(e) => formOption(e)}
             />
             {errorMsg.datasource === true ? (

@@ -22,7 +22,7 @@ import './datasourcetable.scss';
 
 import { formatDateTime } from '../../utils/date-helper';
 
-import { deleteDatasource } from '../../redux/actions';
+import { deleteDatasource, setSyncSchema } from '../../redux/actions';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -93,6 +93,10 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
     );
   };
 
+  const handleSync = (datasource) => {
+    setSyncSchema(datasource);
+  };
+
   const customToast = (data) => {
     const { type, header, description } = data;
     toast({
@@ -127,9 +131,9 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
         <thead>
           <tr>
             <th>Data Connection Name</th>
-            <th>Status</th>
             <th>Data Source Type</th>
             <th>No of KPIs</th>
+            <th>Status</th>
             <th>Last Sync</th>
             <th>Created On</th>
             <th></th>
@@ -144,14 +148,6 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
                       <span>{CustomTooltip(datasource.name)}</span>
                     </td>
                     <td>
-                      <div
-                        className={
-                          datasource.active ? 'live-status' : 'broken-status'
-                        }>
-                        <span>{datasource.active ? 'Live' : 'Broken'}</span>
-                      </div>
-                    </td>
-                    <td>
                       <div className="source-type">
                         {connectionType
                           ? datasourceIcon(datasource.connection_type)
@@ -159,6 +155,14 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
                       </div>
                     </td>
                     <td>{datasource.kpi_count || '-'}</td>
+                    <td>
+                      <div
+                        className={
+                          datasource.active ? 'live-status' : 'broken-status'
+                        }>
+                        <span>{datasource.active ? 'Live' : 'Broken'}</span>
+                      </div>
+                    </td>
                     <td className="date-column-formated">
                       {formatDateTime(datasource.last_sync, true)}
                     </td>
@@ -205,19 +209,13 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
                               Set Alerts
                             </li>
                           </Link>
-                          {/* <li>
-                          <img
-                            src={Viewlog}
-                            alt="View Log"
-                            className="action-disable"
-                          />
-                          <img
-                            src={ViewlogActive}
-                            alt="View Log"
-                            className="action-active"
-                          />
-                          View Logs
-                        </li> */}
+                          <li
+                            onClick={() => {
+                              handleSync(datasource);
+                            }}>
+                            <img src={AlertActive} alt="Sync Schema" />
+                            Sync Schema
+                          </li>
                           <Link to={`/datasource/edit/${datasource.id}`}>
                             <li>
                               <img

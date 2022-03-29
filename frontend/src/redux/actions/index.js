@@ -6,7 +6,8 @@ import {
   deleteDatasource,
   getDatasourceMetaInfo,
   getDatasourceById,
-  updateDatasourceById
+  updateDatasourceById,
+  setSyncSchema
 } from './DataSources';
 //import { getAllDataSources } from './DataSources';
 import {
@@ -139,5 +140,6 @@ export {
   getTimeCuts,
   getVersionSetting,
   getReportSettingTime,
-  saveReportSettingTime
+  saveReportSettingTime,
+  setSyncSchema
 };

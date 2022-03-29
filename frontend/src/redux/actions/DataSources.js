@@ -22,7 +22,10 @@ import {
   DATASOURCEEDITDATAREQUEST,
   DATASOURCEUPDATEREQUEST,
   DATASOURCEUPDATESUCCESS,
-  DATASOURCEUPDATEFAILURE
+  DATASOURCEUPDATEFAILURE,
+  SYNCSCHEMAREQUESTED,
+  SYNCSCHEMAFAILURE,
+  SYNCSCHEMASUCCESS
 } from './ActionConstants';
 
 import {
@@ -31,6 +34,7 @@ import {
   CREATE_DATASOURCE,
   DATASOURCE_META_INFO_URL,
   DELETE_DATASOURCE,
+  METADATA_PREFETCH_URL,
   TEST_CONNECTION
 } from '../../utils/url-helper';
 
@@ -189,6 +193,25 @@ export const deleteDatesourceFailure = () => {
   };
 };
 
+export const syncSchemaRequested = () => {
+  return {
+    type: SYNCSCHEMAREQUESTED
+  };
+};
+
+export const syncSchemaFailure = () => {
+  return {
+    type: SYNCSCHEMAFAILURE
+  };
+};
+
+export const syncSchemaSuccess = (response) => {
+  return {
+    type: SYNCSCHEMASUCCESS,
+    data: response
+  };
+};
+
 export const deleteDatasource = (id) => {
   return async (dispatch) => {
     dispatch(deleteDatasourceRequested());
@@ -200,6 +223,23 @@ export const deleteDatasource = (id) => {
       dispatch(deleteDatesourceFailure());
     } else if (data && status === 200) {
       dispatch(deleteDatasourceSuccess(data));
+    }
+  };
+};
+
+export const setSyncSchema = (datasource) => {
+  return async (dispatch) => {
+    dispatch(syncSchemaRequested());
+    const { data, error, status } = await postRequest({
+      url: METADATA_PREFETCH_URL,
+      data: { data_source_id: datasource?.id }
+    });
+    if (error) {
+      dispatch(syncSchemaFailure());
+    } else if (data && status === 200) {
+      dispatch(
+        syncSchemaSuccess({ ...data.data, data_source_id: datasource?.id })
+      );
     }
   };
 };

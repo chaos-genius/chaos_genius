@@ -9,7 +9,6 @@ import {
   updateDatasourceById,
   setSyncSchema
 } from './DataSources';
-//import { getAllDataSources } from './DataSources';
 import {
   getAllKpiExplorer,
   getAllKpiExplorerForm,

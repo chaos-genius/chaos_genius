@@ -40,6 +40,10 @@ import {
   HRN_PREFIXES
 } from '../../utils/Formatting/Numbers/humanReadableNumberFormatter';
 import store from '../../redux/store';
+import { BASE_URL } from '../../utils/url-helper';
+import { useToast } from 'react-toast-wnm';
+import { CustomContent, CustomActions } from '../../utils/toast-helper';
+import { downloadCsv } from '../../utils/download-helper';
 
 highchartsMore(Highcharts);
 Highcharts.setOptions({
@@ -70,6 +74,7 @@ const customStyles = {
 
 const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
   const dispatch = useDispatch();
+  const toast = useToast();
 
   const [activeDimension, setActiveDimension] = useState('');
   const [collapse, setCollapse] = useState(true);
@@ -401,6 +406,53 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
       return demoChart;
     }
   };
+
+  const handleDownloadClick = async () => {
+    let url = `${BASE_URL}/api/rca/${kpi}/download_chart_data`;
+    let result = await downloadCsv(kpi, url);
+    if (result?.status === 'failure') {
+      customToast({
+        type: 'failure',
+        header: 'Failed to Download',
+        description: result.message
+      });
+    } else {
+      const url = window.URL.createObjectURL(new Blob([result]));
+      const link = document.createElement('a');
+      link.setAttribute('download', `KPI-${kpi}-panel-chart-data.csv`);
+      link.href = url;
+      link.click();
+    }
+  };
+
+  const customToast = (data) => {
+    const { type, header, description } = data;
+    toast({
+      autoDismiss: true,
+      enableAnimation: true,
+      delay: type === 'success' ? '5000' : '30000',
+      backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
+      borderRadius: '6px',
+      color: '#222222',
+      position: 'bottom-right',
+      minWidth: '240px',
+      width: 'auto',
+      boxShadow: '4px 6px 32px -2px rgba(226, 226, 234, 0.24)',
+      padding: '17px 14px',
+      height: 'auto',
+      border: type === 'success' ? '1px solid #60ca9a' : '1px solid #FEF6F5',
+      type: type,
+      actions: <CustomActions />,
+      content: (
+        <CustomContent
+          header={header}
+          description={description}
+          failed={type === 'success' ? false : true}
+        />
+      )
+    });
+  };
+
   return (
     <>
       {anomalystatus.is_rca_precomputed ? (
@@ -442,7 +494,9 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
                       setMonthWeek(e);
                     }}
                   />
-                  <div className="download-icon">
+                  <div
+                    className="download-icon"
+                    onClick={() => handleDownloadClick()}>
                     <img src={download} alt="icon"></img>
                   </div>
                 </div>

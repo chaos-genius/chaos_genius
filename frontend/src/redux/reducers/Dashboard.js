@@ -2,6 +2,9 @@ import {
   DASHBOARDRCAANALYSISFAILURE,
   DASHBOARDRCAANALYSISREQUEST,
   DASHBOARDRCAANALYSISSUCCESS,
+  GRAPHDOWNLOADFAILURE,
+  GRAPHDOWNLOADREQUEST,
+  GRAPHDOWNLOADSUCCESS,
   RCADOWNLOADFAILURE,
   RCADOWNLOADREQUEST,
   RCADOWNLOADSUCCESS
@@ -14,7 +17,10 @@ const initialState = {
   rcaAnalysisError: false,
   rcaCsv: [],
   rcaCsvLoading: false,
-  rcaCsvError: false
+  rcaCsvError: false,
+  graphCsv: [],
+  graphCsvLoading: false,
+  graphCsvError: false
 };
 
 export const dashboard = (state = initialState, action) => {
@@ -54,9 +60,27 @@ export const dashboard = (state = initialState, action) => {
         rcaCsvLoading: false
       };
     }
+    case GRAPHDOWNLOADREQUEST: {
+      return {
+        graphCsvLoading: true
+      };
+    }
+    case GRAPHDOWNLOADSUCCESS: {
+      return {
+        graphCsvLoading: false,
+        graphCsv: action.data
+      };
+    }
+    case GRAPHDOWNLOADFAILURE: {
+      return {
+        graphCsvLoading: false,
+        graphCsvError: true
+      };
+    }
     case 'RCA_CSV_RESET': {
       return {
-        rcaCsv: []
+        rcaCsv: [],
+        graphCsv: []
       };
     }
     case 'RESET_DASHBOARD_RCA': {

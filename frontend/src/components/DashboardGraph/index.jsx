@@ -44,7 +44,10 @@ import { BASE_URL } from '../../utils/url-helper';
 import { useToast } from 'react-toast-wnm';
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
 import { downloadCsv } from '../../utils/download-helper';
-import { rcaDownloadCsv } from '../../redux/actions/Dashboard';
+import {
+  graphDownloadCsv,
+  rcaDownloadCsv
+} from '../../redux/actions/Dashboard';
 
 highchartsMore(Highcharts);
 Highcharts.setOptions({
@@ -106,7 +109,7 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
     (state) => state.hierarchial
   );
 
-  const { rcaAnalysisData, rcaAnalysisLoading, rcaCsv } = useSelector(
+  const { rcaAnalysisData, rcaAnalysisLoading, rcaCsv, graphCsv } = useSelector(
     (state) => state.dashboard
   );
 
@@ -151,7 +154,22 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
       });
       store.dispatch(RESET_RCA_CSV);
     }
-  }, [rcaCsv]);
+    if (graphCsv && graphCsv.length !== 0 && graphCsv.status !== 'failure') {
+      downloadCsv(graphCsv, `KPI-${kpi}-panel-chart-data.csv`);
+      store.dispatch(RESET_RCA_CSV);
+    } else if (
+      graphCsv &&
+      graphCsv.length !== 0 &&
+      graphCsv.status === 'failure'
+    ) {
+      customToast({
+        type: 'failure',
+        header: 'Failed to Download',
+        description: graphCsv.message
+      });
+      store.dispatch(RESET_RCA_CSV);
+    }
+  }, [rcaCsv, graphCsv]);
 
   useEffect(() => {
     if (timeCutsData && timeCutsData.length) {
@@ -425,8 +443,12 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
     }
   };
 
-  const handleDownloadClick = () => {
-    dispatch(rcaDownloadCsv(kpi));
+  const handleDownloadClick = (type) => {
+    if (type === 'rca') {
+      dispatch(rcaDownloadCsv(kpi));
+    } else {
+      dispatch(graphDownloadCsv(kpi));
+    }
   };
 
   const customToast = (data) => {
@@ -500,7 +522,7 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
                   />
                   <div
                     className="download-icon"
-                    onClick={() => handleDownloadClick()}>
+                    onClick={() => handleDownloadClick('rca')}>
                     <img src={download} alt="icon"></img>
                   </div>
                 </div>
@@ -663,7 +685,11 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
                             handleDimensionChange(e);
                           }}
                         />
-                        <div className="download-icon">
+                        <div
+                          className="download-icon"
+                          onClick={() => {
+                            handleDownloadClick('waterfall');
+                          }}>
                           <img src={download} alt="icon"></img>
                         </div>
                       </div>

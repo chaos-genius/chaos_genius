@@ -18,7 +18,10 @@ import {
   DASHBOARDHIERARCHICALREQUEST,
   RCADOWNLOADREQUEST,
   RCADOWNLOADSUCCESS,
-  RCADOWNLOADFAILURE
+  RCADOWNLOADFAILURE,
+  GRAPHDOWNLOADREQUEST,
+  GRAPHDOWNLOADSUCCESS,
+  GRAPHDOWNLOADFAILURE
 } from './ActionConstants';
 import { getRequest } from '../../utils/http-helper';
 
@@ -193,6 +196,40 @@ export const rcaDownloadCsv = (id) => {
       dispatch(rcaDownloadCsvFailure());
     } else if (data && status === 200) {
       dispatch(rcaDownloadCsvSuccess(data));
+    }
+  };
+};
+
+export const graphCsvRequest = () => {
+  return {
+    type: GRAPHDOWNLOADREQUEST
+  };
+};
+
+export const graphCsvSuccess = (response) => {
+  return {
+    type: GRAPHDOWNLOADSUCCESS,
+    data: response
+  };
+};
+
+export const graphCsvFailure = () => {
+  return {
+    type: GRAPHDOWNLOADFAILURE
+  };
+};
+
+export const graphDownloadCsv = (id) => {
+  return async (dispatch) => {
+    dispatch(graphCsvRequest());
+    const { data, error, status } = await getRequest({
+      //Need to change URl
+      url: `${BASE_URL}/api/rca/2/download_chart_data`
+    });
+    if (error) {
+      dispatch(graphCsvFailure());
+    } else if (data && status === 200) {
+      dispatch(graphCsvSuccess(data));
     }
   };
 };

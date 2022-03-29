@@ -5,7 +5,7 @@ VS Code extension (or the Pyright equivalent in other editors) along with flake8
 developing.
 """
 import logging
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from chaos_genius.alerts.anomaly_alerts import AnomalyAlertController
 from chaos_genius.alerts.event_alerts import StaticEventAlertController
@@ -29,7 +29,7 @@ def check_and_trigger_alert(alert_id: int):
     Returns:
         bool: status of the alert trigger
     """
-    alert_info = Alert.get_by_id(alert_id)
+    alert_info: Optional[Alert] = Alert.get_by_id(alert_id)
     if not alert_info:
         raise Exception("Alert doesn't exist")
 
@@ -48,7 +48,7 @@ def check_and_trigger_alert(alert_id: int):
     elif (
         alert_info.alert_type == "KPI Alert" and alert_info.kpi_alert_type == "Anomaly"
     ):
-        anomaly_obj = AnomalyAlertController(alert_info.as_dict)
+        anomaly_obj = AnomalyAlertController(alert_info)
         return anomaly_obj.check_and_send_alert()
     elif alert_info.alert_type == "KPI Alert" and alert_info.kpi_alert_type == "Static":
         StaticKpiAlertController(alert_info.as_dict)
@@ -73,14 +73,14 @@ def trigger_anomaly_alerts_for_kpi(
     """
     success_alerts: List[int] = []
     errors: List[Tuple[int, Exception]] = []
-    alerts = Alert.query.filter(
+    alerts: List[Alert] = Alert.query.filter(
         Alert.kpi == kpi_obj.id,
         Alert.active == True,  # noqa: E712
         Alert.alert_status == True,  # noqa: E712
     ).all()
     for alert in alerts:
         try:
-            anomaly_obj = AnomalyAlertController(alert.as_dict)
+            anomaly_obj = AnomalyAlertController(alert)
             anomaly_obj.check_and_send_alert()
             success_alerts.append(alert.id)
         except Exception as e:

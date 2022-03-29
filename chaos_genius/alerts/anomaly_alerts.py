@@ -46,16 +46,27 @@ logger = logging.getLogger(__name__)
 class AnomalyPointOriginal(BaseModel):
     """Representation of a point of anomaly data as received from raw anomaly data."""
 
+    # TODO: could be generated from AnomalyDataOutput model
+
+    # y-value of point
     y: float
+    # lower bound of expected value
     yhat_lower: float
+    # upper bound of expected value
     yhat_upper: float
+    # int representing whether this point is an anomaly
     is_anomaly: int
+    # severity of the anomaly (0 to 100)
     severity: float
 
+    # overall, subdim or data_quality
     anomaly_type: str
+    # subdimension name (when it's a subdim)
     series_type: Optional[str]
 
+    # timestamp when this entry was added
     created_at: datetime.datetime
+    # timestamp of the anomaly point
     data_datetime: datetime.datetime
 
     @property
@@ -103,8 +114,11 @@ class AnomalyPoint(AnomalyPointOriginal):
     This is the data stored in triggered alerts.
     """
 
+    # severity value rounded to integer
     severity: int
+    # percentage change from previous day's point
     percent_change: Union[int, float, str]
+    # human readable message describing the percent_change
     change_message: str
 
     @staticmethod
@@ -206,18 +220,18 @@ class AnomalyPointFormatted(AnomalyPoint):
 class AnomalyAlertController:
     """Controller for KPI/anomaly alerts."""
 
-    def __init__(self, alert_info: dict):
+    def __init__(self, alert: Alert):
         """Initializes a KPI/anomaly alerts controller.
 
         Note: an AnomalyAlertController instance must only be used for one check/trigger
         of an alert. The same object must not be re-used.
 
         Arguments:
-            alert_info: dict representingalert configuration
+            alert: object of the Alert model for which to send alerts
         """
-        self.alert_info = alert_info
-        self.alert_id: int = self.alert_info["id"]
-        self.kpi_id: int = self.alert_info["kpi"]
+        self.alert = alert
+        self.alert_id: int = self.alert.id
+        self.kpi_id: int = self.alert.kpi
         self.now = datetime.datetime.now()
         latest_anomaly_timestamp = get_last_anomaly_timestamp([self.kpi_id])
 
@@ -235,14 +249,6 @@ class AnomalyAlertController:
 
         Note: must only be called once on an instance.
         """
-        alert: Optional[Alert] = Alert.get_by_id(self.alert_info["id"])
-        if alert is None:
-            raise AlertException(
-                "Could not find alert configuration.",
-                alert_id=self.alert_id,
-                kpi_id=self.kpi_id,
-            )
-
         anomaly_data = self._get_anomalies()
 
         if len(anomaly_data) == 0:
@@ -256,13 +262,13 @@ class AnomalyAlertController:
         status = False
         try:
             if self._to_send_individual():
-                if self.alert_info["alert_channel"] == "email":
+                if self.alert.alert_channel == "email":
                     self._send_email_alert(formatted_anomaly_data)
-                elif self.alert_info["alert_channel"] == "slack":
+                elif self.alert.alert_channel == "slack":
                     self._send_slack_alert(formatted_anomaly_data)
                 else:
                     raise AlertException(
-                        f"Unknown alert channel: {self.alert_info['alert_channel']}",
+                        f"Unknown alert channel: {self.alert.alert_channel}",
                         alert_id=self.alert_id,
                         kpi_id=self.kpi_id,
                     )
@@ -273,7 +279,7 @@ class AnomalyAlertController:
                 )
 
             # TODO: last_anomaly_timestamp can be updated even if no anomaly exists.
-            self._update_alert_metadata(alert)
+            self._update_alert_metadata(self.alert)
 
             status = True
         finally:
@@ -287,9 +293,9 @@ class AnomalyAlertController:
         anomalies_only: bool = True,
         include_severity_cutoff: bool = True,
     ) -> List[AnomalyPointOriginal]:
-        last_anomaly_timestamp: Optional[datetime.datetime] = self.alert_info[
-            "last_anomaly_timestamp"
-        ]
+        last_anomaly_timestamp: Optional[
+            datetime.datetime
+        ] = self.alert.last_anomaly_timestamp
 
         if last_anomaly_timestamp is not None:
             # when last_anomaly_timestamp is available
@@ -306,7 +312,7 @@ class AnomalyAlertController:
         include_end_timestamp = True
 
         severity_cutoff = (
-            self.alert_info["severity_cutoff_score"]
+            self.alert.severity_cutoff_score
             if include_severity_cutoff
             else None
         )
@@ -355,14 +361,14 @@ class AnomalyAlertController:
         )
 
         alert_metadata = {
-            "alert_frequency": self.alert_info["alert_frequency"],
+            "alert_frequency": self.alert.alert_frequency,
             "alert_data": jsonable_encoder(formatted_anomaly_data),
-            "severity_cutoff_score": self.alert_info["severity_cutoff_score"],
-            "kpi": self.alert_info["kpi"],
+            "severity_cutoff_score": self.alert.severity_cutoff_score,
+            "kpi": self.kpi_id,
         }
 
         triggered_alert = TriggeredAlerts(
-            alert_conf_id=self.alert_info["id"],
+            alert_conf_id=self.alert_id,
             alert_type="KPI Alert",
             is_sent=status,
             created_at=datetime.datetime.now(),
@@ -449,8 +455,8 @@ class AnomalyAlertController:
         Returns:
             True if an individual alert needs to be sent, False otherwise.
         """
-        daily_digest = self.alert_info.get("daily_digest", False)
-        weekly_digest = self.alert_info.get("weekly_digest", False)
+        daily_digest = self.alert.daily_digest
+        weekly_digest = self.alert.weekly_digest
 
         return not (daily_digest or weekly_digest)
 
@@ -461,13 +467,13 @@ class AnomalyAlertController:
 
         top_anomalies_ = deepcopy(_top_anomalies(formatted_anomaly_data, 5))
         top_anomalies_ = _format_anomaly_point_for_template(
-            top_anomalies_, kpi, self.alert_info["alert_name"]
+            top_anomalies_, kpi, self.alert.alert_name
         )
 
         return top_anomalies_, overall_count, subdim_count
 
     def _send_email_alert(self, formatted_anomaly_data: List[AnomalyPoint]) -> None:
-        alert_channel_conf = self.alert_info["alert_channel_conf"]
+        alert_channel_conf = self.alert.alert_channel_conf
 
         if not isinstance(alert_channel_conf, dict):
             raise AlertException(
@@ -486,10 +492,9 @@ class AnomalyAlertController:
             )
 
         subject = (
-            f"{self.alert_info['alert_name']} - Chaos Genius Alert "
+            f"{self.alert.alert_name} - Chaos Genius Alert "
             f"({self.now.strftime('%b %d')})❗"
         )
-        alert_message = self.alert_info["alert_message"]
 
         # attach CSV of anomaly data
         files = [
@@ -513,10 +518,10 @@ class AnomalyAlertController:
             subject,
             files,
             top_anomalies=top_anomalies_,
-            alert_message=alert_message,
+            alert_message=self.alert.alert_message,
             kpi_name=kpi.name,
             preview_text="Anomaly Alert",
-            alert_name=self.alert_info.get("alert_name"),
+            alert_name=self.alert.alert_name,
             kpi_link=f"{webapp_url_prefix()}#/dashboard/0/anomaly/" f"{self.kpi_id}",
             alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
             overall_count=overall_count,
@@ -530,9 +535,6 @@ class AnomalyAlertController:
         )
 
     def _send_slack_alert(self, formatted_anomaly_data: List[AnomalyPoint]):
-        alert_name = self.alert_info.get("alert_name")
-        alert_message = self.alert_info["alert_message"]
-
         kpi = self._get_kpi()
 
         (
@@ -543,9 +545,9 @@ class AnomalyAlertController:
 
         err = anomaly_alert_slack(
             kpi.name,
-            alert_name,
+            self.alert.alert_name,
             self.kpi_id,
-            alert_message,
+            self.alert.alert_message,
             top_anomalies_,
             overall_count,
             subdim_count,

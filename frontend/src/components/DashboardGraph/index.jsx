@@ -688,7 +688,7 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
                         <div
                           className="download-icon"
                           onClick={() => {
-                            handleDownloadClick('waterfall');
+                            //handleDownloadClick('waterfall');
                           }}>
                           <img src={download} alt="icon"></img>
                         </div>

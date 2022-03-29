@@ -959,7 +959,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               }
               components={{
                 SingleValue: customSingleValue
-                //Option: CustomOption
               }}
               onChange={(e) => formOption(e)}
             />

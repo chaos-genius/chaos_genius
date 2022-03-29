@@ -227,10 +227,6 @@ export const getAllKpiExplorerField = (option) => {
       url: KPI_LIST_SCHEMA,
       data: { datasource_id: null }
     });
-    // const { data, error, status } = await postRequest({
-    //   url: KPI_FORM_OPTION_URL,
-    //   data: option
-    // });
     if (error) {
       dispatch(getAllKpiExplorerFieldFailure());
     } else if (data && status === 200) {

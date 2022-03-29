@@ -80,7 +80,7 @@ class AlertDigestController:
                     alert_conf, "alert_channel_conf", {}
                 ).get(triggered_alert.alert_channel, None)
 
-            if alert_conf.get(ALERT_ATTRIBUTES_MAPPER[self.frequency]):
+            if getattr(alert_conf, ALERT_ATTRIBUTES_MAPPER[self.frequency]):
                 if triggered_alert.alert_channel == "slack":
                     slack_digests.append(triggered_alert)
                 if triggered_alert.alert_channel == "email":

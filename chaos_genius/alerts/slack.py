@@ -1,6 +1,6 @@
 """Utilities for sending slack alert messages."""
 import logging
-from typing import List, Optional, Sequence
+from typing import Optional, Sequence
 
 from slack_sdk.webhook.client import WebhookClient
 
@@ -22,7 +22,7 @@ def anomaly_alert_slack(
     alert_name: str,
     kpi_id: int,
     alert_message: str,
-    points: "List[anomaly_alerts.AnomalyPointFormatted]",
+    points: "Sequence[anomaly_alerts.AnomalyPointFormatted]",
     overall_count: int,
     subdim_count: int,
 ) -> str:

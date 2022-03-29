@@ -49,11 +49,11 @@ class AnomalyPointOriginal(BaseModel):
     y: float
     yhat_lower: float
     yhat_upper: float
-    anomaly: int
+    is_anomaly: int
     severity: float
 
     anomaly_type: str
-    series_type: str
+    series_type: Optional[str]
 
     created_at: datetime.datetime
     data_datetime: datetime.datetime
@@ -84,6 +84,8 @@ class AnomalyPointOriginal(BaseModel):
     # use custom datetime format
     _normalize_datetimes = validator("created_at", "data_datetime", allow_reuse=True)(
         lambda dt: datetime.datetime.strptime(dt, ALERT_DATETIME_FORMAT)
+        if not isinstance(dt, datetime.datetime)
+        else dt
     )
 
     class Config:
@@ -146,7 +148,7 @@ class AnomalyPoint(AnomalyPointOriginal):
             y=y,
             yhat_lower=yhat_lower,
             yhat_upper=yhat_upper,
-            anomaly=point.anomaly,
+            is_anomaly=point.is_anomaly,
             severity=severity,
             anomaly_type=point.anomaly_type,
             series_type=series_type,
@@ -329,7 +331,9 @@ class AnomalyAlertController:
             severity_cutoff=severity_cutoff,
         )
 
-        return parse_obj_as(List[AnomalyPointOriginal], anomaly_data)
+        return parse_obj_as(
+            List[AnomalyPointOriginal], [point.as_dict for point in anomaly_data]
+        )
 
     def _update_alert_metadata(self, alert: Alert):
         """Sets last alerted and last anomaly timestamps."""
@@ -452,7 +456,7 @@ class AnomalyAlertController:
 
     def _get_top_anomalies_and_counts(
         self, formatted_anomaly_data: List[AnomalyPoint], kpi: Kpi
-    ) -> Tuple[List[AnomalyPointFormatted], int, int]:
+    ) -> Tuple[Sequence[AnomalyPointFormatted], int, int]:
         overall_count, subdim_count = _count_anomalies(formatted_anomaly_data)
 
         top_anomalies_ = deepcopy(_top_anomalies(formatted_anomaly_data, 5))
@@ -560,7 +564,7 @@ class AnomalyAlertController:
             )
 
 
-def _format_series_type(anomaly_type: str, series_type: str) -> str:
+def _format_series_type(anomaly_type: str, series_type: Optional[str]) -> str:
     """Format a anomaly point's series type for use in alerts.
 
     Do not call this function twice on the same data.
@@ -572,7 +576,7 @@ def _format_series_type(anomaly_type: str, series_type: str) -> str:
     series_type = (
         OVERALL_KPI_SERIES_TYPE_REPR
         if anomaly_type == "overall"
-        else convert_query_string_to_user_string(series_type)
+        else convert_query_string_to_user_string(series_type or "")
     )
 
     return series_type

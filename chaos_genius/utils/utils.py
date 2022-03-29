@@ -4,6 +4,7 @@ import subprocess
 from types import GeneratorType
 
 from flask import flash
+from pydantic import BaseModel
 from pydantic.json import pydantic_encoder
 
 
@@ -42,4 +43,9 @@ def jsonable_encoder(obj):
         }
     if isinstance(obj, (list, set, frozenset, GeneratorType, tuple)):
         return [jsonable_encoder(item) for item in obj]
+    if isinstance(obj, BaseModel):
+        obj_dict = obj.dict()
+        if "__root__" in obj_dict:
+            obj_dict = obj_dict["__root__"]
+        return jsonable_encoder(obj_dict)
     return pydantic_encoder(obj)

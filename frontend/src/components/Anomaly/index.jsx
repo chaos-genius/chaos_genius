@@ -8,6 +8,7 @@ import highchartsMore from 'highcharts/highcharts-more';
 
 import Toparrow from '../../assets/images/toparrow.svg';
 import Refresh from '../../assets/images/refresh.svg';
+import download from '../../assets/images/Download.svg';
 import Anomalygraph from '../Anomalygraph';
 import Noresult from '../Noresult';
 import AnomalyEmptyState from '../AnomalyEmptyState';
@@ -450,20 +451,25 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                       </div>
                     </div>
                     <div className="option-selections-container">
-                      <div className="option-selections">
-                        {KPITabs?.length &&
-                          KPITabs.map(function (tab, i) {
-                            return (
-                              <span
-                                onClick={() => setKPITab(tab.name)}
-                                className={
-                                  tab.name === kpiTab ? 'active' : 'inactive'
-                                }
-                                key={i}>
-                                {tab.name}
-                              </span>
-                            );
-                          })}
+                      <div className="download-container">
+                        <div className="option-selections">
+                          {KPITabs?.length &&
+                            KPITabs.map(function (tab, i) {
+                              return (
+                                <span
+                                  onClick={() => setKPITab(tab.name)}
+                                  className={
+                                    tab.name === kpiTab ? 'active' : 'inactive'
+                                  }
+                                  key={i}>
+                                  {tab.name}
+                                </span>
+                              );
+                            })}
+                        </div>
+                        <div className="download-icon">
+                          <img src={download} alt="icon"></img>
+                        </div>
                       </div>
                     </div>
                   </div>

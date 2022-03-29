@@ -116,7 +116,8 @@ const Dashboardcards = ({ dashboarddata, setChange }) => {
             return (
               <Link
                 to={`/dashboard/${dashboard.id}/deepdrills/`}
-                className="dashboardcard">
+                className="dashboardcard"
+                key={dashboard?.id}>
                 <div>
                   <div className="header-card">
                     <div className="header-content">

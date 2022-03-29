@@ -5,6 +5,8 @@ import { useHistory, useLocation } from 'react-router-dom';
 import Search from '../../assets/images/search.svg';
 
 import Fuse from 'fuse.js';
+
+import { v4 as uuidv4 } from 'uuid';
 import { CustomTooltip } from '../../utils/tooltip-helper';
 import { debuncerReturn } from '../../utils/simple-debouncer';
 
@@ -242,7 +244,7 @@ const DataSourceFilter = ({
           datasourceType.length !== 0 ? (
             datasourceType.map((type) => {
               return (
-                <div className="form-check check-box" key={type?.id}>
+                <div className="form-check check-box" key={uuidv4()}>
                   <input
                     className="form-check-input"
                     type="checkbox"

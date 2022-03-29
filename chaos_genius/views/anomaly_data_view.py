@@ -397,6 +397,10 @@ def kpi_anomaly_retraining(kpi_id):
 
 @blueprint.route("/<int:kpi_id>/download_anomaly_data", methods=["GET"])
 def download_anomaly_data(kpi_id):
+    """API Endpoint to download overall KPI anomaly data in CSV form.
+
+    Data is downloaded for the last 60 days by default
+    """
     try:
         data_points = get_overall_data_points(kpi_id)
         if not data_points:

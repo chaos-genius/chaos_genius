@@ -13,8 +13,9 @@ services:
   chaosgenius-server:
     container_name: chaosgenius-server
     build: .
-    command: sh setup/run-backend-docker.sh
+    command: sh setup/run-backend-docker.sh --reload
     volumes:
+      - ./:/usr/src/app/
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - chaosgenius-db
@@ -111,6 +112,9 @@ services:
     container_name: chaosgenius-scheduler
     build: .
     command: celery -A run.celery beat --loglevel=DEBUG
+    volumes:
+      - ./:/usr/src/app/
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - IN_DOCKER=True
       - AIRBYTE_ENABLED=${AIRBYTE_ENABLED}
@@ -146,6 +150,9 @@ services:
     container_name: chaosgenius-worker-analytics
     build: .
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
+    volumes:
+      - ./:/usr/src/app/
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - IN_DOCKER=True
       - AIRBYTE_ENABLED=${AIRBYTE_ENABLED}
@@ -198,6 +205,9 @@ services:
     container_name: chaosgenius-worker-alerts
     build: .
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
+    volumes:
+      - ./:/usr/src/app/
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - IN_DOCKER=True
       - AIRBYTE_ENABLED=${AIRBYTE_ENABLED}

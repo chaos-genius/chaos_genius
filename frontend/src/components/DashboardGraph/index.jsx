@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { useSelector, useDispatch } from 'react-redux';
-
+import { v4 as uuidv4 } from 'uuid';
 import Select from 'react-select';
 
 import DashboardTable from '../DashboardTable';
@@ -552,6 +552,7 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
                                       className={
                                         activeDimension === data ? 'active' : ''
                                       }
+                                      key={uuidv4()}
                                       onClick={() => {
                                         store.dispatch({
                                           type: 'RESET_DASHBOARD_RCA'

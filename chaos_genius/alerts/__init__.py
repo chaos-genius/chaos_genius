@@ -1,5 +1,5 @@
+"""Alerting logic, email/slack formats and other utilities."""
 import logging
-from datetime import date
 from typing import List, Tuple
 
 from chaos_genius.alerts.anomaly_alerts import AnomalyAlertController
@@ -13,7 +13,7 @@ logger = logging.getLogger()
 
 
 def check_and_trigger_alert(alert_id):
-    """Check the alert and trigger the notification if found
+    """Check the alert and trigger the notification if found.
 
     Args:
         alert_id (int): alert id
@@ -44,39 +44,41 @@ def check_and_trigger_alert(alert_id):
         alert_info.alert_type == "KPI Alert" and alert_info.kpi_alert_type == "Anomaly"
     ):
         anomaly_obj = AnomalyAlertController(alert_info.as_dict)
-        return anomaly_obj.check_and_prepare_alert()
+        return anomaly_obj.check_and_send_alert()
     elif alert_info.alert_type == "KPI Alert" and alert_info.kpi_alert_type == "Static":
-        static_kpi_alert = StaticKpiAlertController(alert_info.as_dict)
+        StaticKpiAlertController(alert_info.as_dict)
 
     return True
 
 
 def trigger_anomaly_alerts_for_kpi(
-    kpi_obj: Kpi, end_date: date
-) -> Tuple[List[int], List[int]]:
+    kpi_obj: Kpi,
+) -> Tuple[List[int], List[Tuple[int, Exception]]]:
     """Triggers anomaly alerts starting from end_date.
 
     Args:
         kpi_obj (Kpi): Object of kpi for which alerts are to be triggered
-        end_date (dateimte.datetime): Datetime object containing the upper bound of anomaly date values
+        end_date (dateimte.datetime): Datetime object containing the upper bound of
+            anomaly date values
 
     Returns:
         List[int]: List of alert IDs for which alert messages were successfully sent
-        List[int]: List of alert IDs for which alert failed
+        List[Tuple[int, Exception]]: List of alert IDs and exceptions for which alert
+            failed
     """
-    success_alerts = []
-    errors = []
+    success_alerts: List[int] = []
+    errors: List[Tuple[int, Exception]] = []
     alerts = Alert.query.filter(
-        Alert.kpi == kpi_obj.id, Alert.active == True, Alert.alert_status == True
+        Alert.kpi == kpi_obj.id,
+        Alert.active == True,  # noqa: E712
+        Alert.alert_status == True,  # noqa: E712
     ).all()
     for alert in alerts:
         try:
-            anomaly_obj = AnomalyAlertController(
-                alert.as_dict, anomaly_end_date=end_date
-            )
-            anomaly_obj.check_and_prepare_alert()
+            anomaly_obj = AnomalyAlertController(alert.as_dict)
+            anomaly_obj.check_and_send_alert()
             success_alerts.append(alert.id)
         except Exception as e:
             logger.error(f"Error running alert for Alert ID: {alert.id}", exc_info=e)
-            errors.append(alert.id)
+            errors.append((alert.id, e))
     return success_alerts, errors

@@ -1,20 +1,15 @@
+"""Utilities for sending emails."""
+import logging
 import smtplib
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import logging
 from typing import List
 
-from chaos_genius.alerts.alert_channel_creds import get_creds
+from chaos_genius.alerts.alert_channel_creds import get_email_creds
 
 # TODO: Need little refactoring
 
-
-EMAIL_HOST = None
-EMAIL_HOST_PORT = None
-EMAIL_HOST_USER = None
-EMAIL_HOST_PASSWORD = None
-EMAIL_SENDER = None
 DEBUG = False
 
 TEMPLATE_DIR = "chaos_genius/alerts/templates"
@@ -24,8 +19,8 @@ EMAIL_TEMPLATE_MAPPING = {"STATIC_ALERT": "static_alert.html"}
 logger = logging.getLogger(__name__)
 
 
-def init_smtp_server():
-    """Initiate the SMTP server
+def init_smtp_server(host: str, port: int, user: str, password: str):
+    """Initiate the SMTP server.
 
     Raises:
         Exception: Raise if env variable not found
@@ -34,41 +29,50 @@ def init_smtp_server():
     Returns:
         obj: SMTP server object
     """
-    if not (EMAIL_HOST and EMAIL_HOST_PASSWORD and EMAIL_HOST_USER):
-        raise Exception("SMTP ENV Variable not found...")
-
     retry_count = 0
 
-    def connect_smtp(retry_count):
-        server = None
+    def connect_smtp(retry_count: int) -> smtplib.SMTP:
         try:
             retry_count += 1
-            server = smtplib.SMTP(EMAIL_HOST, EMAIL_HOST_PORT)
+            server = smtplib.SMTP(host, port)
             server.ehlo()
             server.starttls()
             # stmplib docs recommend calling ehlo() before & after starttls()
             server.ehlo()
-            server.login(EMAIL_HOST_USER, EMAIL_HOST_PASSWORD)
-        except Exception as err_msg:
-            print("Error: ", err_msg)
-            print("Retrying again to connect...")
+            server.login(user, password)
+        except smtplib.SMTPException as e:
+            logger.error("Error in initializing SMTP connection", exc_info=e)
             if retry_count < 4:
+                logger.warn("Retrying SMTP connection")
                 server = connect_smtp(retry_count)
+            else:
+                raise
         return server
 
-    server = connect_smtp(retry_count)
-    if not server:
-        raise Exception("SMTP Connection Failed...")
-    return server
+    return connect_smtp(retry_count)
 
 
-def send_email(recipient_emails: List[str], message: MIMEMultipart, count=0):
+def send_email(
+    recipient_emails: List[str],
+    message: MIMEMultipart,
+    host: str,
+    port: int,
+    user: str,
+    password: str,
+    sender: str,
+    count=0,
+):
     """Send the email to the provided recipients.
 
     Args:
-        recipient_emails (list): List of emails
-        message (MIMEMultipart): email MIMEMultipart object
-        count (int, optional): Retry count for the emails. Defaults to 0.
+        recipient_emails: List of emails
+        message: email MIMEMultipart object
+        host: hostname of SMTP server
+        port: port number of SMTP server
+        user: username to authenticate to SMTP server
+        password: password to authenticate to SMTP server
+        sender: email sender
+        count: Retry count for the emails. Defaults to 0
     """
     count += 1
     try:
@@ -78,33 +82,19 @@ def send_email(recipient_emails: List[str], message: MIMEMultipart, count=0):
         else:
             toaddr = recipient_emails
 
-        server = init_smtp_server()
-        server.sendmail(EMAIL_SENDER, toaddr, message.as_string())
+        server = init_smtp_server(host, port, user, password)
+        server.sendmail(sender, toaddr, message.as_string())
         server.quit()
         logger.info("Email sent to " + ", ".join(toaddr))
     except smtplib.SMTPServerDisconnected:
         logger.info(f"Retry ({count}) for the email")
         if count < 3:
-            send_email(recipient_emails, message, count)
+            send_email(
+                recipient_emails, message, host, port, user, password, sender, count
+            )
         else:
-            raise Exception("Email Sending Failed after max retries")
-
-
-def initialize_env_variables():
-    global EMAIL_HOST
-    global EMAIL_HOST_PORT
-    global EMAIL_HOST_USER
-    global EMAIL_HOST_PASSWORD
-    global EMAIL_SENDER
-    global DEBUG
-    creds = get_creds("email")
-    (
-        EMAIL_HOST,
-        EMAIL_HOST_PORT,
-        EMAIL_HOST_USER,
-        EMAIL_HOST_PASSWORD,
-        EMAIL_SENDER,
-    ) = creds
+            logger.error("Email Sending Failed after max retries")
+            raise
 
 
 def send_static_alert_email(
@@ -119,10 +109,10 @@ def send_static_alert_email(
         files (list, optional): List of the files with the file name and file data as
             base64. Defaults to [].
     """
-    initialize_env_variables()
+    host, port, user, password, sender = get_email_creds()
 
     message = MIMEMultipart()
-    message["From"] = EMAIL_SENDER
+    message["From"] = sender
     message["To"] = ",".join(recipient_emails)
     message["Subject"] = subject
 
@@ -139,4 +129,4 @@ def send_static_alert_email(
         attachment["Content-Disposition"] = 'attachment; filename="{}"'.format(fname)
         message.attach(attachment)
 
-    send_email(recipient_emails, message)
+    send_email(recipient_emails, message, host, port, user, password, sender)

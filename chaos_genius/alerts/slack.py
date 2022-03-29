@@ -1,10 +1,11 @@
+"""Utilities for sending slack alert messages."""
 import logging
 from typing import List, Optional
 
 from slack_sdk.webhook.client import WebhookClient
 
 import chaos_genius.alerts.anomaly_alerts as anomaly_alerts
-from chaos_genius.alerts.alert_channel_creds import get_creds
+from chaos_genius.alerts.alert_channel_creds import get_slack_creds
 from chaos_genius.alerts.utils import webapp_url_prefix
 
 logger = logging.getLogger(__name__)
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 def get_webhook_client() -> WebhookClient:
     """Initializes a Slack Webhook client."""
-    url = get_creds("slack")
+    url = get_slack_creds()
     return WebhookClient(url)
 
 

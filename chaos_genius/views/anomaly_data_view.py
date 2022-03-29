@@ -386,6 +386,8 @@ def kpi_anomaly_retraining(kpi_id):
 def download_anomaly_data(kpi_id):
     try:
         data_points = get_overall_data_points(kpi_id)
+        if not data_points:
+            raise Exception(f"No anomaly data found for KPI id {kpi_id}")
         output_csv_obj = io.StringIO()
         csv_headers = ["datetime",
                        "value",
@@ -483,6 +485,8 @@ def convert_to_graph_json(
 
 def get_overall_data_points(kpi_id, n=60):
     kpi_info = get_kpi_data_from_id(kpi_id)
+    if not kpi_info["anomaly_params"]:
+        return None
 
     end_date = get_anomaly_output_end_date(kpi_info)
 

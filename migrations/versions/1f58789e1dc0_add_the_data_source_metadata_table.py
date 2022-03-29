@@ -8,7 +8,7 @@ Create Date: 2022-03-25 10:50:05.655412
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
-from chaos_genius.commands import _fetch_metadata
+from chaos_genius.jobs import metadata_prefetch_daily_scheduler
 
 # revision identifiers, used by Alembic.
 revision = '1f58789e1dc0'
@@ -30,7 +30,12 @@ def upgrade():
     )
     op.create_index(op.f('ix_data_source_metadata_data_source_id'), 'data_source_metadata', ['data_source_id'], unique=False)
     op.create_index(op.f('ix_data_source_metadata_metadata_type'), 'data_source_metadata', ['metadata_type'], unique=False)
-    _fetch_metadata(0)
+
+    try:
+        metadata_prefetch_daily_scheduler.delay()
+    except Exception as e:
+        print(e)
+
     # ### end Alembic commands ###
 
 

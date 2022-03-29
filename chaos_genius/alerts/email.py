@@ -8,8 +8,6 @@ from typing import List
 
 from chaos_genius.alerts.alert_channel_creds import get_email_creds
 
-# TODO: Need little refactoring
-
 DEBUG = False
 
 TEMPLATE_DIR = "chaos_genius/alerts/templates"

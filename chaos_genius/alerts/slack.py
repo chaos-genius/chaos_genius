@@ -1,6 +1,6 @@
 """Utilities for sending slack alert messages."""
 import logging
-from typing import List, Optional
+from typing import List, Optional, Sequence
 
 from slack_sdk.webhook.client import WebhookClient
 
@@ -26,7 +26,10 @@ def anomaly_alert_slack(
     overall_count: int,
     subdim_count: int,
 ) -> str:
-    """Sends an anomaly alert on slack."""
+    """Sends an anomaly alert on slack.
+
+    Returns an empty string if successful or the error as a string if not.
+    """
     client = get_webhook_client()
     response = client.send(
         blocks=[
@@ -167,7 +170,7 @@ def event_alert_slack(alert_name, alert_frequency, alert_message, alert_overview
 
 
 def _format_slack_anomalies(
-    top10: "List[anomaly_alerts.AnomalyPointFormatted]",
+    top10: "Sequence[anomaly_alerts.AnomalyPointFormatted]",
     kpi_name: Optional[str] = None,
     include_kpi_link: bool = True,
 ) -> str:
@@ -197,8 +200,15 @@ def _format_slack_anomalies(
 
 
 def alert_digest_slack_formatted(
-    frequency: str, top10: List[dict], overall_count: int, subdim_count: int
-):
+    frequency: str,
+    top10: "Sequence[anomaly_alerts.AnomalyPointFormatted]",
+    overall_count: int,
+    subdim_count: int,
+) -> str:
+    """Sends an anomaly digest on slack.
+
+    Returns an empty string if successful or the error as a string if not.
+    """
     client = get_webhook_client()
     if not client:
         raise Exception("Slack not configured properly.")
@@ -228,8 +238,11 @@ def alert_digest_slack_formatted(
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"- Total alerts generated (Overall KPI): *{overall_count}*\n"
-                    f"- Total alerts generated (including subdimenions): *{subdim_count + overall_count}*\n",
+                    "text": (
+                        f"- Total alerts generated (Overall KPI): *{overall_count}*\n"
+                        "- Total alerts generated (including subdimenions): "
+                        f"*{subdim_count + overall_count}*\n"
+                    ),
                 },
             },
             {
@@ -266,9 +279,9 @@ def alert_digest_slack_formatted(
     )
 
     if response.body != "ok":
-        print(response.body)
+        return response.body
 
-    return response.body
+    return ""
 
 
 def alert_table_sender(client, table_data):

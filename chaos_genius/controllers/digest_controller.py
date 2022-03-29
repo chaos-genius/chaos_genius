@@ -1,40 +1,38 @@
 import datetime
 from collections import defaultdict
-from typing import DefaultDict, List
+from typing import DefaultDict, Dict, List
 
-from chaos_genius.alerts.utils import change_message_from_percent
-from chaos_genius.alerts.constants import ( 
-    ALERT_DATE_FORMAT, 
+from chaos_genius.alerts.constants import (
+    ALERT_DATE_FORMAT,
     ALERT_DATETIME_FORMAT,
     DIGEST_DATETIME_FORMAT,
-    OVERALL_KPI_SERIES_TYPE_REPR
+    OVERALL_KPI_SERIES_TYPE_REPR,
 )
+from chaos_genius.alerts.utils import change_message_from_percent
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
-from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
-from typing import Iterator
 
 
-def get_alert_kpi_configurations(data):
-
-    alert_config_cache = dict()
-    alert_conf_ids = list(set([alert.alert_conf_id for alert in data]))
+def get_alert_kpi_configurations(triggered_alerts: List[TriggeredAlerts]):
+    """Gets all alert and KPI configs for given triggered alerts."""
+    alert_conf_ids = list(set([alert.alert_conf_id for alert in triggered_alerts]))
     alert_confs = Alert.query.filter(Alert.id.in_(alert_conf_ids)).all()
-    alert_config_cache = {alert.id: alert.as_dict for alert in alert_confs}
+    alert_config_cache: Dict[int, Alert] = {
+        alert.id: alert for alert in alert_confs
+    }
 
-    kpi_cache = dict()
     kpi_ids = list(
         set(
             [
                 alert.alert_metadata.get("kpi")
-                for alert in data
+                for alert in triggered_alerts
                 if alert.alert_metadata.get("kpi") is not None
             ]
         )
     )
     kpis = Kpi.query.filter(Kpi.id.in_(kpi_ids)).all()
-    kpi_cache = {kpi.id: kpi.as_dict for kpi in kpis}
+    kpi_cache: Dict[int, Kpi] = {kpi.id: kpi for kpi in kpis}
 
     return alert_config_cache, kpi_cache
 
@@ -112,7 +110,9 @@ def _preprocess_anomaly_alerts(anomaly_alerts_data: list):
             if exact_time is None:
                 point["date_only"] = "Older Alerts"
             else:
-                exact_time = datetime.datetime.strptime(exact_time, ALERT_DATETIME_FORMAT)
+                exact_time = datetime.datetime.strptime(
+                    exact_time, ALERT_DATETIME_FORMAT
+                )
                 point["date_only"] = exact_time.strftime(ALERT_DATE_FORMAT)
 
     _add_nl_messages_anomaly_alerts(anomaly_alerts_data)
@@ -121,7 +121,9 @@ def _preprocess_anomaly_alerts(anomaly_alerts_data: list):
 def _preprocess_event_alerts(event_alerts_data: list):
     for triggered_alert in event_alerts_data:
         new_time = triggered_alert.created_at.strftime(DIGEST_DATETIME_FORMAT)
-        triggered_alert.date_only = triggered_alert.created_at.strftime(ALERT_DATE_FORMAT)
+        triggered_alert.date_only = triggered_alert.created_at.strftime(
+            ALERT_DATE_FORMAT
+        )
         triggered_alert.created_at = new_time
 
 
@@ -148,4 +150,3 @@ def get_digest_view_data(triggered_alert_id=None, include_subdims: bool = False)
     _preprocess_event_alerts(event_alerts_data)
 
     return anomaly_alerts_data, event_alerts_data
-

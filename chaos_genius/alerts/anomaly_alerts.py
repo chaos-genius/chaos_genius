@@ -4,7 +4,7 @@ import heapq
 import io
 import logging
 from copy import deepcopy
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Sequence, Tuple, TypeVar, Union
 
 import pandas as pd
 from pydantic import BaseModel, validator
@@ -158,10 +158,14 @@ class AnomalyPoint(AnomalyPointOriginal):
 
 
 class AnomalyPointFormatted(AnomalyPoint):
-    """Anomaly point data with formatting used in templates (email, slack, etc)."""
+    """Anomaly point data with formatting used in templates (email, slack, etc).
+
+    Also used in digests as a representation of points in TriggeredAlerts.
+    """
 
     kpi_id: int
     kpi_name: str
+    alert_name: str
 
     formatted_date: str
     formatted_change_percent: str
@@ -172,6 +176,7 @@ class AnomalyPointFormatted(AnomalyPoint):
         time_series_frequency: Optional[str],
         kpi_id: int,
         kpi_name: str,
+        alert_name: str,
     ) -> "AnomalyPointFormatted":
         """Constructs a formatted point from an AnomalyPoint."""
         dt_format = ALERT_READABLE_DATETIME_FORMAT
@@ -190,6 +195,7 @@ class AnomalyPointFormatted(AnomalyPoint):
             **point.dict(),
             kpi_id=kpi_id,
             kpi_name=kpi_name,
+            alert_name=alert_name,
             formatted_date=formatted_date,
             formatted_change_percent=str(formatted_change_percent),
         )
@@ -450,7 +456,9 @@ class AnomalyAlertController:
         overall_count, subdim_count = _count_anomalies(formatted_anomaly_data)
 
         top_anomalies_ = deepcopy(_top_anomalies(formatted_anomaly_data, 5))
-        top_anomalies_ = _format_anomaly_point_for_template(top_anomalies_, kpi)
+        top_anomalies_ = _format_anomaly_point_for_template(
+            top_anomalies_, kpi, self.alert_info["alert_name"]
+        )
 
         return top_anomalies_, overall_count, subdim_count
 
@@ -594,25 +602,29 @@ def _make_anomaly_data_csv(anomaly_points: List[AnomalyPoint]) -> str:
 
 
 def _format_anomaly_point_for_template(
-    points: List[AnomalyPoint], kpi: Kpi
+    points: List[AnomalyPoint], kpi: Kpi, alert_name: str
 ) -> List[AnomalyPointFormatted]:
     """Formats fields of each point, to be used in alert templates."""
     return list(
         map(
             lambda point: AnomalyPointFormatted.from_point(
-                point, kpi.anomaly_params.get("frequency"), kpi.id, kpi.name
+                point, kpi.anomaly_params.get("frequency"), kpi.id, kpi.name, alert_name
             ),
             points,
         )
     )
 
 
-def _top_anomalies(points: List[AnomalyPoint], n=10) -> List[AnomalyPoint]:
+# ref: https://stackoverflow.com/a/53287607/11199009
+TAnomalyPoint = TypeVar("TAnomalyPoint", bound=AnomalyPointOriginal)
+
+
+def _top_anomalies(points: Sequence[TAnomalyPoint], n=10) -> Sequence[TAnomalyPoint]:
     """Returns top n anomalies according to severity."""
     return heapq.nlargest(n, points, key=lambda point: point.severity)
 
 
-def _count_anomalies(points: List[AnomalyPoint]) -> Tuple[int, int]:
+def _count_anomalies(points: Sequence[TAnomalyPoint]) -> Tuple[int, int]:
     """Returns a count of overall anomalies and subdim anomalies."""
     total = len(points)
     overall = sum(
@@ -620,3 +632,20 @@ def _count_anomalies(points: List[AnomalyPoint]) -> Tuple[int, int]:
     )
     subdims = total - overall
     return overall, subdims
+
+
+def get_top_anomalies_and_counts(
+    formatted_anomaly_data: Sequence[AnomalyPointFormatted],
+    n: int = 10,
+) -> Tuple[Sequence[AnomalyPointFormatted], int, int]:
+    """Returns top anomalies and counts of all anomalies for digests.
+
+    Arguments:
+        formatted_anomaly_data: list of `AnomalyPointFormatted`s
+        n: number of top anomalies to be returned
+    """
+    overall_count, subdim_count = _count_anomalies(formatted_anomaly_data)
+
+    top_anomalies_ = deepcopy(_top_anomalies(formatted_anomaly_data, n))
+
+    return top_anomalies_, overall_count, subdim_count

@@ -12,7 +12,7 @@ import '../../assets/styles/table.scss';
 
 import Toparrow from '../../assets/images/toparrow.svg';
 import Next from '../../assets/images/next.svg';
-
+import download from '../../assets/images/Download.svg';
 import * as am4core from '@amcharts/amcharts4/core';
 import * as am4charts from '@amcharts/amcharts4/charts';
 
@@ -40,6 +40,14 @@ import {
   HRN_PREFIXES
 } from '../../utils/Formatting/Numbers/humanReadableNumberFormatter';
 import store from '../../redux/store';
+import { BASE_URL } from '../../utils/url-helper';
+import { useToast } from 'react-toast-wnm';
+import { CustomContent, CustomActions } from '../../utils/toast-helper';
+import { downloadCsv } from '../../utils/download-helper';
+import {
+  graphDownloadCsv,
+  rcaDownloadCsv
+} from '../../redux/actions/Dashboard';
 
 highchartsMore(Highcharts);
 Highcharts.setOptions({
@@ -68,8 +76,12 @@ const customStyles = {
   })
 };
 
+const RESET_RCA_CSV = {
+  type: 'RCA_CSV_RESET'
+};
 const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
   const dispatch = useDispatch();
+  const toast = useToast();
 
   const [activeDimension, setActiveDimension] = useState('');
   const [collapse, setCollapse] = useState(true);
@@ -97,7 +109,7 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
     (state) => state.hierarchial
   );
 
-  const { rcaAnalysisData, rcaAnalysisLoading } = useSelector(
+  const { rcaAnalysisData, rcaAnalysisLoading, rcaCsv, graphCsv } = useSelector(
     (state) => state.dashboard
   );
 
@@ -129,6 +141,35 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
     }
     setTimeCutOptions(res);
   };
+
+  useEffect(() => {
+    if (rcaCsv && rcaCsv.length !== 0 && rcaCsv.status !== 'failure') {
+      downloadCsv(rcaCsv, `KPI-${kpi}-panel-chart-data.csv`);
+      store.dispatch(RESET_RCA_CSV);
+    } else if (rcaCsv && rcaCsv.length !== 0 && rcaCsv.status === 'failure') {
+      customToast({
+        type: 'failure',
+        header: 'Failed to Download',
+        description: rcaCsv.message
+      });
+      store.dispatch(RESET_RCA_CSV);
+    }
+    if (graphCsv && graphCsv.length !== 0 && graphCsv.status !== 'failure') {
+      downloadCsv(graphCsv, `KPI-${kpi}-panel-chart-data.csv`);
+      store.dispatch(RESET_RCA_CSV);
+    } else if (
+      graphCsv &&
+      graphCsv.length !== 0 &&
+      graphCsv.status === 'failure'
+    ) {
+      customToast({
+        type: 'failure',
+        header: 'Failed to Download',
+        description: graphCsv.message
+      });
+      store.dispatch(RESET_RCA_CSV);
+    }
+  }, [rcaCsv, graphCsv]);
 
   useEffect(() => {
     if (timeCutsData && timeCutsData.length) {
@@ -401,6 +442,43 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
       return demoChart;
     }
   };
+
+  const handleDownloadClick = (type) => {
+    if (type === 'rca') {
+      dispatch(rcaDownloadCsv(kpi));
+    } else {
+      dispatch(graphDownloadCsv(kpi));
+    }
+  };
+
+  const customToast = (data) => {
+    const { type, header, description } = data;
+    toast({
+      autoDismiss: true,
+      enableAnimation: true,
+      delay: type === 'success' ? '5000' : '30000',
+      backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
+      borderRadius: '6px',
+      color: '#222222',
+      position: 'bottom-right',
+      minWidth: '240px',
+      width: 'auto',
+      boxShadow: '4px 6px 32px -2px rgba(226, 226, 234, 0.24)',
+      padding: '17px 14px',
+      height: 'auto',
+      border: type === 'success' ? '1px solid #60ca9a' : '1px solid #FEF6F5',
+      type: type,
+      actions: <CustomActions />,
+      content: (
+        <CustomContent
+          header={header}
+          description={description}
+          failed={type === 'success' ? false : true}
+        />
+      )
+    });
+  };
+
   return (
     <>
       {anomalystatus.is_rca_precomputed ? (
@@ -430,17 +508,24 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
                     </p>
                   </div>
                 </div>
-                <Select
-                  value={monthWeek}
-                  options={timeCutOptions}
-                  styles={customStyles}
-                  classNamePrefix="selectcategory"
-                  placeholder="select"
-                  isSearchable={false}
-                  onChange={(e) => {
-                    setMonthWeek(e);
-                  }}
-                />
+                <div className="download-container">
+                  <Select
+                    value={monthWeek}
+                    options={timeCutOptions}
+                    styles={customStyles}
+                    classNamePrefix="selectcategory"
+                    placeholder="select"
+                    isSearchable={false}
+                    onChange={(e) => {
+                      setMonthWeek(e);
+                    }}
+                  />
+                  <div
+                    className="download-icon"
+                    onClick={() => handleDownloadClick('rca')}>
+                    <img src={download} alt="icon"></img>
+                  </div>
+                </div>
               </div>
               <div className="dashboard-aggregate-section">
                 <div className="aggregate-card-container">
@@ -587,18 +672,27 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
                       </ul>
                     </div>
                     <div className="common-option">
-                      <Select
-                        options={multidimensional}
-                        classNamePrefix="selectcategory"
-                        placeholder="Multidimensional"
-                        isSearchable={false}
-                        isDisabled={!configData?.multidim_status}
-                        value={dimension}
-                        onChange={(e) => {
-                          store.dispatch({ type: 'RESET_DASHBOARD_RCA' });
-                          handleDimensionChange(e);
-                        }}
-                      />
+                      <div className="download-container">
+                        <Select
+                          options={multidimensional}
+                          classNamePrefix="selectcategory"
+                          placeholder="Multidimensional"
+                          isSearchable={false}
+                          isDisabled={!configData?.multidim_status}
+                          value={dimension}
+                          onChange={(e) => {
+                            store.dispatch({ type: 'RESET_DASHBOARD_RCA' });
+                            handleDimensionChange(e);
+                          }}
+                        />
+                        <div
+                          className="download-icon"
+                          onClick={() => {
+                            //handleDownloadClick('waterfall');
+                          }}>
+                          <img src={download} alt="icon"></img>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   {rcaAnalysisData &&

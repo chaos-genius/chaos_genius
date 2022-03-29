@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useToast } from 'react-toast-wnm';
 import { useDispatch, useSelector } from 'react-redux';
-import Select from 'react-select';
+import Select, { components } from 'react-select';
 import Modal from 'react-modal';
 
 import Play from '../../assets/images/play-green.png';
@@ -163,6 +163,18 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
 
   const dispatchGetAllDashboard = () => {
     dispatch(getDashboard());
+  };
+  const CustomOption = (props) => {
+    const { data, innerRef, innerProps } = props;
+    if (data.value === 'Data Sync in Progress...') {
+      return (
+        <div ref={innerRef} {...innerProps} className="data-sync-cls">
+          <span>{data.label}</span>
+        </div>
+      );
+    }
+
+    return <components.Option {...props} />;
   };
 
   useEffect(() => {
@@ -447,12 +459,28 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   useEffect(() => {
     if (
       datasourceid &&
-      dataSourceHasSchema &&
       tableListOnSchemaLoading === false &&
       tableListOnSchema &&
       tableListOnSchema.table_names
     ) {
       var optionArr = [];
+      if (kpiFormData && kpiFormData.data && kpiFormData.data.length) {
+        const datasourceIndex = kpiFormData.data.findIndex((datasource) => {
+          return datasource.id === datasourceid;
+        });
+        if (datasourceIndex > -1) {
+          if (
+            kpiFormData.data[datasourceIndex]?.sync_status === 'In Progress'
+          ) {
+            optionArr.push({
+              index: -1,
+              value: 'Data Sync in Progress...',
+              label: 'Data Sync in Progress...',
+              isDisabled: true
+            });
+          }
+        }
+      }
       for (const [key, value] of Object.entries(
         tableListOnSchema.table_names
       )) {
@@ -517,6 +545,23 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   const schemaNameOption = () => {
     if (schemaNamesList && schemaNamesList.data) {
       var optionArr = [];
+      if (kpiFormData && kpiFormData.data && kpiFormData.data.length) {
+        const datasourceIndex = kpiFormData.data.findIndex((datasource) => {
+          return datasource.id === datasourceid;
+        });
+        if (datasourceIndex > -1) {
+          if (
+            kpiFormData.data[datasourceIndex]?.sync_status === 'In Progress'
+          ) {
+            optionArr.push({
+              index: -1,
+              value: 'Data Sync in Progress...',
+              label: 'Data Sync in Progress...',
+              isDisabled: true
+            });
+          }
+        }
+      }
       for (const [key, value] of Object.entries(schemaNamesList.data)) {
         optionArr.push({
           index: key,
@@ -563,42 +608,16 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
 
   const tableName = (e) => {
     setErrorMsg({ tablename: false });
-    if (!dataSourceHasSchema && kpiField && kpiField?.tables) {
-      var optionValueArr = [];
-      for (const [key, value] of Object.entries(kpiField.tables)) {
-        const valueData = e.value;
-        if (key === valueData) {
-          value.table_columns.forEach((data) => {
-            optionValueArr.push({
-              value: data.name,
-              label: data.name
-            });
-          });
-        }
-
-        setOption({ ...option, metricOption: optionValueArr });
-        setFormdata({
-          ...formdata,
-          tablename: valueData,
-          metriccolumns: '',
-          aggregate: '',
-          datetimecolumns: '',
-          dimensions: [],
-          dashboardNameList: []
-        });
-      }
-    } else if (dataSourceHasSchema) {
-      const valueData = e.value;
-      setFormdata({
-        ...formdata,
-        tablename: valueData,
-        metriccolumns: '',
-        aggregate: '',
-        datetimecolumns: '',
-        dimensions: []
-      });
-      dispatchGetTableInfoData(valueData);
-    }
+    const valueData = e.value;
+    setFormdata({
+      ...formdata,
+      tablename: valueData,
+      metriccolumns: '',
+      aggregate: '',
+      datetimecolumns: '',
+      dimensions: []
+    });
+    dispatchGetTableInfoData(valueData);
   };
 
   useEffect(() => {
@@ -626,7 +645,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   const dispatchGetTableInfoData = (table) => {
     const obj = {
       datasource_id: datasourceid,
-      schema: formdata.schemaName,
+      schema: dataSourceHasSchema ? formdata.schemaName : null,
       table_name: table
     };
     dispatch(getTableinfoData(obj));
@@ -938,7 +957,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
               isDisabled={
                 data[2] === 'edit' ? editableStatus('data_source') : false
               }
-              components={{ SingleValue: customSingleValue }}
+              components={{
+                SingleValue: customSingleValue
+              }}
               onChange={(e) => formOption(e)}
             />
             {errorMsg.datasource === true ? (
@@ -1043,6 +1064,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                         ? 'Loading...'
                         : 'No Options';
                     }}
+                    components={{
+                      Option: CustomOption
+                    }}
                     classNamePrefix="selectcategory"
                     placeholder="Select Schema Name"
                     onChange={(e) => schemaName(e)}
@@ -1066,6 +1090,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                       value: formdata.tablename
                     }
                   }
+                  components={{
+                    Option: CustomOption
+                  }}
                   noOptionsMessage={() => {
                     return tableListOnSchemaLoading ||
                       tableInfoLoading ||

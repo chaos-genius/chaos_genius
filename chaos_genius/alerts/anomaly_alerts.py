@@ -602,8 +602,8 @@ def _make_anomaly_data_csv(anomaly_points: List[AnomalyPoint]) -> str:
 
 
 def _format_anomaly_point_for_template(
-    points: List[AnomalyPoint], kpi: Kpi, alert_name: str
-) -> List[AnomalyPointFormatted]:
+    points: Sequence[AnomalyPoint], kpi: Kpi, alert_name: str
+) -> Sequence[AnomalyPointFormatted]:
     """Formats fields of each point, to be used in alert templates."""
     return list(
         map(

@@ -1,4 +1,9 @@
-"""Alerting logic, email/slack formats and other utilities."""
+"""Alerting logic, email/slack formats and other utilities.
+
+Most of the code in this module has extensive type annotation. Please use the Pylance
+VS Code extension (or the Pyright equivalent in other editors) along with flake8 when
+developing.
+"""
 import logging
 from typing import List, Tuple
 
@@ -12,7 +17,7 @@ from chaos_genius.databases.models.kpi_model import Kpi
 logger = logging.getLogger()
 
 
-def check_and_trigger_alert(alert_id):
+def check_and_trigger_alert(alert_id: int):
     """Check the alert and trigger the notification if found.
 
     Args:

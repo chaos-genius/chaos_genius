@@ -51,22 +51,16 @@ def run_anomaly_for_kpi(
 
     logger.info("Selecting end date.")
 
-    if (
-        end_date is None
-        and kpi_info["scheduler_params"]["scheduler_frequency"] == "D"
-    ):
+    if end_date is None and kpi_info["scheduler_params"]["scheduler_frequency"] == "D":
         # by default we always calculate for n-days_offset_for_analytics
-        end_date = datetime.today().date() - timedelta(
-            days=(DAYS_OFFSET_FOR_ANALTYICS)
-        )
+        end_date = datetime.today().date() - timedelta(days=(DAYS_OFFSET_FOR_ANALTYICS))
         # Check if data is available or not then try for n-days_offset_for_analytics-1
         if not _is_data_present_for_end_date(kpi_info, end_date):
             end_date = end_date - timedelta(days=1)
             logger.info("Decreasing end date by 1.")
 
     elif (
-        end_date is None
-        and kpi_info["scheduler_params"]["scheduler_frequency"] == "H"
+        end_date is None and kpi_info["scheduler_params"]["scheduler_frequency"] == "H"
     ):
         end_date = datetime.today().date()
 
@@ -221,7 +215,9 @@ def get_last_anomaly_timestamp(
 
 def get_active_kpi_from_id(kpi_id: int) -> Optional[Kpi]:
     """Returns a kpi obj for an active Kpi using the input kpi id."""
-    kpi_obj = Kpi.query.filter(Kpi.active is True, Kpi.id == kpi_id).first()
+    kpi_obj = Kpi.query.filter(
+        Kpi.active == True, Kpi.id == kpi_id  # noqa: E712
+    ).first()
 
     return kpi_obj
 

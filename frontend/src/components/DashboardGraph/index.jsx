@@ -12,7 +12,7 @@ import '../../assets/styles/table.scss';
 
 import Toparrow from '../../assets/images/toparrow.svg';
 import Next from '../../assets/images/next.svg';
-
+import download from '../../assets/images/Download.svg';
 import * as am4core from '@amcharts/amcharts4/core';
 import * as am4charts from '@amcharts/amcharts4/charts';
 
@@ -430,17 +430,22 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
                     </p>
                   </div>
                 </div>
-                <Select
-                  value={monthWeek}
-                  options={timeCutOptions}
-                  styles={customStyles}
-                  classNamePrefix="selectcategory"
-                  placeholder="select"
-                  isSearchable={false}
-                  onChange={(e) => {
-                    setMonthWeek(e);
-                  }}
-                />
+                <div className="download-container">
+                  <Select
+                    value={monthWeek}
+                    options={timeCutOptions}
+                    styles={customStyles}
+                    classNamePrefix="selectcategory"
+                    placeholder="select"
+                    isSearchable={false}
+                    onChange={(e) => {
+                      setMonthWeek(e);
+                    }}
+                  />
+                  <div className="download-icon">
+                    <img src={download} alt="icon"></img>
+                  </div>
+                </div>
               </div>
               <div className="dashboard-aggregate-section">
                 <div className="aggregate-card-container">
@@ -587,18 +592,23 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
                       </ul>
                     </div>
                     <div className="common-option">
-                      <Select
-                        options={multidimensional}
-                        classNamePrefix="selectcategory"
-                        placeholder="Multidimensional"
-                        isSearchable={false}
-                        isDisabled={!configData?.multidim_status}
-                        value={dimension}
-                        onChange={(e) => {
-                          store.dispatch({ type: 'RESET_DASHBOARD_RCA' });
-                          handleDimensionChange(e);
-                        }}
-                      />
+                      <div className="download-container">
+                        <Select
+                          options={multidimensional}
+                          classNamePrefix="selectcategory"
+                          placeholder="Multidimensional"
+                          isSearchable={false}
+                          isDisabled={!configData?.multidim_status}
+                          value={dimension}
+                          onChange={(e) => {
+                            store.dispatch({ type: 'RESET_DASHBOARD_RCA' });
+                            handleDimensionChange(e);
+                          }}
+                        />
+                        <div className="download-icon">
+                          <img src={download} alt="icon"></img>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   {rcaAnalysisData &&

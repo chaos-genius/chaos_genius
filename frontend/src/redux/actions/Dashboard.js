@@ -15,7 +15,10 @@ import {
   DASHBOARDDIMENSIONFAILURE,
   DASHBOARDHIERARCHICALFAILURE,
   DASHBOARDHIERARCHICALSUCCESS,
-  DASHBOARDHIERARCHICALREQUEST
+  DASHBOARDHIERARCHICALREQUEST,
+  RCADOWNLOADREQUEST,
+  RCADOWNLOADSUCCESS,
+  RCADOWNLOADFAILURE
 } from './ActionConstants';
 import { getRequest } from '../../utils/http-helper';
 
@@ -157,6 +160,39 @@ export const getAllDashboardHierarchical = (id, params) => {
       dispatch(getAllHierarchicalFailure());
     } else if (data && status === 200) {
       dispatch(getAllHierarchicalSuccess(data.data));
+    }
+  };
+};
+
+export const rcaDownloadCsvRequest = () => {
+  return {
+    type: RCADOWNLOADREQUEST
+  };
+};
+
+export const rcaDownloadCsvSuccess = (response) => {
+  return {
+    type: RCADOWNLOADSUCCESS,
+    data: response
+  };
+};
+
+export const rcaDownloadCsvFailure = () => {
+  return {
+    type: RCADOWNLOADFAILURE
+  };
+};
+
+export const rcaDownloadCsv = (id) => {
+  return async (dispatch) => {
+    dispatch(rcaDownloadCsvRequest());
+    const { data, error, status } = await getRequest({
+      url: `${BASE_URL}/api/rca/${id}/download_chart_data`
+    });
+    if (error) {
+      dispatch(rcaDownloadCsvFailure());
+    } else if (data && status === 200) {
+      dispatch(rcaDownloadCsvSuccess(data));
     }
   };
 };

@@ -44,6 +44,7 @@ import { BASE_URL } from '../../utils/url-helper';
 import { useToast } from 'react-toast-wnm';
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
 import { downloadCsv } from '../../utils/download-helper';
+import { rcaDownloadCsv } from '../../redux/actions/Dashboard';
 
 highchartsMore(Highcharts);
 Highcharts.setOptions({
@@ -72,6 +73,9 @@ const customStyles = {
   })
 };
 
+const RESET_RCA_CSV = {
+  type: 'RCA_CSV_RESET'
+};
 const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
   const dispatch = useDispatch();
   const toast = useToast();
@@ -102,7 +106,7 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
     (state) => state.hierarchial
   );
 
-  const { rcaAnalysisData, rcaAnalysisLoading } = useSelector(
+  const { rcaAnalysisData, rcaAnalysisLoading, rcaCsv } = useSelector(
     (state) => state.dashboard
   );
 
@@ -134,6 +138,20 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
     }
     setTimeCutOptions(res);
   };
+
+  useEffect(() => {
+    if (rcaCsv && rcaCsv.length !== 0 && rcaCsv.status !== 'failure') {
+      downloadCsv(rcaCsv, `KPI-${kpi}-panel-chart-data.csv`);
+      store.dispatch(RESET_RCA_CSV);
+    } else if (rcaCsv && rcaCsv.length !== 0 && rcaCsv.status === 'failure') {
+      customToast({
+        type: 'failure',
+        header: 'Failed to Download',
+        description: rcaCsv.message
+      });
+      store.dispatch(RESET_RCA_CSV);
+    }
+  }, [rcaCsv]);
 
   useEffect(() => {
     if (timeCutsData && timeCutsData.length) {
@@ -407,22 +425,8 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
     }
   };
 
-  const handleDownloadClick = async () => {
-    let url = `${BASE_URL}/api/rca/${kpi}/download_chart_data`;
-    let result = await downloadCsv(kpi, url);
-    if (result?.status === 'failure') {
-      customToast({
-        type: 'failure',
-        header: 'Failed to Download',
-        description: result.message
-      });
-    } else {
-      const url = window.URL.createObjectURL(new Blob([result]));
-      const link = document.createElement('a');
-      link.setAttribute('download', `KPI-${kpi}-panel-chart-data.csv`);
-      link.href = url;
-      link.click();
-    }
+  const handleDownloadClick = () => {
+    dispatch(rcaDownloadCsv(kpi));
   };
 
   const customToast = (data) => {

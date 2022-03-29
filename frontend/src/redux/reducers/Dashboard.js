@@ -1,13 +1,20 @@
 import {
   DASHBOARDRCAANALYSISFAILURE,
   DASHBOARDRCAANALYSISREQUEST,
-  DASHBOARDRCAANALYSISSUCCESS
+  DASHBOARDRCAANALYSISSUCCESS,
+  RCADOWNLOADFAILURE,
+  RCADOWNLOADREQUEST,
+  RCADOWNLOADSUCCESS
 } from '../actions/ActionConstants';
+import { rcaDownloadCsv } from '../actions/Dashboard';
 
 const initialState = {
   rcaAnalysisData: [],
   rcaAnalysisLoading: true,
-  rcaAnalysisError: false
+  rcaAnalysisError: false,
+  rcaCsv: [],
+  rcaCsvLoading: false,
+  rcaCsvError: false
 };
 
 export const dashboard = (state = initialState, action) => {
@@ -28,6 +35,28 @@ export const dashboard = (state = initialState, action) => {
       return {
         rcaAnalysisLoading: false,
         rcaAnalysisError: true
+      };
+    }
+    case RCADOWNLOADREQUEST: {
+      return {
+        rcaCsvLoading: true
+      };
+    }
+    case RCADOWNLOADSUCCESS: {
+      return {
+        rcaCsv: action.data,
+        rcaCsvLoading: false
+      };
+    }
+    case RCADOWNLOADFAILURE: {
+      return {
+        rcaCsvError: true,
+        rcaCsvLoading: false
+      };
+    }
+    case 'RCA_CSV_RESET': {
+      return {
+        rcaCsv: []
       };
     }
     case 'RESET_DASHBOARD_RCA': {

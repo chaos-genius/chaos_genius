@@ -93,7 +93,7 @@ def kpi_aggregation(kpi_id, timeline="last_30_days"):
     return status, message, final_data
 
 
-def kpi_line_data(kpi_id):
+def kpi_line_data(kpi_id, download=False):
     """Get KPI line data."""
     final_data = []
     status = "success"
@@ -116,10 +116,15 @@ def kpi_line_data(kpi_id):
             raise ValueError("No data found.")
 
         final_data = data_point.data
-        for row in final_data:
-            row["date"] = convert_datetime_to_timestamp(
-                get_rca_date_from_string(row["date"])
-            )
+        if not download:
+            for row in final_data:
+                row["date"] = convert_datetime_to_timestamp(
+                    get_rca_date_from_string(row["date"])
+                )
+        else:
+            for row in final_data:
+                row["date"] = get_rca_date_from_string(row["date"])
+
     except Exception as err:  # noqa: B902
         logger.error(f"Error in KPI Line data retrieval: {err}", exc_info=1)
         status = "error"

@@ -127,17 +127,34 @@ def run_rca(kpi, end_date):
     click.echo(f"Completed the RCA for KPI ID: {kpi}.")
 
 
+def _fetch_metadata(id):
+    from chaos_genius.controllers.data_source_controller import get_data_source_list
+    from chaos_genius.controllers.data_source_metadata_controller import (
+        run_metadata_prefetch,
+    )
+
+    if id == 0:
+        to_run_ids = [data_source.id for data_source in get_data_source_list()]
+        click.echo(f"Fetching the metadata for all active datasources: {to_run_ids}")
+    else:
+        to_run_ids = [id]
+
+    for data_source_id in to_run_ids:
+        click.echo(f"Fetching the metadata for data source ID: {data_source_id}")
+        status = run_metadata_prefetch(data_source_id)
+        click.echo(
+            f"Completed the metadata fetch for data source ID: {data_source_id} with status: {status}."
+        )
+        
+
 @click.command()
 @with_appcontext
 @click.option('--id', required=True, type=int, help="Fetch the metadata of provided data source.")
 @time_my_func
 def fetch_metadata(id):
-    """Fetch the metadata of the given data source."""
-
-    click.echo(f"Fetching the metadata for data source ID: {id}")
-    from chaos_genius.controllers.data_source_metadata_controller import run_metadata_prefetch
-    status = run_metadata_prefetch(id)
-    click.echo(f"Completed the metadata fetch for data source ID: {id} with status: {status}.")
+    """Fetch the metadata of the given data source. if id is 0 run for all active datasources"""
+    _fetch_metadata(id)
+    
 
 
 @click.command()

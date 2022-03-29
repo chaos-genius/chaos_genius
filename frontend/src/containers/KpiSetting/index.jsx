@@ -42,16 +42,16 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
   }, [analystics]);
 
   const getAllDashboardSidebar = () => {
-    if (dashboardId) {
+    if (dashboardId !== null && dashboardId !== undefined) {
       dispatch(getDashboardSidebar({ dashboard_id: dashboardId }));
     } else {
-      dispatch(getDashboardSidebar({ dashboard_id: 1 }));
+      dispatch(getDashboardSidebar({ dashboard_id: 0 }));
     }
   };
 
   useEffect(() => {
     if (sidebarList && sidebarList.length !== 0 && onboarding) {
-      setKpi(sidebarList[0]?.id);
+      setKpi(sidebarList?.data?.[0]?.id);
     } else if (sidebarList && sidebarList.length !== 0) {
       setBreadCrumbs(
         sidebarList?.dashboards?.find(

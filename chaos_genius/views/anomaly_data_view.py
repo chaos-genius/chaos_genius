@@ -1,36 +1,37 @@
 # -*- coding: utf-8 -*-
 """anomaly data view."""
-from datetime import date, datetime, timedelta
 import time
 import io
 import csv
+from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple, cast
 
 from flask import Blueprint, current_app, jsonify, request, send_file
 from sqlalchemy import func, delete
+
 import pandas as pd
+from flask import Blueprint, current_app, jsonify, request
+from sqlalchemy import delete, func
 from sqlalchemy.orm.attributes import flag_modified
+
+from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
+from chaos_genius.core.rca.rca_utils.string_helpers import (
+    convert_query_string_to_user_string,
+)
 from chaos_genius.core.utils.round import round_number
+from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
+from chaos_genius.databases.models.kpi_model import Kpi
+from chaos_genius.databases.models.rca_data_model import RcaData
+from chaos_genius.extensions import db
 from chaos_genius.settings import (
     TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN,
     TOP_SUBDIMENSIONS_FOR_ANOMALY,
-)
-
-from chaos_genius.extensions import db
-from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
-from chaos_genius.databases.models.rca_data_model import RcaData
-from chaos_genius.databases.models.kpi_model import Kpi
-from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
-
-from chaos_genius.core.rca.rca_utils.string_helpers import (
-    convert_query_string_to_user_string,
 )
 from chaos_genius.utils.datetime_helper import (
     get_datetime_string_with_tz,
     get_lastscan_string_with_tz,
 )
-
 
 blueprint = Blueprint("anomaly_data", __name__)
 
@@ -49,6 +50,18 @@ def kpi_anomaly_detection(kpi_id):
     end_date = None
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
+
+        if not kpi_info["anomaly_params"]:
+            current_app.logger.info(f"Anomaly settings not configured for KPI ID: {kpi_id}")
+            return jsonify(
+                {
+                    "data": None,
+                    "msg": "",
+                    "anomaly_end_date": None,
+                    "last_run_time_anomaly": None,
+                }
+            )
+
         period = kpi_info["anomaly_params"]["anomaly_period"]
         hourly = kpi_info["anomaly_params"]["frequency"] == "H"
 

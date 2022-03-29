@@ -258,7 +258,12 @@ export const getSchemaAvailability = (option) => {
         dispatch(getSchemaNamelist(option));
       } else {
         dispatch(getAllSchemaAvailabilitySuccess(data));
-        dispatch(getAllKpiExplorerField(option));
+        dispatch(
+          getTableListOnSchema({
+            datasource_id: option.data_source_id,
+            schema: ''
+          })
+        );
       }
     }
   };

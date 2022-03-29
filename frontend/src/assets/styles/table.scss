@@ -94,6 +94,11 @@
             color: $red_variation_1;
           }
         }
+        .in-progress-status {
+          span {
+            color: #ed872d;
+          }
+        }
         .table-tips {
           display: flex;
           flex-direction: row;

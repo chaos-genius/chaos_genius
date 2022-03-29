@@ -11,6 +11,7 @@ import AlertActive from '../../assets/images/alert-active.svg';
 import DeleteActive from '../../assets/images/delete-active.svg';
 import Close from '../../assets/images/close.svg';
 import More from '../../assets/images/more.svg';
+import Sync from '../../assets/images/sync.svg';
 import Moreactive from '../../assets/images/more-active.svg';
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
 // import Viewlog from '../../assets/images/viewlog.svg';
@@ -94,7 +95,7 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
   };
 
   const handleSync = (datasource) => {
-    setSyncSchema(datasource);
+    dispatch(setSyncSchema(datasource));
   };
 
   const customToast = (data) => {
@@ -142,6 +143,25 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
         <tbody>
           {tableData && tableData.length !== 0
             ? tableData.map((datasource) => {
+                const dataSourceStatusObj = {
+                  className: 'live-status',
+                  status: 'Live'
+                };
+                if (datasource?.sync_status) {
+                  if (datasource.sync_status === 'Completed') {
+                    dataSourceStatusObj.className = 'live-status';
+                    dataSourceStatusObj.status = 'Live';
+                  } else if (datasource.sync_status === 'In Progress') {
+                    dataSourceStatusObj.className = 'in-progress-status';
+                    dataSourceStatusObj.status = 'In Progress';
+                  } else {
+                    dataSourceStatusObj.className = 'broken-status';
+                    dataSourceStatusObj.status = 'Broken';
+                  }
+                } else {
+                  dataSourceStatusObj.className = 'broken-status';
+                  dataSourceStatusObj.status = 'Broken';
+                }
                 return (
                   <tr key={uuidv4()}>
                     <td className="name-tooltip">
@@ -156,11 +176,8 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
                     </td>
                     <td>{datasource.kpi_count || '-'}</td>
                     <td>
-                      <div
-                        className={
-                          datasource.active ? 'live-status' : 'broken-status'
-                        }>
-                        <span>{datasource.active ? 'Live' : 'Broken'}</span>
+                      <div className={dataSourceStatusObj.className}>
+                        <span>{dataSourceStatusObj.status}</span>
                       </div>
                     </td>
                     <td className="date-column-formated">
@@ -209,13 +226,15 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
                               Set Alerts
                             </li>
                           </Link>
-                          <li
-                            onClick={() => {
-                              handleSync(datasource);
-                            }}>
-                            <img src={AlertActive} alt="Sync Schema" />
-                            Sync Schema
-                          </li>
+                          {datasource && !datasource?.is_third_party && (
+                            <li
+                              onClick={() => {
+                                handleSync(datasource);
+                              }}>
+                              <img src={Sync} alt="Sync Schema" />
+                              Sync Schema
+                            </li>
+                          )}
                           <Link to={`/datasource/edit/${datasource.id}`}>
                             <li>
                               <img
@@ -231,6 +250,7 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
                               Edit
                             </li>
                           </Link>
+
                           <li
                             className="delete-item"
                             onClick={() => {

@@ -164,14 +164,12 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   const dispatchGetAllDashboard = () => {
     dispatch(getDashboard());
   };
-
-  const dataSync = true;
   const CustomOption = (props) => {
     const { data, innerRef, innerProps } = props;
-    if (dataSync) {
+    if (data.value === 'Data Sync in Progress...') {
       return (
-        <div ref={innerRef} {...innerProps}>
-          I'm a custom link
+        <div ref={innerRef} {...innerProps} className="data-sync-cls">
+          <span>{data.label}</span>
         </div>
       );
     }
@@ -467,6 +465,23 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       tableListOnSchema.table_names
     ) {
       var optionArr = [];
+      if (kpiFormData && kpiFormData.data && kpiFormData.data.length) {
+        const datasourceIndex = kpiFormData.data.findIndex((datasource) => {
+          return datasource.id === datasourceid;
+        });
+        if (datasourceIndex > -1) {
+          if (
+            kpiFormData.data[datasourceIndex]?.sync_status === 'In Progress'
+          ) {
+            optionArr.push({
+              index: -1,
+              value: 'Data Sync in Progress...',
+              label: 'Data Sync in Progress...',
+              isDisabled: true
+            });
+          }
+        }
+      }
       for (const [key, value] of Object.entries(
         tableListOnSchema.table_names
       )) {
@@ -531,6 +546,23 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   const schemaNameOption = () => {
     if (schemaNamesList && schemaNamesList.data) {
       var optionArr = [];
+      if (kpiFormData && kpiFormData.data && kpiFormData.data.length) {
+        const datasourceIndex = kpiFormData.data.findIndex((datasource) => {
+          return datasource.id === datasourceid;
+        });
+        if (datasourceIndex > -1) {
+          if (
+            kpiFormData.data[datasourceIndex]?.sync_status === 'In Progress'
+          ) {
+            optionArr.push({
+              index: -1,
+              value: 'Data Sync in Progress...',
+              label: 'Data Sync in Progress...',
+              isDisabled: true
+            });
+          }
+        }
+      }
       for (const [key, value] of Object.entries(schemaNamesList.data)) {
         optionArr.push({
           index: key,
@@ -1060,6 +1092,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                         ? 'Loading...'
                         : 'No Options';
                     }}
+                    components={{
+                      Option: CustomOption
+                    }}
                     classNamePrefix="selectcategory"
                     placeholder="Select Schema Name"
                     onChange={(e) => schemaName(e)}
@@ -1083,6 +1118,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                       value: formdata.tablename
                     }
                   }
+                  components={{
+                    Option: CustomOption
+                  }}
                   noOptionsMessage={() => {
                     return tableListOnSchemaLoading ||
                       tableInfoLoading ||

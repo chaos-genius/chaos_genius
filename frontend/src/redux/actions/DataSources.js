@@ -237,9 +237,7 @@ export const setSyncSchema = (datasource) => {
     if (error) {
       dispatch(syncSchemaFailure());
     } else if (data && status === 200) {
-      dispatch(
-        syncSchemaSuccess({ ...data.data, data_source_id: datasource?.id })
-      );
+      dispatch(syncSchemaSuccess({ ...data, data_source_id: datasource?.id }));
     }
   };
 };

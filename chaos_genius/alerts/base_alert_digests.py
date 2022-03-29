@@ -5,7 +5,6 @@ from collections import defaultdict
 from typing import DefaultDict, Dict, List, Sequence, Set, Tuple
 
 from chaos_genius.alerts.anomaly_alerts import (
-    AnomalyPoint,
     AnomalyPointFormatted,
     get_top_anomalies_and_counts,
 )
@@ -13,7 +12,11 @@ from chaos_genius.alerts.constants import ALERT_DATE_FORMAT, FREQUENCY_DICT
 from chaos_genius.alerts.slack import alert_digest_slack_formatted
 from chaos_genius.alerts.utils import send_email_using_template, webapp_url_prefix
 from chaos_genius.controllers.config_controller import get_config_object
-from chaos_genius.controllers.digest_controller import get_alert_kpi_configurations
+from chaos_genius.controllers.digest_controller import (
+    extract_anomaly_points_from_triggered_alerts,
+    get_alert_kpi_configurations,
+    preprocess_triggered_alert,
+)
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
@@ -25,6 +28,7 @@ ALERT_ATTRIBUTES_MAPPER = {"daily": "daily_digest", "weekly": "weekly_digest"}
 
 class AlertDigestController:
     """Controller for anomaly alert digests."""
+
     def __init__(self, frequency: str):
         """Initializes an anomaly alert digests controller.
 
@@ -61,26 +65,14 @@ class AlertDigestController:
         )
 
         for triggered_alert in triggered_alerts:
-            alert_conf_id = triggered_alert.alert_conf_id
-            alert_conf = self.alert_config_cache[alert_conf_id]
+            triggered_alert = preprocess_triggered_alert(
+                triggered_alert, self.alert_config_cache, self.kpi_cache
+            )
 
-            kpi_id = alert_conf.kpi
-            kpi = self.kpi_cache[kpi_id] if kpi_id is not None else None
-
-            # TODO: make a dataclass for this
-            triggered_alert.kpi_id = kpi_id
-            triggered_alert.kpi_name = kpi.name if kpi is not None else "Doesn't Exist"
-            triggered_alert.alert_name = alert_conf.alert_name
-            triggered_alert.alert_channel = alert_conf.alert_channel
-
-            if not isinstance(alert_conf.alert_channel_conf, dict):
-                triggered_alert.alert_channel_conf = None
-            else:
-                triggered_alert.alert_channel_conf = getattr(
-                    alert_conf, "alert_channel_conf", {}
-                ).get(triggered_alert.alert_channel, None)
-
-            if getattr(alert_conf, ALERT_ATTRIBUTES_MAPPER[self.frequency]):
+            if getattr(
+                self.alert_config_cache[triggered_alert.alert_conf_id],
+                ALERT_ATTRIBUTES_MAPPER[self.frequency],
+            ):
                 if triggered_alert.alert_channel == "slack":
                     slack_digests.append(triggered_alert)
                 if triggered_alert.alert_channel == "email":
@@ -109,7 +101,9 @@ class AlertDigestController:
     def _get_top_anomalies_and_counts(
         self, triggered_alerts: List[TriggeredAlerts]
     ) -> Tuple[Sequence[AnomalyPointFormatted], int, int]:
-        points = _all_anomaly_points(triggered_alerts, self.kpi_cache)
+        points = extract_anomaly_points_from_triggered_alerts(
+            triggered_alerts, self.kpi_cache
+        )
         return get_top_anomalies_and_counts(points)
 
     def _send_email_digest(
@@ -163,24 +157,6 @@ class AlertDigestController:
             raise Exception(
                 f"(frequency: {self.frequency}) Error in sending slack digest: {err}"
             )
-
-
-def _all_anomaly_points(
-    triggered_alerts: List[TriggeredAlerts], kpi_cache: Dict[int, Kpi]
-) -> List[AnomalyPointFormatted]:
-    return [
-        AnomalyPointFormatted.from_point(
-            AnomalyPoint.parse_obj(point),
-            time_series_frequency=getattr(
-                kpi_cache.get(triggered_alert.kpi_id), "anomaly_params", {}
-            ).get("frequency"),
-            kpi_id=triggered_alert.kpi_id,
-            kpi_name=triggered_alert.kpi_name,
-            alert_name=triggered_alert.alert_name,
-        )
-        for triggered_alert in triggered_alerts
-        for point in triggered_alert.alert_metadata["alert_data"]
-    ]
 
 
 def check_and_trigger_digest(frequency: str):

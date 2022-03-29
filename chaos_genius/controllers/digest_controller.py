@@ -1,7 +1,8 @@
 import datetime
 from collections import defaultdict
-from typing import DefaultDict, Dict, List
+from typing import DefaultDict, Dict, List, Optional, Sequence, Tuple
 
+from chaos_genius.alerts.anomaly_alerts import AnomalyPoint, AnomalyPointFormatted
 from chaos_genius.alerts.constants import (
     ALERT_DATE_FORMAT,
     ALERT_DATETIME_FORMAT,
@@ -14,13 +15,11 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
 
 
-def get_alert_kpi_configurations(triggered_alerts: List[TriggeredAlerts]):
+def get_alert_kpi_configurations(triggered_alerts: Sequence[TriggeredAlerts]):
     """Gets all alert and KPI configs for given triggered alerts."""
     alert_conf_ids = list(set([alert.alert_conf_id for alert in triggered_alerts]))
     alert_confs = Alert.query.filter(Alert.id.in_(alert_conf_ids)).all()
-    alert_config_cache: Dict[int, Alert] = {
-        alert.id: alert for alert in alert_confs
-    }
+    alert_config_cache: Dict[int, Alert] = {alert.id: alert for alert in alert_confs}
 
     kpi_ids = list(
         set(
@@ -37,85 +36,102 @@ def get_alert_kpi_configurations(triggered_alerts: List[TriggeredAlerts]):
     return alert_config_cache, kpi_cache
 
 
-def triggered_alert_data_processing(data):
+def preprocess_triggered_alert(
+    triggered_alert: TriggeredAlerts,
+    alert_config_cache: Dict[int, Alert],
+    kpi_cache: Dict[int, Kpi],
+) -> TriggeredAlerts:
+    """Preprocess a triggered alert for use in digests and alerts dashboard."""
+    alert_conf_id = triggered_alert.alert_conf_id
+    alert_conf = alert_config_cache[alert_conf_id]
 
-    alert_config_cache, kpi_cache = get_alert_kpi_configurations(data)
+    kpi_id = alert_conf.kpi
+    kpi = kpi_cache[kpi_id] if kpi_id is not None else None
 
-    for alert in data:
-        alert_conf_id = getattr(alert, "alert_conf_id")
-        alert_conf = alert_config_cache.get(alert_conf_id, None)
+    # TODO: make a dataclass for this
+    triggered_alert.kpi_id = kpi_id
+    triggered_alert.kpi_name = kpi.name if kpi is not None else "Doesn't Exist"
+    triggered_alert.alert_name = alert_conf.alert_name
+    triggered_alert.alert_channel = alert_conf.alert_channel
+    triggered_alert.alert_channel_conf = alert_conf.alert_channel_conf
 
-        kpi_id = alert_conf.get("kpi", None)
-        kpi = kpi_cache.get(kpi_id) if kpi_id is not None else None
+    if not isinstance(alert_conf.alert_channel_conf, dict):
+        triggered_alert.alert_channel_conf = None
+    else:
+        triggered_alert.alert_channel_conf = getattr(
+            alert_conf, "alert_channel_conf", {}
+        ).get(triggered_alert.alert_channel, None)
 
-        alert.kpi_name = kpi.get("name") if kpi is not None else "Doesn't Exist"
-        alert.kpi_id = kpi_id
-        alert.alert_name = alert_conf.get("alert_name")
-        alert.alert_channel = alert_conf.get("alert_channel")
-        alert.alert_message = alert_conf.get("alert_message")
+    return triggered_alert
 
-        if not isinstance(alert_conf.get("alert_channel_conf"), dict):
-            alert.alert_channel_conf = None
-        else:
-            alert.alert_channel_conf = alert_conf.get("alert_channel_conf").get(
-                alert.alert_channel, None
-            )
 
-    return data
+def extract_anomaly_points_from_triggered_alerts(
+    triggered_alerts: List[TriggeredAlerts], kpi_cache: Dict[int, Kpi]
+) -> List[AnomalyPointFormatted]:
+    """Extracts all anomaly points from given (anomaly/KPI) triggered alerts.
+
+    Arguments:
+        triggered_alerts: the sequence of triggered alerts to extract points from. Must
+            be anomaly alerts.
+        kpi_cache: obtained from `get_alert_kpi_configurations`
+    """
+    return [
+        AnomalyPointFormatted.from_point(
+            AnomalyPoint.parse_obj(point),
+            time_series_frequency=getattr(
+                kpi_cache.get(triggered_alert.kpi_id), "anomaly_params", {}
+            ).get("frequency"),
+            kpi_id=triggered_alert.kpi_id,
+            kpi_name=triggered_alert.kpi_name,
+            alert_id=triggered_alert.alert_conf_id,
+            alert_name=triggered_alert.alert_name,
+            alert_channel=triggered_alert.alert_channel,
+            alert_channel_conf=triggered_alert.alert_channel_conf,
+        )
+        for triggered_alert in triggered_alerts
+        for point in triggered_alert.alert_metadata["alert_data"]
+    ]
+
+
+def _preprocess_triggered_alerts(
+    triggered_alerts: Sequence[TriggeredAlerts],
+    alert_config_cache: Dict[int, Alert],
+    kpi_cache: Dict[int, Kpi],
+) -> List[TriggeredAlerts]:
+    """Preprocess triggered alerts for use in the Alert Dashboard."""
+    return list(
+        map(
+            lambda ta: preprocess_triggered_alert(ta, alert_config_cache, kpi_cache),
+            triggered_alerts,
+        )
+    )
 
 
 def _filter_anomaly_alerts(
-    anomaly_alerts_data: List[TriggeredAlerts], include_subdims: bool = False
-):
+    anomaly_alerts: Sequence[AnomalyPointFormatted], include_subdims: bool = False
+) -> List[AnomalyPointFormatted]:
     if not include_subdims:
-        for alert in anomaly_alerts_data:
-            alert.alert_metadata["alert_data"] = list(
-                filter(
-                    lambda point: point["Dimension"] == OVERALL_KPI_SERIES_TYPE_REPR,
-                    alert.alert_metadata["alert_data"],
-                )
+        return list(
+            filter(
+                lambda point: point.series_type == OVERALL_KPI_SERIES_TYPE_REPR,
+                anomaly_alerts,
             )
+        )
     else:
-        for alert in anomaly_alerts_data:
-            anomaly_data = []
-            counts: DefaultDict[str, int] = defaultdict(lambda: 0)
-            max_subdims = 20
+        counts: DefaultDict[Tuple[int, datetime.datetime], int] = defaultdict(lambda: 0)
+        filtered_points: List[AnomalyPointFormatted] = []
+        max_subdims = 20
 
-            for point in alert.alert_metadata["alert_data"]:
-                if point["Dimension"] != OVERALL_KPI_SERIES_TYPE_REPR:
-                    counts[point["data_datetime"]] += 1
-                    if counts[point["data_datetime"]] > max_subdims:
-                        continue
+        for point in anomaly_alerts:
 
-                anomaly_data.append(point)
+            if point.series_type != OVERALL_KPI_SERIES_TYPE_REPR:
+                counts[(point.alert_id, point.data_datetime)] += 1
+                if counts[(point.alert_id, point.data_datetime)] > max_subdims:
+                    continue
 
-            alert.alert_metadata["alert_data"] = anomaly_data
+            filtered_points.append(point)
 
-
-def _add_nl_messages_anomaly_alerts(anomaly_alerts_data):
-    for triggered_alert in anomaly_alerts_data:
-        for point in triggered_alert.alert_metadata["alert_data"]:
-            percentage_change = point.get("percentage_change", None)
-            if percentage_change is None:
-                point["nl_message"] = "Not available for older triggered alerts."
-            else:
-                point["nl_message"] = change_message_from_percent(percentage_change)
-
-
-def _preprocess_anomaly_alerts(anomaly_alerts_data: list):
-    for triggered_alert in anomaly_alerts_data:
-        for point in triggered_alert.alert_metadata["alert_data"]:
-            exact_time = point.get("data_datetime")
-
-            if exact_time is None:
-                point["date_only"] = "Older Alerts"
-            else:
-                exact_time = datetime.datetime.strptime(
-                    exact_time, ALERT_DATETIME_FORMAT
-                )
-                point["date_only"] = exact_time.strftime(ALERT_DATE_FORMAT)
-
-    _add_nl_messages_anomaly_alerts(anomaly_alerts_data)
+        return filtered_points
 
 
 def _preprocess_event_alerts(event_alerts_data: list):
@@ -127,8 +143,10 @@ def _preprocess_event_alerts(event_alerts_data: list):
         triggered_alert.created_at = new_time
 
 
-def get_digest_view_data(triggered_alert_id=None, include_subdims: bool = False):
-
+def get_digest_view_data(
+    triggered_alert_id: Optional[int] = None, include_subdims: bool = False
+):
+    """Collects triggered alerts data for alerts dashboard."""
     curr_time = datetime.datetime.now()
     time_diff = datetime.timedelta(days=7)
 
@@ -136,17 +154,26 @@ def get_digest_view_data(triggered_alert_id=None, include_subdims: bool = False)
     if triggered_alert_id is not None:
         filters.append(TriggeredAlerts.id == triggered_alert_id)
 
-    data = (
+    triggered_alerts: Sequence[TriggeredAlerts] = (
         TriggeredAlerts.query.filter(*filters)
         .order_by(TriggeredAlerts.created_at.desc())
         .all()
     )
-    data = triggered_alert_data_processing(data)
 
-    anomaly_alerts_data = [alert for alert in data if alert.alert_type == "KPI Alert"]
-    _filter_anomaly_alerts(anomaly_alerts_data, include_subdims)
-    _preprocess_anomaly_alerts(anomaly_alerts_data)
-    event_alerts_data = [alert for alert in data if alert.alert_type == "Event Alert"]
+    alert_config_cache, kpi_cache = get_alert_kpi_configurations(triggered_alerts)
+
+    triggered_alerts = _preprocess_triggered_alerts(
+        triggered_alerts, alert_config_cache, kpi_cache
+    )
+
+    anomaly_alerts = extract_anomaly_points_from_triggered_alerts(
+        [alert for alert in triggered_alerts if alert.alert_type == "KPI Alert"],
+        kpi_cache,
+    )
+    anomaly_alerts = _filter_anomaly_alerts(anomaly_alerts, include_subdims)
+    event_alerts_data = [
+        alert for alert in triggered_alerts if alert.alert_type == "Event Alert"
+    ]
     _preprocess_event_alerts(event_alerts_data)
 
-    return anomaly_alerts_data, event_alerts_data
+    return anomaly_alerts, event_alerts_data

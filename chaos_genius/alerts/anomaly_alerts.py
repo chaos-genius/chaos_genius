@@ -11,6 +11,7 @@ from pydantic import BaseModel, validator
 from pydantic.tools import parse_obj_as
 
 from chaos_genius.alerts.constants import (
+    ALERT_DATE_FORMAT,
     ALERT_DATETIME_FORMAT,
     ALERT_READABLE_DATE_FORMAT,
     ALERT_READABLE_DATETIME_FORMAT,
@@ -81,6 +82,11 @@ class AnomalyPointOriginal(BaseModel):
         Also known as Time of Occurrence.
         """
         return self.data_datetime.strftime("%b %d %Y %H:%M:%S")
+
+    @property
+    def date_only(self) -> str:
+        """Only date part of the data timestamp (data_datetime)."""
+        return self.data_datetime.strftime(ALERT_DATE_FORMAT)
 
     def format_series_type(self):
         """Format series_type to be more readable for use in alerts.
@@ -181,7 +187,10 @@ class AnomalyPointFormatted(AnomalyPoint):
 
     kpi_id: int
     kpi_name: str
+    alert_id: int
     alert_name: str
+    alert_channel: str
+    alert_channel_conf: Optional[list]
 
     formatted_date: str
     formatted_change_percent: str
@@ -192,7 +201,10 @@ class AnomalyPointFormatted(AnomalyPoint):
         time_series_frequency: Optional[str],
         kpi_id: int,
         kpi_name: str,
+        alert_id: int,
         alert_name: str,
+        alert_channel: str,
+        alert_channel_conf: Optional[list],
     ) -> "AnomalyPointFormatted":
         """Constructs a formatted point from an AnomalyPoint."""
         dt_format = ALERT_READABLE_DATETIME_FORMAT
@@ -211,7 +223,10 @@ class AnomalyPointFormatted(AnomalyPoint):
             **point.dict(),
             kpi_id=kpi_id,
             kpi_name=kpi_name,
+            alert_id=alert_id,
             alert_name=alert_name,
+            alert_channel=alert_channel,
+            alert_channel_conf=alert_channel_conf,
             formatted_date=formatted_date,
             formatted_change_percent=str(formatted_change_percent),
         )
@@ -312,9 +327,7 @@ class AnomalyAlertController:
         include_end_timestamp = True
 
         severity_cutoff = (
-            self.alert.severity_cutoff_score
-            if include_severity_cutoff
-            else None
+            self.alert.severity_cutoff_score if include_severity_cutoff else None
         )
 
         logger.info(
@@ -467,7 +480,7 @@ class AnomalyAlertController:
 
         top_anomalies_ = deepcopy(_top_anomalies(formatted_anomaly_data, 5))
         top_anomalies_ = _format_anomaly_point_for_template(
-            top_anomalies_, kpi, self.alert.alert_name
+            top_anomalies_, kpi, self.alert
         )
 
         return top_anomalies_, overall_count, subdim_count
@@ -608,13 +621,20 @@ def _make_anomaly_data_csv(anomaly_points: List[AnomalyPoint]) -> str:
 
 
 def _format_anomaly_point_for_template(
-    points: Sequence[AnomalyPoint], kpi: Kpi, alert_name: str
+    points: Sequence[AnomalyPoint], kpi: Kpi, alert: Alert
 ) -> Sequence[AnomalyPointFormatted]:
     """Formats fields of each point, to be used in alert templates."""
     return list(
         map(
             lambda point: AnomalyPointFormatted.from_point(
-                point, kpi.anomaly_params.get("frequency"), kpi.id, kpi.name, alert_name
+                point,
+                kpi.anomaly_params.get("frequency"),
+                kpi.id,
+                kpi.name,
+                alert.id,
+                alert.alert_name,
+                alert.alert_channel,
+                alert.alert_channel_conf,
             ),
             points,
         )

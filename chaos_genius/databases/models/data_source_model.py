@@ -10,12 +10,13 @@ class DataSource(PkModel):
 
     __tablename__ = "data_source"
     name = Column(db.String(80), nullable=False)
-    connection_type = Column(db.String(80)) # TODO: Make the nullable=False
+    connection_type = Column(db.String(80))  # TODO: Make the nullable=False
     db_uri = Column(db.Text())
     active = Column(db.Boolean(), default=False)
     is_third_party = Column(db.Boolean(), default=True)
     connection_status = Column(db.String(80))
     sync_status = Column(db.String(80))
+    database_timezone = Column(db.String(80), server_default='UTC', nullable=False)
 
     # configs field
     sourceConfig = Column(db.JSON)
@@ -45,6 +46,7 @@ class DataSource(PkModel):
             "is_third_party": self.is_third_party,
             "connection_status": self.connection_status,
             "sync_status": self.sync_status,
+            "database_timezone": self.database_timezone,
             "last_sync": self.last_sync,
             "created_at": self.created_at
         }
@@ -59,6 +61,7 @@ class DataSource(PkModel):
             "is_third_party": self.is_third_party,
             "connection_status": self.connection_status,
             "sync_status": self.sync_status,
+            "database_timezone": self.database_timezone,
             "sourceConfig": self.sourceConfig,
             "destinationConfig": self.destinationConfig,
             "connectionConfig": self.connectionConfig,
@@ -73,7 +76,7 @@ class DataSource(PkModel):
         return{
             "name": "data_source",
             "table_name": "data_source",
-            "fields":[
+            "fields": [
                 {
                     "name": "name",
                     "is_editable": True,
@@ -106,6 +109,12 @@ class DataSource(PkModel):
                     "name": "sync_status",
                     "is_editable": False,
                     "is_sensitive": False,
+
+                },
+                {
+                    "name": "database_timezone",
+                    "is_editable": True,
+                    "is_sensitive": True,
 
                 },
                 {
@@ -147,4 +156,3 @@ class DataSource(PkModel):
             ]
 
         }
-

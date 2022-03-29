@@ -30,7 +30,7 @@ import EmptyDataQualityAnomaly from '../EmptyDataQualityAnomaly';
 import { useToast } from 'react-toast-wnm';
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
 import { downloadCsv } from '../../utils/download-helper';
-import { BASE_URL } from '../../utils/url-helper';
+import { anomalyDownloadCsv } from '../../redux/actions/Anomaly';
 
 highchartsMore(Highcharts);
 Highcharts.setOptions({
@@ -45,6 +45,10 @@ const RESET_ACTION = {
 
 const RESET = {
   type: 'RESET_DRILL'
+};
+
+const RESET_CSV = {
+  type: 'RESET_CSV'
 };
 
 const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
@@ -69,10 +73,34 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
     anomalyDetectionData,
     anomalyDrilldownData,
     anomalyQualityData,
-    retrain
+    retrain,
+    anomalyCsv
   } = useSelector((state) => {
     return state.anomaly;
   });
+
+  useEffect(() => {
+    if (
+      anomalyCsv &&
+      anomalyCsv.length !== 0 &&
+      anomalyCsv.status !== 'failure'
+    ) {
+      downloadCsv(anomalyCsv, `KPI-${kpi}-anomaly-data.csv`);
+      store.dispatch(RESET_CSV);
+    } else if (
+      anomalyCsv &&
+      anomalyCsv.length !== 0 &&
+      anomalyCsv.status === 'failure'
+    ) {
+      customToast({
+        type: 'failure',
+        header: 'Failed to Download',
+        description: anomalyCsv.message
+      });
+      store.dispatch(RESET_CSV);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [anomalyCsv]);
 
   useEffect(() => {
     store.dispatch(RESET_ACTION);
@@ -105,6 +133,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
     }
     dispatch(anomalyDetection(kpi, tab));
   };
+
   useEffect(() => {
     let subDimesionList = [];
     if (kpiTab === 'Overall KPI') {
@@ -421,22 +450,8 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
     dispatch(setRetrain(kpi));
   };
 
-  const handleDownloadClick = async () => {
-    let url = `${BASE_URL}/api/anomaly-data/${kpi}/download_anomaly_data`;
-    let isDownloaded = await downloadCsv(kpi, url);
-    if (isDownloaded?.status === 'failure') {
-      customToast({
-        type: 'failure',
-        header: 'Failed to Download',
-        description: isDownloaded.message
-      });
-    } else {
-      const url = window.URL.createObjectURL(new Blob([isDownloaded]));
-      const link = document.createElement('a');
-      link.setAttribute('download', `KPI-${kpi}-anomaly-data.csv`);
-      link.href = url;
-      link.click();
-    }
+  const handleDownloadClick = () => {
+    dispatch(anomalyDownloadCsv(kpi));
   };
 
   const customToast = (data) => {

@@ -50,6 +50,17 @@
   justify-content: space-between;
   height: 38px;
 }
+.download-container {
+  display: flex;
+  justify-content: space-between;
+  margin-left: 20px;
+}
+.download-icon {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+  cursor: pointer;
+}
 .retrain-button-container {
   display: flex;
   flex-direction: row;

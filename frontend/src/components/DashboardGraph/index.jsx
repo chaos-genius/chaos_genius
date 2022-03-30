@@ -40,7 +40,6 @@ import {
   HRN_PREFIXES
 } from '../../utils/Formatting/Numbers/humanReadableNumberFormatter';
 import store from '../../redux/store';
-import { BASE_URL } from '../../utils/url-helper';
 import { useToast } from 'react-toast-wnm';
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
 import { downloadCsv } from '../../utils/download-helper';
@@ -169,6 +168,7 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
       });
       store.dispatch(RESET_RCA_CSV);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rcaCsv, graphCsv]);
 
   useEffect(() => {

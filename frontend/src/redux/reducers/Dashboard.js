@@ -9,7 +9,6 @@ import {
   RCADOWNLOADREQUEST,
   RCADOWNLOADSUCCESS
 } from '../actions/ActionConstants';
-import { rcaDownloadCsv } from '../actions/Dashboard';
 
 const initialState = {
   rcaAnalysisData: [],

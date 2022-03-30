@@ -48,39 +48,41 @@ def kpi_get_line_data(kpi_id):
         message = str(err)
     return jsonify({"status": status, "message": message, "data": data})
 
+
 @blueprint.route("/<int:kpi>/download_chart_data", methods=["GET"])
 def kpi_download_line_data(kpi):
     """API endpoint to download chart data for last 60 days."""
     try:
         line_data = kpi_line_data(kpi, download=True)
-        if line_data[0]=="error":
+        if line_data[0] == "error":
             raise Exception(f"{line_data[1]}")
         data_points = line_data[2]
 
         if not data_points:
             raise Exception(f"No chart data found for KPI id {kpi}")
         output_csv_obj = io.StringIO()
-        csv_headers = ["date",
-                       "value"]
-        csvwriter = csv.writer(output_csv_obj, delimiter=',')
+        csv_headers = ["date", "value"]
+        csvwriter = csv.writer(output_csv_obj, delimiter=",")
         csvwriter.writerow(csv_headers)
         for row in data_points:
-            attr_list = [row["date"].strftime("%a %-d %B %Y"),
-                         str(row["value"])]
+            attr_list = [row["date"].strftime("%a %-d %B %Y"), str(row["value"])]
             csvwriter.writerow(attr_list)
 
         output_csv_obj.seek(0)
-        output_csv_str = output_csv_obj.read().encode('utf-8')
+        output_csv_str = output_csv_obj.read().encode("utf-8")
         output_csv_bytes = io.BytesIO(output_csv_str)
         output_csv_obj.close()
 
-        return send_file(output_csv_bytes,
-                            mimetype='text/csv',
-                            attachment_filename=f'KPI-{kpi}-panel-chart-data.csv',
-                            as_attachment=True)
+        return send_file(
+            output_csv_bytes,
+            mimetype="text/csv",
+            attachment_filename=f"KPI-{kpi}-panel-chart-data.csv",
+            as_attachment=True,
+        )
     except Exception as e:
-        return jsonify({"status":"failure",
-                        "message":f"chart data download failed : {e}"})
+        return jsonify(
+            {"status": "failure", "message": f"chart data download failed : {e}"}
+        )
 
 
 @blueprint.route("/<int:kpi_id>/rca-analysis", methods=["GET"])

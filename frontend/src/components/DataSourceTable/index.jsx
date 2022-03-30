@@ -164,9 +164,12 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
                     dataSourceStatusObj.status = 'Broken';
                   }
                 } else {
-                  dataSourceStatusObj = datasource?.active
-                    ? { className: 'live-status', status: 'Live' }
-                    : { className: 'broken-status', status: 'Broken' };
+                  dataSourceStatusObj.className =
+                    datasource?.active === true
+                      ? 'live-status'
+                      : 'broken-status';
+                  dataSourceStatusObj.status =
+                    datasource?.active === true ? 'Live' : 'Broken';
                 }
                 return (
                   <tr key={uuidv4()}>

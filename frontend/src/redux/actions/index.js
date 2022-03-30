@@ -6,9 +6,9 @@ import {
   deleteDatasource,
   getDatasourceMetaInfo,
   getDatasourceById,
-  updateDatasourceById
+  updateDatasourceById,
+  setSyncSchema
 } from './DataSources';
-//import { getAllDataSources } from './DataSources';
 import {
   getAllKpiExplorer,
   getAllKpiExplorerForm,
@@ -139,5 +139,6 @@ export {
   getTimeCuts,
   getVersionSetting,
   getReportSettingTime,
-  saveReportSettingTime
+  saveReportSettingTime,
+  setSyncSchema
 };

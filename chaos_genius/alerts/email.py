@@ -83,7 +83,7 @@ def send_email(
         server = init_smtp_server(host, port, user, password)
         server.sendmail(sender, toaddr, message.as_string())
         server.quit()
-        logger.info("Email sent to " + ", ".join(toaddr))
+        logger.info(f"Email sent to {', '.join(toaddr)}")
     except smtplib.SMTPServerDisconnected:
         logger.info(f"Retry ({count}) for the email")
         if count < 3:

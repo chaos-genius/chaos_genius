@@ -12,3 +12,4 @@ docstring-convention = google
 classmethod-decorators =
     classmethod
     validator
+    root_validator

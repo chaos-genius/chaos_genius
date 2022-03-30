@@ -32,7 +32,6 @@ def latest_git_commit_hash() -> str:
         return ""
 
 
-<<<<<<< HEAD
 def time_my_func(func):
     """Print the runtime of the decorated function."""
     @functools.wraps(func)
@@ -46,7 +45,8 @@ def time_my_func(func):
         print("----------------------------")
         return value
     return wrapper_timer
-=======
+
+
 def jsonable_encoder(obj):
     """Convert a (pydantic) object to a JSONable dict.
 
@@ -66,4 +66,3 @@ def jsonable_encoder(obj):
             obj_dict = obj_dict["__root__"]
         return jsonable_encoder(obj_dict)
     return pydantic_encoder(obj)
->>>>>>> 7b7fdd2fdce4d5a8214ccf90f57fb3af4490dc77

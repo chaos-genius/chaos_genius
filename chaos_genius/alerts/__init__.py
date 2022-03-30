@@ -37,6 +37,8 @@ def check_and_trigger_alert(alert_id: int):
         print("Alert isn't active. Please activate the alert.")
         return True
 
+    # TODO: extract these values of `alert_type` as an enum
+    #   ref: https://github.com/chaos-genius/chaos_genius/pull/836#discussion_r838077656
     if alert_info.alert_type == "Event Alert":
 
         data_source_id = alert_info.data_source
@@ -51,6 +53,7 @@ def check_and_trigger_alert(alert_id: int):
         anomaly_obj = AnomalyAlertController(alert_info)
         return anomaly_obj.check_and_send_alert()
     elif alert_info.alert_type == "KPI Alert" and alert_info.kpi_alert_type == "Static":
+        # TODO: is this still needed?
         StaticKpiAlertController(alert_info.as_dict)
 
     return True

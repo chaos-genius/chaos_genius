@@ -4,6 +4,8 @@ from typing import Tuple
 from chaos_genius.controllers.config_controller import get_config_object
 
 
+# TODO: make a new type here to better represent the return value
+#   ref: https://github.com/chaos-genius/chaos_genius/pull/836#discussion_r838085548
 def get_email_creds() -> Tuple[str, int, str, str, str]:
     """Retrieves email channel configuration.
 
@@ -13,6 +15,8 @@ def get_email_creds() -> Tuple[str, int, str, str, str]:
     Raises:
         Exception: if email channel was not configured.
     """
+    # TODO: remove hardcoding of "email" - use a constant or a function
+    #   ref: https://github.com/chaos-genius/chaos_genius/pull/836#discussion_r838110482
     config_obj = get_config_object("email")
     if not config_obj:
         raise Exception("Email alert channel was not configured")

@@ -47,9 +47,9 @@ def run_anomaly_for_kpi(
 
     logger.info(f"Starting Anomaly Detection for KPI ID: {kpi_id}.")
     kpi_info = get_kpi_data_from_id(kpi_id)
-    logger.info("Retrieved KPI information.")
+    logger.info(f"(KPI ID: {kpi_id}) Retrieved KPI information.")
 
-    logger.info("Selecting end date.")
+    logger.info("(KPI ID: {kpi_id}) Selecting end date.")
 
     if end_date is None and kpi_info["scheduler_params"]["scheduler_frequency"] == "D":
         # by default we always calculate for n-days_offset_for_analytics
@@ -57,14 +57,14 @@ def run_anomaly_for_kpi(
         # Check if data is available or not then try for n-days_offset_for_analytics-1
         if not _is_data_present_for_end_date(kpi_info, end_date):
             end_date = end_date - timedelta(days=1)
-            logger.info("Decreasing end date by 1.")
+            logger.info("(KPI ID: {kpi_id}) Decreasing end date by 1.")
 
     elif (
         end_date is None and kpi_info["scheduler_params"]["scheduler_frequency"] == "H"
     ):
         end_date = datetime.today().date()
 
-    logger.info(f"End date is {end_date}.")
+    logger.info(f"(KPI ID: {kpi_id}) End date is {end_date}.")
 
     adc = AnomalyDetectionController(kpi_info, end_date, task_id=task_id)
     adc.detect()

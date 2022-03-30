@@ -96,7 +96,10 @@ def send_email(
 
 
 def send_static_alert_email(
-    recipient_emails: List[str], subject: str, messsage_body: str, files=[]
+    recipient_emails: List[str],
+    subject: str,
+    messsage_body: str,
+    files: Sequence[Dict] = [],
 ) -> None:
     """Send an alert email with the CSV attachment.
 

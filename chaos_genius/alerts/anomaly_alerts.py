@@ -202,7 +202,7 @@ class AnomalyPointFormatted(AnomalyPoint):
     alert_id: int
     alert_name: str
     alert_channel: str
-    alert_channel_conf: Optional[list]
+    alert_channel_conf: Any
 
     formatted_date: str
     formatted_change_percent: str
@@ -216,7 +216,7 @@ class AnomalyPointFormatted(AnomalyPoint):
         alert_id: int,
         alert_name: str,
         alert_channel: str,
-        alert_channel_conf: Optional[list],
+        alert_channel_conf: Any,
     ) -> "AnomalyPointFormatted":
         """Constructs a formatted point from an AnomalyPoint."""
         dt_format = ALERT_READABLE_DATETIME_FORMAT

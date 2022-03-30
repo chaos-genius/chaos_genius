@@ -47,7 +47,7 @@ def preprocess_triggered_alert(
     alert_conf = alert_config_cache[alert_conf_id]
 
     kpi_id = alert_conf.kpi
-    kpi = kpi_cache[kpi_id] if kpi_id is not None else None
+    kpi = kpi_cache.get(kpi_id)
 
     # TODO: make a dataclass for this
     triggered_alert.kpi_id = kpi_id

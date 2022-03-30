@@ -200,7 +200,7 @@ def get_last_anomaly_timestamp(
     anomaly_types: List[str] = ["overall", "subdim"],
 ) -> Optional[datetime]:
     """Returns the timestamp of the latest anomaly data."""
-    results = (
+    result = (
         AnomalyDataOutput.query.filter(
             (AnomalyDataOutput.kpi_id.in_(kpi_ids))
             & (AnomalyDataOutput.anomaly_type.in_(anomaly_types))
@@ -209,8 +209,8 @@ def get_last_anomaly_timestamp(
         .first()
     )
 
-    if results:
-        return results.data_datetime
+    if result:
+        return result.data_datetime
 
 
 def get_active_kpi_from_id(kpi_id: int) -> Optional[Kpi]:

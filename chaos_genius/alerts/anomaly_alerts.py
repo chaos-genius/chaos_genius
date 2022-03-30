@@ -79,7 +79,7 @@ class AnomalyPointOriginal(BaseModel):
 
         Also known as Time of Occurrence.
         """
-        return self.data_datetime.strftime("%b %d %Y %H:%M:%S")
+        return self.data_datetime.strftime(ALERT_READABLE_DATA_TIMESTAMP_FORMAT)
 
     @property
     def date_only(self) -> str:

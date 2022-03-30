@@ -6,11 +6,9 @@ from typing import DefaultDict, Dict, List, Optional, Sequence, Tuple
 from chaos_genius.alerts.anomaly_alerts import AnomalyPoint, AnomalyPointFormatted
 from chaos_genius.alerts.constants import (
     ALERT_DATE_FORMAT,
-    ALERT_DATETIME_FORMAT,
-    DIGEST_DATETIME_FORMAT,
+    ALERT_READABLE_DATA_TIMESTAMP_FORMAT,
     OVERALL_KPI_SERIES_TYPE_REPR,
 )
-from chaos_genius.alerts.utils import change_message_from_percent
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
@@ -149,7 +147,9 @@ def _filter_anomaly_alerts(
 
 def _preprocess_event_alerts(event_alerts_data: list):
     for triggered_alert in event_alerts_data:
-        new_time = triggered_alert.created_at.strftime(DIGEST_DATETIME_FORMAT)
+        new_time = triggered_alert.created_at.strftime(
+            ALERT_READABLE_DATA_TIMESTAMP_FORMAT
+        )
         triggered_alert.date_only = triggered_alert.created_at.strftime(
             ALERT_DATE_FORMAT
         )

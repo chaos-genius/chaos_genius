@@ -1,4 +1,5 @@
 import datetime
+import logging
 from collections import defaultdict
 from typing import DefaultDict, Dict, List, Optional, Sequence, Tuple
 
@@ -13,6 +14,8 @@ from chaos_genius.alerts.utils import change_message_from_percent
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
+
+logger = logging.getLogger(__name__)
 
 
 def get_alert_kpi_configurations(triggered_alerts: Sequence[TriggeredAlerts]):
@@ -75,22 +78,32 @@ def extract_anomaly_points_from_triggered_alerts(
             be anomaly alerts.
         kpi_cache: obtained from `get_alert_kpi_configurations`
     """
-    return [
-        AnomalyPointFormatted.from_point(
-            AnomalyPoint.parse_obj(point),
-            time_series_frequency=getattr(
-                kpi_cache.get(triggered_alert.kpi_id), "anomaly_params", {}
-            ).get("frequency"),
-            kpi_id=triggered_alert.kpi_id,
-            kpi_name=triggered_alert.kpi_name,
-            alert_id=triggered_alert.alert_conf_id,
-            alert_name=triggered_alert.alert_name,
-            alert_channel=triggered_alert.alert_channel,
-            alert_channel_conf=triggered_alert.alert_channel_conf,
-        )
-        for triggered_alert in triggered_alerts
-        for point in triggered_alert.alert_metadata["alert_data"]
-    ]
+    anomaly_points: List[AnomalyPointFormatted] = []
+    for triggered_alert in triggered_alerts:
+        for point in triggered_alert.alert_metadata["alert_data"]:
+
+            try:
+                point = AnomalyPointFormatted.from_point(
+                    AnomalyPoint.parse_obj(point),
+                    time_series_frequency=getattr(
+                        kpi_cache.get(triggered_alert.kpi_id), "anomaly_params", {}
+                    ).get("frequency"),
+                    kpi_id=triggered_alert.kpi_id,
+                    kpi_name=triggered_alert.kpi_name,
+                    alert_id=triggered_alert.alert_conf_id,
+                    alert_name=triggered_alert.alert_name,
+                    alert_channel=triggered_alert.alert_channel,
+                    alert_channel_conf=triggered_alert.alert_channel_conf,
+                )
+
+                anomaly_points.append(point)
+            except OverflowError as e:
+                logger.error(
+                    "Error in extracting an anomaly point from triggered alert",
+                    exc_info=e,
+                )
+
+    return anomaly_points
 
 
 def _preprocess_triggered_alerts(

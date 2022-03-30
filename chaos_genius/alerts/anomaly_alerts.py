@@ -4,10 +4,10 @@ import heapq
 import io
 import logging
 from copy import deepcopy
-from typing import Dict, List, Optional, Sequence, Tuple, TypeVar, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, TypeVar, Union
 
 import pandas as pd
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, root_validator, validator
 from pydantic.tools import parse_obj_as
 
 from chaos_genius.alerts.constants import (
@@ -55,8 +55,6 @@ class AnomalyPointOriginal(BaseModel):
     yhat_lower: float
     # upper bound of expected value
     yhat_upper: float
-    # int representing whether this point is an anomaly
-    is_anomaly: int
     # severity of the anomaly (0 to 100)
     severity: float
 
@@ -168,7 +166,6 @@ class AnomalyPoint(AnomalyPointOriginal):
             y=y,
             yhat_lower=yhat_lower,
             yhat_upper=yhat_upper,
-            is_anomaly=point.is_anomaly,
             severity=severity,
             anomaly_type=point.anomaly_type,
             series_type=series_type,
@@ -177,6 +174,20 @@ class AnomalyPoint(AnomalyPointOriginal):
             percent_change=percent_change,
             change_message=change_message,
         )
+
+    @root_validator(pre=True)
+    def _support_old_field_names(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        aliases = {
+            "percent_change": "percentage_change",
+            "change_message": "nl_message",
+        }
+
+        for field_name, alias in aliases.items():
+            if field_name not in values:
+                if alias in values:
+                    values[field_name] = values[alias]
+
+        return values
 
 
 class AnomalyPointFormatted(AnomalyPoint):

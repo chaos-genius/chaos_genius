@@ -9,3 +9,6 @@ exclude =
     sandbox
 max-complexity = 10
 docstring-convention = google
+classmethod-decorators =
+    classmethod
+    validator

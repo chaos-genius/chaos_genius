@@ -1,34 +1,34 @@
 # -*- coding: utf-8 -*-
 """anomaly data view."""
-from datetime import date, datetime, timedelta
+import csv
+import io
 import time
+from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple, cast
 
-from flask import Blueprint, current_app, jsonify, request
-from sqlalchemy import func, delete
 import pandas as pd
+from flask import Blueprint, current_app, jsonify, request, send_file
+from sqlalchemy import delete, func
 from sqlalchemy.orm.attributes import flag_modified
+
+from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
+from chaos_genius.core.rca.rca_utils.string_helpers import (
+    convert_query_string_to_user_string,
+)
 from chaos_genius.core.utils.round import round_number
+from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
+from chaos_genius.databases.models.kpi_model import Kpi
+from chaos_genius.databases.models.rca_data_model import RcaData
+from chaos_genius.extensions import db
 from chaos_genius.settings import (
     TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN,
     TOP_SUBDIMENSIONS_FOR_ANOMALY,
-)
-
-from chaos_genius.extensions import db
-from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
-from chaos_genius.databases.models.rca_data_model import RcaData
-from chaos_genius.databases.models.kpi_model import Kpi
-from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
-
-from chaos_genius.core.rca.rca_utils.string_helpers import (
-    convert_query_string_to_user_string,
 )
 from chaos_genius.utils.datetime_helper import (
     get_datetime_string_with_tz,
     get_lastscan_string_with_tz,
 )
-
 
 blueprint = Blueprint("anomaly_data", __name__)
 
@@ -47,6 +47,18 @@ def kpi_anomaly_detection(kpi_id):
     end_date = None
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
+
+        if not kpi_info["anomaly_params"]:
+            current_app.logger.info(f"Anomaly settings not configured for KPI ID: {kpi_id}")
+            return jsonify(
+                {
+                    "data": None,
+                    "msg": "",
+                    "anomaly_end_date": None,
+                    "last_run_time_anomaly": None,
+                }
+            )
+
         period = kpi_info["anomaly_params"]["anomaly_period"]
         hourly = kpi_info["anomaly_params"]["frequency"] == "H"
 
@@ -381,6 +393,57 @@ def kpi_anomaly_retraining(kpi_id):
         return jsonify({"msg" : f"retraining failed for KPI: {kpi_id}, KPI id is None"})
 
 
+@blueprint.route("/<int:kpi_id>/download_anomaly_data", methods=["GET"])
+def download_anomaly_data(kpi_id: int):
+    """API Endpoint to download overall KPI anomaly data in CSV form.
+
+    Data is downloaded for the last 60 days by default
+    """
+    try:
+        data_points = get_overall_data_points(kpi_id)
+        if not data_points:
+            raise Exception(f"No anomaly data found for KPI id {kpi_id}")
+        output_csv_obj = io.StringIO()
+        csv_headers = [
+            "datetime",
+            "value",
+            "severity",
+            "upper_bound",
+            "lower_bound",
+            "series_type",
+            "series_name",
+        ]
+        csvwriter = csv.writer(output_csv_obj, delimiter=",")
+        csvwriter.writerow(csv_headers)
+        for row in data_points:
+            attr_list = [
+                row.data_datetime.strftime("%a %-d %B %H:%M:%S %Y"),
+                str(row.y),
+                str(row.severity),
+                str(row.yhat_upper),
+                str(row.yhat_lower),
+                str(row.anomaly_type),
+                str(row.series_type),
+            ]
+            csvwriter.writerow(attr_list)
+
+        output_csv_obj.seek(0)
+        output_csv_str = output_csv_obj.read().encode("utf-8")
+        output_csv_bytes = io.BytesIO(output_csv_str)
+        output_csv_obj.close()
+
+        return send_file(
+            output_csv_bytes,
+            mimetype="text/csv",
+            attachment_filename=f"KPI-{kpi_id}-anomaly-data.csv",
+            as_attachment=True,
+        )
+    except Exception as e:
+        return jsonify(
+            {"status": "failure", "message": f"Downloading data failed: {e}"}
+        )
+
+
 def fill_graph_data(row, graph_data):
     """Fills graph_data with intervals, values, and predicted_values for
     a given row.
@@ -441,6 +504,23 @@ def convert_to_graph_json(
 
     return graph_data
 
+def get_overall_data_points(kpi_id: int, n: int = 60) -> List:
+    kpi_info = get_kpi_data_from_id(kpi_id)
+    if not kpi_info["anomaly_params"]:
+        return []
+
+    end_date = get_anomaly_output_end_date(kpi_info)
+
+    start_date = end_date - timedelta(days=n)
+    start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
+
+    data_points = AnomalyDataOutput.query.filter(
+        (AnomalyDataOutput.kpi_id == kpi_id)
+        & (AnomalyDataOutput.data_datetime >= start_date)
+        & (AnomalyDataOutput.anomaly_type == "overall")
+    ).order_by(AnomalyDataOutput.data_datetime).all()
+
+    return data_points
 
 def get_overall_data(kpi_id, end_date: datetime, n=90):
     start_date = end_date - timedelta(days=n)

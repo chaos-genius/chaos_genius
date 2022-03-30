@@ -4,7 +4,7 @@ import smtplib
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import List
+from typing import Dict, List, Sequence
 
 from chaos_genius.alerts.alert_channel_creds import get_email_creds
 

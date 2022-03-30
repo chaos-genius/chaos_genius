@@ -13,6 +13,7 @@ from pydantic.tools import parse_obj_as
 from chaos_genius.alerts.constants import (
     ALERT_DATE_FORMAT,
     ALERT_DATETIME_FORMAT,
+    ALERT_READABLE_DATA_TIMESTAMP_FORMAT,
     ALERT_READABLE_DATE_FORMAT,
     ALERT_READABLE_DATETIME_FORMAT,
     ANOMALY_TABLE_COLUMN_NAMES_MAPPER,

@@ -110,30 +110,27 @@ def _preprocess_triggered_alerts(
     kpi_cache: Dict[int, Kpi],
 ) -> List[TriggeredAlerts]:
     """Preprocess triggered alerts for use in the Alert Dashboard."""
-    return list(
-        map(
-            lambda ta: preprocess_triggered_alert(ta, alert_config_cache, kpi_cache),
-            triggered_alerts,
-        )
-    )
+    return [
+        preprocess_triggered_alert(ta, alert_config_cache, kpi_cache)
+        for ta in triggered_alerts
+    ]
 
 
 def _filter_anomaly_alerts(
-    anomaly_alerts: Sequence[AnomalyPointFormatted], include_subdims: bool = False
+    anomaly_points: Sequence[AnomalyPointFormatted], include_subdims: bool = False
 ) -> List[AnomalyPointFormatted]:
     if not include_subdims:
-        return list(
-            filter(
-                lambda point: point.series_type == OVERALL_KPI_SERIES_TYPE_REPR,
-                anomaly_alerts,
-            )
-        )
+        return [
+            point
+            for point in anomaly_points
+            if point.series_type == OVERALL_KPI_SERIES_TYPE_REPR
+        ]
     else:
         counts: DefaultDict[Tuple[int, datetime.datetime], int] = defaultdict(lambda: 0)
         filtered_points: List[AnomalyPointFormatted] = []
         max_subdims = 20
 
-        for point in anomaly_alerts:
+        for point in anomaly_points:
 
             if point.series_type != OVERALL_KPI_SERIES_TYPE_REPR:
                 counts[(point.alert_id, point.data_datetime)] += 1

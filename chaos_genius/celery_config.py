@@ -1,9 +1,7 @@
 from datetime import timedelta
 
 from celery.schedules import crontab, schedule
-
 from chaos_genius.settings import METADATA_SYNC_TIME
-
 
 CELERY_IMPORTS = "chaos_genius.jobs"
 CELERY_TASK_RESULT_EXPIRES = 30
@@ -40,7 +38,7 @@ CELERYBEAT_SCHEDULE = {
         "task": "chaos_genius.jobs.metadata_prefetch.metadata_prefetch_daily_scheduler",
         "schedule": crontab(
             hour=METADATA_SYNC_TIME_HRS, minute=METADATA_SYNC_TIME_MINS
-        ),  # TODO: Set from env
+        ),
         "args": ("daily",),
     },
 }

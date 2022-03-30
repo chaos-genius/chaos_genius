@@ -34,7 +34,7 @@ def latest_git_commit_hash() -> str:
 
 <<<<<<< HEAD
 def time_my_func(func):
-    """Print the runtime of the decorated function"""
+    """Print the runtime of the decorated function."""
     @functools.wraps(func)
     def wrapper_timer(*args, **kwargs):
         start_time = time.perf_counter()

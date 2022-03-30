@@ -1,12 +1,12 @@
 from collections import defaultdict
+from typing import List
+
+from chaos_genius.connectors import test_connection
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.extensions import integration_connector as connector
 from chaos_genius.settings import AIRBYTE_ENABLED
 from chaos_genius.third_party.integration_server_config import SOURCE_WHITELIST_AND_TYPE
-from chaos_genius.connectors import test_connection
-from chaos_genius.utils.metadata_api_config import TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY
-
-NON_THIRD_PARTY_DATASOURCES = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY.keys()
+from chaos_genius.utils.metadata_api_config import NON_THIRD_PARTY_DATASOURCES
 
 
 def get_datasource_data_from_id(n: int, as_obj: bool = False) -> dict:
@@ -128,7 +128,7 @@ def update_third_party(payload):
     return connection_status
 
 
-def get_data_source_list(exclude_third_party=True):
+def get_data_source_list(exclude_third_party=True) -> List[DataSource]:
     args = ()
     if exclude_third_party:
         args = (DataSource.connection_type.in_(NON_THIRD_PARTY_DATASOURCES),)

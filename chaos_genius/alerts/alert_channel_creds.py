@@ -14,7 +14,7 @@ def get_email_creds() -> Tuple[str, int, str, str, str]:
         Exception: if email channel was not configured.
     """
     config_obj = get_config_object("email")
-    if config_obj is None:
+    if not config_obj:
         raise Exception("Email alert channel was not configured")
 
     email_config = config_obj.as_dict.get("config_setting")
@@ -41,7 +41,7 @@ def get_slack_creds() -> str:
         Exception: if slack channel was not configured.
     """
     config_obj = get_config_object("slack")
-    if config_obj is None:
+    if not config_obj:
         raise Exception("Slack alert channel was not configured")
 
     configs = config_obj.as_dict.get("config_setting")

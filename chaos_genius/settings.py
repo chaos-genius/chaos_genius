@@ -119,6 +119,6 @@ SOURCE_BING_ADS = _make_bool(os.getenv("SOURCE_BING_ADS", default=False))
 """Alert Configuration"""
 EVENT_ALERTS_ENABLED = _make_bool(os.getenv("REACT_APP_EVENT_ALERT", default=False))
 
-METADATA_SYNC_TIME = os.getenv("METADATA_SYNC_TIME")
+METADATA_SYNC_TIME = os.getenv("METADATA_SYNC_TIME", "03:00")
 if len(METADATA_SYNC_TIME.split(':')) != 2:
     raise ValueError("Metadata prefetch time is invalid. Must be in HH:MM format.")

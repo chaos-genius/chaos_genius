@@ -324,7 +324,6 @@ def delete_data_source():
 @blueprint.route("/trigger-metadata-prefetch", methods=["POST"])
 def trigger_metadata_prefetch():
     """Initiates Metadata prefetch for a given datasource via celery Task."""
-
     from chaos_genius.jobs.metadata_prefetch import fetch_data_source_schema
 
     msg, status, sync_status = "", "success", ""
@@ -332,7 +331,7 @@ def trigger_metadata_prefetch():
     try:
         payload = request.get_json()
 
-        if type(payload) is not dict or "data_source_id" not in payload:
+        if not isinstance(payload, dict) or "data_source_id" not in payload:
             msg = "Invalid payload for metadata prefetch"
             status = "failure"
             logger.error("Error in trigger metadata prefetch: %s", msg)
@@ -349,7 +348,7 @@ def trigger_metadata_prefetch():
             else:
                 logger.error(f"Datasource with id: {data_source_id} not found!!")
                 status = "failure"
-                msg = f"Datasource with id: {data_source_id} not found!!"
+                msg = f"Datasource was not found."
 
     except Exception as err_msg:
         logger.error(

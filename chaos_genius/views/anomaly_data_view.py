@@ -440,7 +440,7 @@ def download_anomaly_data(kpi_id):
         )
     except Exception as e:
         return jsonify(
-            {"status": "failure", "message": f"Downloading data failed :{e}"}
+            {"status": "failure", "message": f"Downloading data failed: {e}"}
         )
 
 

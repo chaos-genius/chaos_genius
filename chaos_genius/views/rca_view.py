@@ -81,7 +81,7 @@ def kpi_download_line_data(kpi):
         )
     except Exception as e:
         return jsonify(
-            {"status": "failure", "message": f"chart data download failed : {e}"}
+            {"status": "failure", "message": f"chart data download failed: {e}"}
         )
 
 

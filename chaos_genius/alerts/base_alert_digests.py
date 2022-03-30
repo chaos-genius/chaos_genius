@@ -36,7 +36,7 @@ class AlertDigestController:
         of a digest. The same object must not be re-used.
 
         Arguments:
-            frequency: digest frequency
+            frequency: digest frequency. See keys of FREQUENCY_DICT for possible values.
         """
         self.time_diff = FREQUENCY_DICT[frequency]
         self.curr_time = datetime.datetime.now()

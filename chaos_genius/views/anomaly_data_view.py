@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 """anomaly data view."""
-import time
-import io
 import csv
+import io
+import time
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple, cast
 
-from flask import Blueprint, current_app, jsonify, request, send_file
-from sqlalchemy import func, delete
-
 import pandas as pd
-from flask import Blueprint, current_app, jsonify, request
+from flask import Blueprint, current_app, jsonify, request, send_file
 from sqlalchemy import delete, func
 from sqlalchemy.orm.attributes import flag_modified
 

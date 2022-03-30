@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 """Endpoints for data retrieval of computed RCAs."""
+import csv
+import io
 import logging
 
 from flask import Blueprint, jsonify, request, send_file  # noqa: F401
-
-import io
-import csv
 
 from chaos_genius.core.rca.rca_utils.api_utils import (
     kpi_aggregation,

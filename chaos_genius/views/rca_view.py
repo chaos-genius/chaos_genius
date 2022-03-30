@@ -50,7 +50,7 @@ def kpi_get_line_data(kpi_id):
 
 
 @blueprint.route("/<int:kpi>/download_chart_data", methods=["GET"])
-def kpi_download_line_data(kpi):
+def kpi_download_line_data(kpi: int):
     """API endpoint to download chart data for last 60 days."""
     try:
         line_data = kpi_line_data(kpi, download=True)

@@ -7,7 +7,7 @@ from copy import deepcopy
 from typing import Any, Dict, List, Optional, Sequence, Tuple, TypeVar, Union
 
 import pandas as pd
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, StrictFloat, StrictInt, root_validator, validator
 from pydantic.tools import parse_obj_as
 
 from chaos_genius.alerts.constants import (
@@ -122,7 +122,7 @@ class AnomalyPoint(AnomalyPointOriginal):
     # severity value rounded to integer
     severity: int
     # percentage change from previous day's point
-    percent_change: Union[int, float, str]
+    percent_change: Union[StrictFloat, StrictInt, str]
     # human readable message describing the percent_change
     change_message: str
 
@@ -202,7 +202,12 @@ class AnomalyPointFormatted(AnomalyPoint):
     alert_id: int
     alert_name: str
     alert_channel: str
-    alert_channel_conf: Optional[list]
+    # stores alert channel configuration
+    # in individual alerts, this will be the entire dict (`Dict`)
+    # in digests, this will be just the list of emails or None (`Optional[List[str]]`)
+    # TODO: make a different type for digest data or use a consistent type across both
+    #  ref: https://github.com/chaos-genius/chaos_genius/pull/862#discussion_r839400411
+    alert_channel_conf: Any
 
     formatted_date: str
     formatted_change_percent: str
@@ -216,7 +221,7 @@ class AnomalyPointFormatted(AnomalyPoint):
         alert_id: int,
         alert_name: str,
         alert_channel: str,
-        alert_channel_conf: Optional[list],
+        alert_channel_conf: Any,
     ) -> "AnomalyPointFormatted":
         """Constructs a formatted point from an AnomalyPoint."""
         dt_format = ALERT_READABLE_DATETIME_FORMAT
@@ -345,7 +350,7 @@ class AnomalyAlertController:
         logger.info(
             f"Checking for anomalies for (KPI: {self.kpi_id}, Alert: "
             f"{self.alert_id}) in the range - start: {start_timestamp} (included: "
-            f"{include_start_timestamp}) and end: {self.latest_anomaly_timestamp} "
+            f"{include_start_timestamp}) and end: {end_timestamp} "
             "(included: True)"
         )
 
@@ -426,8 +431,6 @@ class AnomalyAlertController:
         prev_day_data = self._get_anomalies(
             time_diff=time_diff, anomalies_only=False, include_severity_cutoff=False
         )
-        for anomaly_point in prev_day_data:
-            anomaly_point.format_series_type()
 
         # store a mapping of hour => list of anomaly points for that hour
         hourly_data: Dict[int, List[AnomalyPointOriginal]] = dict()

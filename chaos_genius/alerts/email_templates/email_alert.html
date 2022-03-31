@@ -60,21 +60,23 @@
     {% for point in top_anomalies %}
     <li>
         <strong>{{kpi_name}} ({{point.series_type}})</strong>
-        <span style="color: lightgrey;">changed to
-        <strong>{{point.y}}</strong>
-        {% if point.percent_change is string and "inf" not in point.percent_change %}
-        (<span><strong>{{ point.formatted_change_percent }}</strong></span>)
-        {% elif "+inf" in str(point.percent_change) or point.percent_change > 0 %}
-        <span style="color: lightgreen;">({{ point.formatted_change_percent }})</span>
-        {% elif "-inf" in str(point.percent_change) or point.percent_change < 0 %}
-        <span style="color: red;">({{ point.formatted_change_percent }})</span>
-        {% else %}
-        (<span><strong>{{ point.formatted_change_percent }}</strong></span>)
-        {% endif %}
-        on {{ point.formatted_date }}
-        (expected: <strong>{{point.yhat_lower}}</strong> to <strong>{{point.yhat_upper}}</strong>,
-        severity:
-        <strong>{{point.severity}}</strong>)
+        <span style="color: lightgrey;">
+            changed to <strong>{{point.y}}</strong>
+            {% if point.percent_change is string and "inf" not in point.percent_change %}
+                <span>
+            {% elif "+inf" in str(point.percent_change) or point.percent_change > 0 %}
+                <span style="color: lightgreen;">
+            {% elif "-inf" in str(point.percent_change) or point.percent_change < 0 %}
+                <span style="color: red;">
+            {% else %}
+                <span>
+            {% endif %}
+                ({{ point.formatted_change_percent }})
+                </span>
+            on {{ point.formatted_date }}
+            (expected: <strong>{{point.yhat_lower}}</strong> to <strong>{{point.yhat_upper}}</strong>,
+            severity:
+            <strong>{{point.severity}}</strong>)
         </span>
     </li>
     {% endfor %}

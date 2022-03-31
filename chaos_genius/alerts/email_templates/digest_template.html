@@ -52,19 +52,21 @@
         <strong><a class="kpi-link" href="{{ kpi_link_prefix }}/{{ point.kpi_id }}">{{point.kpi_name}} ({{point.series_type}})</strong></a>
         <span style="color: lightgrey;">
             changed to <strong>{{point.y}}</strong>
-        {% if point.percent_change is string and "inf" not in point.percent_change %}
-        (<span>{{ point["change_message"] }}</span>)
-        {% elif "+inf" in str(point.percent_change) or point.percent_change > 0 %}
-        (<span style="color: lightgreen;">{{ point.change_message }}</span>)
-        {% elif "-inf" in str(point.percent_change) or point.percent_change < 0 %}
-        (<span style="color: red;">{{ point.change_message }}</span>)
-        {% else %}
-        (<span>{{ point.change_message }}</span>)
-        {% endif %}
-        on {{ point.formatted_date }}
-        (expected: <strong>{{point.yhat_lower}}</strong> to <strong>{{point.yhat_upper}}</strong>,
-        severity:
-        <strong>{{point.severity}}</strong>)
+            {% if point.percent_change is string and "inf" not in point.percent_change %}
+                <span>
+            {% elif "+inf" in str(point.percent_change) or point.percent_change > 0 %}
+                <span style="color: lightgreen;">
+            {% elif "-inf" in str(point.percent_change) or point.percent_change < 0 %}
+                <span style="color: red;">
+            {% else %}
+                <span>
+            {% endif %}
+                ({{ point.formatted_change_percent }})
+                </span>
+            on {{ point.formatted_date }}
+            (expected: <strong>{{point.yhat_lower}}</strong> to <strong>{{point.yhat_upper}}</strong>,
+            severity:
+            <strong>{{point.severity}}</strong>)
         </span>
     </li>
     {% endfor %}

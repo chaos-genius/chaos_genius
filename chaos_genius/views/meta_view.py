@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 """Views for meta information of the API such as version."""
 
+from copy import deepcopy
+
 from flask.blueprints import Blueprint
 from flask.json import jsonify
+from pytz import all_timezones
 
 from chaos_genius.settings import (
     CHAOSGENIUS_VERSION,
@@ -11,6 +14,12 @@ from chaos_genius.settings import (
 )
 
 blueprint = Blueprint("meta", __name__, static_folder="../static")
+
+
+# add UTC to the beginning to show it first in the dropdown
+# since it will be default in most cases
+# (UTC will be repeated again below in the list)
+PYTZ_TIMEZONES = ["UTC"] + deepcopy(all_timezones)
 
 
 @blueprint.route("/version", methods=["GET"])
@@ -25,3 +34,9 @@ def version_view():
             },
         }
     )
+
+
+@blueprint.route("/supported-timezones", methods=["GET"])
+def support_timezones():
+    """Returns a list of support timezone (region) names."""
+    return jsonify({"timezones": PYTZ_TIMEZONES})

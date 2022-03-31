@@ -469,6 +469,7 @@ def check_views_availability():
     schema_exist = False
     message = ""
     status = "failure"
+    supported_aggregations = []
 
     try:
         data = request.get_json()

@@ -61,8 +61,8 @@ def anomaly_alert_slack(
                 "text": {
                     "type": "mrkdwn",
                     "text": (
-                        f"- Total alerts generated (Overall KPI): *{overall_count}*\n"
-                        "- Total alerts generated (including subdimenions): "
+                        f"- Total alerts generated (Overall KPI): *{overall_count}*\n" +
+                        "- Total alerts generated (including subdimenions): " +
                         f"*{subdim_count + overall_count}*\n"
                     ),
                 },
@@ -180,7 +180,7 @@ def _format_slack_anomalies(
 
         if include_kpi_link:
             kpi_name_link = (
-                f"<{webapp_url_prefix()}#/dashboard/0/anomaly/{point.kpi_id}"
+                f"<{webapp_url_prefix()}#/dashboard/0/anomaly/{point.kpi_id}" +
                 f"|{point.kpi_name} (*{point.series_type}*)>"
             )
         else:
@@ -191,8 +191,8 @@ def _format_slack_anomalies(
         threshold_message = f"expected: *{point.yhat_lower} to {point.yhat_upper}*"
 
         out += (
-            f"- *{kpi_name_link}* changed to "
-            f"*{point.y}* (*{point.formatted_change_percent}*) "
+            f"- *{kpi_name_link}* changed to " +
+            f"*{point.y}* (*{point.formatted_change_percent}*) " +
             f"on {date} ({threshold_message}, severity: *{point.severity}*)\n"
         )
 
@@ -239,8 +239,8 @@ def alert_digest_slack_formatted(
                 "text": {
                     "type": "mrkdwn",
                     "text": (
-                        f"- Total alerts generated (Overall KPI): *{overall_count}*\n"
-                        "- Total alerts generated (including subdimenions): "
+                        f"- Total alerts generated (Overall KPI): *{overall_count}*\n" +
+                        "- Total alerts generated (including subdimenions): " +
                         f"*{subdim_count + overall_count}*\n"
                     ),
                 },

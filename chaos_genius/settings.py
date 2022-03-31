@@ -85,7 +85,7 @@ for enabled_time_range in DEEPDRILLS_ENABLED_TIME_RANGES:
         raise ValueError(f"Values in DEEPDRILLS_ENABLED_TIME_RANGES must be one of {', '.join(TIME_RANGES_BY_KEY.keys())}. Got: {enabled_time_range}.")
 TIMEZONE = os.getenv('TIMEZONE', default='UTC')
 if TIMEZONE not in SUPPORTED_TIMEZONES and TIMEZONE not in pytz.all_timezones:
-    raise ValueError(f"Invalid Timezone Provided. Value of TIMEZONE must be one of [{', '.join(SUPPORTED_TIMEZONES)}] or {pytz.all_timezones}. Got: {TIMEZONE}.")
+    raise ValueError(f"Invalid Timezone Provided. Got: {TIMEZONE}. Please refer to https://docs.chaosgenius.io/docs/Operator_Guides/Configuration/supported-timezones for the list of supported timezones.")
 
 SENTRY_DSN = os.getenv('SENTRY_DSN')
 

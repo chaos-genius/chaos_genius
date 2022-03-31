@@ -53,13 +53,13 @@
         <span style="color: lightgrey;">
             changed to <strong>{{point.y}}</strong>
         {% if point.percent_change is string and "inf" not in point.percent_change %}
-        (<span>{{ point["change_message"] }}</span>)
+        (<span>{{ point.formatted_change_percent }}</span>)
         {% elif "+inf" in str(point.percent_change) or point.percent_change > 0 %}
-        (<span style="color: lightgreen;">{{ point.change_message }}</span>)
+        (<span style="color: lightgreen;">{{ point.formatted_change_percent }}</span>)
         {% elif "-inf" in str(point.percent_change) or point.percent_change < 0 %}
-        (<span style="color: red;">{{ point.change_message }}</span>)
+        (<span style="color: red;">{{ point.formatted_change_percent }}</span>)
         {% else %}
-        (<span>{{ point.change_message }}</span>)
+        (<span>{{ point.formatted_change_percent }}</span>)
         {% endif %}
         on {{ point.formatted_date }}
         (expected: <strong>{{point.yhat_lower}}</strong> to <strong>{{point.yhat_upper}}</strong>,

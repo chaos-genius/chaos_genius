@@ -7,6 +7,8 @@ import Arrow from '../../assets/images/table/subvalue.svg';
 
 import '../../assets/styles/table.scss';
 
+import { v4 as uuidv4 } from 'uuid';
+
 const HierarchicalTable = ({ hierarchicalData }) => {
   const parentChildData = () => {
     var map = {},
@@ -41,7 +43,7 @@ const HierarchicalTable = ({ hierarchicalData }) => {
                 <tr>
                   <th></th>
                   {hierarchicalData.data_columns.map((data) => {
-                    return <th>{data.title}</th>;
+                    return <th key={uuidv4()}>{data.title}</th>;
                   })}
                 </tr>
               </>

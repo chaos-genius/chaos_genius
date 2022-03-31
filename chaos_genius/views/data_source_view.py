@@ -630,7 +630,7 @@ def get_schema_tables():
 
             ds_name = getattr(ds_data, "connection_type")
             schema = (
-                None if (ds_data.is_third_party or SCHEMAS_AVAILABLE[ds_name] == False) else schema
+                None if (ds_data.is_third_party or not SCHEMAS_AVAILABLE[ds_name]) else schema
             )
             if ds_data.is_third_party:
                 table_names = ds_data.as_dict["dbConfig"]["tables"]

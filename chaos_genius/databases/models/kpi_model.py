@@ -132,22 +132,22 @@ class Kpi(PkModel):
                 },
                 {
                     "name": "kpi_query",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
                 },
                 {
                     "name": "table_name",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
                 },
                 {
                     "name": "metric",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
                 },
                 {
                     "name": "aggregation",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
                     "options": [{
                         "label": "Mean",
@@ -162,17 +162,17 @@ class Kpi(PkModel):
                 },
                 {
                     "name": "datetime_column",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
                 },
                 {
                     "name": "filters",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
                 },
                 {
                     "name": "dimensions",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
                 },
                 {

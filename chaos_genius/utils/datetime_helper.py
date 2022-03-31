@@ -22,9 +22,9 @@ def get_rca_date_from_string(date_value):
 def get_datetime_string_with_tz(date_value, hourly=False) -> str:
     """Get date string with timezone."""
     if hourly:
-        main_str = date_value.strftime("%d %b %Y %H:%M") + f" {TIMEZONE}"
+        main_str = date_value.strftime("%d %b %Y %H:%M") + f" ({TIMEZONE})"
     else:
-        main_str = date_value.strftime("%d %b %Y") + f" {TIMEZONE}"
+        main_str = date_value.strftime("%d %b %Y") + f" ({TIMEZONE})"
     return main_str
 
 
@@ -50,20 +50,19 @@ def _get_tz_from_offset_str(utc_offset_str):
 
 def get_lastscan_string_with_tz(datetime_value_str) -> str:
     """Get last scan time in reporting timezone."""
-    reporting_tz_offset = SUPPORTED_TIMEZONES[TIMEZONE]
     server_tz_offset = timezone(datetime.now().astimezone().utcoffset())
 
     datetime_value = pd.Timestamp(
         datetime.strptime(datetime_value_str, "%Y-%m-%dT%H:%M:%S.%f")
     ).tz_localize(tz=server_tz_offset)
 
-    if reporting_tz_offset:
-        timezone_info = _get_tz_from_offset_str(reporting_tz_offset)
+    if TIMEZONE in SUPPORTED_TIMEZONES:
+        timezone_info = _get_tz_from_offset_str(SUPPORTED_TIMEZONES[TIMEZONE])
     else:
-        timezone_info = _get_tz_from_offset_str("GMT+00:00")
+        timezone_info = TIMEZONE
 
     datetime_value = datetime_value.tz_convert(tz=timezone_info)
-    main_str = datetime_value.strftime("%d %b %Y %H:%M") + f" {TIMEZONE}"
+    main_str = datetime_value.strftime("%d %b %Y %H:%M") + f" ({TIMEZONE})"
     return main_str
 
 

@@ -13,6 +13,7 @@ tasks:
       sed -i "s~CHAOSGENIUS_WEBAPP_URL_HERE~`gp url 5000`~g" ".env.local"
       pg_start
       flask db upgrade
+      unset PGHOSTADDR
       bash dev_server.sh
 
   - name: Webapp

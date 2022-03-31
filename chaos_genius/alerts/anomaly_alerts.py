@@ -7,7 +7,7 @@ from copy import deepcopy
 from typing import Any, Dict, List, Optional, Sequence, Tuple, TypeVar, Union
 
 import pandas as pd
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, StrictFloat, StrictInt, root_validator, validator
 from pydantic.tools import parse_obj_as
 
 from chaos_genius.alerts.constants import (
@@ -122,7 +122,7 @@ class AnomalyPoint(AnomalyPointOriginal):
     # severity value rounded to integer
     severity: int
     # percentage change from previous day's point
-    percent_change: Union[int, float, str]
+    percent_change: Union[StrictFloat, StrictInt, str]
     # human readable message describing the percent_change
     change_message: str
 

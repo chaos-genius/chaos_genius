@@ -46,6 +46,7 @@ from chaos_genius.third_party.integration_utils import get_connection_config
 from chaos_genius.utils.metadata_api_config import (
     SCHEMAS_AVAILABLE,
     TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY,
+    TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY_THIRD_PARTY,
 )
 # from chaos_genius.jobs.metadata_prefetch import fetch_data_source_schema
 
@@ -517,6 +518,7 @@ def check_views_availability():
     schema_exist = False
     message = ""
     status = "failure"
+    supported_aggregations = []
 
     try:
         data = request.get_json()
@@ -534,12 +536,15 @@ def check_views_availability():
                 )
 
             datasource_name = getattr(ds_data, "connection_type")
+            datasource_capability = (
+                TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY_THIRD_PARTY
+                if ds_data.is_third_party
+                else TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]
+            )
             schema_exist = SCHEMAS_AVAILABLE.get(datasource_name, False)
-            views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["views"]
-            supported_aggregations = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["supported_aggregations"]
-            materialize_views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[
-                datasource_name
-            ]["materialized_views"]
+            views = datasource_capability["views"]
+            supported_aggregations = datasource_capability["supported_aggregations"]
+            materialize_views = datasource_capability["materialized_views"]
             status = "success"
     except Exception as err:
         message = "Error in fetching table info: {}".format(err)

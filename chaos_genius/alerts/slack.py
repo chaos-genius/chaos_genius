@@ -192,7 +192,7 @@ def _format_slack_anomalies(
 
         out += (
             f"- *{kpi_name_link}* changed to "
-            f"*{point.y}* (*{point.change_message}*) "
+            f"*{point.y}* (*{point.formatted_change_percent}*) "
             f"on {date} ({threshold_message}, severity: *{point.severity}*)\n"
         )
 

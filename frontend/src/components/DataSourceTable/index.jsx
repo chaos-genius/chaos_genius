@@ -147,20 +147,29 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
                   className: 'live-status',
                   status: 'Live'
                 };
-                if (datasource?.sync_status) {
-                  if (datasource.sync_status === 'Completed') {
-                    dataSourceStatusObj.className = 'live-status';
-                    dataSourceStatusObj.status = 'Live';
-                  } else if (datasource.sync_status === 'In Progress') {
-                    dataSourceStatusObj.className = 'in-progress-status';
-                    dataSourceStatusObj.status = 'In Progress';
+                if (!datasource?.is_third_party) {
+                  if (datasource?.sync_status) {
+                    if (datasource.sync_status === 'Completed') {
+                      dataSourceStatusObj.className = 'live-status';
+                      dataSourceStatusObj.status = 'Live';
+                    } else if (datasource.sync_status === 'In Progress') {
+                      dataSourceStatusObj.className = 'in-progress-status';
+                      dataSourceStatusObj.status = 'In Progress';
+                    } else {
+                      dataSourceStatusObj.className = 'broken-status';
+                      dataSourceStatusObj.status = 'Broken';
+                    }
                   } else {
                     dataSourceStatusObj.className = 'broken-status';
                     dataSourceStatusObj.status = 'Broken';
                   }
                 } else {
-                  dataSourceStatusObj.className = 'broken-status';
-                  dataSourceStatusObj.status = 'Broken';
+                  dataSourceStatusObj.className =
+                    datasource?.active === true
+                      ? 'live-status'
+                      : 'broken-status';
+                  dataSourceStatusObj.status =
+                    datasource?.active === true ? 'Live' : 'Broken';
                 }
                 return (
                   <tr key={uuidv4()}>

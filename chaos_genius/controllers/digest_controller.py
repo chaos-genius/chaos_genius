@@ -63,7 +63,7 @@ def preprocess_triggered_alert(
         #  emails
         triggered_alert.alert_channel_conf = getattr(
             alert_conf, "alert_channel_conf", {}
-        ).get(triggered_alert.alert_channel, None)
+        ).get(triggered_alert.alert_channel)
 
     return triggered_alert
 

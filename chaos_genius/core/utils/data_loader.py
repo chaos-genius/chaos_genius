@@ -181,9 +181,7 @@ class DataLoader:
         # tz-naive timestamps get localized to their database timezone.
         if df[self.dt_col].dt.tz is None:
             df[self.dt_col] = df[self.dt_col].dt.tz_localize(
-                DataSource.get_by_id(
-                    self.kpi_info["data_source"]
-                    ).as_dict["database_timezone"])
+                self.connection_info["database_timezone"])
 
         # TODO: deprecate over releases
         # maps the abbreviations to respective tz regions

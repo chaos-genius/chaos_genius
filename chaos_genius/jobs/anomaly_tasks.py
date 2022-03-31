@@ -54,10 +54,6 @@ def anomaly_single_kpi(kpi_id, end_date=None):
     )
     task_id = checkpoint.task_id
 
-    anomaly_end_date = run_anomaly_for_kpi(kpi_id, end_date, task_id=task_id)
-
-    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
-
     def _checkpoint_success(checkpoint: str):
         checkpoint_success(task_id, kpi.id, "Anomaly", checkpoint)
         logger.info(
@@ -80,31 +76,34 @@ def anomaly_single_kpi(kpi_id, end_date=None):
             exc_info=e,
         )
 
-    if anomaly_end_date:
-        logger.info(f"Completed the anomaly for KPI ID: {kpi_id}.")
+    try:
+        run_anomaly_for_kpi(kpi_id, end_date, task_id=task_id)
+
+        kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
         kpi.scheduler_params = update_scheduler_params("anomaly_status", "completed")
         _checkpoint_success("Anomaly complete")
+        logger.info(f"Completed the anomaly for KPI ID: {kpi_id}.")
+
         try:
-            # anomaly_end_date is same as the last date (of data in DB)
-            _, errors = trigger_anomaly_alerts_for_kpi(kpi, anomaly_end_date)
+            _, errors = trigger_anomaly_alerts_for_kpi(kpi)
             if not errors:
                 logger.info(f"Triggered the alerts for KPI {kpi_id}.")
                 _checkpoint_success("Alert trigger")
             else:
                 logger.error(f"Alert trigger failed for the KPI ID: {kpi_id}.")
-                _checkpoint_failure("Alert trigger", None)
+                # we only log the first exception
+                _checkpoint_failure("Alert trigger", errors[0][1])
         except Exception as e:
             logger.error(f"Alert trigger failed for the KPI ID: {kpi_id}.", exc_info=e)
             _checkpoint_failure("Alert trigger", e)
-    else:
-        logger.error(f"Anomaly failed for the for KPI ID: {kpi_id}.")
+
+    except Exception as e:
+        kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
         kpi.scheduler_params = update_scheduler_params("anomaly_status", "failed")
-        _checkpoint_failure("Anomaly complete", None)
+        _checkpoint_failure("Anomaly complete", e)
 
     flag_modified(kpi, "scheduler_params")
     kpi.update(commit=True)
-
-    return anomaly_end_date
 
 
 @celery.task

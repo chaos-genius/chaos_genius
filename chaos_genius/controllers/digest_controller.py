@@ -59,6 +59,8 @@ def preprocess_triggered_alert(
     if not isinstance(alert_conf.alert_channel_conf, dict):
         triggered_alert.alert_channel_conf = None
     else:
+        # in case of email, this makes triggered_alert.alert_channel_conf the list of
+        #  emails
         triggered_alert.alert_channel_conf = getattr(
             alert_conf, "alert_channel_conf", {}
         ).get(triggered_alert.alert_channel, None)

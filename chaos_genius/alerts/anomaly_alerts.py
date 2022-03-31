@@ -202,6 +202,11 @@ class AnomalyPointFormatted(AnomalyPoint):
     alert_id: int
     alert_name: str
     alert_channel: str
+    # stores alert channel configuration
+    # in individual alerts, this will be the entire dict (`Dict`)
+    # in digests, this will be just the list of emails or None (`Optional[List[str]]`)
+    # TODO: make a different type for digest data or use a consistent type across both
+    #  ref: https://github.com/chaos-genius/chaos_genius/pull/862#discussion_r839400411
     alert_channel_conf: Any
 
     formatted_date: str

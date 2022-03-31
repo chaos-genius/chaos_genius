@@ -345,7 +345,7 @@ class AnomalyAlertController:
         logger.info(
             f"Checking for anomalies for (KPI: {self.kpi_id}, Alert: "
             f"{self.alert_id}) in the range - start: {start_timestamp} (included: "
-            f"{include_start_timestamp}) and end: {self.latest_anomaly_timestamp} "
+            f"{include_start_timestamp}) and end: {end_timestamp} "
             "(included: True)"
         )
 
@@ -426,8 +426,6 @@ class AnomalyAlertController:
         prev_day_data = self._get_anomalies(
             time_diff=time_diff, anomalies_only=False, include_severity_cutoff=False
         )
-        for anomaly_point in prev_day_data:
-            anomaly_point.format_series_type()
 
         # store a mapping of hour => list of anomaly points for that hour
         hourly_data: Dict[int, List[AnomalyPointOriginal]] = dict()

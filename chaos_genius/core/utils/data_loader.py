@@ -1,18 +1,16 @@
 """Provides utilties for loading data from KPIs."""
 
-from datetime import date, datetime, timedelta
 import logging
-import random
-import string
-import pytz
+from datetime import date, datetime, timedelta
 
 import pandas as pd
+import pytz
+
 from chaos_genius.connectors import get_sqla_db_conn
-from chaos_genius.databases.models.data_source_model import DataSource
-from chaos_genius.settings import TIMEZONE
 from chaos_genius.core.utils.constants import SUPPORTED_TIMEZONES
 from chaos_genius.core.utils.utils import randomword
-
+from chaos_genius.databases.models.data_source_model import DataSource
+from chaos_genius.settings import TIMEZONE
 
 _SQL_IDENTIFIERS = {
     "MySQL": "`",
@@ -23,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class DataLoader:
+    """Data Loader Class."""
     def __init__(
         self,
         kpi_info: dict,
@@ -178,17 +177,30 @@ class DataLoader:
     def _preprocess_df(self, df):
         df[self.dt_col] = pd.to_datetime(df[self.dt_col])
 
-        if self.kpi_info.get("timezone_aware"):
-            # if tz aware data, convert to given timezone
-            # and then strip tz information
+        # TODO: use the timezone_aware column in kpi table once updated
+        # tz-naive timestamps get localized to their database timezone.
+        if df[self.dt_col].dt.tz is None:
+            df[self.dt_col] = df[self.dt_col].dt.tz_localize(
+                DataSource.get_by_id(
+                    self.kpi_info["data_source"]
+                    ).as_dict["database_timezone"])
+
+        # TODO: deprecate over releases
+        # maps the abbreviations to respective tz regions
+        if TIMEZONE in SUPPORTED_TIMEZONES:
             tz_to_convert_to = self._get_tz_from_offset_str(
                 SUPPORTED_TIMEZONES[TIMEZONE]
             )
-            df[self.dt_col] = (
-                df[self.dt_col]
-                .dt.tz_convert(tz_to_convert_to)
-                .dt.tz_localize(None)
-            )
+        else:
+            tz_to_convert_to = TIMEZONE
+
+        # convert to reporting timezone
+        # and then strip tz information
+        df[self.dt_col] = (
+            df[self.dt_col]
+            .dt.tz_convert(tz_to_convert_to)
+            .dt.tz_localize(None)
+        )
 
     def get_count(self) -> int:
         """Return count of rows in KPI data."""

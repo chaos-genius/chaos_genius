@@ -100,8 +100,8 @@ def kpi_download_line_data(kpi: int):
         )
 
 
-@blueprint.route("/<int:kpi_id>/hierarchial_data", methods=["GET"])
-def download_hierarchial_data(kpi_id):
+@blueprint.route("/<int:kpi_id>/hierarchical_data", methods=["GET"])
+def download_hierarchical_data(kpi_id):
     """API endpoint to download RCA hierarchical data."""
     try:
         timeline = request.args.get("timeline")

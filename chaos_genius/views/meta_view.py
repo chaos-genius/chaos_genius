@@ -19,7 +19,10 @@ blueprint = Blueprint("meta", __name__, static_folder="../static")
 # add UTC to the beginning to show it first in the dropdown
 # since it will be default in most cases
 # (UTC will be repeated again below in the list)
-PYTZ_TIMEZONES = ["UTC"] + deepcopy(all_timezones)
+PYTZ_TIMEZONES = [
+    # this format (label-value pairs) is needed for the frontend
+    {"label": tz, "value": tz} for tz in ["UTC"] + deepcopy(all_timezones)
+]
 
 
 @blueprint.route("/version", methods=["GET"])

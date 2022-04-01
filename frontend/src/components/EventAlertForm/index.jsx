@@ -519,7 +519,7 @@ const EventAlertForm = ({
                       ? 'form-check-label active'
                       : 'form-check-label'
                   }
-                  for="newentry">
+                  htmlFor="newentry">
                   New Entry
                 </label>
               </div>
@@ -553,7 +553,7 @@ const EventAlertForm = ({
                       ? 'form-check-label active'
                       : 'form-check-label'
                   }
-                  for="allchanges">
+                  htmlFor="allchanges">
                   All Changes
                 </label>
               </div>
@@ -587,7 +587,7 @@ const EventAlertForm = ({
                       ? 'form-check-label active'
                       : 'form-check-label'
                   }
-                  for="alwayssend">
+                  htmlFor="alwayssend">
                   Always Send
                 </label>
               </div>
@@ -623,7 +623,7 @@ const EventAlertForm = ({
                       ? 'form-check-label active'
                       : 'form-check-label'
                   }
-                  for="missingDataAlert">
+                  htmlFor="missingDataAlert">
                   Missing Data
                 </label>
               </div>

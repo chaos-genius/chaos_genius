@@ -235,7 +235,7 @@ export const anomalyDownloadCsv = (id) => {
   return async (dispatch) => {
     dispatch(anomalyDownloadRequest());
     const { data, error, status } = await getRequest({
-      url: `${BASE_URL}/api/anomaly-data/${id}/download_anomaly_data`
+      url: `${BASE_URL}/api/downloads/${id}/anomaly_data`
     });
     if (error) {
       dispatch(anomalyDownloadFailure());

@@ -445,8 +445,20 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
   const handleDownloadClick = (type) => {
     if (type === 'rca') {
       dispatch(rcaDownloadCsv(kpi));
-    } else {
-      dispatch(graphDownloadCsv(kpi));
+    } else if (type === 'waterfall') {
+      if (dimension?.value === 'singledimension') {
+        dispatch(
+          graphDownloadCsv(kpi, 'hierarchical_data', {
+            timeline: monthWeek?.value
+          })
+        );
+      } else if (dimension?.value === 'multidimension') {
+        dispatch(
+          graphDownloadCsv(kpi, 'multidim_analysis_data', {
+            timeline: monthWeek?.value
+          })
+        );
+      }
     }
   };
 
@@ -687,7 +699,7 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
                         <div
                           className="download-icon"
                           onClick={() => {
-                            //handleDownloadClick('waterfall');
+                            handleDownloadClick('waterfall');
                           }}>
                           <img src={download} alt="icon"></img>
                         </div>

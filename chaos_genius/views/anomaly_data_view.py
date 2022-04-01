@@ -393,57 +393,6 @@ def kpi_anomaly_retraining(kpi_id):
         return jsonify({"msg" : f"retraining failed for KPI: {kpi_id}, KPI id is None"})
 
 
-@blueprint.route("/<int:kpi_id>/download_anomaly_data", methods=["GET"])
-def download_anomaly_data(kpi_id: int):
-    """API Endpoint to download overall KPI anomaly data in CSV form.
-
-    Data is downloaded for the last 60 days by default
-    """
-    try:
-        data_points = get_overall_data_points(kpi_id)
-        if not data_points:
-            raise Exception(f"No anomaly data found for KPI id {kpi_id}")
-        output_csv_obj = io.StringIO()
-        csv_headers = [
-            "datetime",
-            "value",
-            "severity",
-            "upper_bound",
-            "lower_bound",
-            "series_type",
-            "series_name",
-        ]
-        csvwriter = csv.writer(output_csv_obj, delimiter=",")
-        csvwriter.writerow(csv_headers)
-        for row in data_points:
-            attr_list = [
-                row.data_datetime.strftime("%a %-d %B %H:%M:%S %Y"),
-                str(row.y),
-                str(row.severity),
-                str(row.yhat_upper),
-                str(row.yhat_lower),
-                str(row.anomaly_type),
-                str(row.series_type),
-            ]
-            csvwriter.writerow(attr_list)
-
-        output_csv_obj.seek(0)
-        output_csv_str = output_csv_obj.read().encode("utf-8")
-        output_csv_bytes = io.BytesIO(output_csv_str)
-        output_csv_obj.close()
-
-        return send_file(
-            output_csv_bytes,
-            mimetype="text/csv",
-            attachment_filename=f"KPI-{kpi_id}-anomaly-data.csv",
-            as_attachment=True,
-        )
-    except Exception as e:
-        return jsonify(
-            {"status": "failure", "message": f"Downloading data failed: {e}"}
-        )
-
-
 def fill_graph_data(row, graph_data):
     """Fills graph_data with intervals, values, and predicted_values for
     a given row.

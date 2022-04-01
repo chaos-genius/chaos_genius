@@ -190,7 +190,7 @@ export const rcaDownloadCsv = (id) => {
   return async (dispatch) => {
     dispatch(rcaDownloadCsvRequest());
     const { data, error, status } = await getRequest({
-      url: `${BASE_URL}/api/rca/${id}/download_chart_data`
+      url: `${BASE_URL}/api/downloads/${id}/chart_data`
     });
     if (error) {
       dispatch(rcaDownloadCsvFailure());
@@ -219,12 +219,15 @@ export const graphCsvFailure = () => {
   };
 };
 
-export const graphDownloadCsv = (id) => {
+export const graphDownloadCsv = (id, paramHeader, params) => {
   return async (dispatch) => {
     dispatch(graphCsvRequest());
+    const URL = attachParams(
+      `${BASE_URL}/api/downloads/${id}/${paramHeader}`,
+      params
+    );
     const { data, error, status } = await getRequest({
-      //Need to change URl
-      url: `${BASE_URL}/api/rca/2/download_chart_data`
+      url: URL
     });
     if (error) {
       dispatch(graphCsvFailure());

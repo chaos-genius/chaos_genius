@@ -734,7 +734,6 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
             <div className="editable-field">
               <TimePicker
                 onChange={handleValueChange}
-                defaultValue={schedule}
                 className="time-picker"
                 disabled={
                   edit

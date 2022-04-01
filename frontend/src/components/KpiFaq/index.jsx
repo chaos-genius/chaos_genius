@@ -1,6 +1,7 @@
 import React from 'react';
 import slacksmall from '../../assets/images/slack-small-logo.svg';
 import './faq.scss';
+import { v4 as uuidv4 } from 'uuid';
 
 const AddFaq = () => {
   const getView = (list) => {
@@ -9,13 +10,17 @@ const AddFaq = () => {
         faq.content &&
         faq.content.map((item) => {
           return (
-            <a href={item.href} target={item.target} rel={item.rel}>
+            <a
+              href={item.href}
+              target={item.target}
+              rel={item.rel}
+              key={uuidv4()}>
               <label>{item.label}</label>
             </a>
           );
         });
       return (
-        <li>
+        <li key={uuidv4()}>
           {faq.subheading && <h3>{faq.subheading}</h3>}
           {linkList}
         </li>

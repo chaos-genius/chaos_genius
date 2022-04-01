@@ -120,7 +120,7 @@ def download_hierarchial_data(kpi_id):
                 raise Exception(
                     f"failed to fetch heirarchial data for kpi {kpi_id} with dimension={dimension} - {result[1]}"
                 )
-            data_list[dimension] = result[2]['data_table']
+            data_list[dimension] = result[2]["data_table"]
 
         def row_gen(data_list):
             csv_headers = [

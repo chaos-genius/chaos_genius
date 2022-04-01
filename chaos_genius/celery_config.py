@@ -39,7 +39,7 @@ CELERYBEAT_SCHEDULE = {
         "schedule": crontab(
             hour=METADATA_SYNC_TIME_HRS, minute=METADATA_SYNC_TIME_MINS
         ),
-        "args": ("daily",),
+        "args": (),
     },
 }
 

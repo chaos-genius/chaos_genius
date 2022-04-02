@@ -16,6 +16,7 @@ from flask import (  # noqa: F401
     jsonify,
 )
 import pandas as pd
+from sqlalchemy import delete
 from chaos_genius.connectors import get_sqla_db_conn
 
 from chaos_genius.core.utils.kpi_validation import validate_kpi
@@ -295,10 +296,24 @@ def kpi_meta_info():
     return jsonify({"data": Kpi.meta_info()})
 
 
+def delete_rca_data_for_kpi(kpi_id):
+    delete_kpi_query = delete(RcaData).where(RcaData.kpi_id == kpi_id)
+    db.session.execute(delete_kpi_query)
+    db.session.commit()
+    # retrun True
+
+def delete_anomaly_data_for_kpi(kpi_id):
+    delete_kpi_query = delete(AnomalyDataOutput).where(AnomalyDataOutput.kpi_id == kpi_id)
+    db.session.execute(delete_kpi_query)
+    db.session.commit()
+
 @blueprint.route("/<int:kpi_id>/update", methods=["PUT"])
 def edit_kpi(kpi_id):
     """edit kpi details."""
     status, message = "", ""
+    do_not_run_analytics_list = ["name", "dashboards"]
+    run_analytics = False
+
     try:
         kpi_obj = Kpi.get_by_id(kpi_id)
         data = request.get_json()
@@ -308,8 +323,33 @@ def edit_kpi(kpi_id):
             dashboard_id_list = list(set(dashboard_id_list))
 
             for key, value in data.items():
+                print(key, value)
+                if key not in do_not_run_analytics_list:
+                    run_analytics = True
                 if chech_editable_field(meta_info, key):
                     setattr(kpi_obj, key, value)
+            if run_analytics:
+                # add anomaly to queue
+                # run_anomaly = False
+                delete_rca_data_for_kpi(kpi_id)
+                from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task, ready_rca_task
+                rca_task = ready_rca_task(kpi_id)
+                if rca_task is not None:
+                    rca_task.apply_async()
+                    current_app.logger.info(f"RCA started for KPI ID: {kpi_id}")
+                try:
+                    delete_anomaly_data_for_kpi(kpi_id)
+                    anomaly_task = ready_anomaly_task(kpi_id)
+                    if anomaly_task is not None:
+                        anomaly_task.apply_async()
+                        current_app.logger.info(f"Anomaly started for KPI ID: {kpi_id}")
+                except Exception as e:
+                    print(e)
+                
+
+                
+                
+
 
             mapper_dict = edit_kpi_dashboards(kpi_id, dashboard_id_list)
             kpi_obj.save(commit=True)

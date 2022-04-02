@@ -122,12 +122,12 @@ class Kpi(PkModel):
                 },
                 {
                     "name": "schema_name",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False
                 },
                 {
                     "name": "kpi_type",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
                 },
                 {

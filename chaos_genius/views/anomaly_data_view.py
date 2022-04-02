@@ -315,6 +315,12 @@ def kpi_anomaly_params(kpi_id: int):
         kpi, new_anomaly_params, check_editable=not is_first_time
     )
 
+    # if anomaly params are updated, run anomaly again
+    from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task, ready_rca_task
+    anomaly_task = ready_anomaly_task(new_kpi.id)
+    anomaly_task.apply_async()
+    current_app.logger.info(f"Anomaly started for KPI ID: {new_kpi.kpi_id}")
+
     if err != "":
         return jsonify({"error": err, "status": "failure"}), 400
 
@@ -323,7 +329,6 @@ def kpi_anomaly_params(kpi_id: int):
     if is_first_time:
         # TODO: move this import to top and fix import issue
         from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task, ready_rca_task
-
         anomaly_task = ready_anomaly_task(new_kpi.id)
         rca_task = ready_rca_task(new_kpi.id)
         if anomaly_task is None or rca_task is None:

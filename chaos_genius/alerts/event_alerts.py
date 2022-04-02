@@ -264,7 +264,7 @@ class StaticEventAlertController:
 
         template = env.get_template(template)
         test = send_static_alert_email(
-            recipient_emails, subject, template.render(**kwargs), self.alert_info, files
+            recipient_emails, subject, template.render(**kwargs), files
         )
 
         if test == True:

@@ -247,6 +247,16 @@
   justify-content: space-between;
   height: 35px;
 }
+.download-container {
+  display: flex;
+  justify-content: space-between;
+  margin-left: 20px;
+}
+.download-icon {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
 .time-stamp {
   font-size: 12px;
   font-weight: 400;

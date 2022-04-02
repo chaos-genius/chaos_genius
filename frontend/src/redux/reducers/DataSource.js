@@ -22,7 +22,10 @@ import {
   DATASOURCEEDITDATAFAILURE,
   DATASOURCEUPDATEREQUEST,
   DATASOURCEUPDATESUCCESS,
-  DATASOURCEUPDATEFAILURE
+  DATASOURCEUPDATEFAILURE,
+  SYNCSCHEMAFAILURE,
+  SYNCSCHEMAREQUESTED,
+  SYNCSCHEMASUCCESS
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -211,6 +214,27 @@ export const dataSource = (state = initialState, action) => {
         ...state,
         updateDatasourceLoading: false,
         updateDatasourceError: true
+      };
+    }
+    case SYNCSCHEMAREQUESTED: {
+      return {
+        ...state
+      };
+    }
+    case SYNCSCHEMAFAILURE: {
+      return {
+        ...state
+      };
+    }
+    case SYNCSCHEMASUCCESS: {
+      const index = state.dataSourcesList?.findIndex(
+        (datasource) => datasource.id === action.data.data_source_id
+      );
+      const newArray = [...state.dataSourcesList];
+      newArray[index].sync_status = action.data.sync_status;
+      return {
+        ...state,
+        dataSourcesList: newArray
       };
     }
     case 'CREATE_RESPONSE_RESET': {

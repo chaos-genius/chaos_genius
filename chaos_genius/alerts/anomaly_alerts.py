@@ -248,6 +248,27 @@ class AnomalyPointFormatted(AnomalyPoint):
             formatted_change_percent=str(formatted_change_percent),
         )
 
+    @property
+    def y_readable(self):
+        """Returns human readable format for y value of anomaly point."""
+        from numerize import numerize
+
+        return numerize.numerize(self.y)
+
+    @property
+    def yhat_lower_readable(self):
+        """Returns human readable format for lower bound of expected range."""
+        from numerize import numerize
+
+        return numerize.numerize(self.yhat_lower)
+
+    @property
+    def yhat_upper_readable(self):
+        """Returns human readable format for upper bound of expected range."""
+        from numerize import numerize
+
+        return numerize.numerize(self.yhat_upper)
+
 
 class AnomalyAlertController:
     """Controller for KPI/anomaly alerts."""

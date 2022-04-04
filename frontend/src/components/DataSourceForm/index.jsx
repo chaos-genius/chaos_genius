@@ -194,7 +194,8 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       ) {
         setShowModal(true);
       } else {
-        history.push('/datasource');
+        setShowModal(true);
+        //history.push('/datasource');
       }
     } else if (
       createDatasourceResponse &&
@@ -234,7 +235,8 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       ) {
         setShowModal(true);
       } else {
-        history.push('/datasource');
+        setShowModal(true);
+        //history.push('/datasource');
       }
       customToast({
         type: 'success',

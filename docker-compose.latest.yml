@@ -103,8 +103,8 @@ services:
 
   chaosgenius-redis:
     container_name: chaosgenius-redis
-    restart: unless-stopped
     image: "redis:6.2-alpine"
+    restart: unless-stopped
     
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler

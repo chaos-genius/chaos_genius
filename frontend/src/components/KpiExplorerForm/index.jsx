@@ -70,6 +70,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     dashboard: ''
   });
 
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const [aggregate, setAggregate] = useState([]);
 
   const [formdata, setFormdata] = useState({
@@ -90,6 +91,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   });
 
   const [editedFormData, setEditedFormData] = useState({});
+  const [needForCleanup, setNeedForCleanUp] = useState({});
 
   const [errorMsg, setErrorMsg] = useState({
     kpiname: false,
@@ -649,6 +651,12 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         ...editedFormData,
         schema_name: e.value
       });
+      if (kpiEditData?.schema_name !== e.value) {
+        setNeedForCleanUp({ ...needForCleanup, schema_name: true });
+      } else {
+        const { schema_name, ...newItems } = needForCleanup;
+        setNeedForCleanUp(newItems);
+      }
     }
   };
 
@@ -667,6 +675,12 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       ...editedFormData,
       table_name: valueData
     });
+    if (kpiEditData?.table_name !== e.value) {
+      setNeedForCleanUp({ ...needForCleanup, table_name: true });
+    } else {
+      const { table_name, ...newItems } = needForCleanup;
+      setNeedForCleanUp(newItems);
+    }
     dispatchGetTableInfoData(valueData);
   };
 
@@ -724,6 +738,12 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       ...editedFormData,
       kpi_type: e.value
     });
+    if (kpiEditData?.kpi_type !== e.value) {
+      setNeedForCleanUp({ ...needForCleanup, kpi_type: true });
+    } else {
+      const { kpi_type, ...newItems } = needForCleanup;
+      setNeedForCleanUp(newItems);
+    }
     setTableAdditional({
       ...tableAdditional,
       tabledimension: false
@@ -850,7 +870,11 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       };
 
       if (data[2] === 'edit' && present) {
-        dispatch(getUpdatekpi(kpiId, editedFormData));
+        if (Object.keys(needForCleanup)?.length) {
+          setEditModalOpen(true);
+        } else {
+          dispatch(getUpdatekpi(kpiId, editedFormData));
+        }
       } else if (data[2] !== 'edit') {
         dispatchgetAllKpiExplorerSubmit(kpiInfo);
       }
@@ -1058,6 +1082,15 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                       ...editedFormData,
                       kpi_query: e.target.value
                     });
+                    if (kpiEditData?.kpi_query !== e.value) {
+                      setNeedForCleanUp({
+                        ...needForCleanup,
+                        kpi_query: true
+                      });
+                    } else {
+                      const { kpi_query, ...newItems } = needForCleanup;
+                      setNeedForCleanUp(newItems);
+                    }
                     setErrorMsg((prev) => {
                       return {
                         ...prev,
@@ -1209,6 +1242,12 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                     ...editedFormData,
                     metric: e.value
                   });
+                  if (kpiEditData?.metric !== e.value) {
+                    setNeedForCleanUp({ ...needForCleanup, metric: true });
+                  } else {
+                    const { metric, ...newItems } = needForCleanup;
+                    setNeedForCleanUp(newItems);
+                  }
                   setErrorMsg((prev) => {
                     return {
                       ...prev,
@@ -1251,6 +1290,15 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                     ...editedFormData,
                     aggregation: e.value
                   });
+                  if (kpiEditData?.aggregation !== e.value) {
+                    setNeedForCleanUp({
+                      ...needForCleanup,
+                      aggregation: true
+                    });
+                  } else {
+                    const { aggregation, ...newItems } = needForCleanup;
+                    setNeedForCleanUp(newItems);
+                  }
                   setErrorMsg((prev) => {
                     return {
                       ...prev,
@@ -1296,6 +1344,15 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                     ...editedFormData,
                     datetime_column: e.value
                   });
+                  if (kpiEditData?.datetime_column !== e.value) {
+                    setNeedForCleanUp({
+                      ...needForCleanup,
+                      datetime_column: true
+                    });
+                  } else {
+                    const { datetime_column, ...newItems } = needForCleanup;
+                    setNeedForCleanUp(newItems);
+                  }
                   setErrorMsg((prev) => {
                     return {
                       ...prev,
@@ -1356,6 +1413,15 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                     ...editedFormData,
                     dimensions: e.map((el) => el.value)
                   });
+                  if (kpiEditData?.dimensions !== e.value) {
+                    setNeedForCleanUp({
+                      ...needForCleanup,
+                      dimensions: true
+                    });
+                  } else {
+                    const { dimensions, ...newItems } = needForCleanup;
+                    setNeedForCleanUp(newItems);
+                  }
                   setOption({ ...option, datetime_column: e.value });
                   setErrorMsg((prev) => {
                     return {
@@ -1507,6 +1573,39 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                     <div className="btn-content">
                       <span>Create</span>
                     </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </Modal>
+          <Modal
+            portalClassName="dashboardmodal"
+            isOpen={editModalOpen}
+            shouldCloseOnOverlayClick={false}>
+            <div className="modal-close">
+              <img
+                src={Close}
+                alt="Close"
+                onClick={() => setEditModalOpen(false)}
+              />
+            </div>
+            <div className="modal-body">
+              <div className="modal-contents">
+                <h3>All your previous data will be deleted</h3>
+                <p>Are you sure you want to proceed </p>
+                <div className="next-step-navigate-edit-modal">
+                  <button
+                    className="btn white-button"
+                    onClick={() => setEditModalOpen(false)}>
+                    <span>Cancel</span>
+                  </button>
+                  <button
+                    className="btn black-button"
+                    onClick={() => {
+                      dispatch(getUpdatekpi(kpiId, editedFormData));
+                      setEditModalOpen(false);
+                    }}>
+                    <span>Save Changes</span>
                   </button>
                 </div>
               </div>

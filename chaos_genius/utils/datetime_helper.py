@@ -56,6 +56,7 @@ def get_lastscan_string_with_tz(datetime_value_str) -> str:
         datetime.strptime(datetime_value_str, "%Y-%m-%dT%H:%M:%S.%f")
     ).tz_localize(tz=server_tz_offset)
 
+    # TODO : Deprecate SUPPORTED_TIMEZONES over releases.
     if TIMEZONE in SUPPORTED_TIMEZONES:
         timezone_info = _get_tz_from_offset_str(SUPPORTED_TIMEZONES[TIMEZONE])
     else:

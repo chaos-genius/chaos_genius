@@ -24,6 +24,8 @@ def iter_csv(data):
         line.truncate(0)
         line.seek(0)
 
+ANOMALY_DATA_DATETIME_FORMAT="%a %-d %B %H:%M:%S %Y"
+CHART_DATA_DATETIME_FORMAT="%a %-d %B %Y"
 
 @blueprint.route("/<int:kpi_id>/anomaly_data", methods=["GET"])
 def download_anomaly_data(kpi_id: int):
@@ -49,7 +51,7 @@ def download_anomaly_data(kpi_id: int):
             yield csv_headers
             for row in data_points:
                 attr_list = [
-                    row.data_datetime.strftime("%a %-d %B %H:%M:%S %Y"),
+                    row.data_datetime.strftime(ANOMALY_DATA_DATETIME_FORMAT),
                     str(row.y),
                     str(row.severity),
                     str(row.yhat_upper),
@@ -72,12 +74,11 @@ def download_anomaly_data(kpi_id: int):
 
 @blueprint.route("/<int:kpi>/chart_data", methods=["GET"])
 def kpi_download_line_data(kpi: int):
-    """API endpoint to download chart data for last 60 days."""
+    """API endpoint to download chart data."""
     try:
-        line_data = kpi_line_data(kpi, download=True)
-        if line_data[0] == "error":
-            raise Exception(f"{line_data[1]}")
-        data_points = line_data[2]
+        status,message,data_points = kpi_line_data(kpi, download=True)
+        if status == "error":
+            raise Exception(message)
 
         if not data_points:
             raise Exception(f"No chart data found for KPI id {kpi}")
@@ -86,7 +87,7 @@ def kpi_download_line_data(kpi: int):
             csv_headers = ["date", "value"]
             yield csv_headers
             for row in data_points:
-                attr_list = [row["date"].strftime("%a %-d %B %Y"), str(row["value"])]
+                attr_list = [row["date"].strftime(CHART_DATA_DATETIME_FORMAT), str(row["value"])]
                 yield attr_list
 
         response = Response(iter_csv(row_gen(data_points)), mimetype="text/csv")
@@ -106,7 +107,9 @@ def download_hierarchical_data(kpi_id):
     try:
         timeline = request.args.get("timeline")
         if not timeline:
-            raise Exception("Please provide timeline as an argument")
+            status = "failure"
+            message = "Please provide timeline as an argument"
+            return jsonify({"status":status, "message":message}), 400
 
         kpi_info = get_kpi_data_from_id(kpi_id)
         dimensions = kpi_info.get("dimensions")
@@ -128,11 +131,11 @@ def download_hierarchical_data(kpi_id):
                 "Hierarchy Level",
                 "Sub-Group Name",
                 "Previous Period Value",
-                "Previous Period Count(#)",
-                "Previous Period Size(%)",
+                "Previous Period Count (#)",
+                "Previous Period Size (%)",
                 "Current Period Value",
-                "Current Period Count(#)",
-                "Current Period Size(%)",
+                "Current Period Count (#)",
+                "Current Period Size (%)",
                 "Impact",
             ]
             yield csv_headers
@@ -172,22 +175,24 @@ def download_multidim_analysis_data(kpi_id):
     try:
         timeline = request.args.get("timeline")
         if not timeline:
-            raise Exception("Please provide timeline as an argument")
+            status = "failure"
+            message = "Please provide timeline as an argument"
+            return jsonify({"status":status, "message":message}), 400
 
-        result = rca_analysis(kpi_id, timeline)
-        if result[0] == "error":
-            raise Exception("failed to fetch rca analysis data")
-        data = result[2]["data_table"]
+        status, message, result = rca_analysis(kpi_id, timeline)
+        if status == "error":
+            raise Exception(f"failed to fetch rca analysis data - {message}")
+        data = result["data_table"]
 
         def row_gen(data):
             csv_headers = [
                 "Sub-Group Name",
                 "Previous Period Value",
-                "Previous Period Count(#)",
-                "Previous Period Size(%)",
+                "Previous Period Count (#)",
+                "Previous Period Size (%)",
                 "Current Period Value",
-                "Current Period Count(#)",
-                "Current Period Size(%)",
+                "Current Period Count (#)",
+                "Current Period Size (%)",
                 "Impact",
             ]
             yield csv_headers

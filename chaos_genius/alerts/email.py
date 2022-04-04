@@ -1,27 +1,24 @@
+"""Utilities for sending emails."""
+import logging
 import smtplib
-import traceback
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from typing import Dict, List, Sequence
 
-from chaos_genius.alerts.alert_channel_creds import get_creds
+from chaos_genius.alerts.alert_channel_creds import get_email_creds
 
-# TODO: Need little refactoring
-
-
-EMAIL_HOST = None
-EMAIL_HOST_PORT = None
-EMAIL_HOST_USER = None
-EMAIL_HOST_PASSWORD = None
-EMAIL_SENDER = None
 DEBUG = False
 
 TEMPLATE_DIR = "chaos_genius/alerts/templates"
 EMAIL_TEMPLATE_MAPPING = {"STATIC_ALERT": "static_alert.html"}
 
 
-def init_smtp_server():
-    """Initiate the SMTP server
+logger = logging.getLogger(__name__)
+
+
+def init_smtp_server(host: str, port: int, user: str, password: str):
+    """Initiate the SMTP server.
 
     Raises:
         Exception: Raise if env variable not found
@@ -30,41 +27,50 @@ def init_smtp_server():
     Returns:
         obj: SMTP server object
     """
-    if not (EMAIL_HOST and EMAIL_HOST_PASSWORD and EMAIL_HOST_USER):
-        raise Exception("SMTP ENV Variable not found...")
-
     retry_count = 0
 
-    def connect_smtp(retry_count):
-        server = None
+    def connect_smtp(retry_count: int) -> smtplib.SMTP:
         try:
             retry_count += 1
-            server = smtplib.SMTP(EMAIL_HOST, EMAIL_HOST_PORT)
+            server = smtplib.SMTP(host, port)
             server.ehlo()
             server.starttls()
             # stmplib docs recommend calling ehlo() before & after starttls()
             server.ehlo()
-            server.login(EMAIL_HOST_USER, EMAIL_HOST_PASSWORD)
-        except Exception as err_msg:
-            print("Error: ", err_msg)
-            print("Retrying again to connect...")
+            server.login(user, password)
+        except smtplib.SMTPException as e:
+            logger.error("Error in initializing SMTP connection", exc_info=e)
             if retry_count < 4:
+                logger.warn("Retrying SMTP connection")
                 server = connect_smtp(retry_count)
+            else:
+                raise
         return server
 
-    server = connect_smtp(retry_count)
-    if not server:
-        raise Exception("SMTP Connection Failed...")
-    return server
+    return connect_smtp(retry_count)
 
 
-def send_email(recipient_emails, message, count=0):
-    """send the email to the provided recipients
+def send_email(
+    recipient_emails: List[str],
+    message: MIMEMultipart,
+    host: str,
+    port: int,
+    user: str,
+    password: str,
+    sender: str,
+    count=0,
+):
+    """Send the email to the provided recipients.
 
     Args:
-        recipient_emails (list): List of emails
-        message (MIMEMultipart): email MIMEMultipart object
-        count (int, optional): Retry count for the emails. Defaults to 0.
+        recipient_emails: List of emails
+        message: email MIMEMultipart object
+        host: hostname of SMTP server
+        port: port number of SMTP server
+        user: username to authenticate to SMTP server
+        password: password to authenticate to SMTP server
+        sender: email sender
+        count: Retry count for the emails. Defaults to 0
     """
     count += 1
     try:
@@ -74,81 +80,54 @@ def send_email(recipient_emails, message, count=0):
         else:
             toaddr = recipient_emails
 
-        server = init_smtp_server()
-        server.sendmail(EMAIL_SENDER, toaddr, message.as_string())
+        server = init_smtp_server(host, port, user, password)
+        server.sendmail(sender, toaddr, message.as_string())
         server.quit()
-        print("Email sent to " + ", ".join(toaddr))
+        logger.info(f"Email sent to {', '.join(toaddr)}")
     except smtplib.SMTPServerDisconnected:
-        print(f"Retry ({count}) for the email")
+        logger.info(f"Retry ({count}) for the email")
         if count < 3:
-            send_email(recipient_emails, message, count)
+            send_email(
+                recipient_emails, message, host, port, user, password, sender, count
+            )
         else:
-            print("Email Sending Failed after max retries")
-    except Exception:
-        print(traceback.format_exc())
-
-
-def initialize_env_variables():
-    global EMAIL_HOST
-    global EMAIL_HOST_PORT
-    global EMAIL_HOST_USER
-    global EMAIL_HOST_PASSWORD
-    global EMAIL_SENDER
-    global DEBUG
-    creds = get_creds("email")
-    (
-        EMAIL_HOST,
-        EMAIL_HOST_PORT,
-        EMAIL_HOST_USER,
-        EMAIL_HOST_PASSWORD,
-        EMAIL_SENDER,
-    ) = creds
+            logger.error("Email Sending Failed after max retries")
+            raise
 
 
 def send_static_alert_email(
-    recipient_emails, subject, messsage_body, alert_info, files=[]
-):
-    """Send the static event alert email with the CSV attachment
+    recipient_emails: List[str],
+    subject: str,
+    messsage_body: str,
+    files: Sequence[Dict] = [],
+) -> None:
+    """Send an alert email with the CSV attachment.
 
     Args:
         recipient_emails (list): List of emails
         subject (str): Subject of the email
         messsage_body (str): Main configurable body text
-        alert_info (dict): alert information
-        files (list, optional): List of the files with the file name and file data as base64. Defaults to [].
-
-    Returns:
-        bool: status of the email
+        files (list, optional): List of the files with the file name and file data as
+            base64. Defaults to [].
     """
-    status = False
-    initialize_env_variables()
+    host, port, user, password, sender = get_email_creds()
 
-    try:
-        message = MIMEMultipart()
-        message["From"] = EMAIL_SENDER
-        message["To"] = ",".join(recipient_emails)
-        message["Subject"] = subject
+    message = MIMEMultipart()
+    message["From"] = sender
+    message["To"] = ",".join(recipient_emails)
+    message["Subject"] = subject
 
-        msgAlternative = MIMEMultipart("alternative")
-        # msgText = MIMEText(parsed_template, 'html')
-        msgText = MIMEText(
-            messsage_body, "html"
-        )  # TODO: To be changed according to use
-        msgAlternative.attach(msgText)
-        message.attach(msgAlternative)
+    msg_alternative = MIMEMultipart("alternative")
+    # msgText = MIMEText(parsed_template, 'html')
+    msg_text = MIMEText(messsage_body, "html")  # TODO: To be changed according to use
+    msg_alternative.attach(msg_text)
+    message.attach(msg_alternative)
 
-        for file_detail in files:
-            fname = file_detail["fname"]
-            fdata = file_detail["fdata"]
-            attachment = MIMEApplication(fdata, fname)
-            attachment["Content-Disposition"] = 'attachment; filename="{}"'.format(
-                fname
-            )
-            message.attach(attachment)
+    for file_detail in files:
+        fname = file_detail["fname"]
+        fdata = file_detail["fdata"]
+        attachment = MIMEApplication(fdata, fname)
+        attachment["Content-Disposition"] = 'attachment; filename="{}"'.format(fname)
+        message.attach(attachment)
 
-        send_email(recipient_emails, message)
-        status = True
-    except Exception as err_msg:
-        print(err_msg)
-
-    return status
+    send_email(recipient_emails, message, host, port, user, password, sender)

@@ -44,7 +44,6 @@ import {
 import {
   KPI_URL,
   CONNECTION_URL,
-  KPI_FORM_OPTION_URL,
   TEST_QUERY_URL,
   ADD_KPI_GET_AVAILABILITY,
   KPI_LIST_SCHEMA,
@@ -224,10 +223,9 @@ export const supportedAggSuccess = (response) => {
 export const getAllKpiExplorerField = (option) => {
   return async (dispatch) => {
     dispatch(getAllKpiExplorerFieldRequested());
-
     const { data, error, status } = await postRequest({
-      url: KPI_FORM_OPTION_URL,
-      data: option
+      url: KPI_LIST_SCHEMA,
+      data: { datasource_id: null }
     });
     if (error) {
       dispatch(getAllKpiExplorerFieldFailure());
@@ -256,7 +254,12 @@ export const getSchemaAvailability = (option) => {
         dispatch(getSchemaNamelist(option));
       } else {
         dispatch(getAllSchemaAvailabilitySuccess(data));
-        dispatch(getAllKpiExplorerField(option));
+        dispatch(
+          getTableListOnSchema({
+            datasource_id: option.data_source_id,
+            schema: null
+          })
+        );
       }
     }
   };

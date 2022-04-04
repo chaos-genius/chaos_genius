@@ -369,7 +369,7 @@ export const getTestQuerySuccess = (response) => {
   };
 };
 
-export const getTestQuery = (payload) => {
+export const getTestQuery = (payload, isEditing) => {
   return async (dispatch) => {
     dispatch(getTestQueryRequested());
     const { data, error, status } = await postRequest({
@@ -379,7 +379,11 @@ export const getTestQuery = (payload) => {
     if (error) {
       dispatch(getTestQueryFailure());
     } else if (data && status === 200) {
-      dispatch(getTestQuerySuccess(data));
+      if (isEditing) {
+        dispatch(getTestQuerySuccess({ data: data, isEditing: isEditing }));
+      } else {
+        dispatch(getTestQuerySuccess({ data }));
+      }
     }
   };
 };

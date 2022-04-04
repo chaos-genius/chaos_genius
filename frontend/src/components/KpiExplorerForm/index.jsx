@@ -211,6 +211,36 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         label: kpiEditData?.kpi_type,
         value: kpiEditData?.kpi_type
       });
+
+      if (
+        kpiEditData?.data_source !== null &&
+        kpiEditData?.data_source !== undefined
+      ) {
+        if (kpiEditData?.schema_name) {
+          dispatchGetTableListOnSchema({
+            datasource_id: kpiEditData?.data_source,
+            schema: kpiEditData?.schema_name
+          });
+        }
+        if (kpiEditData?.table_name) {
+          const obj = {
+            datasource_id: kpiEditData?.data_source,
+            schema: kpiEditData?.schema_name ? kpiEditData?.schema_name : null,
+            table_name: kpiEditData?.table_name
+          };
+          dispatch(getTableinfoData(obj));
+        }
+        if (kpiEditData?.kpi_query) {
+          const data = {
+            data_source_id: kpiEditData?.data_source,
+            from_query: true,
+            query: kpiEditData?.kpi_query
+          };
+          dispatch(getTestQuery(data, true));
+        }
+        setDataSourceId(kpiEditData?.data_source);
+      }
+
       setFormdata(obj);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -232,9 +262,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     if (testQueryData) {
       testQueryData &&
         testQueryData.data &&
-        testQueryData.data.tables &&
-        testQueryData.data.tables.query &&
-        testQueryData.data.tables.query.table_columns.forEach((item) => {
+        testQueryData.data.data &&
+        testQueryData.data.data.tables &&
+        testQueryData.data.data.tables.query &&
+        testQueryData.data.data.tables.query.table_columns.forEach((item) => {
           arr.push({
             label: item.name,
             value: item.name
@@ -383,18 +414,28 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   }, [kpiSubmit, kpiUpdateData]);
 
   useEffect(() => {
-    if (testQueryData && testQueryData?.status === 'success') {
+    if (
+      testQueryData &&
+      !testQueryData.isEditing &&
+      testQueryData.data &&
+      testQueryData.data?.status === 'success'
+    ) {
       customToast({
         type: 'success',
         header: 'Test Connection Successful',
-        description: testQueryData.msg
+        description: testQueryData.data.msg
       });
     }
-    if (testQueryData && testQueryData?.status === 'failure') {
+    if (
+      testQueryData &&
+      !testQueryData.isEditing &&
+      testQueryData.data &&
+      testQueryData.data?.status === 'failure'
+    ) {
       customToast({
         type: 'error',
         header: 'Test Connection Failed',
-        description: testQueryData.msg
+        description: testQueryData.data.msg
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -571,7 +612,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       }
       setOption({
         ...option,
-        tableoption: [],
+        tableoption:
+          kpiEditData && data[2] === 'edit' ? option.tableoption : [],
         schemaOption: optionArr
       });
     }
@@ -603,6 +645,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         datetimecolumns: '',
         dimensions: []
       });
+      setEditedFormData({
+        ...editedFormData,
+        schema_name: e.value
+      });
     }
   };
 
@@ -616,6 +662,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       aggregate: '',
       datetimecolumns: '',
       dimensions: []
+    });
+    setEditedFormData({
+      ...editedFormData,
+      table_name: valueData
     });
     dispatchGetTableInfoData(valueData);
   };
@@ -669,6 +719,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       tablename: '',
       schemaName: '',
       dashboardNameList: []
+    });
+    setEditedFormData({
+      ...editedFormData,
+      kpi_type: e.value
     });
     setTableAdditional({
       ...tableAdditional,
@@ -1000,6 +1054,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                   placeholder="Enter Query"
                   onChange={(e) => {
                     setFormdata({ ...formdata, query: e.target.value });
+                    setEditedFormData({
+                      ...editedFormData,
+                      kpi_query: e.target.value
+                    });
                     setErrorMsg((prev) => {
                       return {
                         ...prev,
@@ -1020,22 +1078,26 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                     </span>
                   </div>
                   <div>
-                    {testQueryData && testQueryData?.msg === 'success' && (
-                      <div className="connection__success">
-                        <p>
-                          <img src={Success} alt="Success" />
-                          Test Connection Success
-                        </p>
-                      </div>
-                    )}
-                    {testQueryData && testQueryData?.msg === 'failed' && (
-                      <div className="connection__fail">
-                        <p>
-                          <img src={Fail} alt="Failed" />
-                          Test Connection Failed
-                        </p>
-                      </div>
-                    )}
+                    {testQueryData &&
+                      testQueryData.data &&
+                      testQueryData.data?.msg === 'success' && (
+                        <div className="connection__success">
+                          <p>
+                            <img src={Success} alt="Success" />
+                            Test Connection Success
+                          </p>
+                        </div>
+                      )}
+                    {testQueryData &&
+                      testQueryData.data &&
+                      testQueryData.data?.msg === 'failed' && (
+                        <div className="connection__fail">
+                          <p>
+                            <img src={Fail} alt="Failed" />
+                            Test Connection Failed
+                          </p>
+                        </div>
+                      )}
                   </div>
                 </div>
               </div>
@@ -1143,7 +1205,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                 }}
                 onChange={(e) => {
                   setFormdata({ ...formdata, metriccolumns: e.value });
-
+                  setEditedFormData({
+                    ...editedFormData,
+                    metric: e.value
+                  });
                   setErrorMsg((prev) => {
                     return {
                       ...prev,
@@ -1182,6 +1247,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                 placeholder="Select Aggregate by"
                 onChange={(e) => {
                   setFormdata({ ...formdata, aggregate: e.value });
+                  setEditedFormData({
+                    ...editedFormData,
+                    aggregation: e.value
+                  });
                   setErrorMsg((prev) => {
                     return {
                       ...prev,
@@ -1223,6 +1292,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                 placeholder="Select Datetime Columns"
                 onChange={(e) => {
                   setFormdata({ ...formdata, datetimecolumns: e.value });
+                  setEditedFormData({
+                    ...editedFormData,
+                    datetime_column: e.value
+                  });
                   setErrorMsg((prev) => {
                     return {
                       ...prev,
@@ -1277,6 +1350,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                 onChange={(e) => {
                   setFormdata({
                     ...formdata,
+                    dimensions: e.map((el) => el.value)
+                  });
+                  setEditedFormData({
+                    ...editedFormData,
                     dimensions: e.map((el) => el.value)
                   });
                   setOption({ ...option, datetime_column: e.value });

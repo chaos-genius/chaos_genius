@@ -31,9 +31,9 @@ tabulate==0.8.9
 
 # Data Analysis
 matplotlib==3.4.2
-numpy==1.21.0
+numpy==1.22.2
 numpyencoder==0.3.0
-pandas==1.2.4
+pandas==1.4.2
 pystan==2.19.1.1
 altair==4.1.0
 statsmodels==0.12.2

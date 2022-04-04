@@ -56,10 +56,11 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   const [frequency, setFrequency] = useState({});
   const [modalFrequency, setModalFrequency] = useState({});
   const [seasonality, setSeasonality] = useState([]);
-  const [isModalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [edit, setEdit] = useState('');
   const [schedule, setSchedule] = useState(moment());
   const [editForm, setEditForm] = useState({});
+  const [needForCleanup, setNeedForCleanup] = useState({});
 
   const globalSetting = getLocalStorage('GlobalSetting');
 
@@ -313,7 +314,11 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
           ...editForm
         }
       };
-      dispatch(kpiSettingSetup(kpi, data));
+      if (Object.keys(needForCleanup)?.length) {
+        setModalOpen(true);
+      } else {
+        dispatch(kpiSettingSetup(kpi, data));
+      }
     }
   };
 
@@ -586,6 +591,20 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     ...editForm,
                     anomaly_period: Number(e.target.value)
                   });
+                  if (
+                    kpiEditData &&
+                    kpiEditData?.anomaly_params?.anomaly_period &&
+                    Number(kpiEditData?.anomaly_params?.anomaly_period) !==
+                      Number(e.target.value)
+                  ) {
+                    setNeedForCleanup({
+                      ...needForCleanup,
+                      anomaly_period: true
+                    });
+                  } else {
+                    const { anomaly_period, ...newItems } = needForCleanup;
+                    setNeedForCleanup(newItems);
+                  }
                   setError({ ...error, anomaly_period: '' });
                 }}
               />{' '}
@@ -638,6 +657,19 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     ...editForm,
                     scheduler_frequency: e.value
                   });
+                  if (
+                    kpiEditData &&
+                    kpiEditData?.anomaly_params?.scheduler_frequency &&
+                    kpiEditData?.anomaly_params?.scheduler_frequency !== e.value
+                  ) {
+                    setNeedForCleanup({
+                      ...needForCleanup,
+                      scheduler_frequency: true
+                    });
+                  } else {
+                    const { scheduler_frequency, ...newItems } = needForCleanup;
+                    setNeedForCleanup(newItems);
+                  }
                 }}
               />
               {edit &&
@@ -680,6 +712,19 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     });
                   }
                   setEditForm({ ...editForm, model_name: e.value });
+                  if (
+                    kpiEditData &&
+                    kpiEditData?.anomaly_params?.model_name &&
+                    kpiEditData?.anomaly_params?.model_name !== e.value
+                  ) {
+                    setNeedForCleanup({
+                      ...needForCleanup,
+                      model_name: true
+                    });
+                  } else {
+                    const { model_name, ...newItems } = needForCleanup;
+                    setNeedForCleanup(newItems);
+                  }
                   setError({ ...error, modelName: '' });
                 }}
               />
@@ -733,6 +778,19 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     setSensitiveData({ ...sensitiveData, sensitivity: e });
                   }
                   setEditForm({ ...editForm, sensitivity: e.value });
+                  if (
+                    kpiEditData &&
+                    kpiEditData?.anomaly_params?.sensitivity &&
+                    kpiEditData?.anomaly_params?.sensitivity !== e.value
+                  ) {
+                    setNeedForCleanup({
+                      ...needForCleanup,
+                      sensitivity: true
+                    });
+                  } else {
+                    const { sensitivity, ...newItems } = needForCleanup;
+                    setNeedForCleanup(newItems);
+                  }
                   setError({ ...error, sensitivity: '' });
                 }}
               />
@@ -802,18 +860,34 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
           </div>
         </div>
         <Modal
-          isOpen={isModalOpen}
-          shouldCloseOnOverlayClick={false}
-          portalClassName="anomaly-setting-modal">
-          <div className="modal-close" onClick={() => closeModal()}>
-            <img src={Close} alt="Close" />
+          portalClassName="dashboardmodal"
+          isOpen={modalOpen}
+          shouldCloseOnOverlayClick={false}>
+          <div className="modal-close">
+            <img src={Close} alt="Close" onClick={() => closeModal()} />
           </div>
           <div className="modal-body">
-            <div className="modal-success-image">
-              <img src={Success} alt="Success" />
-            </div>
             <div className="modal-contents">
-              <h3>You have successfully updated</h3>
+              <h3>All your previous data will be deleted</h3>
+              <p>Are you sure you want to proceed? </p>
+              <div className="next-step-navigate-edit-modal">
+                <button
+                  className="btn white-button"
+                  onClick={() => closeModal()}>
+                  <span>Cancel</span>
+                </button>
+                <button
+                  className="btn black-button"
+                  onClick={() => {
+                    const data = {
+                      anomaly_params: { ...editForm }
+                    };
+                    dispatch(kpiSettingSetup(kpi, data));
+                    setModalOpen(false);
+                  }}>
+                  <span>Save Changes</span>
+                </button>
+              </div>
             </div>
           </div>
         </Modal>

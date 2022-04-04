@@ -219,7 +219,7 @@ export const graphCsvFailure = () => {
   };
 };
 
-export const graphDownloadCsv = (id, paramHeader, params) => {
+export const graphDownloadCsv = (id, paramHeader, params, dimensionName) => {
   return async (dispatch) => {
     dispatch(graphCsvRequest());
     const URL = attachParams(
@@ -232,7 +232,7 @@ export const graphDownloadCsv = (id, paramHeader, params) => {
     if (error) {
       dispatch(graphCsvFailure());
     } else if (data && status === 200) {
-      dispatch(graphCsvSuccess(data));
+      dispatch(graphCsvSuccess({ data: data, name: dimensionName }));
     }
   };
 };

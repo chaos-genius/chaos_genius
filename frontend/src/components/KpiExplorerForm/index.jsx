@@ -1592,7 +1592,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             <div className="modal-body">
               <div className="modal-contents">
                 <h3>All your previous data will be deleted</h3>
-                <p>Are you sure you want to proceed </p>
+                <p>Are you sure you want to proceed? </p>
                 <div className="next-step-navigate-edit-modal">
                   <button
                     className="btn white-button"

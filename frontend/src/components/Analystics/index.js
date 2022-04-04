@@ -59,6 +59,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [edit, setEdit] = useState('');
   const [schedule, setSchedule] = useState(moment());
+  const [editForm, setEditForm] = useState({});
 
   const globalSetting = getLocalStorage('GlobalSetting');
 
@@ -309,13 +310,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     ) {
       const data = {
         anomaly_params: {
-          anomaly_period: Number(anomalyPeriod),
-          frequency: frequency.value,
-          model_name: modelName.value,
-          sensitivity: Sensitivity.value,
-          seasonality: seasonality,
-          scheduler_frequency: modalFrequency.value,
-          scheduler_params_time: schedule
+          ...editForm
         }
       };
       dispatch(kpiSettingSetup(kpi, data));
@@ -330,14 +325,30 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
     if (enabled.scheduler_frequency) {
       if (modalFrequency.value === 'D') {
         setSchedule(data ? data.format('HH:mm:00') : '');
+        setEditForm({
+          ...editForm,
+          scheduler_params_time: data ? data.format('HH:mm:00') : ''
+        });
       } else {
         setSchedule(data ? data.format('00:mm:00') : '');
+        setEditForm({
+          ...editForm,
+          scheduler_params_time: data ? data.format('00:mm:00') : ''
+        });
       }
     } else {
       if (sensitiveData?.scheduler_frequency?.value === 'D') {
         setSchedule(data ? data.format('HH:mm:00') : '');
+        setEditForm({
+          ...editForm,
+          scheduler_params_time: data ? data.format('HH:mm:00') : ''
+        });
       } else {
         setSchedule(data ? data.format('00:mm:00') : '');
+        setEditForm({
+          ...editForm,
+          scheduler_params_time: data ? data.format('00:mm:00') : ''
+        });
       }
     }
   };
@@ -511,7 +522,8 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                   } else {
                     setSensitiveData({ ...sensitiveData, frequency: e });
                   }
-                  setError({ ...error, frequency: '' });
+                  setEditForm({ ...editForm, frequency: e.value });
+                  setError({ ...error, frequency: '', anomaly_period: '' });
                 }}
               />
               {edit &&
@@ -570,6 +582,10 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                       anomaly_period: e.target.value
                     });
                   }
+                  setEditForm({
+                    ...editForm,
+                    anomaly_period: Number(e.target.value)
+                  });
                   setError({ ...error, anomaly_period: '' });
                 }}
               />{' '}
@@ -618,6 +634,10 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                       scheduler_frequency: e
                     });
                   }
+                  setEditForm({
+                    ...editForm,
+                    scheduler_frequency: e.value
+                  });
                 }}
               />
               {edit &&
@@ -659,6 +679,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                       model_name: e
                     });
                   }
+                  setEditForm({ ...editForm, model_name: e.value });
                   setError({ ...error, modelName: '' });
                 }}
               />
@@ -711,6 +732,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                   } else {
                     setSensitiveData({ ...sensitiveData, sensitivity: e });
                   }
+                  setEditForm({ ...editForm, sensitivity: e.value });
                   setError({ ...error, sensitivity: '' });
                 }}
               />

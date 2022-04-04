@@ -307,6 +307,7 @@ def kpi_anomaly_params(kpi_id: int):
     err, new_anomaly_params = validate_partial_anomaly_params(
         req_data["anomaly_params"]
     )
+    print(new_anomaly_params)
 
     if err != "":
         return jsonify({"error": err, "status": "failure"}), 400
@@ -314,12 +315,26 @@ def kpi_anomaly_params(kpi_id: int):
     err, new_kpi = update_anomaly_params(
         kpi, new_anomaly_params, check_editable=not is_first_time
     )
+    run_anomaly = False
+    # if anomaly params are updated, run anomaly again.
+    # if only scheduled time is updated, do not run anomaly again.
+    if not is_first_time:
+        if "scheduler_params_time" not in new_anomaly_params and len(new_anomaly_params) > 0:
+            run_anomaly = True
+        elif "scheduler_params_time" in new_anomaly_params and len(new_anomaly_params) > 1:
+            run_anomaly = True
+        else:
+            run_anomaly = False
 
-    # if anomaly params are updated, run anomaly again
-    from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task, ready_rca_task
-    anomaly_task = ready_anomaly_task(new_kpi.id)
-    anomaly_task.apply_async()
-    current_app.logger.info(f"Anomaly started for KPI ID: {new_kpi.kpi_id}")
+    if run_anomaly and err == "":
+        delete_kpi_query = delete(AnomalyDataOutput).where(AnomalyDataOutput.kpi_id == kpi_id)
+        db.session.execute(delete_kpi_query)
+        db.session.commit()
+
+        from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task
+        anomaly_task = ready_anomaly_task(new_kpi.id)
+        anomaly_task.apply_async()
+        current_app.logger.info(f"Anomaly started for KPI ID: {new_kpi.id}")
 
     if err != "":
         return jsonify({"error": err, "status": "failure"}), 400
@@ -664,13 +679,13 @@ ANOMALY_PARAMS_META = {
     "fields": [
         {
             "name": "anomaly_period",
-            "is_editable": False,
+            "is_editable": True,
             "is_sensitive": False,
             "type": "integer",
         },
         {
             "name": "model_name",
-            "is_editable": False,
+            "is_editable": True,
             "is_sensitive": False,
             "type": "select",
             "options": [
@@ -703,7 +718,7 @@ ANOMALY_PARAMS_META = {
         },
         {
             "name": "seasonality",
-            "is_editable": False,
+            "is_editable": True,
             "is_sensitive": False,
             "type": "multiselect",
             "options": [
@@ -745,7 +760,7 @@ ANOMALY_PARAMS_META = {
         },
         {
             "name": "scheduler_frequency",
-            "is_editable": False,
+            "is_editable": True,
             "is_sensitive": False,
             "type": "select",
             "options": [

@@ -18,7 +18,12 @@ from flask import (  # noqa: F401
 import pandas as pd
 from sqlalchemy import delete
 from chaos_genius.connectors import get_sqla_db_conn
-
+from chaos_genius.views.utils import (
+    delete_rca_output_for_kpi,
+    delete_anomaly_output_for_kpi,
+    find_percentage_change,
+    get_anomaly_count
+)
 from chaos_genius.core.utils.kpi_validation import validate_kpi
 from chaos_genius.core.utils.round import round_number
 from chaos_genius.core.utils.utils import randomword
@@ -29,6 +34,7 @@ from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.extensions import cache, db
 from chaos_genius.databases.db_utils import chech_editable_field
 from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
+
 from chaos_genius.controllers.dashboard_controller import (
     create_dashboard_kpi_mapper,
     get_mapper_obj_by_dashboard_ids,
@@ -49,7 +55,7 @@ blueprint = Blueprint("api_kpi", __name__)
 logger = logging.getLogger(__name__)
 
 
-@blueprint.route("/", methods=["GET", "POST"]) # TODO: Remove this
+@blueprint.route("/", methods=["GET", "POST"])  # TODO: Remove this
 @blueprint.route("", methods=["GET", "POST"])
 def kpi():
     """kpi list view."""
@@ -61,9 +67,7 @@ def kpi():
         data = request.get_json()
         data["dimensions"] = [] if data["dimensions"] is None else data["dimensions"]
 
-        data_source = DataSource.get_by_id(data["data_source"]).as_dict
-        data_con = get_sqla_db_conn(data_source_info=data_source)
-
+        data_source = DataSource.get_by_id(data["data_source"]).as_dict    
         if data.get("kpi_query", "").strip():
             data["kpi_query"] = data["kpi_query"].strip()
             # remove trailing semicolon
@@ -101,7 +105,6 @@ def kpi():
         # Add the dashboard id 0 to the kpi
         dashboard_list = data.get("dashboards", []) + [0]
         dashboard_list = list(set(dashboard_list))
-        mapper_obj_list = create_dashboard_kpi_mapper(dashboard_list, [new_kpi.id])
 
         # TODO: Fix circular import error
         from chaos_genius.jobs.anomaly_tasks import ready_rca_task
@@ -146,7 +149,8 @@ def kpi():
                 .all()
             )
 
-        kpi_dashboard_mapper = get_mapper_obj_by_kpi_ids([kpi.id for kpi, _ in kpi_result_list])
+        kpi_dashboard_mapper = get_mapper_obj_by_kpi_ids([kpi.id for kpi, 
+                                _ in kpi_result_list])
         kpi_dashboard_dict = defaultdict(list)
         for mapper in kpi_dashboard_mapper:
             kpi_dashboard_dict[mapper.kpi].append(mapper.dashboard)
@@ -249,7 +253,6 @@ def disable_kpi(kpi_id):
         if kpi_obj:
             kpi_obj.active = False
             kpi_obj.save(commit=True)
-            disable = disable_mapper_for_kpi_ids([kpi_id])
             status = "success"
         else:
             message = "KPI not found"
@@ -295,18 +298,6 @@ def kpi_meta_info():
     logger.info("kpi meta info")
     return jsonify({"data": Kpi.meta_info()})
 
-
-def delete_rca_data_for_kpi(kpi_id):
-    delete_kpi_query = delete(RcaData).where(RcaData.kpi_id == kpi_id)
-    db.session.execute(delete_kpi_query)
-    db.session.commit()
-    # retrun True
-
-def delete_anomaly_data_for_kpi(kpi_id):
-    delete_kpi_query = delete(AnomalyDataOutput).where(AnomalyDataOutput.kpi_id == kpi_id)
-    db.session.execute(delete_kpi_query)
-    db.session.commit()
-
 @blueprint.route("/<int:kpi_id>/update", methods=["PUT"])
 def edit_kpi(kpi_id):
     """edit kpi details."""
@@ -331,27 +322,18 @@ def edit_kpi(kpi_id):
             if run_analytics:
                 # add anomaly to queue
                 # run_anomaly = False
-                delete_rca_data_for_kpi(kpi_id)
-                from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task, ready_rca_task
+                from chaos_genius.jobs.anomaly_tasks import ready_rca_task
                 rca_task = ready_rca_task(kpi_id)
                 if rca_task is not None:
+                    delete_rca_output_for_kpi(kpi_id)
                     rca_task.apply_async()
                     current_app.logger.info(f"RCA started for KPI ID: {kpi_id}")
-                try:
-                    delete_anomaly_data_for_kpi(kpi_id)
-                    anomaly_task = ready_anomaly_task(kpi_id)
-                    if anomaly_task is not None:
-                        anomaly_task.apply_async()
-                        current_app.logger.info(f"Anomaly started for KPI ID: {kpi_id}")
-                except Exception as e:
-                    print(e)
-                
-
-                
-                
-
-
-            mapper_dict = edit_kpi_dashboards(kpi_id, dashboard_id_list)
+                from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task
+                anomaly_task = ready_anomaly_task(kpi_id)
+                if anomaly_task is not None:
+                    delete_anomaly_output_for_kpi(kpi_id)
+                    anomaly_task.apply_async()
+                    current_app.logger.info(f"Anomaly started for KPI ID: {kpi_id}")
             kpi_obj.save(commit=True)
             status = "success"
         else:
@@ -390,7 +372,6 @@ def trigger_analytics(kpi_id):
 
     # TODO: Fix circular import error
     from chaos_genius.jobs.anomaly_tasks import ready_rca_task, ready_anomaly_task
-
     rca_task = ready_rca_task(kpi_id)
     anomaly_task = ready_anomaly_task(kpi_id)
     if rca_task is not None and anomaly_task is not None:
@@ -401,27 +382,4 @@ def trigger_analytics(kpi_id):
     return jsonify({"message": "RCA and Anomaly triggered successfully"})
 
 
-def find_percentage_change(curr_val, prev_val):
 
-    if prev_val == 0:
-        return "--"
-
-    change = curr_val - prev_val
-    percentage_change = (change / prev_val) * 100
-    return str(round_number(percentage_change))
-
-
-def get_anomaly_count(kpi_id, timeline):
-
-    curr_date = datetime.now().date()
-    (_, _), (sd, _) = TIME_RANGES_BY_KEY[timeline]["function"](curr_date)
-
-    # TODO: Add the series type filter
-    anomaly_data = AnomalyDataOutput.query.filter(
-        AnomalyDataOutput.kpi_id == kpi_id,
-        AnomalyDataOutput.anomaly_type == "overall",
-        AnomalyDataOutput.is_anomaly == 1,
-        AnomalyDataOutput.data_datetime >= sd,
-    ).all()
-
-    return len(anomaly_data)

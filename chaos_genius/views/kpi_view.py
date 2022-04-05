@@ -38,6 +38,12 @@ from chaos_genius.controllers.dashboard_controller import (
     edit_kpi_dashboards,
     enable_mapper_for_kpi_ids
 )
+from chaos_genius.views.utils.utils import (
+    delete_rca_output_for_kpi,
+    delete_anomaly_output_for_kpi,
+    find_percentage_change,
+    get_anomaly_count
+)
 from chaos_genius.settings import DEEPDRILLS_ENABLED_TIME_RANGES
 from chaos_genius.core.rca.rca_utils.api_utils import (
     kpi_line_data,
@@ -105,7 +111,6 @@ def kpi():
 
         # TODO: Fix circular import error
         from chaos_genius.jobs.anomaly_tasks import ready_rca_task
-
         # run rca as soon as new KPI is added
         rca_task = ready_rca_task(new_kpi.id)
         if rca_task is None:
@@ -329,27 +334,23 @@ def edit_kpi(kpi_id):
                 if chech_editable_field(meta_info, key):
                     setattr(kpi_obj, key, value)
             if run_analytics:
-                # add anomaly to queue
-                # run_anomaly = False
-                delete_rca_data_for_kpi(kpi_id)
-                from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task, ready_rca_task
+                from chaos_genius.jobs.anomaly_tasks import ready_rca_task
                 rca_task = ready_rca_task(kpi_id)
                 if rca_task is not None:
+                    delete_rca_output_for_kpi(kpi_id)
                     rca_task.apply_async()
                     current_app.logger.info(f"RCA started for KPI ID: {kpi_id}")
-                try:
-                    delete_anomaly_data_for_kpi(kpi_id)
-                    anomaly_task = ready_anomaly_task(kpi_id)
-                    if anomaly_task is not None:
-                        anomaly_task.apply_async()
-                        current_app.logger.info(f"Anomaly started for KPI ID: {kpi_id}")
-                except Exception as e:
-                    print(e)
-                
+                else:
+                    current_app.logger.info(f"RCA failed for KPI ID: {kpi_id}")
 
-                
-                
-
+                from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task
+                anomaly_task = ready_anomaly_task(kpi_id)
+                if anomaly_task is not None:
+                    delete_anomaly_output_for_kpi(kpi_id)
+                    anomaly_task.apply_async()
+                    current_app.logger.info(f"Anomaly started for KPI ID: {kpi_id}")
+                else:
+                    current_app.logger.info(f"Anomaly failed for KPI ID: {kpi_id}")
 
             mapper_dict = edit_kpi_dashboards(kpi_id, dashboard_id_list)
             kpi_obj.save(commit=True)
@@ -400,28 +401,3 @@ def trigger_analytics(kpi_id):
         print(f"Could not analytics since newly added KPI was not found: {kpi_id}")
     return jsonify({"message": "RCA and Anomaly triggered successfully"})
 
-
-def find_percentage_change(curr_val, prev_val):
-
-    if prev_val == 0:
-        return "--"
-
-    change = curr_val - prev_val
-    percentage_change = (change / prev_val) * 100
-    return str(round_number(percentage_change))
-
-
-def get_anomaly_count(kpi_id, timeline):
-
-    curr_date = datetime.now().date()
-    (_, _), (sd, _) = TIME_RANGES_BY_KEY[timeline]["function"](curr_date)
-
-    # TODO: Add the series type filter
-    anomaly_data = AnomalyDataOutput.query.filter(
-        AnomalyDataOutput.kpi_id == kpi_id,
-        AnomalyDataOutput.anomaly_type == "overall",
-        AnomalyDataOutput.is_anomaly == 1,
-        AnomalyDataOutput.data_datetime >= sd,
-    ).all()
-
-    return len(anomaly_data)

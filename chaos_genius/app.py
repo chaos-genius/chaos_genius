@@ -126,3 +126,4 @@ def register_commands(app):
     app.cli.add_command(commands.insert_demo_data)
     app.cli.add_command(commands.run_anomaly_rca_scheduler)
     app.cli.add_command(commands.run_digest)
+    app.cli.add_command(commands.fetch_metadata)

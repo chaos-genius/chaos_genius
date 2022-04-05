@@ -17,6 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 def _is_data_present_for_end_date(kpi_info: dict, end_date: date = None) -> bool:
+    if end_date is None:
+        end_date = datetime.now().date()
     df_count = DataLoader(kpi_info, end_date=end_date, days_before=0).get_count()
     return df_count != 0
 

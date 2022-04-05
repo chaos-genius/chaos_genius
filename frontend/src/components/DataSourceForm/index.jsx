@@ -566,13 +566,12 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
               setSelectedTimeZone(e);
               setError('');
               setFormError([]);
-              // setSourceDefinitionId(e.selected.sourceDefinitionId);
-              // setDsFormData({});
-              // setStatus('');
             }}
             components={{ SingleValue: customSingleValue }}
           />
-          <div className="channel-tip">{noteForTimeZone}</div>
+          {path[2] === 'edit' && (
+            <div className="channel-tip">{noteForTimeZone}</div>
+          )}
         </div>
         <div className="form-group">
           <label>Select Data Source*</label>

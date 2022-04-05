@@ -7,7 +7,7 @@ from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 from chaos_genius.core.rca.rca_utils.api_utils import (
     kpi_line_data,
     rca_analysis,
-    rca_hierarchical_data,
+    rca_hierarchical_data_all_dims,
 )
 from chaos_genius.views.anomaly_data_view import get_overall_data_points
 
@@ -24,8 +24,10 @@ def iter_csv(data):
         line.truncate(0)
         line.seek(0)
 
-ANOMALY_DATA_DATETIME_FORMAT="%a %-d %B %H:%M:%S %Y"
-CHART_DATA_DATETIME_FORMAT="%a %-d %B %Y"
+
+ANOMALY_DATA_DATETIME_FORMAT = "%a %-d %B %H:%M:%S %Y"
+CHART_DATA_DATETIME_FORMAT = "%a %-d %B %Y"
+
 
 @blueprint.route("/<int:kpi_id>/anomaly_data", methods=["GET"])
 def download_anomaly_data(kpi_id: int):
@@ -76,7 +78,7 @@ def download_anomaly_data(kpi_id: int):
 def kpi_download_line_data(kpi: int):
     """API endpoint to download chart data."""
     try:
-        status,message,data_points = kpi_line_data(kpi, download=True)
+        status, message, data_points = kpi_line_data(kpi, download=True)
         if status == "error":
             raise Exception(message)
 
@@ -87,7 +89,10 @@ def kpi_download_line_data(kpi: int):
             csv_headers = ["date", "value"]
             yield csv_headers
             for row in data_points:
-                attr_list = [row["date"].strftime(CHART_DATA_DATETIME_FORMAT), str(row["value"])]
+                attr_list = [
+                    row["date"].strftime(CHART_DATA_DATETIME_FORMAT),
+                    str(row["value"]),
+                ]
                 yield attr_list
 
         response = Response(iter_csv(row_gen(data_points)), mimetype="text/csv")
@@ -109,21 +114,11 @@ def download_hierarchical_data(kpi_id):
         if not timeline:
             status = "failure"
             message = "Please provide timeline as an argument"
-            return jsonify({"status":status, "message":message}), 400
+            return jsonify({"status": status, "message": message}), 400
 
-        kpi_info = get_kpi_data_from_id(kpi_id)
-        dimensions = kpi_info.get("dimensions")
-        if not dimensions:
-            raise Exception(f"Failed to fetch dimensions for kpi {kpi_id}")
-
-        data_list = {}
-        for dimension in dimensions:
-            result = rca_hierarchical_data(kpi_id, timeline, dimension)
-            if result[0] == "error":
-                raise Exception(
-                    f"failed to fetch heirarchial data for kpi {kpi_id} with dimension={dimension} - {result[1]}"
-                )
-            data_list[dimension] = result[2]["data_table"]
+        status, message, data_list = rca_hierarchical_data_all_dims(kpi_id, timeline)
+        if status == "error":
+            raise Exception(f"fetching hierarchical data failed - {message}")
 
         def row_gen(data_list):
             csv_headers = [
@@ -140,10 +135,11 @@ def download_hierarchical_data(kpi_id):
             ]
             yield csv_headers
 
-            for dimension in data_list.keys():
-                data = data_list[dimension]
-                for row in data:
-                    hlevel = len(row["subgroup"].split("&"))
+            for data in data_list:
+                dimension = data["dimension"]
+                data_table = data["data_table"]
+                for row in data_table:
+                    hlevel = len(row["subgroup"].split(" & "))
                     attr_list = [
                         str(dimension),
                         str(hlevel),
@@ -177,7 +173,7 @@ def download_multidim_analysis_data(kpi_id):
         if not timeline:
             status = "failure"
             message = "Please provide timeline as an argument"
-            return jsonify({"status":status, "message":message}), 400
+            return jsonify({"status": status, "message": message}), 400
 
         status, message, result = rca_analysis(kpi_id, timeline)
         if status == "error":

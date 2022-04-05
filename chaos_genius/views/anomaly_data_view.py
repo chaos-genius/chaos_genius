@@ -308,7 +308,6 @@ def kpi_anomaly_params(kpi_id: int):
     err, new_anomaly_params = validate_partial_anomaly_params(
         req_data["anomaly_params"]
     )
-    print(new_anomaly_params)
 
     if err != "":
         return jsonify({"error": err, "status": "failure"}), 400

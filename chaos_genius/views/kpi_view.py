@@ -300,18 +300,6 @@ def kpi_meta_info():
     logger.info("kpi meta info")
     return jsonify({"data": Kpi.meta_info()})
 
-
-def delete_rca_data_for_kpi(kpi_id):
-    delete_kpi_query = delete(RcaData).where(RcaData.kpi_id == kpi_id)
-    db.session.execute(delete_kpi_query)
-    db.session.commit()
-    # retrun True
-
-def delete_anomaly_data_for_kpi(kpi_id):
-    delete_kpi_query = delete(AnomalyDataOutput).where(AnomalyDataOutput.kpi_id == kpi_id)
-    db.session.execute(delete_kpi_query)
-    db.session.commit()
-
 @blueprint.route("/<int:kpi_id>/update", methods=["PUT"])
 def edit_kpi(kpi_id):
     """edit kpi details."""

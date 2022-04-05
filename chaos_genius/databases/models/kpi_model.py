@@ -177,7 +177,7 @@ class Kpi(PkModel):
                 },
                 {
                     "name": "timezone_aware",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
                 },
                 # TODO: Fix this with some better implementation

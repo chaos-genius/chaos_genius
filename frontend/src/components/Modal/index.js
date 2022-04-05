@@ -107,7 +107,7 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
           </h3>
           <p>
             {text === 'datasource'
-              ? 'Next step is to set up KPI definitions.Please wait for a few minutes for data sync to complete before adding a KPI'
+              ? 'Next step is to set up KPI definitions.'
               : text === 'kpi'
               ? 'Next step is to Activate the Analytics.'
               : text === 'activateanalytics'

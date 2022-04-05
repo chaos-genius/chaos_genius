@@ -188,7 +188,14 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       createDatasourceResponse.status === 'connected' &&
       onboarding === false
     ) {
-      setShowModal(true);
+      if (
+        createDatasourceResponse.data &&
+        createDatasourceResponse.data.is_third_party
+      ) {
+        setShowModal(true);
+      } else {
+        history.push('/datasource');
+      }
     } else if (
       createDatasourceResponse &&
       createDatasourceResponse.status === 'connected' &&
@@ -221,7 +228,14 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       createDatasourceResponse.status === 'connected' &&
       path[2] === 'add'
     ) {
-      setShowModal(true);
+      if (
+        createDatasourceResponse.data &&
+        createDatasourceResponse.data.is_third_party
+      ) {
+        setShowModal(true);
+      } else {
+        history.push('/datasource');
+      }
       customToast({
         type: 'success',
         header: 'Successfully Added',

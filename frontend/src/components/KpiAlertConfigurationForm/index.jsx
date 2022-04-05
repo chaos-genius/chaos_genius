@@ -45,7 +45,7 @@ const KpiAlertConfigurationForm = ({
   const connectionType = useContext(connectionContext);
   const [type, setType] = useState('anomoloy');
   const [conditionType, setConditionType] = useState('');
-  const [value, setValue] = useState([90]);
+  const [value, setValue] = useState([1]);
   const [selectedKpi, setSelectedKpi] = useState();
   const [error, setError] = useState({
     alert_name: '',

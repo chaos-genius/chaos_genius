@@ -1,6 +1,3 @@
-import csv
-import io
-
 from flask import Blueprint, Response, jsonify, request
 
 from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
@@ -9,20 +6,10 @@ from chaos_genius.core.rca.rca_utils.api_utils import (
     rca_analysis,
     rca_hierarchical_data_all_dims,
 )
+from chaos_genius.utils.utils import iter_csv
 from chaos_genius.views.anomaly_data_view import get_overall_data_points
 
 blueprint = Blueprint("downloads", __name__)
-
-
-def iter_csv(data):
-    line = io.StringIO()
-    writer = csv.writer(line, delimiter=",")
-    for csv_line in data:
-        writer.writerow(csv_line)
-        line.seek(0)
-        yield line.read()
-        line.truncate(0)
-        line.seek(0)
 
 
 ANOMALY_DATA_DATETIME_FORMAT = "%a %-d %B %H:%M:%S %Y"

@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 class DataLoader:
     """Data Loader Class."""
+
     def __init__(
         self,
         kpi_info: dict,
@@ -85,13 +86,31 @@ class DataLoader:
         start_date_str = self.start_date.strftime("%Y-%m-%d")
         end_date_str = self.end_date.strftime("%Y-%m-%d")
 
-        # TODO: Write tests for tz aware date strings
-        # if we have tz aware data, we need to add tz info to data
-        if self.kpi_info.get("timezone_aware"):
+        # TODO: Deprecate SUPPORTED_TIMEZONES over releases.
+        # Use reporting timezone to localize start & end date
+        if TIMEZONE in SUPPORTED_TIMEZONES:
             tz_offset_string = SUPPORTED_TIMEZONES[TIMEZONE][-6:]
-            tz_offset_string = f"T00:00:00{tz_offset_string}"
-            start_date_str += tz_offset_string
-            end_date_str += tz_offset_string
+        else:
+            tz_offset_string = datetime.now(pytz.timezone(TIMEZONE)).strftime("%z")
+            tz_offset_string = tz_offset_string[:3] + ":" + tz_offset_string[3:]
+
+        start_date_str += f"T00:00:00{tz_offset_string}"
+        end_date_str += f"T00:00:00{tz_offset_string}"
+
+        # convert to database timezone and remove tz info if tz naive datetime column
+        if not self.kpi_info.get("timezone_aware"):
+            start_date_str = (
+                pd.Timestamp(datetime.strptime(start_date_str, "%Y-%m-%dT%H:%M:%S%z"))
+                .tz_convert(self.connection_info["database_timezone"])
+                .tz_localize(None)
+                .strftime("%Y-%m-%d %H:%M:%S")
+            )
+            end_date_str = (
+                pd.Timestamp(datetime.strptime(end_date_str, "%Y-%m-%dT%H:%M:%S%z"))
+                .tz_convert(self.connection_info["database_timezone"])
+                .tz_localize(None)
+                .strftime("%Y-%m-%d %H:%M:%S")
+            )
 
         start_query = f"{dt_col_str} >= '{start_date_str}'"
         end_query = f"{dt_col_str} < '{end_date_str}'"
@@ -181,9 +200,10 @@ class DataLoader:
         # tz-naive timestamps get localized to their database timezone.
         if df[self.dt_col].dt.tz is None:
             df[self.dt_col] = df[self.dt_col].dt.tz_localize(
-                self.connection_info["database_timezone"])
+                self.connection_info["database_timezone"]
+            )
 
-        # TODO: deprecate over releases
+        # TODO: Deprecate SUPPORTED_TIMEZONES over releases.
         # maps the abbreviations to respective tz regions
         if TIMEZONE in SUPPORTED_TIMEZONES:
             tz_to_convert_to = self._get_tz_from_offset_str(

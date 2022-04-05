@@ -316,7 +316,6 @@ def edit_kpi(kpi_id):
             dashboard_id_list = list(set(dashboard_id_list))
 
             for key, value in data.items():
-                print(key, value)
                 if key not in do_not_run_analytics_list:
                     run_analytics = True
                 if chech_editable_field(meta_info, key):

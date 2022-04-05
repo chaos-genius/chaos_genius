@@ -16,9 +16,14 @@ from flask import (  # noqa: F401
     jsonify,
 )
 import pandas as pd
-from sqlalchemy import delete
 from chaos_genius.connectors import get_sqla_db_conn
 
+from chaos_genius.controllers.kpi_controller import (
+    delete_anomaly_output_for_kpi,
+    delete_rca_output_for_kpi,
+    get_anomaly_count,
+    get_kpi_data_from_id,
+)
 from chaos_genius.core.utils.kpi_validation import validate_kpi
 from chaos_genius.core.utils.round import round_number
 from chaos_genius.core.utils.utils import randomword
@@ -28,7 +33,6 @@ from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.extensions import cache, db
 from chaos_genius.databases.db_utils import chech_editable_field
-from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 from chaos_genius.controllers.dashboard_controller import (
     create_dashboard_kpi_mapper,
     get_mapper_obj_by_dashboard_ids,
@@ -37,12 +41,6 @@ from chaos_genius.controllers.dashboard_controller import (
     disable_mapper_for_kpi_ids,
     edit_kpi_dashboards,
     enable_mapper_for_kpi_ids
-)
-from chaos_genius.views.utils.utils import (
-    delete_rca_output_for_kpi,
-    delete_anomaly_output_for_kpi,
-    find_percentage_change,
-    get_anomaly_count
 )
 from chaos_genius.settings import DEEPDRILLS_ENABLED_TIME_RANGES
 from chaos_genius.core.rca.rca_utils.api_utils import (
@@ -321,23 +319,34 @@ def edit_kpi(kpi_id):
                 if chech_editable_field(meta_info, key):
                     setattr(kpi_obj, key, value)
             if run_analytics:
+                logger.info(
+                    "Deleting analytics output and re-running tasks since KPI was "
+                    + f"edited for KPI ID: {kpi_id}"
+                )
+
                 from chaos_genius.jobs.anomaly_tasks import ready_rca_task
                 rca_task = ready_rca_task(kpi_id)
                 if rca_task is not None:
                     delete_rca_output_for_kpi(kpi_id)
                     rca_task.apply_async()
-                    current_app.logger.info(f"RCA started for KPI ID after editing: {kpi_id}")
+                    logger.info(f"RCA started for KPI ID after editing: {kpi_id}")
                 else:
-                    current_app.logger.info(f"RCA failed for KPI ID after editing: {kpi_id}")
+                    logger.info(
+                        "RCA failed for KPI ID since KPI does not exist after editing:"
+                        + f" {kpi_id}"
+                    )
 
                 from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task
                 anomaly_task = ready_anomaly_task(kpi_id)
                 if anomaly_task is not None:
                     delete_anomaly_output_for_kpi(kpi_id)
                     anomaly_task.apply_async()
-                    current_app.logger.info(f"Anomaly started for KPI ID after editing: {kpi_id}")
+                    logger.info(f"Anomaly started for KPI ID after editing: {kpi_id}")
                 else:
-                    current_app.logger.info(f"Anomaly failed for KPI ID after editing: {kpi_id}")
+                    logger.info(
+                        "Anomaly failed for KPI ID since KPI does not exist after "
+                        + f"editing: {kpi_id}"
+                    )
 
             mapper_dict = edit_kpi_dashboards(kpi_id, dashboard_id_list)
             kpi_obj.save(commit=True)

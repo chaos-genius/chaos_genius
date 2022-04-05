@@ -8,10 +8,13 @@ from typing import Any, Dict, List, Optional, Tuple, cast
 
 import pandas as pd
 from flask import Blueprint, current_app, jsonify, request, send_file
-from sqlalchemy import delete, func
+from sqlalchemy import func
 from sqlalchemy.orm.attributes import flag_modified
 
-from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
+from chaos_genius.controllers.kpi_controller import (
+    delete_anomaly_output_for_kpi,
+    get_kpi_data_from_id,
+)
 from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
 from chaos_genius.core.rca.rca_utils.string_helpers import (
     convert_query_string_to_user_string,
@@ -25,7 +28,6 @@ from chaos_genius.settings import (
     TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN,
     TOP_SUBDIMENSIONS_FOR_ANOMALY,
 )
-from chaos_genius.views.utils import delete_anomaly_output_for_kpi
 from chaos_genius.utils.datetime_helper import (
     get_datetime_string_with_tz,
     get_lastscan_string_with_tz,
@@ -319,14 +321,24 @@ def kpi_anomaly_params(kpi_id: int):
     # if anomaly params are updated, run anomaly again.
     # if only scheduled time is updated, do not run anomaly again.
     if not is_first_time:
-        if "scheduler_params_time" not in new_anomaly_params and len(new_anomaly_params) > 0:
+        if (
+            "scheduler_params_time" not in new_anomaly_params
+            and len(new_anomaly_params) > 0
+        ):
             run_anomaly = True
-        elif "scheduler_params_time" in new_anomaly_params and len(new_anomaly_params) > 1:
+        elif (
+            "scheduler_params_time" in new_anomaly_params
+            and len(new_anomaly_params) > 1
+        ):
             run_anomaly = True
         else:
             run_anomaly = False
 
     if run_anomaly and err == "":
+        current_app.logger.info(
+            "Deleting anomaly data and re-running anomaly since anomaly params was "
+            + f"edited for KPI ID: {new_kpi.id}"
+        )
         delete_anomaly_output_for_kpi(new_kpi.id)
         from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task
         anomaly_task = ready_anomaly_task(new_kpi.id)
@@ -334,7 +346,9 @@ def kpi_anomaly_params(kpi_id: int):
             anomaly_task.apply_async()
             current_app.logger.info(f"Anomaly started for KPI ID: {new_kpi.id}")
         else:
-            current_app.logger.info(f"Anomaly failed for KPI ID: {new_kpi.id}")
+            current_app.logger.info(
+                f"Anomaly failed since KPI was not found for KPI ID: {new_kpi.id}"
+            )
 
     if err != "":
         return jsonify({"error": err, "status": "failure"}), 400
@@ -397,7 +411,6 @@ def anomaly_settings_status(kpi_id):
 
 @blueprint.route("/<int:kpi_id>/retrain", methods=["POST", "GET"])
 def kpi_anomaly_retraining(kpi_id):
-    # TODO: Move the deletion into KPI controller file
     # delete all data in anomaly output table
     delete_anomaly_output_for_kpi(kpi_id)
 
@@ -407,9 +420,9 @@ def kpi_anomaly_retraining(kpi_id):
     if anomaly_task is not None:
         anomaly_task.apply_async()
         current_app.logger.info(f"Retraining started for KPI ID: {kpi_id}")
-        return jsonify({"msg" : f"retraining started for KPI: {kpi_id}"})
+        return jsonify({"msg": f"retraining started for KPI: {kpi_id}"})
     else:
-        return jsonify({"msg" : f"retraining failed for KPI: {kpi_id}, KPI id is None"})
+        return jsonify({"msg": f"retraining failed for KPI: {kpi_id}, KPI id is None"})
 
 
 @blueprint.route("/<int:kpi_id>/download_anomaly_data", methods=["GET"])

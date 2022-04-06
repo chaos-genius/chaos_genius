@@ -26,6 +26,7 @@ from chaos_genius.alerts.utils import (
     find_percentage_change,
     send_email_using_template,
     webapp_url_prefix,
+    human_readable,
 )
 from chaos_genius.controllers.kpi_controller import (
     get_active_kpi_from_id,
@@ -251,23 +252,17 @@ class AnomalyPointFormatted(AnomalyPoint):
     @property
     def y_readable(self):
         """Returns human readable format for y value of anomaly point."""
-        from numerize import numerize
-
-        return numerize.numerize(self.y)
+        return human_readable(self.y)
 
     @property
     def yhat_lower_readable(self):
         """Returns human readable format for lower bound of expected range."""
-        from numerize import numerize
-
-        return numerize.numerize(self.yhat_lower)
+        return human_readable(self.yhat_lower)
 
     @property
     def yhat_upper_readable(self):
         """Returns human readable format for upper bound of expected range."""
-        from numerize import numerize
-
-        return numerize.numerize(self.yhat_upper)
+        return human_readable(self.yhat_upper)
 
 
 class AnomalyAlertController:

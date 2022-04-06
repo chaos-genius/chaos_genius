@@ -11,7 +11,6 @@ import 'rc-time-picker/assets/index.css';
 
 import Help from '../../assets/images/help.svg';
 import Close from '../../assets/images/close.svg';
-import Success from '../../assets/images/successful.svg';
 
 import './analystics.scss';
 
@@ -55,7 +54,6 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   const [Sensitivity, setSensitivity] = useState({});
   const [frequency, setFrequency] = useState({});
   const [modalFrequency, setModalFrequency] = useState({});
-  const [seasonality, setSeasonality] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [edit, setEdit] = useState('');
   const [schedule, setSchedule] = useState(moment());
@@ -174,7 +172,6 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
           : '',
         value: kpiEditData?.anomaly_params?.scheduler_frequency
       });
-      setSeasonality(kpiEditData?.anomaly_params?.seasonality || []);
       setAnomalyPeriod(kpiEditData?.anomaly_params?.anomaly_period || 0);
       setSchedule(kpiEditData?.anomaly_params?.scheduler_params_time);
     }
@@ -368,8 +365,6 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
       setSensitivity(sensitiveData.sensitivity);
     } else if (name === 'anomaly_period') {
       setAnomalyPeriod(sensitiveData.anomaly_period);
-    } else if (name === 'seasonality') {
-      setSeasonality(sensitiveData.seasonality);
     }
   };
 

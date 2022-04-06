@@ -147,6 +147,7 @@ class DataLoader:
 
         timezones = pytz.all_timezones
         for tz_name in timezones:
+            # TODO: use getattr here with a default value instead of supressing
             with contextlib.suppress(AttributeError):
                 tz = pytz.timezone(tz_name)
                 tz_offset = tz._transition_info[-1][0]

@@ -1,7 +1,7 @@
 """Provides utility functions for validating KPIs."""
 
-from datetime import datetime
 import logging
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
@@ -292,7 +292,7 @@ def _validate_for_maximum_kpi_size(
         num_rows = DataLoader(kpi_info, end_date=end_date, days_before=60).get_count()
     except Exception as e:  # noqa: B902
         logger.error(
-            "Unable to load data for KPI validation of max size", exc_info=1
+            "Unable to load data for KPI validation of max size", exc_info=e
         )
         return False, f"Could not load data. Error: {str(e)}"
 

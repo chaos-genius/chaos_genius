@@ -24,5 +24,5 @@ from chaos_genius.alerts.utils import human_readable
     ],
 )
 def test_human_readable_conversion(value, expected):
-    """Bound value between min and max."""
+    """Converts value to human readable format and matches with the expected answer."""
     assert human_readable(value) == expected

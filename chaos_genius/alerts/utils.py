@@ -125,7 +125,6 @@ def _get_exponent(num: float) -> int:
 
 def human_readable(num: float) -> str:
     """Returns the human readable format of a number."""
-    num = round(num, 3)
     exponent = _get_exponent(num)
 
     new_exponent = min((3 * floor(exponent / 3)), 12)

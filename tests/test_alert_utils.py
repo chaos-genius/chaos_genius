@@ -8,7 +8,7 @@ from chaos_genius.alerts.utils import human_readable
 @pytest.mark.parametrize(
     "value, expected",
     [
-        (0.000005, "0.0"),
+        (0.000005, "5.0µ"),
         (0.005, "5.0m"),
         (0, "0.0"),
         (5, "5.0"),
@@ -20,7 +20,7 @@ from chaos_genius.alerts.utils import human_readable
         (1050000, "1.05M"),
         (5678906785, "5.679B"),
         (1000000000000, "1.0T"),
-        (15600000000000, "1.56T")
+        (15600000000000, "15.6T")
     ],
 )
 def test_human_readable_conversion(value, expected):

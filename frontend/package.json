@@ -18,7 +18,7 @@
     "jquery": "^3.6.0",
     "js-cookie": "^2.2.1",
     "luxon": "^2.1.1",
-    "moment": "^2.29.1",
+    "moment": "^2.29.2",
     "posthog-js": "^1.15.3",
     "rc-time-picker": "^3.7.3",
     "react": "^17.0.2",

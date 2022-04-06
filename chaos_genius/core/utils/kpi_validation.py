@@ -2,7 +2,7 @@
 
 from datetime import datetime
 import logging
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
@@ -17,14 +17,14 @@ KPI_VALIDATION_TAIL_SIZE = 1000
 logger = logging.getLogger(__name__)
 
 
-def validate_kpi(kpi_info: Dict[str, Any], check_tz_aware: bool = False) -> Tuple[bool, str, bool]:
+def validate_kpi(kpi_info: Dict[str, Any], check_tz_aware: bool = False) -> Tuple[bool, str, Optional[bool]]:
     """Load data for KPI and invoke all validation checks.
 
     :param kpi_info: Dictionary with all params for the KPI
     :type kpi_info: Dict[str, Any]
     :param check_tz_aware: Bool for checking if the data is timezone aware
     :return: Returns a tuple with the status as a bool, a status message and None if check_tz_aware is False otherwise a bool telling whether the data is timezone aware
-    :rtype: Tuple[bool, str, bool]
+    :rtype: Tuple[bool, str, Optional[bool]]
     """
     try:
         df = DataLoader(
@@ -35,6 +35,8 @@ def validate_kpi(kpi_info: Dict[str, Any], check_tz_aware: bool = False) -> Tupl
         logger.error("Unable to load data for KPI validation", exc_info=1)
         return False, f"Could not load data. Error: {str(e)}"
 
+    # TODO: Take in connection info as an argument instead of
+    # getting it here as it will help with mocking for tests.
     connection_info = DataSource.get_by_id(
         kpi_info["data_source"]
     ).as_dict

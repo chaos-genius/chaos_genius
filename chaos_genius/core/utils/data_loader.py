@@ -3,7 +3,7 @@
 import contextlib
 import logging
 from datetime import date, datetime, timedelta
-from typing import List
+from typing import List, Optional
 
 import pandas as pd
 import pytz
@@ -28,10 +28,10 @@ class DataLoader:
     def __init__(
         self,
         kpi_info: dict,
-        end_date: date = None,
-        start_date: date = None,
-        days_before: int = None,
-        tail: int = None,
+        end_date: Optional[date] = None,
+        start_date: Optional[date] = None,
+        days_before: Optional[int] = None,
+        tail: Optional[int] = None,
         validation: bool = False,
     ):
         """Initialize Data Loader for KPI.

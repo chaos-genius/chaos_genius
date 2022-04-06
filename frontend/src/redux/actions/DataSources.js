@@ -25,7 +25,10 @@ import {
   DATASOURCEUPDATEFAILURE,
   SYNCSCHEMAREQUESTED,
   SYNCSCHEMAFAILURE,
-  SYNCSCHEMASUCCESS
+  SYNCSCHEMASUCCESS,
+  TIMEZONESREQUEST,
+  TIMEZONESFAILURE,
+  TIMEZONESSUCCESS
 } from './ActionConstants';
 
 import {
@@ -35,7 +38,8 @@ import {
   DATASOURCE_META_INFO_URL,
   DELETE_DATASOURCE,
   METADATA_PREFETCH_URL,
-  TEST_CONNECTION
+  TEST_CONNECTION,
+  TIMEZONE_URL
 } from '../../utils/url-helper';
 
 import { getRequest, postRequest } from '../../utils/http-helper';
@@ -270,6 +274,39 @@ export const getDatasourceMetaInfo = () => {
       dispatch(getDatasourceMetaInfoFailure());
     } else if (data && status === 200) {
       dispatch(getDatasourceMetaInfoSuccess(data.data));
+    }
+  };
+};
+
+export const getTimeZonesRequest = () => {
+  return {
+    type: TIMEZONESREQUEST
+  };
+};
+
+export const getTimeZonesFailure = () => {
+  return {
+    type: TIMEZONESFAILURE
+  };
+};
+
+export const getTimeZonesSuccess = (response) => {
+  return {
+    type: TIMEZONESSUCCESS,
+    data: response
+  };
+};
+
+export const getTimeZones = () => {
+  return async (dispatch) => {
+    dispatch(getTimeZonesRequest());
+    const { data, error, status } = await getRequest({
+      url: TIMEZONE_URL
+    });
+    if (error) {
+      dispatch(getTimeZonesFailure());
+    } else if (data && status === 200) {
+      dispatch(getTimeZonesSuccess(data));
     }
   };
 };

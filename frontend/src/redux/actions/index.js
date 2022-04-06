@@ -7,7 +7,8 @@ import {
   getDatasourceMetaInfo,
   getDatasourceById,
   updateDatasourceById,
-  setSyncSchema
+  setSyncSchema,
+  getTimeZones
 } from './DataSources';
 import {
   getAllKpiExplorer,
@@ -102,6 +103,7 @@ export {
   getAnomalyQualityData,
   anomalyDrilldown,
   kpiDisable,
+  getTimeZones,
   getAllAlertEmail,
   getChannelStatus,
   getEditChannel,

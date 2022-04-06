@@ -33,7 +33,7 @@ def validate_kpi(kpi_info: Dict[str, Any], check_tz_aware: bool = False) -> Tupl
         logger.info(f"Created df with {len(df)} rows for validation")
     except Exception as e:
         logger.error("Unable to load data for KPI validation", exc_info=1)
-        return False, f"Could not load data. Error: {str(e)}"
+        return False, f"Could not load data. Error: {str(e)}", None
 
     # TODO: Take in connection info as an argument instead of
     # getting it here as it will help with mocking for tests.

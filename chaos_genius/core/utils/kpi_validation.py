@@ -1,5 +1,6 @@
 """Provides utility functions for validating KPIs."""
 
+from datetime import datetime
 import logging
 from typing import Any, Dict, List, Tuple, Union
 
@@ -285,7 +286,8 @@ def _validate_for_maximum_kpi_size(
     :rtype: Tuple[bool, str]
     """
     try:
-        num_rows = DataLoader(kpi_info, days_before=60).get_count()
+        end_date = datetime.now().date()
+        num_rows = DataLoader(kpi_info, end_date=end_date, days_before=60).get_count()
     except Exception as e:  # noqa: B902
         logger.error(
             "Unable to load data for KPI validation of max size", exc_info=1

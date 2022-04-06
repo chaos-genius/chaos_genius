@@ -83,7 +83,7 @@ def kpi():
             dimensions=data.get("dimensions"),
         )
         # Perform KPI Validation
-        status, message, tz_aware = validate_kpi(new_kpi.as_dict, data_source, check_tz_aware=True)
+        status, message, tz_aware = validate_kpi(new_kpi.as_dict, check_tz_aware=True)
         if status is not True:
             return jsonify(
                 {"error": message, "status": "failure", "is_critical": "true"}

@@ -51,7 +51,7 @@
     <li>
         <strong><a class="kpi-link" href="{{ kpi_link_prefix }}/{{ point.kpi_id }}">{{point.kpi_name}} ({{point.series_type}})</strong></a>
         <span style="color: lightgrey;">
-            changed to <strong>{{point.y}}</strong>
+            changed to <strong>{{point.y_readable}}</strong>
             {% if point.percent_change is string and "inf" not in point.percent_change %}
                 <span>
             {% elif "+inf" in str(point.percent_change) or point.percent_change > 0 %}
@@ -64,7 +64,7 @@
                 ({{ point.formatted_change_percent }})
                 </span>
             on {{ point.formatted_date }}
-            (expected: <strong>{{point.yhat_lower}}</strong> to <strong>{{point.yhat_upper}}</strong>,
+            (expected: <strong>{{point.yhat_lower_readable}}</strong> to <strong>{{point.yhat_upper_readable}}</strong>,
             severity:
             <strong>{{point.severity}}</strong>)
         </span>

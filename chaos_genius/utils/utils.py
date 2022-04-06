@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 """Helper utilities and decorators."""
+import csv
+import io
+import subprocess
+from typing import Iterator, List
 import time
 import functools
-import subprocess
 from types import GeneratorType
 
 from flask import flash
@@ -30,6 +33,20 @@ def latest_git_commit_hash() -> str:
         )
     except (subprocess.CalledProcessError, FileNotFoundError):
         return ""
+
+
+def iter_csv(data: Iterator[List[str]]) -> Iterator[str]:
+    """A Generator function to help in streaming csv downloads.
+
+    Yields lines of CSV file made out of the input data"""
+    line = io.StringIO()
+    writer = csv.writer(line, delimiter=",")
+    for csv_line in data:
+        writer.writerow(csv_line)
+        line.seek(0)
+        yield line.read()
+        line.truncate(0)
+        line.seek(0)
 
 
 def time_my_func(func):

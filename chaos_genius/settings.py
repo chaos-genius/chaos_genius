@@ -93,7 +93,7 @@ IN_DOCKER = _make_bool(os.getenv('IN_DOCKER', default=False))
 TASK_CHECKPOINT_LIMIT: int = int(os.getenv("TASK_CHECKPOINT_LIMIT", 1000))
 """Number of last checkpoints to retrieve in Task Monitor"""
 
-CHAOSGENIUS_VERSION_MAIN = os.getenv("CHAOSGENIUS_VERSION_MAIN", "0.5.1")
+CHAOSGENIUS_VERSION_MAIN = os.getenv("CHAOSGENIUS_VERSION_MAIN", "0.5.2")
 """ChaosGenius version - semver part only"""
 CHAOSGENIUS_VERSION_POSTFIX = os.getenv("CHAOSGENIUS_VERSION_POSTFIX", "git")
 """ChaosGenius version - postfix to identify deployment"""
@@ -118,3 +118,7 @@ SOURCE_BING_ADS = _make_bool(os.getenv("SOURCE_BING_ADS", default=False))
 
 """Alert Configuration"""
 EVENT_ALERTS_ENABLED = _make_bool(os.getenv("REACT_APP_EVENT_ALERT", default=False))
+
+METADATA_SYNC_TIME = os.getenv("METADATA_SYNC_TIME", "03:00")
+if len(METADATA_SYNC_TIME.split(':')) != 2:
+    raise ValueError("Metadata prefetch time is invalid. Must be in HH:MM format.")

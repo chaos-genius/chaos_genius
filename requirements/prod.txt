@@ -31,7 +31,7 @@ tabulate==0.8.9
 
 # Data Analysis
 matplotlib==3.4.2
-numpy==1.21.0
+numpy==1.22.2
 numpyencoder==0.3.0
 pandas==1.2.4
 pystan==2.19.1.1
@@ -75,4 +75,7 @@ docker~=5.0.3
 
 # Pygments for syntax higlighting errors
 Pygments~=2.10.0
+
+# converting to/from JSON and custom classes
+pydantic~=1.9.0
 

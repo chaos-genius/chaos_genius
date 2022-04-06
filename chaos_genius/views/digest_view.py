@@ -20,7 +20,7 @@ def task_monitor_view():
         include_subdims = include_subdims == "true"
 
     anomaly_alerts_data, event_alerts_data = get_digest_view_data(
-        triggered_alert_id,
+        int(triggered_alert_id) if triggered_alert_id else None,
         include_subdims,
     )
 

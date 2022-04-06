@@ -24,9 +24,9 @@ from chaos_genius.alerts.utils import (
     AlertException,
     change_message_from_percent,
     find_percentage_change,
+    human_readable,
     send_email_using_template,
     webapp_url_prefix,
-    human_readable,
 )
 from chaos_genius.controllers.kpi_controller import (
     get_active_kpi_from_id,

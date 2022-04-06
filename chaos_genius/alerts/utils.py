@@ -115,7 +115,7 @@ HRN_PREFIXES = {
 }
 
 
-def _get_exponent(num: float) -> str:
+def _get_exponent(num: float) -> int:
     """Returns the power of 10 to which the number is raised to."""
     if num == 0:
         return 0

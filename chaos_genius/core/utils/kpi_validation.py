@@ -1,13 +1,15 @@
 """Provides utility functions for validating KPIs."""
 
 import logging
-from typing import Any, Dict, List, Tuple, Union
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 
 from chaos_genius.core.rca.root_cause_analysis import SUPPORTED_AGGREGATIONS
 from chaos_genius.core.utils.data_loader import DataLoader
+from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.settings import MAX_ROWS_FOR_DEEPDRILLS
 
 KPI_VALIDATION_TAIL_SIZE = 1000
@@ -15,35 +17,47 @@ KPI_VALIDATION_TAIL_SIZE = 1000
 logger = logging.getLogger(__name__)
 
 
-def validate_kpi(kpi_info: Dict[str, Any], data_source: Dict[str, Any]) -> Tuple[bool, str]:
+def validate_kpi(kpi_info: Dict[str, Any], check_tz_aware: bool = False) -> Tuple[bool, str, Optional[bool]]:
     """Load data for KPI and invoke all validation checks.
 
     :param kpi_info: Dictionary with all params for the KPI
     :type kpi_info: Dict[str, Any]
-    :param data_source: Dictionary describing the data source
-    :type data_source: Dict[str, Any]
-    :return: Returns a tuple with the status as a bool and a status message
-    :rtype: Tuple[bool, str]
+    :param check_tz_aware: Bool for checking if the data is timezone aware
+    :return: Returns a tuple with the status as a bool, a status message and None if check_tz_aware is False otherwise a bool telling whether the data is timezone aware
+    :rtype: Tuple[bool, str, Optional[bool]]
     """
     try:
         df = DataLoader(
             kpi_info, tail=KPI_VALIDATION_TAIL_SIZE, validation=True
         ).get_data()
         logger.info(f"Created df with {len(df)} rows for validation")
-    except Exception as e:  # noqa: B902
+    except Exception as e:
         logger.error("Unable to load data for KPI validation", exc_info=1)
-        return False, "Could not load data. Error: " + str(e)
+        return False, f"Could not load data. Error: {str(e)}", None
 
-    supports_tz_aware = data_source["connection_type"] == "Druid"
+    # TODO: Take in connection info as an argument instead of
+    # getting it here as it will help with mocking for tests.
+    connection_info = DataSource.get_by_id(
+        kpi_info["data_source"]
+    ).as_dict
+    supports_date_string_parsing = connection_info["name"] == "Druid"
 
-    return _validate_kpi_from_df(
+    status, message = _validate_kpi_from_df(
         df,
         kpi_info,
         kpi_column_name=kpi_info["metric"],
         agg_type=kpi_info["aggregation"],
         date_column_name=kpi_info["datetime_column"],
-        supports_tz_aware=supports_tz_aware,
+        supports_date_string_parsing=supports_date_string_parsing
     )
+
+    if check_tz_aware:
+        df[kpi_info["datetime_column"]] = pd.to_datetime(df[kpi_info["datetime_column"]])
+        # check if timezone is present
+        is_tz_aware = df[kpi_info["datetime_column"]].dt.tz is None
+        return status, message, is_tz_aware
+    else:
+        return status, message, None
 
 
 def _validate_kpi_from_df(
@@ -52,8 +66,7 @@ def _validate_kpi_from_df(
     kpi_column_name: str,
     agg_type: str,
     date_column_name: str,
-    debug: bool = False,
-    supports_tz_aware: bool = False,
+    supports_date_string_parsing: bool = False,
 ) -> Tuple[bool, str]:
     """Invoke each validation check and break if there's a falsy check.
 
@@ -67,9 +80,8 @@ def _validate_kpi_from_df(
     :type agg_type: str
     :param date_column_name: Name of the date column
     :type date_column_name: str
-    :param debug: Bool for using debug mode with extra print statements at each
-    validation, defaults to False
-    :type debug: bool, optional
+    :param supports_date_string_parsing: Bool for allowing parsing of strings, defaults to False
+    :type supports_date_string_parsing: bool, optional
     :return: returns a tuple with the status as a bool and a status message
     :rtype: Tuple[bool, str]
     """
@@ -114,22 +126,16 @@ def _validate_kpi_from_df(
         {
             "debug_str": "Check #4: Validate date column is parseable",
             "status": lambda: _validate_date_column_is_parseable(
-                df, date_column_name=date_column_name, supports_tz_aware=supports_tz_aware
+                df, date_column_name=date_column_name, supports_date_string_parsing=supports_date_string_parsing
             ),
         },
         {
-            "debug_str": "Check #5: Validate date column is tz-naive if tz-aware not supported",
-            "status": lambda: _validate_date_column_is_tz_naive(
-                df, date_column_name=date_column_name
-            ) if not supports_tz_aware else (True, "Accepted!"),
-        },
-        {
-            "debug_str": "Check #6: Validate dimensions",
+            "debug_str": "Check #5: Validate dimensions",
             "status": lambda: _validate_dimensions(kpi_info),
         },
         {
             "debug_str": (
-                "Check #7: Validate KPI has no more than "
+                "Check #6: Validate KPI has no more than "
                 f"{MAX_ROWS_FOR_DEEPDRILLS} rows"
             ),
             "status": lambda: _validate_for_maximum_kpi_size(kpi_info),
@@ -238,7 +244,7 @@ def _validate_kpi_not_datetime(
 def _validate_date_column_is_parseable(
     df: pd.core.frame.DataFrame,
     date_column_name: str,
-    supports_tz_aware: bool,
+    supports_date_string_parsing: bool,
 ) -> Tuple[bool, str]:
     """Validate if specified date column is parseable.
 
@@ -246,11 +252,14 @@ def _validate_date_column_is_parseable(
     :type df: pd.core.frame.DataFrame
     :param date_column_name: Name of the date column
     :type date_column_name: str
+    :param supports_date_string_parsing: Whether the date column supports
+    parsing date strings.
+    :type supports_date_string_parsing: bool
     :return: returns a tuple with the status as a bool and a status message
     :rtype: Tuple[bool, str]
     """
     # has to be datetime only then proceed else exit
-    if supports_tz_aware:
+    if supports_date_string_parsing:
         # try to parse date col
         # TODO: ensure this parses only tz-aware data and nothing else
         #       (str, int, float, etc.)
@@ -269,31 +278,6 @@ def _validate_date_column_is_parseable(
     return True, "Accepted!"
 
 
-def _validate_date_column_is_tz_naive(
-    df: pd.core.frame.DataFrame,
-    date_column_name: str,
-) -> Tuple[bool, str]:
-    """Validate if specified date column is tz-naive.
-
-    :param df: A pandas DataFrame
-    :type df: pd.core.frame.DataFrame
-    :param date_column_name: Name of the date column
-    :type date_column_name: str
-    :return: returns a tuple with the status as a bool and a status message
-    :rtype: Tuple[bool, str]
-    """
-    date_col = df[date_column_name]
-    all_tz_naive = date_col.apply(lambda t: t.tz is None).all()
-    if not all_tz_naive:
-        invalid_type_err_msg = (
-            "The datetime column has timezone aware data,"
-            " use 'cast' to convert to timezone naive."
-        )
-        return False, invalid_type_err_msg
-
-    return True, "Accepted!"
-
-
 def _validate_for_maximum_kpi_size(
     kpi_info: Dict[str, Any],
 ) -> Tuple[bool, str]:
@@ -304,12 +288,13 @@ def _validate_for_maximum_kpi_size(
     :rtype: Tuple[bool, str]
     """
     try:
-        num_rows = DataLoader(kpi_info, days_before=60).get_count()
+        end_date = datetime.now().date()
+        num_rows = DataLoader(kpi_info, end_date=end_date, days_before=60).get_count()
     except Exception as e:  # noqa: B902
         logger.error(
-            "Unable to load data for KPI validation of max size", exc_info=1
+            "Unable to load data for KPI validation of max size", exc_info=e
         )
-        return False, "Could not load data. Error: " + str(e)
+        return False, f"Could not load data. Error: {str(e)}"
 
     if num_rows <= MAX_ROWS_FOR_DEEPDRILLS:
         return True, "Accepted!"

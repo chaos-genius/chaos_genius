@@ -25,7 +25,10 @@ import {
   DATASOURCEUPDATEFAILURE,
   SYNCSCHEMAFAILURE,
   SYNCSCHEMAREQUESTED,
-  SYNCSCHEMASUCCESS
+  SYNCSCHEMASUCCESS,
+  TIMEZONESSUCCESS,
+  TIMEZONESREQUEST,
+  TIMEZONESFAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -48,7 +51,8 @@ const initialState = {
   datasourceError: false,
   updateDatasource: [],
   updateDatasourceLoading: false,
-  updateDatasourceError: false
+  updateDatasourceError: false,
+  timeZones: []
 };
 
 export const dataSource = (state = initialState, action) => {
@@ -224,6 +228,23 @@ export const dataSource = (state = initialState, action) => {
     case SYNCSCHEMAFAILURE: {
       return {
         ...state
+      };
+    }
+    case TIMEZONESREQUEST: {
+      return {
+        ...state,
+        timeZones: []
+      };
+    }
+    case TIMEZONESFAILURE: {
+      return {
+        ...state
+      };
+    }
+    case TIMEZONESSUCCESS: {
+      return {
+        ...state,
+        timeZones: action.data?.timezones
       };
     }
     case SYNCSCHEMASUCCESS: {

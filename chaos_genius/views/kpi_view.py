@@ -66,17 +66,12 @@ def kpi():
         data["dimensions"] = [] if data["dimensions"] is None else data["dimensions"]
 
         data_source = DataSource.get_by_id(data["data_source"]).as_dict
-        data_con = get_sqla_db_conn(data_source_info=data_source)
 
         if data.get("kpi_query", "").strip():
             data["kpi_query"] = data["kpi_query"].strip()
             # remove trailing semicolon
             if data["kpi_query"][-1] == ";":
                 data["kpi_query"] = data["kpi_query"][:-1]
-
-        # TODO: make this more general.
-        #       query data to figure out if it's tz-aware.
-        timezone_aware = data_source["connection_type"] == "Druid"
 
         new_kpi = Kpi(
             name=data.get("name"),
@@ -91,14 +86,15 @@ def kpi():
             datetime_column=data.get("datetime_column"),
             filters=data.get("filters"),
             dimensions=data.get("dimensions"),
-            timezone_aware=timezone_aware,
         )
         # Perform KPI Validation
-        status, message = validate_kpi(new_kpi.as_dict, data_source)
+        status, message, tz_aware = validate_kpi(new_kpi.as_dict, check_tz_aware=True)
         if status is not True:
             return jsonify(
                 {"error": message, "status": "failure", "is_critical": "true"}
             )
+
+        new_kpi.timezone_aware = tz_aware
 
         new_kpi.save(commit=True)
 

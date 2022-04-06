@@ -100,6 +100,9 @@ class DataLoader:
         return f"{self.identifier}{value}{self.identifier}"
 
     def _convert_date_to_string(self, date: date, offset: str):
+        # TODO: Once SUPPOERTED_TIMEZONES is deprecated,
+        # we shouldn't need to take offset as a string, but rather
+        # take in a pytz timezone and skip using strings.
         date = date.strftime("%Y-%m-%d")
         date += f" 00:00:00 {offset}"
         if not self.kpi_info.get("timezone_aware"):
@@ -107,6 +110,7 @@ class DataLoader:
                 pd.Timestamp(datetime.strptime(date, "%Y-%m-%d %H:%M:%S %z"))
                 .tz_convert(self.connection_info["database_timezone"])
                 .tz_localize(None)
+                # TODO: We should also use date.isoformat() here
                 .strftime("%Y-%m-%d %H:%M:%S")
             )
         return date

@@ -272,6 +272,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   };
 
   const onSettingSave = () => {
+    let data = {};
     var obj = { ...error };
     if (anomalyPeriod === '' || anomalyPeriod === 0) {
       obj['anomaly_period'] = 'Enter Time Window';
@@ -308,11 +309,25 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
       obj.sensitivity === '' &&
       obj.frequency === ''
     ) {
-      const data = {
-        anomaly_params: {
-          ...editForm
-        }
-      };
+      if (edit) {
+        data = {
+          anomaly_params: {
+            ...editForm
+          }
+        };
+      } else {
+        data = {
+          anomaly_params: {
+            anomaly_period: Number(anomalyPeriod),
+            frequency: frequency.value,
+            model_name: modelName.value,
+            sensitivity: Sensitivity.value,
+            scheduler_frequency: modalFrequency.value,
+            scheduler_params_time: schedule
+          }
+        };
+      }
+
       if (Object.keys(needForCleanup)?.length) {
         setModalOpen(true);
       } else {

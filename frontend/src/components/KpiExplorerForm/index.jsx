@@ -218,6 +218,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         kpiEditData?.data_source !== null &&
         kpiEditData?.data_source !== undefined
       ) {
+        setDataSourceId(kpiEditData?.data_source);
         if (kpiEditData?.schema_name) {
           dispatchGetTableListOnSchema({
             datasource_id: kpiEditData?.data_source,
@@ -240,7 +241,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           };
           dispatch(getTestQuery(data, true));
         }
-        setDataSourceId(kpiEditData?.data_source);
       }
 
       setFormdata(obj);
@@ -625,8 +625,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     setOption({
       ...option,
       schemaOption: [],
-      tableoption: [],
-      metricOption: []
+      tableoption: kpiEditData && data[2] === 'edit' ? option.tableoption : [],
+      metricOption: kpiEditData && data[2] === 'edit' ? option.metricOption : []
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataSourceHasSchema]);

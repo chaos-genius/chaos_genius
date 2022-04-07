@@ -100,6 +100,8 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
   });
 
   useEffect(() => {
+    setEditForm({});
+    setNeedForCleanup({});
     dispatch(anomalySetting(kpi));
     dispatch(settingMetaInfo());
     dispatch(kpiEditSetup(kpi));
@@ -516,13 +518,22 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     setFrequency(e);
                     if (e.value === 'D') {
                       setAnomalyPeriod(60);
+                      setEditForm({
+                        ...editForm,
+                        anomaly_period: 60,
+                        frequency: e.value
+                      });
                     } else if (e.value === 'H') {
                       setAnomalyPeriod(14);
+                      setEditForm({
+                        ...editForm,
+                        anomaly_period: 14,
+                        frequency: e.value
+                      });
                     }
                   } else {
                     setSensitiveData({ ...sensitiveData, frequency: e });
                   }
-                  setEditForm({ ...editForm, frequency: e.value });
                   setError({ ...error, frequency: '', anomaly_period: '' });
                 }}
               />

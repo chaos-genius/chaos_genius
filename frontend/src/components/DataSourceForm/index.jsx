@@ -68,6 +68,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const [showModal, setShowModal] = useState(false);
   const [connectionName, setConnectionName] = useState('');
   const [editedConnectionName, setEditedConnecitonName] = useState('');
+  const [editedTimeZone, setEditedTimeZone] = useState('');
   const [dsFormData, setDsFormData] = useState({});
   const [error, setError] = useState('');
   const [formError, setFormError] = useState({});
@@ -109,6 +110,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   useEffect(() => {
     dispatch(getTimeZones());
     if (path[2] === 'edit') {
+      setEditedTimeZone('');
       getEditDatasource();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -550,6 +552,9 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             value={selectedTimeZone}
             onChange={(e) => {
               setSelectedTimeZone(e);
+              if (path[2] === 'edit') {
+                setEditedTimeZone(e.value);
+              }
               setError('');
               setFormError([]);
             }}
@@ -634,6 +639,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
               }
               disabled={
                 editedConnectionName === '' &&
+                editedTimeZone === '' &&
                 Object.keys(editedForm).length === 0
                   ? true
                   : false

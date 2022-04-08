@@ -54,7 +54,7 @@ def validate_kpi(kpi_info: Dict[str, Any], check_tz_aware: bool = False) -> Tupl
     if check_tz_aware:
         df[kpi_info["datetime_column"]] = pd.to_datetime(df[kpi_info["datetime_column"]])
         # check if timezone is present
-        is_tz_aware = df[kpi_info["datetime_column"]].dt.tz is None
+        is_tz_aware = df[kpi_info["datetime_column"]].dt.tz is not None
         return status, message, is_tz_aware
     else:
         return status, message, None

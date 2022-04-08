@@ -1,7 +1,7 @@
 """Provides utility functions for validating KPIs."""
 
 import logging
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
@@ -54,7 +54,7 @@ def validate_kpi(kpi_info: Dict[str, Any], check_tz_aware: bool = False) -> Tupl
     if check_tz_aware:
         df[kpi_info["datetime_column"]] = pd.to_datetime(df[kpi_info["datetime_column"]])
         # check if timezone is present
-        is_tz_aware = df[kpi_info["datetime_column"]].dt.tz is None
+        is_tz_aware = df[kpi_info["datetime_column"]].dt.tz is not None
         return status, message, is_tz_aware
     else:
         return status, message, None
@@ -268,7 +268,9 @@ def _validate_date_column_is_parseable(
         # support only datetime type (not datetime with tz, strings, etc.)
         date_col = df[date_column_name]
 
-    if not is_datetime(date_col):
+    if not (
+        is_datetime(date_col) or date_col.apply(lambda x: isinstance(x, date)).all()
+    ):
         invalid_type_err_msg = (
             "The datetime column is of the type"
             f" {df[date_column_name].dtype}, use 'cast' to convert to datetime."

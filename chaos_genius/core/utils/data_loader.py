@@ -193,43 +193,17 @@ class DataLoader:
 
     def _prepare_date_column(self, df):
         if is_datetime(df[self.dt_col]):
+            # this should handle tz naive cases as all data points are in timestamp
             return
 
         dtypes = df[self.dt_col].apply(lambda x: type(x)).unique()
 
-        if len(dtypes) > 1:
-            raise ValueError(
-                f"Column {self.dt_col} has multiple types: {dtypes}. "
-                "Please ensure that the column is of type datetime."
-            )
-
-        if dtypes[0] == str:
-            # if it is a string, we want to be parsed in either
-            # validation or during the preprocessing
+        if len(dtypes) == 1 and dtypes[0] == str:
+            # strings should be parsed later
             return
-        elif dtypes[0] == date:
-            # convert date object to datetime object
-            # with time as 00:00:00
-            df[self.dt_col] = df[self.dt_col].apply(
-                lambda x: datetime(x.year, x.month, x.day)
-            )
-        elif dtypes[0] == datetime:
-            # if datetime object is timezone aware, we want to
-            # convert it to UTC otherwise pandas can have issues with
-            # parsing it otherwise we remove any timezone info in it
-            is_tz_aware = (
-                df[self.dt_col].apply(lambda x: x.tzinfo is not None).all()
-            )
-            df[self.dt_col] = (
-                df[self.dt_col].apply(lambda x: x.astimezone(pytz.utc))
-                if is_tz_aware
-                else df[self.dt_col].apply(lambda x: x.replace(tzinfo=None))
-            )
-        else:
-            raise ValueError(
-                f"Column {self.dt_col} has unknown type: {dtypes[0]}. "
-                "Please ensure that the column is of type datetime."
-            )
+
+        # convert to timestamp and convert to UTC
+        df[self.dt_col] = pd.to_datetime(df[self.dt_col], utc=True)
 
     def _preprocess_df(self, df):
         df[self.dt_col] = pd.to_datetime(df[self.dt_col])

@@ -1,7 +1,7 @@
 """Provides utility functions for validating KPIs."""
 
 import logging
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd

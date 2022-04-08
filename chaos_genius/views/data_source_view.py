@@ -177,6 +177,7 @@ def create_data_source():
         conn_name = payload.get("name")
         conn_type = payload.get("connection_type")
         source_form = payload.get("sourceForm")
+        # TODO: Validation for the timezone
         database_timezone = payload.get("database_timezone")
         is_third_party = SOURCE_WHITELIST_AND_TYPE[source_form["sourceDefinitionId"]]
         if is_third_party and not AIRBYTE_ENABLED:
@@ -481,6 +482,7 @@ def update_data_source_info(datasource_id):
             raise Exception("Airbyte is not enabled")
         ds_obj.name = conn_name
         if database_timezone is not None:
+            # TODO: Validation for the timezone
             ds_obj.database_timezone = database_timezone
         connection_config = deepcopy(ds_obj.sourceConfig)
         connection_config["connectionConfiguration"].update(

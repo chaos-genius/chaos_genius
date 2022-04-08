@@ -104,14 +104,19 @@ class AnomalyDetectionController(object):
         if self.kpi_info["anomaly_params"]["frequency"] == "H":
             period /= 24
 
-        start_date = last_date - timedelta(days=period) if last_date else None
-
-        return DataLoader(
-            self.kpi_info,
-            end_date=self.end_date,
-            start_date=start_date,
-            days_before=period,
-        ).get_data()
+        if last_date:
+            start_date = last_date - timedelta(days=period)
+            return DataLoader(
+                self.kpi_info,
+                end_date=self.end_date,
+                start_date=start_date,
+            ).get_data()
+        else:
+            return DataLoader(
+                self.kpi_info,
+                end_date=self.end_date,
+                days_before=period,
+            ).get_data()
 
     def _get_last_date_in_db(self, series: str, subgroup: str = None) -> datetime:
         """Return the last date for which we have data for the given series.

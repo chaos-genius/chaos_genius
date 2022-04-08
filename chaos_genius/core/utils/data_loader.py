@@ -193,10 +193,15 @@ class DataLoader:
 
     def _prepare_date_column(self, df):
         if is_datetime(df[self.dt_col]):
+<<<<<<< Updated upstream
+=======
+            # this should handle tz naive cases as all data points are in timestamp
+>>>>>>> Stashed changes
             return
 
         dtypes = df[self.dt_col].apply(lambda x: type(x)).unique()
 
+<<<<<<< Updated upstream
         if len(dtypes) > 1:
             raise ValueError(
                 f"Column {self.dt_col} has multiple types: {dtypes}. "
@@ -230,6 +235,14 @@ class DataLoader:
                 f"Column {self.dt_col} has unknown type: {dtypes[0]}. "
                 "Please ensure that the column is of type datetime."
             )
+=======
+        if len(dtypes) == 1 and dtypes[0] == str:
+            # strings should be parsed later
+            return
+
+        # convert to timestamp and convert to UTC
+        df[self.dt_col] = pd.to_datetime(df[self.dt_col], utc=True)
+>>>>>>> Stashed changes
 
     def _preprocess_df(self, df):
         df[self.dt_col] = pd.to_datetime(df[self.dt_col])

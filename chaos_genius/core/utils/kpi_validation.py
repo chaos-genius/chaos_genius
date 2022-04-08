@@ -268,7 +268,9 @@ def _validate_date_column_is_parseable(
         # support only datetime type (not datetime with tz, strings, etc.)
         date_col = df[date_column_name]
 
-    if not is_datetime(date_col):
+    if not (
+        is_datetime(date_col) or date_col.apply(lambda x: isinstance(x, date)).all()
+    ):
         invalid_type_err_msg = (
             "The datetime column is of the type"
             f" {df[date_column_name].dtype}, use 'cast' to convert to datetime."

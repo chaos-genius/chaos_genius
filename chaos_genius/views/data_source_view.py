@@ -475,10 +475,13 @@ def update_data_source_info(datasource_id):
         payload = request.get_json()
         conn_name = payload.get("name")
         source_form = payload.get("sourceForm")
+        database_timezone = payload.get("database_timezone")
         ds_obj = get_datasource_data_from_id(datasource_id, as_obj=True)
         if ds_obj.is_third_party and not AIRBYTE_ENABLED:
             raise Exception("Airbyte is not enabled")
         ds_obj.name = conn_name
+        if database_timezone is not None:
+            ds_obj.database_timezone = database_timezone
         connection_config = deepcopy(ds_obj.sourceConfig)
         connection_config["connectionConfiguration"].update(
             source_form.get("connectionConfiguration", {})

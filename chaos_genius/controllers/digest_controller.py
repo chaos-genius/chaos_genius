@@ -55,6 +55,7 @@ def preprocess_triggered_alert(
     triggered_alert.alert_name = alert_conf.alert_name
     triggered_alert.alert_channel = alert_conf.alert_channel
     triggered_alert.alert_channel_conf = alert_conf.alert_channel_conf
+    triggered_alert.alert_message = alert_conf.alert_message
 
     if not isinstance(alert_conf.alert_channel_conf, dict):
         triggered_alert.alert_channel_conf = None

@@ -1413,8 +1413,6 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                     ...editedFormData,
                     dimensions: e.map((el) => el.value)
                   });
-                  console.log(e);
-                  console.log(kpiEditData?.dimensions);
                   if (
                     (Array.isArray(e) &&
                       Array.isArray(kpiEditData?.dimensions) &&

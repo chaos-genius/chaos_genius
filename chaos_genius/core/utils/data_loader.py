@@ -105,14 +105,14 @@ class DataLoader:
         # we shouldn't need to take offset as a string, but rather
         # take in a pytz timezone and skip using strings.
         date = date.strftime("%Y-%m-%d")
-        date += f" 00:00:00 {offset}"
+        date += f"T00:00:00{offset}"
         if not self.kpi_info.get("timezone_aware"):
             date = (
-                pd.Timestamp(datetime.strptime(date, "%Y-%m-%d %H:%M:%S %z"))
+                pd.Timestamp(datetime.strptime(date, "%Y-%m-%dT%H:%M:%S%z"))
                 .tz_convert(self.connection_info["database_timezone"])
                 .tz_localize(None)
                 # TODO: We should also use date.isoformat() here
-                .strftime("%Y-%m-%d %H:%M:%S")
+                .strftime("%Y-%m-%dT%H:%M:%S")
             )
         return date
 

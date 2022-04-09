@@ -1413,7 +1413,17 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                     ...editedFormData,
                     dimensions: e.map((el) => el.value)
                   });
-                  if (kpiEditData?.dimensions !== e.value) {
+                  console.log(e);
+                  console.log(kpiEditData?.dimensions);
+                  if (
+                    (Array.isArray(e) &&
+                      Array.isArray(kpiEditData?.dimensions) &&
+                      e.length !== kpiEditData?.dimensions?.length) ||
+                    e.every(
+                      (val, index) =>
+                        val.value !== kpiEditData?.dimensions[index]
+                    )
+                  ) {
                     setNeedForCleanUp({
                       ...needForCleanup,
                       dimensions: true
@@ -1603,6 +1613,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                     className="btn black-button"
                     onClick={() => {
                       dispatch(getUpdatekpi(kpiId, editedFormData));
+                      setNeedForCleanUp({});
                       setEditModalOpen(false);
                     }}>
                     <span>Save Changes</span>

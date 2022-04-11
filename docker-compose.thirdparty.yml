@@ -18,6 +18,7 @@ services:
              apk upgrade && 
              apk add bash && 
              bash /setup/docker/setup-airbyte-images.sh"
+    restart: unless-stopped
     volumes:
       - ./setup:/setup
       - /var/run/docker.sock:/var/run/docker.sock
@@ -37,8 +38,9 @@ services:
 
   chaosgenius-server:
     container_name: chaosgenius-server
-    image: chaosgenius/chaosgenius-server:0.5.1
+    image: chaosgenius/chaosgenius-server:0.6.0
     command: sh setup/run-backend-docker.sh
+    restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
@@ -93,10 +95,11 @@ services:
 
   chaosgenius-webapp:
     container_name: chaosgenius-webapp
-    image: chaosgenius/chaosgenius-webapp:0.5.1
+    image: chaosgenius/chaosgenius-webapp:0.6.0
     command: >
       sh -c "npx react-inject-env set -d ./ &&
              nginx -g 'daemon off;'"
+    restart: unless-stopped
     volumes:
       - ./frontend/nginx:/etc/nginx/conf.d/
     ports:
@@ -111,13 +114,12 @@ services:
   chaosgenius-db:
     container_name: chaosgenius-db
     image: postgres:13
-    restart: always
+    restart: unless-stopped
     healthcheck:
       test: [ "CMD", "pg_isready", "-q", "-d", "chaosgenius_data", "-U", "postgres" ]
       timeout: 45s
       interval: 10s
       retries: 10
-    restart: always
     environment:
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
@@ -130,11 +132,13 @@ services:
   chaosgenius-redis:
     container_name: chaosgenius-redis
     image: "redis:6.2-alpine"
+    restart: unless-stopped
     
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler
-    image: chaosgenius/chaosgenius-server:0.5.1
+    image: chaosgenius/chaosgenius-server:0.6.0
     command: celery -A run.celery beat --loglevel=DEBUG
+    restart: unless-stopped
     environment:
       - IN_DOCKER=True
       - AIRBYTE_ENABLED=True
@@ -163,13 +167,15 @@ services:
       - SENTRY_DSN=${SENTRY_DSN}
       - CHAOSGENIUS_ENTERPRISE_EDITION_KEY=${CHAOSGENIUS_ENTERPRISE_EDITION_KEY}
       - CHAOSGENIUS_WEBAPP_URL=${CHAOSGENIUS_WEBAPP_URL}
+      - METADATA_SYNC_TIME=${METADATA_SYNC_TIME}
     depends_on:
       - chaosgenius-redis
   
   chaosgenius-worker-analytics:
     container_name: chaosgenius-worker-analytics
-    image: chaosgenius/chaosgenius-server:0.5.1
+    image: chaosgenius/chaosgenius-server:0.6.0
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
+    restart: unless-stopped
     environment:
       - IN_DOCKER=True
       - AIRBYTE_ENABLED=True
@@ -220,8 +226,9 @@ services:
 
   chaosgenius-worker-alerts:
     container_name: chaosgenius-worker-alerts
-    image: chaosgenius/chaosgenius-server:0.5.1
+    image: chaosgenius/chaosgenius-server:0.6.0
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
+    restart: unless-stopped
     environment:
       - IN_DOCKER=True
       - AIRBYTE_ENABLED=True

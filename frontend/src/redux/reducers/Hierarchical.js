@@ -14,18 +14,21 @@ export const hierarchial = (state = initialState, action) => {
   switch (action.type) {
     case DASHBOARDHIERARCHICALREQUEST: {
       return {
+        ...state,
         hierarchialLoading: true,
         hierarchicalError: false
       };
     }
     case DASHBOARDHIERARCHICALSUCCESS: {
       return {
+        ...state,
         hierarchialLoading: false,
         hierarchicalData: action.data
       };
     }
     case DASHBOARDHIERARCHICALFAILURE: {
       return {
+        ...state,
         hierarchicalError: true,
         hierarchialLoading: false
       };

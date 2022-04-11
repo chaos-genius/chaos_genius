@@ -19,6 +19,11 @@ from chaos_genius.controllers.data_source_controller import (
     test_data_source,
     update_third_party,
 )
+from chaos_genius.controllers.data_source_metadata_controller import (
+    fetch_schema_list,
+    fetch_table_info,
+    fetch_table_list
+)
 from chaos_genius.databases.db_utils import create_sqlalchemy_uri
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.kpi_model import Kpi
@@ -41,7 +46,9 @@ from chaos_genius.third_party.integration_utils import get_connection_config
 from chaos_genius.utils.metadata_api_config import (
     SCHEMAS_AVAILABLE,
     TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY,
+    TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY_THIRD_PARTY,
 )
+# from chaos_genius.jobs.metadata_prefetch import fetch_data_source_schema
 
 blueprint = Blueprint("api_data_source", __name__)
 
@@ -102,7 +109,8 @@ def data_source():
         for conn in data_sources:
             # TODO: Add the kpi_count, real sync details and sorting info
             conn_detail = conn.safe_dict
-            conn_detail["last_sync"] = datetime.now()
+            if not conn_detail["last_sync"]:
+                conn_detail["last_sync"] = conn_detail["created_at"]
             conn_detail["kpi_count"] = data_source_kpi_map.get(conn_detail["id"], 0)
             results.append(conn_detail)
         results = sorted(results, reverse=True, key=lambda x: x["id"])
@@ -163,11 +171,14 @@ def create_data_source():
     connection_status, msg, status = {}, "failed", False
     sourceRecord, desinationRecord, connectionRecord, stream_tables = {}, {}, {}, []
     db_connection_uri = ""
+    database_timezone = "UTC"
     try:
         payload = request.get_json()
         conn_name = payload.get("name")
         conn_type = payload.get("connection_type")
         source_form = payload.get("sourceForm")
+        # TODO: Validation for the timezone
+        database_timezone = payload.get("database_timezone")
         is_third_party = SOURCE_WHITELIST_AND_TYPE[source_form["sourceDefinitionId"]]
         if is_third_party and not AIRBYTE_ENABLED:
             raise Exception("Airbytes is not enabled.")
@@ -251,6 +262,7 @@ def create_data_source():
             active=True,
             is_third_party=is_third_party,
             connection_status=status,
+            database_timezone=database_timezone,
             sourceConfig=sourceRecord,
             destinationConfig=desinationRecord,
             connectionConfig=connectionRecord,
@@ -260,7 +272,9 @@ def create_data_source():
         msg = f"Connection {new_connection.name} has been created successfully."
         logger.info("Data source '%s' added successfully.", new_connection.name)
         connection_data = new_connection.safe_dict
-
+        from chaos_genius.jobs.metadata_prefetch import fetch_data_source_schema
+        logger.info("prefetching metadata for  '%s', id '%s'", new_connection.name, new_connection.id)
+        fetch_data_source_schema.delay(new_connection.id)
     except Exception as err_msg:
         msg = str(err_msg)
         logger.error("Error in creating data source: %s", err_msg, exc_info=err_msg)
@@ -310,6 +324,45 @@ def delete_data_source():
         msg = str(err_msg)
 
     return jsonify({"data": {}, "msg": msg, "status": status})
+
+
+@blueprint.route("/trigger-metadata-prefetch", methods=["POST"])
+def trigger_metadata_prefetch():
+    """Initiates Metadata prefetch for a given datasource via celery Task."""
+    from chaos_genius.jobs.metadata_prefetch import fetch_data_source_schema
+
+    msg, status, sync_status = "", "success", ""
+
+    try:
+        payload = request.get_json()
+
+        if not isinstance(payload, dict) or "data_source_id" not in payload:
+            msg = "Invalid payload for metadata prefetch"
+            status = "failure"
+            logger.error("Error in trigger metadata prefetch: %s", msg)
+        else:
+            data_source_id = payload["data_source_id"]
+            data_source = DataSource.get_by_id(data_source_id)
+            if data_source and data_source.active:
+                msg = "Metadata prefetch triggered."
+                logger.info(
+                    "Trigger Metadata prefetch for Datasource: %s", data_source_id
+                )
+                fetch_data_source_schema.delay(data_source_id)
+                sync_status = "In Progress"
+            else:
+                logger.error(f"Datasource with id: {data_source_id} not found!!")
+                status = "failure"
+                msg = f"Datasource was not found."
+
+    except Exception as err_msg:
+        logger.error(
+            "Error in trigger metadata prefetch: %s", err_msg, exc_info=err_msg
+        )
+        msg = str(err_msg)
+        status = "failure"
+
+    return jsonify({"msg": msg, "status": status, "sync_status": sync_status})
 
 
 @blueprint.route("/metadata", methods=["POST"])
@@ -423,10 +476,14 @@ def update_data_source_info(datasource_id):
         payload = request.get_json()
         conn_name = payload.get("name")
         source_form = payload.get("sourceForm")
+        database_timezone = payload.get("database_timezone")
         ds_obj = get_datasource_data_from_id(datasource_id, as_obj=True)
         if ds_obj.is_third_party and not AIRBYTE_ENABLED:
             raise Exception("Airbyte is not enabled")
         ds_obj.name = conn_name
+        if database_timezone is not None:
+            # TODO: Validation for the timezone
+            ds_obj.database_timezone = database_timezone
         connection_config = deepcopy(ds_obj.sourceConfig)
         connection_config["connectionConfiguration"].update(
             source_form.get("connectionConfiguration", {})
@@ -469,6 +526,7 @@ def check_views_availability():
     schema_exist = False
     message = ""
     status = "failure"
+    supported_aggregations = []
 
     try:
         data = request.get_json()
@@ -486,12 +544,15 @@ def check_views_availability():
                 )
 
             datasource_name = getattr(ds_data, "connection_type")
+            datasource_capability = (
+                TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY_THIRD_PARTY
+                if ds_data.is_third_party
+                else TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]
+            )
             schema_exist = SCHEMAS_AVAILABLE.get(datasource_name, False)
-            views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["views"]
-            supported_aggregations = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[datasource_name]["supported_aggregations"]
-            materialize_views = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY[
-                datasource_name
-            ]["materialized_views"]
+            views = datasource_capability["views"]
+            supported_aggregations = datasource_capability["supported_aggregations"]
+            materialize_views = datasource_capability["materialized_views"]
             status = "success"
     except Exception as err:
         message = "Error in fetching table info: {}".format(err)
@@ -527,15 +588,17 @@ def get_schema_list():
         logger.info("Listing data source schemas. ID: %s", datasource_id)
 
         if datasource_id is None:
-            message = "Datasource ID needs to be provided"
+            message = "Data Source ID needs to be provided"
         else:
             ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
             if not ds_data or not getattr(ds_data, "active"):
                 raise ValueError(
                     f"There exists no active datasource matching the provided id: {datasource_id}"
                 )
-
-            data = get_schema_names(ds_data.as_dict)
+            if ds_data.is_third_party:
+                data = get_schema_names(ds_data.as_dict)
+            else:
+                data = fetch_schema_list(ds_data.id)
             if data is None:
                 message = "Error occurred while establishing DB Connection"
                 data = []
@@ -574,9 +637,13 @@ def get_schema_tables():
                 )
 
             ds_name = getattr(ds_data, "connection_type")
-            schema = None if SCHEMAS_AVAILABLE[ds_name] == False else schema
-
-            table_names = get_table_list(ds_data.as_dict, schema)
+            schema = (
+                None if (ds_data.is_third_party or not SCHEMAS_AVAILABLE[ds_name]) else schema
+            )
+            if ds_data.is_third_party:
+                table_names = ds_data.as_dict["dbConfig"]["tables"]
+            else:
+                table_names = fetch_table_list(ds_data.id, schema)
             if table_names is None:
                 message = "Error occurred while establishing DB Connection"
                 table_names = []
@@ -665,9 +732,14 @@ def get_table_info():
 
         ds_name = getattr(ds_data, "connection_type")
 
-        schema = None if SCHEMAS_AVAILABLE[ds_name] == False else schema
+        schema = (
+            None if (ds_data.is_third_party or not SCHEMAS_AVAILABLE[ds_name]) else schema
+        )
 
-        table_info = get_table_metadata(ds_data.as_dict, schema, table_name)
+        if ds_data.is_third_party:
+            table_info = get_table_metadata(ds_data.as_dict, schema, table_name)
+        else:
+            table_info = fetch_table_info(ds_data.id, schema, table_name)
         if table_info is None:
             raise Exception("Unable to fetch table info for the requested table")
         else:

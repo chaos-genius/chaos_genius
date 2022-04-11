@@ -540,6 +540,6 @@ def datetime_timezone_aware_str(  # noqa: D103
 def is_druid_kpi(  # noqa: D103
     extra_kpi_validation_data: dict, monkeypatch: MonkeyPatch
 ):
-    monkeypatch.setitem(extra_kpi_validation_data, "supports_tz_aware", True)
+    monkeypatch.setitem(extra_kpi_validation_data, "supports_date_string_parsing", True)
 
     return extra_kpi_validation_data

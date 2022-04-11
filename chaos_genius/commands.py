@@ -8,7 +8,12 @@ from subprocess import call
 import click
 from flask.cli import with_appcontext
 
+from chaos_genius.controllers.data_source_controller import get_data_source_list
+from chaos_genius.controllers.data_source_metadata_controller import (
+    run_metadata_prefetch,
+)
 from chaos_genius.settings import AIRBYTE_ENABLED
+from chaos_genius.utils.utils import time_my_func
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.join(HERE, os.pardir)
@@ -125,6 +130,36 @@ def run_rca(kpi, end_date):
     click.echo(f"Completed the RCA for KPI ID: {kpi}.")
 
 
+def _fetch_metadata(id: int):
+    if id == 0:
+        to_run_ids = [data_source.id for data_source in get_data_source_list()]
+        click.echo(f"Fetching the metadata for all active datasources: {to_run_ids}")
+    else:
+        to_run_ids = [id]
+
+    for data_source_id in to_run_ids:
+        click.echo(f"Fetching the metadata for data source ID: {data_source_id}")
+        status = run_metadata_prefetch(data_source_id)
+        click.echo(
+            f"Completed the metadata fetch for data source ID: {data_source_id} with "
+            + f"status: {status}."
+        )
+
+
+@click.command()
+@with_appcontext
+@click.option(
+    "--id", required=True, type=int, help="Fetch the metadata of provided data source."
+)
+@time_my_func
+def fetch_metadata(id):
+    """Fetch the metadata of the given data source.
+
+    if id is 0 run for all active datasources
+    """
+    _fetch_metadata(id)
+    
+
 @click.command()
 @with_appcontext
 @click.option('--id', required=True, type=int, help="Perform the alert operation for provided Alert ID.")
@@ -163,9 +198,9 @@ def run_anomaly_rca_scheduler():
 @with_appcontext
 def reinstall_db():
     """Delete the db and reinstall again."""
-    from chaos_genius.settings import META_DATABASE
-    from chaos_genius.extensions import db
     from chaos_genius.databases.demo_data import install_demo_db
+    from chaos_genius.extensions import db
+    from chaos_genius.settings import META_DATABASE
     if click.confirm(click.style(f"Do you want to delete and reinstall the database: {META_DATABASE}?", fg="red", bold=True)):
         click.echo('Deleting the database...')
         db.drop_all()

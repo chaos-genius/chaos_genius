@@ -15,7 +15,13 @@ import {
   DASHBOARDDIMENSIONFAILURE,
   DASHBOARDHIERARCHICALFAILURE,
   DASHBOARDHIERARCHICALSUCCESS,
-  DASHBOARDHIERARCHICALREQUEST
+  DASHBOARDHIERARCHICALREQUEST,
+  RCADOWNLOADREQUEST,
+  RCADOWNLOADSUCCESS,
+  RCADOWNLOADFAILURE,
+  GRAPHDOWNLOADREQUEST,
+  GRAPHDOWNLOADSUCCESS,
+  GRAPHDOWNLOADFAILURE
 } from './ActionConstants';
 import { getRequest } from '../../utils/http-helper';
 
@@ -157,6 +163,76 @@ export const getAllDashboardHierarchical = (id, params) => {
       dispatch(getAllHierarchicalFailure());
     } else if (data && status === 200) {
       dispatch(getAllHierarchicalSuccess(data.data));
+    }
+  };
+};
+
+export const rcaDownloadCsvRequest = () => {
+  return {
+    type: RCADOWNLOADREQUEST
+  };
+};
+
+export const rcaDownloadCsvSuccess = (response) => {
+  return {
+    type: RCADOWNLOADSUCCESS,
+    data: response
+  };
+};
+
+export const rcaDownloadCsvFailure = () => {
+  return {
+    type: RCADOWNLOADFAILURE
+  };
+};
+
+export const rcaDownloadCsv = (id) => {
+  return async (dispatch) => {
+    dispatch(rcaDownloadCsvRequest());
+    const { data, error, status } = await getRequest({
+      url: `${BASE_URL}/api/downloads/${id}/chart_data`
+    });
+    if (error) {
+      dispatch(rcaDownloadCsvFailure());
+    } else if (data && status === 200) {
+      dispatch(rcaDownloadCsvSuccess(data));
+    }
+  };
+};
+
+export const graphCsvRequest = () => {
+  return {
+    type: GRAPHDOWNLOADREQUEST
+  };
+};
+
+export const graphCsvSuccess = (response) => {
+  return {
+    type: GRAPHDOWNLOADSUCCESS,
+    data: response
+  };
+};
+
+export const graphCsvFailure = () => {
+  return {
+    type: GRAPHDOWNLOADFAILURE
+  };
+};
+
+export const graphDownloadCsv = (id, paramHeader, params, dimensionName) => {
+  return async (dispatch) => {
+    dispatch(graphCsvRequest());
+    const URL = attachParams(
+      `${BASE_URL}/api/downloads/${id}/${paramHeader}`,
+      params
+    );
+    const { data, error, status } = await getRequest({
+      url: URL
+    });
+    if (error) {
+      dispatch(graphCsvFailure());
+    } else if (data && status === 200) {
+      dispatch(graphCsvSuccess({ data: data, name: dimensionName }));
     }
   };
 };

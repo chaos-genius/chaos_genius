@@ -22,7 +22,7 @@ export const sidebar = (state = initialState, action) => {
 
     case DASHBOARDSIDEBARSUCCESS: {
       return {
-        ...sidebar,
+        ...state,
         sidebarLoading: false,
         sidebarList: action.data
       };

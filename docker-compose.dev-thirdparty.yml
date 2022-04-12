@@ -7,7 +7,7 @@ x-logging: &default-logging
   driver: json-file
 x-version:
   &chaosgenius-version
-  CHAOSGENIUS_VERSION_POSTFIX=stable-thirdparty-compose
+  CHAOSGENIUS_VERSION_POSTFIX=dev-thirdparty-compose
 
 services:
   chaosgenius-init:
@@ -42,6 +42,7 @@ services:
       args:
         DEV: 1
     command: sh setup/run-backend-docker.sh --reload
+    restart: on-failure:5
     volumes:
       - ./:/usr/src/app/
       - /var/run/docker.sock:/var/run/docker.sock
@@ -102,6 +103,7 @@ services:
     command: >
       sh -c "npx react-inject-env set -d ./ &&
              nginx -g 'daemon off;'"
+    restart: on-failure:5
     volumes:
       - ./frontend/nginx:/etc/nginx/conf.d/
     ports:
@@ -116,13 +118,12 @@ services:
   chaosgenius-db:
     container_name: chaosgenius-db
     image: postgres:13
-    restart: always
+    restart: on-failure:5
     healthcheck:
       test: [ "CMD", "pg_isready", "-q", "-d", "chaosgenius_data", "-U", "postgres" ]
       timeout: 45s
       interval: 10s
       retries: 10
-    restart: always
     environment:
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
@@ -135,6 +136,7 @@ services:
   chaosgenius-redis:
     container_name: chaosgenius-redis
     image: "redis:6.2-alpine"
+    restart: on-failure:5
     
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler
@@ -143,6 +145,7 @@ services:
       args:
         DEV: 1
     command: scripts/celery/dev_scheduler.sh
+    restart: on-failure:5
     volumes:
       - ./:/usr/src/app/
       - /var/run/docker.sock:/var/run/docker.sock
@@ -185,6 +188,7 @@ services:
       args:
         DEV: 1
     command: scripts/celery/dev_worker-analytics.sh
+    restart: on-failure:5
     volumes:
       - ./:/usr/src/app/
       - /var/run/docker.sock:/var/run/docker.sock
@@ -243,6 +247,7 @@ services:
       args:
         DEV: 1
     command: scripts/celery/dev_worker-alerts.sh
+    restart: on-failure:5
     volumes:
       - ./:/usr/src/app/
       - /var/run/docker.sock:/var/run/docker.sock
@@ -297,7 +302,7 @@ services:
     image: airbyte/db:${VERSION}
     logging: *default-logging
     container_name: airbyte-db
-    restart: unless-stopped
+    restart: on-failure:5
     environment:
       - POSTGRES_USER=${DATABASE_USER}
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
@@ -308,7 +313,7 @@ services:
     image: airbyte/scheduler:${VERSION}
     logging: *default-logging
     container_name: airbyte-scheduler
-    restart: unless-stopped
+    restart: on-failure:5
     environment:
       - WEBAPP_URL=${WEBAPP_URL}
       - DATABASE_USER=${DATABASE_USER}
@@ -350,7 +355,7 @@ services:
     image: airbyte/server:${VERSION}
     logging: *default-logging
     container_name: airbyte-server
-    restart: unless-stopped
+    restart: on-failure:5
     environment:
       - WEBAPP_URL=${WEBAPP_URL}
       - DATABASE_USER=${DATABASE_USER}
@@ -385,7 +390,7 @@ services:
     image: airbyte/webapp:${VERSION}
     logging: *default-logging
     container_name: airbyte-webapp
-    restart: unless-stopped
+    restart: on-failure:5
     environment:
       - AIRBYTE_ROLE=${AIRBYTE_ROLE:-}
       - AIRBYTE_VERSION=${VERSION}
@@ -401,7 +406,7 @@ services:
     image: temporalio/auto-setup:1.7.0
     logging: *default-logging
     container_name: airbyte-temporal
-    restart: unless-stopped
+    restart: on-failure:5
     environment:
       - DB=postgresql
       - DB_PORT=${DATABASE_PORT}

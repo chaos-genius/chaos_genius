@@ -14,7 +14,7 @@ redis==3.5.3
 # Database
 Flask-SQLAlchemy==2.5.1
 SQLAlchemy==1.4.15
-psycopg2-binary==2.8.6
+psycopg2-binary==2.9.3
 PyMySQL==1.0.2
 sqlalchemy-bigquery==1.2.0
 snowflake-sqlalchemy==1.2.4

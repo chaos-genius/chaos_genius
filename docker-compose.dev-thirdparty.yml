@@ -50,7 +50,7 @@ services:
     environment:
       - *chaosgenius-version
       - IN_DOCKER=True
-      - AIRBYTE_ENABLED=${AIRBYTE_ENABLED}
+      - AIRBYTE_ENABLED=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -148,7 +148,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - IN_DOCKER=True
-      - AIRBYTE_ENABLED=${AIRBYTE_ENABLED}
+      - AIRBYTE_ENABLED=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -190,7 +190,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - IN_DOCKER=True
-      - AIRBYTE_ENABLED=${AIRBYTE_ENABLED}
+      - AIRBYTE_ENABLED=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -248,7 +248,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - IN_DOCKER=True
-      - AIRBYTE_ENABLED=${AIRBYTE_ENABLED}
+      - AIRBYTE_ENABLED=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}

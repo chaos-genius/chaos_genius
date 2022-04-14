@@ -328,7 +328,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
         };
       }
 
-      if (Object.keys(needForCleanup)?.length) {
+      if (edit && Object.keys(needForCleanup)?.length) {
         setModalOpen(true);
       } else {
         dispatch(kpiSettingSetup(kpi, data));
@@ -612,19 +612,21 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     ...editForm,
                     anomaly_period: Number(e.target.value)
                   });
-                  if (
-                    kpiEditData &&
-                    kpiEditData?.anomaly_params?.anomaly_period &&
-                    Number(kpiEditData?.anomaly_params?.anomaly_period) !==
-                      Number(e.target.value)
-                  ) {
-                    setNeedForCleanup({
-                      ...needForCleanup,
-                      anomaly_period: true
-                    });
-                  } else {
-                    const { anomaly_period, ...newItems } = needForCleanup;
-                    setNeedForCleanup(newItems);
+                  if (edit) {
+                    if (
+                      kpiEditData &&
+                      kpiEditData?.anomaly_params?.anomaly_period &&
+                      Number(kpiEditData?.anomaly_params?.anomaly_period) !==
+                        Number(e.target.value)
+                    ) {
+                      setNeedForCleanup({
+                        ...needForCleanup,
+                        anomaly_period: true
+                      });
+                    } else {
+                      const { anomaly_period, ...newItems } = needForCleanup;
+                      setNeedForCleanup(newItems);
+                    }
                   }
                   setError({ ...error, anomaly_period: '' });
                 }}
@@ -678,18 +680,22 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     ...editForm,
                     scheduler_frequency: e.value
                   });
-                  if (
-                    kpiEditData &&
-                    kpiEditData?.anomaly_params?.scheduler_frequency &&
-                    kpiEditData?.anomaly_params?.scheduler_frequency !== e.value
-                  ) {
-                    setNeedForCleanup({
-                      ...needForCleanup,
-                      scheduler_frequency: true
-                    });
-                  } else {
-                    const { scheduler_frequency, ...newItems } = needForCleanup;
-                    setNeedForCleanup(newItems);
+                  if (edit) {
+                    if (
+                      kpiEditData &&
+                      kpiEditData?.anomaly_params?.scheduler_frequency &&
+                      kpiEditData?.anomaly_params?.scheduler_frequency !==
+                        e.value
+                    ) {
+                      setNeedForCleanup({
+                        ...needForCleanup,
+                        scheduler_frequency: true
+                      });
+                    } else {
+                      const { scheduler_frequency, ...newItems } =
+                        needForCleanup;
+                      setNeedForCleanup(newItems);
+                    }
                   }
                 }}
               />
@@ -733,18 +739,20 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     });
                   }
                   setEditForm({ ...editForm, model_name: e.value });
-                  if (
-                    kpiEditData &&
-                    kpiEditData?.anomaly_params?.model_name &&
-                    kpiEditData?.anomaly_params?.model_name !== e.value
-                  ) {
-                    setNeedForCleanup({
-                      ...needForCleanup,
-                      model_name: true
-                    });
-                  } else {
-                    const { model_name, ...newItems } = needForCleanup;
-                    setNeedForCleanup(newItems);
+                  if (edit) {
+                    if (
+                      kpiEditData &&
+                      kpiEditData?.anomaly_params?.model_name &&
+                      kpiEditData?.anomaly_params?.model_name !== e.value
+                    ) {
+                      setNeedForCleanup({
+                        ...needForCleanup,
+                        model_name: true
+                      });
+                    } else {
+                      const { model_name, ...newItems } = needForCleanup;
+                      setNeedForCleanup(newItems);
+                    }
                   }
                   setError({ ...error, modelName: '' });
                 }}
@@ -799,18 +807,20 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     setSensitiveData({ ...sensitiveData, sensitivity: e });
                   }
                   setEditForm({ ...editForm, sensitivity: e.value });
-                  if (
-                    kpiEditData &&
-                    kpiEditData?.anomaly_params?.sensitivity &&
-                    kpiEditData?.anomaly_params?.sensitivity !== e.value
-                  ) {
-                    setNeedForCleanup({
-                      ...needForCleanup,
-                      sensitivity: true
-                    });
-                  } else {
-                    const { sensitivity, ...newItems } = needForCleanup;
-                    setNeedForCleanup(newItems);
+                  if (edit) {
+                    if (
+                      kpiEditData &&
+                      kpiEditData?.anomaly_params?.sensitivity &&
+                      kpiEditData?.anomaly_params?.sensitivity !== e.value
+                    ) {
+                      setNeedForCleanup({
+                        ...needForCleanup,
+                        sensitivity: true
+                      });
+                    } else {
+                      const { sensitivity, ...newItems } = needForCleanup;
+                      setNeedForCleanup(newItems);
+                    }
                   }
                   setError({ ...error, sensitivity: '' });
                 }}

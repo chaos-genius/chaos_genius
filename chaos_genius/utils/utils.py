@@ -142,5 +142,6 @@ DEMO_ENDPOINT_WHITELIST = {
     # "static",
     # "status.static",
     # "status.task_monitor_view",
+    "meta.support_timezones": ["GET"],
     "meta.version_view": ["GET"],
 }

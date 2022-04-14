@@ -129,12 +129,12 @@ const EventAlertDestinationForm = ({
           return getOption(channel.name);
         })
       );
+      channelStatusData.forEach((data) => {
+        if (data.name === 'slack') {
+          setChannelName(data?.config_setting.channel_name || '');
+        }
+      });
     }
-    channelStatusData.forEach((data) => {
-      if (data.name === 'slack') {
-        setChannelName(data?.config_setting.channel_name || '');
-      }
-    });
   }, [channelStatusData]);
 
   useEffect(() => {

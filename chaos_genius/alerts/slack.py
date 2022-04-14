@@ -1,32 +1,36 @@
-from datetime import datetime
-from typing import List, Optional
+"""Utilities for sending slack alert messages."""
+import logging
+from typing import Optional, Sequence
 
-from slack_sdk.webhook import WebhookClient
+from slack_sdk.webhook.client import WebhookClient
 
-from chaos_genius.alerts.alert_channel_creds import get_creds
-from chaos_genius.alerts.constants import (
-    ALERT_DATE_FORMAT,
-    ALERT_DATETIME_FORMAT,
-    ALERT_READABLE_DATETIME_FORMAT,
-)
+import chaos_genius.alerts.anomaly_alerts as anomaly_alerts
+from chaos_genius.alerts.alert_channel_creds import get_slack_creds
 from chaos_genius.alerts.utils import webapp_url_prefix
 
+logger = logging.getLogger(__name__)
 
-def get_webhook_client():
-    url = get_creds("slack")
-    try:
-        return WebhookClient(url)
-    except Exception as err_msg:
-        print(err_msg)
-        return None
+
+def get_webhook_client() -> WebhookClient:
+    """Initializes a Slack Webhook client."""
+    url = get_slack_creds()
+    return WebhookClient(url)
 
 
 def anomaly_alert_slack(
-    kpi_name, alert_name, kpi_id, alert_message, points, overall_count, subdim_count
-):
+    kpi_name: str,
+    alert_name: str,
+    kpi_id: int,
+    alert_message: str,
+    points: "Sequence[anomaly_alerts.AnomalyPointFormatted]",
+    overall_count: int,
+    subdim_count: int,
+) -> str:
+    """Sends an anomaly alert on slack.
+
+    Returns an empty string if successful or the error as a string if not.
+    """
     client = get_webhook_client()
-    if not client:
-        raise Exception("Slack not configured properly.")
     response = client.send(
         blocks=[
             {
@@ -56,8 +60,11 @@ def anomaly_alert_slack(
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"- Total alerts generated (Overall KPI): *{overall_count}*\n"
-                    f"- Total alerts generated (including subdimenions): *{subdim_count + overall_count}*\n",
+                    "text": (
+                        f"- Total alerts generated (Overall KPI): *{overall_count}*\n"
+                        + "- Total alerts generated (including subdimenions): "
+                        + f"*{subdim_count + overall_count}*\n"
+                    ),
                 },
             },
             {
@@ -115,9 +122,9 @@ def anomaly_alert_slack(
     )
 
     if response.body != "ok":
-        print(response.body)
+        return response.body
 
-    return response.body
+    return ""
 
 
 def event_alert_slack(alert_name, alert_frequency, alert_message, alert_overview):
@@ -163,7 +170,9 @@ def event_alert_slack(alert_name, alert_frequency, alert_message, alert_overview
 
 
 def _format_slack_anomalies(
-    top10: List[dict], kpi_name=None, include_kpi_link=True
+    top10: "Sequence[anomaly_alerts.AnomalyPointFormatted]",
+    kpi_name: Optional[str] = None,
+    include_kpi_link: bool = True,
 ) -> str:
     out = ""
 
@@ -171,31 +180,37 @@ def _format_slack_anomalies(
 
         if include_kpi_link:
             kpi_name_link = (
-                f'<{webapp_url_prefix()}#/dashboard/0/anomaly/{point["kpi_id"]}'
-                f'|{point["kpi_name"]} (*{point["Dimension"]}*)>'
+                f"<{webapp_url_prefix()}#/dashboard/0/anomaly/{point.kpi_id}"
+                + f"|{point.kpi_name} (*{point.series_type}*)>"
             )
         else:
-            kpi_name_link = f'{kpi_name} ({point["Dimension"]})'
+            kpi_name_link = f"{kpi_name} ({point.series_type})"
 
-        date = point.get("formatted_date")
+        date = point.formatted_date
 
         threshold_message = (
-            f'expected: *{point["yhat_lower"]} to {point["yhat_upper"]}*'
+            f"expected: *{point.yhat_lower_readable} to {point.yhat_upper_readable}*"
         )
-        change_message = point["change_message"]
 
         out += (
             f"- *{kpi_name_link}* changed to "
-            f'*{point["y"]}* (*{change_message}*) '
-            f'on {date} ({threshold_message}, severity: *{point["severity"]}*)\n'
+            + f"*{point.y_readable}* (*{point.formatted_change_percent}*) "
+            + f"on {date} ({threshold_message}, severity: *{point.severity}*)\n"
         )
 
     return out
 
 
 def alert_digest_slack_formatted(
-    frequency: str, top10: List[dict], overall_count: int, subdim_count: int
-):
+    frequency: str,
+    top10: "Sequence[anomaly_alerts.AnomalyPointFormatted]",
+    overall_count: int,
+    subdim_count: int,
+) -> str:
+    """Sends an anomaly digest on slack.
+
+    Returns an empty string if successful or the error as a string if not.
+    """
     client = get_webhook_client()
     if not client:
         raise Exception("Slack not configured properly.")
@@ -225,8 +240,11 @@ def alert_digest_slack_formatted(
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"- Total alerts generated (Overall KPI): *{overall_count}*\n"
-                    f"- Total alerts generated (including subdimenions): *{subdim_count + overall_count}*\n",
+                    "text": (
+                        f"- Total alerts generated (Overall KPI): *{overall_count}*\n"
+                        + "- Total alerts generated (including subdimenions): "
+                        + f"*{subdim_count + overall_count}*\n"
+                    ),
                 },
             },
             {
@@ -263,43 +281,9 @@ def alert_digest_slack_formatted(
     )
 
     if response.body != "ok":
-        print(response.body)
+        return response.body
 
-    return response.body
-
-
-def anomaly_alert_slack_formatted(alert_name, kpi_name, data_source_name, table_data):
-    client = get_webhook_client()
-    if not client:
-        raise Exception("Slack not configured properly.")
-    response = client.send(
-        text=f"Anomaly Alert: {kpi_name}",
-        blocks=[
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": f"Alert: {alert_name}",
-                    "emoji": True,
-                },
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"This is the alert generated from KPI *{kpi_name}* and Data Source *{data_source_name}*.",
-                },
-            },
-        ],
-    )
-
-    subsequent_response = "failed"
-    if response.body == "ok":
-        subsequent_response = alert_table_sender(client, table_data)
-
-    if response.body == "ok" and subsequent_response == "ok":
-        return "ok"
-    return subsequent_response
+    return ""
 
 
 def alert_table_sender(client, table_data):

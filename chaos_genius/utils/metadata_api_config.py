@@ -52,8 +52,18 @@ TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY = {
     }
 }
 
+TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY_THIRD_PARTY = {
+    "tables": True,
+    "views": False,
+    "materialized_views": False,
+    "supported_aggregations": ["mean", "sum", "count"],
+    "supports_multidim_dd": True,
+}
+
 SUPPORTED_DATASOURCES_FOR_MULTIDIM_DD = [
     datasource
     for datasource, conf in TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY.items()
     if conf["supports_multidim_dd"]
 ]
+
+NON_THIRD_PARTY_DATASOURCES = TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY.keys()

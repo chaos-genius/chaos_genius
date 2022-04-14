@@ -13,7 +13,10 @@ import {
   ANOMALYSETTINGFAILURE,
   RETRAINFAILURE,
   RETRAINREQUEST,
-  RETRAINSUCCESS
+  RETRAINSUCCESS,
+  ANOMALYDOWNLOADREQUEST,
+  ANOMALYDOWNLOADSUCCESS,
+  ANOMALYDOWNLOADFAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -29,7 +32,10 @@ const initialState = {
   anomalySettingLoading: false,
   anomalySettingData: '',
   anomalySettingError: false,
-  retrain: false
+  retrain: false,
+  anomalyCsv: [],
+  anomalyCsvLoading: false,
+  anomalyCsvError: false
 };
 
 export const anomaly = (state = initialState, action) => {
@@ -138,12 +144,38 @@ export const anomaly = (state = initialState, action) => {
         retrain: false
       };
     }
+    case ANOMALYDOWNLOADREQUEST: {
+      return {
+        ...state,
+        anomalyCsvLoading: true
+      };
+    }
+    case ANOMALYDOWNLOADSUCCESS: {
+      return {
+        ...state,
+        anomalyCsvLoading: false,
+        anomalyCsv: action.data
+      };
+    }
+    case ANOMALYDOWNLOADFAILURE: {
+      return {
+        ...state,
+        anomalyCsvLoading: false,
+        anomalyCsvError: true
+      };
+    }
     case 'RESET': {
       return {
         ...state,
         anomalyDrilldownData: '',
         anomalyQualityData: '',
         retrain: false
+      };
+    }
+    case 'RESET_CSV': {
+      return {
+        ...state,
+        anomalyCsv: []
       };
     }
     case 'RESET_DRILL': {

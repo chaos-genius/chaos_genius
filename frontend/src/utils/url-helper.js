@@ -71,3 +71,5 @@ export const checkBlackList = (url) => {
 };
 export const TIME_CUTS_URL = `${BASE_URL}/api/kpi/get-timecuts-list`;
 export const VERSION_SETTING_URL = `${BASE_URL}/api/meta/version`;
+export const METADATA_PREFETCH_URL = `${BASE_URL}/api/connection/trigger-metadata-prefetch`;
+export const TIMEZONE_URL = `${BASE_URL}/api/meta/supported-timezones`;

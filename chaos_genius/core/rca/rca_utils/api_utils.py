@@ -3,6 +3,7 @@ import logging
 from datetime import date, datetime
 from typing import List
 
+from chaos_genius.extensions import db
 from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
 from chaos_genius.databases.models.rca_data_model import RcaData
@@ -12,6 +13,7 @@ from chaos_genius.utils.datetime_helper import (
     get_lastscan_string_with_tz,
     get_rca_date_from_string,
 )
+from sqlalchemy import func, and_
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +95,7 @@ def kpi_aggregation(kpi_id, timeline="last_30_days"):
     return status, message, final_data
 
 
-def kpi_line_data(kpi_id):
+def kpi_line_data(kpi_id, download=False):
     """Get KPI line data."""
     final_data = []
     status = "success"
@@ -116,10 +118,15 @@ def kpi_line_data(kpi_id):
             raise ValueError("No data found.")
 
         final_data = data_point.data
-        for row in final_data:
-            row["date"] = convert_datetime_to_timestamp(
-                get_rca_date_from_string(row["date"])
-            )
+        if not download:
+            for row in final_data:
+                row["date"] = convert_datetime_to_timestamp(
+                    get_rca_date_from_string(row["date"])
+                )
+        else:
+            for row in final_data:
+                row["date"] = get_rca_date_from_string(row["date"])
+
     except Exception as err:  # noqa: B902
         logger.error(f"Error in KPI Line data retrieval: {err}", exc_info=1)
         status = "error"
@@ -207,6 +214,62 @@ def rca_hierarchical_data(kpi_id, timeline="last_30_days", dimension=None):
         message = str(err)
         final_data = {"data_table": [], "analysis_date": ""}
     return status, message, final_data
+
+
+def rca_hierarchical_data_all_dims(kpi_id, timeline="last_30_days"):
+    """Get RCA hierarchical data for all dimensions."""
+    final_data_list = {}
+    status = "success"
+    message = ""
+    try:
+        kpi_info = get_kpi_data_from_id(kpi_id)
+        end_date = get_rca_output_end_date(kpi_info)
+
+        subq = (
+            db.session.query(
+                RcaData.dimension,
+                func.max(RcaData.created_at).label("latest_created_at"),
+            )
+            .filter(RcaData.kpi_id == kpi_id)
+            .group_by(RcaData.dimension)
+            .subquery()
+        )
+
+        data_points = (
+            db.session.query(RcaData)
+            .filter(
+                (RcaData.kpi_id == kpi_id)
+                & (RcaData.data_type == "htable")
+                & (RcaData.timeline == timeline)
+                & (RcaData.end_date <= end_date)
+            )
+            .join(
+                subq,
+                and_(
+                    RcaData.dimension == subq.c.dimension,
+                    RcaData.created_at == subq.c.latest_created_at,
+                ),
+            )
+            .all()
+        )
+
+        final_data_list = []
+        if data_points:
+            for data_point in data_points:
+                final_data = data_point.data
+                final_data["analysis_date"] = get_datetime_string_with_tz(
+                    get_analysis_date(kpi_id, end_date)
+                )
+                final_data["dimension"] = data_point.dimension
+                final_data_list.append(final_data)
+        else:
+            raise ValueError("No data found.")
+    except Exception as err:  # noqa: B902
+        logger.error(f"Error in RCA hierarchical table retrieval: {err}", exc_info=1)
+        status = "error"
+        message = str(err)
+        final_data_list = []
+    return status, message, final_data_list
 
 
 def get_rca_output_end_date(kpi_info: dict) -> date:

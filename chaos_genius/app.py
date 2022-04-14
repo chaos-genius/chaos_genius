@@ -14,6 +14,7 @@ from chaos_genius.settings import REACT_APP_IS_DEMO
 from chaos_genius.utils.utils import DEMO_ENDPOINT_WHITELIST
 from chaos_genius.views import (
     data_source_view,
+    download_view,
     kpi_view,
     public_view,
     meta_view,
@@ -82,6 +83,7 @@ def register_blueprints(app):
     app.register_blueprint(anomaly_data_view.blueprint, url_prefix='/api/anomaly-data')
     app.register_blueprint(alert_view.blueprint, url_prefix='/api/alert')
     app.register_blueprint(dashboard_view.blueprint, url_prefix='/api/dashboard')
+    app.register_blueprint(download_view.blueprint, url_prefix='/api/downloads')
     app.register_blueprint(status_view.blueprint, url_prefix='/api/status')
     app.register_blueprint(meta_view.blueprint, url_prefix='/api/meta')
     app.register_blueprint(digest_view.blueprint, url_prefix='/api/digest')
@@ -159,3 +161,4 @@ def register_commands(app):
     app.cli.add_command(commands.insert_demo_data)
     app.cli.add_command(commands.run_anomaly_rca_scheduler)
     app.cli.add_command(commands.run_digest)
+    app.cli.add_command(commands.fetch_metadata)

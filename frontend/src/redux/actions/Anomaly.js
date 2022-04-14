@@ -16,7 +16,10 @@ import {
   ANOMALYSETTINGFAILURE,
   RETRAINFAILURE,
   RETRAINREQUEST,
-  RETRAINSUCCESS
+  RETRAINSUCCESS,
+  ANOMALYDOWNLOADREQUEST,
+  ANOMALYDOWNLOADSUCCESS,
+  ANOMALYDOWNLOADFAILURE
 } from './ActionConstants';
 
 export const anomalyDetectionRequest = () => {
@@ -217,6 +220,39 @@ export const anomalySetting = (id) => {
       dispatch(anomalySettingFailure());
     } else if (data && status === 200) {
       dispatch(anomalySettingSuccess(data));
+    }
+  };
+};
+
+export const anomalyDownloadRequest = () => {
+  return {
+    type: ANOMALYDOWNLOADREQUEST
+  };
+};
+
+export const anomalyDownloadSuccess = (response) => {
+  return {
+    type: ANOMALYDOWNLOADSUCCESS,
+    data: response
+  };
+};
+
+export const anomalyDownloadFailure = () => {
+  return {
+    type: ANOMALYDOWNLOADFAILURE
+  };
+};
+
+export const anomalyDownloadCsv = (id) => {
+  return async (dispatch) => {
+    dispatch(anomalyDownloadRequest());
+    const { data, error, status } = await getRequest({
+      url: `${BASE_URL}/api/downloads/${id}/anomaly_data`
+    });
+    if (error) {
+      dispatch(anomalyDownloadFailure());
+    } else if (data && status === 200) {
+      dispatch(anomalyDownloadSuccess(data));
     }
   };
 };

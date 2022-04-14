@@ -21,7 +21,8 @@ import {
   testDatasourceConnection,
   getDatasourceMetaInfo,
   getDatasourceById,
-  updateDatasourceById
+  updateDatasourceById,
+  getTimeZones
 } from '../../redux/actions';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -67,11 +68,17 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   const [showModal, setShowModal] = useState(false);
   const [connectionName, setConnectionName] = useState('');
   const [editedConnectionName, setEditedConnecitonName] = useState('');
+  const [editedTimeZone, setEditedTimeZone] = useState('');
   const [dsFormData, setDsFormData] = useState({});
   const [error, setError] = useState('');
   const [formError, setFormError] = useState({});
   const [editedForm, setEditedForm] = useState({});
   const [status, setStatus] = useState('');
+  const [timeZonesOptions, setTimeZonesOptions] = useState([]);
+  const [selectedTimeZone, setSelectedTimeZone] = useState({
+    value: 'UTC',
+    label: 'UTC'
+  });
   const history = useHistory();
   const path = history.location.pathname.split('/');
 
@@ -86,7 +93,8 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     datasourceLoading,
     updateDatasourceLoading,
     updateDatasource,
-    connectionTypeLoading
+    connectionTypeLoading,
+    timeZones
   } = useSelector((state) => state.dataSource);
 
   const getEditDatasource = () => {
@@ -100,11 +108,19 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
   };
 
   useEffect(() => {
+    dispatch(getTimeZones());
     if (path[2] === 'edit') {
+      setEditedTimeZone('');
       getEditDatasource();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (timeZones && timeZones.length) {
+      setTimeZonesOptions(timeZones);
+    }
+  }, [timeZones]);
 
   useEffect(() => {
     const fetchData = () => {
@@ -135,6 +151,10 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     ) {
       setConnectionName(datasourceData?.name);
       setDsFormData(datasourceData?.sourceForm);
+      setSelectedTimeZone({
+        value: datasourceData?.database_timezone,
+        label: datasourceData?.database_timezone
+      });
       findDataType(datasourceData);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -188,14 +208,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       createDatasourceResponse.status === 'connected' &&
       onboarding === false
     ) {
-      if (
-        createDatasourceResponse.data &&
-        createDatasourceResponse.data.is_third_party
-      ) {
-        setShowModal(true);
-      } else {
-        history.push('/datasource');
-      }
+      setShowModal(true);
     } else if (
       createDatasourceResponse &&
       createDatasourceResponse.status === 'connected' &&
@@ -228,14 +241,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       createDatasourceResponse.status === 'connected' &&
       path[2] === 'add'
     ) {
-      if (
-        createDatasourceResponse.data &&
-        createDatasourceResponse.data.is_third_party
-      ) {
-        setShowModal(true);
-      } else {
-        history.push('/datasource');
-      }
+      setShowModal(true);
       customToast({
         type: 'success',
         header: 'Successfully Added',
@@ -412,6 +418,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
         const bingPayload = {
           connection_type: selectedDatasource.value,
           name: connectionName,
+          database_timezone: selectedTimeZone?.value,
           sourceForm: {
             connectionConfiguration: obj,
             sourceDefinitionId: sourceDefinitionId
@@ -422,6 +429,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
         const payload = {
           connection_type: selectedDatasource.value,
           name: connectionName,
+          database_timezone: selectedTimeZone?.value,
           sourceForm: {
             connectionConfiguration: dsFormData,
             sourceDefinitionId: sourceDefinitionId
@@ -465,6 +473,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
     if (Object.keys(newobj).length === 0 && connectionName !== '') {
       const payload = {
         name: connectionName,
+        database_timezone: selectedTimeZone?.value,
         sourceForm: {
           connectionConfiguration: editedForm
         }
@@ -505,6 +514,9 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
       </div>
     );
   } else {
+    const noteForTimeZone = (
+      <p>Note: Please retrain KPIs if Time Zone is changed</p>
+    );
     return (
       <>
         <div className="form-group">
@@ -527,6 +539,29 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             <div className="connection__fail">
               <p>{error}</p>
             </div>
+          )}
+        </div>
+        <div className="form-group">
+          <label>Select Time Zone*</label>
+          <Select
+            options={timeZonesOptions}
+            classNamePrefix="selectcategory"
+            isDisabled={
+              path[2] === 'edit' ? editableStatus('time_zone') : false
+            }
+            value={selectedTimeZone}
+            onChange={(e) => {
+              setSelectedTimeZone(e);
+              if (path[2] === 'edit') {
+                setEditedTimeZone(e.value);
+              }
+              setError('');
+              setFormError([]);
+            }}
+            components={{ SingleValue: customSingleValue }}
+          />
+          {path[2] === 'edit' && (
+            <div className="channel-tip">{noteForTimeZone}</div>
           )}
         </div>
         <div className="form-group">
@@ -604,6 +639,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
               }
               disabled={
                 editedConnectionName === '' &&
+                editedTimeZone === '' &&
                 Object.keys(editedForm).length === 0
                   ? true
                   : false

@@ -84,6 +84,7 @@ def jsonable_encoder(obj):
         return jsonable_encoder(obj_dict)
     return pydantic_encoder(obj)
 
+
 DEMO_ENDPOINT_WHITELIST = {
     "alert.alert_meta_info": ["GET"],
     "alert.get_alert_info_by_id": ["GET"],
@@ -130,6 +131,10 @@ DEMO_ENDPOINT_WHITELIST = {
     "config_settings.edit_config_setting": ["PUT"],
     "dashboard.get_dashboard_list": ["GET"],
     "dashboard.get_dashboard": ["GET"],
+    "downloads.download_anomaly_data": ["GET"],
+    "downloads.download_hierarchical_data": ["GET"],
+    "downloads.download_multidim_analysis_data": ["GET"],
+    "downloads.kpi_download_line_data": ["GET"],
     # "meta.static",
     # "public.api_view",
     # "public.home",

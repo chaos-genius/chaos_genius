@@ -29,8 +29,6 @@ import store from '../../redux/store';
 import SubdimensionEmpty from '../SubdimensionEmpty';
 import EmptyDataQualityAnomaly from '../EmptyDataQualityAnomaly';
 
-import { useToast } from 'react-toast-wnm';
-import { CustomContent, CustomActions } from '../../utils/toast-helper';
 import { downloadCsv } from '../../utils/download-helper';
 import { anomalyDownloadCsv } from '../../redux/actions/Anomaly';
 
@@ -84,7 +82,6 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
   };
   const dispatch = useDispatch();
   const history = useHistory();
-  const toast = useToast();
   const [chartData, setChartData] = useState([]);
   const [subDimLoading, setSubDimloading] = useState(true);
   const [retrainOn, setRetrainOn] = useState(false);
@@ -482,34 +479,6 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
 
   const handleDownloadClick = () => {
     dispatch(anomalyDownloadCsv(kpi));
-  };
-
-  const customToast = (data) => {
-    const { type, header, description } = data;
-    toast({
-      autoDismiss: true,
-      enableAnimation: true,
-      delay: type === 'success' ? '5000' : '30000',
-      backgroundColor: type === 'success' ? '#effaf5' : '#FEF6F5',
-      borderRadius: '6px',
-      color: '#222222',
-      position: 'bottom-right',
-      minWidth: '240px',
-      width: 'auto',
-      boxShadow: '4px 6px 32px -2px rgba(226, 226, 234, 0.24)',
-      padding: '17px 14px',
-      height: 'auto',
-      border: type === 'success' ? '1px solid #60ca9a' : '1px solid #FEF6F5',
-      type: type,
-      actions: <CustomActions />,
-      content: (
-        <CustomContent
-          header={header}
-          description={description}
-          failed={type === 'success' ? false : true}
-        />
-      )
-    });
   };
 
   return (

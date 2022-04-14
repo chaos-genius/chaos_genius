@@ -18,3 +18,11 @@
     color: grey;
   }
 }
+.next-step-navigate-edit-modal {
+  display: flex;
+  justify-content: center !important;
+  margin-top: 24px;
+  .btn {
+    margin-left: 16px;
+  }
+}

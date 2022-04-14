@@ -14,7 +14,7 @@ redis==3.5.3
 # Database
 Flask-SQLAlchemy==2.5.1
 SQLAlchemy==1.4.15
-psycopg2-binary==2.8.6
+psycopg2-binary==2.9.3
 PyMySQL==1.0.2
 sqlalchemy-bigquery==1.2.0
 snowflake-sqlalchemy==1.2.4
@@ -31,7 +31,7 @@ tabulate==0.8.9
 
 # Data Analysis
 matplotlib==3.4.2
-numpy==1.21.0
+numpy==1.22.2
 numpyencoder==0.3.0
 pandas==1.2.4
 pystan==2.19.1.1
@@ -63,7 +63,7 @@ Flask-Caching>=1.7.2
 # Flask-DebugToolbar==0.11.0
 
 # Environment variable parsing
-python-dotenv==0.18.0
+python-dotenv==0.20.0
 
 # Logging
 python-json-logger==2.0.2

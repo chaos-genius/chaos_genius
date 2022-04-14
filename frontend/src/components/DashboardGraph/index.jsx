@@ -153,18 +153,27 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
       });
       store.dispatch(RESET_RCA_CSV);
     }
-    if (graphCsv && graphCsv.length !== 0 && graphCsv.status !== 'failure') {
-      downloadCsv(graphCsv, `KPI-${kpi}-panel-chart-data.csv`);
+    if (
+      graphCsv &&
+      graphCsv.data &&
+      graphCsv.data.length !== 0 &&
+      graphCsv.data.status !== 'failure'
+    ) {
+      downloadCsv(
+        graphCsv.data,
+        `KPI-${kpi}-Deepdrills-${graphCsv?.name ? graphCsv.name : ''}.csv`
+      );
       store.dispatch(RESET_RCA_CSV);
     } else if (
       graphCsv &&
-      graphCsv.length !== 0 &&
-      graphCsv.status === 'failure'
+      graphCsv.data &&
+      graphCsv.data.length !== 0 &&
+      graphCsv.data.status === 'failure'
     ) {
       customToast({
         type: 'failure',
         header: 'Failed to Download',
-        description: graphCsv.message
+        description: graphCsv.data.message
       });
       store.dispatch(RESET_RCA_CSV);
     }
@@ -445,8 +454,30 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
   const handleDownloadClick = (type) => {
     if (type === 'rca') {
       dispatch(rcaDownloadCsv(kpi));
-    } else {
-      dispatch(graphDownloadCsv(kpi));
+    } else if (type === 'waterfall') {
+      if (dimension?.value === 'singledimension') {
+        dispatch(
+          graphDownloadCsv(
+            kpi,
+            'hierarchical_data',
+            {
+              timeline: monthWeek?.value
+            },
+            'singledim'
+          )
+        );
+      } else if (dimension?.value === 'multidimension') {
+        dispatch(
+          graphDownloadCsv(
+            kpi,
+            'multidim_analysis_data',
+            {
+              timeline: monthWeek?.value
+            },
+            'multidim'
+          )
+        );
+      }
     }
   };
 
@@ -687,7 +718,7 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
                         <div
                           className="download-icon"
                           onClick={() => {
-                            //handleDownloadClick('waterfall');
+                            handleDownloadClick('waterfall');
                           }}>
                           <img src={download} alt="icon"></img>
                         </div>

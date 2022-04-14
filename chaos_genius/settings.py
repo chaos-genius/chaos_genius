@@ -8,7 +8,9 @@ environment variables.
 """
 import os
 from typing import Union
+import warnings
 
+import pytz
 from dotenv import load_dotenv
 
 from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
@@ -83,8 +85,15 @@ for enabled_time_range in DEEPDRILLS_ENABLED_TIME_RANGES:
     if enabled_time_range not in TIME_RANGES_BY_KEY.keys():
         raise ValueError(f"Values in DEEPDRILLS_ENABLED_TIME_RANGES must be one of {', '.join(TIME_RANGES_BY_KEY.keys())}. Got: {enabled_time_range}.")
 TIMEZONE = os.getenv('TIMEZONE', default='UTC')
-if TIMEZONE not in SUPPORTED_TIMEZONES:
-    raise ValueError(f"Value of TIMEZONE must be one of {', '.join(SUPPORTED_TIMEZONES)}. Got: {TIMEZONE}.")
+# TODO : Deprecate SUPPORTED_TIMEZONES over releases.
+if TIMEZONE in SUPPORTED_TIMEZONES:
+    warnings.warn(
+        "TIMEZONE as 3 letter abbreviation will be deprecated in the future. Please refer to https://docs.chaosgenius.io/docs/Operator_Guides/Configuration/supported-timezones for the list of supported timezones.",
+        FutureWarning
+    )
+elif TIMEZONE not in pytz.all_timezones:
+    raise ValueError(f"Invalid Timezone Provided. Got: {TIMEZONE}. Please refer to https://docs.chaosgenius.io/docs/Operator_Guides/Configuration/supported-timezones for the list of supported timezones.")
+# else, timezone is valid
 
 SENTRY_DSN = os.getenv('SENTRY_DSN')
 
@@ -93,7 +102,7 @@ IN_DOCKER = _make_bool(os.getenv('IN_DOCKER', default=False))
 TASK_CHECKPOINT_LIMIT: int = int(os.getenv("TASK_CHECKPOINT_LIMIT", 1000))
 """Number of last checkpoints to retrieve in Task Monitor"""
 
-CHAOSGENIUS_VERSION_MAIN = os.getenv("CHAOSGENIUS_VERSION_MAIN", "0.5.1")
+CHAOSGENIUS_VERSION_MAIN = os.getenv("CHAOSGENIUS_VERSION_MAIN", "0.6.0")
 """ChaosGenius version - semver part only"""
 CHAOSGENIUS_VERSION_POSTFIX = os.getenv("CHAOSGENIUS_VERSION_POSTFIX", "git")
 """ChaosGenius version - postfix to identify deployment"""

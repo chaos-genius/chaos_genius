@@ -1,6 +1,7 @@
 """Common utilities for alerts and alert digests."""
 
 import os
+from math import floor, log10
 from typing import List, Optional, Union
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -15,6 +16,7 @@ class AlertException(Exception):
 
     Stores and prints alert ID and KPI ID.
     """
+
     def __init__(self, message: str, alert_id: int, kpi_id: Optional[int] = None):
         """Initialize a new alert exception.
 
@@ -98,6 +100,36 @@ def send_email_using_template(
     )
 
     template = env.get_template(template_name)
-    send_static_alert_email(
-        recipient_emails, subject, template.render(**kwargs), files
-    )
+    send_static_alert_email(recipient_emails, subject, template.render(**kwargs), files)
+
+
+HRN_PREFIXES = {
+    -9: "n",
+    -6: "µ",
+    -3: "m",
+    0: "",
+    3: "K",
+    6: "M",
+    9: "B",
+    12: "T",
+}
+
+
+def _get_exponent(num: float) -> int:
+    """Returns the power of 10 to which the number is raised to."""
+    if num == 0:
+        return 0
+
+    return floor(log10(abs(num)))
+
+
+def human_readable(num: float) -> str:
+    """Returns the human readable format of a number."""
+    exponent = _get_exponent(num)
+
+    new_exponent = min((3 * floor(exponent / 3)), 12)
+    precision = 10 ** (new_exponent)
+
+    new_val = round(num / precision, 3)
+    human_readable_format = str(new_val) + HRN_PREFIXES[new_exponent]
+    return human_readable_format

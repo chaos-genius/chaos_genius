@@ -121,28 +121,33 @@ class Kpi(PkModel):
                     "is_sensitive": False,
                 },
                 {
+                    "name": "schema_name",
+                    "is_editable": True,
+                    "is_sensitive": False
+                },
+                {
                     "name": "kpi_type",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
                 },
                 {
                     "name": "kpi_query",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
                 },
                 {
                     "name": "table_name",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
                 },
                 {
                     "name": "metric",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
                 },
                 {
                     "name": "aggregation",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
                     "options": [{
                         "label": "Mean",
@@ -157,22 +162,22 @@ class Kpi(PkModel):
                 },
                 {
                     "name": "datetime_column",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
                 },
                 {
                     "name": "filters",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
                 },
                 {
                     "name": "dimensions",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
                 },
                 {
                     "name": "timezone_aware",
-                    "is_editable": False,
+                    "is_editable": True,
                     "is_sensitive": False,
                 },
                 # TODO: Fix this with some better implementation

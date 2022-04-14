@@ -87,13 +87,12 @@ services:
   chaosgenius-db:
     container_name: chaosgenius-db
     image: postgres:13
-    restart: always
+    restart: unless-stopped
     healthcheck:
       test: [ "CMD", "pg_isready", "-q", "-d", "chaosgenius_data", "-U", "postgres" ]
       timeout: 45s
       interval: 10s
       retries: 10
-    restart: always
     environment:
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
@@ -103,8 +102,8 @@ services:
 
   chaosgenius-redis:
     container_name: chaosgenius-redis
-    restart: unless-stopped
     image: "redis:6.2-alpine"
+    restart: unless-stopped
     
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler

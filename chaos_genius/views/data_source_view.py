@@ -171,11 +171,14 @@ def create_data_source():
     connection_status, msg, status = {}, "failed", False
     sourceRecord, desinationRecord, connectionRecord, stream_tables = {}, {}, {}, []
     db_connection_uri = ""
+    database_timezone = "UTC"
     try:
         payload = request.get_json()
         conn_name = payload.get("name")
         conn_type = payload.get("connection_type")
         source_form = payload.get("sourceForm")
+        # TODO: Validation for the timezone
+        database_timezone = payload.get("database_timezone")
         is_third_party = SOURCE_WHITELIST_AND_TYPE[source_form["sourceDefinitionId"]]
         if is_third_party and not AIRBYTE_ENABLED:
             raise Exception("Airbytes is not enabled.")
@@ -259,6 +262,7 @@ def create_data_source():
             active=True,
             is_third_party=is_third_party,
             connection_status=status,
+            database_timezone=database_timezone,
             sourceConfig=sourceRecord,
             destinationConfig=desinationRecord,
             connectionConfig=connectionRecord,
@@ -472,10 +476,14 @@ def update_data_source_info(datasource_id):
         payload = request.get_json()
         conn_name = payload.get("name")
         source_form = payload.get("sourceForm")
+        database_timezone = payload.get("database_timezone")
         ds_obj = get_datasource_data_from_id(datasource_id, as_obj=True)
         if ds_obj.is_third_party and not AIRBYTE_ENABLED:
             raise Exception("Airbyte is not enabled")
         ds_obj.name = conn_name
+        if database_timezone is not None:
+            # TODO: Validation for the timezone
+            ds_obj.database_timezone = database_timezone
         connection_config = deepcopy(ds_obj.sourceConfig)
         connection_config["connectionConfiguration"].update(
             source_form.get("connectionConfiguration", {})

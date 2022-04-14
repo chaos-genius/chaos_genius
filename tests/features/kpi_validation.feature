@@ -115,8 +115,7 @@ Feature: KPI Validation
     Scenario: date/time column is timezone-aware
         Given a newly added KPI and its DataFrame
         When date/time column is a timezone-aware timestamp
-        Then validation should fail
-        And error message should be "The datetime column has timezone aware data, use 'cast' to convert to timezone naive."
+        Then validation should pass
 
     Scenario: date/time column is timezone-aware for a Druid KPI
         Given a newly added KPI and its DataFrame

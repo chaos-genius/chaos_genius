@@ -24,6 +24,7 @@ from chaos_genius.alerts.utils import (
     AlertException,
     change_message_from_percent,
     find_percentage_change,
+    human_readable,
     send_email_using_template,
     webapp_url_prefix,
 )
@@ -247,6 +248,21 @@ class AnomalyPointFormatted(AnomalyPoint):
             formatted_date=formatted_date,
             formatted_change_percent=str(formatted_change_percent),
         )
+
+    @property
+    def y_readable(self):
+        """Returns human readable format for y value of anomaly point."""
+        return human_readable(self.y)
+
+    @property
+    def yhat_lower_readable(self):
+        """Returns human readable format for lower bound of expected range."""
+        return human_readable(self.yhat_lower)
+
+    @property
+    def yhat_upper_readable(self):
+        """Returns human readable format for upper bound of expected range."""
+        return human_readable(self.yhat_upper)
 
 
 class AnomalyAlertController:

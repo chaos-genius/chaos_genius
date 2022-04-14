@@ -1,22 +1,27 @@
 import logging
-import typing
 from datetime import date, datetime, timedelta
-from typing import Iterator, List, Optional, Union
+from typing import Iterator, List, Optional
 
-from flask import current_app  # noqa: F401
+from sqlalchemy import delete
 
 from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
 from chaos_genius.core.anomaly.controller import AnomalyDetectionController
+from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
 from chaos_genius.core.rca.rca_controller import RootCauseAnalysisController
 from chaos_genius.core.utils.data_loader import DataLoader
+from chaos_genius.core.utils.round import round_number
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.kpi_model import Kpi
+from chaos_genius.databases.models.rca_data_model import RcaData
+from chaos_genius.extensions import db
 from chaos_genius.settings import DAYS_OFFSET_FOR_ANALTYICS, MAX_DEEPDRILLS_SLACK_DAYS
 
 logger = logging.getLogger(__name__)
 
 
 def _is_data_present_for_end_date(kpi_info: dict, end_date: date = None) -> bool:
+    if end_date is None:
+        end_date = datetime.now().date()
     df_count = DataLoader(kpi_info, end_date=end_date, days_before=0).get_count()
     return df_count != 0
 
@@ -222,6 +227,33 @@ def get_active_kpi_from_id(kpi_id: int) -> Optional[Kpi]:
     return kpi_obj
 
 
-# def delete_data(kpi, query):
-#     db.session.execute(query)
-#     db.session.commit()
+def delete_rca_output_for_kpi(kpi_id: int):
+    """Delete RCA output for a prticular KPI."""
+    delete_kpi_query = delete(RcaData).where(RcaData.kpi_id == kpi_id)
+    db.session.execute(delete_kpi_query)
+    db.session.commit()
+
+
+def delete_anomaly_output_for_kpi(kpi_id: int):
+    """Delete Anomaly output for a particular KPI."""
+    delete_kpi_query = delete(AnomalyDataOutput).where(
+        AnomalyDataOutput.kpi_id == kpi_id
+    )
+    db.session.execute(delete_kpi_query)
+    db.session.commit()
+
+
+def get_anomaly_count(kpi_id, timeline):
+
+    curr_date = datetime.now().date()
+    (_, _), (sd, _) = TIME_RANGES_BY_KEY[timeline]["function"](curr_date)
+
+    # TODO: Add the series type filter
+    anomaly_data = AnomalyDataOutput.query.filter(
+        AnomalyDataOutput.kpi_id == kpi_id,
+        AnomalyDataOutput.anomaly_type == "overall",
+        AnomalyDataOutput.is_anomaly == 1,
+        AnomalyDataOutput.data_datetime >= sd,
+    ).all()
+
+    return len(anomaly_data)

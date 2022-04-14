@@ -95,7 +95,7 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
   };
 
   const handleSync = (datasource) => {
-    dispatch(setSyncSchema(datasource));
+    dispatch(setSyncSchema(datasource, customToast));
   };
 
   const customToast = (data) => {

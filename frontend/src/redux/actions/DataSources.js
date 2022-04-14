@@ -234,19 +234,33 @@ export const deleteDatasource = (id, customToast) => {
   };
 };
 
-export const setSyncSchema = (datasource) => {
-  return async (dispatch) => {
-    dispatch(syncSchemaRequested());
-    const { data, error, status } = await postRequest({
-      url: METADATA_PREFETCH_URL,
-      data: { data_source_id: datasource?.id }
-    });
-    if (error) {
-      dispatch(syncSchemaFailure());
-    } else if (data && status === 200) {
-      dispatch(syncSchemaSuccess({ ...data, data_source_id: datasource?.id }));
+export const setSyncSchema = (datasource, customToast) => {
+  if (env.REACT_APP_IS_DEMO === 'true') {
+    if (customToast) {
+      customToast({
+        type: 'error',
+        header: 'This is a demo version'
+      });
     }
-  };
+    return {
+      type: 'default'
+    };
+  } else {
+    return async (dispatch) => {
+      dispatch(syncSchemaRequested());
+      const { data, error, status } = await postRequest({
+        url: METADATA_PREFETCH_URL,
+        data: { data_source_id: datasource?.id }
+      });
+      if (error) {
+        dispatch(syncSchemaFailure());
+      } else if (data && status === 200) {
+        dispatch(
+          syncSchemaSuccess({ ...data, data_source_id: datasource?.id })
+        );
+      }
+    };
+  }
 };
 
 export const getDatasourceMetaInfoRequest = () => {

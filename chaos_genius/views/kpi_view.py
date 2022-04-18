@@ -1,71 +1,51 @@
 # -*- coding: utf-8 -*-
 """KPI views for creating and viewing the kpis."""
-from collections import defaultdict
 import logging
-import traceback  # noqa: F401
-from datetime import date, datetime, timedelta
+from collections import defaultdict
 
-from flask import (  # noqa: F401
-    Blueprint,
-    current_app,
-    flash,
-    redirect,
-    render_template,
-    request,
-    url_for,
-    jsonify,
+from flask.blueprints import Blueprint
+from flask.globals import request
+from flask.json import jsonify
+
+from chaos_genius.controllers.dashboard_controller import (
+    create_dashboard_kpi_mapper,
+    disable_mapper_for_kpi_ids,
+    edit_kpi_dashboards,
+    enable_mapper_for_kpi_ids,
+    get_dashboard_list_by_ids,
+    get_mapper_obj_by_dashboard_ids,
+    get_mapper_obj_by_kpi_ids,
 )
-import pandas as pd
-from chaos_genius.connectors import get_sqla_db_conn
-
 from chaos_genius.controllers.kpi_controller import (
     delete_anomaly_output_for_kpi,
     delete_rca_output_for_kpi,
     get_anomaly_count,
     get_kpi_data_from_id,
 )
-from chaos_genius.core.utils.kpi_validation import validate_kpi
-from chaos_genius.core.utils.round import round_number
-from chaos_genius.core.utils.utils import randomword
-from chaos_genius.databases.models.kpi_model import Kpi
-from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
-from chaos_genius.databases.models.data_source_model import DataSource
-from chaos_genius.databases.models.rca_data_model import RcaData
-from chaos_genius.extensions import cache, db
-from chaos_genius.databases.db_utils import chech_editable_field
-from chaos_genius.controllers.dashboard_controller import (
-    create_dashboard_kpi_mapper,
-    get_mapper_obj_by_dashboard_ids,
-    get_mapper_obj_by_kpi_ids,
-    get_dashboard_list_by_ids,
-    disable_mapper_for_kpi_ids,
-    edit_kpi_dashboards,
-    enable_mapper_for_kpi_ids
-)
-from chaos_genius.settings import DEEPDRILLS_ENABLED_TIME_RANGES
-from chaos_genius.core.rca.rca_utils.api_utils import (
-    kpi_line_data,
-    kpi_aggregation,
-)
 from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
+from chaos_genius.core.rca.rca_utils.api_utils import kpi_aggregation, kpi_line_data
+from chaos_genius.core.utils.kpi_validation import validate_kpi
+from chaos_genius.databases.db_utils import chech_editable_field
+from chaos_genius.databases.models.data_source_model import DataSource
+from chaos_genius.databases.models.kpi_model import Kpi
+from chaos_genius.extensions import db
+from chaos_genius.settings import DEEPDRILLS_ENABLED_TIME_RANGES
 
 blueprint = Blueprint("api_kpi", __name__)
 logger = logging.getLogger(__name__)
 
 
-@blueprint.route("/", methods=["GET", "POST"]) # TODO: Remove this
+@blueprint.route("/", methods=["GET", "POST"])  # TODO: Remove this
 @blueprint.route("", methods=["GET", "POST"])
 def kpi():
-    """kpi list view."""
+    """List KPIs."""
     # Handle logging in
     if request.method == "POST":
-        if not request.is_json:
+        data = request.get_json()
+        if data is None:
             return jsonify({"error": "The request payload is not in JSON format"})
 
-        data = request.get_json()
         data["dimensions"] = [] if data["dimensions"] is None else data["dimensions"]
-
-        data_source = DataSource.get_by_id(data["data_source"]).as_dict
 
         if data.get("kpi_query", "").strip():
             data["kpi_query"] = data["kpi_query"].strip()
@@ -101,15 +81,17 @@ def kpi():
         # Add the dashboard id 0 to the kpi
         dashboard_list = data.get("dashboards", []) + [0]
         dashboard_list = list(set(dashboard_list))
-        mapper_obj_list = create_dashboard_kpi_mapper(dashboard_list, [new_kpi.id])
+        create_dashboard_kpi_mapper(dashboard_list, [new_kpi.id])
 
         # TODO: Fix circular import error
         from chaos_genius.jobs.anomaly_tasks import ready_rca_task
+
         # run rca as soon as new KPI is added
         rca_task = ready_rca_task(new_kpi.id)
         if rca_task is None:
-            print(
-                f"Could not run RCA task since newly added KPI was not found: {new_kpi.id}"
+            logger.warn(
+                "Could not run RCA task since newly added KPI was not found: "
+                + f"{new_kpi.id}"
             )
         else:
             rca_task.apply_async()
@@ -145,13 +127,17 @@ def kpi():
                 .all()
             )
 
-        kpi_dashboard_mapper = get_mapper_obj_by_kpi_ids([kpi.id for kpi, _ in kpi_result_list])
+        kpi_dashboard_mapper = get_mapper_obj_by_kpi_ids(
+            [kpi.id for kpi, _ in kpi_result_list]
+        )
         kpi_dashboard_dict = defaultdict(list)
         for mapper in kpi_dashboard_mapper:
             kpi_dashboard_dict[mapper.kpi].append(mapper.dashboard)
         dashboard_list = [mapper.dashboard for mapper in kpi_dashboard_mapper]
         dashboard_result_list = get_dashboard_list_by_ids(dashboard_list)
-        dashboard_dict = {dashboard.id: dashboard.as_dict for dashboard in dashboard_result_list}
+        dashboard_dict = {
+            dashboard.id: dashboard.as_dict for dashboard in dashboard_result_list
+        }
 
         kpis = []
         for row in kpi_result_list:
@@ -172,19 +158,21 @@ def kpi():
                 dashboard_details = [dashboard.as_dict for dashboard in dashboards]
         else:
             dashboard_details = list(dashboard_dict.values())
-        return jsonify({"count": len(kpis), "data": kpis, "dashboards": dashboard_details})
+        return jsonify(
+            {"count": len(kpis), "data": kpis, "dashboards": dashboard_details}
+        )
 
 
 @blueprint.route("/get-dashboard-list", methods=["GET"])
 def get_all_kpis():
-    """returning all kpis"""
-
+    """List KPIs for a particular dashboard."""
     status, message = "success", ""
     timeline = request.args.get("timeline", "last_7_days")
     dashboard_id = request.args.get("dashboard_id")
+    ret = []
 
     try:
-        filters = [Kpi.active == True]
+        filters = [Kpi.active == True]  # noqa: E712
         if dashboard_id:
             kpi_dashboard_mapper = get_mapper_obj_by_dashboard_ids([dashboard_id])
             kpi_list = [mapper.kpi for mapper in kpi_dashboard_mapper]
@@ -196,7 +184,6 @@ def get_all_kpis():
             .all()
         )
 
-        ret = []
         metrics = ["name", "metric", "id"]
         for kpi in results:
             info = {key: getattr(kpi, key) for key in metrics}
@@ -206,8 +193,12 @@ def get_all_kpis():
             info["change"] = aggregate_data["aggregation"][2]["value"]
             info["percentage_change"] = aggregate_data["aggregation"][3]["value"]
 
-            info["display_value_prev"] = TIME_RANGES_BY_KEY[timeline]["last_period_name"]
-            info["display_value_current"] = TIME_RANGES_BY_KEY[timeline]["current_period_name"]
+            info["display_value_prev"] = TIME_RANGES_BY_KEY[timeline][
+                "last_period_name"
+            ]
+            info["display_value_current"] = TIME_RANGES_BY_KEY[timeline][
+                "current_period_name"
+            ]
             info["anomaly_count"] = get_anomaly_count(kpi.id, timeline)
             _, _, info["graph_data"] = kpi_line_data(kpi.id)
             ret.append(info)
@@ -233,7 +224,7 @@ def get_timecuts_list():
         ]
         ret = enabled_cuts
         message = "All timecuts fetched succesfully."
-    except Exception as e:
+    except Exception as e:  # noqa: B902
         status = "failure"
         message = str(e)
         logger.error(message)
@@ -242,36 +233,39 @@ def get_timecuts_list():
 
 @blueprint.route("/<int:kpi_id>/disable", methods=["GET"])
 def disable_kpi(kpi_id):
+    """Disable a KPI."""
     status, message = "", ""
     try:
         kpi_obj = Kpi.get_by_id(kpi_id)
         if kpi_obj:
             kpi_obj.active = False
             kpi_obj.save(commit=True)
-            disable = disable_mapper_for_kpi_ids([kpi_id])
+            disable_mapper_for_kpi_ids([kpi_id])
             status = "success"
         else:
             message = "KPI not found"
             status = "failure"
-    except Exception as err:
+    except Exception as err:  # noqa: B902
         status = "failure"
         logger.info(f"Error in disabling the KPI: {err}")
     return jsonify({"message": message, "status": status})
 
+
 @blueprint.route("/<int:kpi_id>/enable", methods=["GET"])
 def enable_kpi(kpi_id):
+    """Enable a KPI."""
     status, message = "", ""
     try:
         kpi_obj = Kpi.get_by_id(kpi_id)
         if kpi_obj:
             kpi_obj.active = True
             kpi_obj.save(commit=True)
-            enable = enable_mapper_for_kpi_ids([kpi_id])
+            enable_mapper_for_kpi_ids([kpi_id])
             status = "success"
         else:
             message = "KPI not found"
             status = "failure"
-    except Exception as err:
+    except Exception as err:  # noqa: B902
         status = "failure"
         logger.info(f"Error in enabling the KPI: {err}")
     return jsonify({"message": message, "status": status})
@@ -279,31 +273,37 @@ def enable_kpi(kpi_id):
 
 @blueprint.route("/<int:kpi_id>/get-dimensions", methods=["GET"])
 def kpi_get_dimensions(kpi_id):
+    """Retrieve list of dimensions of a KPI."""
     dimensions = []
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
         dimensions = kpi_info["dimensions"]
-    except Exception as err:
+    except Exception as err:  # noqa: B902
         logger.info(f"Error Found: {err}")
     return jsonify({"dimensions": dimensions, "msg": ""})
 
 
 @blueprint.route("/meta-info", methods=["GET"])
 def kpi_meta_info():
-    """kpi meta info view."""
+    """Meta info of fields of KPI."""
     logger.info("kpi meta info")
     return jsonify({"data": Kpi.meta_info()})
 
+
 @blueprint.route("/<int:kpi_id>/update", methods=["PUT"])
 def edit_kpi(kpi_id):
-    """edit kpi details."""
+    """Edit a KPI."""
     status, message = "", ""
     do_not_run_analytics_list = ["name", "dashboards"]
     run_analytics = False
 
     try:
         kpi_obj = Kpi.get_by_id(kpi_id)
+
         data = request.get_json()
+        if data is None:
+            raise Exception("Request body is not a JSON.")
+
         meta_info = Kpi.meta_info()
         if kpi_obj and kpi_obj.active is True:
             dashboard_id_list = data.pop("dashboards", []) + [0]
@@ -321,6 +321,7 @@ def edit_kpi(kpi_id):
                 )
 
                 from chaos_genius.jobs.anomaly_tasks import ready_rca_task
+
                 rca_task = ready_rca_task(kpi_id)
                 if rca_task is not None:
                     delete_rca_output_for_kpi(kpi_id)
@@ -333,6 +334,7 @@ def edit_kpi(kpi_id):
                     )
 
                 from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task
+
                 anomaly_task = ready_anomaly_task(kpi_id)
                 if anomaly_task is not None:
                     delete_anomaly_output_for_kpi(kpi_id)
@@ -344,13 +346,13 @@ def edit_kpi(kpi_id):
                         + f"editing: {kpi_id}"
                     )
 
-            mapper_dict = edit_kpi_dashboards(kpi_id, dashboard_id_list)
+            edit_kpi_dashboards(kpi_id, dashboard_id_list)
             kpi_obj.save(commit=True)
             status = "success"
         else:
             message = "KPI not found or disabled"
             status = "failure"
-    except Exception as err:
+    except Exception as err:  # noqa: B902
         status = "failure"
         logger.info(f"Error in updating the KPI: {err}")
         message = str(err)
@@ -359,7 +361,7 @@ def edit_kpi(kpi_id):
 
 @blueprint.route("/<int:kpi_id>", methods=["GET"])
 def get_kpi_info(kpi_id):
-    """get Kpi details."""
+    """Retrieve details of a KPI."""
     status, message = "", ""
     data = None
     try:
@@ -371,7 +373,7 @@ def get_kpi_info(kpi_id):
         dashboard_list = [dashboard.as_dict for dashboard in dashboard_list]
         data["dashboards"] = dashboard_list
         status = "success"
-    except Exception as err:
+    except Exception as err:  # noqa: B902
         status = "failure"
         message = str(err)
         logger.info(f"Error in fetching the KPI: {err}")
@@ -380,9 +382,9 @@ def get_kpi_info(kpi_id):
 
 @blueprint.route("/<int:kpi_id>/trigger-analytics", methods=["GET"])
 def trigger_analytics(kpi_id):
-
+    """Trigger analytics tasks for a KPI."""
     # TODO: Fix circular import error
-    from chaos_genius.jobs.anomaly_tasks import ready_rca_task, ready_anomaly_task
+    from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task, ready_rca_task
 
     rca_task = ready_rca_task(kpi_id)
     anomaly_task = ready_anomaly_task(kpi_id)
@@ -390,6 +392,5 @@ def trigger_analytics(kpi_id):
         rca_task.apply_async()
         anomaly_task.apply_async()
     else:
-        print(f"Could not analytics since newly added KPI was not found: {kpi_id}")
+        logger.warn(f"Could not analytics since KPI was not found: {kpi_id}")
     return jsonify({"message": "RCA and Anomaly triggered successfully"})
-

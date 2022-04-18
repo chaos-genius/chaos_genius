@@ -6,6 +6,7 @@ from collections import defaultdict
 from flask.blueprints import Blueprint
 from flask.globals import request
 from flask.json import jsonify
+from flask_sqlalchemy import Pagination
 
 from chaos_genius.controllers.dashboard_controller import (
     create_dashboard_kpi_mapper,
@@ -30,6 +31,7 @@ from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.extensions import db
 from chaos_genius.settings import DEEPDRILLS_ENABLED_TIME_RANGES
+from chaos_genius.utils.pagination import pagination_info
 
 blueprint = Blueprint("api_kpi", __name__)
 logger = logging.getLogger(__name__)
@@ -106,29 +108,34 @@ def kpi():
 
     elif request.method == "GET":
         dashboard_id = request.args.get("dashboard_id")
-        kpi_result_list, kpi_dashboard_mapper = [], []
+
+        page = int(request.args.get("page", 1))
+        per_page = int(request.args.get("per_page", 10))
+
+        kpi_dashboard_mapper = []
         if dashboard_id:
             dashboard_id = int(dashboard_id)
+            # TODO: add pagination for dashboard mapper
             kpi_dashboard_mapper = get_mapper_obj_by_dashboard_ids([dashboard_id])
             kpi_list = [mapper.kpi for mapper in kpi_dashboard_mapper]
-            kpi_result_list = (
+            kpis_paginated: Pagination = (
                 db.session.query(Kpi, DataSource)
                 .join(DataSource, Kpi.data_source == DataSource.id)
                 .filter(Kpi.active == True, Kpi.id.in_(kpi_list))  # noqa: E712
                 .order_by(Kpi.created_at.desc())
-                .all()
+                .paginate(page=page, per_page=per_page)
             )
         else:
-            kpi_result_list = (
+            kpis_paginated: Pagination = (
                 db.session.query(Kpi, DataSource)
                 .join(DataSource, Kpi.data_source == DataSource.id)
                 .filter(Kpi.active == True)  # noqa: E712
                 .order_by(Kpi.created_at.desc())
-                .all()
+                .paginate(page=page, per_page=per_page)
             )
 
         kpi_dashboard_mapper = get_mapper_obj_by_kpi_ids(
-            [kpi.id for kpi, _ in kpi_result_list]
+            [kpi.id for kpi, _ in kpis_paginated.items]
         )
         kpi_dashboard_dict = defaultdict(list)
         for mapper in kpi_dashboard_mapper:
@@ -140,7 +147,7 @@ def kpi():
         }
 
         kpis = []
-        for row in kpi_result_list:
+        for row in kpis_paginated.items:
             kpi_info = row[0].safe_dict
             data_source_info = row[1].safe_dict
             kpi_info["data_source"] = data_source_info
@@ -159,7 +166,12 @@ def kpi():
         else:
             dashboard_details = list(dashboard_dict.values())
         return jsonify(
-            {"count": len(kpis), "data": kpis, "dashboards": dashboard_details}
+            {
+                "count": len(kpis),
+                "data": kpis,
+                "dashboards": dashboard_details,
+                "pagination": pagination_info(kpis_paginated),
+            }
         )
 
 

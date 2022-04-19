@@ -26,6 +26,7 @@ from chaos_genius.settings import (
     MIN_DATA_IN_SUBGROUP,
     MULTIDIM_ANALYSIS_FOR_ANOMALY,
     HOURS_OFFSET_FOR_ANALTYICS,
+    ITERATIVE_DAYS_ON_INITIAL_BATCH_TRAINING
 )
 
 logger = logging.getLogger(__name__)
@@ -80,6 +81,7 @@ class AnomalyDetectionController(object):
             self.kpi_info["anomaly_params"]["anomaly_period"] = period
 
         self._task_id = task_id
+        self.iterative_days_on_initial_batch_training = ITERATIVE_DAYS_ON_INITIAL_BATCH_TRAINING
 
         # TODO: Make this connection type agnostic.
         conn_type = DataSource.get_by_id(
@@ -190,6 +192,7 @@ class AnomalyDetectionController(object):
             self.slack,
             series,
             subgroup,
+            self.iterative_days_on_initial_batch_training,
             self.kpi_info.get("model_kwargs", {}),
         ).predict()
 

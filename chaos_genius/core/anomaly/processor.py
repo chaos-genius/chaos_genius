@@ -28,6 +28,7 @@ class ProcessAnomalyDetection:
         slack: int,
         series: str,
         subgroup: str = None,
+        min_number_of_days: int = 0,
         model_kwargs={},
     ):
         """Initialize the processor.
@@ -52,6 +53,9 @@ class ProcessAnomalyDetection:
         :type series: str
         :param subgroup: subgroup identifier, defaults to None
         :type subgroup: str, optional
+        :param min_number_of_days: the min number of days to day by day train
+            for in the initial batch training, defaults to 0
+        :type min_number_of_days: int
         :param model_kwargs: parameters to initialize the model with, defaults
         to {}
         :type model_kwargs: dict, optional
@@ -68,6 +72,7 @@ class ProcessAnomalyDetection:
         self.freq = freq
         self.sensitivity = sensitivity
         self.slack = slack
+        self.min_number_of_days = min_number_of_days
 
     def predict(self) -> pd.DataFrame:
         """Run the prediction for anomalies.
@@ -94,7 +99,6 @@ class ProcessAnomalyDetection:
 
         input_last_date = input_data["dt"].iloc[-1]
         input_first_date = input_data["dt"].iloc[0]
-        max_period = get_timedelta(self.freq, self.period)
 
         logger.info(f"Prediction data stats for {self.series}-{self.subgroup}", extra={
             "period": self.period,
@@ -107,42 +111,101 @@ class ProcessAnomalyDetection:
 
         if self.last_date is None:
             # pass complete input data frame in here as pred_df
-            if self.period - len(input_data) <= self.slack:
-
-                prediction = model.predict(
-                    input_data,
-                    self.sensitivity,
-                    self.freq,
-                    pred_df=input_data,
-                )
-
-                prediction["y"] = input_data["y"]
-                prediction_with_severity = self._detect_severity(self._detect_anomalies(prediction))
-                pred_series = prediction_with_severity
-            else:
-                logger.warning(f"Insufficient slack for {self.series}-{self.subgroup}")
-
-        else:
-            date_to_predict = self.last_date + datetime.timedelta(**FREQUENCY_DELTA[self.freq])
-            while date_to_predict <= input_last_date:
-                curr_period = date_to_predict - input_first_date
-
-                if curr_period >= max_period:
-                    df = input_data[
-                        (input_data["dt"] >= date_to_predict - max_period)
-                        & (input_data["dt"] <= date_to_predict)
-                    ]
+            if self.min_number_of_days == 0:
+                if self.period - len(input_data) <= self.slack:
 
                     prediction = model.predict(
-                        df.iloc[:-1], self.sensitivity, self.freq
+                        input_data,
+                        self.sensitivity,
+                        self.freq,
+                        pred_df=input_data,
                     )
-                    prediction["y"] = df["y"].to_list()
+
+                    prediction["y"] = input_data["y"]
                     prediction_with_severity = self._detect_severity(self._detect_anomalies(prediction))
-                    to_append = prediction_with_severity.iloc[-1].copy()
+                    pred_series = prediction_with_severity
+                else:
+                    logger.warning(
+                        f"Insufficient slack for {self.series}-{self.subgroup}")
+            else:
+                pred_df = input_data[
+                    (input_data['dt'] <= input_data['dt'].max() -
+                        get_timedelta(self.freq, self.min_number_of_days))
+                ]
+                prediction = model.predict(
+                    pred_df,
+                    self.sensitivity,
+                    self.freq,
+                    pred_df=pred_df
+                )
+                prediction['y'] = pred_df['y']
+                prediction_with_severity = self._detect_severity(self._detect_anomalies(prediction))
+                daily_train_with_severity = self._day_by_day_predict(input_data, model, self.min_number_of_days)
+                pred_series = pd.concat(
+                    [
+                        prediction_with_severity,
+                        daily_train_with_severity
+                    ]
+                )
 
-                    pred_series = pred_series.append(to_append, ignore_index=True)
+        else:
+            prediction_with_severity = self._day_by_day_predict(self.input_data, model)
+            pred_series = prediction_with_severity
 
-                date_to_predict += datetime.timedelta(**FREQUENCY_DELTA[self.freq])
+        return pred_series
+
+    def _day_by_day_predict(
+        self,
+        input_data: pd.DataFrame,
+        model: AnomalyModel,
+        days_to_train: int = None
+    ) -> pd.DataFrame:
+
+        pred_series = pd.DataFrame(
+            columns=["dt", "y", "yhat_lower", "yhat_upper", "anomaly", "severity"])
+
+        input_first_date = input_data["dt"].iloc[0]
+        input_last_date = input_data["dt"].iloc[-1]
+        max_period = get_timedelta(self.freq, self.period)
+
+        if days_to_train is not None:
+            last_date = input_last_date - get_timedelta(self.freq, days_to_train - 1)
+        else:
+            last_date = self.last_date + datetime.timedelta(**FREQUENCY_DELTA[self.freq])
+
+        while last_date <= input_last_date:
+            curr_period = last_date - input_first_date
+
+            if curr_period >= max_period and days_to_train is None:
+                df = input_data[
+                    (input_data["dt"] >= last_date - max_period)
+                    & (input_data["dt"] <= last_date)
+                ]
+
+                prediction = model.predict(
+                    df.iloc[:-1], self.sensitivity, self.freq
+                )
+                prediction["y"] = df["y"].to_list()
+                prediction_with_severity = self._detect_severity(self._detect_anomalies(prediction))
+                to_append = prediction_with_severity.iloc[-1].copy()
+
+                pred_series = pred_series.append(
+                    to_append, ignore_index=True)
+
+            elif curr_period < max_period and days_to_train is not None:
+                df = input_data[input_data['dt'] <= last_date]
+                prediction = model.predict(
+                    df.iloc[:-1], self.sensitivity, self.freq
+                )
+                prediction["y"] = df["y"].to_list()
+                prediction_with_severity = self._detect_severity(self._detect_anomalies(prediction))
+                to_append = prediction_with_severity.iloc[-1].copy()
+
+                pred_series = pred_series.append(
+                    to_append, ignore_index=True
+                )
+
+            last_date = last_date + datetime.timedelta(**FREQUENCY_DELTA[self.freq])
 
         return pred_series
 
@@ -157,6 +220,14 @@ class ProcessAnomalyDetection:
 
     def _detect_severity(self, anomaly_prediction):
         std_dev = anomaly_prediction["y"].std()
+
+        logger.info(f"Severity stats for {self.series}-{self.subgroup}", extra={
+            "Start/End Date": list([anomaly_prediction["dt"][0], anomaly_prediction["dt"].iloc[-1]]),
+            "Start/End Value": list([anomaly_prediction["y"][0], anomaly_prediction["y"].iloc[-1]]),
+            "len": list([len(anomaly_prediction["y"]), len(anomaly_prediction["y"])]),
+            "std_dev": std_dev,
+            "period": self.period,
+        })
 
         anomaly_prediction["severity"] = 0
         if std_dev == 0:
@@ -182,6 +253,16 @@ class ProcessAnomalyDetection:
 
         # Map zscore of 0-3 to 0-100
         severity = zscore * 100 / ZSCORE_UPPER_BOUND
+        logger.info("Severity Score Info: ", extra={
+            "Anomaly" : row["anomaly"],
+            "Date" : row["dt"],
+            "Value": row["y"],
+            "std_dev": std_dev,
+            "Upper Bound": row["yhat_upper"],
+            "Lower Bound": row["yhat_lower"],
+            "zscore" : zscore,
+            "Severity": severity
+        })
         severity = abs(severity)
 
         # Bound between min and max score

@@ -1,5 +1,9 @@
+from collections import defaultdict
+from typing import Any, DefaultDict, Dict, List, Literal, Union, overload
+
 from chaos_genius.databases.models.dashboard_model import Dashboard
 from chaos_genius.databases.models.dashboard_kpi_mapper_model import DashboardKpiMapper
+from chaos_genius.extensions import db
 
 # TODO: Refactor these functions
 
@@ -175,3 +179,57 @@ def enable_mapper_for_kpi_ids(kpi_list):
         mapper.active = True
         mapper.save(commit=True)
     return True
+
+
+@overload
+def kpi_dashboard_mapper_dict(
+    kpi_ids: List[int],
+    as_dict: Literal[False] = False
+) -> Dict[int, List[Dashboard]]:
+    ...
+
+
+@overload
+def kpi_dashboard_mapper_dict(
+    kpi_ids: List[int],
+    as_dict: Literal[True] = True
+) -> Dict[int, List[Dict[str, Any]]]:
+    ...
+
+
+def kpi_dashboard_mapper_dict(
+    kpi_ids: List[int],
+    as_dict: bool = False
+) -> Union[Dict[int, List[Dashboard]], Dict[int, List[Dict[str, Any]]]]:
+    """Retrieves the mapping between KPI IDs and dashboards as a dict."""
+    result = (
+        db.session.query(DashboardKpiMapper, Dashboard)
+        .filter(
+            DashboardKpiMapper.kpi.in_(kpi_ids),
+            DashboardKpiMapper.active == True,  # noqa: E712
+            Dashboard.id == DashboardKpiMapper.dashboard
+        )
+        .all()
+    )
+
+    mappers = [res[0] for res in result]
+    dashboards = [res[1] for res in result]
+
+    kpi_dashboard_id_mapper: DefaultDict[int, List[int]] = defaultdict(list)
+    for mapper in mappers:
+        kpi_dashboard_id_mapper[mapper.kpi].append(mapper.dashboard)
+
+    dashboards_dict: Union[Dict[int, Dict[str, Any]], Dict[int, Dashboard]]
+    if not as_dict:
+        dashboards_dict = {
+            dashboard.id: dashboard for dashboard in dashboards
+        }
+    else:
+        dashboards_dict = {
+            dashboard.id: dashboard.as_dict for dashboard in dashboards
+        }
+
+    return {
+        kpi_id: [dashboards_dict[dashboard_id] for dashboard_id in dashboard_ids]
+        for kpi_id, dashboard_ids in kpi_dashboard_id_mapper.items()
+    }

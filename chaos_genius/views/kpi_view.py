@@ -16,6 +16,7 @@ from chaos_genius.controllers.dashboard_controller import (
     get_dashboard_list_by_ids,
     get_mapper_obj_by_dashboard_ids,
     get_mapper_obj_by_kpi_ids,
+    kpi_dashboard_mapper_dict,
 )
 from chaos_genius.controllers.kpi_controller import (
     delete_anomaly_output_for_kpi,
@@ -27,6 +28,7 @@ from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
 from chaos_genius.core.rca.rca_utils.api_utils import kpi_aggregation, kpi_line_data
 from chaos_genius.core.utils.kpi_validation import validate_kpi
 from chaos_genius.databases.db_utils import chech_editable_field
+from chaos_genius.databases.models.dashboard_kpi_mapper_model import DashboardKpiMapper
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.extensions import db
@@ -112,16 +114,17 @@ def kpi():
         page = int(request.args.get("page", 1))
         per_page = int(request.args.get("per_page", 10))
 
-        kpi_dashboard_mapper = []
         if dashboard_id:
             dashboard_id = int(dashboard_id)
-            # TODO: add pagination for dashboard mapper
-            kpi_dashboard_mapper = get_mapper_obj_by_dashboard_ids([dashboard_id])
-            kpi_list = [mapper.kpi for mapper in kpi_dashboard_mapper]
             kpis_paginated: Pagination = (
                 db.session.query(Kpi, DataSource)
                 .join(DataSource, Kpi.data_source == DataSource.id)
-                .filter(Kpi.active == True, Kpi.id.in_(kpi_list))  # noqa: E712
+                .join(DashboardKpiMapper, Kpi.id == DashboardKpiMapper.kpi)
+                .filter(
+                    Kpi.active == True,  # noqa: E712
+                    DashboardKpiMapper.active == True,  # noqa: E712
+                    DashboardKpiMapper.dashboard == dashboard_id
+                )
                 .order_by(Kpi.created_at.desc())
                 .paginate(page=page, per_page=per_page)
             )
@@ -129,47 +132,31 @@ def kpi():
             kpis_paginated: Pagination = (
                 db.session.query(Kpi, DataSource)
                 .join(DataSource, Kpi.data_source == DataSource.id)
-                .filter(Kpi.active == True)  # noqa: E712
+                .filter(
+                    Kpi.active == True  # noqa: E712
+                )
                 .order_by(Kpi.created_at.desc())
                 .paginate(page=page, per_page=per_page)
             )
 
-        kpi_dashboard_mapper = get_mapper_obj_by_kpi_ids(
-            [kpi.id for kpi, _ in kpis_paginated.items]
+        kpi_dashboard_mapper = kpi_dashboard_mapper_dict(
+            [kpi.id for kpi, _ in kpis_paginated.items],
+            as_dict=True
         )
-        kpi_dashboard_dict = defaultdict(list)
-        for mapper in kpi_dashboard_mapper:
-            kpi_dashboard_dict[mapper.kpi].append(mapper.dashboard)
-        dashboard_list = [mapper.dashboard for mapper in kpi_dashboard_mapper]
-        dashboard_result_list = get_dashboard_list_by_ids(dashboard_list)
-        dashboard_dict = {
-            dashboard.id: dashboard.as_dict for dashboard in dashboard_result_list
-        }
 
         kpis = []
         for row in kpis_paginated.items:
             kpi_info = row[0].safe_dict
             data_source_info = row[1].safe_dict
             kpi_info["data_source"] = data_source_info
-            dashboards = []
-            for dashboard in kpi_dashboard_dict[kpi_info["id"]]:
-                dashboards.append(dashboard_dict[dashboard])
+            dashboards = kpi_dashboard_mapper[kpi_info["id"]]
             kpi_info["dashboards"] = dashboards
             kpis.append(kpi_info)
-        dashboard_details = []
-        if dashboard_id:
-            if dashboard_dict:
-                dashboard_details = [dashboard_dict[dashboard_id]]
-            else:
-                dashboards = get_dashboard_list_by_ids([dashboard_id])
-                dashboard_details = [dashboard.as_dict for dashboard in dashboards]
-        else:
-            dashboard_details = list(dashboard_dict.values())
+
         return jsonify(
             {
                 "count": len(kpis),
                 "data": kpis,
-                "dashboards": dashboard_details,
                 "pagination": pagination_info(kpis_paginated),
             }
         )

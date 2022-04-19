@@ -16,6 +16,8 @@ class PaginationInfo:
     pages: int
     has_next: bool
     has_prev: bool
+    first_entry_position: int
+    last_entry_position: int
 
     def as_dict(self) -> Dict[str, Any]:
         """Converts to a dictionary."""
@@ -31,4 +33,7 @@ def pagination_info(pagination: Pagination) -> PaginationInfo:
         pages=pagination.pages,
         has_next=pagination.has_next,
         has_prev=pagination.has_prev,
+        first_entry_position=(pagination.page - 1) * pagination.per_page + 1,
+        last_entry_position=(pagination.page - 1) * pagination.per_page
+        + len(pagination.items),
     )

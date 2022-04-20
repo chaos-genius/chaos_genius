@@ -1,8 +1,9 @@
 """Utilities to support pagination of API responses."""
 
 from dataclasses import asdict, dataclass
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 
+from flask.wrappers import Request
 from flask_sqlalchemy import Pagination
 
 
@@ -37,3 +38,14 @@ def pagination_info(pagination: Pagination) -> PaginationInfo:
         last_entry_position=(pagination.page - 1) * pagination.per_page
         + len(pagination.items),
     )
+
+
+def pagination_args(req: Request) -> Tuple[int, int]:
+    """Extracts page number and per_page from Flask request args.
+
+    Extracted from URL request parameters, not from the body.
+    """
+    page = int(req.args.get("page", 1))
+    per_page = int(req.args.get("per_page", 10))
+
+    return page, per_page

@@ -46,7 +46,15 @@ def kpi():
     if request.method == "POST":
         data = request.get_json()
         if data is None:
-            return jsonify({"error": "The request payload is not in JSON format"})
+            return (
+                jsonify(
+                    {
+                        "error": "The request payload is not in JSON format",
+                        "status": "failure",
+                    }
+                ),
+                400,
+            )
 
         data["dimensions"] = [] if data["dimensions"] is None else data["dimensions"]
 

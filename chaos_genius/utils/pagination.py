@@ -40,12 +40,14 @@ def pagination_info(pagination: Pagination) -> PaginationInfo:
     )
 
 
-def pagination_args(req: Request) -> Tuple[int, int]:
+def pagination_args(
+    req: Request, default_page=1, default_per_page=10
+) -> Tuple[int, int]:
     """Extracts page number and per_page from Flask request args.
 
     Extracted from URL request parameters, not from the body.
     """
-    page = int(req.args.get("page", 1))
-    per_page = int(req.args.get("per_page", 10))
+    page = int(req.args.get("page", default_page))
+    per_page = int(req.args.get("per_page", default_per_page))
 
     return page, per_page

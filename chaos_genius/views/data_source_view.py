@@ -8,6 +8,7 @@ from uuid import uuid4
 from flask.blueprints import Blueprint
 from flask.globals import request
 from flask.json import jsonify
+from flask_sqlalchemy import Pagination
 from sqlalchemy import func
 
 from chaos_genius.connectors import get_metadata, get_schema_names
@@ -48,6 +49,7 @@ from chaos_genius.utils.metadata_api_config import (
     TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY,
     TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY_THIRD_PARTY,
 )
+from chaos_genius.utils.pagination import pagination_args, pagination_info
 # from chaos_genius.jobs.metadata_prefetch import fetch_data_source_schema
 
 blueprint = Blueprint("api_data_source", __name__)
@@ -89,10 +91,12 @@ def data_source():
     elif request.method == "GET":
         logger.info("Listing data sources.")
 
-        data_sources = (
+        page, per_page = pagination_args(request)
+
+        data_sources_paginated: Pagination = (
             DataSource.query.filter(DataSource.active == True)  # noqa: E712
             .order_by(DataSource.created_at.desc())
-            .all()
+            .paginate(page=page, per_page=per_page)
         )
         ds_kpi_count = (
             db.session.query(DataSource.id, func.count(Kpi.id))
@@ -106,7 +110,7 @@ def data_source():
         for row in ds_kpi_count:
             data_source_kpi_map[row[0]] = row[1]
         results = []
-        for conn in data_sources:
+        for conn in data_sources_paginated.items:
             # TODO: Add the kpi_count, real sync details and sorting info
             conn_detail = conn.safe_dict
             if not conn_detail["last_sync"]:
@@ -117,7 +121,11 @@ def data_source():
 
         logger.info("Found %d data sources", len(results))
 
-        return jsonify({"count": len(results), "data": results})
+        return jsonify({
+            "count": len(results),
+            "data": results,
+            "pagination": pagination_info(data_sources_paginated)
+        })
 
 
 @blueprint.route("/types", methods=["GET"])

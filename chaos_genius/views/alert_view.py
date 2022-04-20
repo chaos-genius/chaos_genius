@@ -10,6 +10,7 @@ from flask.json import jsonify
 from chaos_genius.controllers.alert_controller import get_alert_info, get_alert_list
 from chaos_genius.databases.db_utils import chech_editable_field
 from chaos_genius.databases.models.alert_model import Alert
+from chaos_genius.utils.pagination import pagination_args, pagination_info
 
 blueprint = Blueprint("alert", __name__)
 logger = logging.getLogger(__name__)
@@ -19,8 +20,14 @@ logger = logging.getLogger(__name__)
 @blueprint.route("", methods=["GET"])
 def list_alert():
     """List the alert data."""
-    results = get_alert_list()
-    return jsonify({"data": results})
+    page, per_page = pagination_args(request)
+    alerts_paginated = get_alert_list(page_num_size=(page, per_page))
+    return jsonify(
+        {
+            "data": alerts_paginated.items,
+            "pagination": pagination_info(alerts_paginated),
+        }
+    )
 
 
 @blueprint.route("/<int:alert_id>/get-info", methods=["GET"])

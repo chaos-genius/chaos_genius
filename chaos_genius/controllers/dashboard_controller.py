@@ -1,11 +1,37 @@
 from collections import defaultdict
-from typing import Any, DefaultDict, Dict, List, Literal, Union, overload
+from typing import (
+    Any,
+    Callable,
+    DefaultDict,
+    Dict,
+    List,
+    Literal,
+    Tuple,
+    Union,
+    overload,
+)
 
 from chaos_genius.databases.models.dashboard_model import Dashboard
 from chaos_genius.databases.models.dashboard_kpi_mapper_model import DashboardKpiMapper
 from chaos_genius.extensions import db
 
 # TODO: Refactor these functions
+
+DEFAULT_SORT_BY = "number_of_kpis"
+SORTER_MAPPING: Dict[str, Tuple[Callable[[Dict[str, Any]], Any], bool]] = {
+    "number_of_kpis": (lambda dboard: len(dboard.get("kpis", [])), True),
+    "alphabetical": (lambda dboard: dboard["name"], False),
+    "recently_modified": (lambda dboard: dboard["last_modified"], True),
+}
+"""A mapping between names of sorters and (key fn for sorting, whether to reverse sort).
+
+`reverse=True` means descending order.
+
+The key function is used and not a column identifier (to be passed to `order_by`)
+because some sorting such as `number_of_kpis` cannot be directly done in DB without
+doing some JOINs and adding extra columns to the query. Since the number of dashboards
+can be assumed to be relatively low, doing it in python is good enough.
+"""
 
 
 def get_dashboard_by_id(dashboard_id):
@@ -42,14 +68,25 @@ def get_mapper_obj_by_kpi_ids(kpi_list):
     ).all()
 
 
-def get_dashboard_list():
+def get_dashboard_list(sort_by: str = DEFAULT_SORT_BY) -> List[Dict[str, Any]]:
+    """Retrieve all dashboards with the IDs of KPIs it contains.
+
+    Arguments:
+        sort_by: the key to sort by. Assumed to be present in `SORTER_MAPPING`. Will
+            fail if it's not in the mapping.
+    """
     dashboard_list = get_dashboard_list_by_ids()
-    dashboard_dict_list = []
+    dashboard_dict_list: List[Dict[str, Any]] = []
+
     for dashboard in dashboard_list:
         dashboard_dict = dashboard.as_dict
         mapper_list = get_mapper_obj_by_dashboard_ids([dashboard.id])
         dashboard_dict["kpis"] = [mapper.kpi for mapper in mapper_list]
         dashboard_dict_list.append(dashboard_dict)
+
+    sort_key, reverse = SORTER_MAPPING[sort_by]
+    dashboard_dict_list.sort(key=sort_key, reverse=reverse)
+
     return dashboard_dict_list
 
 

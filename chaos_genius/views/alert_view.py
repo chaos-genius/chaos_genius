@@ -11,6 +11,7 @@ from chaos_genius.controllers.alert_controller import get_alert_info, get_alert_
 from chaos_genius.databases.db_utils import chech_editable_field
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.utils.pagination import pagination_args, pagination_info
+from chaos_genius.utils.search import make_search_filter
 
 blueprint = Blueprint("alert", __name__)
 logger = logging.getLogger(__name__)
@@ -21,7 +22,12 @@ logger = logging.getLogger(__name__)
 def list_alert():
     """List the alert data."""
     page, per_page = pagination_args(request)
-    alerts_paginated = get_alert_list(page_num_size=(page, per_page))
+    search_filter = make_search_filter(request, Alert.alert_name)
+
+    alerts_paginated = get_alert_list(
+        page_num_size=(page, per_page), extra_filters=(search_filter,)
+    )
+
     return jsonify(
         {
             "data": alerts_paginated.items,

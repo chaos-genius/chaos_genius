@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """alert controlller."""
-from typing import Any, Dict, List, Literal, Optional, Tuple, overload
+from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, overload
 
 from flask_sqlalchemy import Pagination
 
@@ -12,6 +12,7 @@ def get_alert_list(
     frequency: Optional[str] = None,
     as_obj: Literal[False] = False,
     page_num_size: Optional[None] = None,
+    extra_filters: Optional[Sequence] = None,
 ) -> List[Dict[str, Any]]:
     ...
 
@@ -21,6 +22,7 @@ def get_alert_list(
     frequency: Optional[str] = None,
     as_obj: Literal[True] = True,
     page_num_size: Optional[None] = None,
+    extra_filters: Optional[Sequence] = None,
 ) -> List[Alert]:
     ...
 
@@ -31,6 +33,7 @@ def get_alert_list(
     frequency: Optional[str] = None,
     as_obj: bool = False,
     page_num_size: Tuple[int, int] = (0, 0),
+    extra_filters: Optional[Sequence] = None,
 ) -> Pagination:
     ...
 
@@ -39,6 +42,7 @@ def get_alert_list(
     frequency: Optional[str] = None,
     as_obj: bool = False,
     page_num_size: Optional[Tuple[int, int]] = None,
+    extra_filters: Optional[Sequence] = None,
 ):
     """Retrieve all alerts.
 
@@ -50,10 +54,14 @@ def get_alert_list(
         page_num_size: if provided, returns a Pagination object instead of the whole
             list. This is a tuple of (page, per_page). The items inside the Pagination
             object are either Alert objects or Dicts based on as_obj.
+        extra_filters: SQLalchemy filters added to the query if provided.
     """
     filters = [Alert.alert_status == True]  # noqa: E712
     if frequency:
         filters.extend([Alert.alert_frequency == frequency])
+    if extra_filters is not None:
+        filters.extend(extra_filters)
+
     query = Alert.query.filter(*filters).order_by(Alert.created_at.desc())
 
     if page_num_size is not None:

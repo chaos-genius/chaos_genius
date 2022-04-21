@@ -33,6 +33,7 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.extensions import db
 from chaos_genius.settings import DEEPDRILLS_ENABLED_TIME_RANGES
 from chaos_genius.utils.pagination import pagination_args, pagination_info
+from chaos_genius.utils.search import make_search_filter
 
 blueprint = Blueprint("api_kpi", __name__)
 logger = logging.getLogger(__name__)
@@ -117,8 +118,12 @@ def kpi():
 
     elif request.method == "GET":
         dashboard_id = request.args.get("dashboard_id")
-
         page, per_page = pagination_args(request)
+        search_filter = make_search_filter(request, Kpi.name)
+
+        filters = [Kpi.active == True]  # noqa: E712
+        if search_filter is not None:
+            filters.append(search_filter)
 
         if dashboard_id:
             dashboard_id = int(dashboard_id)
@@ -127,7 +132,7 @@ def kpi():
                 .join(DataSource, Kpi.data_source == DataSource.id)
                 .join(DashboardKpiMapper, Kpi.id == DashboardKpiMapper.kpi)
                 .filter(
-                    Kpi.active == True,  # noqa: E712
+                    *filters,
                     DashboardKpiMapper.active == True,  # noqa: E712
                     DashboardKpiMapper.dashboard == dashboard_id,
                 )
@@ -138,7 +143,7 @@ def kpi():
             kpis_paginated: Pagination = (
                 db.session.query(Kpi, DataSource)
                 .join(DataSource, Kpi.data_source == DataSource.id)
-                .filter(Kpi.active == True)  # noqa: E712
+                .filter(*filters)  # noqa: E712
                 .order_by(Kpi.created_at.desc())
                 .paginate(page=page, per_page=per_page)
             )
@@ -172,6 +177,12 @@ def get_all_kpis():
     timeline = request.args.get("timeline", "last_7_days")
     dashboard_id = request.args.get("dashboard_id")
     page, per_page = pagination_args(request)
+    search_filter = make_search_filter(request, Kpi.name)
+
+    filters = [Kpi.active == True]  # noqa: E712
+    if search_filter is not None:
+        filters.append(search_filter)
+
     kpis_paginated: Optional[Pagination] = None
     ret = []
 
@@ -180,8 +191,8 @@ def get_all_kpis():
             kpis_paginated_: Pagination = (
                 Kpi.query.join(DashboardKpiMapper, DashboardKpiMapper.kpi == Kpi.id)
                 .filter(
-                    Kpi.active == True,  # noqa: E712
-                    DashboardKpiMapper.active == True,
+                    *filters,
+                    DashboardKpiMapper.active == True,  # noqa: E712
                     DashboardKpiMapper.dashboard == dashboard_id,
                 )
                 .order_by(Kpi.created_at.desc())
@@ -189,9 +200,7 @@ def get_all_kpis():
             )
         else:
             kpis_paginated_: Pagination = (
-                Kpi.query.filter(
-                    Kpi.active == True,  # noqa: E712
-                )
+                Kpi.query.filter(*filters)
                 .order_by(Kpi.created_at.desc())
                 .paginate(page=page, per_page=per_page)
             )

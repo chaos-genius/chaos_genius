@@ -50,6 +50,7 @@ from chaos_genius.utils.metadata_api_config import (
     TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY_THIRD_PARTY,
 )
 from chaos_genius.utils.pagination import pagination_args, pagination_info
+from chaos_genius.utils.search import make_search_filter
 # from chaos_genius.jobs.metadata_prefetch import fetch_data_source_schema
 
 blueprint = Blueprint("api_data_source", __name__)
@@ -92,16 +93,21 @@ def data_source():
         logger.info("Listing data sources.")
 
         page, per_page = pagination_args(request)
+        search_filter = make_search_filter(request, DataSource.name)
+
+        filters = [DataSource.active == True]  # noqa: E712
+        if search_filter is not None:
+            filters.append(search_filter)
 
         data_sources_paginated: Pagination = (
-            DataSource.query.filter(DataSource.active == True)  # noqa: E712
+            DataSource.query.filter(*filters)
             .order_by(DataSource.created_at.desc())
             .paginate(page=page, per_page=per_page)
         )
         ds_kpi_count = (
             db.session.query(DataSource.id, func.count(Kpi.id))
             .join(Kpi, Kpi.data_source == DataSource.id)
-            .filter(DataSource.active == True, Kpi.active == True)  # noqa: E712
+            .filter(*filters, Kpi.active == True)  # noqa: E712
             .group_by(DataSource.id)
             .order_by(DataSource.created_at.desc())
             .all()

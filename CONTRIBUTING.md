@@ -53,14 +53,41 @@ Follow these steps if you want to make a code contribution to Chaos Genius.
 
 ## Development Workflow
 
-### Backend/API
+We support 3 different development workflows:
+- [Gitpod](#gitpod): easiest and fastest way to get started. Has some minor limitations but can be used in most cases.
+- [Docker Compose](#docker-compose): if you have Docker and docker-compose set up locally, this is the fastest way to get started on your local system.
+- [Local setup](#local-setup): if you prefer running it directly on your system (without layers like Docker), opt for this. It requires running a Postgres and a Redis server yourself and needs some set up.
 
-#### Prerequisites
+### **Gitpod**
+
+It can be quite a bit of work to set up Chaos Genius locally for development. Instead, you can use Gitpod which gives you everything you need to run and develop Chaos Genius but in a cloud environment and with the familiar interface of VS Code. See [GITPOD.md](./GITPOD.md) for details.
+
+### **Docker Compose**
+
+We have provided Docker Compose files specifically made for development. They include all the services (Postgres, Redis, etc.) along with auto-reloading backend server, workers and scheduler.
+
+Note: this does not yet support development of the webapp/frontend. Use Gitpod or a local setup instead if you will be making changes to the webapp/frontend/UI.
+
+Run the dev compose using:
+```
+docker-compose -f docker-compose.dev.yml up
+```
+
+If you will be testing third party data sources (go for the above if you're not sure), use this instead:
+```
+docker-compose -f docker-compose.dev-thirdparty.yml up
+```
+
+### **Local setup**
+
+#### **Backend/API**
+
+Prerequisites:
 - Python 3.8 with `venv`
 - A PostgreSQL server
 - A Redis server
 
-#### Steps to set up a development environment
+Steps to set up a development environment:
 
 - Create a new python virtual environment.
     ```bash
@@ -85,13 +112,13 @@ Follow these steps if you want to make a code contribution to Chaos Genius.
     ```
 - Note: this does not start any of the celery schedulers or workers, which are needed if you want to run any analytics.
 
-### Frontend/UI/Webapp
+#### **Frontend/UI/Webapp**
 
-#### Prerequisites
+Prerequisites:
 
 - Node JS
 
-#### Steps to set up a development environment
+Steps to set up a development environment:
 
 - The webapp is present in the `frontend` directory.
     ```

@@ -60,7 +60,7 @@ def get_alert_list(
     if frequency:
         filters.extend([Alert.alert_frequency == frequency])
     if extra_filters is not None:
-        filters.extend(extra_filters)
+        filters.extend([filter for filter in extra_filters if filter is not None])
 
     query = Alert.query.filter(*filters).order_by(Alert.created_at.desc())
 

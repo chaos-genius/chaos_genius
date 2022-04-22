@@ -33,7 +33,7 @@ from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.extensions import db
 from chaos_genius.settings import DEEPDRILLS_ENABLED_TIME_RANGES
 from chaos_genius.utils.pagination import pagination_args, pagination_info
-from chaos_genius.utils.search import make_search_filter
+from chaos_genius.utils.search import SEARCH_PARAM_NAME, make_search_filter
 
 blueprint = Blueprint("api_kpi", __name__)
 logger = logging.getLogger(__name__)
@@ -119,7 +119,7 @@ def kpi():
     elif request.method == "GET":
         dashboard_id = request.args.get("dashboard_id")
         page, per_page = pagination_args(request)
-        search_filter = make_search_filter(request, Kpi.name)
+        search_query, search_filter = make_search_filter(request, Kpi.name)
 
         filters = [Kpi.active == True]  # noqa: E712
         if search_filter is not None:
@@ -166,6 +166,7 @@ def kpi():
                 "count": len(kpis),
                 "data": kpis,
                 "pagination": pagination_info(kpis_paginated),
+                SEARCH_PARAM_NAME: search_query,
             }
         )
 
@@ -177,7 +178,7 @@ def get_all_kpis():
     timeline = request.args.get("timeline", "last_7_days")
     dashboard_id = request.args.get("dashboard_id")
     page, per_page = pagination_args(request)
-    search_filter = make_search_filter(request, Kpi.name)
+    search_query, search_filter = make_search_filter(request, Kpi.name)
 
     filters = [Kpi.active == True]  # noqa: E712
     if search_filter is not None:
@@ -239,6 +240,7 @@ def get_all_kpis():
             "pagination": pagination_info(kpis_paginated)
             if kpis_paginated is not None
             else None,
+            SEARCH_PARAM_NAME: search_query,
         }
     )
 

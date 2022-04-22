@@ -50,7 +50,7 @@ from chaos_genius.utils.metadata_api_config import (
     TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY_THIRD_PARTY,
 )
 from chaos_genius.utils.pagination import pagination_args, pagination_info
-from chaos_genius.utils.search import make_search_filter
+from chaos_genius.utils.search import SEARCH_PARAM_NAME, make_search_filter
 # from chaos_genius.jobs.metadata_prefetch import fetch_data_source_schema
 
 blueprint = Blueprint("api_data_source", __name__)
@@ -93,7 +93,7 @@ def data_source():
         logger.info("Listing data sources.")
 
         page, per_page = pagination_args(request)
-        search_filter = make_search_filter(request, DataSource.name)
+        search_query, search_filter = make_search_filter(request, DataSource.name)
 
         filters = [DataSource.active == True]  # noqa: E712
         if search_filter is not None:
@@ -130,7 +130,8 @@ def data_source():
         return jsonify({
             "count": len(results),
             "data": results,
-            "pagination": pagination_info(data_sources_paginated)
+            "pagination": pagination_info(data_sources_paginated),
+            SEARCH_PARAM_NAME: search_query,
         })
 
 

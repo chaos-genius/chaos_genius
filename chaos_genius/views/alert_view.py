@@ -7,7 +7,11 @@ from flask.blueprints import Blueprint
 from flask.globals import request
 from flask.json import jsonify
 
-from chaos_genius.controllers.alert_controller import get_alert_info, get_alert_list
+from chaos_genius.controllers.alert_controller import (
+    ALERT_CHANNELS,
+    get_alert_info,
+    get_alert_list,
+)
 from chaos_genius.databases.db_utils import chech_editable_field
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.utils.pagination import pagination_args, pagination_info
@@ -222,3 +226,20 @@ def alert_meta_info():
     logger.info("alert meta info")
 
     return jsonify({"data": Alert.meta_info(), "status": "success"})
+
+
+@blueprint.route("/used-channel-types", methods=["GET"])
+def get_used_channels():
+    """Returns all channel types in use."""
+    channels = [{"value": k, "label": v} for k, v in ALERT_CHANNELS.items()]
+    return jsonify({"message": "", "status": "success", "data": channels})
+
+
+@blueprint.route("/used-status-types", methods=["GET"])
+def get_used_statuses():
+    """Returns all status types in use."""
+    statuses = [
+        {"value": True, "label": "Active"},
+        {"value": False, "label": "Inactive"},
+    ]
+    return jsonify({"message": "", "status": "success", "data": statuses})

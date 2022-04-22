@@ -6,6 +6,12 @@ from flask_sqlalchemy import Pagination
 
 from chaos_genius.databases.models.alert_model import Alert
 
+ALERT_CHANNELS = {
+    "email": "E-mail",
+    "slack": "Slack",
+}
+"""A mapping of channel types and a readable name for them."""
+
 
 @overload
 def get_alert_list(

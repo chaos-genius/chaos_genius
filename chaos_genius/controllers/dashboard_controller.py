@@ -270,3 +270,11 @@ def kpi_dashboard_mapper_dict(
         kpi_id: [dashboards_dict[dashboard_id] for dashboard_id in dashboard_ids]
         for kpi_id, dashboard_ids in kpi_dashboard_id_mapper.items()
     }
+
+
+def all_dashboard_names() -> List[str]:
+    """Return a list of names of all active dashboards."""
+    return [
+        row[0]
+        for row in db.session.query(Dashboard.name).order_by(Dashboard.name).all()
+    ]

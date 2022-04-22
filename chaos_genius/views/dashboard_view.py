@@ -9,6 +9,7 @@ from flask.json import jsonify
 from chaos_genius.controllers.dashboard_controller import (
     DEFAULT_SORT_BY,
     SORTER_MAPPING,
+    all_dashboard_names,
     create_dashboard,
     edit_dashboard_kpis,
     get_dashboard_by_id,
@@ -232,3 +233,10 @@ def get_dashboard_list():
         message = "Failed to fetch dashboard list :{}".format(e)
 
     return jsonify({"status": status, "message": message, "data": dashboard_list})
+
+
+@blueprint.route("/names", methods=["GET"])
+def get_all_dashboard_names():
+    """Return names of all active dashboards."""
+    names_mapping = [{"value": name, "label": name} for name in all_dashboard_names()]
+    return jsonify({"status": "success", "message": "", "data": names_mapping})

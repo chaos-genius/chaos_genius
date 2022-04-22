@@ -19,6 +19,7 @@ from chaos_genius.controllers.data_source_controller import (
     mask_sensitive_info,
     test_data_source,
     update_third_party,
+    used_data_source_types,
 )
 from chaos_genius.controllers.data_source_metadata_controller import (
     fetch_schema_list,
@@ -769,3 +770,11 @@ def get_table_info():
             logger.error("Error in data source table info: %s", message)
 
     return jsonify({"table_info": table_info, "status": status, "message": message})
+
+
+@blueprint.route("/used-types", methods=["GET"])
+def used_data_source_types_endpoint():
+    """Returns a list of unique data source types currently in use."""
+    types = [{"value": type_, "label": type_} for type_ in used_data_source_types()]
+
+    return jsonify({"data": types, "status": "success", "message": ""})

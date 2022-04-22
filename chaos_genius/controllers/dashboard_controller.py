@@ -272,9 +272,11 @@ def kpi_dashboard_mapper_dict(
     }
 
 
-def all_dashboard_names() -> List[str]:
+def all_dashboard_names() -> Dict[int, str]:
     """Return a list of names of all active dashboards."""
-    return [
-        row[0]
-        for row in db.session.query(Dashboard.name).order_by(Dashboard.name).all()
-    ]
+    return {
+        row[0]: row[1]
+        for row in db.session.query(Dashboard.id, Dashboard.name)
+        .order_by(Dashboard.name)
+        .all()
+    }

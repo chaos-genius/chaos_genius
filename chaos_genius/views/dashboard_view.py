@@ -238,5 +238,8 @@ def get_dashboard_list():
 @blueprint.route("/names", methods=["GET"])
 def get_all_dashboard_names():
     """Return names of all active dashboards."""
-    names_mapping = [{"value": name, "label": name} for name in all_dashboard_names()]
+    names_mapping = [
+        {"value": name, "label": name, "id": id}
+        for id, name in all_dashboard_names().items()
+    ]
     return jsonify({"status": "success", "message": "", "data": names_mapping})

@@ -117,19 +117,19 @@ def kpi():
         )
 
     elif request.method == "GET":
-        dashboard_id = request.args.get("dashboard_id")
-        datasource_type = request.args.get("datasource_type")
+        dashboard_ids = request.args.getlist("dashboard_id")
+        datasource_types = request.args.getlist("datasource_type")
         page, per_page = pagination_args(request)
         search_query, search_filter = make_search_filter(request, Kpi.name)
 
         filters = [Kpi.active == True]  # noqa: E712
         if search_filter is not None:
             filters.append(search_filter)
-        if datasource_type is not None:
-            filters.append(DataSource.connection_type == datasource_type)
+        if datasource_types:
+            filters.append(DataSource.connection_type.in_(datasource_types))
 
-        if dashboard_id:
-            dashboard_id = int(dashboard_id)
+        if dashboard_ids:
+            dashboard_ids = [int(dashboard_id) for dashboard_id in dashboard_ids]
             kpis_paginated: Pagination = (
                 db.session.query(Kpi, DataSource)
                 .join(DataSource, Kpi.data_source == DataSource.id)
@@ -137,7 +137,7 @@ def kpi():
                 .filter(
                     *filters,
                     DashboardKpiMapper.active == True,  # noqa: E712
-                    DashboardKpiMapper.dashboard == dashboard_id,
+                    DashboardKpiMapper.dashboard.in_(dashboard_ids),
                 )
                 .order_by(Kpi.created_at.desc())
                 .paginate(page=page, per_page=per_page)

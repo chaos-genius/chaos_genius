@@ -93,15 +93,15 @@ def data_source():
     elif request.method == "GET":
         logger.info("Listing data sources.")
 
-        datasource_type = request.args.get("datasource_type")
+        datasource_types = request.args.getlist("datasource_type")
         page, per_page = pagination_args(request)
         search_query, search_filter = make_search_filter(request, DataSource.name)
 
         filters = [DataSource.active == True]  # noqa: E712
         if search_filter is not None:
             filters.append(search_filter)
-        if datasource_type is not None:
-            filters.append(DataSource.connection_type == datasource_type)
+        if datasource_types:
+            filters.append(DataSource.connection_type.in_(datasource_types))
 
         data_sources_paginated: Pagination = (
             DataSource.query.filter(*filters)

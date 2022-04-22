@@ -21,15 +21,28 @@ blueprint = Blueprint("alert", __name__)
 logger = logging.getLogger(__name__)
 
 
+TRUE_VALUES = {"true", "True", "1", True}
+
+
 @blueprint.route("/", methods=["GET"])  # TODO: Remove this
 @blueprint.route("", methods=["GET"])
 def list_alert():
     """List the alert data."""
+    channel_to_filter = request.args.get("channel")
+    active_to_filter = request.args.get("active")
     page, per_page = pagination_args(request)
     search_query, search_filter = make_search_filter(request, Alert.alert_name)
 
+    filters = []
+    if search_filter is not None:
+        filters.append(search_filter)
+    if channel_to_filter is not None:
+        filters.append(Alert.alert_channel == channel_to_filter)
+    if active_to_filter is not None:
+        filters.append(Alert.active == (active_to_filter in TRUE_VALUES))
+
     alerts_paginated = get_alert_list(
-        page_num_size=(page, per_page), extra_filters=(search_filter,)
+        page_num_size=(page, per_page), extra_filters=filters
     )
 
     return jsonify(

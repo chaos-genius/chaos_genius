@@ -118,12 +118,15 @@ def kpi():
 
     elif request.method == "GET":
         dashboard_id = request.args.get("dashboard_id")
+        datasource_type = request.args.get("datasource_type")
         page, per_page = pagination_args(request)
         search_query, search_filter = make_search_filter(request, Kpi.name)
 
         filters = [Kpi.active == True]  # noqa: E712
         if search_filter is not None:
             filters.append(search_filter)
+        if datasource_type is not None:
+            filters.append(DataSource.connection_type == datasource_type)
 
         if dashboard_id:
             dashboard_id = int(dashboard_id)

@@ -100,8 +100,15 @@ def data_source():
         filters = [DataSource.active == True]  # noqa: E712
         if search_filter is not None:
             filters.append(search_filter)
-        if datasource_types:
-            filters.append(DataSource.connection_type.in_(datasource_types))
+        if datasource_types and datasource_types!=[""]:
+            filters.append(DataSource.connection_type.in_(
+                    [
+                        source_type
+                        for datasource_type in datasource_types
+                        for source_type in datasource_type.split(",")
+                    ]
+                )
+            )
 
         data_sources_paginated: Pagination = (
             DataSource.query.filter(*filters)

@@ -36,14 +36,22 @@ def list_alert():
     filters = []
     if search_filter is not None:
         filters.append(search_filter)
-    if channels_to_filter:
-        filters.append(Alert.alert_channel.in_(channels_to_filter))
-    if actives_to_filter:
+    if channels_to_filter and channels_to_filter!=[""]:
+        filters.append(Alert.alert_channel.in_(
+                [
+                    channel_filter
+                    for channel_to_filter in channels_to_filter
+                    for channel_filter in channel_to_filter.split(",")
+                ]
+            )
+        )
+    if actives_to_filter and actives_to_filter!=[""]:
         filters.append(
             Alert.active.in_(
                 [
-                    active_to_filter in TRUE_VALUES
+                    active_filter in TRUE_VALUES
                     for active_to_filter in actives_to_filter
+                    for active_filter in active_to_filter.split(",")
                 ]
             )
         )

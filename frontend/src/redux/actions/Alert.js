@@ -1,6 +1,7 @@
 import {
   ALERT_EMAIL_URL,
   ALERT_LIST_URL,
+  attachParams,
   BASE_URL,
   CHANNEL_CONFIGURATION_URL,
   CREATE_KPI_ALERT_URL,
@@ -9,7 +10,9 @@ import {
   GET_KPI_ALERT_BY_ID_URL,
   KPI_ALERT_META_INFO_URL,
   SLACK_META_INFO_URL,
-  UPDATE_KPI_ALERT_URL
+  UPDATE_KPI_ALERT_URL,
+  ALERT_CHANNEL_FOR_FILTER,
+  ALERT_STATUS_FOR_FILTER
 } from '../../utils/url-helper';
 
 import { getRequest, postRequest, putRequest } from '../../utils/http-helper';
@@ -53,7 +56,11 @@ import {
   KPIALERTENABLEREQUEST,
   KPIALERTDELETEREQUEST,
   KPIALERTDELETERESPONSE,
-  KPIALERTDELETEFAILURE
+  KPIALERTDELETEFAILURE,
+  ALERTCHANNELFORFILTERSUCCESS,
+  ALERTCHANNELFORFILTERFAILURE,
+  ALERTSTATUSFORFILTERSUCCESS,
+  ALERTSTATUSFORFILTERFAILURE
 } from './ActionConstants';
 
 export const getAlertEmailRequest = () => {
@@ -250,16 +257,17 @@ export const getAllAlertSuccess = (response) => {
   };
 };
 
-export const getAllAlerts = () => {
+export const getAllAlerts = (pgInfo) => {
   return async (dispatch) => {
     dispatch(getAllAlertRequest());
+    const url = attachParams(ALERT_LIST_URL, pgInfo);
     const { data, error, status } = await getRequest({
-      url: ALERT_LIST_URL
+      url: url
     });
     if (error) {
       dispatch(getAllAlertFailure());
     } else if (data && status === 200) {
-      dispatch(getAllAlertSuccess(data.data));
+      dispatch(getAllAlertSuccess(data));
     }
   };
 };
@@ -472,24 +480,24 @@ export const kpiAlertEnable = (id) => {
   };
 };
 
-export const kpiAlertDeleteRequest = () =>{
+export const kpiAlertDeleteRequest = () => {
   return {
     type: KPIALERTDELETEREQUEST
-  }
-}
+  };
+};
 
-export const kpiAlertDeleteFailure = () =>{
+export const kpiAlertDeleteFailure = () => {
   return {
     type: KPIALERTDELETEFAILURE
-  }
-}
+  };
+};
 
-export const kpiAlertDeleteSuccess = (response) =>{
+export const kpiAlertDeleteSuccess = (response) => {
   return {
     type: KPIALERTDELETERESPONSE,
     data: response
-  }
-}
+  };
+};
 
 export const kpiAlertDeleteById = (id) => {
   return async (dispatch) => {
@@ -503,4 +511,56 @@ export const kpiAlertDeleteById = (id) => {
       dispatch(kpiAlertDeleteSuccess(data));
     }
   };
-}
+};
+
+export const alertChannelForFilterFailure = () => {
+  return {
+    type: ALERTCHANNELFORFILTERFAILURE
+  };
+};
+
+export const alertChannelForFilterSuccess = (response) => {
+  return {
+    type: ALERTCHANNELFORFILTERSUCCESS,
+    data: response.data
+  };
+};
+
+export const getAlertChannelForFilter = () => {
+  return async (dispatch) => {
+    const { data, error, status } = await getRequest({
+      url: ALERT_CHANNEL_FOR_FILTER
+    });
+    if (error) {
+      dispatch(alertChannelForFilterFailure());
+    } else if (data && status === 200) {
+      dispatch(alertChannelForFilterSuccess(data));
+    }
+  };
+};
+
+export const alertStatusForFilterSuccess = (response) => {
+  return {
+    type: ALERTSTATUSFORFILTERSUCCESS,
+    data: response.data
+  };
+};
+
+export const alertStatusForFilterFailure = () => {
+  return {
+    type: ALERTSTATUSFORFILTERFAILURE
+  };
+};
+
+export const getAlertStatusForFilter = () => {
+  return async (dispatch) => {
+    const { data, error, status } = await getRequest({
+      url: ALERT_STATUS_FOR_FILTER
+    });
+    if (error) {
+      dispatch(alertStatusForFilterFailure());
+    } else if (data && status === 200) {
+      dispatch(alertStatusForFilterSuccess(data));
+    }
+  };
+};

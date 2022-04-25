@@ -13,7 +13,10 @@ import DataSourceTable from '../../components/DataSourceTable';
 
 import './datasource.scss';
 
-import { getAllDataSources } from '../../redux/actions';
+import {
+  getAllDataSources,
+  getAllDataSourcesForFilter
+} from '../../redux/actions';
 import store from '../../redux/store';
 
 const RESET_ACTION = {
@@ -31,10 +34,19 @@ const DataSource = () => {
   const [dataSourceFilter, setDataSourceFilter] = useState([]);
   const [data, setData] = useState(false);
   const [filterData, setFilterData] = useState([]);
-  const { isLoading, dataSourcesList } = useSelector(
+  const [pgInfo, setPgInfo] = useState({ page: 1, per_page: 5, search: '' });
+  const [datasourceType, setDatasourceType] = useState([]);
+  const [pages, setPages] = useState({});
+  const { isLoading, dataSourcesList, pagination } = useSelector(
     (state) => state.dataSource
   );
+  const { dataSourceType } = useSelector((state) => state.dataSource);
   const [dataSourceData, setDataSourceData] = useState(dataSourcesList);
+
+  useEffect(() => {
+    dispatch(getAllDataSourcesForFilter());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     store.dispatch(RESET_ACTION);
@@ -43,7 +55,7 @@ const DataSource = () => {
   }, [data]);
 
   const dispatchGetAllDataSources = () => {
-    dispatch(getAllDataSources());
+    dispatch(getAllDataSources(pgInfo));
   };
 
   useEffect(() => {
@@ -54,15 +66,39 @@ const DataSource = () => {
   }, [dataSourcesList]);
 
   useEffect(() => {
-    if (search !== '') {
-      searchDataSource();
-    } else if (filterData.length !== 0) {
+    if (dataSourceType && dataSourceType.length > 0) {
+      setDatasourceType(dataSourceType);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataSourceType]);
+
+  useEffect(() => {
+    if (filterData.length !== 0) {
       setDataSourceData(filterData);
     } else {
       setDataSourceData(dataSourcesList);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, dataSourcesList, filterData]);
+  }, [dataSourcesList, filterData]);
+
+  useEffect(() => {
+    setPgInfo({ ...pgInfo, page: 1, search });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
+
+  useEffect(() => {
+    if (pagination && pagination?.pages && +pagination.pages > 0) {
+      setPages(pagination);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pagination]);
+
+  useEffect(() => {
+    if (pgInfo.page > 0 && pgInfo.per_page > 0) {
+      setData((prev) => !prev);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pgInfo]);
 
   const searchDataSource = () => {
     const options = {
@@ -131,8 +167,10 @@ const DataSource = () => {
             <Filter
               datasource
               setSearch={setSearch}
+              search={search}
               setDataSourceFilter={setDataSourceFilter}
               datasourceList={dataSourcesList}
+              datasourceType={datasourceType}
             />
           </div>
           {/* table section */}
@@ -141,6 +179,9 @@ const DataSource = () => {
               tableData={dataSourceData}
               changeData={setData}
               search={search}
+              setPgInfo={setPgInfo}
+              pagination={pages}
+              pgInfo={pgInfo}
             />
           </div>
         </div>

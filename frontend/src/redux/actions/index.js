@@ -8,7 +8,8 @@ import {
   getDatasourceById,
   updateDatasourceById,
   setSyncSchema,
-  getTimeZones
+  getTimeZones,
+  getAllDataSourcesForFilter
 } from './DataSources';
 import {
   getAllKpiExplorer,
@@ -49,7 +50,9 @@ import {
   updateKpiAlert,
   kpiAlertDisable,
   kpiAlertEnable,
-  kpiAlertDeleteById
+  kpiAlertDeleteById,
+  getAlertChannelForFilter,
+  getAlertStatusForFilter
 } from './Alert';
 import {
   anomalyDetection,
@@ -64,7 +67,8 @@ import {
   getDashboardDelete,
   getCreateDashboard,
   getEditDashboard,
-  getUpdateDashboard
+  getUpdateDashboard,
+  getDashboardForFilter
 } from './DashboardHome';
 
 import {
@@ -142,5 +146,9 @@ export {
   getVersionSetting,
   getReportSettingTime,
   saveReportSettingTime,
-  setSyncSchema
+  setSyncSchema,
+  getAllDataSourcesForFilter,
+  getDashboardForFilter,
+  getAlertChannelForFilter,
+  getAlertStatusForFilter
 };

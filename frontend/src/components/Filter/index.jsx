@@ -137,10 +137,6 @@ const DataSourceFilter = ({
     setPgInfo({ ...pgInfo, page: 1, dashboard_id: selected });
   };
 
-  // const implementDashboardSearch = (e) => {
-  //   setDashboardSearch(e.target.value);
-  // };
-
   const debounce = (func) => debuncerReturn(func, 800);
 
   return (

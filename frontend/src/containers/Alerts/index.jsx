@@ -59,7 +59,7 @@ const Alerts = () => {
   const [alertSearch, setAlertSearch] = useState('');
   const [pgInfo, setPgInfo] = useState({
     page: 1,
-    per_page: 5,
+    per_page: 10,
     search: '',
     channel: [],
     active: []

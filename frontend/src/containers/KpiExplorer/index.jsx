@@ -38,7 +38,7 @@ const KpiExplorer = () => {
   const [dashboardSearch, setDashboardSearch] = useState('');
   const [pgInfo, setPgInfo] = useState({
     page: 1,
-    per_page: 5,
+    per_page: 10,
     search: '',
     dashboard_id: [],
     datasource_type: []

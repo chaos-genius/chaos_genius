@@ -16,7 +16,6 @@ import HumanReadableNumbers from '../HumanReadableNumbers';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { getHomeKpi } from '../../redux/actions';
-import Fuse from 'fuse.js';
 import Noresult from '../Noresult';
 import Homefilter from '../Homefilter';
 
@@ -67,7 +66,7 @@ const Kpihome = () => {
   const [kpiHomeData, setKpiHomeData] = useState(homeKpiData);
   const [kpiHomeloading, setKpiHomeLoading] = useState(homeKpiLoading);
   const [dashboard, setDashboard] = useState();
-  const [pgInfo, setPgInfo] = useState({ page: 1, per_page: 5, search: '' });
+  const [pgInfo, setPgInfo] = useState({ page: 1, per_page: 10, search: '' });
   const [pages, setPages] = useState({});
   const [timeCutOptions, setTimeCutOptions] = useState([]);
 

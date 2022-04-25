@@ -11,15 +11,15 @@ const Pagination = ({
 
   const per_page_options = [
     {
-      value: 5,
-      label: '5'
-    },
-    {
       value: 10,
       label: '10'
     },
-    { value: 15, label: '15' },
-    { value: 20, label: '20' }
+    {
+      value: 20,
+      label: '20'
+    },
+    { value: 40, label: '40' },
+    { value: 50, label: '50' }
   ];
 
   const per_page_index = per_page_options.findIndex((option) => {
@@ -42,7 +42,7 @@ const Pagination = ({
       l;
 
     for (let i = 1; i <= last; i++) {
-      if (i == 1 || i == last || (i >= left && i < right)) {
+      if (+i === 1 || +i === +last || (+i >= +left && +i < +right)) {
         range.push(i);
       }
     }
@@ -67,7 +67,7 @@ const Pagination = ({
     Number(pagination?.pages)
   );
 
-  pageArrays.map((pageItem) => {
+  pageArrays.forEach((pageItem) => {
     pageBtns.push(
       pageItem === '...' ? (
         '...'

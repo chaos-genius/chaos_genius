@@ -28,7 +28,7 @@ const DataSource = () => {
   const [dashboardSearch, setDashboardSearch] = useState('');
   const [pgInfo, setPgInfo] = useState({
     page: 1,
-    per_page: 5,
+    per_page: 10,
     search: '',
     datasource_type: []
   });

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -30,18 +30,19 @@ const SETTING_RESET = {
 const KpiExplorer = () => {
   const dispatch = useDispatch();
 
-  const location = useLocation();
-
-  const query = new URLSearchParams(location.search);
-
   const [kpiSearch, setKpiSearch] = useState('');
   const [data, setData] = useState(false);
-  const [kpiFilter, setKpiFilter] = useState([]);
   const [dashboard, setDashboard] = useState([]);
   const [datasourceType, setDatasourceType] = useState([]);
-  const [dashboardFilter, setDashboardFilter] = useState([]);
-  const [filterData, setFilterData] = useState([]);
-  const [pgInfo, setPgInfo] = useState({ page: 1, per_page: 5, search: '' });
+  const [dashboardTypeList, setDashboardTypeList] = useState([]);
+  const [dashboardSearch, setDashboardSearch] = useState('');
+  const [pgInfo, setPgInfo] = useState({
+    page: 1,
+    per_page: 5,
+    search: '',
+    dashboard_id: [],
+    datasource_type: []
+  });
   const { isLoading, kpiExplorerList, pagination } = useSelector(
     (state) => state.kpiExplorer
   );
@@ -74,21 +75,14 @@ const KpiExplorer = () => {
   useEffect(() => {
     if (dashboardTypes && dashboardTypes.length > 0) {
       setDashboard(dashboardTypes);
+      setDashboardTypeList(dashboard);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dashboardTypes]);
 
   const dispatchGetAllKpiExplorer = () => {
     dispatch(getAllKpiExplorer(pgInfo));
   };
-
-  useEffect(() => {
-    if (query.getAll('datasourcetype').length !== 0 && kpiExplorerList) {
-      setKpiFilter(query.getAll('datasourcetype'));
-    } else if (query.getAll('dashboard').length !== 0 && kpiExplorerList) {
-      setDashboardFilter(query.getAll('dashboard'));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpiExplorerList]);
 
   useEffect(() => {
     if (pagination && pagination?.pages && +pagination.pages > 0) {
@@ -105,76 +99,16 @@ const KpiExplorer = () => {
   }, [pgInfo]);
 
   useEffect(() => {
-    if (filterData && filterData.length !== 0) {
-      setKpiExplorerData(filterData);
-    } else if (kpiExplorerList) {
+    if (kpiExplorerList) {
       setKpiExplorerData(kpiExplorerList);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpiExplorerList, filterData]);
+  }, [kpiExplorerList]);
 
   useEffect(() => {
     setPgInfo({ ...pgInfo, page: 1, search: kpiSearch });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSearch]);
-
-  useEffect(() => {
-    const fetchFilter = () => {
-      var arr = [];
-      if (kpiFilter.length === 0 && dashboardFilter.length === 0) {
-        setFilterData(kpiExplorerList);
-      } else if (kpiFilter.length !== 0 && dashboardFilter.length === 0) {
-        kpiFilter &&
-          kpiFilter.forEach((data) => {
-            kpiExplorerList &&
-              kpiExplorerList.forEach((list) => {
-                if (
-                  list.data_source.connection_type.toLowerCase() ===
-                  data.toLowerCase()
-                ) {
-                  arr.push(list);
-                }
-              });
-          });
-        setFilterData(arr);
-      } else if (dashboardFilter.length !== 0 && kpiFilter.length === 0) {
-        dashboardFilter &&
-          dashboardFilter.forEach((data) => {
-            kpiExplorerList &&
-              kpiExplorerList.forEach((list) => {
-                list.dashboards.forEach((value) => {
-                  if (data.toString() === value.id.toString()) {
-                    arr.push(list);
-                  }
-                });
-              });
-          });
-        setFilterData(arr);
-      } else if (dashboardFilter.length !== 0 && kpiFilter.length !== 0) {
-        dashboardFilter &&
-          dashboardFilter.forEach((dashboard) => {
-            kpiFilter &&
-              kpiFilter.forEach((kpi) => {
-                kpiExplorerList &&
-                  kpiExplorerList.forEach((list) => {
-                    list.dashboards.forEach((value) => {
-                      if (
-                        list.data_source.connection_type.toLowerCase() ===
-                          kpi.toLowerCase() &&
-                        value.id.toString() === dashboard.toString()
-                      ) {
-                        arr.push(list);
-                      }
-                    });
-                  });
-              });
-          });
-        setFilterData(arr);
-      }
-    };
-    fetchFilter();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpiFilter, dashboardFilter]);
 
   if (isLoading) {
     return (
@@ -198,7 +132,11 @@ const KpiExplorer = () => {
           </div>
         </div>
 
-        {kpiExplorerList && kpiExplorerList.length === 0 && kpiSearch === '' ? (
+        {kpiExplorerList &&
+        kpiExplorerList.length === 0 &&
+        kpiSearch === '' &&
+        pgInfo?.dashboard_id === [] &&
+        pgInfo?.datasource_type === [] ? (
           <div className="empty-dashboard-container">
             <EmptyKPI />
           </div>
@@ -210,13 +148,17 @@ const KpiExplorer = () => {
               <div className="filter-section">
                 <Filter
                   setKpiSearch={setKpiSearch}
-                  setKpiFilter={setKpiFilter}
                   kpiList={kpiExplorerList}
-                  setDashboardFilter={setDashboardFilter}
                   dashboard={dashboard}
                   datasourceType={datasourceType}
                   kpiSearch={kpiSearch}
+                  setPgInfo={setPgInfo}
+                  pgInfo={pgInfo}
                   kpi={true}
+                  dashboardTypeList={dashboardTypeList}
+                  setDashboardTypeList={setDashboardTypeList}
+                  dashboardSearch={dashboardSearch}
+                  setDashboardSearch={setDashboardSearch}
                 />
               </div>
               {/* table section */}

@@ -13,24 +13,26 @@ const DataSourceFilter = ({
   search,
   setSearch,
   setKpiSearch,
-  setKpiFilter,
-  setDataSourceFilter,
   kpiList,
   kpiSearch,
-  setDashboardFilter,
   dashboard,
   datasourceType,
-  kpi
+  kpi,
+  pgInfo,
+  setPgInfo,
+  dashboardTypeList,
+  setDashboardTypeList,
+  dashboardSearch,
+  setDashboardSearch
 }) => {
   const location = useLocation();
   const history = useHistory();
   const query = new URLSearchParams(location.search);
-  const [dashboardTypeList, setDashboardTypeList] = useState(dashboard);
-  const [checked, setChecked] = useState([]);
-  const [dashboardFilterList, setDashboardFilterList] = useState([]);
+  const [checked, setChecked] = useState(pgInfo?.datasource_type);
+  const [dashboardFilterList, setDashboardFilterList] = useState(
+    pgInfo?.dashboard_id
+  );
   const [searchText, setSearchText] = useState(datasource ? search : kpiSearch);
-  const [dashboardSearch, setDashboardSearch] = useState('');
-
   const onSearch = (e) => {
     if (datasource) {
       setSearch(e.target.value);
@@ -46,35 +48,32 @@ const DataSourceFilter = ({
   };
 
   useEffect(() => {
-    if (query.getAll('datasourcetype').length !== 0) {
-      setChecked(query.getAll('datasourcetype'));
+    if (query.getAll('datasource_type').length !== 0) {
+      setChecked(query.getAll('datasource_type'));
     }
-    if (query.getAll('dashboard').length !== 0) {
-      setDashboardFilterList(query.getAll('dashboard'));
+    if (query.getAll('dashboard_id').length !== 0) {
+      setDashboardFilterList(query.getAll('dashboard_id'));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (datasource) {
-      setDataSourceFilter(checked);
       let params = new URLSearchParams();
       for (const key of checked) {
-        params.append('datasourcetype', key.toLowerCase());
+        params.append('datasource_type', key);
       }
       history.push({
         pathname: '/datasource',
         search: '?' + params.toString()
       });
     } else {
-      setKpiFilter(checked);
-      setDashboardFilter(dashboardFilterList);
       let params = new URLSearchParams();
       for (const key of checked) {
-        params.append('datasourcetype', key.toLowerCase());
+        params.append('datasource_type', key);
       }
       for (const key of dashboardFilterList) {
-        params.append('dashboard', key.toLowerCase());
+        params.append('dashboard_id', key);
       }
       history.push({
         pathname: '/kpiexplorer',
@@ -87,91 +86,60 @@ const DataSourceFilter = ({
   useEffect(() => {
     if (dashboardSearch !== '') {
       searchDashboardName();
+    } else if (dashboardSearch.trim() === '') {
+      setDashboardTypeList(dashboard);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dashboardSearch]);
 
   const searchDashboardName = () => {
-    let key = 'id';
     const options = {
       keys: ['label']
     };
 
     const fuse = new Fuse(dashboard, options);
-
     const result = fuse.search(dashboardSearch);
-
-    setDashboardTypeList([
-      ...new Map(result.map((item) => [item[key], item])).values()
-    ]);
+    setDashboardTypeList(result.map((value) => value.item));
   };
-
-  // useEffect(() => {
-  //   if (datasourceList) {
-  //     setDatasourceType([
-  //       ...new Set(datasourceList.map((item) => item.connection_type))
-  //     ]);
-  //   }
-  //   if (kpiData) {
-  //     setDatasourceType([
-  //       ...new Set(kpiList.map((item) => item.data_source.connection_type))
-  //     ]);
-  //     var unique = [];
-  //     kpiData.map((item) =>
-  //       item.dashboards.map((key) =>
-  //         unique.push({ name: key.name, id: key.id })
-  //       )
-  //     );
-  //     let key = 'id';
-
-  //     setDashboard([
-  //       ...new Map(unique.map((item) => [item[key], item])).values()
-  //     ]);
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [datasourceList, kpiData]);
 
   const onChangeFilter = (e) => {
     if (datasource) {
+      let selected = [];
       if (e.target.checked === true) {
-        let selected = checked.concat(e.target.name.toLowerCase());
-        setChecked(selected);
-        setDataSourceFilter(checked);
+        selected = checked.concat(e.target.name);
       } else if (e.target.checked === false) {
-        let selected = checked.filter(
-          (data) => data !== e.target.name.toLowerCase()
-        );
-        setChecked(selected);
+        selected = checked.filter((data) => data !== e.target.name);
       }
+      setChecked(selected);
+      setPgInfo({ ...pgInfo, page: 1, datasource_type: selected });
     } else {
+      let selected = [];
       if (e.target.checked === true) {
-        let selected = checked.concat(e.target.name.toLowerCase());
-        setChecked(selected);
-        setKpiFilter(checked);
+        selected = checked.concat(e.target.name);
       } else if (e.target.checked === false) {
-        let selected = checked.filter(
-          (data) => data !== e.target.name.toLowerCase()
-        );
-        setChecked(selected);
+        selected = checked.filter((data) => data !== e.target.name);
       }
+      setChecked(selected);
+      setPgInfo({ ...pgInfo, page: 1, datasource_type: selected });
     }
   };
 
   const onDashboardFilter = (e, type) => {
+    let selected = [];
     if (e.target.checked === true) {
-      let selected = dashboardFilterList.concat(type.id.toString());
-      setDashboardFilterList(selected);
+      selected = dashboardFilterList.concat(type.id.toString());
     } else if (e.target.checked === false) {
-      let selected = dashboardFilterList.filter(
+      selected = dashboardFilterList.filter(
         (data) => data !== type.id.toString()
       );
-      setDashboardFilterList(selected);
     }
+    setDashboardFilterList(selected);
+    setPgInfo({ ...pgInfo, page: 1, dashboard_id: selected });
   };
 
-  const implementDashboardSearch = (e) => {
-    setDashboardSearch(e.target.value);
-  };
+  // const implementDashboardSearch = (e) => {
+  //   setDashboardSearch(e.target.value);
+  // };
 
   const debounce = (func) => debuncerReturn(func, 800);
 
@@ -203,7 +171,8 @@ const DataSourceFilter = ({
               type="text"
               className="form-control h-40"
               placeholder="Search dashboard"
-              onChange={debounce(implementDashboardSearch)}
+              value={dashboardSearch}
+              onChange={(e) => setDashboardSearch(e.target.value)}
             />
             <span>
               <img src={Search} alt="Search Icon" />
@@ -251,7 +220,7 @@ const DataSourceFilter = ({
                     type="checkbox"
                     id={type.value}
                     name={type.value}
-                    checked={checked.includes(type.value.toLowerCase())}
+                    checked={checked.includes(type.value)}
                     onChange={(e) => onChangeFilter(e)}
                   />
                   <label className="form-check-label" htmlFor={type.label}>

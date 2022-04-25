@@ -1,27 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import Search from '../../assets/images/search.svg';
 import { debuncerReturn } from '../../utils/simple-debouncer';
 
 const AlertFilter = ({
   setAlertSearch,
-  setAlertFilter,
-  setAlertStatusFilter,
   alertSearch,
   channelType,
   channelStatus,
   setPgInfo,
   pgInfo
 }) => {
-  console.log(channelType);
   const [checked, setChecked] = useState(pgInfo?.channel);
-  const [statusChecked, setStatusChecked] = useState([]);
+  const [statusChecked, setStatusChecked] = useState(pgInfo?.active);
   const [searchText, setSearchText] = useState(alertSearch);
-  const [channelChecked, setChannelChecked] = useState(
+  const [channelChecked] = useState(
     channelType.length &&
       channelType.map((channel) => {
         const foundIndex = pgInfo?.channel?.findIndex((item) => {
           return item === channel.value.toLowerCase();
+        });
+        if (foundIndex > -1) {
+          return true;
+        }
+        return false;
+      })
+  );
+  const [activeChecked] = useState(
+    channelStatus.length &&
+      channelStatus.map((status) => {
+        const foundIndex = pgInfo?.active?.findIndex((item) => {
+          return item === status.value;
         });
         if (foundIndex > -1) {
           return true;
@@ -35,64 +44,34 @@ const AlertFilter = ({
 
   const debounce = (func) => debuncerReturn(func, 500);
 
-  // useEffect(() => {
-  //   //setAlertFilter(checked);
-  //   //setAlertStatusFilter(statusChecked);
-  //   //setPgInfo({ ...pgInfo, alertChannels: [] });
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  //   //console.log(checked);
-  //   // setPgInfo({
-  //   //   ...pgInfo,
-  //   //   channel: checked.map((item) => item.toLowerCase())
-  //   // });
-  // }, [checked]);
-
   const onChangeFilter = (e) => {
+    let selected = [];
     if (e.target.checked === true) {
-      let selected = checked ? checked.concat(e.target.id) : [e.target.id];
-      setChecked(selected);
-      //setAlertFilter(checked);
-      if (selected.length > 0) {
-        setPgInfo({
-          ...pgInfo,
-          channel: selected.map((item) => item.toLowerCase())
-        });
-      } else if (selected.length === 0) {
-        setPgInfo({
-          page: pgInfo.page,
-          per_page: pgInfo.per_page,
-          search: pgInfo.search,
-          active: pgInfo.active
-        });
-      }
+      selected = checked.concat(e.target.id);
     } else if (e.target.checked === false) {
-      let selected = checked.filter((data) => data !== e.target.id);
-      setChecked(selected);
-      if (selected.length > 0) {
-        setPgInfo({
-          ...pgInfo,
-          channel: selected.map((item) => item.toLowerCase())
-        });
-      } else if (selected.length === 0) {
-        setPgInfo({
-          page: pgInfo.page,
-          per_page: pgInfo.per_page,
-          search: pgInfo.search,
-          active: pgInfo.active
-        });
-      }
+      selected = checked.filter((data) => data !== e.target.id);
     }
+    setChecked(selected);
+    setPgInfo({
+      ...pgInfo,
+      page: 1,
+      channel: selected.map((item) => item.toLowerCase())
+    });
   };
 
-  const onChangeStatusFilter = (e) => {
+  const onChangeStatusFilter = (e, value) => {
+    let selected = [];
     if (e.target.checked === true) {
-      let selected = statusChecked.concat(e.target.name);
-      setStatusChecked(selected);
-      setAlertStatusFilter(statusChecked);
+      selected = statusChecked.concat(value);
     } else if (e.target.checked === false) {
-      let selected = statusChecked.filter((data) => data !== e.target.name);
-      setStatusChecked(selected);
+      selected = statusChecked.filter((data) => data !== value);
     }
+    setStatusChecked(selected);
+    setPgInfo({
+      ...pgInfo,
+      page: 1,
+      active: selected.map((item) => item)
+    });
   };
 
   return (
@@ -153,8 +132,9 @@ const AlertFilter = ({
                   className="form-check-input"
                   type="checkbox"
                   id={type.label}
+                  checked={activeChecked[index]}
                   name={type.label}
-                  onChange={(e) => onChangeStatusFilter(e)}
+                  onChange={(e) => onChangeStatusFilter(e, type.value)}
                 />
                 <label className="form-check-label" htmlFor={type.label}>
                   {type.label}

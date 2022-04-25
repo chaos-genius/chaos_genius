@@ -57,8 +57,6 @@ const Alerts = () => {
 
   const [alertData, setAlertData] = useState(alertList);
   const [alertSearch, setAlertSearch] = useState('');
-  const [alertFilter, setAlertFilter] = useState([]);
-  const [alertStatusFilter, setAlertStatusFilter] = useState([]);
   const [pgInfo, setPgInfo] = useState({
     page: 1,
     per_page: 5,
@@ -218,60 +216,6 @@ const Alerts = () => {
     });
   };
 
-  useEffect(() => {
-    const fetchFilter = () => {
-      var arr = [];
-      if (alertFilter.length === 0 && alertStatusFilter.length === 0) {
-        setAlertData(alertList);
-        //setPgInfo({ ...pgInfo, alertStatus: [], alertChannels: [] });
-      } else if (alertFilter.length === 0 && alertStatusFilter.length !== 0) {
-        alertStatusFilter.forEach((data) => {
-          alertList.forEach((list) => {
-            if (list.active && data === 'active') {
-              arr.push(list);
-            } else if (list.active === false && data === 'inactive') {
-              arr.push(list);
-            }
-          });
-        });
-        setAlertData(arr);
-      } else if (alertStatusFilter.length === 0 && alertFilter.length !== 0) {
-        alertFilter &&
-          alertFilter.forEach((data) => {
-            alertList.forEach((list) => {
-              if (list.alert_channel.toLowerCase() === data.toLowerCase()) {
-                arr.push(list);
-              }
-            });
-          });
-        setAlertData(arr);
-      } else if (alertStatusFilter.length !== 0 && alertFilter.length !== 0) {
-        alertStatusFilter.forEach((status) => {
-          alertFilter.forEach((channel) => {
-            alertList.forEach((list) => {
-              if (
-                list.active === true &&
-                status === 'active' &&
-                list.alert_channel.toLowerCase() === channel
-              ) {
-                arr.push(list);
-              } else if (
-                list.active === false &&
-                list.alert_channel === channel &&
-                status === 'inactive'
-              ) {
-                arr.push(list);
-              }
-            });
-          });
-        });
-        setAlertData(arr);
-      }
-    };
-    fetchFilter();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alertFilter, alertStatusFilter]);
-
   if (alertLoading) {
     return (
       <div className="load loader-page">
@@ -311,7 +255,11 @@ const Alerts = () => {
             </Link>
           </div>
         </div>
-        {alertList && alertList.length === 0 && alertSearch === '' ? (
+        {alertList &&
+        alertList.length === 0 &&
+        alertSearch === '' &&
+        pgInfo?.active === [] &&
+        pgInfo?.channel === [] ? (
           <div className="no-alert-container">
             <Noalert />
           </div>
@@ -322,12 +270,10 @@ const Alerts = () => {
             <div className="filter-section">
               <AlertFilter
                 setAlertSearch={setAlertSearch}
-                setAlertFilter={setAlertFilter}
                 channelType={channelType}
                 setPgInfo={setPgInfo}
                 pgInfo={pgInfo}
                 channelStatus={channelStatus}
-                setAlertStatusFilter={setAlertStatusFilter}
                 alertSearch={alertSearch}
               />
             </div>

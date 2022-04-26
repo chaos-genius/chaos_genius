@@ -54,7 +54,7 @@ Follow these steps if you want to make a code contribution to Chaos Genius.
 ## Development Workflow
 
 We support 3 different development workflows:
-- [Gitpod](#gitpod): easiest and fastest way to get started. Has some minor limitations but can be used in most cases.
+- [Gitpod](#gitpod): easiest and fastest way to get started. Has some minor [limitations](GITPOD.md#known-issues) but can be used in most cases.
 - [Docker Compose](#docker-compose): if you have Docker and docker-compose set up locally, this is the fastest way to get started on your local system.
 - [Local setup](#local-setup): if you prefer running it directly on your system (without layers like Docker), opt for this. It requires running a Postgres and a Redis server yourself and needs some set up.
 

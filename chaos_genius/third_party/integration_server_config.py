@@ -64,6 +64,7 @@ SOURCE_WHITELIST_AND_TYPE = {
     "e2d65910-8c8b-40a1-ae7d-ee2416b2bfa2": False,  # Snowflake
     "e87ffa8e-a3b5-f69c-9076-6011339de1f6": False,  # Redshift
     "5B45DB62-303C-4E70-92DA-419D3CDBD506": False,  # Druid
+    "ea6b0872-b25b-4591-8829-7e46d3276a5b": False,  # Trino
     # "29b409d9-30a5-4cc8-ad50-886eb846fea3", # Quickbooks
 }
 
@@ -116,6 +117,14 @@ DATABASE_CONFIG_MAPPER = {
         "username": "username",
         "password": "password",
         "db_type": "druid"
+    },
+    "ea6b0872-b25b-4591-8829-7e46d3276a5b": {
+        "host": "host",
+        "port": "port",
+        "username": "username",
+        "password": "password",
+        "catalog": "catalog",
+        "db_type": "trino"
     }
 }
 

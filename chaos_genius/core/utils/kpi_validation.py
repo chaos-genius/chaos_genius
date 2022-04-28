@@ -40,7 +40,7 @@ def validate_kpi(kpi_info: Dict[str, Any], check_tz_aware: bool = False) -> Tupl
     connection_info = DataSource.get_by_id(
         kpi_info["data_source"]
     ).as_dict
-    supports_date_string_parsing = connection_info["name"] == "Druid"
+    supports_date_string_parsing = connection_info["connection_type"] in {"Druid", "Trino"}
 
     status, message = _validate_kpi_from_df(
         df,

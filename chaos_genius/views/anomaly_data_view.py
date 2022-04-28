@@ -245,6 +245,74 @@ def kpi_subdim_anomaly(kpi_id):
     )
 
 
+@blueprint.route("/<int:kpi_id>/subdim-anomaly-filter-dropdown", methods=["GET"])
+def kpi_subdim_anomaly_filter_dropdown(kpi_id):
+    current_app.logger.info(f"Subdimension Anomaly Filter Dropdown for KPI ID: {kpi_id}")
+    query = (
+        db.session.query(
+            func.distinct(AnomalyDataOutput.series_type)
+        )
+        .filter(
+            (AnomalyDataOutput.kpi_id == kpi_id)
+            & (AnomalyDataOutput.anomaly_type == "subdim")
+        )
+    )
+
+    results = pd.read_sql(query.statement, query.session.bind)
+
+    return jsonify(
+        {
+            "data": results['distinct_1'].to_list(),
+        }
+    )
+
+
+@blueprint.route("/<int:kpi_id>/subdim-anomaly-filter", methods=["GET"])
+def kpi_subdim_anomaly_filter(kpi_id, subdims):
+    current_app.logger.info(f"Subdimension Anomaly Filter Started for KPI ID: {kpi_id}")
+    subdim_graphs = []
+    end_date = None
+    try:
+        kpi_info = get_kpi_data_from_id(kpi_id)
+        period = kpi_info["anomaly_params"]["anomaly_period"]
+        hourly = kpi_info["anomaly_params"]["frequency"] == "H"
+        end_date = get_anomaly_output_end_date(kpi_info)
+        graph_xlims = get_anomaly_graph_x_lims(end_date, period, hourly)
+
+        # TODO: Remove until before for loop. For testing purpose.
+        # query = (
+        #     db.session.query(
+        #         func.distinct(AnomalyDataOutput.series_type)
+        #     )
+        #     .filter(
+        #         (AnomalyDataOutput.kpi_id == kpi_id)
+        #         & (AnomalyDataOutput.anomaly_type == "subdim")
+        #     )
+        # )
+        # results = pd.read_sql(query.statement, query.session.bind)
+        # subdims = results['distinct_1'].to_list()
+
+        for subdim in subdims:
+            anom_data = get_dq_and_subdim_data(
+                kpi_id, end_date, "subdim", subdim, period
+            )
+            anom_data["x_axis_limits"] = graph_xlims
+            subdim_graphs.append(anom_data)
+
+        current_app.logger.info(
+            f"Subdimension Anomaly Filter Retrieval Completed for KPI ID: {kpi_id}"
+        )
+    except:  # noqa: E722
+        current_app.logger.error("Error in Subdimension Anomaly Filter Retrieval", exc_info=1)
+
+    return jsonify(
+        {
+            "data": subdim_graphs,
+            "msg": "",
+        }
+    )
+
+
 @blueprint.route("/anomaly-params/meta-info", methods=["GET"])
 def kpi_anomaly_params_meta():
     # TODO: Move this dict into the corresponding data model

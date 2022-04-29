@@ -16,6 +16,8 @@ from chaos_genius.controllers.dashboard_controller import (
     get_mapper_obj_by_dashboard_ids,
     get_mapper_obj_by_kpi_ids,
 )
+from sqlalchemy.orm.attributes import flag_modified
+
 from chaos_genius.controllers.kpi_controller import (
     delete_anomaly_output_for_kpi,
     delete_rca_output_for_kpi,
@@ -322,6 +324,28 @@ def edit_kpi(kpi_id):
                     run_analytics = True
                 if chech_editable_field(meta_info, key):
                     setattr(kpi_obj, key, value)
+            # check if dimensions are editted
+            if "dimensions" in data.keys():
+                # if empty, do not run anomaly on subdim
+                if len(data["dimensions"]) < 1:
+                    run_optional = {
+                        "data_quality": True,
+                        "overall": True,
+                        "subdim": False
+                    }
+                else:
+                    run_optional = {
+                        "data_quality": True,
+                        "overall": True,
+                        "subdim": True
+                    }
+
+                if "run_optional" not in kpi_obj.anomaly_params or \
+                    run_optional["subdim"] != kpi_obj.anomaly_params["run_optional"]["subdim"]:
+                    kpi_obj.anomaly_params["run_optional"] = run_optional
+                    flag_modified(kpi_obj, "anomaly_params")
+
+
             if run_analytics:
                 logger.info(
                     "Deleting analytics output and re-running tasks since KPI was "

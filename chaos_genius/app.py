@@ -56,7 +56,7 @@ def create_app(config_object="chaos_genius.settings"):
 
 def configure_cors(app):
     """Configure cross origin request sharing."""
-    if app.config['CORS_ENABLED']:
+    if app.config["CORS_ENABLED"]:
         CORS(app)
     return None
 

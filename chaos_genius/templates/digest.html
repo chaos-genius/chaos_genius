@@ -135,9 +135,6 @@
                                 <thead class="bg-gray-900">
                                     <tr>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                            Triggered Alert ID
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
                                             Alert Name (ID)
                                         </th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
@@ -237,6 +234,10 @@
  
     .toggle-checkbox.hidden {
         display: none;
+    }
+
+    .hidden {
+        display: none !important;
     }
 
     .search-container{
@@ -340,18 +341,17 @@
     <script src="https://unpkg.com/simple-datatables@3.2.0/dist/umd/simple-datatables.js" type="text/javascript"></script>
     <script>
         const dataAnomaly = [
-            {% for triggered_alert in anomaly_alerts_data %}
-            {% for point in triggered_alert.alert_metadata["alert_data"] %}
-                [ "{{ triggered_alert.alert_name }} ({{ triggered_alert.alert_conf_id }})",
-                  "{{ triggered_alert.kpi_name }} ({{ triggered_alert.kpi_id }})",
-                  "{{ point['Dimension'] }}",
-                  "{{ point['Value'] }}",
-                  "{{ point['Expected Value'] }}",
-                  `{% if point['Severity Score'] >= 65 %}
+            {% for point in anomaly_alerts_data %}
+                [ "{{ point.alert_name }} ({{ point.alert_id }})",
+                  "{{ point.kpi_name }} ({{ point.kpi_id }})",
+                  "{{ point.series_type }}",
+                  "{{ point.y }}",
+                  "{{ point.expected_value }}",
+                  `{% if point.severity >= 65 %}
                         <span style='color:#FF2C1F;font-weight: light' class="severity"> <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" style="display: inline!important;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 </svg>
-                    {% elif point['Severity Score'] >= 25 %}
+                    {% elif point.severity >= 25 %}
                         <span style='color:#F57C00;font-weight: light' class="severity"> <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" style="display: inline!important;" viewBox="0 0 24 24" stroke="currentColor">
   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 </svg>
@@ -360,28 +360,24 @@
   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 </svg>
                     {% endif %}
-                    
-                        {{ point['Severity Score'] }}</span>`
+                        {{ point.severity }}</span>`
                     ,
-                  "{{ point['Time of Occurrence'] }}",
+                  "{{ point.readable_data_timestamp }}",
                   [
-                      {% for email in (triggered_alert.alert_channel_conf or []) %}
+                      {% for email in (point.alert_channel_conf or []) %}
                       "{{ email }}",
                       {% endfor %}
                   ],
-                  "{{ triggered_alert.alert_channel }}",
-                  {% if 'nl_message' not in point %}
-                    "Not available for older triggered alerts",
-                  {% elif point['nl_message'].startswith("Increased") %}
-                    "{{ point['nl_message'][:len('Increased by')] }} <span style=\"color: rgb(96, 202, 154); font-weight: 600;\">{{point['nl_message'][len('Increased by'):]}}</span>",
-                  {% elif point['nl_message'].startswith("Decreased") %}
-                    "{{ point['nl_message'][:len('Decreased by')] }} <span style=\"color: #FF2C1F; font-weight: 600;\">{{point['nl_message'][len('Decreased by'):]}}</span>",
+                  "{{ point.alert_channel }}",
+                  {% if point.change_message.startswith("Increased") %}
+                    "{{ point.change_message[:len('Increased by')] }} <span style=\"color: rgb(96, 202, 154); font-weight: 600;\">{{point.change_message[len('Increased by'):]}}</span>",
+                  {% elif point.change_message.startswith("Decreased") %}
+                    "{{ point.change_message[:len('Decreased by')] }} <span style=\"color: #FF2C1F; font-weight: 600;\">{{point.change_message[len('Decreased by'):]}}</span>",
                   {% else %}
-                    "{{ point['nl_message'] }}",
+                    "{{ point.change_message }}",
                   {% endif %}
-                  "{{ point['date_only'] }}",
+                  "{{ point.date_only }}",
                 ],
-            {% endfor %}
             {% endfor %}
         ];
 
@@ -415,7 +411,6 @@
         const dataEvent = [
             {% for triggered_alert in event_alerts_data %}
             [
-                "{{ triggered_alert.id }}",
                 "{{ triggered_alert.alert_name }} ({{ triggered_alert.alert_conf_id }})",
                 "{{ triggered_alert.alert_message }}",
                 "{{ triggered_alert.created_at }}",
@@ -425,6 +420,7 @@
                     "{{ email }}",
                     {% endfor %}
                 ],
+                "{{ triggered_alert.date_only }}"
             ],
             {% endfor %}
         ]
@@ -434,10 +430,11 @@
             }
         });
         dataTableEvent.origData = dataEvent;
-        dataTableEvent.alertColIndex = 1;
-        dataTableEvent.emailColIndex = 5;
-        dataTableEvent.channelColIndex = 4;
-        dataTableEvent.columns().hide([dataTableEvent.emailColIndex, dataTableEvent.channelColIndex]);
+        dataTableEvent.alertColIndex = 0;
+        dataTableEvent.emailColIndex = 4;
+        dataTableEvent.channelColIndex = 3;
+        dataTableEvent.dateOnlyColIndex = 5;
+        dataTableEvent.columns().hide([dataTableEvent.emailColIndex, dataTableEvent.channelColIndex, dataTableEvent.dateOnlyColIndex]);
         dataTables.push(dataTableEvent);
         {% endif %}
 
@@ -527,6 +524,7 @@
         }
     </script>
 
+    <!-- script for anomaly and event alert tabs -->
     <script>
         let tabsContainer = document.querySelector("#tabs");
 
@@ -537,6 +535,18 @@
             e.preventDefault();
 
             let tabName = this.getAttribute("href");
+            console.log("switching to tab", tabName);
+
+            // hide "Show subdims" and "KPI names" filter on event alert tab
+            const kpiFilter = document.querySelector(".search-box-container #kpi-select").parentElement;
+            const showSubdims = document.querySelector(".toggle #subdims-check").parentElement;
+            if (tabName === "#event-alerts") {
+                kpiFilter.classList.add("hidden");
+                showSubdims.classList.add("hidden");
+            } else if (tabName === "#anomaly-alerts") {
+                kpiFilter.classList.remove("hidden");
+                showSubdims.classList.remove("hidden");
+            }
 
             let tabContents = document.getElementById("tab-contents");
 

@@ -52,18 +52,20 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
   const onNavigate = () => {
     if (text === 'kpi') {
       store.dispatch(KPI_RESET);
-      history.push('/dashboard');
+      history.push('/onboarding/3');
     } else if (text === 'datasource') {
       store.dispatch(RESET_ACTION);
       history.push('/onboarding/2');
     } else if (text === 'dashboard') {
       store.dispatch(DASHBOARD_KPILIST_RESET);
       store.dispatch(DASHBOARD_RESET);
-
       history.push('/onboarding/4');
+    } else if (text === 'activateanalytics') {
+      store.dispatch(SETTING_RESET);
+      history.push('/dashboard/0/deepdrills');
     } else {
       store.dispatch(SETTING_RESET);
-      history.push('/dashboard/deepdrills');
+      history.push('/dashboard/');
     }
     setIsOpen(false);
   };
@@ -80,7 +82,7 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
       history.push('/dashboard');
     } else if (text === 'activateanalytics') {
       store.dispatch(SETTING_RESET);
-      history.push('/dashboard/deepdrills');
+      history.push('/dashboard/');
     }
   };
   return (
@@ -100,17 +102,17 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
               : text === 'datasource'
               ? 'Added a Data Source'
               : text === 'activateanalytics'
-              ? 'Added a Activate Analytics'
-              : 'created a Dashboard'}
+              ? 'Activated Analytics'
+              : 'Created a Dashboard'}
           </h3>
           <p>
-            {text === 'kpi'
-              ? 'Next step is to create dashboards for monitoring.'
-              : text === 'datasource'
-              ? 'Next step is to set up KPI definitions.'
+            {text === 'datasource'
+              ? 'Next step is to set up KPI definitions.Please wait for a few minutes for data sync to complete before adding a KPI'
+              : text === 'kpi'
+              ? 'Next step is to Activate the Analytics.'
               : text === 'activateanalytics'
-              ? 'Next step is to create dashboards for monitoring.'
-              : 'Next step is to Activate the Analytics'}
+              ? "Let's check the Dashboard for Analytics."
+              : 'Check the Dashboard for Analytics'}
           </p>
           <div className="next-step-navigate">
             <button className="btn black-button" onClick={() => onNavigate()}>
@@ -120,7 +122,7 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
                   : text === 'datasource'
                   ? 'Add KPI'
                   : text === 'activateanalytics'
-                  ? 'Go to Dashboard'
+                  ? 'Go to Analytics'
                   : 'Go to Dashboard'}
               </span>
             </button>
@@ -132,8 +134,8 @@ const ModalPopUp = ({ isOpen, setIsOpen, text }) => {
                 : text === 'datasource'
                 ? 'View added data source'
                 : text === 'activateanalytics'
-                ? 'View Activate Analytics'
-                : 'View created dashboard'}
+                ? 'View Dashboard'
+                : 'View Dashboard'}
             </label>
           </div>
         </div>

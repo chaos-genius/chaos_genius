@@ -1,6 +1,5 @@
 [flake8]
 max-line-length = 88
-extend-ignore = E203, E501, D203
 exclude =
     .git,
     __pycache__,
@@ -9,3 +8,7 @@ exclude =
     sandbox
 max-complexity = 10
 docstring-convention = google
+classmethod-decorators =
+    classmethod
+    validator
+    root_validator

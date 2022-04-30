@@ -1,5 +1,5 @@
 import React from 'react';
-
+import slacksmall from '../../assets/images/slack-small-logo.svg';
 import './faq.scss';
 
 const AddFaq = () => {
@@ -109,7 +109,14 @@ const AddFaq = () => {
       </div>
       <div className="faq__support-content">
         <p>
-          Need help? Feel free to join our community Slack and ping us there!
+          Stuck somewhere? Feel free to reach out on our{' '}
+          <a
+            href="https://join.slack.com/t/chaosgenius/shared_invite/zt-140042uac-rrm~xbx9o_aydi6PTmp_Mg"
+            target="_blank"
+            rel="noopener noreferrer">
+            Community Slack{' '}
+            <img src={slacksmall} className="in-active" alt="Slack" />
+          </a>
         </p>
       </div>
     </div>

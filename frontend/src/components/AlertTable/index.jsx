@@ -216,7 +216,7 @@ const AlertTable = ({ alertData, alertSearch }) => {
         </div>
         <div className="modal-body">
           <div className="modal-contents">
-            <h3>Delete {data.name} ?</h3>
+            <h3>Delete {data?.alert_name} ?</h3>
             <p>Are you sure you want to delete </p>
             <div className="next-step-navigate">
               <button className="btn white-button" onClick={closeModal}>

@@ -109,7 +109,7 @@ ipython_config.py
 __pypackages__/
 
 # Celery stuff
-celerybeat-schedule
+celerybeat-schedule*
 celerybeat.pid
 
 # SageMath parsed files
@@ -346,6 +346,6 @@ docs/yarn-error.log*
 .integrations.json
 .connectors
 
-# IDE configuration
-.idea/* # IntelliJ IDEA
-.vscode/* # Visual Studio Code
+########### Gitpod #########################
+
+dump.rdb

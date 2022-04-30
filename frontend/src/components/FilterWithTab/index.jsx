@@ -46,7 +46,7 @@ const DashboardFilter = ({ kpi, data, setActive, tabs, dashboard }) => {
       const options = {
         keys: ['name']
       };
-      const fuse = new Fuse(listData, options);
+      const fuse = new Fuse(searchData, options);
       const result = fuse.search(e.target.value);
       setListData(
         result.map((item) => {

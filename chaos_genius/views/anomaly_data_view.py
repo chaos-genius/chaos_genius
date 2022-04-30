@@ -1,34 +1,37 @@
 # -*- coding: utf-8 -*-
 """anomaly data view."""
-from datetime import date, datetime, timedelta
+import csv
+import io
 import time
+from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple, cast
 
-from flask import Blueprint, current_app, jsonify, request
-from sqlalchemy import func, delete
 import pandas as pd
+from flask import Blueprint, current_app, jsonify, request, send_file
+from sqlalchemy import func
 from sqlalchemy.orm.attributes import flag_modified
+
+from chaos_genius.controllers.kpi_controller import (
+    delete_anomaly_output_for_kpi,
+    get_kpi_data_from_id,
+)
 from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
+from chaos_genius.core.rca.rca_utils.string_helpers import (
+    convert_query_string_to_user_string,
+)
 from chaos_genius.core.utils.round import round_number
+from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
+from chaos_genius.databases.models.kpi_model import Kpi
+from chaos_genius.databases.models.rca_data_model import RcaData
+from chaos_genius.extensions import db
 from chaos_genius.settings import (
     TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN,
     TOP_SUBDIMENSIONS_FOR_ANOMALY,
-)
-
-from chaos_genius.extensions import db
-from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
-from chaos_genius.databases.models.rca_data_model import RcaData
-from chaos_genius.databases.models.kpi_model import Kpi
-from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
-
-from chaos_genius.core.rca.rca_utils.string_helpers import (
-    convert_query_string_to_user_string,
 )
 from chaos_genius.utils.datetime_helper import (
     get_datetime_string_with_tz,
     get_lastscan_string_with_tz,
 )
-
 
 blueprint = Blueprint("anomaly_data", __name__)
 
@@ -47,6 +50,18 @@ def kpi_anomaly_detection(kpi_id):
     end_date = None
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
+
+        if not kpi_info["anomaly_params"]:
+            current_app.logger.info(f"Anomaly settings not configured for KPI ID: {kpi_id}")
+            return jsonify(
+                {
+                    "data": None,
+                    "msg": "",
+                    "anomaly_end_date": None,
+                    "last_run_time_anomaly": None,
+                }
+            )
+
         period = kpi_info["anomaly_params"]["anomaly_period"]
         hourly = kpi_info["anomaly_params"]["frequency"] == "H"
 
@@ -302,6 +317,38 @@ def kpi_anomaly_params(kpi_id: int):
     err, new_kpi = update_anomaly_params(
         kpi, new_anomaly_params, check_editable=not is_first_time
     )
+    run_anomaly = False
+    # if anomaly params are updated, run anomaly again.
+    # if only scheduled time is updated, do not run anomaly again.
+    if not is_first_time:
+        if (
+            "scheduler_params_time" not in new_anomaly_params
+            and len(new_anomaly_params) > 0
+        ):
+            run_anomaly = True
+        elif (
+            "scheduler_params_time" in new_anomaly_params
+            and len(new_anomaly_params) > 1
+        ):
+            run_anomaly = True
+        else:
+            run_anomaly = False
+
+    if run_anomaly and err == "":
+        current_app.logger.info(
+            "Deleting anomaly data and re-running anomaly since anomaly params was "
+            + f"edited for KPI ID: {new_kpi.id}"
+        )
+        delete_anomaly_output_for_kpi(new_kpi.id)
+        from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task
+        anomaly_task = ready_anomaly_task(new_kpi.id)
+        if anomaly_task is not None:
+            anomaly_task.apply_async()
+            current_app.logger.info(f"Anomaly started for KPI ID: {new_kpi.id}")
+        else:
+            current_app.logger.info(
+                f"Anomaly failed since KPI was not found for KPI ID: {new_kpi.id}"
+            )
 
     if err != "":
         return jsonify({"error": err, "status": "failure"}), 400
@@ -311,7 +358,6 @@ def kpi_anomaly_params(kpi_id: int):
     if is_first_time:
         # TODO: move this import to top and fix import issue
         from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task, ready_rca_task
-
         anomaly_task = ready_anomaly_task(new_kpi.id)
         rca_task = ready_rca_task(new_kpi.id)
         if anomaly_task is None or rca_task is None:
@@ -324,6 +370,7 @@ def kpi_anomaly_params(kpi_id: int):
             rca_task.apply_async()
 
     return jsonify({"msg": "Successfully updated Anomaly params", "status": "success"})
+
 
 
 @blueprint.route("/<int:kpi_id>/settings", methods=["GET"])
@@ -364,11 +411,8 @@ def anomaly_settings_status(kpi_id):
 
 @blueprint.route("/<int:kpi_id>/retrain", methods=["POST", "GET"])
 def kpi_anomaly_retraining(kpi_id):
-    # TODO: Move the deletion into KPI controller file
     # delete all data in anomaly output table
-    delete_kpi_query = delete(AnomalyDataOutput).where(AnomalyDataOutput.kpi_id == kpi_id)
-    db.session.execute(delete_kpi_query)
-    db.session.commit()
+    delete_anomaly_output_for_kpi(kpi_id)
 
     # add anomaly to queue
     from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task
@@ -376,9 +420,9 @@ def kpi_anomaly_retraining(kpi_id):
     if anomaly_task is not None:
         anomaly_task.apply_async()
         current_app.logger.info(f"Retraining started for KPI ID: {kpi_id}")
-        return jsonify({"msg" : f"retraining started for KPI: {kpi_id}"})
+        return jsonify({"msg": f"retraining started for KPI: {kpi_id}"})
     else:
-        return jsonify({"msg" : f"retraining failed for KPI: {kpi_id}, KPI id is None"})
+        return jsonify({"msg": f"retraining failed for KPI: {kpi_id}, KPI id is None"})
 
 
 def fill_graph_data(row, graph_data):
@@ -441,6 +485,23 @@ def convert_to_graph_json(
 
     return graph_data
 
+def get_overall_data_points(kpi_id: int, n: int = 60) -> List:
+    kpi_info = get_kpi_data_from_id(kpi_id)
+    if not kpi_info["anomaly_params"]:
+        return []
+
+    end_date = get_anomaly_output_end_date(kpi_info)
+
+    start_date = end_date - timedelta(days=n)
+    start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
+
+    data_points = AnomalyDataOutput.query.filter(
+        (AnomalyDataOutput.kpi_id == kpi_id)
+        & (AnomalyDataOutput.data_datetime >= start_date)
+        & (AnomalyDataOutput.anomaly_type == "overall")
+    ).order_by(AnomalyDataOutput.data_datetime).all()
+
+    return data_points
 
 def get_overall_data(kpi_id, end_date: datetime, n=90):
     start_date = end_date - timedelta(days=n)
@@ -579,13 +640,13 @@ ANOMALY_PARAMS_META = {
     "fields": [
         {
             "name": "anomaly_period",
-            "is_editable": False,
+            "is_editable": True,
             "is_sensitive": False,
             "type": "integer",
         },
         {
             "name": "model_name",
-            "is_editable": False,
+            "is_editable": True,
             "is_sensitive": False,
             "type": "select",
             "options": [
@@ -618,7 +679,7 @@ ANOMALY_PARAMS_META = {
         },
         {
             "name": "seasonality",
-            "is_editable": False,
+            "is_editable": True,
             "is_sensitive": False,
             "type": "multiselect",
             "options": [
@@ -660,7 +721,7 @@ ANOMALY_PARAMS_META = {
         },
         {
             "name": "scheduler_frequency",
-            "is_editable": False,
+            "is_editable": True,
             "is_sensitive": False,
             "type": "select",
             "options": [

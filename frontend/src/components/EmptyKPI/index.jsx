@@ -1,7 +1,7 @@
 import React from 'react';
 
 import Documents from '../../assets/images/document-green.svg';
-
+import slacksmall from '../../assets/images/slack-small-logo.svg';
 import './emptykpi.scss';
 
 const EmptyKPI = () => {
@@ -40,7 +40,14 @@ const EmptyKPI = () => {
           rel="noopener noreferrer">
           Troubleshoot guide{' '}
         </a>
-        for you or feel free to ping us on our Community Slack!
+        for you or feel free to ping us on our{' '}
+        <a
+          href="https://join.slack.com/t/chaosgenius/shared_invite/zt-140042uac-rrm~xbx9o_aydi6PTmp_Mg"
+          target="_blank"
+          rel="noopener noreferrer">
+          Community Slack{' '}
+          <img src={slacksmall} className="in-active" alt="Slack" />
+        </a>
       </h5>
     </div>
   );

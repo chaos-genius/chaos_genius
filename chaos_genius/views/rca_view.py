@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """Endpoints for data retrieval of computed RCAs."""
+import csv
+import io
 import logging
 
-from flask import Blueprint, jsonify, request  # noqa: F401
+from flask import Blueprint, jsonify, request, send_file  # noqa: F401
 
 from chaos_genius.core.rca.rca_utils.api_utils import (
     kpi_aggregation,
@@ -10,6 +12,7 @@ from chaos_genius.core.rca.rca_utils.api_utils import (
     rca_analysis,
     rca_hierarchical_data,
 )
+from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 
 blueprint = Blueprint("api_rca", __name__)
 logger = logging.getLogger(__name__)

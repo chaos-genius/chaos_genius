@@ -5,6 +5,7 @@ import { Link, useHistory } from 'react-router-dom';
 import rightarrow from '../../assets/images/rightarrow.svg';
 
 import DataSourceForm from '../../components/DataSourceForm';
+import AddFaq from '../../components/KpiFaq';
 import KpiExplorerForm from '../../components/KpiExplorerForm';
 
 import Kpisetting from '../KpiSetting';
@@ -89,12 +90,17 @@ const Onboarding = () => {
             />
           </div>
         ) : data[2] === '2' ? (
-          <div className="add-form-container">
-            <KpiExplorerForm
-              onboarding={true}
-              setModal={setModal}
-              setText={setText}
-            />
+          <div className="add-kpi-wrapper">
+            <div className="add-form-container kpi-form-container">
+              <KpiExplorerForm
+                onboarding={true}
+                setModal={setModal}
+                setText={setText}
+              />
+            </div>
+            <div>
+              <AddFaq />
+            </div>
           </div>
         ) : data[2] === '3' ? (
           <Kpisetting onboarding={true} setModal={setModal} setText={setText} />

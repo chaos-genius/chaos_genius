@@ -28,31 +28,31 @@ TRUE_VALUES = {"true", "True", "1", True}
 @blueprint.route("", methods=["GET"])
 def list_alert():
     """List the alert data."""
-    channels_to_filter = request.args.getlist("channel")
-    actives_to_filter = request.args.getlist("active")
+    channels_list = request.args.getlist("channel")
+    actives_list = request.args.getlist("active")
     page, per_page = pagination_args(request)
     search_query, search_filter = make_search_filter(request, Alert.alert_name)
 
     filters = []
     if search_filter is not None:
         filters.append(search_filter)
-    if channels_to_filter and channels_to_filter != [""]:
+    if channels_list and channels_list != [""]:
         filters.append(
             Alert.alert_channel.in_(
                 [
-                    channel_filter
-                    for channel_to_filter in channels_to_filter
-                    for channel_filter in channel_to_filter.split(",")
+                    channel
+                    for channels in channels_list
+                    for channel in channels.split(",")
                 ]
             )
         )
-    if actives_to_filter and actives_to_filter != [""]:
+    if actives_list and actives_list != [""]:
         filters.append(
             Alert.active.in_(
                 [
-                    active_filter in TRUE_VALUES
-                    for active_to_filter in actives_to_filter
-                    for active_filter in active_to_filter.split(",")
+                    active in TRUE_VALUES
+                    for actives in actives_list
+                    for active in actives.split(",")
                 ]
             )
         )

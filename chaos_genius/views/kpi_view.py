@@ -117,21 +117,23 @@ def kpi():
         )
 
     elif request.method == "GET":
+        # TODO: abstract this filter params extraction logic
         dashboard_ids_list = request.args.getlist("dashboard_id")
-        datasource_types = request.args.getlist("datasource_type")
+        datasource_types_list = request.args.getlist("datasource_type")
+
         page, per_page = pagination_args(request)
         search_query, search_filter = make_search_filter(request, Kpi.name)
 
         filters = [Kpi.active == True]  # noqa: E712
         if search_filter is not None:
             filters.append(search_filter)
-        if datasource_types and datasource_types != [""]:
+        if datasource_types_list and datasource_types_list != [""]:
             filters.append(
                 DataSource.connection_type.in_(
                     [
-                        source_type
-                        for datasource_type in datasource_types
-                        for source_type in datasource_type.split(",")
+                        datasource_type
+                        for datasource_types in datasource_types_list
+                        for datasource_type in datasource_types.split(",")
                     ]
                 )
             )

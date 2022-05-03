@@ -93,19 +93,19 @@ def data_source():
     elif request.method == "GET":
         logger.info("Listing data sources.")
 
-        datasource_types = request.args.getlist("datasource_type")
+        datasource_types_list = request.args.getlist("datasource_type")
         page, per_page = pagination_args(request)
         search_query, search_filter = make_search_filter(request, DataSource.name)
 
         filters = [DataSource.active == True]  # noqa: E712
         if search_filter is not None:
             filters.append(search_filter)
-        if datasource_types and datasource_types != [""]:
+        if datasource_types_list and datasource_types_list != [""]:
             filters.append(DataSource.connection_type.in_(
                     [
-                        source_type
-                        for datasource_type in datasource_types
-                        for source_type in datasource_type.split(",")
+                        datasource_type
+                        for datasource_types in datasource_types_list
+                        for datasource_type in datasource_types.split(",")
                     ]
                 )
             )

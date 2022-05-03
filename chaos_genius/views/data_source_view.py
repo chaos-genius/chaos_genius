@@ -100,7 +100,7 @@ def data_source():
         filters = [DataSource.active == True]  # noqa: E712
         if search_filter is not None:
             filters.append(search_filter)
-        if datasource_types and datasource_types!=[""]:
+        if datasource_types and datasource_types != [""]:
             filters.append(DataSource.connection_type.in_(
                     [
                         source_type

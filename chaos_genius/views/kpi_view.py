@@ -125,8 +125,9 @@ def kpi():
         filters = [Kpi.active == True]  # noqa: E712
         if search_filter is not None:
             filters.append(search_filter)
-        if datasource_types and datasource_types!=[""]:
-            filters.append(DataSource.connection_type.in_(
+        if datasource_types and datasource_types != [""]:
+            filters.append(
+                DataSource.connection_type.in_(
                     [
                         source_type
                         for datasource_type in datasource_types
@@ -135,12 +136,12 @@ def kpi():
                 )
             )
 
-        if dashboard_ids_list and dashboard_ids_list!=[""]:
+        if dashboard_ids_list and dashboard_ids_list != [""]:
             dashboard_ids = [
-                                int(dashboard_id)
-                                for dashboard_ids in dashboard_ids_list
-                                for dashboard_id in dashboard_ids.split(",")
-                            ]
+                int(dashboard_id)
+                for dashboard_ids in dashboard_ids_list
+                for dashboard_id in dashboard_ids.split(",")
+            ]
             kpis_paginated: Pagination = (
                 db.session.query(Kpi, DataSource)
                 .join(DataSource, Kpi.data_source == DataSource.id)

@@ -9,8 +9,8 @@ const Dimension = ({ data }) => {
     <ul className="table-tips">
       {data &&
         data.length !== 0 &&
-        data.slice(0, show).map((dimension) => (
-          <li>
+        data.slice(0, show).map((dimension, index) => (
+          <li key={index}>
             <span>{dimension}</span>
           </li>
         ))}

@@ -7,20 +7,67 @@ from flask.blueprints import Blueprint
 from flask.globals import request
 from flask.json import jsonify
 
-from chaos_genius.controllers.alert_controller import get_alert_info, get_alert_list
+from chaos_genius.controllers.alert_controller import (
+    ALERT_CHANNELS,
+    get_alert_info,
+    get_alert_list,
+)
 from chaos_genius.databases.db_utils import chech_editable_field
 from chaos_genius.databases.models.alert_model import Alert
+from chaos_genius.utils.pagination import pagination_args, pagination_info
+from chaos_genius.utils.search import SEARCH_PARAM_NAME, make_search_filter
 
 blueprint = Blueprint("alert", __name__)
 logger = logging.getLogger(__name__)
+
+
+TRUE_VALUES = {"true", "True", "1", True}
 
 
 @blueprint.route("/", methods=["GET"])  # TODO: Remove this
 @blueprint.route("", methods=["GET"])
 def list_alert():
     """List the alert data."""
-    results = get_alert_list()
-    return jsonify({"data": results})
+    channels_list = request.args.getlist("channel")
+    actives_list = request.args.getlist("active")
+    page, per_page = pagination_args(request)
+    search_query, search_filter = make_search_filter(request, Alert.alert_name)
+
+    filters = []
+    if search_filter is not None:
+        filters.append(search_filter)
+    if channels_list and channels_list != [""]:
+        filters.append(
+            Alert.alert_channel.in_(
+                [
+                    channel
+                    for channels in channels_list
+                    for channel in channels.split(",")
+                ]
+            )
+        )
+    if actives_list and actives_list != [""]:
+        filters.append(
+            Alert.active.in_(
+                [
+                    active in TRUE_VALUES
+                    for actives in actives_list
+                    for active in actives.split(",")
+                ]
+            )
+        )
+
+    alerts_paginated = get_alert_list(
+        page_num_size=(page, per_page), extra_filters=filters
+    )
+
+    return jsonify(
+        {
+            "data": alerts_paginated.items,
+            "pagination": pagination_info(alerts_paginated),
+            SEARCH_PARAM_NAME: search_query,
+        }
+    )
 
 
 @blueprint.route("/<int:alert_id>/get-info", methods=["GET"])
@@ -208,3 +255,20 @@ def alert_meta_info():
     logger.info("alert meta info")
 
     return jsonify({"data": Alert.meta_info(), "status": "success"})
+
+
+@blueprint.route("/used-channel-types", methods=["GET"])
+def get_used_channels():
+    """Returns all channel types in use."""
+    channels = [{"value": k, "label": v} for k, v in ALERT_CHANNELS.items()]
+    return jsonify({"message": "", "status": "success", "data": channels})
+
+
+@blueprint.route("/used-status-types", methods=["GET"])
+def get_used_statuses():
+    """Returns all status types in use."""
+    statuses = [
+        {"value": True, "label": "Active"},
+        {"value": False, "label": "Inactive"},
+    ]
+    return jsonify({"message": "", "status": "success", "data": statuses})

@@ -3,6 +3,7 @@ from typing import List
 
 from chaos_genius.connectors import test_connection
 from chaos_genius.databases.models.data_source_model import DataSource
+from chaos_genius.extensions import db
 from chaos_genius.extensions import integration_connector as connector
 from chaos_genius.settings import AIRBYTE_ENABLED
 from chaos_genius.third_party.integration_server_config import SOURCE_WHITELIST_AND_TYPE
@@ -138,3 +139,14 @@ def get_data_source_list(exclude_third_party=True) -> List[DataSource]:
         .all()
     )
     return data_sources
+
+
+def used_data_source_types() -> List[str]:
+    """List of unique data source types currently in use by at least one data source."""
+    return [
+        row[0]
+        for row in db.session.query(DataSource.connection_type)
+        .order_by(DataSource.connection_type)
+        .distinct()
+        .all()
+    ]

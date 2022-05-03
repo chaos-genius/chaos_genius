@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """KPI views for creating and viewing the kpis."""
 import logging
-from collections import defaultdict
+from typing import Optional
 
 from flask.blueprints import Blueprint
 from flask.globals import request
 from flask.json import jsonify
+from flask_sqlalchemy import Pagination
 from sqlalchemy.orm.attributes import flag_modified
 
 from chaos_genius.controllers.dashboard_controller import (
@@ -14,8 +15,8 @@ from chaos_genius.controllers.dashboard_controller import (
     edit_kpi_dashboards,
     enable_mapper_for_kpi_ids,
     get_dashboard_list_by_ids,
-    get_mapper_obj_by_dashboard_ids,
     get_mapper_obj_by_kpi_ids,
+    kpi_dashboard_mapper_dict,
 )
 from chaos_genius.controllers.kpi_controller import (
     delete_anomaly_output_for_kpi,
@@ -27,10 +28,13 @@ from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
 from chaos_genius.core.rca.rca_utils.api_utils import kpi_aggregation, kpi_line_data
 from chaos_genius.core.utils.kpi_validation import validate_kpi
 from chaos_genius.databases.db_utils import chech_editable_field
+from chaos_genius.databases.models.dashboard_kpi_mapper_model import DashboardKpiMapper
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.extensions import db
 from chaos_genius.settings import DEEPDRILLS_ENABLED_TIME_RANGES
+from chaos_genius.utils.pagination import pagination_args, pagination_info
+from chaos_genius.utils.search import SEARCH_PARAM_NAME, make_search_filter
 
 blueprint = Blueprint("api_kpi", __name__)
 logger = logging.getLogger(__name__)
@@ -114,61 +118,74 @@ def kpi():
         )
 
     elif request.method == "GET":
-        dashboard_id = request.args.get("dashboard_id")
-        kpi_result_list, kpi_dashboard_mapper = [], []
-        if dashboard_id:
-            dashboard_id = int(dashboard_id)
-            kpi_dashboard_mapper = get_mapper_obj_by_dashboard_ids([dashboard_id])
-            kpi_list = [mapper.kpi for mapper in kpi_dashboard_mapper]
-            kpi_result_list = (
+        # TODO: abstract this filter params extraction logic
+        dashboard_ids_list = request.args.getlist("dashboard_id")
+        datasource_types_list = request.args.getlist("datasource_type")
+
+        page, per_page = pagination_args(request)
+        search_query, search_filter = make_search_filter(request, Kpi.name)
+
+        filters = [Kpi.active == True]  # noqa: E712
+        if search_filter is not None:
+            filters.append(search_filter)
+        if datasource_types_list and datasource_types_list != [""]:
+            filters.append(
+                DataSource.connection_type.in_(
+                    [
+                        datasource_type
+                        for datasource_types in datasource_types_list
+                        for datasource_type in datasource_types.split(",")
+                    ]
+                )
+            )
+
+        if dashboard_ids_list and dashboard_ids_list != [""]:
+            dashboard_ids = [
+                int(dashboard_id)
+                for dashboard_ids in dashboard_ids_list
+                for dashboard_id in dashboard_ids.split(",")
+            ]
+            kpis_paginated: Pagination = (
                 db.session.query(Kpi, DataSource)
                 .join(DataSource, Kpi.data_source == DataSource.id)
-                .filter(Kpi.active == True, Kpi.id.in_(kpi_list))  # noqa: E712
+                .join(DashboardKpiMapper, Kpi.id == DashboardKpiMapper.kpi)
+                .filter(
+                    *filters,
+                    DashboardKpiMapper.active == True,  # noqa: E712
+                    DashboardKpiMapper.dashboard.in_(dashboard_ids),
+                )
                 .order_by(Kpi.created_at.desc())
-                .all()
+                .paginate(page=page, per_page=per_page)
             )
         else:
-            kpi_result_list = (
+            kpis_paginated: Pagination = (
                 db.session.query(Kpi, DataSource)
                 .join(DataSource, Kpi.data_source == DataSource.id)
-                .filter(Kpi.active == True)  # noqa: E712
+                .filter(*filters)  # noqa: E712
                 .order_by(Kpi.created_at.desc())
-                .all()
+                .paginate(page=page, per_page=per_page)
             )
 
-        kpi_dashboard_mapper = get_mapper_obj_by_kpi_ids(
-            [kpi.id for kpi, _ in kpi_result_list]
+        kpi_dashboard_mapper = kpi_dashboard_mapper_dict(
+            [kpi.id for kpi, _ in kpis_paginated.items], as_dict=True
         )
-        kpi_dashboard_dict = defaultdict(list)
-        for mapper in kpi_dashboard_mapper:
-            kpi_dashboard_dict[mapper.kpi].append(mapper.dashboard)
-        dashboard_list = [mapper.dashboard for mapper in kpi_dashboard_mapper]
-        dashboard_result_list = get_dashboard_list_by_ids(dashboard_list)
-        dashboard_dict = {
-            dashboard.id: dashboard.as_dict for dashboard in dashboard_result_list
-        }
 
         kpis = []
-        for row in kpi_result_list:
+        for row in kpis_paginated.items:
             kpi_info = row[0].safe_dict
             data_source_info = row[1].safe_dict
             kpi_info["data_source"] = data_source_info
-            dashboards = []
-            for dashboard in kpi_dashboard_dict[kpi_info["id"]]:
-                dashboards.append(dashboard_dict[dashboard])
+            dashboards = kpi_dashboard_mapper[kpi_info["id"]]
             kpi_info["dashboards"] = dashboards
             kpis.append(kpi_info)
-        dashboard_details = []
-        if dashboard_id:
-            if dashboard_dict:
-                dashboard_details = [dashboard_dict[dashboard_id]]
-            else:
-                dashboards = get_dashboard_list_by_ids([dashboard_id])
-                dashboard_details = [dashboard.as_dict for dashboard in dashboards]
-        else:
-            dashboard_details = list(dashboard_dict.values())
+
         return jsonify(
-            {"count": len(kpis), "data": kpis, "dashboards": dashboard_details}
+            {
+                "count": len(kpis),
+                "data": kpis,
+                "pagination": pagination_info(kpis_paginated),
+                SEARCH_PARAM_NAME: search_query,
+            }
         )
 
 
@@ -176,25 +193,48 @@ def kpi():
 def get_all_kpis():
     """List KPIs for a particular dashboard."""
     status, message = "success", ""
+
     timeline = request.args.get("timeline", "last_7_days")
-    dashboard_id = request.args.get("dashboard_id")
+    dashboard_ids_list = request.args.getlist("dashboard_id")
+
+    page, per_page = pagination_args(request)
+    search_query, search_filter = make_search_filter(request, Kpi.name)
+
+    filters = [Kpi.active == True]  # noqa: E712
+    if search_filter is not None:
+        filters.append(search_filter)
+
+    kpis_paginated: Optional[Pagination] = None
     ret = []
 
     try:
-        filters = [Kpi.active == True]  # noqa: E712
-        if dashboard_id:
-            kpi_dashboard_mapper = get_mapper_obj_by_dashboard_ids([dashboard_id])
-            kpi_list = [mapper.kpi for mapper in kpi_dashboard_mapper]
-            filters.append(Kpi.id.in_(kpi_list))
-
-        results = (
-            Kpi.query.filter(*filters)  # noqa: E712
-            .order_by(Kpi.created_at.desc())
-            .all()
-        )
+        if dashboard_ids_list and dashboard_ids_list != [""]:
+            dashboard_ids = [
+                int(dashboard_id)
+                for dashboard_ids in dashboard_ids_list
+                for dashboard_id in dashboard_ids.split(",")
+            ]
+            kpis_paginated_: Pagination = (
+                Kpi.query.join(DashboardKpiMapper, DashboardKpiMapper.kpi == Kpi.id)
+                .filter(
+                    *filters,
+                    DashboardKpiMapper.active == True,  # noqa: E712
+                    DashboardKpiMapper.dashboard.in_(dashboard_ids),
+                )
+                .order_by(Kpi.created_at.desc())
+                .paginate(page=page, per_page=per_page)
+            )
+        else:
+            kpis_paginated_: Pagination = (
+                Kpi.query.filter(*filters)
+                .order_by(Kpi.created_at.desc())
+                .paginate(page=page, per_page=per_page)
+            )
+        # this is only required to let the type checker know that this is not None here
+        kpis_paginated = kpis_paginated_
 
         metrics = ["name", "metric", "id"]
-        for kpi in results:
+        for kpi in kpis_paginated.items:
             info = {key: getattr(kpi, key) for key in metrics}
             _, _, aggregate_data = kpi_aggregation(kpi.id, timeline)
             info["prev"] = aggregate_data["aggregation"][0]["value"]
@@ -217,7 +257,17 @@ def get_all_kpis():
         message = str(e)
         logger.error(message, exc_info=True)
 
-    return jsonify({"data": ret, "message": message, "status": status})
+    return jsonify(
+        {
+            "data": ret,
+            "message": message,
+            "status": status,
+            "pagination": pagination_info(kpis_paginated)
+            if kpis_paginated is not None
+            else None,
+            SEARCH_PARAM_NAME: search_query,
+        }
+    )
 
 
 @blueprint.route("/get-timecuts-list", methods=["GET"])

@@ -7,6 +7,9 @@ from flask.globals import request
 from flask.json import jsonify
 
 from chaos_genius.controllers.dashboard_controller import (
+    DEFAULT_SORT_BY,
+    SORTER_MAPPING,
+    all_dashboard_names,
     create_dashboard,
     edit_dashboard_kpis,
     get_dashboard_by_id,
@@ -205,17 +208,38 @@ def delete_dashboard():
 def get_dashboard_list():
     """List all dashboards."""
     status, message = "", ""
+    sort_by = request.args.get("sort_by", DEFAULT_SORT_BY)
+    if sort_by not in SORTER_MAPPING:
+        return (
+            jsonify(
+                {
+                    "status": "failure",
+                    "message": (
+                        f"{sort_by} was not a valid sort key. Must be one of "
+                        + f"{', '.join(SORTER_MAPPING.keys())}"
+                    ),
+                }
+            ),
+            400,
+        )
+
     dashboard_list = []
     try:
-        dashboards = get_active_dashboard_list()
-        dashboard_list = sorted(
-            dashboards, key=lambda x: len(x.get("kpis", [])), reverse=True
-        )
+        dashboard_list = get_active_dashboard_list(sort_by=sort_by)
         status = "success"
 
     except Exception as e:  # noqa: B902
         status = "failure"
         message = "Failed to fetch dashboard list :{}".format(e)
-        dashboard_list = []
 
     return jsonify({"status": status, "message": message, "data": dashboard_list})
+
+
+@blueprint.route("/names", methods=["GET"])
+def get_all_dashboard_names():
+    """Return names of all active dashboards."""
+    names_mapping = [
+        {"value": name, "label": name, "id": id}
+        for id, name in all_dashboard_names().items()
+    ]
+    return jsonify({"status": "success", "message": "", "data": names_mapping})

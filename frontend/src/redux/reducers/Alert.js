@@ -37,7 +37,11 @@ import {
   KPIALERTENABLEFAILURE,
   KPIALERTDELETEREQUEST,
   KPIALERTDELETERESPONSE,
-  KPIALERTDELETEFAILURE
+  KPIALERTDELETEFAILURE,
+  ALERTCHANNELFORFILTERFAILURE,
+  ALERTCHANNELFORFILTERSUCCESS,
+  ALERTSTATUSFORFILTERFAILURE,
+  ALERTSTATUSFORFILTERSUCCESS
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -80,7 +84,10 @@ const initialState = {
   kpiAlertEnableError: false,
   kpiAlertDeleteLoading: false,
   kpiAlertDeleteData: [],
-  kpiAlertDeleteError: false
+  kpiAlertDeleteError: false,
+  pagination: {},
+  alertChannelTypes: [],
+  alertStatusTypes: []
 };
 export const alert = (state = initialState, action) => {
   switch (action.type) {
@@ -103,6 +110,30 @@ export const alert = (state = initialState, action) => {
         ...state,
         emailLoading: false,
         emailError: true
+      };
+    }
+    case ALERTCHANNELFORFILTERFAILURE: {
+      return {
+        ...state,
+        alertChannelTypes: []
+      };
+    }
+    case ALERTCHANNELFORFILTERSUCCESS: {
+      return {
+        ...state,
+        alertChannelTypes: action.data
+      };
+    }
+    case ALERTSTATUSFORFILTERSUCCESS: {
+      return {
+        ...state,
+        alertStatusTypes: action.data
+      };
+    }
+    case ALERTSTATUSFORFILTERFAILURE: {
+      return {
+        ...state,
+        alertStatusTypes: []
       };
     }
     case CHANNELSTATUSREQUEST: {
@@ -195,7 +226,8 @@ export const alert = (state = initialState, action) => {
       return {
         ...state,
         alertLoading: false,
-        alertList: action.data
+        alertList: action.data.data,
+        pagination: action.data.pagination
       };
     }
     case ALERTSFAILURE: {
@@ -203,7 +235,8 @@ export const alert = (state = initialState, action) => {
         ...state,
         alertLoading: false,
         alertList: [],
-        alertError: true
+        alertError: true,
+        pagination: {}
       };
     }
     case CREATEKPIALERTREQUEST: {

@@ -192,8 +192,10 @@ def kpi():
 def get_all_kpis():
     """List KPIs for a particular dashboard."""
     status, message = "success", ""
+
     timeline = request.args.get("timeline", "last_7_days")
-    dashboard_id = request.args.get("dashboard_id")
+    dashboard_ids_list = request.args.getlist("dashboard_id")
+
     page, per_page = pagination_args(request)
     search_query, search_filter = make_search_filter(request, Kpi.name)
 
@@ -205,13 +207,18 @@ def get_all_kpis():
     ret = []
 
     try:
-        if dashboard_id is not None:
+        if dashboard_ids_list and dashboard_ids_list != [""]:
+            dashboard_ids = [
+                int(dashboard_id)
+                for dashboard_ids in dashboard_ids_list
+                for dashboard_id in dashboard_ids.split(",")
+            ]
             kpis_paginated_: Pagination = (
                 Kpi.query.join(DashboardKpiMapper, DashboardKpiMapper.kpi == Kpi.id)
                 .filter(
                     *filters,
                     DashboardKpiMapper.active == True,  # noqa: E712
-                    DashboardKpiMapper.dashboard == dashboard_id,
+                    DashboardKpiMapper.dashboard.in_(dashboard_ids),
                 )
                 .order_by(Kpi.created_at.desc())
                 .paginate(page=page, per_page=per_page)

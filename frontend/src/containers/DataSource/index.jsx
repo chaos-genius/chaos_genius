@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useDispatch, useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 
 import Plus from '../../assets/images/plus.svg';
 
@@ -22,6 +23,8 @@ const RESET_ACTION = {
 };
 const DataSource = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
   const [search, setSearch] = useState('');
   const [data, setData] = useState(false);
   const [dashboardTypeList, setDashboardTypeList] = useState([]);
@@ -30,7 +33,10 @@ const DataSource = () => {
     page: 1,
     per_page: 10,
     search: '',
-    datasource_type: []
+    datasource_type:
+      query.getAll('datasource_type').length !== 0
+        ? query.getAll('datasource_type')
+        : []
   });
   const [datasourceType, setDatasourceType] = useState([]);
   const [pages, setPages] = useState({});

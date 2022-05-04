@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useDispatch, useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 
 import Plus from '../../assets/images/plus.svg';
 
@@ -29,6 +30,8 @@ const SETTING_RESET = {
 
 const KpiExplorer = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
 
   const [kpiSearch, setKpiSearch] = useState('');
   const [data, setData] = useState(false);
@@ -40,8 +43,14 @@ const KpiExplorer = () => {
     page: 1,
     per_page: 10,
     search: '',
-    dashboard_id: [],
-    datasource_type: []
+    dashboard_id:
+      query.getAll('dashboard_id').length !== 0
+        ? query.getAll('dashboard_id')
+        : [],
+    datasource_type:
+      query.getAll('datasource_type').length !== 0
+        ? query.getAll('datasource_type')
+        : []
   });
   const { isLoading, kpiExplorerList, pagination } = useSelector(
     (state) => state.kpiExplorer

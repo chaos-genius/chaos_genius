@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """KPI views for creating and viewing the kpis."""
 import logging
-from typing import Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from flask.blueprints import Blueprint
 from flask.globals import request
@@ -122,6 +122,8 @@ def kpi():
         dashboard_ids_list = request.args.getlist("dashboard_id")
         datasource_types_list = request.args.getlist("datasource_type")
 
+        paginate = request.args.get("paginate") != "false"
+
         page, per_page = pagination_args(request)
         search_query, search_filter = make_search_filter(request, Kpi.name)
 
@@ -139,13 +141,16 @@ def kpi():
                 )
             )
 
+        kpis: List[Tuple[Kpi, DataSource]]
+        kpis_paginated: Optional[Pagination] = None
+
         if dashboard_ids_list and dashboard_ids_list != [""]:
             dashboard_ids = [
                 int(dashboard_id)
                 for dashboard_ids in dashboard_ids_list
                 for dashboard_id in dashboard_ids.split(",")
             ]
-            kpis_paginated: Pagination = (
+            kpis_query = (
                 db.session.query(Kpi, DataSource)
                 .join(DataSource, Kpi.data_source == DataSource.id)
                 .join(DashboardKpiMapper, Kpi.id == DashboardKpiMapper.kpi)
@@ -154,36 +159,53 @@ def kpi():
                     DashboardKpiMapper.active == True,  # noqa: E712
                     DashboardKpiMapper.dashboard.in_(dashboard_ids),
                 )
-                .order_by(Kpi.created_at.desc())
-                .paginate(page=page, per_page=per_page)
             )
+            # TODO: refactor this to reduce code duplication
+            if paginate:
+                kpis_paginated_ = kpis_query.order_by(Kpi.created_at.desc()).paginate(
+                    page=page, per_page=per_page
+                )
+                kpis = kpis_paginated_.items
+                kpis_paginated = kpis_paginated_
+            else:
+                kpis = kpis_query.all()
         else:
-            kpis_paginated: Pagination = (
+            kpis_query = (
                 db.session.query(Kpi, DataSource)
                 .join(DataSource, Kpi.data_source == DataSource.id)
                 .filter(*filters)  # noqa: E712
-                .order_by(Kpi.created_at.desc())
-                .paginate(page=page, per_page=per_page)
             )
+            if paginate:
+                kpis_paginated_ = kpis_query.order_by(Kpi.created_at.desc()).paginate(
+                    page=page, per_page=per_page
+                )
+                kpis = kpis_paginated_.items
+                kpis_paginated = kpis_paginated_
+            else:
+                kpis = kpis_query.all()
 
         kpi_dashboard_mapper = kpi_dashboard_mapper_dict(
-            [kpi.id for kpi, _ in kpis_paginated.items], as_dict=True
+            [kpi.id for kpi, _ in kpis], as_dict=True
         )
 
-        kpis = []
-        for row in kpis_paginated.items:
+        kpi_infos: List[Dict[str, Any]] = []
+        for row in kpis:
             kpi_info = row[0].safe_dict
             data_source_info = row[1].safe_dict
             kpi_info["data_source"] = data_source_info
             dashboards = kpi_dashboard_mapper[kpi_info["id"]]
             kpi_info["dashboards"] = dashboards
-            kpis.append(kpi_info)
+            kpi_infos.append(kpi_info)
 
         return jsonify(
             {
-                "count": len(kpis),
-                "data": kpis,
-                "pagination": pagination_info(kpis_paginated),
+                "count": len(kpi_infos),
+                "data": kpi_infos,
+                "pagination": (
+                    pagination_info(kpis_paginated)
+                    if kpis_paginated is not None
+                    else None
+                ),
                 SEARCH_PARAM_NAME: search_query,
             }
         )

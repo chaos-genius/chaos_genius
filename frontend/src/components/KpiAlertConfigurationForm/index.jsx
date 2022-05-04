@@ -161,7 +161,7 @@ const KpiAlertConfigurationForm = ({
   }, [kpiAlertEditData]);
 
   const dispatchGetAllKpiExplorer = () => {
-    dispatch(getAllKpiExplorer());
+    dispatch(getAllKpiExplorer({ paginate: false }));
   };
 
   useEffect(() => {

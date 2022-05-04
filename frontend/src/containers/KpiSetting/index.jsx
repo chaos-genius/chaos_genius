@@ -43,9 +43,11 @@ const Kpisetting = ({ onboarding, setModal, setText }) => {
 
   const getAllDashboardSidebar = () => {
     if (dashboardId !== null && dashboardId !== undefined) {
-      dispatch(getDashboardSidebar({ dashboard_id: dashboardId }));
+      dispatch(
+        getDashboardSidebar({ dashboard_id: dashboardId, paginate: false })
+      );
     } else {
-      dispatch(getDashboardSidebar({ dashboard_id: 0 }));
+      dispatch(getDashboardSidebar({ dashboard_id: 0, paginate: false }));
     }
   };
 

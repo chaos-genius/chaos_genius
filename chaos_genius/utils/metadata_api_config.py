@@ -4,7 +4,8 @@ SCHEMAS_AVAILABLE = {
     "Redshift": True,
     "BigQuery": False,
     "Snowflake": True,
-    "Druid": False
+    "Druid": False,
+    "AWS Athena": True
 }
 
 TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY = {
@@ -27,7 +28,7 @@ TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY = {
         "views": True,
         "materialized_views": True,
         "supported_aggregations": ["mean", "sum", "count"],
-        "supports_multidim_dd": True  
+        "supports_multidim_dd": True
     },
     "BigQuery": {
         "tables": True,
@@ -49,7 +50,14 @@ TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY = {
         "materialized_views": True,
         "supported_aggregations": ["sum", "count"],
         "supports_multidim_dd": False
-    }
+    },
+    "AWS Athena": {
+        "tables": True,
+        "views": True,
+        "materialized_views": True,
+        "supported_aggregations": ["mean", "sum", "count"],
+        "supports_multidim_dd": True
+    },
 }
 
 TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY_THIRD_PARTY = {

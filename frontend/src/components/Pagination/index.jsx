@@ -123,18 +123,20 @@ const Pagination = ({
             }}>
             {'>'}
           </button>
-          <select
-            className="per-page-select"
-            onChange={handleSelectClick}
-            value={per_page.value}>
-            {per_page_options.map((option, index) => {
-              return (
-                <option key={index} value={option.value}>
-                  {option.label}
-                </option>
-              );
-            })}
-          </select>
+          <div className="select-container">
+            <select
+              className="per-page-select"
+              onChange={handleSelectClick}
+              value={per_page.value}>
+              {per_page_options.map((option, index) => {
+                return (
+                  <option key={index} value={option.value}>
+                    {option.label}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
         </div>
       )}
     </div>

@@ -50,13 +50,14 @@
   width: 32px;
   height: 32px;
 }
-.per-page-select {
+.select-container .per-page-select {
   border: 1px solid #e2e2ea;
   box-sizing: border-box;
   border-radius: 8px;
   width: 61px;
   height: 32px;
   background: none;
+  font-size: 14px;
 }
 .per-page-select * {
   background-color: white;

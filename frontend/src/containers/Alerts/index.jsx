@@ -15,11 +15,13 @@ import AlertTable from '../../components/AlertTable';
 import './alerts.scss';
 import AlertFilter from '../../components/AlertFilter';
 
-import { getAllAlerts } from '../../redux/actions';
+import {
+  getAllAlerts,
+  getAlertChannelForFilter,
+  getAlertStatusForFilter
+} from '../../redux/actions';
 
 import { BASE_URL } from '../../utils/url-helper';
-
-import Fuse from 'fuse.js';
 import store from '../../redux/store';
 import Noalert from '../../components/Noalert';
 
@@ -47,31 +49,78 @@ const Alerts = () => {
     kpiAlertEnableData,
     kpiAlertDisableData,
     kpiAlertDeleteData,
-    changingAlert
+    changingAlert,
+    pagination,
+    alertChannelTypes,
+    alertStatusTypes
   } = useSelector((state) => state.alert);
 
   const [alertData, setAlertData] = useState(alertList);
   const [alertSearch, setAlertSearch] = useState('');
-  const [alertFilter, setAlertFilter] = useState([]);
-  const [alertStatusFilter, setAlertStatusFilter] = useState([]);
+  const [pgInfo, setPgInfo] = useState({
+    page: 1,
+    per_page: 10,
+    search: '',
+    channel: [],
+    active: []
+  });
+  const [pages, setPages] = useState({});
   const [data, setData] = useState(false);
+  const [channelType, setChannelType] = useState([]);
+  const [channelStatus, setChannelStatus] = useState([]);
+
+  useEffect(() => {
+    dispatch(getAlertChannelForFilter());
+    dispatch(getAlertStatusForFilter());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (alertChannelTypes && alertChannelTypes.length > 0) {
+      setChannelType(alertChannelTypes);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alertChannelTypes]);
+
+  useEffect(() => {
+    if (alertStatusTypes && alertStatusTypes.length > 0) {
+      setChannelStatus(alertStatusTypes);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alertStatusTypes]);
 
   useEffect(() => {
     store.dispatch(RESET_ACTION);
     store.dispatch(RESET_ENABLE_DISABLE_DATA);
     store.dispatch(RESET_DELETE_DATA);
     store.dispatch(RESET_QUERY_DATA);
-    dispatch(getAllAlerts());
+    dispatch(getAllAlerts(pgInfo));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, data]);
 
   useEffect(() => {
-    if (alertSearch !== '') {
-      searchAlert();
-    } else {
-      setAlertData(alertList);
+    setAlertData(alertList);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alertList]);
+
+  useEffect(() => {
+    setPgInfo({ ...pgInfo, page: 1, search: alertSearch });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alertSearch]);
+
+  useEffect(() => {
+    if (pagination && pagination?.pages && +pagination.pages > 0) {
+      setPages(pagination);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alertSearch, alertList]);
+  }, [pagination]);
+
+  useEffect(() => {
+    if (pgInfo.page > 0 && pgInfo.per_page > 0) {
+      setData((prev) => !prev);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pgInfo]);
 
   useEffect(() => {
     if (changingAlert !== undefined) {
@@ -122,7 +171,7 @@ const Alerts = () => {
       });
       store.dispatch(RESET_ENABLE_DISABLE_DATA);
     } else if (kpiAlertDeleteData && kpiAlertDeleteData.status === 'success') {
-      setData((prev) => !prev);
+      setAlertSearch('');
       customToast({
         type: 'success',
         header: 'Successfully Deleted'
@@ -167,74 +216,6 @@ const Alerts = () => {
     });
   };
 
-  const searchAlert = () => {
-    const options = {
-      keys: ['alert_name']
-    };
-
-    const fuse = new Fuse(alertList, options);
-
-    const result = fuse.search(alertSearch);
-    setAlertData(
-      result.map((item) => {
-        return item.item;
-      })
-    );
-  };
-
-  useEffect(() => {
-    const fetchFilter = () => {
-      var arr = [];
-      if (alertFilter.length === 0 && alertStatusFilter.length === 0) {
-        setAlertData(alertList);
-      } else if (alertFilter.length === 0 && alertStatusFilter.length !== 0) {
-        alertStatusFilter.forEach((data) => {
-          alertList.forEach((list) => {
-            if (list.active && data === 'active') {
-              arr.push(list);
-            } else if (list.active === false && data === 'inactive') {
-              arr.push(list);
-            }
-          });
-        });
-        setAlertData(arr);
-      } else if (alertStatusFilter.length === 0 && alertFilter.length !== 0) {
-        alertFilter &&
-          alertFilter.forEach((data) => {
-            alertList.forEach((list) => {
-              if (list.alert_channel.toLowerCase() === data.toLowerCase()) {
-                arr.push(list);
-              }
-            });
-          });
-        setAlertData(arr);
-      } else if (alertStatusFilter.length !== 0 && alertFilter.length !== 0) {
-        alertStatusFilter.forEach((status) => {
-          alertFilter.forEach((channel) => {
-            alertList.forEach((list) => {
-              if (
-                list.active === true &&
-                status === 'active' &&
-                list.alert_channel.toLowerCase() === channel
-              ) {
-                arr.push(list);
-              } else if (
-                list.active === false &&
-                list.alert_channel === channel &&
-                status === 'inactive'
-              ) {
-                arr.push(list);
-              }
-            });
-          });
-        });
-        setAlertData(arr);
-      }
-    };
-    fetchFilter();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alertFilter, alertStatusFilter]);
-
   if (alertLoading) {
     return (
       <div className="load loader-page">
@@ -274,26 +255,38 @@ const Alerts = () => {
             </Link>
           </div>
         </div>
-        {alertList && alertList.length !== 0 ? (
+        {alertList &&
+        alertList.length === 0 &&
+        alertSearch === '' &&
+        pgInfo?.active === [] &&
+        pgInfo?.channel === [] ? (
+          <div className="no-alert-container">
+            <Noalert />
+          </div>
+        ) : (
           <div className="explore-wrapper">
             {/* explore wrapper */}
             {/* filter section */}
             <div className="filter-section">
               <AlertFilter
                 setAlertSearch={setAlertSearch}
-                setAlertFilter={setAlertFilter}
-                alertData={alertList}
-                setAlertStatusFilter={setAlertStatusFilter}
+                channelType={channelType}
+                setPgInfo={setPgInfo}
+                pgInfo={pgInfo}
+                channelStatus={channelStatus}
+                alertSearch={alertSearch}
               />
             </div>
             {/* table section */}
             <div className="table-section">
-              <AlertTable alertData={alertData} alertSearch={alertSearch} />
+              <AlertTable
+                alertData={alertData}
+                alertSearch={alertSearch}
+                setPgInfo={setPgInfo}
+                pagination={pages}
+                pgInfo={pgInfo}
+              />
             </div>
-          </div>
-        ) : (
-          <div className="no-alert-container">
-            <Noalert />
           </div>
         )}
       </>

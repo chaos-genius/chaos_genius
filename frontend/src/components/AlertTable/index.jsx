@@ -18,6 +18,8 @@ import DeleteActive from '../../assets/images/delete-active.svg';
 import Close from '../../assets/images/close.svg';
 import { formatDateTime } from '../../utils/date-helper';
 
+import Pagination from '../Pagination';
+
 import store from '../../redux/store';
 import {
   kpiAlertDisable,
@@ -34,7 +36,13 @@ const RESET_DELETE_DATA = {
   type: 'RESET_DELETE_DATA'
 };
 
-const AlertTable = ({ alertData, alertSearch }) => {
+const AlertTable = ({
+  alertData,
+  alertSearch,
+  setPgInfo,
+  pagination,
+  pgInfo
+}) => {
   const dispatch = useDispatch();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -53,6 +61,14 @@ const AlertTable = ({ alertData, alertSearch }) => {
     store.dispatch(RESET_DELETE_DATA);
     dispatch(kpiAlertDeleteById(id));
     setIsOpen(false);
+  };
+
+  const handleBtnClick = (e) => {
+    setPgInfo({ ...pgInfo, page: e });
+  };
+
+  const handleSelectClick = (e) => {
+    setPgInfo({ ...pgInfo, page: 1, per_page: e.target.value });
   };
 
   const onChecking = (alert) => {
@@ -95,9 +111,9 @@ const AlertTable = ({ alertData, alertSearch }) => {
         </thead>
         <tbody>
           {alertData && alertData.length !== 0
-            ? alertData.map((alert) => {
+            ? alertData.map((alert, index) => {
                 return (
-                  <tr>
+                  <tr key={index}>
                     <td className="name-tooltip">
                       <span>{CustomTooltip(alert.alert_name)}</span>
                     </td>
@@ -206,6 +222,14 @@ const AlertTable = ({ alertData, alertSearch }) => {
               )}
         </tbody>
       </table>
+      {pagination && alertData && alertData.length !== 0 && (
+        <Pagination
+          handleBtnClick={handleBtnClick}
+          pagination={pagination}
+          pgInfo={pgInfo}
+          handleSelectClick={handleSelectClick}
+        />
+      )}
       <Modal
         portalClassName="deletemodal"
         isOpen={isOpen}

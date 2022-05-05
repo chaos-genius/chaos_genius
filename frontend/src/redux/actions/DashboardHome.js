@@ -5,7 +5,8 @@ import {
   DASHBOARD_CREATE_URL,
   DASHBOARD_UPDATE_URL,
   attachParams,
-  DASHBOARD_EDIT_URL
+  DASHBOARD_EDIT_URL,
+  DASHBOARD_LIST_FOR_FILTER
 } from '../../utils/url-helper';
 import {
   DASHBOARDFAILURE,
@@ -22,7 +23,9 @@ import {
   DASHBOARDEDITFAILURE,
   DASHBOARDUPDATEREQUEST,
   DASHBOARDUPDATESUCCESS,
-  DASHBOARDUPDATEFAILURE
+  DASHBOARDUPDATEFAILURE,
+  GETDASHBOARDFORFIlTERSUCCESS,
+  GETDASHBOARDFORFIlTERFAILURE
 } from './ActionConstants';
 
 export const getDashboardRequested = () => {
@@ -195,6 +198,32 @@ export const getUpdateDashboard = (payload) => {
       dispatch(getUpdateDashboardFailure());
     } else if (data && status === 200) {
       dispatch(getUpdateDashboardSuccess(data));
+    }
+  };
+};
+
+export const getDashboardForFilterSuccess = (response) => {
+  return {
+    type: GETDASHBOARDFORFIlTERSUCCESS,
+    data: response.data
+  };
+};
+
+export const getDashboardForFilterFailure = () => {
+  return {
+    type: GETDASHBOARDFORFIlTERFAILURE
+  };
+};
+
+export const getDashboardForFilter = () => {
+  return async (dispatch) => {
+    const { data, error, status } = await getRequest({
+      url: DASHBOARD_LIST_FOR_FILTER
+    });
+    if (error) {
+      dispatch(getDashboardForFilterFailure());
+    } else if (data && status === 200) {
+      dispatch(getDashboardForFilterSuccess(data));
     }
   };
 };

@@ -50,6 +50,7 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 CHAOSGENIUS_WEBAPP_URL = os.getenv("CHAOSGENIUS_WEBAPP_URL")
+CORS_ENABLED = _make_bool(os.getenv("CORS_ENABLED", default=False))
 
 EMAIL_HOST = os.getenv('EMAIL_HOST')
 EMAIL_HOST_PORT = os.getenv('EMAIL_HOST_PORT', default=587)
@@ -102,7 +103,7 @@ IN_DOCKER = _make_bool(os.getenv('IN_DOCKER', default=False))
 TASK_CHECKPOINT_LIMIT: int = int(os.getenv("TASK_CHECKPOINT_LIMIT", 1000))
 """Number of last checkpoints to retrieve in Task Monitor"""
 
-CHAOSGENIUS_VERSION_MAIN = os.getenv("CHAOSGENIUS_VERSION_MAIN", "0.6.1")
+CHAOSGENIUS_VERSION_MAIN = os.getenv("CHAOSGENIUS_VERSION_MAIN", "0.7.0")
 """ChaosGenius version - semver part only"""
 CHAOSGENIUS_VERSION_POSTFIX = os.getenv("CHAOSGENIUS_VERSION_POSTFIX", "git")
 """ChaosGenius version - postfix to identify deployment"""

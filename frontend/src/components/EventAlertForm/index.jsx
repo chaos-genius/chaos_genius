@@ -126,9 +126,9 @@ const EventAlertForm = ({
   useEffect(() => {
     if (path[2] === 'edit') {
       dispatch(getKpiAlertById(kpiId));
-      dispatch(getAllKpiExplorerForm());
+      dispatch(getAllKpiExplorerForm({ paginate: false }));
     } else {
-      dispatch(getAllKpiExplorerForm());
+      dispatch(getAllKpiExplorerForm({ paginate: false }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

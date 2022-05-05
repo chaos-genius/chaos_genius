@@ -3,6 +3,7 @@
 import logging
 from copy import deepcopy
 from datetime import datetime
+from typing import List, Optional
 from uuid import uuid4
 
 from flask.blueprints import Blueprint
@@ -94,7 +95,10 @@ def data_source():
         logger.info("Listing data sources.")
 
         datasource_types_list = request.args.getlist("datasource_type")
+
+        paginate = request.args.get("paginate") != "false"
         page, per_page = pagination_args(request)
+
         search_query, search_filter = make_search_filter(request, DataSource.name)
 
         filters = [DataSource.active == True]  # noqa: E712
@@ -110,11 +114,19 @@ def data_source():
                 )
             )
 
-        data_sources_paginated: Pagination = (
-            DataSource.query.filter(*filters)
-            .order_by(DataSource.created_at.desc())
-            .paginate(page=page, per_page=per_page)
-        )
+        data_sources_paginated: Optional[Pagination]
+        data_sources: List[DataSource]
+        if paginate:
+            data_sources_paginated_: Pagination = (
+                DataSource.query.filter(*filters)
+                .order_by(DataSource.created_at.desc())
+                .paginate(page=page, per_page=per_page)
+            )
+            data_sources = data_sources_paginated_.items
+            data_sources_paginated = data_sources_paginated_
+        else:
+            data_sources = DataSource.query.filter(*filters).all()
+            data_sources_paginated = None
         ds_kpi_count = (
             db.session.query(DataSource.id, func.count(Kpi.id))
             .join(Kpi, Kpi.data_source == DataSource.id)
@@ -127,7 +139,7 @@ def data_source():
         for row in ds_kpi_count:
             data_source_kpi_map[row[0]] = row[1]
         results = []
-        for conn in data_sources_paginated.items:
+        for conn in data_sources:
             # TODO: Add the kpi_count, real sync details and sorting info
             conn_detail = conn.safe_dict
             if not conn_detail["last_sync"]:
@@ -141,7 +153,11 @@ def data_source():
         return jsonify({
             "count": len(results),
             "data": results,
-            "pagination": pagination_info(data_sources_paginated),
+            "pagination": (
+                pagination_info(data_sources_paginated)
+                if data_sources_paginated is not None
+                else None
+            ),
             SEARCH_PARAM_NAME: search_query,
         })
 

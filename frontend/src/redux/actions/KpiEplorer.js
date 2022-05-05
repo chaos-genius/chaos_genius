@@ -146,11 +146,12 @@ export const getTableInfoDataFailure = () => {
   };
 };
 
-export const getAllKpiExplorerForm = () => {
+export const getAllKpiExplorerForm = (pgInfo) => {
   return async (dispatch) => {
     dispatch(getAllKpiExplorerFormRequested());
+    const url = attachParams(CONNECTION_URL, pgInfo);
     const { data, error, status } = await getRequest({
-      url: CONNECTION_URL
+      url: url
     });
     if (error) {
       dispatch(getAllKpiExplorerFormFailure());

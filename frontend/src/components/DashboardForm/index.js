@@ -52,7 +52,7 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
   } = useSelector((state) => state.DashboardHome);
 
   useEffect(() => {
-    dispatch(getAllKpiExplorer());
+    dispatch(getAllKpiExplorer({ paginate: false }));
     if (path[2] === 'edit') {
       dispatch(getEditDashboard({ dashboard_id: dashboardId }));
     } // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,0 +1,77 @@
+image:
+  file: .gitpod.dockerfile
+
+# List the start up tasks. Learn more https://www.gitpod.io/docs/config-start-tasks/
+tasks:
+  # modify .bashrc here.
+  # `PGHOSTADDR` is set to the Postgres server running on Gitpod. pyscopg2 picks up this
+  # variable and connects to that DB instead of the one we specify through data sources
+  # for some reason. So we unset this.
+  # See `DATABASE_URL_CG_DB` in `.gitpod.env` for the credentials to the Postgres server
+  # running inside Gitpod.
+  - before: printf 'unset PGHOSTADDR\n' >> $HOME/.bashrc && exit
+
+  # the backend server
+  - name: API Server
+    init: |
+      pip install wheel
+      pip install -r requirements/dev.txt
+      # notify that backend requirements have finished installing
+      gp sync-done backend-reqs
+    command: |
+      cp .gitpod.env .env.local
+      # get the URL for port 5000 exposed through Gitpod and use it as the WEBAPP_URL
+      # TODO: links to "View KPI", etc. won't work since they are on port 3000
+      sed -i "s~CHAOSGENIUS_WEBAPP_URL_HERE~`gp url 5000`~g" ".env.local"
+
+      # start postgres server
+      pg_start
+
+      # apply migrations
+      flask db upgrade
+
+      # notify that backend has been setup completely
+      gp sync-done backend-setup
+
+      bash dev_server.sh
+
+  - name: Webapp
+    init: |
+      cd frontend
+      npm install
+    command: |
+      cd frontend
+      # BASE_URL is set to port 5000 exposed through gitpod
+      REACT_APP_BASE_URL=`gp url 5000` npm start
+
+  - name: Redis
+    command: redis-server
+
+  - name: Workers and Scheduler
+    # TODO: is the await needed here?
+    init: gp sync-await backend-reqs
+    command: |
+      # wait all of backend setup (incl. migrations, env vars) to be completed
+      gp sync-await backend-setup
+      bash dev_workers.sh
+
+ports:
+  # webapp
+  - port: 3000
+    onOpen: open-browser
+    visibility: "public"
+  # backend server
+  - port: 5000
+    visibility: "public"
+
+vscode:
+  extensions:
+    - "ms-python.python"
+    - "samuelcolvin.jinjahtml"
+
+github:
+  prebuilds:
+    # add a check to pull requests (defaults to true)
+    addCheck: false
+    # add a "Review in Gitpod" button as a comment to pull requests (defaults to false)
+    addComment: true

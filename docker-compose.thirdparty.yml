@@ -38,7 +38,7 @@ services:
 
   chaosgenius-server:
     container_name: chaosgenius-server
-    image: chaosgenius/chaosgenius-server:0.6.1
+    image: chaosgenius/chaosgenius-server:0.7.0
     command: sh setup/run-backend-docker.sh
     restart: unless-stopped
     volumes:
@@ -92,10 +92,11 @@ services:
       - SENTRY_DSN=${SENTRY_DSN}
       - CHAOSGENIUS_ENTERPRISE_EDITION_KEY=${CHAOSGENIUS_ENTERPRISE_EDITION_KEY}
       - CHAOSGENIUS_WEBAPP_URL=${CHAOSGENIUS_WEBAPP_URL}
+      - CORS_ENABLED=${CORS_ENABLED}
 
   chaosgenius-webapp:
     container_name: chaosgenius-webapp
-    image: chaosgenius/chaosgenius-webapp:0.6.1
+    image: chaosgenius/chaosgenius-webapp:0.7.0
     command: >
       sh -c "npx react-inject-env set -d ./ &&
              nginx -g 'daemon off;'"
@@ -136,7 +137,7 @@ services:
     
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler
-    image: chaosgenius/chaosgenius-server:0.6.1
+    image: chaosgenius/chaosgenius-server:0.7.0
     command: celery -A run.celery beat --loglevel=DEBUG
     restart: unless-stopped
     environment:
@@ -173,7 +174,7 @@ services:
   
   chaosgenius-worker-analytics:
     container_name: chaosgenius-worker-analytics
-    image: chaosgenius/chaosgenius-server:0.6.1
+    image: chaosgenius/chaosgenius-server:0.7.0
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
     restart: unless-stopped
     environment:
@@ -226,7 +227,7 @@ services:
 
   chaosgenius-worker-alerts:
     container_name: chaosgenius-worker-alerts
-    image: chaosgenius/chaosgenius-server:0.6.1
+    image: chaosgenius/chaosgenius-server:0.7.0
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
     restart: unless-stopped
     environment:

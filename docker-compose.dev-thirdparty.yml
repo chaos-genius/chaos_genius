@@ -2,41 +2,56 @@ version: "3.7"
 #https://github.com/compose-spec/compose-spec/blob/master/spec.md#using-extensions-as-fragments
 x-logging: &default-logging
   options:
-    fluentd-address: localhost:24224
-    fluentd-async: "true"
-  driver: fluentd
+    max-size: "100m"
+    max-file: "5"
+  driver: json-file
 x-version:
   &chaosgenius-version
-  CHAOSGENIUS_VERSION_POSTFIX=fluentd-compose
+  CHAOSGENIUS_VERSION_POSTFIX=dev-thirdparty-compose
 
 services:
-  chaosgenius-fluentd:
-    container_name: chaosgenius-fluentd
-    image: fluent/fluentd:latest
-    restart: unless-stopped
-    environment:
-      - FLUENTD_CONF=log.conf
-      - FLUENT_UID=0
-    ports:
-      - 24224:24224
+  chaosgenius-init:
+    container_name: chaosgenius-init
+    image: docker:20.10
+    command: >
+      sh -c "apk update && 
+             apk upgrade && 
+             apk add bash && 
+             bash /setup/docker/setup-airbyte-images.sh"
     volumes:
-      - ./setup/fluentd/log.conf:/fluentd/etc/log.conf
-      - ./logs:/var/log/fluent
+      - ./setup:/setup
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - SOURCE_GOOGLE_ANALYTICS=${SOURCE_GOOGLE_ANALYTICS}
+      - SOURCE_GOOGLE_SHEETS=${SOURCE_GOOGLE_SHEETS}
+      - SOURCE_MYSQL=${SOURCE_MYSQL}
+      - SOURCE_POSTGRES=${SOURCE_POSTGRES}
+      - SOURCE_SHOPIFY=${SOURCE_SHOPIFY}
+      - SOURCE_STRIPE=${SOURCE_STRIPE}
+      - SOURCE_GOOGLE_ADS=${SOURCE_GOOGLE_ADS}
+      - SOURCE_FACEBOOK_ADS=${SOURCE_FACEBOOK_ADS}
+      - SOURCE_BING_ADS=${SOURCE_BING_ADS}
+      - SOURCE_GOOGLE_BIG_QUERY=${SOURCE_GOOGLE_BIG_QUERY}
+      - SOURCE_SNOWFLAKE=${SOURCE_SNOWFLAKE}
+
 
   chaosgenius-server:
     container_name: chaosgenius-server
-    image: chaosgenius/chaosgenius-server:latest
-    command: sh setup/run-backend-docker.sh
-    restart: unless-stopped
+    build:
+      context: .
+      args:
+        DEV: 1
+    command: sh setup/run-backend-docker.sh --reload
+    restart: on-failure:5
     volumes:
+      - ./:/usr/src/app/
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - chaosgenius-db
-      - chaosgenius-fluentd
     environment:
       - *chaosgenius-version
       - IN_DOCKER=True
-      - AIRBYTE_ENABLED=${AIRBYTE_ENABLED}
+      - AIRBYTE_ENABLED=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -80,15 +95,16 @@ services:
       - CHAOSGENIUS_ENTERPRISE_EDITION_KEY=${CHAOSGENIUS_ENTERPRISE_EDITION_KEY}
       - CHAOSGENIUS_WEBAPP_URL=${CHAOSGENIUS_WEBAPP_URL}
       - CORS_ENABLED=${CORS_ENABLED}
-    logging: *default-logging
 
   chaosgenius-webapp:
     container_name: chaosgenius-webapp
-    image: chaosgenius/chaosgenius-webapp:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
     command: >
       sh -c "npx react-inject-env set -d ./ &&
              nginx -g 'daemon off;'"
-    restart: unless-stopped
+    restart: on-failure:5
     volumes:
       - ./frontend/nginx:/etc/nginx/conf.d/
     ports:
@@ -99,13 +115,11 @@ services:
       - REACT_APP_EVENT_ALERT=${REACT_APP_EVENT_ALERT}
     depends_on:
       - chaosgenius-server
-      - chaosgenius-fluentd
-    logging: *default-logging
 
   chaosgenius-db:
     container_name: chaosgenius-db
     image: postgres:13
-    restart: unless-stopped
+    restart: on-failure:5
     healthcheck:
       test: [ "CMD", "pg_isready", "-q", "-d", "chaosgenius_data", "-U", "postgres" ]
       timeout: 45s
@@ -117,26 +131,28 @@ services:
     volumes:
       - ./docker/cg-db-setup:/docker-entrypoint-initdb.d/
       - cg-db:/var/lib/postgresql/data
-    depends_on:
-      - chaosgenius-fluentd
-    logging: *default-logging
+    ports:
+      - "5433:5432"
 
   chaosgenius-redis:
     container_name: chaosgenius-redis
     image: "redis:6.2-alpine"
-    restart: unless-stopped
-    depends_on:
-      - chaosgenius-fluentd
-    logging: *default-logging
+    restart: on-failure:5
     
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler
-    image: chaosgenius/chaosgenius-server:latest
-    command: celery -A run.celery beat --loglevel=DEBUG
-    restart: unless-stopped
+    build:
+      context: .
+      args:
+        DEV: 1
+    command: scripts/celery/dev_scheduler.sh
+    restart: on-failure:5
+    volumes:
+      - ./:/usr/src/app/
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - IN_DOCKER=True
-      - AIRBYTE_ENABLED=${AIRBYTE_ENABLED}
+      - AIRBYTE_ENABLED=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -165,17 +181,21 @@ services:
       - METADATA_SYNC_TIME=${METADATA_SYNC_TIME}
     depends_on:
       - chaosgenius-redis
-      - chaosgenius-fluentd
-    logging: *default-logging
   
   chaosgenius-worker-analytics:
     container_name: chaosgenius-worker-analytics
-    image: chaosgenius/chaosgenius-server:latest
-    command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
-    restart: unless-stopped
+    build:
+      context: .
+      args:
+        DEV: 1
+    command: scripts/celery/dev_worker-analytics.sh
+    restart: on-failure:5
+    volumes:
+      - ./:/usr/src/app/
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - IN_DOCKER=True
-      - AIRBYTE_ENABLED=${AIRBYTE_ENABLED}
+      - AIRBYTE_ENABLED=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -220,17 +240,21 @@ services:
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db
-      - chaosgenius-fluentd
-    logging: *default-logging
 
   chaosgenius-worker-alerts:
     container_name: chaosgenius-worker-alerts
-    image: chaosgenius/chaosgenius-server:latest
-    command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
-    restart: unless-stopped
+    build:
+      context: .
+      args:
+        DEV: 1
+    command: scripts/celery/dev_worker-alerts.sh
+    restart: on-failure:5
+    volumes:
+      - ./:/usr/src/app/
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - IN_DOCKER=True
-      - AIRBYTE_ENABLED=${AIRBYTE_ENABLED}
+      - AIRBYTE_ENABLED=True
       - FLASK_APP=${FLASK_APP}
       - FLASK_ENV=${FLASK_ENV}
       - FLASK_DEBUG=${FLASK_DEBUG}
@@ -260,9 +284,152 @@ services:
     depends_on:
       - chaosgenius-redis
       - chaosgenius-db
-      - chaosgenius-fluentd
+
+  # == airbyte services start here ==
+  #
+  # hook in case we need to add init behavior
+  # every root service (no depends_on) should depend on init
+  init:
+    image: airbyte/init:${VERSION}
     logging: *default-logging
+    container_name: init
+    command: /bin/sh -c "./scripts/create_mount_directories.sh /local_parent ${HACK_LOCAL_ROOT_PARENT} ${LOCAL_ROOT}"
+    environment:
+      - LOCAL_ROOT=${LOCAL_ROOT}
+      - HACK_LOCAL_ROOT_PARENT=${HACK_LOCAL_ROOT_PARENT}
+    volumes:
+      - ${HACK_LOCAL_ROOT_PARENT}:/local_parent
+  db:
+    image: airbyte/db:${VERSION}
+    logging: *default-logging
+    container_name: airbyte-db
+    restart: on-failure:5
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - DOCKER_NETWORK=${DOCKER_NETWORK}
+    volumes:
+      - db:/var/lib/postgresql/data
+  scheduler:
+    image: airbyte/scheduler:${VERSION}
+    logging: *default-logging
+    container_name: airbyte-scheduler
+    restart: on-failure:5
+    environment:
+      - WEBAPP_URL=${WEBAPP_URL}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_URL=${DATABASE_URL}
+      - CONFIG_DATABASE_USER=${CONFIG_DATABASE_USER:-}
+      - CONFIG_DATABASE_PASSWORD=${CONFIG_DATABASE_PASSWORD:-}
+      - CONFIG_DATABASE_URL=${CONFIG_DATABASE_URL:-}
+      - WORKSPACE_ROOT=${WORKSPACE_ROOT}
+      - WORKSPACE_DOCKER_MOUNT=${WORKSPACE_DOCKER_MOUNT}
+      - LOCAL_ROOT=${LOCAL_ROOT}
+      - LOCAL_DOCKER_MOUNT=${LOCAL_DOCKER_MOUNT}
+      - CONFIG_ROOT=${CONFIG_ROOT}
+      - TRACKING_STRATEGY=${TRACKING_STRATEGY}
+      - AIRBYTE_VERSION=${VERSION}
+      - AIRBYTE_ROLE=${AIRBYTE_ROLE:-}
+      - TEMPORAL_HOST=${TEMPORAL_HOST}
+      - WORKER_ENVIRONMENT=${WORKER_ENVIRONMENT}
+      - S3_LOG_BUCKET=${S3_LOG_BUCKET}
+      - S3_LOG_BUCKET_REGION=${S3_LOG_BUCKET_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - GCP_STORAGE_BUCKET=${GCP_STORAGE_BUCKET}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - SUBMITTER_NUM_THREADS=${SUBMITTER_NUM_THREADS}
+      - RESOURCE_CPU_REQUEST=${RESOURCE_CPU_REQUEST}
+      - RESOURCE_CPU_LIMIT=${RESOURCE_CPU_LIMIT}
+      - RESOURCE_MEMORY_REQUEST=${RESOURCE_MEMORY_REQUEST}
+      - RESOURCE_MEMORY_LIMIT=${RESOURCE_MEMORY_LIMIT}
+      - MAX_SYNC_JOB_ATTEMPTS=${MAX_SYNC_JOB_ATTEMPTS}
+      - MAX_SYNC_TIMEOUT_DAYS=${MAX_SYNC_TIMEOUT_DAYS}
+      - DOCKER_NETWORK=${DOCKER_NETWORK}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - workspace:${WORKSPACE_ROOT}
+      - ${LOCAL_ROOT}:${LOCAL_ROOT}
+      - data:${CONFIG_ROOT}
+  server:
+    image: airbyte/server:${VERSION}
+    logging: *default-logging
+    container_name: airbyte-server
+    restart: on-failure:5
+    environment:
+      - WEBAPP_URL=${WEBAPP_URL}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_URL=${DATABASE_URL}
+      - CONFIG_DATABASE_USER=${CONFIG_DATABASE_USER:-}
+      - CONFIG_DATABASE_PASSWORD=${CONFIG_DATABASE_PASSWORD:-}
+      - CONFIG_DATABASE_URL=${CONFIG_DATABASE_URL:-}
+      - WORKSPACE_ROOT=${WORKSPACE_ROOT}
+      - CONFIG_ROOT=${CONFIG_ROOT}
+      - TRACKING_STRATEGY=${TRACKING_STRATEGY}
+      - AIRBYTE_VERSION=${VERSION}
+      - AIRBYTE_ROLE=${AIRBYTE_ROLE:-}
+      - TEMPORAL_HOST=${TEMPORAL_HOST}
+      - WORKER_ENVIRONMENT=${WORKER_ENVIRONMENT}
+      - S3_LOG_BUCKET=${S3_LOG_BUCKET}
+      - S3_LOG_BUCKET_REGION=${S3_LOG_BUCKET_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - GCP_STORAGE_BUCKET=${GCP_STORAGE_BUCKET}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - RESOURCE_CPU_REQUEST=${RESOURCE_CPU_REQUEST}
+      - RESOURCE_CPU_LIMIT=${RESOURCE_CPU_LIMIT}
+      - RESOURCE_MEMORY_REQUEST=${RESOURCE_MEMORY_REQUEST}
+      - RESOURCE_MEMORY_LIMIT=${RESOURCE_MEMORY_LIMIT}
+      - DOCKER_NETWORK=${DOCKER_NETWORK}
+    volumes:
+      - workspace:${WORKSPACE_ROOT}
+      - data:${CONFIG_ROOT}
+      - ${LOCAL_ROOT}:${LOCAL_ROOT}
+  webapp:
+    image: airbyte/webapp:${VERSION}
+    logging: *default-logging
+    container_name: airbyte-webapp
+    restart: on-failure:5
+    environment:
+      - AIRBYTE_ROLE=${AIRBYTE_ROLE:-}
+      - AIRBYTE_VERSION=${VERSION}
+      - API_URL=${API_URL:-}
+      - IS_DEMO=${IS_DEMO:-}
+      - PAPERCUPS_STORYTIME=${PAPERCUPS_STORYTIME:-}
+      - FULLSTORY=${FULLSTORY:-}
+      - OPENREPLAY=${OPENREPLAY:-}
+      - TRACKING_STRATEGY=${TRACKING_STRATEGY}
+      - INTERNAL_API_HOST=${INTERNAL_API_HOST}
+      - DOCKER_NETWORK=${DOCKER_NETWORK}
+  airbyte-temporal:
+    image: temporalio/auto-setup:1.7.0
+    logging: *default-logging
+    container_name: airbyte-temporal
+    restart: on-failure:5
+    environment:
+      - DB=postgresql
+      - DB_PORT=${DATABASE_PORT}
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PWD=${DATABASE_PASSWORD}
+      - POSTGRES_SEEDS=${DATABASE_HOST}
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development.yaml
+      - LOG_LEVEL=${LOG_LEVEL}
+      - DOCKER_NETWORK=${DOCKER_NETWORK}
+    volumes:
+      - ./temporal/dynamicconfig:/etc/temporal/config/dynamicconfig
 
 volumes:
+  workspace:
+    name: ${WORKSPACE_DOCKER_MOUNT}
+  data:
+    name: ${DATA_DOCKER_MOUNT}
+  db:
+    name: ${DB_DOCKER_MOUNT}
   cg-db:
     name: ${CG_DB_DOCKER_MOUNT}
+
+networks:
+  default:
+    name: chaos_genius_default

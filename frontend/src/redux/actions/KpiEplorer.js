@@ -48,7 +48,8 @@ import {
   ADD_KPI_GET_AVAILABILITY,
   KPI_LIST_SCHEMA,
   KPI_TABLE_LIST_ON_SCHEMA,
-  KPI_TABLE_INFO_DATA
+  KPI_TABLE_INFO_DATA,
+  attachParams
 } from '../../utils/url-helper';
 
 import { getRequest, postRequest, putRequest } from '../../utils/http-helper';
@@ -72,16 +73,17 @@ export const getAllKpiExplorerFailure = () => {
   };
 };
 
-export const getAllKpiExplorer = () => {
+export const getAllKpiExplorer = (pgInfo) => {
   return async (dispatch) => {
     dispatch(getAllKpiExplorerRequested());
+    const url = attachParams(KPI_URL, pgInfo);
     const { data, error, status } = await getRequest({
-      url: KPI_URL
+      url: url
     });
     if (error) {
       dispatch(getAllKpiExplorerFailure());
     } else if (data && status === 200) {
-      dispatch(getAllKpiExplorerSuccess(data.data));
+      dispatch(getAllKpiExplorerSuccess(data));
     }
   };
 };
@@ -144,11 +146,12 @@ export const getTableInfoDataFailure = () => {
   };
 };
 
-export const getAllKpiExplorerForm = () => {
+export const getAllKpiExplorerForm = (pgInfo) => {
   return async (dispatch) => {
     dispatch(getAllKpiExplorerFormRequested());
+    const url = attachParams(CONNECTION_URL, pgInfo);
     const { data, error, status } = await getRequest({
-      url: CONNECTION_URL
+      url: url
     });
     if (error) {
       dispatch(getAllKpiExplorerFormFailure());

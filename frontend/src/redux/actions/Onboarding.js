@@ -78,7 +78,7 @@ export const getHomeKpi = (params) => {
     if (error) {
       dispatch(getHomeKpiFailure());
     } else if (data && status === 200) {
-      dispatch(getHomeKpiSuccess(data.data));
+      dispatch(getHomeKpiSuccess(data));
     }
   };
 };

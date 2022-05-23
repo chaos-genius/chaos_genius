@@ -67,20 +67,36 @@ class DataLoader:
         self.start_date = start_date
         self.days_before = days_before
 
-        if self.end_date is None and self.start_date is None and self.days_before is not None:
+        if (
+            self.end_date is None
+            and self.start_date is None
+            and self.days_before is not None
+        ):
             raise ValueError(
                 "If days_before is specified, either start_date or end_date must be specified"
             )
 
-        if self.end_date is not None and self.start_date is not None and self.days_before is not None:
+        if (
+            self.end_date is not None
+            and self.start_date is not None
+            and self.days_before is not None
+        ):
             raise ValueError(
                 "end_date, start_date and days_before cannot be specified at the same time"
             )
 
-        if self.end_date is None and self.start_date is not None and self.days_before is not None:
+        if (
+            self.end_date is None
+            and self.start_date is not None
+            and self.days_before is not None
+        ):
             self.end_date = self.start_date + timedelta(days=self.days_before)
 
-        if self.end_date is not None and self.start_date is None and self.days_before is not None:
+        if (
+            self.end_date is not None
+            and self.start_date is None
+            and self.days_before is not None
+        ):
             self.start_date = self.end_date - timedelta(days=self.days_before)
 
         # when we do date <= "6 Feb 2022", we get data till "6 Feb 2022 00:00:00"
@@ -124,15 +140,23 @@ class DataLoader:
         if TIMEZONE in SUPPORTED_TIMEZONES:
             tz_offset_string = SUPPORTED_TIMEZONES[TIMEZONE][-6:]
         else:
-            tz_offset_string = datetime.now(pytz.timezone(TIMEZONE)).strftime("%z")
-            tz_offset_string = tz_offset_string[:3] + ":" + tz_offset_string[3:]
+            tz_offset_string = datetime.now(pytz.timezone(TIMEZONE)).strftime(
+                "%z"
+            )
+            tz_offset_string = (
+                tz_offset_string[:3] + ":" + tz_offset_string[3:]
+            )
 
         filters = []
         if self.start_date is not None:
-            start_date_str = self._convert_date_to_string(self.start_date, tz_offset_string)
+            start_date_str = self._convert_date_to_string(
+                self.start_date, tz_offset_string
+            )
             filters.append(f"{dt_col_str} >= '{start_date_str}'")
         if self.end_date is not None:
-            end_date_str = self._convert_date_to_string(self.end_date, tz_offset_string)
+            end_date_str = self._convert_date_to_string(
+                self.end_date, tz_offset_string
+            )
             filters.append(f"{dt_col_str} < '{end_date_str}'")
 
         return filters

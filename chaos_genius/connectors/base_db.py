@@ -11,9 +11,9 @@ logger = logging.getLogger(__name__)
 class BaseDb:
 
     __SQL_IDENTIFIER = ""
-    __SQL_DATE_TO_DATETIME_FORMAT = "T00:00:00{}"
-    __SQL_STRPTIME_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
-    __SQL_STRFTIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
+    __SQL_DATE_FORMAT = "'%Y-%m-%dT00:00:00{}'"
+    __SQL_STRPTIME_FORMAT = "'%Y-%m-%dT%H:%M:%S%z'"
+    __SQL_STRFTIME_FORMAT = "'%Y-%m-%dT%H:%M:%S'"
 
     @property
     def sql_identifier(self):
@@ -21,9 +21,9 @@ class BaseDb:
         return self.__SQL_IDENTIFIER
 
     @property
-    def sql_date_to_datetime_format(self):
-        """String format to add time to a date along with an offset."""
-        return self.__SQL_DATE_TO_DATETIME_FORMAT
+    def sql_date_format(self):
+        """String format to convert date to datetime along with an offset."""
+        return self.__SQL_DATE_FORMAT
 
     @property
     def sql_strptime_format(self):

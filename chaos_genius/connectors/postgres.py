@@ -6,6 +6,9 @@ from .connector_utils import merge_dataframe_chunks
 
 
 class PostgresDb(BaseDb):
+
+    SQL_IDENTIFIER = '"'
+
     db_name = "postgresql"
     test_db_query = "SELECT 1"
 

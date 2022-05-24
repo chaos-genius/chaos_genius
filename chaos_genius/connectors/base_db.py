@@ -9,6 +9,12 @@ logger = logging.getLogger(__name__)
 
 
 class BaseDb:
+
+    SQL_IDENTIFIER = ""
+    SQL_DATE_TO_DATETIME_FORMAT = "T00:00:00{}"
+    SQL_STRPTIME_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
+    SQL_STRFTIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
+
     def __init__(self, *args, **kwargs):
         self.ds_info = kwargs.get("connection_info")
         self.CHUNKSIZE = 20000

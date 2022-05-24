@@ -118,8 +118,8 @@ class DataLoader:
         # TODO: Once SUPPOERTED_TIMEZONES is deprecated,
         # we shouldn't need to take offset as a string, but rather
         # take in a pytz timezone and skip using strings.
-        date = date.strftime("%Y-%m-%d")
-        date += self.db_connection.sql_date_to_datetime_format.format(offset)
+        date = date.strftime(self.db_connection.sql_date_format)
+        date = date.format(offset)
         if not self.kpi_info.get("timezone_aware"):
             date = (
                 pd.Timestamp(
@@ -154,12 +154,12 @@ class DataLoader:
             start_date_str = self._convert_date_to_string(
                 self.start_date, tz_offset_string
             )
-            filters.append(f"{dt_col_str} >= '{start_date_str}'")
+            filters.append(f"{dt_col_str} >= {start_date_str}")
         if self.end_date is not None:
             end_date_str = self._convert_date_to_string(
                 self.end_date, tz_offset_string
             )
-            filters.append(f"{dt_col_str} < '{end_date_str}'")
+            filters.append(f"{dt_col_str} < {end_date_str}")
 
         return filters
 

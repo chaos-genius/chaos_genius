@@ -79,7 +79,8 @@ const initialState = {
   kpiUpdateLoading: false,
   kpiUpdateData: [],
   kpiUpdateError: false,
-  supportedAgg: []
+  supportedAgg: [],
+  pagination: {}
 };
 
 export const kpiExplorer = (state = initialState, action) => {
@@ -95,8 +96,9 @@ export const kpiExplorer = (state = initialState, action) => {
       return {
         ...state,
         isLoading: false,
-        kpiExplorerList: action.data,
-        error: false
+        kpiExplorerList: action.data.data,
+        error: false,
+        pagination: action.data.pagination
       };
     }
     case KPIEXPLORERFAILURE: {
@@ -104,7 +106,8 @@ export const kpiExplorer = (state = initialState, action) => {
         ...state,
         isLoading: false,
         kpiExplorerList: [],
-        error: true
+        error: true,
+        pagination: {}
       };
     }
     case KPIEXPLORERFORMREQUEST: {

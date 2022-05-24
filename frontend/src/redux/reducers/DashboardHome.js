@@ -13,7 +13,9 @@ import {
   DASHBOARDEDITFAILURE,
   DASHBOARDUPDATEREQUEST,
   DASHBOARDUPDATESUCCESS,
-  DASHBOARDUPDATEFAILURE
+  DASHBOARDUPDATEFAILURE,
+  GETDASHBOARDFORFIlTERSUCCESS,
+  GETDASHBOARDFORFIlTERFAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -31,7 +33,8 @@ const initialState = {
   editDashboardError: false,
   updateDashboard: [],
   updateDashboardLoading: false,
-  updateDashboardError: false
+  updateDashboardError: false,
+  dashboardTypes: []
 };
 
 export const DashboardHome = (state = initialState, action) => {
@@ -49,6 +52,18 @@ export const DashboardHome = (state = initialState, action) => {
         dashboardListLoading: false,
         dashboardList: action.data,
         dashboardListError: false
+      };
+    }
+    case GETDASHBOARDFORFIlTERSUCCESS: {
+      return {
+        ...state,
+        dashboardTypes: action.data
+      };
+    }
+    case GETDASHBOARDFORFIlTERFAILURE: {
+      return {
+        ...state,
+        dashboardTypes: []
       };
     }
     case DASHBOARDFAILURE: {

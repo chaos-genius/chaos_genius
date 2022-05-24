@@ -12,7 +12,7 @@ const Dashboardname = ({ data }) => {
       {data &&
         data.length !== 0 &&
         data.slice(0, show).map((dashboard, index) => (
-          <li>
+          <li key={index}>
             <label className="name-tooltip">
               <Tooltip
                 className="tooltip-name"

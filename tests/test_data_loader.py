@@ -29,6 +29,8 @@ def test_data_loader(monkeypatch: MonkeyPatch):
         "connection_type": "Postgres",
         "id": 1,
         "database_timezone": "Etc/UTC",
+        "is_third_party": False,
+        "sourceConfig": {"connectionConfiguration": {}},
     }
 
     @dataclass
@@ -206,7 +208,12 @@ def test_data_loader(monkeypatch: MonkeyPatch):
     output_query = f"""select * from "cloud_cost" where "date" >= '{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and "date" < '{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
     assert output_query == dl._build_query().strip()
 
-    data_source["database_timezone"] = "America/New_York"
-    start_date = start_date - timedelta(days=1)
-    end_date = end_date - timedelta(days=1)
-    output_query = f"""select * from "cloud_cost" where "date" >= '{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and "date" < '{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
+    data_source["connection_type"] = "MySQL"
+    end_date = date(2020, 1, 1)
+    start_date = date(2019, 1, 1)
+    dl = data_loader.DataLoader(
+        kpi_info, end_date=end_date, start_date=start_date
+    )
+    end_date = end_date + timedelta(days=1)
+    output_query = f"""select * from `cloud_cost` where `date` >= '{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and `date` < '{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
+    assert output_query == dl._build_query().strip()

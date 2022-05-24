@@ -249,7 +249,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   }, [kpiEditData]);
 
   const dispatchGetAllKpiExplorerForm = () => {
-    dispatch(getAllKpiExplorerForm());
+    dispatch(getAllKpiExplorerForm({ paginate: false }));
   };
 
   useEffect(() => {

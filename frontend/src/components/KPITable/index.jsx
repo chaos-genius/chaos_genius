@@ -30,8 +30,18 @@ import { useToast } from 'react-toast-wnm';
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
 import { connectionContext } from '../context';
 import { CustomTooltip } from '../../utils/tooltip-helper';
+import Pagination from '../Pagination';
 
-const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
+const KPITable = ({
+  kpiData,
+  kpiLoading,
+  kpiSearch,
+  changeData,
+  pagination,
+  pgInfo,
+  setKpiSearch,
+  setPgInfo
+}) => {
   const connectionType = useContext(connectionContext);
 
   const dispatch = useDispatch();
@@ -57,7 +67,7 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
         header: 'KPI deleted successfully',
         description: kpiDisableData.message
       });
-      changeData((prev) => !prev);
+      setKpiSearch('');
     } else if (kpiDisableData && kpiDisableData.status === 'failed') {
       customToast({
         type: 'error',
@@ -116,6 +126,14 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
     });
   };
 
+  const handleBtnClick = (e) => {
+    setPgInfo({ ...pgInfo, page: e });
+  };
+
+  const handleSelectClick = (e) => {
+    setPgInfo({ ...pgInfo, page: 1, per_page: e.target.value });
+  };
+
   return (
     <>
       <table className="table">
@@ -142,115 +160,112 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
             </tr>
           ) : (
             <>
-              {kpiData && kpiData.length !== 0
-                ? kpiData.map((kpi) => {
-                    return (
-                      <tr key={uuidv4()}>
-                        <td className="name-tooltip">
-                          <span>{CustomTooltip(kpi.name)}</span>
-                        </td>
-                        <td>
-                          {kpi?.dashboards.length !== 0 ? (
-                            <Dashboardname data={kpi?.dashboards} />
-                          ) : (
-                            '-'
-                          )}
-                        </td>
-                        <td>
-                          {kpi.dimensions.length !== 0 ? (
-                            <Dimension data={kpi.dimensions}></Dimension>
-                          ) : (
-                            '-'
-                          )}
-                        </td>
-                        <td>
-                          <div className="source-type">
-                            {connectionType ? datasourceIcon(kpi) : '-'}
+              {kpiData && kpiData.length !== 0 ? (
+                kpiData.map((kpi) => {
+                  return (
+                    <tr key={uuidv4()}>
+                      <td className="name-tooltip">
+                        <span>{CustomTooltip(kpi.name)}</span>
+                      </td>
+                      <td>
+                        {kpi?.dashboards.length !== 0 ? (
+                          <Dashboardname data={kpi?.dashboards} />
+                        ) : (
+                          '-'
+                        )}
+                      </td>
+                      <td>
+                        {kpi.dimensions.length !== 0 ? (
+                          <Dimension data={kpi.dimensions}></Dimension>
+                        ) : (
+                          '-'
+                        )}
+                      </td>
+                      <td>
+                        <div className="source-type">
+                          {connectionType ? datasourceIcon(kpi) : '-'}
+                        </div>
+                      </td>
+                      <td className="date-column-formated">
+                        {formatDateTime(kpi.created_at, true) || '-'}
+                      </td>
+                      <td>
+                        <div className={' more-dropdown dropdown'}>
+                          <div
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                            aria-haspopup="true">
+                            <img
+                              src={More}
+                              alt="More"
+                              className="moreoption"
+                              data-bs-toggle="tooltip"
+                              data-bs-placement="bottom"
+                              title="Actions"
+                            />
+                            <img
+                              src={Moreactive}
+                              alt="More"
+                              className="moreoption-active"
+                              data-bs-toggle="tooltip"
+                              data-bs-placement="bottom"
+                              title="Actions"
+                            />
                           </div>
-                        </td>
-                        <td className="date-column-formated">
-                          {formatDateTime(kpi.created_at, true) || '-'}
-                        </td>
-                        <td>
-                          {/* dropdown */}
-
-                          <div className={' more-dropdown dropdown'}>
-                            <div
-                              data-bs-toggle="dropdown"
-                              aria-expanded="false"
-                              aria-haspopup="true">
-                              <img
-                                src={More}
-                                alt="More"
-                                className="moreoption"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="bottom"
-                                title="Actions"
-                              />
-                              <img
-                                src={Moreactive}
-                                alt="More"
-                                className="moreoption-active"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="bottom"
-                                title="Actions"
-                              />
-                            </div>
-                            <ul className="dropdown-menu ">
-                              <Link
-                                to={`/dashboard/${kpi?.dashboards[0]?.id}/settings/${kpi.id}`}>
-                                <li>
-                                  <img
-                                    src={Setting}
-                                    alt="Configure Analytics"
-                                    className="action-disable"
-                                  />
-                                  <img
-                                    src={Settingactive}
-                                    alt="Configure Analytics"
-                                    className="action-active"
-                                  />
-                                  Configure Analytics
-                                </li>
-                              </Link>
-                              <Link to={`/kpiexplorer/edit/${kpi.id}`}>
-                                <li>
-                                  <img
-                                    src={Edit}
-                                    alt="Edit"
-                                    className="action-disable"
-                                  />
-                                  <img
-                                    src={EditActive}
-                                    alt="Edit"
-                                    className="action-active"
-                                  />
-                                  Edit
-                                </li>
-                              </Link>
-                              <li
-                                className="delete-item"
-                                onClick={() => {
-                                  setIsOpen(true);
-                                  setData(kpi);
-                                }}>
-                                <img src={DeleteActive} alt="Delete" />
-                                Delete
+                          <ul className="dropdown-menu ">
+                            <Link
+                              to={`/dashboard/${kpi?.dashboards[0]?.id}/settings/${kpi.id}`}>
+                              <li>
+                                <img
+                                  src={Setting}
+                                  alt="Configure Analytics"
+                                  className="action-disable"
+                                />
+                                <img
+                                  src={Settingactive}
+                                  alt="Configure Analytics"
+                                  className="action-active"
+                                />
+                                Configure Analytics
                               </li>
-                            </ul>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                : kpiData &&
-                  kpiData !== '' && (
-                    <tr className="empty-table">
-                      <td colSpan={6}>
-                        <Noresult text={kpiSearch} title="KPI" />
+                            </Link>
+                            <Link to={`/kpiexplorer/edit/${kpi.id}`}>
+                              <li>
+                                <img
+                                  src={Edit}
+                                  alt="Edit"
+                                  className="action-disable"
+                                />
+                                <img
+                                  src={EditActive}
+                                  alt="Edit"
+                                  className="action-active"
+                                />
+                                Edit
+                              </li>
+                            </Link>
+                            <li
+                              className="delete-item"
+                              onClick={() => {
+                                setIsOpen(true);
+                                setData(kpi);
+                              }}>
+                              <img src={DeleteActive} alt="Delete" />
+                              Delete
+                            </li>
+                          </ul>
+                        </div>
                       </td>
                     </tr>
-                  )}
+                  );
+                })
+              ) : kpiData && kpiData !== '' ? (
+                <tr className="empty-table">
+                  <td colSpan={6}>
+                    <Noresult text={kpiSearch} title="KPI" />
+                  </td>
+                </tr>
+              ) : null}
             </>
           )}
         </tbody>
@@ -280,6 +295,14 @@ const KPITable = ({ kpiData, kpiLoading, kpiSearch, changeData }) => {
           </div>
         </Modal>
       </table>
+      {pagination && kpiData && kpiData.length !== 0 && (
+        <Pagination
+          handleBtnClick={handleBtnClick}
+          pagination={pagination}
+          pgInfo={pgInfo}
+          handleSelectClick={handleSelectClick}
+        />
+      )}
     </>
   );
 };

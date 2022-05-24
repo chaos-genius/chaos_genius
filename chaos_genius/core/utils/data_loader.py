@@ -118,8 +118,7 @@ class DataLoader:
         # TODO: Once SUPPOERTED_TIMEZONES is deprecated,
         # we shouldn't need to take offset as a string, but rather
         # take in a pytz timezone and skip using strings.
-        date = date.strftime(self.db_connection.sql_date_format)
-        date = date.format(offset)
+        date = date.strftime(self.db_connection.sql_date_format).format(offset)
         if not self.kpi_info.get("timezone_aware"):
             date = (
                 pd.Timestamp(

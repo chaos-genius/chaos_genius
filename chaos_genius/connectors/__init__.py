@@ -16,7 +16,7 @@ DB_CLASS_MAPPER = {
 }
 
 
-def get_sqla_db_conn(data_source_info=None, connection_config=None):
+def get_sqla_db_conn(data_source_info=None, connection_config=None) -> BaseDb:
     database = None
     if not (data_source_info or connection_config):
         raise Exception(
@@ -67,7 +67,9 @@ def get_metadata(data_source_info, from_query=False, query=""):
     return metadata, err_msg
 
 
-def get_table_info(data_source_info, schema, table_name, from_db_conn=False, db_conn=None):
+def get_table_info(
+    data_source_info, schema, table_name, from_db_conn=False, db_conn=None
+):
     if from_db_conn and db_conn:
         db_connection = db_conn
     else:
@@ -78,7 +80,9 @@ def get_table_info(data_source_info, schema, table_name, from_db_conn=False, db_
     table_info = {}
     db_connection.init_inspector()
     table_info["columns"] = db_connection.get_columns(table_name, schema)
-    table_info["primary_key"] = db_connection.get_primary_key(table_name, schema)
+    table_info["primary_key"] = db_connection.get_primary_key(
+        table_name, schema
+    )
     return table_info
 
 

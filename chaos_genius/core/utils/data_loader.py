@@ -10,15 +10,11 @@ from pandas.api.types import is_datetime64_any_dtype as is_datetime
 import pytz
 
 from chaos_genius.connectors import get_sqla_db_conn
+from chaos_genius.connectors.base_db import BaseDb
 from chaos_genius.core.utils.constants import SUPPORTED_TIMEZONES
 from chaos_genius.core.utils.utils import randomword
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.settings import TIMEZONE
-
-_SQL_IDENTIFIERS = {
-    "MySQL": "`",
-    "Postgres": '"',
-}
 
 logger = logging.getLogger(__name__)
 
@@ -105,13 +101,15 @@ class DataLoader:
         if self.end_date is not None:
             self.end_date = self.end_date + timedelta(days=1)
 
+        self.dt_col = self.kpi_info["datetime_column"]
+
         self.connection_info = DataSource.get_by_id(
             kpi_info["data_source"]
         ).as_dict
-        self.dt_col = self.kpi_info["datetime_column"]
-        self.identifier = _SQL_IDENTIFIERS.get(
-            self.connection_info["connection_type"], ""
+        self.db_connection = get_sqla_db_conn(
+            data_source_info=self.connection_info
         )
+        self.identifier = self.db_connection.SQL_IDENTIFIER
 
     def _get_id_string(self, value):
         return f"{self.identifier}{value}{self.identifier}"
@@ -121,14 +119,18 @@ class DataLoader:
         # we shouldn't need to take offset as a string, but rather
         # take in a pytz timezone and skip using strings.
         date = date.strftime("%Y-%m-%d")
-        date += f"T00:00:00{offset}"
+        date += self.db_connection.SQL_DATE_TO_DATETIME_FORMAT.format(offset)
         if not self.kpi_info.get("timezone_aware"):
             date = (
-                pd.Timestamp(datetime.strptime(date, "%Y-%m-%dT%H:%M:%S%z"))
+                pd.Timestamp(
+                    datetime.strptime(
+                        date, self.db_connection.SQL_STRPTIME_FORMAT
+                    )
+                )
                 .tz_convert(self.connection_info["database_timezone"])
                 .tz_localize(None)
                 # TODO: We should also use date.isoformat() here
-                .strftime("%Y-%m-%dT%H:%M:%S")
+                .strftime(self.db_connection.SQL_STRFTIME_FORMAT)
             )
         return date
 
@@ -212,8 +214,7 @@ class DataLoader:
         return query
 
     def _run_query(self, query):
-        db_connection = get_sqla_db_conn(data_source_info=self.connection_info)
-        return db_connection.run_query(query)
+        return self.db_connection.run_query(query)
 
     def _prepare_date_column(self, df):
         if is_datetime(df[self.dt_col]):

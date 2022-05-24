@@ -10,17 +10,30 @@ logger = logging.getLogger(__name__)
 
 class BaseDb:
 
-    SQL_IDENTIFIER = ""
-    """Used to quote any SQL identifier in case of it using special characters or keywords."""
+    __SQL_IDENTIFIER = ""
+    __SQL_DATE_TO_DATETIME_FORMAT = "T00:00:00{}"
+    __SQL_STRPTIME_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
+    __SQL_STRFTIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
 
-    SQL_DATE_TO_DATETIME_FORMAT = "T00:00:00{}"
-    """String format to add time to a date along with an offset."""
+    @property
+    def sql_identifier(self):
+        """Used to quote any SQL identifier in case of it using special characters or keywords."""
+        return self.__SQL_IDENTIFIER
 
-    SQL_STRPTIME_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
-    """Format to convert strings into dates."""
+    @property
+    def sql_date_to_datetime_format(self):
+        """String format to add time to a date along with an offset."""
+        return self.__SQL_DATE_TO_DATETIME_FORMAT
 
-    SQL_STRFTIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
-    """Format to convert dates into strings."""
+    @property
+    def sql_strptime_format(self):
+        """Format to convert strings into dates."""
+        return self.__SQL_STRPTIME_FORMAT
+
+    @property
+    def sql_strftime_format(self):
+        """Format to convert dates into strings."""
+        return self.__SQL_STRFTIME_FORMAT
 
     def __init__(self, *args, **kwargs):
         self.ds_info = kwargs.get("connection_info")

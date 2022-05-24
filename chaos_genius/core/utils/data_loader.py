@@ -109,7 +109,7 @@ class DataLoader:
         self.db_connection = get_sqla_db_conn(
             data_source_info=self.connection_info
         )
-        self.identifier = self.db_connection.SQL_IDENTIFIER
+        self.identifier = self.db_connection.sql_identifier
 
     def _get_id_string(self, value):
         return f"{self.identifier}{value}{self.identifier}"
@@ -119,18 +119,18 @@ class DataLoader:
         # we shouldn't need to take offset as a string, but rather
         # take in a pytz timezone and skip using strings.
         date = date.strftime("%Y-%m-%d")
-        date += self.db_connection.SQL_DATE_TO_DATETIME_FORMAT.format(offset)
+        date += self.db_connection.sql_date_to_datetime_format.format(offset)
         if not self.kpi_info.get("timezone_aware"):
             date = (
                 pd.Timestamp(
                     datetime.strptime(
-                        date, self.db_connection.SQL_STRPTIME_FORMAT
+                        date, self.db_connection.sql_strptime_format
                     )
                 )
                 .tz_convert(self.connection_info["database_timezone"])
                 .tz_localize(None)
                 # TODO: We should also use date.isoformat() here
-                .strftime(self.db_connection.SQL_STRFTIME_FORMAT)
+                .strftime(self.db_connection.sql_strftime_format)
             )
         return date
 

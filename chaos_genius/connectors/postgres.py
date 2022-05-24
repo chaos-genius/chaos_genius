@@ -7,7 +7,12 @@ from .connector_utils import merge_dataframe_chunks
 
 class PostgresDb(BaseDb):
 
-    SQL_IDENTIFIER = '"'
+    __SQL_IDENTIFIER = '"'
+
+    @property
+    def sql_identifier(self):
+        """Used to quote any SQL identifier in case of it using special characters or keywords."""
+        return self.__SQL_IDENTIFIER
 
     db_name = "postgresql"
     test_db_query = "SELECT 1"

@@ -11,9 +11,16 @@ logger = logging.getLogger(__name__)
 class BaseDb:
 
     SQL_IDENTIFIER = ""
+    """Used to quote any SQL identifier in case of it using special characters or keywords."""
+
     SQL_DATE_TO_DATETIME_FORMAT = "T00:00:00{}"
+    """String format to add time to a date along with an offset."""
+
     SQL_STRPTIME_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
+    """Format to convert strings into dates."""
+
     SQL_STRFTIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
+    """Format to convert dates into strings."""
 
     def __init__(self, *args, **kwargs):
         self.ds_info = kwargs.get("connection_info")

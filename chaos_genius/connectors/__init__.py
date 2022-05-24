@@ -1,3 +1,4 @@
+from chaos_genius.connectors.base_db import BaseDb
 from chaos_genius.connectors.bigquery import BigQueryDb
 from chaos_genius.connectors.postgres import PostgresDb
 from chaos_genius.connectors.mysql import MysqlDb

@@ -4,7 +4,8 @@ SCHEMAS_AVAILABLE = {
     "Redshift": True,
     "BigQuery": False,
     "Snowflake": True,
-    "Druid": False
+    "Druid": False,
+    "Trino": True,
 }
 
 TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY = {
@@ -49,6 +50,13 @@ TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY = {
         "materialized_views": True,
         "supported_aggregations": ["sum", "count"],
         "supports_multidim_dd": False
+    },
+    "Trino": {
+        "tables": True,
+        "views": True,
+        "materialized_views": True,
+        "supported_aggregations": ["mean", "sum", "count"],
+        "supports_multidim_dd": True,
     }
 }
 

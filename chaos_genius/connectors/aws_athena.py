@@ -10,6 +10,26 @@ from .connector_utils import merge_dataframe_chunks
 
 
 class AwsAthenaDb(BaseDb):
+
+    __SQL_DATE_FORMAT = "timestamp '%Y-%m-%d 00:00:00{}'"
+    __SQL_STRPTIME_FORMAT = "timestamp '%Y-%m-%d %H:%M:%S%z'"
+    __SQL_STRFTIME_FORMAT = "timestamp '%Y-%m-%d %H:%M:%S'"
+
+    @property
+    def sql_date_format(self):
+        """String format to add time to a date along with an offset."""
+        return self.__SQL_DATE_FORMAT
+
+    @property
+    def sql_strptime_format(self):
+        """Format to convert strings into dates."""
+        return self.__SQL_STRPTIME_FORMAT
+
+    @property
+    def sql_strftime_format(self):
+        """Format to convert dates into strings."""
+        return self.__SQL_STRFTIME_FORMAT
+
     db_name = "aws athena"
     test_db_query = "SELECT 1"
 
@@ -29,7 +49,9 @@ class AwsAthenaDb(BaseDb):
             and region_name
             and s3_staging_dir
         ):
-            raise NotImplementedError("Database Credential not found for AWS Athena.")
+            raise NotImplementedError(
+                "Database Credential not found for AWS Athena."
+            )
 
         conn_string = "awsathena+rest://{aws_access_key_id}:{aws_secret_access_key}@athena.{region_name}.amazonaws.com/{schema_name}?s3_staging_dir={s3_staging_dir}".format(
             aws_access_key_id=quote_plus(aws_access_key_id),
@@ -58,7 +80,9 @@ class AwsAthenaDb(BaseDb):
             and region_name
             and s3_staging_dir
         ):
-            raise NotImplementedError("Database Credential not found for AWS Athena.")
+            raise NotImplementedError(
+                "Database Credential not found for AWS Athena."
+            )
         cursor = connect(
             aws_access_key_id=aws_access_key_id,
             aws_secret_access_key=aws_secret_access_key,

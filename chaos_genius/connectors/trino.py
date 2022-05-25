@@ -12,6 +12,24 @@ class Trino(BaseDb):
     """Apache Trino connector."""
 
     test_db_query = "SELECT 1"
+    __SQL_DATE_FORMAT = "timestamp '%Y-%m-%d 00:00:00{}'"
+    __SQL_STRPTIME_FORMAT = "timestamp '%Y-%m-%d %H:%M:%S%z'"
+    __SQL_STRFTIME_FORMAT = "timestamp '%Y-%m-%d %H:%M:%S'"
+
+    @property
+    def sql_date_format(self):
+        """String format to convert date to datetime along with an offset."""
+        return self.__SQL_DATE_FORMAT
+
+    @property
+    def sql_strptime_format(self):
+        """Format to convert strings into dates."""
+        return self.__SQL_STRPTIME_FORMAT
+
+    @property
+    def sql_strftime_format(self):
+        """Format to convert dates into strings."""
+        return self.__SQL_STRFTIME_FORMAT
 
     def get_db_uri(self):
         """Create SQLAlchemy URI from data source info."""

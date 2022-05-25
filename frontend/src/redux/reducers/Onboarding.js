@@ -13,7 +13,8 @@ const initialState = {
   error: '',
   homeKpiData: [],
   homeKpiLoading: true,
-  homeKpiError: false
+  homeKpiError: false,
+  pagination: {}
 };
 
 export const onboarding = (state = initialState, action) => {
@@ -49,7 +50,8 @@ export const onboarding = (state = initialState, action) => {
       return {
         ...state,
         homeKpiLoading: false,
-        homeKpiData: action.data
+        homeKpiData: action.data.data,
+        pagination: action.data.pagination
       };
     }
     case HOMEKPIVIEWFAILURE: {
@@ -63,6 +65,7 @@ export const onboarding = (state = initialState, action) => {
       return {
         ...state,
         homeKpiData: [],
+        pagination: {},
         homeKpiLoading: true,
         homeKpiError: false
       };

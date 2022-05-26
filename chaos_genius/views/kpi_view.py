@@ -451,7 +451,7 @@ def edit_kpi(kpi_id):
                         + f"editing: {kpi_id}"
                     )
 
-            if "dashboards" in data.keys():
+            if "dashboards" in data:
                 edit_kpi_dashboards(kpi_id, dashboard_id_list)
 
             kpi_obj.save(commit=True)

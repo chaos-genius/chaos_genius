@@ -387,9 +387,6 @@ def edit_kpi(kpi_id):
 
         meta_info = Kpi.meta_info()
         if kpi_obj and kpi_obj.active is True:
-            dashboard_id_list = data.pop("dashboards", []) + [0]
-            dashboard_id_list = list(set(dashboard_id_list))
-
             for key, value in data.items():
                 if key not in do_not_run_analytics_list:
                     run_analytics = True
@@ -452,6 +449,8 @@ def edit_kpi(kpi_id):
                     )
 
             if "dashboards" in data:
+                dashboard_id_list = data.pop("dashboards", []) + [0]
+                dashboard_id_list = list(set(dashboard_id_list))
                 edit_kpi_dashboards(kpi_id, dashboard_id_list)
 
             kpi_obj.save(commit=True)

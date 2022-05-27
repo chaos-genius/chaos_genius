@@ -37,7 +37,7 @@ from chaos_genius.databases.models.dashboard_kpi_mapper_model import (
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.extensions import db
-from chaos_genius.settings import DEEPDRILLS_ENABLED_TIME_RANGES
+from chaos_genius.settings import SUMMARY_DEEPDRILLS_ENABLED_TIME_RANGES
 from chaos_genius.utils.pagination import pagination_args, pagination_info
 from chaos_genius.utils.search import SEARCH_PARAM_NAME, make_search_filter
 
@@ -314,7 +314,7 @@ def get_timecuts_list():
         enabled_cuts = [
             {**{k: v for k, v in value.items() if k != "function"}, "id": key}
             for key, value in TIME_RANGES_BY_KEY.items()
-            if key in DEEPDRILLS_ENABLED_TIME_RANGES
+            if key in SUMMARY_DEEPDRILLS_ENABLED_TIME_RANGES
         ]
         ret = enabled_cuts
         message = "All timecuts fetched succesfully."

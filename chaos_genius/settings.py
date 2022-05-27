@@ -68,54 +68,14 @@ INTEGRATION_DB_PASSWORD = os.getenv("INTEGRATION_DB_PASSWORD")
 INTEGRATION_DB_PORT = os.getenv("INTEGRATION_DB_PORT")
 INTEGRATION_DATABASE = os.getenv("INTEGRATION_DATABASE")
 
-MULTIDIM_ANALYSIS_FOR_ANOMALY = _make_bool(
-    os.getenv("MULTIDIM_ANALYSIS_FOR_ANOMALY", default=False)
-)
-MAX_SUBDIM_CARDINALITY = int(os.getenv("MAX_SUBDIM_CARDINALITY", default=100))
-TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN = int(
-    os.getenv("TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN", default=10)
-)
-MIN_DATA_IN_SUBGROUP = int(os.getenv("MIN_DATA_IN_SUBGROUP", default=90))
-TOP_SUBDIMENSIONS_FOR_ANOMALY = int(
-    os.getenv("TOP_SUBDIMENSIONS_FOR_ANOMALY", default=10)
-)
-MAX_ROWS_FOR_DEEPDRILLS = int(
-    os.getenv("MAX_ROWS_FOR_DEEPDRILLS", default=10000000)
-)
-MAX_FILTER_SUBGROUPS_ANOMALY = int(
-    os.getenv("MAX_FILTER_SUBGROUPS_ANOMALY", default=100)
-)
-MAX_DEEPDRILLS_SLACK_DAYS = int(
-    os.getenv("MAX_DEEPDRILLS_SLACK_DAYS", default=14)
-)
-MAX_ANOMALY_SLACK_DAYS = int(os.getenv("MAX_ANOMALY_SLACK_DAYS", default=14))
+# Common Analytics Configuration
 DAYS_OFFSET_FOR_ANALTYICS = int(
     os.getenv("DAYS_OFFSET_FOR_ANALTYICS", default=2)
 )
 HOURS_OFFSET_FOR_ANALTYICS = int(
     os.getenv("HOURS_OFFSET_FOR_ANALTYICS", default=0)
 )
-DEEPDRILLS_HTABLE_MAX_PARENTS = int(
-    os.getenv("DEEPDRILLS_HTABLE_MAX_PARENTS", default=5)
-)
-DEEPDRILLS_HTABLE_MAX_CHILDREN = int(
-    os.getenv("DEEPDRILLS_HTABLE_MAX_CHILDREN", default=5)
-)
-DEEPDRILLS_HTABLE_MAX_DEPTH = int(
-    os.getenv("DEEPDRILLS_HTABLE_MAX_DEPTH", default=3)
-)
-DEEPDRILLS_ENABLED_TIME_RANGES = os.getenv(
-    "DEEPDRILLS_ENABLED_TIME_RANGES",
-    default="last_30_days,last_7_days,previous_day",
-)
-DEEPDRILLS_ENABLED_TIME_RANGES = list(
-    map(lambda x: x.strip(), DEEPDRILLS_ENABLED_TIME_RANGES.split(","))
-)
-for enabled_time_range in DEEPDRILLS_ENABLED_TIME_RANGES:
-    if enabled_time_range not in TIME_RANGES_BY_KEY.keys():
-        raise ValueError(
-            f"Values in DEEPDRILLS_ENABLED_TIME_RANGES must be one of {', '.join(TIME_RANGES_BY_KEY.keys())}. Got: {enabled_time_range}."
-        )
+
 TIMEZONE = os.getenv("TIMEZONE", default="UTC")
 # TODO : Deprecate SUPPORTED_TIMEZONES over releases.
 if TIMEZONE in SUPPORTED_TIMEZONES:
@@ -128,6 +88,59 @@ elif TIMEZONE not in pytz.all_timezones:
         f"Invalid Timezone Provided. Got: {TIMEZONE}. Please refer to https://docs.chaosgenius.io/docs/Operator_Guides/Configuration/supported-timezones for the list of supported timezones."
     )
 # else, timezone is valid
+
+METADATA_SYNC_TIME = os.getenv("METADATA_SYNC_TIME", "03:00")
+if len(METADATA_SYNC_TIME.split(":")) != 2:
+    raise ValueError(
+        "Metadata prefetch time is invalid. Must be in HH:MM format."
+    )
+
+# KPI Configuration
+MAX_ROWS_IN_KPI = int(os.getenv("MAX_ROWS_IN_KPI", default=10000000))
+
+# Anomaly Configuration
+MULTIDIM_ANALYSIS_FOR_ANOMALY = _make_bool(
+    os.getenv("MULTIDIM_ANALYSIS_FOR_ANOMALY", default=False)
+)
+MAX_SUBDIM_CARDINALITY = int(os.getenv("MAX_SUBDIM_CARDINALITY", default=100))
+TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN = int(
+    os.getenv("TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN", default=10)
+)
+MIN_DATA_IN_SUBGROUP = int(os.getenv("MIN_DATA_IN_SUBGROUP", default=90))
+TOP_SUBDIMENSIONS_FOR_ANOMALY = int(
+    os.getenv("TOP_SUBDIMENSIONS_FOR_ANOMALY", default=10)
+)
+MAX_FILTER_SUBGROUPS_ANOMALY = int(
+    os.getenv("MAX_FILTER_SUBGROUPS_ANOMALY", default=100)
+)
+MAX_ANOMALY_SLACK_DAYS = int(os.getenv("MAX_ANOMALY_SLACK_DAYS", default=14))
+
+# Summary and DeepDrills Configuration
+MAX_SUMMARY_DEEPDRILLS_SLACK_DAYS = int(
+    os.getenv("MAX_SUMMARY_DEEPDRILLS_SLACK_DAYS", default=14)
+)
+SUMMARY_DEEPDRILLS_ENABLED_TIME_RANGES = os.getenv(
+    "SUMMARY_DEEPDRILLS_ENABLED_TIME_RANGES",
+    default="last_30_days,last_7_days,previous_day",
+)
+SUMMARY_DEEPDRILLS_ENABLED_TIME_RANGES = list(
+    map(lambda x: x.strip(), SUMMARY_DEEPDRILLS_ENABLED_TIME_RANGES.split(","))
+)
+for enabled_time_range in SUMMARY_DEEPDRILLS_ENABLED_TIME_RANGES:
+    if enabled_time_range not in TIME_RANGES_BY_KEY.keys():
+        raise ValueError(
+            f"Values in DEEPDRILLS_ENABLED_TIME_RANGES must be one of {', '.join(TIME_RANGES_BY_KEY.keys())}. Got: {enabled_time_range}."
+        )
+DEEPDRILLS_ENABLED = _make_bool(os.getenv("DEEPDRILLS_ENABLED", default=False))
+DEEPDRILLS_HTABLE_MAX_PARENTS = int(
+    os.getenv("DEEPDRILLS_HTABLE_MAX_PARENTS", default=5)
+)
+DEEPDRILLS_HTABLE_MAX_CHILDREN = int(
+    os.getenv("DEEPDRILLS_HTABLE_MAX_CHILDREN", default=5)
+)
+DEEPDRILLS_HTABLE_MAX_DEPTH = int(
+    os.getenv("DEEPDRILLS_HTABLE_MAX_DEPTH", default=3)
+)
 
 SENTRY_DSN = os.getenv("SENTRY_DSN")
 
@@ -175,9 +188,3 @@ SOURCE_BING_ADS = _make_bool(os.getenv("SOURCE_BING_ADS", default=False))
 EVENT_ALERTS_ENABLED = _make_bool(
     os.getenv("REACT_APP_EVENT_ALERT", default=False)
 )
-
-METADATA_SYNC_TIME = os.getenv("METADATA_SYNC_TIME", "03:00")
-if len(METADATA_SYNC_TIME.split(":")) != 2:
-    raise ValueError(
-        "Metadata prefetch time is invalid. Must be in HH:MM format."
-    )

@@ -10,7 +10,7 @@ from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from chaos_genius.core.rca.root_cause_analysis import SUPPORTED_AGGREGATIONS
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.databases.models.data_source_model import DataSource
-from chaos_genius.settings import MAX_ROWS_FOR_DEEPDRILLS
+from chaos_genius.settings import MAX_ROWS_IN_KPI
 
 KPI_VALIDATION_TAIL_SIZE = 1000
 
@@ -140,7 +140,7 @@ def _validate_kpi_from_df(
         {
             "debug_str": (
                 "Check #6: Validate KPI has no more than "
-                f"{MAX_ROWS_FOR_DEEPDRILLS} rows"
+                f"{MAX_ROWS_IN_KPI} rows"
             ),
             "status": lambda: _validate_for_maximum_kpi_size(kpi_info),
         },
@@ -305,7 +305,7 @@ def _validate_for_maximum_kpi_size(
         )
         return False, f"Could not load data. Error: {str(e)}"
 
-    if num_rows <= MAX_ROWS_FOR_DEEPDRILLS:
+    if num_rows <= MAX_ROWS_IN_KPI:
         return True, "Accepted!"
 
     error_message = (

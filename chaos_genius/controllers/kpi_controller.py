@@ -18,7 +18,7 @@ from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.extensions import db
 from chaos_genius.settings import (
     DAYS_OFFSET_FOR_ANALTYICS,
-    MAX_DEEPDRILLS_SLACK_DAYS,
+    MAX_SUMMARY_DEEPDRILLS_SLACK_DAYS,
 )
 
 logger = logging.getLogger(__name__)
@@ -103,9 +103,10 @@ def _get_end_date_for_rca_kpi(kpi_info: dict, end_date: date = None) -> date:
         logger.info(f"Checking for end date: {end_date}.")
         end_date = end_date - timedelta(days=1)
         count += 1
-        if count > MAX_DEEPDRILLS_SLACK_DAYS:
+        if count > MAX_SUMMARY_DEEPDRILLS_SLACK_DAYS:
             raise ValueError(
-                f"KPI has no data for the last {MAX_DEEPDRILLS_SLACK_DAYS} days."
+                f"KPI has no data for the last "
+                f"{MAX_SUMMARY_DEEPDRILLS_SLACK_DAYS} days."
             )
 
     return end_date

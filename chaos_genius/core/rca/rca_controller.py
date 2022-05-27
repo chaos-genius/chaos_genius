@@ -24,10 +24,11 @@ from chaos_genius.core.utils.round import round_series
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.rca_data_model import RcaData, db
 from chaos_genius.settings import (
-    DEEPDRILLS_ENABLED_TIME_RANGES,
+    DEEPDRILLS_ENABLED,
     DEEPDRILLS_HTABLE_MAX_CHILDREN,
     DEEPDRILLS_HTABLE_MAX_DEPTH,
     DEEPDRILLS_HTABLE_MAX_PARENTS,
+    SUMMARY_DEEPDRILLS_ENABLED_TIME_RANGES,
 )
 
 logger = logging.getLogger(__name__)
@@ -362,7 +363,7 @@ class RootCauseAnalysisController:
             raise e
         logger.info("Line Data for KPI completed.")
 
-        for timeline in DEEPDRILLS_ENABLED_TIME_RANGES:
+        for timeline in SUMMARY_DEEPDRILLS_ENABLED_TIME_RANGES:
             logger.info(f"Running RCA for timeline: {timeline}.")
             try:
                 rca = self._load_rca_obj(timeline)
@@ -391,6 +392,14 @@ class RootCauseAnalysisController:
                     exc_info=1,
                 )
                 self._checkpoint_failure(f"{timeline} Card Metrics", e)
+                continue
+
+            # Do not calculate DeepDrills if DEEPDRILLS_ENABLED is false.
+            if not DEEPDRILLS_ENABLED:
+                logger.info(
+                    "DEEPDRILLS_ENABLED is False. Skipping DeepDrills."
+                )
+                self._checkpoint_success(f"{timeline} DeepDrills Calculation")
                 continue
 
             # Do not calculate further if no dimensions are present

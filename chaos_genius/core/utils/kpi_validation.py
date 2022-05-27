@@ -17,7 +17,9 @@ KPI_VALIDATION_TAIL_SIZE = 1000
 logger = logging.getLogger(__name__)
 
 
-def validate_kpi(kpi_info: Dict[str, Any], check_tz_aware: bool = False) -> Tuple[bool, str, Optional[bool]]:
+def validate_kpi(
+    kpi_info: Dict[str, Any], check_tz_aware: bool = False
+) -> Tuple[bool, str, Optional[bool]]:
     """Load data for KPI and invoke all validation checks.
 
     :param kpi_info: Dictionary with all params for the KPI
@@ -37,9 +39,7 @@ def validate_kpi(kpi_info: Dict[str, Any], check_tz_aware: bool = False) -> Tupl
 
     # TODO: Take in connection info as an argument instead of
     # getting it here as it will help with mocking for tests.
-    connection_info = DataSource.get_by_id(
-        kpi_info["data_source"]
-    ).as_dict
+    connection_info = DataSource.get_by_id(kpi_info["data_source"]).as_dict
     supports_date_string_parsing = connection_info["name"] == "Druid"
 
     status, message = _validate_kpi_from_df(
@@ -48,11 +48,13 @@ def validate_kpi(kpi_info: Dict[str, Any], check_tz_aware: bool = False) -> Tupl
         kpi_column_name=kpi_info["metric"],
         agg_type=kpi_info["aggregation"],
         date_column_name=kpi_info["datetime_column"],
-        supports_date_string_parsing=supports_date_string_parsing
+        supports_date_string_parsing=supports_date_string_parsing,
     )
 
     if check_tz_aware:
-        df[kpi_info["datetime_column"]] = pd.to_datetime(df[kpi_info["datetime_column"]])
+        df[kpi_info["datetime_column"]] = pd.to_datetime(
+            df[kpi_info["datetime_column"]]
+        )
         # check if timezone is present
         is_tz_aware = df[kpi_info["datetime_column"]].dt.tz is not None
         return status, message, is_tz_aware
@@ -126,7 +128,9 @@ def _validate_kpi_from_df(
         {
             "debug_str": "Check #4: Validate date column is parseable",
             "status": lambda: _validate_date_column_is_parseable(
-                df, date_column_name=date_column_name, supports_date_string_parsing=supports_date_string_parsing
+                df,
+                date_column_name=date_column_name,
+                supports_date_string_parsing=supports_date_string_parsing,
             ),
         },
         {
@@ -269,7 +273,8 @@ def _validate_date_column_is_parseable(
         date_col = df[date_column_name]
 
     if not (
-        is_datetime(date_col) or date_col.apply(lambda x: isinstance(x, (date, datetime))).all()
+        is_datetime(date_col)
+        or date_col.apply(lambda x: isinstance(x, (date, datetime))).all()
     ):
         invalid_type_err_msg = (
             "The datetime column is of the type"
@@ -291,7 +296,9 @@ def _validate_for_maximum_kpi_size(
     """
     try:
         end_date = datetime.now().date()
-        num_rows = DataLoader(kpi_info, end_date=end_date, days_before=60).get_count()
+        num_rows = DataLoader(
+            kpi_info, end_date=end_date, days_before=60
+        ).get_count()
     except Exception as e:  # noqa: B902
         logger.error(
             "Unable to load data for KPI validation of max size", exc_info=e

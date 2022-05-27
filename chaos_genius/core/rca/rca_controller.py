@@ -9,7 +9,10 @@ import numpy as np
 import pandas as pd
 from numpyencoder import NumpyEncoder
 
-from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
+from chaos_genius.controllers.task_monitor import (
+    checkpoint_failure,
+    checkpoint_success,
+)
 from chaos_genius.core.rca.constants import (
     LINE_DATA_TIMESTAMP_FORMAT,
     TIME_RANGES_BY_KEY,
@@ -53,9 +56,9 @@ class RootCauseAnalysisController:
         self.kpi_info = kpi_info
 
         # TODO: Make this connection type agnostic.
-        conn_type = DataSource.get_by_id(
-            kpi_info["data_source"]
-        ).as_dict["connection_type"]
+        conn_type = DataSource.get_by_id(kpi_info["data_source"]).as_dict[
+            "connection_type"
+        ]
         self._preaggregated = conn_type == "Druid"
         self._preaggregated_count_col = "count"
 
@@ -457,7 +460,7 @@ class RootCauseAnalysisController:
                 db.engine,
                 if_exists="append",
                 index=False,
-                chunksize=RcaData.__chunksize__
+                chunksize=RcaData.__chunksize__,
             )
             self._checkpoint_success("Output Storage")
         except Exception as e:  # noqa E722

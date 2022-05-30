@@ -99,6 +99,11 @@ const ReportSettings = () => {
               Note: The time set above must be in your server timezone{' '}
               {`(${globalSetting?.timezone})`}
             </p>
+            <p>
+              Warning: Set to a time before which all KPIs are expected to
+              finish running. If not, some alerts for the day will be missed in
+              the report.
+            </p>
           </div>
         </div>{' '}
         <div className="organization-button-container">

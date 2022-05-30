@@ -3,8 +3,19 @@ import datetime
 import heapq
 import io
 import logging
+from collections import defaultdict
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Sequence, Tuple, TypeVar, Union
+from typing import (
+    Any,
+    DefaultDict,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 import pandas as pd
 from pydantic import BaseModel, StrictFloat, StrictInt, root_validator, validator
@@ -372,7 +383,7 @@ class AnomalyAlertController:
 
         anomaly_data = get_anomaly_data(
             [self.kpi_id],
-            anomaly_types=["subdim", "overall"],
+            anomaly_types=["overall"],
             anomalies_only=anomalies_only,
             start_timestamp=start_timestamp,
             include_start_timestamp=include_start_timestamp,
@@ -406,23 +417,40 @@ class AnomalyAlertController:
             reverse=True,
         )
 
-        alert_metadata = {
-            "alert_frequency": self.alert.alert_frequency,
-            "alert_data": jsonable_encoder(formatted_anomaly_data),
-            "severity_cutoff_score": self.alert.severity_cutoff_score,
-            "kpi": self.kpi_id,
-        }
+        # split TriggeredAlerts by date of occurence.
+        # with this, it can be assumed that one TriggeredAlerts row has alert_data for
+        #   one day only.
+        by_date: DefaultDict[datetime.date, List[AnomalyPoint]] = defaultdict(list)
+        for anomaly_point in formatted_anomaly_data:
+            by_date[anomaly_point.data_datetime.date()].append(anomaly_point)
 
-        triggered_alert = TriggeredAlerts(
-            alert_conf_id=self.alert_id,
-            alert_type="KPI Alert",
-            is_sent=status,
-            created_at=datetime.datetime.now(),
-            alert_metadata=alert_metadata,
-        )
+        if len(by_date) > 1:
+            logger.warn(
+                "Multiple days of data found for a single trigger."
+                " This data will be stored in separate TriggeredAlerts rows."
+            )
 
-        triggered_alert.update(commit=True)
-        logger.info("The triggered alert data was successfully stored")
+        for date, formatted_anomaly_data in by_date.items():
+            alert_metadata = {
+                "alert_frequency": self.alert.alert_frequency,
+                "alert_data": jsonable_encoder(formatted_anomaly_data),
+                "severity_cutoff_score": self.alert.severity_cutoff_score,
+                "kpi": self.kpi_id,
+            }
+
+            triggered_alert = TriggeredAlerts(
+                alert_conf_id=self.alert_id,
+                alert_type="KPI Alert",
+                is_sent=status,
+                created_at=datetime.datetime.now(),
+                alert_metadata=alert_metadata,
+            )
+
+            triggered_alert.update(commit=True)
+            logger.info(
+                "The triggered alert data was successfully stored for %s",
+                date.isoformat(),
+            )
 
     def _find_point(
         self, point: AnomalyPointOriginal, prev_data: List[AnomalyPointOriginal]

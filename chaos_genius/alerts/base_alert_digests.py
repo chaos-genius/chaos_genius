@@ -4,6 +4,8 @@ import logging
 from collections import defaultdict
 from typing import DefaultDict, Dict, List, Sequence, Set, Tuple
 
+from sqlalchemy.sql.sqltypes import DateTime
+
 from chaos_genius.alerts.anomaly_alerts import (
     AnomalyPointFormatted,
     get_top_anomalies_and_counts,
@@ -20,6 +22,7 @@ from chaos_genius.controllers.digest_controller import (
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
+from chaos_genius.settings import DAYS_OFFSET_FOR_ANALTYICS
 
 logger = logging.getLogger(__name__)
 
@@ -49,13 +52,8 @@ class AlertDigestController:
 
         Note: must only be called once on an instance.
         """
-        triggered_alerts: List[TriggeredAlerts] = (
-            TriggeredAlerts.query.filter(
-                TriggeredAlerts.created_at >= (self.curr_time - self.time_diff)
-            )
-            .order_by(TriggeredAlerts.created_at.desc())
-            .all()
-        )
+        start_date, end_date = self._data_time_range()
+        triggered_alerts = self._get_triggered_alerts(start_date, end_date)
 
         slack_digests: List[TriggeredAlerts] = []
         email_digests: List[TriggeredAlerts] = []
@@ -83,6 +81,40 @@ class AlertDigestController:
 
         if len(slack_digests) > 0:
             self._send_slack_digests(slack_digests)
+
+    def _data_time_range(self) -> Tuple[datetime.datetime, datetime.datetime]:
+        anomaly_date = datetime.date.today() - datetime.timedelta(
+            days=DAYS_OFFSET_FOR_ANALTYICS
+        )
+
+        # datetime.time() is initialized to 00:00
+        start_date = datetime.datetime.combine(anomaly_date, datetime.time())
+
+        end_date = start_date + datetime.timedelta(days=1)
+
+        return start_date, end_date
+
+    def _get_triggered_alerts(
+        self, start_date: datetime.datetime, end_date: datetime.datetime
+    ) -> List[TriggeredAlerts]:
+        return (
+            TriggeredAlerts.query.filter(
+                (
+                    TriggeredAlerts.alert_metadata[
+                        ("alert_data", 0, "data_datetime")
+                    ].astext.cast(DateTime)
+                    >= start_date
+                )
+                & (
+                    TriggeredAlerts.alert_metadata[
+                        ("alert_data", 0, "data_datetime")
+                    ].astext.cast(DateTime)
+                    < end_date
+                )
+            )
+            .order_by(TriggeredAlerts.created_at.desc())
+            .all()
+        )
 
     def _send_email_digests(self, email_digests: List[TriggeredAlerts]):
         user_triggered_alerts: DefaultDict[str, Set[int]] = defaultdict(set)

@@ -60,6 +60,29 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
             borderColor: 'primary-green'
           };
         }
+        case 'anomalies': {
+          return {
+            label: 'Anomalies',
+            value:
+              data.value !== undefined && data.value !== null
+                ? data.value
+                : '-',
+            format: true,
+            textColor: { color: '#222222' },
+            borderColor: 'accent-purple',
+            timeCutsDate: aggregationData?.anomalies_date
+              ? `(${
+                  aggregationData?.anomalies_date &&
+                  formatDateTime(
+                    aggregationData?.anomalies_date,
+                    true,
+                    false,
+                    false
+                  )
+                })`
+              : '-'
+          };
+        }
         case 'group1_value': {
           return {
             label: monthWeek?.grp1_name,

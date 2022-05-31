@@ -322,34 +322,67 @@ class AnomalyAlertController:
             return True
 
         formatted_anomaly_data = self._format_anomaly_data(anomaly_data)
+        by_date = self._split_anomalies_by_data_timestamp(formatted_anomaly_data)
 
-        status = False
-        try:
-            if self._to_send_individual():
-                if self.alert.alert_channel == "email":
-                    self._send_email_alert(formatted_anomaly_data)
-                elif self.alert.alert_channel == "slack":
-                    self._send_slack_alert(formatted_anomaly_data)
+        if len(by_date) > 1:
+            logger.warn(
+                f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) "
+                "Multiple days of data found for a single trigger. Splitting."
+            )
+
+        status = True
+        for date, formatted_anomaly_data in sorted(by_date.items()):
+            logger.info(
+                f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) running alerts for %s",
+                date.isoformat(),
+            )
+
+            try:
+                if self._to_send_individual():
+                    if self.alert.alert_channel == "email":
+                        self._send_email_alert(formatted_anomaly_data)
+                    elif self.alert.alert_channel == "slack":
+                        self._send_slack_alert(formatted_anomaly_data)
+                    else:
+                        raise AlertException(
+                            f"Unknown alert channel: {self.alert.alert_channel}",
+                            alert_id=self.alert_id,
+                            kpi_id=self.kpi_id,
+                        )
                 else:
-                    raise AlertException(
-                        f"Unknown alert channel: {self.alert.alert_channel}",
-                        alert_id=self.alert_id,
-                        kpi_id=self.kpi_id,
+                    logger.info(
+                        f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) not sending "
+                        "alert as it was configured to be a digest."
                     )
-            else:
-                logger.info(
-                    f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) not sending "
-                    "alert as it was configured to be a digest."
-                )
 
-            # TODO: last_anomaly_timestamp can be updated even if no anomaly exists.
-            self._update_alert_metadata(self.alert)
+                # TODO: last_anomaly_timestamp can be updated even if no anomaly exists.
+                self._update_alert_metadata(self.alert)
 
-            status = True
-        finally:
-            self._save_triggered_alerts(status, formatted_anomaly_data)
+            except Exception as e:  # noqa: B902
+                status = False
+                raise e
+
+            finally:
+                self._save_triggered_alerts(status, formatted_anomaly_data)
 
         return status
+
+    def _split_anomalies_by_data_timestamp(
+        self, formatted_anomaly_data: List[AnomalyPoint]
+    ) -> DefaultDict[datetime.date, List[AnomalyPoint]]:
+        formatted_anomaly_data = sorted(
+            formatted_anomaly_data,
+            key=lambda point: (point.data_datetime, point.severity),
+        )
+
+        # split anomalies by date of occurence.
+        # with this, it can be assumed that one TriggeredAlerts row has alert_data for
+        #   one day only.
+        by_date: DefaultDict[datetime.date, List[AnomalyPoint]] = defaultdict(list)
+        for anomaly_point in formatted_anomaly_data:
+            by_date[anomaly_point.data_datetime.date()].append(anomaly_point)
+
+        return by_date
 
     def _get_anomalies(
         self,
@@ -434,42 +467,26 @@ class AnomalyAlertController:
             reverse=True,
         )
 
-        # split TriggeredAlerts by date of occurence.
-        # with this, it can be assumed that one TriggeredAlerts row has alert_data for
-        #   one day only.
-        by_date: DefaultDict[datetime.date, List[AnomalyPoint]] = defaultdict(list)
-        for anomaly_point in formatted_anomaly_data:
-            by_date[anomaly_point.data_datetime.date()].append(anomaly_point)
+        alert_metadata = {
+            "alert_frequency": self.alert.alert_frequency,
+            "alert_data": jsonable_encoder(formatted_anomaly_data),
+            "severity_cutoff_score": self.alert.severity_cutoff_score,
+            "kpi": self.kpi_id,
+        }
 
-        if len(by_date) > 1:
-            logger.warn(
-                f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) "
-                "Multiple days of data found for a single trigger."
-                " This data will be stored in separate TriggeredAlerts rows."
-            )
+        triggered_alert = TriggeredAlerts(
+            alert_conf_id=self.alert_id,
+            alert_type="KPI Alert",
+            is_sent=status,
+            created_at=datetime.datetime.now(),
+            alert_metadata=alert_metadata,
+        )
 
-        for date, formatted_anomaly_data in by_date.items():
-            alert_metadata = {
-                "alert_frequency": self.alert.alert_frequency,
-                "alert_data": jsonable_encoder(formatted_anomaly_data),
-                "severity_cutoff_score": self.alert.severity_cutoff_score,
-                "kpi": self.kpi_id,
-            }
-
-            triggered_alert = TriggeredAlerts(
-                alert_conf_id=self.alert_id,
-                alert_type="KPI Alert",
-                is_sent=status,
-                created_at=datetime.datetime.now(),
-                alert_metadata=alert_metadata,
-            )
-
-            triggered_alert.update(commit=True)
-            logger.info(
-                f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) "
-                "The triggered alert data was successfully stored for %s",
-                date.isoformat(),
-            )
+        triggered_alert.update(commit=True)
+        logger.info(
+            f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) "
+            "The triggered alert data was successfully stored.",
+        )
 
     def _find_point(
         self, point: AnomalyPointOriginal, prev_data: List[AnomalyPointOriginal]

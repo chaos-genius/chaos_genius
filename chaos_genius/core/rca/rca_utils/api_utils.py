@@ -45,8 +45,8 @@ def kpi_aggregation(kpi_id, timeline="last_30_days"):
             (AnomalyDataOutput.kpi_id == kpi_id)
             & (AnomalyDataOutput.anomaly_type == "overall")
             & (AnomalyDataOutput.is_anomaly != 0)
-            & (AnomalyDataOutput.data_datetime <= rca_end_date + timedelta(days=7))
-            & (AnomalyDataOutput.data_datetime >= rca_end_date)
+            & (AnomalyDataOutput.data_datetime <= rca_end_date + timedelta(days=1))
+            & (AnomalyDataOutput.data_datetime >= rca_end_date - timedelta(days=7))
         ).count()
 
         if data_point:

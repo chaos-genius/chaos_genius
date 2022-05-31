@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Endpoints for data retrieval of computed RCAs."""
+"""Endpoints for data retrieval of computed summaries of KPIs."""
 import logging
 
 from flask import Blueprint, jsonify, request
 
-from chaos_genius.core.rca.rca_utils.api_utils import (
-    kpi_aggregation,
-    kpi_line_data,
-)
+from chaos_genius.core.rca.rca_utils.api_utils import kpi_aggregation, kpi_line_data
 
 blueprint = Blueprint("api_summary", __name__)
 logger = logging.getLogger(__name__)

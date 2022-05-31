@@ -1,53 +1,17 @@
 # -*- coding: utf-8 -*-
 """Endpoints for data retrieval of computed RCAs."""
-import csv
-import io
 import logging
 
-from flask import Blueprint, jsonify, request, send_file  # noqa: F401
+from flask import Blueprint, jsonify, request
 
 from chaos_genius.core.rca.rca_utils.api_utils import (
-    kpi_aggregation,
-    kpi_line_data,
     rca_analysis,
     rca_hierarchical_data,
 )
-from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
+from chaos_genius.settings import DEEPDRILLS_ENABLED
 
 blueprint = Blueprint("api_rca", __name__)
 logger = logging.getLogger(__name__)
-
-
-@blueprint.route("/<int:kpi_id>/kpi-aggregations", methods=["GET"])
-def kpi_get_aggregation(kpi_id):
-    """API endpoint for KPI aggregation data."""
-    data = {}
-    status = "success"
-    message = ""
-    try:
-        timeline = request.args.get("timeline")
-
-        status, message, data = kpi_aggregation(kpi_id, timeline)
-    except Exception as err:  # noqa: B902
-        logger.info(f"Error Found: {err}")
-        status = "error"
-        message = str(err)
-    return jsonify({"status": status, "message": message, "data": data})
-
-
-@blueprint.route("/<int:kpi_id>/kpi-line-data", methods=["GET"])
-def kpi_get_line_data(kpi_id):
-    """API endpoint for KPI line data."""
-    data = []
-    status = "success"
-    message = ""
-    try:
-        status, message, data = kpi_line_data(kpi_id)
-    except Exception as err:  # noqa: B902
-        logger.info(f"Error Found: {err}")
-        status = "error"
-        message = str(err)
-    return jsonify({"status": status, "message": message, "data": data})
 
 
 @blueprint.route("/<int:kpi_id>/rca-analysis", methods=["GET"])
@@ -56,6 +20,14 @@ def kpi_rca_analysis(kpi_id):
     data = []
     status = "success"
     message = ""
+
+    if not DEEPDRILLS_ENABLED:
+        return jsonify({
+            "status": "error",
+            "message": "DeepDrills is not enabled",
+            "data": data
+        })
+
     try:
         timeline = request.args.get("timeline")
         dimension = request.args.get("dimension", None)
@@ -74,6 +46,14 @@ def kpi_rca_hierarchical_data(kpi_id):
     data = []
     status = "success"
     message = ""
+
+    if not DEEPDRILLS_ENABLED:
+        return jsonify({
+            "status": "error",
+            "message": "DeepDrills is not enabled",
+            "data": data
+        })
+
     try:
         timeline = request.args.get("timeline")
         dimension = request.args.get("dimension", None)

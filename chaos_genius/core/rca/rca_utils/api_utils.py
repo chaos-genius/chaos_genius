@@ -1,7 +1,8 @@
 """Utility functions for RCA API endpoints."""
 import logging
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import List
+from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 
 from chaos_genius.extensions import db
 from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
@@ -38,6 +39,16 @@ def kpi_aggregation(kpi_id, timeline="last_30_days"):
             .first()
         )
 
+        rca_end_date = data_point.end_date
+
+        anomaly_data_point = AnomalyDataOutput.query.filter(
+            (AnomalyDataOutput.kpi_id == kpi_id)
+            & (AnomalyDataOutput.anomaly_type == "overall")
+            & (AnomalyDataOutput.is_anomaly != 0)
+            & (AnomalyDataOutput.data_datetime <= rca_end_date + timedelta(days=1))
+            & (AnomalyDataOutput.data_datetime >= rca_end_date - timedelta(days=7))
+        ).count()
+
         if data_point:
             analysis_date = get_analysis_date(kpi_id, end_date)
             final_data = {
@@ -58,12 +69,17 @@ def kpi_aggregation(kpi_id, timeline="last_30_days"):
                         "label": "perc_change",
                         "value": data_point.data["perc_change"],
                     },
+                    {
+                        "label": "anomalous_points",
+                        "value": anomaly_data_point,
+                    },
                 ],
                 "analysis_date": get_datetime_string_with_tz(analysis_date),
                 "timecuts_date": get_timecuts_dates(analysis_date, timeline),
                 "last_run_time_rca": get_lastscan_string_with_tz(
                     kpi_info["scheduler_params"]["last_scheduled_time_rca"]
                 ),
+                "anomalous_points_str": "Last 7 Days",
             }
         else:
             raise ValueError("No data found")

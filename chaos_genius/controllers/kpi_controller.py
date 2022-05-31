@@ -4,25 +4,34 @@ from typing import Iterator, List, Optional
 
 from sqlalchemy import delete
 
-from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
+from chaos_genius.controllers.task_monitor import (
+    checkpoint_failure,
+    checkpoint_success,
+)
 from chaos_genius.core.anomaly.controller import AnomalyDetectionController
 from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
 from chaos_genius.core.rca.rca_controller import RootCauseAnalysisController
 from chaos_genius.core.utils.data_loader import DataLoader
-from chaos_genius.core.utils.round import round_number
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.rca_data_model import RcaData
 from chaos_genius.extensions import db
-from chaos_genius.settings import DAYS_OFFSET_FOR_ANALTYICS, MAX_DEEPDRILLS_SLACK_DAYS
+from chaos_genius.settings import (
+    DAYS_OFFSET_FOR_ANALTYICS,
+    MAX_SUMMARY_DEEPDRILLS_SLACK_DAYS,
+)
 
 logger = logging.getLogger(__name__)
 
 
-def _is_data_present_for_end_date(kpi_info: dict, end_date: date = None) -> bool:
+def _is_data_present_for_end_date(
+    kpi_info: dict, end_date: date = None
+) -> bool:
     if end_date is None:
         end_date = datetime.now().date()
-    df_count = DataLoader(kpi_info, end_date=end_date, days_before=0).get_count()
+    df_count = DataLoader(
+        kpi_info, end_date=end_date, days_before=0
+    ).get_count()
     return df_count != 0
 
 
@@ -56,16 +65,22 @@ def run_anomaly_for_kpi(
 
     logger.info("(KPI ID: {kpi_id}) Selecting end date.")
 
-    if end_date is None and kpi_info["scheduler_params"]["scheduler_frequency"] == "D":
+    if (
+        end_date is None
+        and kpi_info["scheduler_params"]["scheduler_frequency"] == "D"
+    ):
         # by default we always calculate for n-days_offset_for_analytics
-        end_date = datetime.today().date() - timedelta(days=(DAYS_OFFSET_FOR_ANALTYICS))
+        end_date = datetime.today().date() - timedelta(
+            days=(DAYS_OFFSET_FOR_ANALTYICS)
+        )
         # Check if data is available or not then try for n-days_offset_for_analytics-1
         if not _is_data_present_for_end_date(kpi_info, end_date):
             end_date = end_date - timedelta(days=1)
             logger.info("(KPI ID: {kpi_id}) Decreasing end date by 1.")
 
     elif (
-        end_date is None and kpi_info["scheduler_params"]["scheduler_frequency"] == "H"
+        end_date is None
+        and kpi_info["scheduler_params"]["scheduler_frequency"] == "H"
     ):
         end_date = datetime.today().date()
 
@@ -79,16 +94,19 @@ def run_anomaly_for_kpi(
 def _get_end_date_for_rca_kpi(kpi_info: dict, end_date: date = None) -> date:
     # by default we always calculate for n-1
     if end_date is None:
-        end_date = datetime.today().date() - timedelta(days=(DAYS_OFFSET_FOR_ANALTYICS))
+        end_date = datetime.today().date() - timedelta(
+            days=(DAYS_OFFSET_FOR_ANALTYICS)
+        )
 
     count = 0
     while not _is_data_present_for_end_date(kpi_info, end_date):
         logger.info(f"Checking for end date: {end_date}.")
         end_date = end_date - timedelta(days=1)
         count += 1
-        if count > MAX_DEEPDRILLS_SLACK_DAYS:
+        if count > MAX_SUMMARY_DEEPDRILLS_SLACK_DAYS:
             raise ValueError(
-                f"KPI has no data for the last {MAX_DEEPDRILLS_SLACK_DAYS} days."
+                f"KPI has no data for the last "
+                f"{MAX_SUMMARY_DEEPDRILLS_SLACK_DAYS} days."
             )
 
     return end_date
@@ -113,10 +131,16 @@ def run_rca_for_kpi(
                 f"(Task: {task_id}, KPI: {kpi_id}) DeepDrills - Data Loader and Validation - Success",
             )
         except Exception as e:  # noqa: B902
-            logger.error(f"Getting end date failed for KPI: {kpi_id}.", exc_info=e)
+            logger.error(
+                f"Getting end date failed for KPI: {kpi_id}.", exc_info=e
+            )
             if task_id is not None:
                 checkpoint_failure(
-                    task_id, kpi_id, "DeepDrills", "Data Loader and Validation", e
+                    task_id,
+                    kpi_id,
+                    "DeepDrills",
+                    "Data Loader and Validation",
+                    e,
                 )
             logger.error(
                 f"(Task: {task_id}, KPI: {kpi_id}) DeepDrills - Data Loader and Validation - Exception occured.",
@@ -131,13 +155,19 @@ def run_rca_for_kpi(
         logger.info(f"Completed RCA for KPI ID: {kpi_id}.")
 
     except Exception as e:  # noqa: B902
-        logger.error(f"RCA encountered an error for KPI ID: {kpi_id}", exc_info=e)
+        logger.error(
+            f"RCA encountered an error for KPI ID: {kpi_id}", exc_info=e
+        )
         if task_id is not None:
-            checkpoint_failure(task_id, kpi_id, "DeepDrills", "DeepDrills complete", e)
+            checkpoint_failure(
+                task_id, kpi_id, "DeepDrills", "DeepDrills complete", e
+            )
         return False
 
     if task_id is not None:
-        checkpoint_success(task_id, kpi_id, "DeepDrills", "DeepDrills complete")
+        checkpoint_success(
+            task_id, kpi_id, "DeepDrills", "DeepDrills complete"
+        )
 
     return True
 

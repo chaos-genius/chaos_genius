@@ -92,6 +92,12 @@ class AlertDigestController:
 
         end_date = start_date + datetime.timedelta(days=1)
 
+        logger.info(
+            "Got time range for digest check: [%s, %s)",
+            start_date.isoformat(),
+            end_date.isoformat(),
+        )
+
         return start_date, end_date
 
     def _get_triggered_alerts(

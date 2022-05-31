@@ -45,7 +45,7 @@ def kpi_aggregation(kpi_id, timeline="last_30_days"):
             (AnomalyDataOutput.kpi_id == kpi_id)
             & (AnomalyDataOutput.anomaly_type == "overall")
             & (AnomalyDataOutput.is_anomaly != 0)
-            & (AnomalyDataOutput.data_datetime <= rca_end_date + timedelta(days=1))
+            & (AnomalyDataOutput.data_datetime <= rca_end_date + timedelta(days=7))
             & (AnomalyDataOutput.data_datetime >= rca_end_date)
         ).count()
 
@@ -79,6 +79,7 @@ def kpi_aggregation(kpi_id, timeline="last_30_days"):
                 "last_run_time_rca": get_lastscan_string_with_tz(
                     kpi_info["scheduler_params"]["last_scheduled_time_rca"]
                 ),
+                "anomalous_points_str": "Last 7 Days",
             }
         else:
             raise ValueError("No data found")

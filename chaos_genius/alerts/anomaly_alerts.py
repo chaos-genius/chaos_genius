@@ -52,6 +52,7 @@ from chaos_genius.core.rca.rca_utils.string_helpers import (
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
+from chaos_genius.settings import DAYS_OFFSET_FOR_ANALTYICS
 from chaos_genius.utils.utils import jsonable_encoder
 
 logger = logging.getLogger(__name__)
@@ -308,7 +309,11 @@ class AnomalyAlertController:
 
         Note: must only be called once on an instance.
         """
-        anomaly_data = self._get_anomalies()
+        anomaly_data = self._get_anomalies(
+            # consider day's offset only if it's a digest alert.
+            # when it's individual we want alert only for the last timestamp.
+            consider_days_offset=not self._to_send_individual()
+        )
 
         if len(anomaly_data) == 0:
             logger.info(
@@ -351,6 +356,7 @@ class AnomalyAlertController:
         time_diff: datetime.timedelta = datetime.timedelta(),
         anomalies_only: bool = True,
         include_severity_cutoff: bool = True,
+        consider_days_offset: bool = False,
     ) -> List[AnomalyPointOriginal]:
         last_anomaly_timestamp: Optional[
             datetime.datetime
@@ -361,6 +367,17 @@ class AnomalyAlertController:
             #   get data after last_anomaly_timestamp
             start_timestamp = last_anomaly_timestamp - time_diff
             include_start_timestamp = False
+        elif consider_days_offset:
+            # when it's the first time we're running anomaly.
+            # we need to check for alerts on today-offset day
+            # because that's the day being considered for alert digest.
+            start_timestamp = datetime.date.today() - datetime.timedelta(
+                days=DAYS_OFFSET_FOR_ANALTYICS
+            )
+            start_timestamp = datetime.datetime.combine(
+                start_timestamp, datetime.time()
+            )
+            include_start_timestamp = True
         else:
             # when last_anomaly_timestamp is not available
             #   get data of the last timestamp in anomaly table
@@ -426,6 +443,7 @@ class AnomalyAlertController:
 
         if len(by_date) > 1:
             logger.warn(
+                f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) "
                 "Multiple days of data found for a single trigger."
                 " This data will be stored in separate TriggeredAlerts rows."
             )
@@ -448,6 +466,7 @@ class AnomalyAlertController:
 
             triggered_alert.update(commit=True)
             logger.info(
+                f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) "
                 "The triggered alert data was successfully stored for %s",
                 date.isoformat(),
             )

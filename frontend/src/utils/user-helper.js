@@ -1,8 +1,6 @@
 import { AUTH_KEY } from './constants';
 
 import { getCookie, deleteCookie } from './cookie-helper';
-import { env } from '../env';
-export const HAS_DRILLDOWNS = env.DEEPDRILLS_ENABLED || '';
 
 export const isAuthenticated = () => {
   const userToken = getUserToken();

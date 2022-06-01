@@ -23,8 +23,6 @@ import DeepdrillDrilldownsEmpty from '../DeepdrillDrilldownsEmpty';
 
 import { formatDateTime, getTimezone } from '../../utils/date-helper';
 
-import { HAS_DRILLDOWNS } from '../../utils/user-helper';
-
 import {
   getDashboardAggregation,
   getDashboardLinechart,
@@ -49,6 +47,7 @@ import {
   graphDownloadCsv,
   rcaDownloadCsv
 } from '../../redux/actions/Dashboard';
+import { getLocalStorage } from '../../utils/storage-helper';
 
 highchartsMore(Highcharts);
 Highcharts.setOptions({
@@ -81,6 +80,7 @@ const RESET_RCA_CSV = {
   type: 'RCA_CSV_RESET'
 };
 const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
+  const HAS_DRILLDOWNS = getLocalStorage('GlobalSetting')?.deepdrills_enabled;
   const dispatch = useDispatch();
   const toast = useToast();
 

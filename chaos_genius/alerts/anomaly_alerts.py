@@ -286,6 +286,9 @@ class AnomalyPointFormatted(AnomalyPoint):
         return human_readable(self.yhat_upper)
 
 
+GenericAnomalyPoint = TypeVar("GenericAnomalyPoint", bound=AnomalyPointOriginal)
+
+
 class AnomalyAlertController:
     """Controller for KPI/anomaly alerts."""
 
@@ -337,8 +340,11 @@ class AnomalyAlertController:
             )
             return True
 
-        formatted_anomaly_data = self._format_anomaly_data(anomaly_data)
-        by_date = self._split_anomalies_by_data_timestamp(formatted_anomaly_data)
+        by_date_original = self._split_anomalies_by_data_timestamp(anomaly_data)
+        by_date = {
+            date: self._format_anomaly_data(anomaly_points, date)
+            for date, anomaly_points in by_date_original.items()
+        }
 
         latest_day = max(by_date.keys())
         latest_day_data = by_date[latest_day]
@@ -394,8 +400,8 @@ class AnomalyAlertController:
         return status
 
     def _split_anomalies_by_data_timestamp(
-        self, formatted_anomaly_data: List[AnomalyPoint]
-    ) -> DefaultDict[datetime.date, List[AnomalyPoint]]:
+        self, formatted_anomaly_data: List[GenericAnomalyPoint]
+    ) -> DefaultDict[datetime.date, List[GenericAnomalyPoint]]:
         formatted_anomaly_data = sorted(
             formatted_anomaly_data,
             key=lambda point: (point.data_datetime, point.severity),
@@ -404,7 +410,9 @@ class AnomalyAlertController:
         # split anomalies by date of occurence.
         # with this, it can be assumed that one TriggeredAlerts row has alert_data for
         #   one day only.
-        by_date: DefaultDict[datetime.date, List[AnomalyPoint]] = defaultdict(list)
+        by_date: DefaultDict[datetime.date, List[GenericAnomalyPoint]] = defaultdict(
+            list
+        )
         for anomaly_point in formatted_anomaly_data:
             by_date[anomaly_point.data_datetime.date()].append(anomaly_point)
 
@@ -417,37 +425,44 @@ class AnomalyAlertController:
 
     def _get_anomalies(
         self,
-        time_diff: datetime.timedelta = datetime.timedelta(),
+        this_date_only: Optional[datetime.date] = None,
         anomalies_only: bool = True,
         include_severity_cutoff: bool = True,
         consider_days_offset: bool = False,
     ) -> List[AnomalyPointOriginal]:
         last_anomaly_timestamp = self._last_anomaly_timestamp()
 
-        if last_anomaly_timestamp is not None:
-            # when last_anomaly_timestamp is available
-            #   get data after last_anomaly_timestamp
-            start_timestamp = last_anomaly_timestamp - time_diff
-            include_start_timestamp = False
-        elif consider_days_offset:
-            # when it's the first time we're running anomaly.
-            # we need to check for alerts on today-offset day
-            # because that's the day being considered for alert digest.
-            start_timestamp = datetime.date.today() - datetime.timedelta(
-                days=DAYS_OFFSET_FOR_ANALTYICS
-            )
-            start_timestamp = datetime.datetime.combine(
-                start_timestamp, datetime.time()
-            )
-            include_start_timestamp = True
-        else:
-            # when last_anomaly_timestamp is not available
-            #   get data of the last timestamp in anomaly table
-            start_timestamp = self.latest_anomaly_timestamp - time_diff
+        if this_date_only:
+            start_timestamp = datetime.datetime.combine(this_date_only, datetime.time())
             include_start_timestamp = True
 
-        end_timestamp = self.latest_anomaly_timestamp - time_diff
-        include_end_timestamp = True
+            end_timestamp = start_timestamp + datetime.timedelta(days=1)
+            include_end_timestamp = False
+        else:
+            if last_anomaly_timestamp is not None:
+                # when last_anomaly_timestamp is available
+                #   get data after last_anomaly_timestamp
+                start_timestamp = last_anomaly_timestamp
+                include_start_timestamp = False
+            elif consider_days_offset:
+                # when it's the first time we're running anomaly.
+                # we need to check for alerts on today-offset day
+                # because that's the day being considered for alert digest.
+                start_timestamp = datetime.date.today() - datetime.timedelta(
+                    days=DAYS_OFFSET_FOR_ANALTYICS
+                )
+                start_timestamp = datetime.datetime.combine(
+                    start_timestamp, datetime.time()
+                )
+                include_start_timestamp = True
+            else:
+                # when last_anomaly_timestamp is not available
+                #   get data of the last timestamp in anomaly table
+                start_timestamp = self.latest_anomaly_timestamp
+                include_start_timestamp = True
+
+            end_timestamp = self.latest_anomaly_timestamp
+            include_end_timestamp = True
 
         severity_cutoff = (
             self.alert.severity_cutoff_score if include_severity_cutoff else None
@@ -529,16 +544,18 @@ class AnomalyAlertController:
         return intended_point
 
     def _format_anomaly_data(
-        self, anomaly_data: List[AnomalyPointOriginal]
+        self, anomaly_data: List[AnomalyPointOriginal], date: datetime.date
     ) -> List[AnomalyPoint]:
         kpi = self._get_kpi()
 
         time_series_freq: Optional[str] = kpi.anomaly_params.get("frequency")
 
         if time_series_freq == "D":
-            formatted_anomaly_data = self._format_anomaly_data_daily(anomaly_data)
+            formatted_anomaly_data = self._format_anomaly_data_daily(anomaly_data, date)
         elif time_series_freq == "H":
-            formatted_anomaly_data = self._format_anomaly_data_hourly(anomaly_data)
+            formatted_anomaly_data = self._format_anomaly_data_hourly(
+                anomaly_data, date
+            )
         else:
             raise AlertException(
                 (f"Time series frequency not found or invalid: {time_series_freq}"),
@@ -552,14 +569,15 @@ class AnomalyAlertController:
         return formatted_anomaly_data
 
     def _format_anomaly_data_daily(
-        self, anomaly_data: List[AnomalyPointOriginal]
+        self, anomaly_data: List[AnomalyPointOriginal], date: datetime.date
     ) -> List[AnomalyPoint]:
         formatted_anomaly_data: List[AnomalyPoint] = []
 
         # get previous anomaly point for comparison
-        time_diff = datetime.timedelta(days=1, hours=0, minutes=0)
         prev_day_data = self._get_anomalies(
-            time_diff=time_diff, anomalies_only=False, include_severity_cutoff=False
+            this_date_only=date - datetime.timedelta(days=1, hours=0, minutes=0),
+            anomalies_only=False,
+            include_severity_cutoff=False,
         )
 
         formatted_anomaly_data: List[AnomalyPoint] = []
@@ -574,20 +592,21 @@ class AnomalyAlertController:
         return formatted_anomaly_data
 
     def _format_anomaly_data_hourly(
-        self, anomaly_data: List[AnomalyPointOriginal]
+        self, anomaly_data: List[AnomalyPointOriginal], date: datetime.date
     ) -> List[AnomalyPoint]:
         formatted_anomaly_data: List[AnomalyPoint] = []
 
         # get current day's data for comparison
         cur_day_data = self._get_anomalies(
-            anomalies_only=False, include_severity_cutoff=False
+            this_date_only=date, anomalies_only=False, include_severity_cutoff=False
         )
         # get previous day data too.
         # used only when a point is present for 00:00
         #  - the previous point in that case will be previous day's 11PM data
-        time_diff = datetime.timedelta(days=1, hours=0, minutes=0)
         prev_day_data = self._get_anomalies(
-            time_diff=time_diff, anomalies_only=False, include_severity_cutoff=False
+            this_date_only=date - datetime.timedelta(days=1, hours=0, minutes=0),
+            anomalies_only=False,
+            include_severity_cutoff=False,
         )
 
         # store a mapping of hour => list of anomaly points for that hour

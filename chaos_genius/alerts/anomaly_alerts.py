@@ -24,6 +24,7 @@ from pydantic.tools import parse_obj_as
 from chaos_genius.alerts.constants import (
     ALERT_DATE_FORMAT,
     ALERT_DATETIME_FORMAT,
+    ALERT_READABLE_DATA_TIME_ONLY_FORMAT,
     ALERT_READABLE_DATA_TIMESTAMP_FORMAT,
     ALERT_READABLE_DATE_FORMAT,
     ALERT_READABLE_DATETIME_FORMAT,
@@ -234,6 +235,8 @@ class AnomalyPointFormatted(AnomalyPoint):
     formatted_date: str
     formatted_change_percent: str
 
+    is_hourly: bool
+
     @staticmethod
     def from_point(
         point: AnomalyPoint,
@@ -258,6 +261,8 @@ class AnomalyPointFormatted(AnomalyPoint):
             else:
                 formatted_change_percent = f"{point.percent_change}%"
 
+        is_hourly = time_series_frequency is not None and time_series_frequency == "H"
+
         return AnomalyPointFormatted(
             **point.dict(),
             kpi_id=kpi_id,
@@ -268,12 +273,22 @@ class AnomalyPointFormatted(AnomalyPoint):
             alert_channel_conf=alert_channel_conf,
             formatted_date=formatted_date,
             formatted_change_percent=str(formatted_change_percent),
+            is_hourly=is_hourly,
         )
 
     @property
     def y_readable(self):
         """Returns human readable format for y value of anomaly point."""
         return human_readable(self.y)
+
+    @property
+    def previous_value_readable(self):
+        """Returns human readable format for previous value of anomaly point."""
+        return (
+            human_readable(self.previous_value)
+            if self.previous_value is not None
+            else None
+        )
 
     @property
     def yhat_lower_readable(self):
@@ -284,6 +299,21 @@ class AnomalyPointFormatted(AnomalyPoint):
     def yhat_upper_readable(self):
         """Returns human readable format for upper bound of expected range."""
         return human_readable(self.yhat_upper)
+
+    @property
+    def anomaly_time_only(self):
+        """Returns a readable string of the time (without date) of anomaly."""
+        return self.data_datetime.strftime(ALERT_READABLE_DATA_TIME_ONLY_FORMAT)
+
+    @property
+    def previous_point_time_only(self):
+        """Returns a readable string of the time (without date) of the previous point.
+
+        Only for hourly!
+        """
+        return (self.data_datetime - datetime.timedelta(hours=1)).strftime(
+            ALERT_READABLE_DATA_TIME_ONLY_FORMAT
+        )
 
 
 GenericAnomalyPoint = TypeVar("GenericAnomalyPoint", bound=AnomalyPointOriginal)
@@ -382,7 +412,7 @@ class AnomalyAlertController:
             )
 
             if self.alert.alert_channel == "email":
-                self._send_email_alert(latest_day_data)
+                self._send_email_alert(latest_day_data, latest_day)
             elif self.alert.alert_channel == "slack":
                 self._send_slack_alert(latest_day_data)
             else:
@@ -663,7 +693,9 @@ class AnomalyAlertController:
 
         return top_anomalies_, overall_count, subdim_count
 
-    def _send_email_alert(self, formatted_anomaly_data: List[AnomalyPoint]) -> None:
+    def _send_email_alert(
+        self, formatted_anomaly_data: List[AnomalyPoint], date: datetime.date
+    ) -> None:
         alert_channel_conf = self.alert.alert_channel_conf
 
         if not isinstance(alert_channel_conf, dict):
@@ -718,6 +750,7 @@ class AnomalyAlertController:
             overall_count=overall_count,
             subdim_count=subdim_count,
             str=str,
+            date=date.strftime(ALERT_DATE_FORMAT),
         )
 
         logger.info(

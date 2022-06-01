@@ -8,18 +8,14 @@
 
 <div class="alert-container" style="color: #F6F5F5 !important;">
 
-<h3>Summary</h3>
+<h3 style="color: #F6F5F5 !important;">Summary</h3>
 
-<h4><span style="font-weight: 400;">KPI Name: </span>{{ kpi_name }}</h4>
+<h4><span style="color: #F6F5F5 !important; font-weight: 400;">KPI Name: </span>{{ kpi_name }}</h4>
+<h4><span style="color: #F6F5F5 !important; font-weight: 400;">Date: </span>{{ date }}</h4>
 
-<ul>
-    <li>Total alerts generated (overall KPI): <strong>{{ overall_count }}</strong></li>
-    <li>Total alerts generated (including subdimensions): <strong>{{ overall_count + subdim_count }}</strong></li>
-</ul>
+<h3 style="color: #F6F5F5 !important;">Alert Message</h3>
 
-<h3>Alert Message</h3>
-
-<div style="margin-bottom: 1rem;">
+<div style="color: #F6F5F5 !important; margin-bottom: 1rem;">
 {{ alert_message }}
 </div>
 
@@ -28,28 +24,62 @@
 
 <hr>
 
-<h3>Top Anomalies</h3>
+<h3>Anomalies</h3>
 <ul>
     {% for point in top_anomalies %}
     <li>
-        <strong>{{kpi_name}} ({{point.series_type}})</strong>
+        {% if point.previous_value is none %}
+            Change
+        {% elif point.y > point.previous_value %}
+            <span style="color: lightgreen;">
+                ↑Spike
+            </span>
+        {% elif point.y < point.previous_value %}
+            <span style="color: red;">
+                ↓Drop
+            </span>
+        {% else %}
+            Change
+        {% endif %}
+
         <span style="color: lightgrey;">
-            changed to <strong>{{point.y_readable}}</strong>
-            {% if point.percent_change is string and "inf" not in point.percent_change %}
-                <span>
-            {% elif "+inf" in str(point.percent_change) or point.percent_change > 0 %}
-                <span style="color: lightgreen;">
-            {% elif "-inf" in str(point.percent_change) or point.percent_change < 0 %}
-                <span style="color: red;">
-            {% else %}
-                <span>
-            {% endif %}
-                ({{ point.formatted_change_percent }})
+
+            detected
+
+            -
+
+            changed
+
+        </span>
+
+            {% if point.previous_value_readable is not none %}
+
+                <span style="color: lightgrey;">
+                    from
                 </span>
-            on {{ point.formatted_date }}
-            (expected: <strong>{{point.yhat_lower_readable}}</strong> to <strong>{{point.yhat_upper_readable}}</strong>,
-            severity:
-            <strong>{{point.severity}}</strong>)
+                <strong>{{point.previous_value_readable}}</strong>
+
+            {% endif %}
+
+            <span style="color: lightgrey;">
+                to
+            </span>
+            <strong>{{point.y_readable}}</strong>
+
+            (<strong>{{ point.formatted_change_percent }}</strong>)
+
+            {% if point.is_hourly %}
+                <span style="color: lightgrey;">
+                    from
+                </span>
+                <strong>{{ point.previous_point_time_only }}</strong>
+
+                <span style="color: lightgrey;">
+                    to
+                </span>
+                <strong>{{ point.anomaly_time_only }}</strong>
+            {% endif %}
+
         </span>
     </li>
     {% endfor %}

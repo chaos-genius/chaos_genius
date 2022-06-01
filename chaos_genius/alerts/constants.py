@@ -12,6 +12,9 @@ ALERT_READABLE_DATETIME_FORMAT = "%b %d, %I %p"
 
 ALERT_READABLE_DATA_TIMESTAMP_FORMAT = "%b %d %Y %H:%M:%S"
 
+ALERT_READABLE_DATA_TIME_ONLY_FORMAT = "%I:%M%p"
+"""Format for time (without date) of anomaly."""
+
 ANOMALY_TABLE_COLUMN_NAMES_MAPPER = {
     "series_type": "Dimension",
     "data_datetime": "Time of Occurrence",

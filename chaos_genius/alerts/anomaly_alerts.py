@@ -333,46 +333,56 @@ class AnomalyAlertController:
         formatted_anomaly_data = self._format_anomaly_data(anomaly_data)
         by_date = self._split_anomalies_by_data_timestamp(formatted_anomaly_data)
 
+        latest_day = max(by_date.keys())
+        latest_day_data = by_date[latest_day]
+
         if len(by_date) > 1:
             logger.warn(
                 f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) "
-                "Multiple days of data found for a single trigger. Splitting."
+                "Multiple days of data found for a single trigger. Splitting. "
+                "Only alerts for %s will be sent, rest will only be stored.",
+                latest_day.isoformat(),
             )
 
+        # TODO: last_anomaly_timestamp can be updated even if no anomaly exists.
+        self._update_alert_metadata(self.alert)
+
+        # TODO: will always be True?
         status = True
+
         for date, formatted_anomaly_data in sorted(by_date.items()):
             logger.info(
-                f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) running alerts for %s",
+                (
+                    f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) "
+                    "saving TriggeredAlerts for %s"
+                ),
                 date.isoformat(),
             )
 
-            try:
-                if self._to_send_individual():
-                    if self.alert.alert_channel == "email":
-                        self._send_email_alert(formatted_anomaly_data)
-                    elif self.alert.alert_channel == "slack":
-                        self._send_slack_alert(formatted_anomaly_data)
-                    else:
-                        raise AlertException(
-                            f"Unknown alert channel: {self.alert.alert_channel}",
-                            alert_id=self.alert_id,
-                            kpi_id=self.kpi_id,
-                        )
-                else:
-                    logger.info(
-                        f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) not sending "
-                        "alert as it was configured to be a digest."
-                    )
+            self._save_triggered_alerts(status, formatted_anomaly_data)
 
-                # TODO: last_anomaly_timestamp can be updated even if no anomaly exists.
-                self._update_alert_metadata(self.alert)
+        if self._to_send_individual():
+            logger.info(
+                f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) "
+                "Sending alert for %s.",
+                latest_day.isoformat()
+            )
 
-            except Exception as e:  # noqa: B902
-                status = False
-                raise e
-
-            finally:
-                self._save_triggered_alerts(status, formatted_anomaly_data)
+            if self.alert.alert_channel == "email":
+                self._send_email_alert(latest_day_data)
+            elif self.alert.alert_channel == "slack":
+                self._send_slack_alert(latest_day_data)
+            else:
+                raise AlertException(
+                    f"Unknown alert channel: {self.alert.alert_channel}",
+                    alert_id=self.alert_id,
+                    kpi_id=self.kpi_id,
+                )
+        else:
+            logger.info(
+                f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) not sending "
+                "alert as it was configured to be a digest."
+            )
 
         return status
 

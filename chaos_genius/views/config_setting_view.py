@@ -304,6 +304,7 @@ def global_config():
     try:
         data["timezone"] = get_server_timezone()
         data["is_ee"] = is_enterprise_edition()
+        data["deepdrills_enabled"] = DEEPDRILLS_ENABLED
         status = "success"
     except Exception as err:
         status = "failure"

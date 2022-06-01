@@ -11,7 +11,10 @@ from chaos_genius.alerts.constants import (
 )
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
-from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
+from chaos_genius.databases.models.triggered_alerts_model import (
+    TriggeredAlerts,
+    triggered_alerts_data_datetime,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -157,13 +160,39 @@ def _preprocess_event_alerts(event_alerts_data: list):
 
 
 def get_digest_view_data(
-    triggered_alert_id: Optional[int] = None, include_subdims: bool = False
+    triggered_alert_id: Optional[int] = None,
+    include_subdims: bool = False,
+    date: Optional[datetime.date] = None,
 ):
     """Collects triggered alerts data for alerts dashboard."""
-    curr_time = datetime.datetime.now()
-    time_diff = datetime.timedelta(days=7)
+    filters = []
 
-    filters = [TriggeredAlerts.created_at >= (curr_time - time_diff)]
+    if date is None:
+        curr_time = datetime.datetime.now()
+        time_diff = datetime.timedelta(days=7)
+        time_lower_bound = curr_time - time_diff
+
+        filters.append(triggered_alerts_data_datetime() >= time_lower_bound)
+        logger.info(
+            "Digest: looking for anomalies after %s", time_lower_bound.isoformat()
+        )
+    else:
+        filters.extend(
+            [
+                (
+                    triggered_alerts_data_datetime()
+                    >= datetime.datetime.combine(date, datetime.time())
+                ),
+                (
+                    triggered_alerts_data_datetime()
+                    < datetime.datetime.combine(
+                        date + datetime.timedelta(days=1), datetime.time()
+                    )
+                ),
+            ]
+        )
+        logger.info("Digest: looking for anomalies on %s", date)
+
     if triggered_alert_id is not None:
         filters.append(TriggeredAlerts.id == triggered_alert_id)
 

@@ -4,8 +4,6 @@ import logging
 from collections import defaultdict
 from typing import DefaultDict, Dict, List, Sequence, Set, Tuple
 
-from sqlalchemy.sql.sqltypes import DateTime
-
 from chaos_genius.alerts.anomaly_alerts import (
     AnomalyPointFormatted,
     get_top_anomalies_and_counts,
@@ -21,7 +19,10 @@ from chaos_genius.controllers.digest_controller import (
 )
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
-from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
+from chaos_genius.databases.models.triggered_alerts_model import (
+    TriggeredAlerts,
+    triggered_alerts_data_datetime,
+)
 from chaos_genius.settings import DAYS_OFFSET_FOR_ANALTYICS
 
 logger = logging.getLogger(__name__)
@@ -105,18 +106,8 @@ class AlertDigestController:
     ) -> List[TriggeredAlerts]:
         return (
             TriggeredAlerts.query.filter(
-                (
-                    TriggeredAlerts.alert_metadata[
-                        ("alert_data", 0, "data_datetime")
-                    ].astext.cast(DateTime)
-                    >= start_date
-                )
-                & (
-                    TriggeredAlerts.alert_metadata[
-                        ("alert_data", 0, "data_datetime")
-                    ].astext.cast(DateTime)
-                    < end_date
-                )
+                (triggered_alerts_data_datetime() >= start_date)
+                & (triggered_alerts_data_datetime() < end_date)
             )
             .order_by(TriggeredAlerts.created_at.desc())
             .all()

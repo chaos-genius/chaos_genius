@@ -1,8 +1,6 @@
 """View to handle requests pertaining to alert digests."""
 
-import datetime
 import logging
-from typing import Optional
 
 from flask.blueprints import Blueprint
 from flask.globals import request
@@ -24,15 +22,9 @@ def task_monitor_view():
     if include_subdims is not False:
         include_subdims = include_subdims == "true"
 
-    raw_date = request.args.get("date")
-    date: Optional[datetime.date] = None
-    if raw_date is not None:
-        date = datetime.date.fromisoformat(raw_date)
-
     anomaly_alerts_data, event_alerts_data = get_digest_view_data(
         int(triggered_alert_id) if triggered_alert_id else None,
         include_subdims,
-        date=date,
     )
 
     return render_template(

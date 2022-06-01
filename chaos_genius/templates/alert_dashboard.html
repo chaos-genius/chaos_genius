@@ -753,6 +753,8 @@
 
     <!-- Script for filtering search accoring to Date configuration selected-->
     <script type="text/javascript">
+        const dropdownDates = document.getElementById("date-select");
+
         function initDateSelect(currentTable) {
             const Dates = new Set();
 
@@ -768,12 +770,21 @@
             dateSelect.refreshOptions(false);
             dateSelect.refreshItems();
 
+            // get data from URL params
+            const params = new URLSearchParams(window.location.search);
+            if (params.get("date")) {
+                const date_str = params.get("date");
+                const dates = date_str.split(",");
+                for (const date of dates) {
+                    dateSelect.addItem(date, false);
+                }
+            }
+            updateDateSelect();
+
             return Dates;
         }
 
-        let Dates = initDateSelect(currentTable);
-        const dropdownDates = document.getElementById("date-select");
-        dropdownDates.addEventListener("input", () => {
+        function updateDateSelect() {
             const selected = Array.from(dropdownDates.options).filter(option => option.selected).map(option => option.value);
             const selectedSet = new Set(selected);
 
@@ -786,7 +797,17 @@
                 removeFilter("date");
             }
 
+            // set URL params
+            const parser = new URL(window.location);
+            parser.searchParams.set("date", Array.from(selectedSet).join(","));
+            window.history.replaceState({}, null, parser.href);
+
             applyFilters(currentTable);
+        }
+
+        let Dates = initDateSelect(currentTable);
+        dropdownDates.addEventListener("input", () => {
+            updateDateSelect();
         });
     </script>
 

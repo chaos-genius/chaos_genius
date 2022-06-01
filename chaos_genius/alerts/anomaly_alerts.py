@@ -134,7 +134,9 @@ class AnomalyPoint(AnomalyPointOriginal):
 
     # severity value rounded to integer
     severity: int
-    # percentage change from previous day's point
+    # previous data point (y-value)
+    previous_value: Optional[float]
+    # percentage change from previous point
     percent_change: Union[StrictFloat, StrictInt, str]
     # human readable message describing the percent_change
     change_message: str
@@ -185,6 +187,9 @@ class AnomalyPoint(AnomalyPointOriginal):
             series_type=series_type,
             created_at=point.created_at,
             data_datetime=point.data_datetime,
+            previous_value=(
+                previous_anomaly_point.y if previous_anomaly_point is not None else None
+            ),
             percent_change=percent_change,
             change_message=change_message,
         )

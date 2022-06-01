@@ -506,44 +506,81 @@ class AnomalyAlertController:
 
         time_series_freq: Optional[str] = kpi.anomaly_params.get("frequency")
 
+        if time_series_freq == "D":
+            formatted_anomaly_data = self._format_anomaly_data_daily(anomaly_data)
+        elif time_series_freq == "H":
+            formatted_anomaly_data = self._format_anomaly_data_hourly(anomaly_data)
+        else:
+            raise AlertException(
+                (
+                    f"Time series frequency not found or invalid: {time_series_freq}"
+                ),
+                alert_id=self.alert_id,
+                kpi_id=self.kpi_id,
+            )
+
+        # Sort in descending order according to severity
+        formatted_anomaly_data.sort(key=lambda point: point.severity, reverse=True)
+
+        return formatted_anomaly_data
+
+    def _format_anomaly_data_daily(
+        self, anomaly_data: List[AnomalyPointOriginal]
+    ) -> List[AnomalyPoint]:
+        formatted_anomaly_data: List[AnomalyPoint] = []
+
         # get previous anomaly point for comparison
         time_diff = datetime.timedelta(days=1, hours=0, minutes=0)
         prev_day_data = self._get_anomalies(
             time_diff=time_diff, anomalies_only=False, include_severity_cutoff=False
         )
 
-        # store a mapping of hour => list of anomaly points for that hour
-        hourly_data: Dict[int, List[AnomalyPointOriginal]] = dict()
-        if time_series_freq == "H":
-            for point in prev_day_data:
-                if point.data_datetime.hour not in hourly_data.keys():
-                    hourly_data[point.data_datetime.hour] = []
-                hourly_data[point.data_datetime.hour].append(point)
-
         formatted_anomaly_data: List[AnomalyPoint] = []
         for point in anomaly_data:
-            if time_series_freq == "D":
-                # in case of daily granularity, find point in the previous day
-                previous_point = self._find_point(point, prev_day_data)
-            elif time_series_freq == "H":
-                # in case of hourly granularity, find the point of the same hour
-                # but in the previous day.
-                previous_point = self._find_point(
-                    point, hourly_data.get(point.data_datetime.hour, [])
-                )
-            else:
-                raise AlertException(
-                    f"Time series frequency not found or invalid: {time_series_freq}",
-                    alert_id=self.alert_id,
-                    kpi_id=self.kpi_id,
-                )
+            # daily granularity - find point in the previous day
+            previous_point = self._find_point(point, prev_day_data)
 
             formatted_anomaly_data.append(
                 AnomalyPoint.from_original(point, previous_point)
             )
 
-        # Sort in descending order according to severity
-        formatted_anomaly_data.sort(key=lambda point: point.severity, reverse=True)
+        return formatted_anomaly_data
+
+    def _format_anomaly_data_hourly(
+        self, anomaly_data: List[AnomalyPointOriginal]
+    ) -> List[AnomalyPoint]:
+        formatted_anomaly_data: List[AnomalyPoint] = []
+
+        # get current day's data for comparison
+        cur_day_data = self._get_anomalies(
+            anomalies_only=False, include_severity_cutoff=False
+        )
+        # get previous day data too.
+        # used only when a point is present for 00:00
+        #  - the previous point in that case will be previous day's 11PM data
+        time_diff = datetime.timedelta(days=1, hours=0, minutes=0)
+        prev_day_data = self._get_anomalies(
+            time_diff=time_diff, anomalies_only=False, include_severity_cutoff=False
+        )
+
+        # store a mapping of hour => list of anomaly points for that hour
+        hourly_data: DefaultDict[int, List[AnomalyPointOriginal]] = defaultdict(list)
+        for point in cur_day_data:
+            hourly_data[point.data_datetime.hour].append(point)
+        for point in prev_day_data:
+            if point.data_datetime.hour == 23:
+                hourly_data[-1].append(point)
+
+        formatted_anomaly_data: List[AnomalyPoint] = []
+        for point in anomaly_data:
+            # hourly granularity - find previous hour data
+            previous_point = self._find_point(
+                point, hourly_data.get(point.data_datetime.hour - 1, [])
+            )
+
+            formatted_anomaly_data.append(
+                AnomalyPoint.from_original(point, previous_point)
+            )
 
         return formatted_anomaly_data
 

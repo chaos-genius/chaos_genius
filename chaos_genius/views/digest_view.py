@@ -25,7 +25,7 @@ def task_monitor_view():
     )
 
     return render_template(
-        "digest.html",
+        "alert_dashboard.html",
         anomaly_alerts_data=anomaly_alerts_data,
         event_alerts_data=event_alerts_data,
         enumerate=enumerate,

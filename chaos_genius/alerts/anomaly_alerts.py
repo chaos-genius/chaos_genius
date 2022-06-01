@@ -178,6 +178,12 @@ class AnomalyPoint(AnomalyPointOriginal):
             )
             change_message = change_message_from_percent(percent_change)
 
+        previous_value = (
+            round(previous_anomaly_point.y, 2)
+            if previous_anomaly_point is not None
+            else None
+        )
+
         return AnomalyPoint(
             y=y,
             yhat_lower=yhat_lower,
@@ -187,9 +193,7 @@ class AnomalyPoint(AnomalyPointOriginal):
             series_type=series_type,
             created_at=point.created_at,
             data_datetime=point.data_datetime,
-            previous_value=(
-                previous_anomaly_point.y if previous_anomaly_point is not None else None
-            ),
+            previous_value=previous_value,
             percent_change=percent_change,
             change_message=change_message,
         )
@@ -517,9 +521,7 @@ class AnomalyAlertController:
             formatted_anomaly_data = self._format_anomaly_data_hourly(anomaly_data)
         else:
             raise AlertException(
-                (
-                    f"Time series frequency not found or invalid: {time_series_freq}"
-                ),
+                (f"Time series frequency not found or invalid: {time_series_freq}"),
                 alert_id=self.alert_id,
                 kpi_id=self.kpi_id,
             )

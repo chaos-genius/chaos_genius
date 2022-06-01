@@ -289,7 +289,9 @@ class AnomalyPointFormatted(AnomalyPoint):
 class AnomalyAlertController:
     """Controller for KPI/anomaly alerts."""
 
-    def __init__(self, alert: Alert):
+    def __init__(
+        self, alert: Alert, last_anomaly_timestamp: Optional[datetime.datetime] = None
+    ):
         """Initializes a KPI/anomaly alerts controller.
 
         Note: an AnomalyAlertController instance must only be used for one check/trigger
@@ -297,11 +299,16 @@ class AnomalyAlertController:
 
         Arguments:
             alert: object of the Alert model for which to send alerts
+            last_anomaly_timestamp: (override) the anomaly timestamp after which to
+                check. Defaults to the last_anomaly_timestamp stored in the given alert.
         """
         self.alert = alert
         self.alert_id: int = self.alert.id
         self.kpi_id: int = self.alert.kpi
         self.now = datetime.datetime.now()
+
+        self._last_anomaly_timestamp_override = last_anomaly_timestamp
+
         latest_anomaly_timestamp = get_last_anomaly_timestamp([self.kpi_id])
 
         if latest_anomaly_timestamp is None:
@@ -365,7 +372,7 @@ class AnomalyAlertController:
             logger.info(
                 f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) "
                 "Sending alert for %s.",
-                latest_day.isoformat()
+                latest_day.isoformat(),
             )
 
             if self.alert.alert_channel == "email":
@@ -403,6 +410,11 @@ class AnomalyAlertController:
 
         return by_date
 
+    def _last_anomaly_timestamp(self) -> Optional[datetime.datetime]:
+        return (
+            self._last_anomaly_timestamp_override or self.alert.last_anomaly_timestamp
+        )
+
     def _get_anomalies(
         self,
         time_diff: datetime.timedelta = datetime.timedelta(),
@@ -410,9 +422,7 @@ class AnomalyAlertController:
         include_severity_cutoff: bool = True,
         consider_days_offset: bool = False,
     ) -> List[AnomalyPointOriginal]:
-        last_anomaly_timestamp: Optional[
-            datetime.datetime
-        ] = self.alert.last_anomaly_timestamp
+        last_anomaly_timestamp = self._last_anomaly_timestamp()
 
         if last_anomaly_timestamp is not None:
             # when last_anomaly_timestamp is available

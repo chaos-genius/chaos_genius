@@ -1,7 +1,7 @@
 import datetime
 import logging
 from collections import defaultdict
-from typing import DefaultDict, Dict, List, Optional, Sequence, Tuple
+from typing import DefaultDict, Dict, List, NamedTuple, Optional, Sequence, Tuple
 
 from chaos_genius.alerts.anomaly_alerts import AnomalyPoint, AnomalyPointFormatted
 from chaos_genius.alerts.constants import (
@@ -17,6 +17,13 @@ from chaos_genius.databases.models.triggered_alerts_model import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class TriggeredAlertWithPoints(NamedTuple):
+    """A wrapper storing both a TriggeredAlerts and its corresponding anomaly points."""
+
+    triggered_alert: TriggeredAlerts
+    points: List[AnomalyPointFormatted]
 
 
 def get_alert_kpi_configurations(triggered_alerts: Sequence[TriggeredAlerts]):
@@ -44,7 +51,7 @@ def preprocess_triggered_alert(
     triggered_alert: TriggeredAlerts,
     alert_config_cache: Dict[int, Alert],
     kpi_cache: Dict[int, Kpi],
-) -> TriggeredAlerts:
+) -> TriggeredAlertWithPoints:
     """Preprocess a triggered alert for use in digests and alerts dashboard."""
     alert_conf_id = triggered_alert.alert_conf_id
     alert_conf = alert_config_cache[alert_conf_id]
@@ -69,7 +76,13 @@ def preprocess_triggered_alert(
             alert_conf, "alert_channel_conf", {}
         ).get(triggered_alert.alert_channel)
 
-    return triggered_alert
+    points = extract_anomaly_points_from_triggered_alerts([triggered_alert], kpi_cache)
+
+    points = list(
+        filter(lambda point: point.series_type == OVERALL_KPI_SERIES_TYPE_REPR, points)
+    )
+
+    return TriggeredAlertWithPoints(triggered_alert, points)
 
 
 def extract_anomaly_points_from_triggered_alerts(

@@ -13,6 +13,7 @@ from chaos_genius.alerts.slack import alert_digest_slack_formatted
 from chaos_genius.alerts.utils import send_email_using_template, webapp_url_prefix
 from chaos_genius.controllers.config_controller import get_config_object
 from chaos_genius.controllers.digest_controller import (
+    TriggeredAlertWithPoints,
     extract_anomaly_points_from_triggered_alerts,
     get_alert_kpi_configurations,
     preprocess_triggered_alert,
@@ -56,8 +57,8 @@ class AlertDigestController:
         start_date, end_date = self._data_time_range()
         triggered_alerts = self._get_triggered_alerts(start_date, end_date)
 
-        slack_digests: List[TriggeredAlerts] = []
-        email_digests: List[TriggeredAlerts] = []
+        slack_digests: List[TriggeredAlertWithPoints] = []
+        email_digests: List[TriggeredAlertWithPoints] = []
 
         self.alert_config_cache, self.kpi_cache = get_alert_kpi_configurations(
             triggered_alerts
@@ -68,14 +69,24 @@ class AlertDigestController:
                 triggered_alert, self.alert_config_cache, self.kpi_cache
             )
 
-            if getattr(
-                self.alert_config_cache[triggered_alert.alert_conf_id],
-                ALERT_ATTRIBUTES_MAPPER[self.frequency],
-            ):
-                if triggered_alert.alert_channel == "slack":
-                    slack_digests.append(triggered_alert)
-                if triggered_alert.alert_channel == "email":
-                    email_digests.append(triggered_alert)
+            if not triggered_alert.points:
+                logger.info(
+                    f"(frequency: {self.frequency}) "
+                    "No overall anomalies found for TriggeredAlerts with id %d, "
+                    "skipping.",
+                    triggered_alert.triggered_alert.id,
+                )
+            else:
+                if getattr(
+                    self.alert_config_cache[
+                        triggered_alert.triggered_alert.alert_conf_id
+                    ],
+                    ALERT_ATTRIBUTES_MAPPER[self.frequency],
+                ):
+                    if triggered_alert.triggered_alert.alert_channel == "slack":
+                        slack_digests.append(triggered_alert)
+                    if triggered_alert.triggered_alert.alert_channel == "email":
+                        email_digests.append(triggered_alert)
 
         if len(email_digests) > 0:
             self._send_email_digests(email_digests)
@@ -113,14 +124,14 @@ class AlertDigestController:
             .all()
         )
 
-    def _send_email_digests(self, email_digests: List[TriggeredAlerts]):
+    def _send_email_digests(self, triggered_alerts: List[TriggeredAlertWithPoints]):
         user_triggered_alerts: DefaultDict[str, Set[int]] = defaultdict(set)
-        for alert in email_digests:
-            for user in alert.alert_channel_conf:
-                user_triggered_alerts[user].add(alert.id)
+        for triggered_alert in triggered_alerts:
+            for user in triggered_alert.triggered_alert.alert_channel_conf:
+                user_triggered_alerts[user].add(triggered_alert.triggered_alert.id)
 
-        triggered_alert_dict: Dict[int, TriggeredAlerts] = {
-            alert.id: alert for alert in email_digests
+        triggered_alert_dict: Dict[int, TriggeredAlertWithPoints] = {
+            alert.triggered_alert.id: alert for alert in triggered_alerts
         }
         for recipient in user_triggered_alerts.keys():
             self._send_email_digest(
@@ -128,18 +139,21 @@ class AlertDigestController:
             )
 
     def _get_top_anomalies_and_counts(
-        self, triggered_alerts: List[TriggeredAlerts]
+        self, triggered_alerts: List[TriggeredAlertWithPoints]
     ) -> Tuple[Sequence[AnomalyPointFormatted], int, int]:
-        points = extract_anomaly_points_from_triggered_alerts(
-            triggered_alerts, self.kpi_cache
+        return get_top_anomalies_and_counts(
+            [
+                point
+                for triggered_alert in triggered_alerts
+                for point in triggered_alert.points
+            ]
         )
-        return get_top_anomalies_and_counts(points)
 
     def _send_email_digest(
         self,
         recipient: str,
         triggered_alert_ids: Set[int],
-        triggered_alert_dict: Dict[int, TriggeredAlerts],
+        triggered_alert_dict: Dict[int, TriggeredAlertWithPoints],
     ):
         triggered_alerts = [triggered_alert_dict[id_] for id_ in triggered_alert_ids]
         (
@@ -165,7 +179,7 @@ class AlertDigestController:
             top_anomalies=top_anomalies_,
         )
 
-    def _send_slack_digests(self, triggered_alerts: List[TriggeredAlerts]):
+    def _send_slack_digests(self, triggered_alerts: List[TriggeredAlertWithPoints]):
         """Sends a slack alert containing a summary of triggered alerts."""
         (
             top_anomalies_,

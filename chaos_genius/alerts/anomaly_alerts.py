@@ -411,16 +411,30 @@ class AnomalyAlertController:
                 latest_day.isoformat(),
             )
 
-            if self.alert.alert_channel == "email":
-                self._send_email_alert(latest_day_data, latest_day)
-            elif self.alert.alert_channel == "slack":
-                self._send_slack_alert(latest_day_data)
-            else:
-                raise AlertException(
-                    f"Unknown alert channel: {self.alert.alert_channel}",
-                    alert_id=self.alert_id,
-                    kpi_id=self.kpi_id,
+            # send alert only for overall KPI, not subdims
+            latest_day_data = list(
+                filter(
+                    lambda point: point.series_type == OVERALL_KPI_SERIES_TYPE_REPR,
+                    latest_day_data,
                 )
+            )
+
+            if not latest_day_data:
+                logger.info(
+                    f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) "
+                    "No overall anomalies found. Not sending alerts only storing them."
+                )
+            else:
+                if self.alert.alert_channel == "email":
+                    self._send_email_alert(latest_day_data, latest_day)
+                elif self.alert.alert_channel == "slack":
+                    self._send_slack_alert(latest_day_data)
+                else:
+                    raise AlertException(
+                        f"Unknown alert channel: {self.alert.alert_channel}",
+                        alert_id=self.alert_id,
+                        kpi_id=self.kpi_id,
+                    )
         else:
             logger.info(
                 f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) not sending "
@@ -507,7 +521,7 @@ class AnomalyAlertController:
 
         anomaly_data = get_anomaly_data(
             [self.kpi_id],
-            anomaly_types=["overall"],
+            anomaly_types=["overall", "subdim"],
             anomalies_only=anomalies_only,
             start_timestamp=start_timestamp,
             include_start_timestamp=include_start_timestamp,

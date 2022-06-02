@@ -127,7 +127,7 @@ def _preprocess_triggered_alerts(
     triggered_alerts: Sequence[TriggeredAlerts],
     alert_config_cache: Dict[int, Alert],
     kpi_cache: Dict[int, Kpi],
-) -> List[TriggeredAlerts]:
+) -> List[TriggeredAlertWithPoints]:
     """Preprocess triggered alerts for use in the Alert Dashboard."""
     return [
         preprocess_triggered_alert(ta, alert_config_cache, kpi_cache)
@@ -217,15 +217,21 @@ def get_digest_view_data(
 
     alert_config_cache, kpi_cache = get_alert_kpi_configurations(triggered_alerts)
 
-    triggered_alerts = _preprocess_triggered_alerts(
-        triggered_alerts, alert_config_cache, kpi_cache
-    )
+    triggered_alerts = [
+        triggered_alert.triggered_alert
+        for triggered_alert in _preprocess_triggered_alerts(
+            triggered_alerts, alert_config_cache, kpi_cache
+        )
+    ]
 
     anomaly_alerts = extract_anomaly_points_from_triggered_alerts(
         [alert for alert in triggered_alerts if alert.alert_type == "KPI Alert"],
         kpi_cache,
     )
     anomaly_alerts = _filter_anomaly_alerts(anomaly_alerts, include_subdims)
+    # newest data first
+    anomaly_alerts.sort(key=lambda point: point.data_datetime, reverse=True)
+
     event_alerts_data = [
         alert for alert in triggered_alerts if alert.alert_type == "Event Alert"
     ]

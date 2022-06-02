@@ -54,7 +54,7 @@ class AlertDigestController:
 
         Note: must only be called once on an instance.
         """
-        start_date, end_date = self._data_time_range()
+        report_date, start_date, end_date = self._data_time_range()
         triggered_alerts = self._get_triggered_alerts(start_date, end_date)
 
         slack_digests: List[TriggeredAlertWithPoints] = []
@@ -89,12 +89,14 @@ class AlertDigestController:
                         email_digests.append(triggered_alert)
 
         if len(email_digests) > 0:
-            self._send_email_digests(email_digests)
+            self._send_email_digests(email_digests, report_date)
 
         if len(slack_digests) > 0:
             self._send_slack_digests(slack_digests)
 
-    def _data_time_range(self) -> Tuple[datetime.datetime, datetime.datetime]:
+    def _data_time_range(
+        self,
+    ) -> Tuple[datetime.date, datetime.datetime, datetime.datetime]:
         anomaly_date = datetime.date.today() - datetime.timedelta(
             days=DAYS_OFFSET_FOR_ANALTYICS
         )
@@ -110,7 +112,7 @@ class AlertDigestController:
             end_date.isoformat(),
         )
 
-        return start_date, end_date
+        return anomaly_date, start_date, end_date
 
     def _get_triggered_alerts(
         self, start_date: datetime.datetime, end_date: datetime.datetime
@@ -124,7 +126,11 @@ class AlertDigestController:
             .all()
         )
 
-    def _send_email_digests(self, triggered_alerts: List[TriggeredAlertWithPoints]):
+    def _send_email_digests(
+        self,
+        triggered_alerts: List[TriggeredAlertWithPoints],
+        report_date: datetime.date,
+    ):
         user_triggered_alerts: DefaultDict[str, Set[int]] = defaultdict(set)
         for triggered_alert in triggered_alerts:
             for user in triggered_alert.triggered_alert.alert_channel_conf:
@@ -135,7 +141,10 @@ class AlertDigestController:
         }
         for recipient in user_triggered_alerts.keys():
             self._send_email_digest(
-                recipient, user_triggered_alerts[recipient], triggered_alert_dict
+                recipient,
+                user_triggered_alerts[recipient],
+                triggered_alert_dict,
+                report_date,
             )
 
     def _get_top_anomalies_and_counts(
@@ -146,7 +155,8 @@ class AlertDigestController:
                 point
                 for triggered_alert in triggered_alerts
                 for point in triggered_alert.points
-            ]
+            ],
+            n=10,
         )
 
     def _send_email_digest(
@@ -154,6 +164,7 @@ class AlertDigestController:
         recipient: str,
         triggered_alert_ids: Set[int],
         triggered_alert_dict: Dict[int, TriggeredAlertWithPoints],
+        report_date: datetime.date,
     ):
         triggered_alerts = [triggered_alert_dict[id_] for id_ in triggered_alert_ids]
         (
@@ -166,7 +177,7 @@ class AlertDigestController:
             "digest_template.html",
             [recipient],
             (
-                f"Daily Alerts Report ({self.curr_time.strftime(ALERT_DATE_FORMAT)}) - "
+                f"Daily Alerts Report ({report_date.strftime(ALERT_DATE_FORMAT)}) - "
                 "Chaos Genius Alert❗"
             ),
             [],
@@ -174,9 +185,13 @@ class AlertDigestController:
             str=str,
             overall_count=overall_count,
             subdim_count=subdim_count,
-            alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
+            alert_dashboard_link=(
+                f"{webapp_url_prefix()}api/digest"
+                f"?date={report_date.strftime(ALERT_DATE_FORMAT)}"
+            ),
             kpi_link_prefix=f"{webapp_url_prefix()}#/dashboard/0/anomaly",
             top_anomalies=top_anomalies_,
+            report_date=report_date.strftime(ALERT_DATE_FORMAT),
         )
 
     def _send_slack_digests(self, triggered_alerts: List[TriggeredAlertWithPoints]):

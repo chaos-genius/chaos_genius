@@ -303,7 +303,9 @@ class AnomalyPointFormatted(AnomalyPoint):
     @property
     def anomaly_time_only(self):
         """Returns a readable string of the time (without date) of anomaly."""
-        return self.data_datetime.strftime(ALERT_READABLE_DATA_TIME_ONLY_FORMAT)
+        return self.data_datetime.strftime(ALERT_READABLE_DATA_TIME_ONLY_FORMAT).lstrip(
+            "0"
+        )
 
     @property
     def previous_point_time_only(self):
@@ -311,8 +313,20 @@ class AnomalyPointFormatted(AnomalyPoint):
 
         Only for hourly!
         """
-        return (self.data_datetime - datetime.timedelta(hours=1)).strftime(
-            ALERT_READABLE_DATA_TIME_ONLY_FORMAT
+        data_time_suffix = self.data_datetime.strftime("%p")
+        previous_point_time = self.data_datetime - datetime.timedelta(hours=1)
+        previous_time_suffix = self.data_datetime.strftime("%p")
+
+        # skip the AM/PM suffix if both previous and current point has the same
+        if data_time_suffix != previous_time_suffix:
+            format = ALERT_READABLE_DATA_TIME_ONLY_FORMAT
+        else:
+            format = "%I"
+
+        return (
+            (previous_point_time)
+            .strftime(format)
+            .lstrip("0")
         )
 
 

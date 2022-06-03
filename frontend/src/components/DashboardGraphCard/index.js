@@ -60,6 +60,21 @@ const Dashboardgraphcard = ({ aggregationData, monthWeek }) => {
             borderColor: 'primary-green'
           };
         }
+        case 'anomalous_points': {
+          return {
+            label: 'Anomalies',
+            value:
+              data.value !== undefined && data.value !== null
+                ? data.value
+                : '-',
+            format: true,
+            textColor: { color: '#222222' },
+            borderColor: 'accent-purple',
+            timeCutsDate: aggregationData?.anomalous_points_str
+              ? `(${aggregationData?.anomalous_points_str.toString()})`
+              : '-'
+          };
+        }
         case 'group1_value': {
           return {
             label: monthWeek?.grp1_name,

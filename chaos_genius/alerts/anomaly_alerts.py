@@ -444,7 +444,7 @@ class AnomalyAlertController:
                 if self.alert.alert_channel == "email":
                     self._send_email_alert(latest_day_data, latest_day)
                 elif self.alert.alert_channel == "slack":
-                    self._send_slack_alert(latest_day_data)
+                    self._send_slack_alert(latest_day_data, latest_day)
                 else:
                     raise AlertException(
                         f"Unknown alert channel: {self.alert.alert_channel}",
@@ -788,7 +788,9 @@ class AnomalyAlertController:
             "successfully sent"
         )
 
-    def _send_slack_alert(self, formatted_anomaly_data: List[AnomalyPoint]):
+    def _send_slack_alert(
+        self, formatted_anomaly_data: List[AnomalyPoint], date: datetime.date
+    ):
         kpi = self._get_kpi()
 
         (
@@ -805,6 +807,7 @@ class AnomalyAlertController:
             top_anomalies_,
             overall_count,
             subdim_count,
+            date.strftime(ALERT_DATE_FORMAT),
         )
 
         if err == "":

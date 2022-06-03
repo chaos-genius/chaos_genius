@@ -25,6 +25,7 @@ def anomaly_alert_slack(
     points: "Sequence[anomaly_alerts.AnomalyPointFormatted]",
     overall_count: int,
     subdim_count: int,
+    date: str,
 ) -> str:
     """Sends an anomaly alert on slack.
 
@@ -54,18 +55,7 @@ def anomaly_alert_slack(
             },
             {
                 "type": "section",
-                "text": {"type": "mrkdwn", "text": f"KPI name: *{kpi_name}*\n"},
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": (
-                        f"- Total alerts generated (Overall KPI): *{overall_count}*\n"
-                        + "- Total alerts generated (including subdimenions): "
-                        + f"*{subdim_count + overall_count}*\n"
-                    ),
-                },
+                "text": {"type": "mrkdwn", "text": f"KPI name: *{kpi_name}*\nDate: *{date}*\n"},
             },
             {
                 "type": "header",
@@ -114,7 +104,7 @@ def anomaly_alert_slack(
                 "text": {
                     "type": "mrkdwn",
                     "text": _format_slack_anomalies(
-                        points, kpi_name=kpi_name, include_kpi_link=False
+                        points, kpi_name=kpi_name, include_kpi_link=False, include_kpi_name=False
                     ),
                 },
             },
@@ -173,6 +163,7 @@ def _format_slack_anomalies(
     top10: "Sequence[anomaly_alerts.AnomalyPointFormatted]",
     kpi_name: Optional[str] = None,
     include_kpi_link: bool = True,
+    include_kpi_name: bool = True,
 ) -> str:
     out = ""
 
@@ -187,25 +178,33 @@ def _format_slack_anomalies(
             kpi_name_link = f"{kpi_name}"
 
         if point.previous_value is None or point.y == point.previous_value:
-            out += f"- :black_circle_for_record: Anomalous behavior in *{kpi_name_link}* "
-            if point.is_hourly:
-                out += (
-                    f"with constant value *{point.y_readable}*"
-                    + f" from {point.previous_point_time_only}"
-                    + f" to {point.anomaly_time_only}"
-                )
+            out += "- :black_circle_for_record: Anomalous behavior"
+            if include_kpi_name:
+                out += f" in *{kpi_name_link}* "
             else:
-                out += f"with same value *{point.y_readable}* as yesterday"
+                out += " detected "
+            if point.previous_value is None:
+                out += f"- changed to {point.y_readable}"
+            else:
+                if point.is_hourly:
+                    out += (
+                        f"with constant value *{point.y_readable}*"
+                        + f" from {point.previous_point_time_only}"
+                        + f" to {point.anomaly_time_only}"
+                    )
+                else:
+                    out += f"with same value *{point.y_readable}* as yesterday"
 
         else:
             if point.y > point.previous_value:
                 out += "- :arrow_up: Spike"
             elif point.y < point.previous_value:
                 out += "- :arrow_down_small: Drop"
-            out += (
-                f" in *{kpi_name_link}*"
-                + f" -  changed to *{point.y_readable}*"
-            )
+            if include_kpi_name:
+                out += f" in *{kpi_name_link}* "
+            else:
+                out += " detected "
+            out += f" -  changed to *{point.y_readable}*"
             if point.previous_value_readable is not None:
                 out += (
                     f" from {point.previous_value_readable} "

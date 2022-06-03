@@ -260,6 +260,12 @@ class AnomalyPointFormatted(AnomalyPoint):
                 formatted_change_percent = f"+{point.percent_change}%"
             else:
                 formatted_change_percent = f"{point.percent_change}%"
+        if (
+            isinstance(point.percent_change, str)
+            and point.percent_change.endswith("inf")
+            and point.previous_value is not None
+        ):
+            formatted_change_percent = f"{point.percent_change}%"
 
         is_hourly = time_series_frequency is not None and time_series_frequency == "H"
 
@@ -323,11 +329,7 @@ class AnomalyPointFormatted(AnomalyPoint):
         else:
             format = "%I"
 
-        return (
-            (previous_point_time)
-            .strftime(format)
-            .lstrip("0")
-        )
+        return (previous_point_time).strftime(format).lstrip("0")
 
 
 GenericAnomalyPoint = TypeVar("GenericAnomalyPoint", bound=AnomalyPointOriginal)

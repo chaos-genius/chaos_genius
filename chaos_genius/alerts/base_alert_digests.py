@@ -92,7 +92,7 @@ class AlertDigestController:
             self._send_email_digests(email_digests, report_date)
 
         if len(slack_digests) > 0:
-            self._send_slack_digests(slack_digests)
+            self._send_slack_digests(slack_digests, report_date)
 
     def _data_time_range(
         self,
@@ -194,7 +194,11 @@ class AlertDigestController:
             report_date=report_date.strftime(ALERT_DATE_FORMAT),
         )
 
-    def _send_slack_digests(self, triggered_alerts: List[TriggeredAlertWithPoints]):
+    def _send_slack_digests(
+        self,
+        triggered_alerts: List[TriggeredAlertWithPoints],
+        report_date: datetime.date,
+    ):
         """Sends a slack alert containing a summary of triggered alerts."""
         (
             top_anomalies_,
@@ -203,7 +207,11 @@ class AlertDigestController:
         ) = self._get_top_anomalies_and_counts(triggered_alerts)
 
         err = alert_digest_slack_formatted(
-            self.frequency, top_anomalies_, overall_count, subdim_count
+            self.frequency,
+            top_anomalies_,
+            overall_count,
+            subdim_count,
+            report_date.strftime(ALERT_DATE_FORMAT),
         )
 
         if err == "":

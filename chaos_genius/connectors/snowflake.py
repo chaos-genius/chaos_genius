@@ -9,6 +9,13 @@ class SnowflakeDb(BaseDb):
     db_name = "snowflake"
     test_db_query = "SELECT 1"
 
+    __SQL_IDENTIFIER = '"'
+
+    @property
+    def sql_identifier(self):
+        """Used to quote any SQL identifier in case of it using special characters or keywords."""
+        return self.__SQL_IDENTIFIER
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

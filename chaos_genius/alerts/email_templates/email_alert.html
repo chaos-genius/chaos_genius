@@ -1,86 +1,36 @@
 {% extends "layout.html" %}
 
+{% import "common.html" as common %}
+
 {% block content %}
 
-<h2 style="margin-bottom: 15px; color: #F6F5F5">{{ alert_name }}</h2>
+<h2 style="margin-bottom: 15px; {{ common.main_text }}">{{ alert_name }}</h2>
 
 <hr>
 
-<div class="alert-container" style="color: #F6F5F5 !important;">
+<div class="alert-container" style="{{ common.main_text }}">
 
-<h3 style="color: #F6F5F5 !important;">Summary</h3>
+<h3 style="{{ common.main_text }}">Summary</h3>
 
-<h4><span style="color: #F6F5F5 !important; font-weight: 400;">KPI Name: </span>{{ kpi_name }}</h4>
-<h4><span style="color: #F6F5F5 !important; font-weight: 400;">Date: </span>{{ date }}</h4>
+<div style="{{ common.main_text }} margin-bottom: 0.5rem;"><strong>KPI Name: </strong>{{ kpi_name }}</div>
+<div style="{{ common.main_text }}"><strong>Date: </strong>{{ date }}</div>
 
-<h3 style="color: #F6F5F5 !important;">Alert Message</h3>
+<h3 style="{{ common.main_text }}">Alert Message</h3>
 
-<div style="color: #F6F5F5 !important; margin-bottom: 1rem;">
+<div style="{{ common.main_text }} margin-bottom: 1rem;">
 {{ alert_message }}
 </div>
 
-<a class="btn" href="{{ kpi_link }}" style="appearance: button;cursor: pointer;border-radius: 5px;border-width: 0;background-color: #60CA9A;height: 2rem;line-height: 2rem;padding: 0 1rem;margin-bottom: 1rem;text-decoration: none;display: inline-block;color: black !important;">View KPI</a>
-<a class="btn" href="{{ alert_dashboard_link }}" style="appearance: button;cursor: pointer;border-radius: 5px;border-width: 0;background-color: #60CA9A;height: 2rem;line-height: 2rem;padding: 0 1rem;margin-bottom: 1rem;text-decoration: none;display: inline-block;color: black !important;">Alerts Dashboard</a>
+{{ common.button_with_link("View KPI", kpi_link) }}
+{{ common.button_with_link("Alerts Dashboard", alert_dashboard_link) }}
 
-<hr>
+<hr style="margin-top: 1rem;">
 
 <h3>Anomalies</h3>
 <ul>
     {% for point in top_anomalies %}
     <li>
-        {% if point.previous_value is none %}
-            Change
-        {% elif point.y > point.previous_value %}
-            <span style="color: lightgreen;">
-                ↑Spike
-            </span>
-        {% elif point.y < point.previous_value %}
-            <span style="color: red;">
-                ↓Drop
-            </span>
-        {% else %}
-            Change
-        {% endif %}
-
-        <span style="color: lightgrey;">
-
-            detected
-
-            -
-
-            changed
-
-        </span>
-
-            {% if point.previous_value_readable is not none %}
-
-                <span style="color: lightgrey;">
-                    from
-                </span>
-                <strong>{{point.previous_value_readable}}</strong>
-
-            {% endif %}
-
-            <span style="color: lightgrey;">
-                to
-            </span>
-            <strong>{{point.y_readable}}</strong>
-
-            (<strong>{{ point.formatted_change_percent }}</strong>)
-
-            {% if point.is_hourly %}
-                <span style="color: lightgrey;">
-                    from
-                </span>
-                <strong>{{ point.previous_point_time_only }}</strong>
-
-                <span style="color: lightgrey;">
-                    to
-                </span>
-                <strong>{{ point.anomaly_time_only }}</strong>
-            {% endif %}
-
-        </span>
+        {{ common.anomaly_point_formatting(point) }}
     </li>
     {% endfor %}
 </ul>

@@ -580,7 +580,7 @@ class AnomalyAlertController:
             alert_conf_id=self.alert_id,
             alert_type="KPI Alert",
             is_sent=status,
-            created_at=datetime.datetime.now(),
+            created_at=self.now,
             alert_metadata=alert_metadata,
         )
 
@@ -744,7 +744,7 @@ class AnomalyAlertController:
 
         subject = (
             f"{self.alert.alert_name} - Chaos Genius Alert "
-            f"({self.now.strftime('%b %d')})❗"
+            f"({date.strftime('%b %d')})❗"
         )
 
         # attach CSV of anomaly data

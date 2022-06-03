@@ -1,0 +1,143 @@
+{% set non_important_text = "color: lightgrey;" %}
+
+{% set important_text = "color: white !important;" %}
+
+{% set main_text = "color: #F6F5F5 !important;" %}
+
+{% macro kpi_name_link(kpi_link_prefix, point) -%}
+    <strong>
+        <a
+            class="kpi-link"
+            href="{{ kpi_link_prefix }}/{{ point.kpi_id }}"
+            style="{{ important_text }} text-decoration-line: none;"
+        >
+            {{point.kpi_name}}
+        </a>
+    </strong>
+{%- endmacro %}
+
+{% macro button_with_link(text, link) -%}
+<a
+    class="btn"
+    href="{{ link }}"
+    style="
+        appearance: button;
+        cursor: pointer;
+        border-radius: 10px;
+        border-width: 0;
+        background-color: #60CA9A;
+        height: 2rem;
+        line-height: 2rem;
+        padding: 0 1rem;
+        text-decoration: none;
+        display: inline-block;
+        color: black !important;
+        align-self: center;
+    "
+>
+    {{ text }}
+</a>
+{%- endmacro %}
+
+{% macro anomaly_point_formatting(point, include_kpi_name=false) -%}
+    {% if point.previous_value is none or point.y == point.previous_value %}
+        <strong style="color: orange;">
+            Unusual Pattern
+        </strong>
+
+        {% if include_kpi_name %}
+            <span style="{{ non_important_text }}">
+
+                in
+
+            </span>
+
+            {{ kpi_name_link(kpi_link_prefix, point) }}
+        {% else %}
+            <span style="{{ non_important_text }}">
+
+                detected -
+
+            </span>
+        {% endif %}
+
+        <span style="{{ non_important_text }}">
+
+            with value
+
+        </span>
+
+        <strong style="{{ important_text }}">{{point.y_readable}}</strong>
+
+        {% if point.is_hourly %}
+            <span style="{{ non_important_text }}">
+                at
+            </span>
+            <span style="{{ important_text }}">{{ point.anomaly_time_only }}</span>
+        {% endif %}
+
+    {% else %}
+        {% if point.y > point.previous_value %}
+            <strong style="color: rgb(6, 182, 212);">
+                ↑Spike
+            </strong>
+        {% elif point.y < point.previous_value %}
+            <strong style="color: orange;">
+                ↓Drop
+            </strong>
+        {% endif %}
+
+        {% if include_kpi_name %}
+            <span style="{{ non_important_text }}">
+
+                in
+
+            </span>
+
+            {{ kpi_name_link(kpi_link_prefix, point) }}
+        {% else %}
+            <span style="{{ non_important_text }}">
+
+                detected
+
+            </span>
+        {% endif %}
+
+        <span style="{{ non_important_text }}">
+
+            -
+
+            changed
+
+        </span>
+
+        <span style="{{ non_important_text }}">
+            to
+        </span>
+
+        <strong style="{{ important_text }}">{{point.y_readable}}</strong>
+
+        {% if point.previous_value_readable is not none %}
+
+            <span style="{{ non_important_text }}">
+                from
+            </span>
+            <span style="{{ important_text }}">{{point.previous_value_readable}}</span>
+
+        {% endif %}
+
+        (<span style="{{ important_text }}">{{ point.formatted_change_percent }}</span>)
+
+        {% if point.is_hourly %}
+            <span style="{{ non_important_text }}">
+                from
+            </span>
+            <span style="{{ important_text }}">{{ point.previous_point_time_only }}</span>
+
+            <span style="{{ non_important_text }}">
+                to
+            </span>
+            <span style="{{ important_text }}">{{ point.anomaly_time_only }}</span>
+        {% endif %}
+    {% endif %}
+{%- endmacro %}

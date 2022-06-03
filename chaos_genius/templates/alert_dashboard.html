@@ -344,7 +344,7 @@
                   "{{ point.series_type }}",
                   "{{ point.readable_data_timestamp }}",
                   "{{ point.y }}",
-                  "{{ point.previous_value if point.previous_value is not None else "-" }}",
+                  "{{ point.previous_value if point.previous_value is not none else "-" }}",
                   [
                       {% for email in (point.alert_channel_conf or []) %}
                       "{{ email }}",

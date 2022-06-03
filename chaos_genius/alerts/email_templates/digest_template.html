@@ -1,107 +1,25 @@
 {% extends "layout.html" %}
 
+{% import "common.html" as common %}
+
 {% block content %}
 
-<h2 style="margin-bottom: 15px; color: #F6F5F5">Alert Digest ({{ report_date }})</h2>
+<h2 style="margin-bottom: 15px; {{ common.main_text }}">Alert Digest ({{ report_date }})</h2>
 
-<div class="digest-container" style="color: #F6F5F5 !important;">
+<div class="digest-container" style="{{ common.main_text }}">
 
 <hr>
 
-<h3 style="color: #F6F5F5 !important;">Top Anomalies</h3>
+<h3 style="{{ common.main_text }}">Top Anomalies</h3>
 <ul>
     {% for point in top_anomalies %}
     <li>
-        {% if point.previous_value is none or point.y == point.previous_value %}
-            <strong style="color: orange;">
-                Unusual Pattern
-            </strong>
-
-            <span style="color: lightgrey;">
-
-                in
-
-            </span>
-
-            <strong><a class="kpi-link" href="{{ kpi_link_prefix }}/{{ point.kpi_id }}" style="color: white !important; text-decoration-line: none;">{{point.kpi_name}}</a></strong>
-
-            <span style="color: lightgrey;">
-
-                with value
-
-            </span>
-
-            <strong style="color: white !important;">{{point.y_readable}}</strong>
-
-            {% if point.is_hourly %}
-                <span style="color: lightgrey;">
-                    at
-                </span>
-                <span style="color: white !important;">{{ point.anomaly_time_only }}</span>
-            {% endif %}
-
-        {% else %}
-            {% if point.y > point.previous_value %}
-                <strong style="color: rgb(6, 182, 212);">
-                    ↑Spike
-                </strong>
-            {% elif point.y < point.previous_value %}
-                <strong style="color: orange;">
-                    ↓Drop
-                </strong>
-            {% endif %}
-
-            <span style="color: lightgrey;">
-
-                in
-
-            </span>
-
-            <strong><a class="kpi-link" href="{{ kpi_link_prefix }}/{{ point.kpi_id }}" style="color: white !important; text-decoration-line: none;">{{point.kpi_name}}</a></strong>
-
-            <span style="color: lightgrey;">
-
-                -
-
-                changed
-
-            </span>
-
-                <span style="color: lightgrey;">
-                    to
-                </span>
-                <strong style="color: white !important;">{{point.y_readable}}</strong>
-
-                {% if point.previous_value_readable is not none %}
-
-                    <span style="color: lightgrey;">
-                        from
-                    </span>
-                    <span style="color: white !important;">{{point.previous_value_readable}}</span>
-
-                {% endif %}
-
-                (<span style="color: white !important;">{{ point.formatted_change_percent }}</span>)
-
-                {% if point.is_hourly %}
-                    <span style="color: lightgrey;">
-                        from
-                    </span>
-                    <span style="color: white !important;">{{ point.previous_point_time_only }}</span>
-
-                    <span style="color: lightgrey;">
-                        to
-                    </span>
-                    <span style="color: white !important;">{{ point.anomaly_time_only }}</span>
-                {% endif %}
-
-            </span>
-        {% endif %}
+        {{ common.anomaly_point_formatting(point, true) }}
     </li>
     {% endfor %}
 </ul>
 
-<a class="btn" href="{{ alert_dashboard_link }}" style="appearance: button;cursor: pointer;border-radius: 10px;border-width: 0;background-color: #60CA9A;height: 2rem;line-height: 2rem;padding: 0 1rem;text-decoration: none;display: inline-block;color: black !important; align-self: center;">Alerts Dashboard</a>
+{{ common.button_with_link("Alerts Dashboard", alert_dashboard_link) }}
 
 </div>
 

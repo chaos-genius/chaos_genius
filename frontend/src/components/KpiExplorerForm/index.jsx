@@ -899,6 +899,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       datetimecolumns: '',
       dimensions: []
     });
+    setEditedFormData({ ...editedFormData, dimensions: [] });
   };
   const closeModal = () => {
     setIsOpen(false);

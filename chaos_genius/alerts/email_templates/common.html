@@ -42,7 +42,7 @@
 {% macro anomaly_point_formatting(point, include_kpi_name=false) -%}
     {% if point.previous_value is none or point.y == point.previous_value %}
         <strong style="color: orange;">
-            Anomalous behavior
+            ∿ Anomalous behavior
         </strong>
 
         {% if include_kpi_name %}
@@ -61,10 +61,12 @@
             </span>
         {% endif %}
 
+        -
+
         {% if point.previous_value is none %}
             <span style="{{ non_important_text }}">
 
-                - changed to
+                changed to
 
             </span>
             <strong style="{{ important_text }}">{{point.y_readable}}</strong>
@@ -104,11 +106,11 @@
     {% else %}
         {% if point.y > point.previous_value %}
             <strong style="color: rgb(6, 182, 212);">
-                ↑Spike
+                ↑ Spike
             </strong>
         {% elif point.y < point.previous_value %}
             <strong style="color: orange;">
-                ↓Drop
+                ↓ Drop
             </strong>
         {% endif %}
 

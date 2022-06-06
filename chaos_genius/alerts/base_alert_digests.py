@@ -14,7 +14,6 @@ from chaos_genius.alerts.utils import send_email_using_template, webapp_url_pref
 from chaos_genius.controllers.config_controller import get_config_object
 from chaos_genius.controllers.digest_controller import (
     TriggeredAlertWithPoints,
-    extract_anomaly_points_from_triggered_alerts,
     get_alert_kpi_configurations,
     preprocess_triggered_alert,
 )

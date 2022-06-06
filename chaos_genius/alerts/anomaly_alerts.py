@@ -321,7 +321,7 @@ class AnomalyPointFormatted(AnomalyPoint):
         """
         data_time_suffix = self.data_datetime.strftime("%p")
         previous_point_time = self.data_datetime - datetime.timedelta(hours=1)
-        previous_time_suffix = self.data_datetime.strftime("%p")
+        previous_time_suffix = previous_point_time.strftime("%p")
 
         # skip the AM/PM suffix if both previous and current point has the same
         if data_time_suffix != previous_time_suffix:

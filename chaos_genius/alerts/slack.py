@@ -75,8 +75,7 @@ def anomaly_alert_slack(
                     "text": _format_slack_anomalies(
                         points,
                         kpi_name=kpi_name,
-                        include_kpi_link=False,
-                        include_kpi_name=False,
+                        include_kpi_info=False,
                     ),
                 },
             },
@@ -153,14 +152,13 @@ def event_alert_slack(alert_name, alert_frequency, alert_message, alert_overview
 def _format_slack_anomalies(
     top10: "Sequence[anomaly_alerts.AnomalyPointFormatted]",
     kpi_name: Optional[str] = None,
-    include_kpi_link: bool = True,
-    include_kpi_name: bool = True,
+    include_kpi_info: bool = True,
 ) -> str:
     out = ""
 
     for point in top10:
 
-        if include_kpi_link:
+        if include_kpi_info:
             kpi_name_link = (
                 f"<{webapp_url_prefix()}#/dashboard/0/anomaly/{point.kpi_id}"
                 + f"|{point.kpi_name}>"
@@ -170,7 +168,7 @@ def _format_slack_anomalies(
 
         if point.previous_value is None or point.y == point.previous_value:
             out += "- :black_circle_for_record: Anomalous behavior"
-            if include_kpi_name:
+            if include_kpi_info:
                 out += f" in *{kpi_name_link}* "
             else:
                 out += " detected "
@@ -196,7 +194,7 @@ def _format_slack_anomalies(
                 out += "- :arrow_up: Spike"
             elif point.y < point.previous_value:
                 out += "- :arrow_down_small: Drop"
-            if include_kpi_name:
+            if include_kpi_info:
                 out += f" in *{kpi_name_link}* "
             else:
                 out += " detected "

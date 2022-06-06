@@ -38,24 +38,12 @@ def anomaly_alert_slack(
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": f"{alert_name}",
+                    "text": f"{alert_name} - {kpi_name} ({date}) ",
                     "emoji": True,
                 },
             },
             {
                 "type": "divider",
-            },
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": "Summary",
-                    "emoji": True,
-                },
-            },
-            {
-                "type": "section",
-                "text": {"type": "mrkdwn", "text": f"KPI name: *{kpi_name}*\nDate: *{date}*\n"},
             },
             {
                 "type": "header",
@@ -68,6 +56,29 @@ def anomaly_alert_slack(
             {
                 "type": "section",
                 "text": {"type": "mrkdwn", "text": f"{alert_message}\n"},
+            },
+            {
+                "type": "divider",
+            },
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Anomalies",
+                    "emoji": True,
+                },
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": _format_slack_anomalies(
+                        points,
+                        kpi_name=kpi_name,
+                        include_kpi_link=False,
+                        include_kpi_name=False,
+                    ),
+                },
             },
             {
                 "type": "actions",
@@ -87,26 +98,6 @@ def anomaly_alert_slack(
                         "style": "primary",
                     },
                 ],
-            },
-            {
-                "type": "divider",
-            },
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": "Top anomalies",
-                    "emoji": True,
-                },
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": _format_slack_anomalies(
-                        points, kpi_name=kpi_name, include_kpi_link=False, include_kpi_name=False
-                    ),
-                },
             },
         ],
     )

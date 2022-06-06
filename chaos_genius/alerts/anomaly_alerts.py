@@ -460,10 +460,10 @@ class AnomalyAlertController:
         return status
 
     def _split_anomalies_by_data_timestamp(
-        self, formatted_anomaly_data: List[GenericAnomalyPoint]
+        self, anomaly_data: List[GenericAnomalyPoint]
     ) -> DefaultDict[datetime.date, List[GenericAnomalyPoint]]:
-        formatted_anomaly_data = sorted(
-            formatted_anomaly_data,
+        anomaly_data = sorted(
+            anomaly_data,
             key=lambda point: (point.data_datetime, point.severity),
         )
 
@@ -473,7 +473,7 @@ class AnomalyAlertController:
         by_date: DefaultDict[datetime.date, List[GenericAnomalyPoint]] = defaultdict(
             list
         )
-        for anomaly_point in formatted_anomaly_data:
+        for anomaly_point in anomaly_data:
             by_date[anomaly_point.data_datetime.date()].append(anomaly_point)
 
         return by_date
@@ -618,7 +618,7 @@ class AnomalyAlertController:
             )
         else:
             raise AlertException(
-                (f"Time series frequency not found or invalid: {time_series_freq}"),
+                f"Time series frequency not found or invalid: {time_series_freq}",
                 alert_id=self.alert_id,
                 kpi_id=self.kpi_id,
             )

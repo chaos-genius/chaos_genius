@@ -175,16 +175,21 @@ def _format_slack_anomalies(
             else:
                 out += " detected "
             if point.previous_value is None:
-                out += f"- changed to {point.y_readable}"
+                out += f"- changed to *{point.y_readable}*"
+                if point.is_hourly:
+                    out += (
+                        f" from {point.previous_point_time_only}"
+                        + f" to {point.anomaly_time_only}"
+                    )
             else:
                 if point.is_hourly:
                     out += (
-                        f"with constant value *{point.y_readable}*"
+                        f"- with constant value *{point.y_readable}*"
                         + f" from {point.previous_point_time_only}"
                         + f" to {point.anomaly_time_only}"
                     )
                 else:
-                    out += f"with same value *{point.y_readable}* as previous day"
+                    out += f"- with same value *{point.y_readable}* as previous day"
 
         else:
             if point.y > point.previous_value:

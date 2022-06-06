@@ -485,18 +485,21 @@ class AnomalyAlertController:
 
     def _get_anomalies(
         self,
-        this_date_only: Optional[datetime.date] = None,
+        this_date_after_time_only: Optional[datetime.datetime] = None,
         anomalies_only: bool = True,
         include_severity_cutoff: bool = True,
         consider_days_offset: bool = False,
     ) -> List[AnomalyPointOriginal]:
         last_anomaly_timestamp = self._last_anomaly_timestamp()
 
-        if this_date_only:
-            start_timestamp = datetime.datetime.combine(this_date_only, datetime.time())
+        if this_date_after_time_only:
+            # only consider anomalies on and after given time of that day
+            start_timestamp = this_date_after_time_only
             include_start_timestamp = True
 
-            end_timestamp = start_timestamp + datetime.timedelta(days=1)
+            end_timestamp = datetime.datetime.combine(
+                this_date_after_time_only.date(), datetime.time()
+            ) + datetime.timedelta(days=1)
             include_end_timestamp = False
         else:
             if last_anomaly_timestamp is not None:
@@ -532,7 +535,7 @@ class AnomalyAlertController:
             f"Checking for anomalies for (KPI: {self.kpi_id}, Alert: "
             f"{self.alert_id}) in the range - start: {start_timestamp} (included: "
             f"{include_start_timestamp}) and end: {end_timestamp} "
-            "(included: True)"
+            f"(included: {include_end_timestamp})"
         )
 
         anomaly_data = get_anomaly_data(
@@ -635,7 +638,10 @@ class AnomalyAlertController:
 
         # get previous anomaly point for comparison
         prev_day_data = self._get_anomalies(
-            this_date_only=date - datetime.timedelta(days=1, hours=0, minutes=0),
+            this_date_after_time_only=(
+                datetime.datetime.combine(date, datetime.time())
+                - datetime.timedelta(days=1, hours=0, minutes=0)
+            ),
             anomalies_only=False,
             include_severity_cutoff=False,
         )
@@ -656,15 +662,21 @@ class AnomalyAlertController:
     ) -> List[AnomalyPoint]:
         formatted_anomaly_data: List[AnomalyPoint] = []
 
+        current_day_start = datetime.datetime.combine(date, datetime.time())
+
         # get current day's data for comparison
         cur_day_data = self._get_anomalies(
-            this_date_only=date, anomalies_only=False, include_severity_cutoff=False
+            this_date_after_time_only=current_day_start,
+            anomalies_only=False,
+            include_severity_cutoff=False,
         )
-        # get previous day data too.
+        # get previous day 11PM (23:00) data too
         # used only when a point is present for 00:00
         #  - the previous point in that case will be previous day's 11PM data
         prev_day_data = self._get_anomalies(
-            this_date_only=date - datetime.timedelta(days=1, hours=0, minutes=0),
+            this_date_after_time_only=(
+                current_day_start - datetime.timedelta(days=0, hours=1, minutes=0)
+            ),
             anomalies_only=False,
             include_severity_cutoff=False,
         )

@@ -374,11 +374,7 @@ class AnomalyAlertController:
 
         Note: must only be called once on an instance.
         """
-        anomaly_data = self._get_anomalies(
-            # consider day's offset only if it's a digest alert.
-            # when it's individual we want alert only for the last timestamp.
-            consider_days_offset=not self._to_send_individual()
-        )
+        anomaly_data = self._get_anomalies()
 
         if len(anomaly_data) == 0:
             logger.info(
@@ -488,7 +484,6 @@ class AnomalyAlertController:
         this_date_after_time_only: Optional[datetime.datetime] = None,
         anomalies_only: bool = True,
         include_severity_cutoff: bool = True,
-        consider_days_offset: bool = False,
     ) -> List[AnomalyPointOriginal]:
         last_anomaly_timestamp = self._last_anomaly_timestamp()
 
@@ -507,7 +502,7 @@ class AnomalyAlertController:
                 #   get data after last_anomaly_timestamp
                 start_timestamp = last_anomaly_timestamp
                 include_start_timestamp = False
-            elif consider_days_offset:
+            else:
                 # when it's the first time we're running anomaly.
                 # we need to check for alerts on today-offset day
                 # because that's the day being considered for alert digest.
@@ -517,11 +512,6 @@ class AnomalyAlertController:
                 start_timestamp = datetime.datetime.combine(
                     start_timestamp, datetime.time()
                 )
-                include_start_timestamp = True
-            else:
-                # when last_anomaly_timestamp is not available
-                #   get data of the last timestamp in anomaly table
-                start_timestamp = self.latest_anomaly_timestamp
                 include_start_timestamp = True
 
             end_timestamp = self.latest_anomaly_timestamp

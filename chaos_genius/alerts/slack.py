@@ -184,7 +184,7 @@ def _format_slack_anomalies(
                         + f" to {point.anomaly_time_only}"
                     )
                 else:
-                    out += f"with same value *{point.y_readable}* as yesterday"
+                    out += f"with same value *{point.y_readable}* as previous day"
 
         else:
             if point.y > point.previous_value:

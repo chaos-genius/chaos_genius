@@ -479,9 +479,7 @@ def edit_kpi(kpi_id):
             status = "failure"
     except Exception as err:  # noqa: B902
         status = "failure"
-        import traceback
-        logger.error(traceback.format_exc())
-        logger.info(f"Error in updating the KPI: {err}")
+        logger.error("Error in updating KPI: %d", kpi_id, exc_info=err)
         message = str(err)
     return jsonify({"message": message, "status": status})
 

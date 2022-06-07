@@ -422,9 +422,11 @@ def edit_kpi(kpi_id):
                         "subdim": True,
                     }
 
-                if "run_optional" not in kpi_obj.anomaly_params or (
-                    kpi_obj.anomaly_params["run_optional"]["subdim"]
-                    != run_optional["subdim"]
+                if kpi_obj.anomaly_params is not None and (
+                    "run_optional" not in kpi_obj.anomaly_params or (
+                        kpi_obj.anomaly_params["run_optional"]["subdim"]
+                        != run_optional["subdim"]
+                    )
                 ):
                     kpi_obj.anomaly_params["run_optional"] = run_optional
                     flag_modified(kpi_obj, "anomaly_params")
@@ -477,7 +479,7 @@ def edit_kpi(kpi_id):
             status = "failure"
     except Exception as err:  # noqa: B902
         status = "failure"
-        logger.info(f"Error in updating the KPI: {err}")
+        logger.error("Error in updating KPI: %d", kpi_id, exc_info=err)
         message = str(err)
     return jsonify({"message": message, "status": status})
 

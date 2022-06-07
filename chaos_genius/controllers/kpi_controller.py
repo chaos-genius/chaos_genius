@@ -63,25 +63,30 @@ def run_anomaly_for_kpi(
 
     logger.info("(KPI ID: {kpi_id}) Selecting end date.")
 
-    if end_date is None and kpi_info["scheduler_params"]["scheduler_frequency"] == "D":
-        # by default we always calculate for n-days_offset_for_analytics
-        true_end_date = datetime.today().date() - timedelta(
-            days=(DAYS_OFFSET_FOR_ANALTYICS)
-        )
-        # Check if data is available or not then try for n-days_offset_for_analytics-1
-        if not _is_data_present_for_end_date(kpi_info, true_end_date):
-            true_end_date = true_end_date - timedelta(days=1)
-            logger.info("(KPI ID: {kpi_id}) Decreasing end date by 1.")
+    if end_date is None:
+        scheduler_frequency = kpi_info["scheduler_params"]["scheduler_frequency"]
 
-    elif (
-        end_date is None and kpi_info["scheduler_params"]["scheduler_frequency"] == "H"
-    ):
-        true_end_date = datetime.today().date()
+        if scheduler_frequency == "D":
+            # by default we always calculate for n-days_offset_for_analytics
+            true_end_date = datetime.now().date() - timedelta(
+                days=(DAYS_OFFSET_FOR_ANALTYICS)
+            )
+            # Check if data is available or not then try for
+            # n-days_offset_for_analytics-1
+            if not _is_data_present_for_end_date(kpi_info, true_end_date):
+                true_end_date = true_end_date - timedelta(days=1)
+                logger.info("(KPI ID: {kpi_id}) Decreasing end date by 1.")
 
+        elif scheduler_frequency == "H":
+            true_end_date = datetime.now().date()
+
+        else:
+            raise ValueError(
+                f"KPI ID {kpi_id} has invalid scheduler frequency: "
+                f"{scheduler_frequency}"
+            )
     else:
-        raise Exception(
-            "end_date isn't provided and scheduler_frequency is not recognized."
-        )
+        true_end_date = end_date
 
     logger.info(f"(KPI ID: {kpi_id}) End date is {true_end_date}.")
 

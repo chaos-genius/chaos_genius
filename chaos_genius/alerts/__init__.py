@@ -4,6 +4,7 @@ Most of the code in this module has extensive type annotation. Please use the Py
 VS Code extension (or the Pyright equivalent in other editors) along with flake8 when
 developing.
 """
+import datetime
 import logging
 from typing import List, Optional, Tuple
 
@@ -17,7 +18,9 @@ from chaos_genius.databases.models.kpi_model import Kpi
 logger = logging.getLogger()
 
 
-def check_and_trigger_alert(alert_id: int):
+def check_and_trigger_alert(
+    alert_id: int, last_anomaly_timestamp: Optional[datetime.datetime] = None
+):
     """Check the alert and trigger the notification if found.
 
     Args:
@@ -50,7 +53,7 @@ def check_and_trigger_alert(alert_id: int):
     elif (
         alert_info.alert_type == "KPI Alert" and alert_info.kpi_alert_type == "Anomaly"
     ):
-        anomaly_obj = AnomalyAlertController(alert_info)
+        anomaly_obj = AnomalyAlertController(alert_info, last_anomaly_timestamp)
         return anomaly_obj.check_and_send_alert()
     elif alert_info.alert_type == "KPI Alert" and alert_info.kpi_alert_type == "Static":
         # TODO: is this still needed?

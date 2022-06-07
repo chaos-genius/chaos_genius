@@ -1,49 +1,25 @@
 {% extends "layout.html" %}
 
+{% import "common.html" as common %}
+
 {% block content %}
 
-<h2 style="margin-bottom: 15px; color: #F6F5F5">Daily Alert Digest</h2>
+<h2 style="margin-bottom: 15px; {{ common.main_text }}">Alert Digest ({{ report_date }})</h2>
+
+<div class="digest-container" style="{{ common.main_text }}">
 
 <hr>
 
-<div class="digest-container" style="color: #F6F5F5 !important;">
-
-<h3>Summary</h3>
-<ul>
-    <li>Total alerts generated (overall KPI): {{ overall_count }}</li>
-    <li>Total alerts generated (including subdimensions): {{ overall_count + subdim_count }}</li>
-</ul>
-
-<a class="btn" href="{{ alert_dashboard_link }}" style="appearance: button;cursor: pointer;border-radius: 10px;border-width: 0;background-color: #60CA9A;height: 2rem;line-height: 2rem;padding: 0 1rem;margin-bottom: 1rem;text-decoration: none;display: inline-block;color: black !important;">Alerts Dashboard</a>
-
-<hr>
-
-<h3>Top 10 Anomalies</h3>
+<h3 style="{{ common.main_text }}">Top Anomalies</h3>
 <ul>
     {% for point in top_anomalies %}
     <li>
-        <strong><a class="kpi-link" href="{{ kpi_link_prefix }}/{{ point.kpi_id }}" style="color: white !important;">{{point.kpi_name}} ({{point.series_type}})</a></strong>
-        <span style="color: lightgrey;">
-            changed to <strong>{{point.y_readable}}</strong>
-            {% if point.percent_change is string and "inf" not in point.percent_change %}
-                <span>
-            {% elif "+inf" in str(point.percent_change) or point.percent_change > 0 %}
-                <span style="color: lightgreen;">
-            {% elif "-inf" in str(point.percent_change) or point.percent_change < 0 %}
-                <span style="color: red;">
-            {% else %}
-                <span>
-            {% endif %}
-                ({{ point.formatted_change_percent }})
-                </span>
-            on {{ point.formatted_date }}
-            (expected: <strong>{{point.yhat_lower_readable}}</strong> to <strong>{{point.yhat_upper_readable}}</strong>,
-            severity:
-            <strong>{{point.severity}}</strong>)
-        </span>
+        {{ common.anomaly_point_formatting(point, true) }}
     </li>
     {% endfor %}
 </ul>
+
+{{ common.button_with_link("Alerts Dashboard", alert_dashboard_link) }}
 
 </div>
 

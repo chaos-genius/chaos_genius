@@ -1,7 +1,7 @@
 import datetime
 import logging
 from collections import defaultdict
-from typing import DefaultDict, Dict, List, Optional, Sequence, Tuple
+from typing import DefaultDict, Dict, List, NamedTuple, Optional, Sequence, Tuple
 
 from chaos_genius.alerts.anomaly_alerts import AnomalyPoint, AnomalyPointFormatted
 from chaos_genius.alerts.constants import (
@@ -11,9 +11,19 @@ from chaos_genius.alerts.constants import (
 )
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
-from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
+from chaos_genius.databases.models.triggered_alerts_model import (
+    TriggeredAlerts,
+    triggered_alerts_data_datetime,
+)
 
 logger = logging.getLogger(__name__)
+
+
+class TriggeredAlertWithPoints(NamedTuple):
+    """A wrapper storing both a TriggeredAlerts and its corresponding anomaly points."""
+
+    triggered_alert: TriggeredAlerts
+    points: List[AnomalyPointFormatted]
 
 
 def get_alert_kpi_configurations(triggered_alerts: Sequence[TriggeredAlerts]):
@@ -41,7 +51,7 @@ def preprocess_triggered_alert(
     triggered_alert: TriggeredAlerts,
     alert_config_cache: Dict[int, Alert],
     kpi_cache: Dict[int, Kpi],
-) -> TriggeredAlerts:
+) -> TriggeredAlertWithPoints:
     """Preprocess a triggered alert for use in digests and alerts dashboard."""
     alert_conf_id = triggered_alert.alert_conf_id
     alert_conf = alert_config_cache[alert_conf_id]
@@ -66,7 +76,13 @@ def preprocess_triggered_alert(
             alert_conf, "alert_channel_conf", {}
         ).get(triggered_alert.alert_channel)
 
-    return triggered_alert
+    points = extract_anomaly_points_from_triggered_alerts([triggered_alert], kpi_cache)
+
+    points = list(
+        filter(lambda point: point.series_type == OVERALL_KPI_SERIES_TYPE_REPR, points)
+    )
+
+    return TriggeredAlertWithPoints(triggered_alert, points)
 
 
 def extract_anomaly_points_from_triggered_alerts(
@@ -111,7 +127,7 @@ def _preprocess_triggered_alerts(
     triggered_alerts: Sequence[TriggeredAlerts],
     alert_config_cache: Dict[int, Alert],
     kpi_cache: Dict[int, Kpi],
-) -> List[TriggeredAlerts]:
+) -> List[TriggeredAlertWithPoints]:
     """Preprocess triggered alerts for use in the Alert Dashboard."""
     return [
         preprocess_triggered_alert(ta, alert_config_cache, kpi_cache)
@@ -157,13 +173,39 @@ def _preprocess_event_alerts(event_alerts_data: list):
 
 
 def get_digest_view_data(
-    triggered_alert_id: Optional[int] = None, include_subdims: bool = False
+    triggered_alert_id: Optional[int] = None,
+    include_subdims: bool = False,
+    date: Optional[datetime.date] = None,
 ):
     """Collects triggered alerts data for alerts dashboard."""
-    curr_time = datetime.datetime.now()
-    time_diff = datetime.timedelta(days=7)
+    filters = []
 
-    filters = [TriggeredAlerts.created_at >= (curr_time - time_diff)]
+    if date is None:
+        curr_time = datetime.datetime.now()
+        time_diff = datetime.timedelta(days=7)
+        time_lower_bound = curr_time - time_diff
+
+        filters.append(triggered_alerts_data_datetime() >= time_lower_bound)
+        logger.info(
+            "Digest: looking for anomalies after %s", time_lower_bound.isoformat()
+        )
+    else:
+        filters.extend(
+            [
+                (
+                    triggered_alerts_data_datetime()
+                    >= datetime.datetime.combine(date, datetime.time())
+                ),
+                (
+                    triggered_alerts_data_datetime()
+                    < datetime.datetime.combine(
+                        date + datetime.timedelta(days=1), datetime.time()
+                    )
+                ),
+            ]
+        )
+        logger.info("Digest: looking for anomalies on %s", date)
+
     if triggered_alert_id is not None:
         filters.append(TriggeredAlerts.id == triggered_alert_id)
 
@@ -175,15 +217,21 @@ def get_digest_view_data(
 
     alert_config_cache, kpi_cache = get_alert_kpi_configurations(triggered_alerts)
 
-    triggered_alerts = _preprocess_triggered_alerts(
-        triggered_alerts, alert_config_cache, kpi_cache
-    )
+    triggered_alerts = [
+        triggered_alert.triggered_alert
+        for triggered_alert in _preprocess_triggered_alerts(
+            triggered_alerts, alert_config_cache, kpi_cache
+        )
+    ]
 
     anomaly_alerts = extract_anomaly_points_from_triggered_alerts(
         [alert for alert in triggered_alerts if alert.alert_type == "KPI Alert"],
         kpi_cache,
     )
     anomaly_alerts = _filter_anomaly_alerts(anomaly_alerts, include_subdims)
+    # newest data first
+    anomaly_alerts.sort(key=lambda point: point.data_datetime, reverse=True)
+
     event_alerts_data = [
         alert for alert in triggered_alerts if alert.alert_type == "Event Alert"
     ]

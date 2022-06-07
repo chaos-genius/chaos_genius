@@ -5,7 +5,7 @@ from chaos_genius.connectors.mysql import MysqlDb
 from chaos_genius.connectors.snowflake import SnowflakeDb
 from chaos_genius.connectors.redshift import Redshift
 from chaos_genius.connectors.druid import Druid
-
+from chaos_genius.connectors.hana import Hana
 
 DB_CLASS_MAPPER = {
     "Postgres": PostgresDb,
@@ -14,6 +14,7 @@ DB_CLASS_MAPPER = {
     "Snowflake": SnowflakeDb,
     "Redshift": Redshift,
     "Druid": Druid,
+    "Hana": Hana,
 }
 
 

@@ -2,6 +2,14 @@
 
 {% import "common.html" as common %}
 
+{% block head %}
+<style>
+#alert-message a {
+    color: {{ common.button_color }};
+}
+</style>
+{% endblock %}
+
 {% block content %}
 
 <h2 style="margin-bottom: 15px; {{ common.main_text }}">{{ kpi_name }} ({{ date }})</h2>
@@ -12,13 +20,13 @@
 
 <h3 style="{{ common.main_text }}">Alert Message</h3>
 
-<div style="{{ common.main_text }} margin-bottom: 1rem;">
+<div id="alert-message" style="{{ common.main_text }} margin-bottom: 1rem;">
 {{ alert_message }}
 </div>
 
 <hr style="margin-top: 1rem;">
 
-<h3>Anomalies</h3>
+<h3 style="{{ common.main_text }}">Anomalies</h3>
 <ul>
     {% for point in top_anomalies %}
     <li>

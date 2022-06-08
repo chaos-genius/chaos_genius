@@ -112,6 +112,7 @@ class DataLoader:
         self.identifier = self.db_connection.sql_identifier
 
     def _get_id_string(self, value):
+        value = self.db_connection.resolve_identifier(value)
         return f"{self.identifier}{value}{self.identifier}"
 
     def _convert_date_to_string(self, date: date, offset: str):

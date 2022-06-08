@@ -186,3 +186,9 @@ class BaseDb:
     def get_view_names_list(self, schema_name):
         data = self.inspector.get_view_names(schema=schema_name)
         return data
+
+    def resolve_identifier(self, identifier: str) -> str:
+        """
+        Resolve the identifier if it uses special characters.
+        """
+        return self.inspector.identifier_class(identifier)

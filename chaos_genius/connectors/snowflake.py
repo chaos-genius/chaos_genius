@@ -1,3 +1,4 @@
+import string
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy import text
@@ -86,3 +87,10 @@ class SnowflakeDb(BaseDb):
         data = self.inspector.get_schema_names()
         return data
         
+    def resolve_identifier(self, identifier: str) -> str:
+        """Convert an identifier to uppercase if it is valid or return the original string."""
+        compare_string = string.ascii_lowercase + "_$"
+        for char in identifier:
+            if char not in compare_string:
+                return identifier
+        return identifier.upper()

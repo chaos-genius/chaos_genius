@@ -22,7 +22,17 @@ ANOMALY_TABLE_COLUMN_NAMES_MAPPER = {
     "severity": "Severity Score",
     "change_message": "Change",
     "expected_value": "Expected Value",
+    "previous_value": "Previous Value",
 }
+ANOMALY_TABLE_COLUMN_NAMES_ORDERED = [
+    "series_type",
+    "data_datetime",
+    "y",
+    "previous_value",
+    "change_message",
+    "severity",
+    "expected_value",
+]
 
 FREQUENCY_DICT = {
     "weekly": datetime.timedelta(days=7, hours=0, minutes=0),

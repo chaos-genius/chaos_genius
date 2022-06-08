@@ -222,6 +222,14 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         kpiEditData?.data_source !== null &&
         kpiEditData?.data_source !== undefined
       ) {
+        if (option && option.datasource) {
+          const foundIndex = option.datasource.find((item) => {
+            return +kpiEditData.data_source === +item.id;
+          });
+          if (foundIndex && foundIndex.value === 'Druid' && !hasDruidDropDown) {
+            setHasDruidDropDown(true);
+          }
+        }
         setDataSourceId(kpiEditData?.data_source);
         if (kpiEditData?.schema_name) {
           dispatchGetTableListOnSchema({
@@ -276,6 +284,16 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             label: item.name,
             value: item.name
           });
+          if (
+            hasDruidDropDown &&
+            item.name === 'count' &&
+            formdata.count_column === ''
+          ) {
+            setFormdata({
+              ...formdata,
+              count_column: item.name
+            });
+          }
         });
     } else {
       arr = [];
@@ -713,6 +731,16 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           label: value.name,
           value: value.name
         });
+        if (
+          hasDruidDropDown &&
+          value.name === 'count' &&
+          formdata.count_column === ''
+        ) {
+          setFormdata({
+            ...formdata,
+            count_column: value.name
+          });
+        }
       }
       setOption({ ...option, metricOption: optionArr });
     }
@@ -815,7 +843,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         };
       });
     }
-    if (formdata.count_column === '') {
+    if (hasDruidDropDown && formdata.count_column === '') {
       setErrorMsg((prev) => {
         return {
           ...prev,
@@ -873,8 +901,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         formdata.metriccolumns &&
         formdata.aggregate &&
         formdata.datetimecolumns) !== '' &&
-      formdata.count_column &&
-      formdata.dashboardNameList.length !== 0
+      formdata.dashboardNameList.length !== 0 &&
+      (hasDruidDropDown ? formdata.count_column : true)
     ) {
       const kpiInfo = {
         name: formdata.kpiname,
@@ -885,13 +913,16 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         schema_name: formdata.schemaName,
         kpi_query: formdata.query,
         metric: formdata.metriccolumns,
-        count_column: formdata.count_column,
         aggregation: formdata.aggregate,
         datetime_column: formdata.datetimecolumns,
         dimensions: formdata.dimensions,
         filters: formdata.addfilter,
         dashboards: formdata.dashboardNameList.map((el) => el.value)
       };
+
+      if (hasDruidDropDown) {
+        kpiInfo['count_column'] = formdata.count_column;
+      }
 
       if (data[2] === 'edit' && present) {
         if (Object.keys(needForCleanup)?.length) {

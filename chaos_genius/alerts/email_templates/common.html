@@ -39,7 +39,9 @@
 </a>
 {%- endmacro %}
 
-{% macro anomaly_point_formatting(point, include_kpi_name=false) -%}
+{% macro anomaly_point_formatting(point, kpi_link_prefix=none) -%}
+    {% set include_kpi_name = kpi_link_prefix is not none %}
+
     {% if point.previous_value is none or point.y == point.previous_value %}
         <strong style="color: orange;">
             ∿ Anomalous behavior

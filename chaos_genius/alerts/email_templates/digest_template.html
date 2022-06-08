@@ -14,7 +14,7 @@
 <ul>
     {% for point in top_anomalies %}
     <li>
-        {{ common.anomaly_point_formatting(point, true) }}
+        {{ common.anomaly_point_formatting(point, kpi_link_prefix) }}
     </li>
     {% endfor %}
 </ul>

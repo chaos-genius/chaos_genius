@@ -191,4 +191,4 @@ class BaseDb:
         """
         Resolve the identifier if it uses special characters.
         """
-        return self.inspector.identifier_class(identifier)
+        return identifier

@@ -61,7 +61,7 @@ class RootCauseAnalysisController:
             "connection_type"
         ]
         self._preaggregated = conn_type == "Druid"
-        self._preaggregated_count_col = "count"
+        self._preaggregated_count_col = self.kpi_info["count_column"]
 
         self.end_date = load_input_data_end_date(kpi_info, end_date)
         logger.info(f"RCA Controller end date: {self.end_date}")

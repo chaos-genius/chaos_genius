@@ -1374,9 +1374,12 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                 />
                 {errorMsg.count_column === true ? (
                   <div className="connection__fail">
-                    <p>Select Metric Columns</p>
+                    <p>Select Count Column</p>
                   </div>
                 ) : null}
+                <div className="channel-tip">
+                  <p>This column can be a proxy for frequency</p>
+                </div>
               </div>
             )}
 

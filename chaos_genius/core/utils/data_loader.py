@@ -6,11 +6,10 @@ from datetime import date, datetime, timedelta
 from typing import List, Optional
 
 import pandas as pd
-from pandas.api.types import is_datetime64_any_dtype as is_datetime
 import pytz
+from pandas.api.types import is_datetime64_any_dtype as is_datetime
 
 from chaos_genius.connectors import get_sqla_db_conn
-from chaos_genius.connectors.base_db import BaseDb
 from chaos_genius.core.utils.constants import SUPPORTED_TIMEZONES
 from chaos_genius.core.utils.utils import randomword
 from chaos_genius.databases.models.data_source_model import DataSource
@@ -53,7 +52,8 @@ class DataLoader:
         :type tail: int, optional
         :param validation: if validation is True, we do not perform preprocessing
         :type validation: bool, optional
-        :raises ValueError: Raises error if start_date, end_date and days_before not in accepted combinations
+        :raises ValueError: Raises error if start_date, end_date and days_before
+        not in accepted combinations
         """
         self.kpi_info = kpi_info
         self.tail = tail
@@ -69,7 +69,8 @@ class DataLoader:
             and self.days_before is not None
         ):
             raise ValueError(
-                "If days_before is specified, either start_date or end_date must be specified"
+                "If days_before is specified, either start_date "
+                + "or end_date must be specified"
             )
 
         if (
@@ -78,7 +79,8 @@ class DataLoader:
             and self.days_before is not None
         ):
             raise ValueError(
-                "end_date, start_date and days_before cannot be specified at the same time"
+                "end_date, start_date and days_before cannot be "
+                + "specified at the same time"
             )
 
         if (
@@ -112,6 +114,7 @@ class DataLoader:
         self.identifier = self.db_connection.sql_identifier
 
     def _get_id_string(self, value):
+        value = self.db_connection.resolve_identifier(value)
         return f"{self.identifier}{value}{self.identifier}"
 
     def _convert_date_to_string(self, date: date, offset: str):
@@ -183,7 +186,8 @@ class DataLoader:
 
     def _get_table_name(self):
         if self.kpi_info["kpi_type"] != "table":
-            return f"({self.kpi_info['kpi_query']}) as {self._get_id_string(randomword(10))}"
+            return f"({self.kpi_info['kpi_query']}) as " \
+                + f"{self._get_id_string(randomword(10))}"
         table_name = self._get_id_string(self.kpi_info["table_name"])
         schema_name = self.kpi_info.get("schema_name", None)
         if schema_name:

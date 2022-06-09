@@ -89,6 +89,9 @@ class SnowflakeDb(BaseDb):
         
     def resolve_identifier(self, identifier: str) -> str:
         """Convert an identifier to uppercase if it is valid or return the original string."""
+        # this is necessary for snowflake as it treats unquoted identifiers as uppercase
+        # by default but sqlalchemy treats them as lowercase, so we convert them to
+        # uppercase before quoting them in the query.
         compare_string = string.ascii_lowercase + "_$"
         for char in identifier:
             if char not in compare_string:

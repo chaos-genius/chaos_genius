@@ -217,3 +217,58 @@ def test_data_loader(monkeypatch: MonkeyPatch):
     end_date = end_date + timedelta(days=1)
     output_query = f"""select * from `cloud_cost` where `date` >= '{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and `date` < '{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
     assert output_query == dl._build_query().strip()
+
+    # test for snowflake
+    data_source["connection_type"] = "Snowflake"
+    kpi_info["schema_name"] = "test-ILLEGAL-schema"
+    end_date = date(2020, 1, 1)
+    start_date = date(2019, 1, 1)
+    dl = data_loader.DataLoader(
+        kpi_info, end_date=end_date, start_date=start_date
+    )
+    end_date = end_date + timedelta(days=1)
+    output_query = f"""select * from "test-ILLEGAL-schema"."CLOUD_COST" where "DATE" >= '{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and "DATE" < '{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
+    assert output_query == dl._build_query().strip()
+
+    kpi_info["schema_name"] = "public"
+    end_date = date(2020, 1, 1)
+    start_date = date(2019, 1, 1)
+    dl = data_loader.DataLoader(
+        kpi_info, end_date=end_date, start_date=start_date
+    )
+    end_date = end_date + timedelta(days=1)
+    output_query = f"""select * from "PUBLIC"."CLOUD_COST" where "DATE" >= '{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and "DATE" < '{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
+    assert output_query == dl._build_query().strip()
+
+    # test for redshift
+    data_source["connection_type"] = "Redshift"
+    end_date = date(2020, 1, 1)
+    start_date = date(2019, 1, 1)
+    dl = data_loader.DataLoader(
+        kpi_info, end_date=end_date, start_date=start_date
+    )
+    end_date = end_date + timedelta(days=1)
+    output_query = f"""select * from "public"."cloud_cost" where "date" >= '{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and "date" < '{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
+    assert output_query == dl._build_query().strip()
+
+    # test for driod
+    data_source["connection_type"] = "Druid"
+    end_date = date(2020, 1, 1)
+    start_date = date(2019, 1, 1)
+    dl = data_loader.DataLoader(
+        kpi_info, end_date=end_date, start_date=start_date
+    )
+    end_date = end_date + timedelta(days=1)
+    output_query = f"""select * from "public"."cloud_cost" where "date" >= '{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and "date" < '{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
+    assert output_query == dl._build_query().strip()
+
+    # test for bigquery
+    data_source["connection_type"] = "BigQuery"
+    end_date = date(2020, 1, 1)
+    start_date = date(2019, 1, 1)
+    dl = data_loader.DataLoader(
+        kpi_info, end_date=end_date, start_date=start_date
+    )
+    end_date = end_date + timedelta(days=1)
+    output_query = f"""select * from `public`.`cloud_cost` where `date` >= '{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and `date` < '{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
+    assert output_query == dl._build_query().strip()

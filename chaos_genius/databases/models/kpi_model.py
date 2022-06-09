@@ -22,6 +22,7 @@ class Kpi(PkModel):
     metric = Column(db.Text(), nullable=False)
     aggregation = Column(db.String(80), nullable=False)
     datetime_column = Column(db.Text(), nullable=False)
+    count_column = Column(db.Text(), nullable=True, default=None)
     filters = Column(db.JSON)
     dimensions = Column(db.JSON)
     timezone_aware = Column(db.Boolean(), nullable=False, default=False)
@@ -59,6 +60,7 @@ class Kpi(PkModel):
             "metric": self.metric,
             "aggregation": self.aggregation,
             "datetime_column": self.datetime_column,
+            "count_column": self.count_column,
             "dimensions": self.dimensions,
             "timezone_aware": self.timezone_aware,
             "run_anomaly": self.run_anomaly,
@@ -85,6 +87,7 @@ class Kpi(PkModel):
             "metric": self.metric,
             "aggregation": self.aggregation,
             "datetime_column": self.datetime_column,
+            "count_column": self.count_column,
             "filters": self.filters,
             "dimensions": self.dimensions,
             "timezone_aware": self.timezone_aware,
@@ -167,6 +170,11 @@ class Kpi(PkModel):
                 },
                 {
                     "name": "filters",
+                    "is_editable": True,
+                    "is_sensitive": False,
+                },
+                {
+                    "name": "count_column",
                     "is_editable": True,
                     "is_sensitive": False,
                 },

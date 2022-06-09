@@ -86,7 +86,7 @@ class AnomalyDetectionController(object):
             kpi_info["data_source"]
         ).as_dict["connection_type"]
         self._preaggregated = conn_type == "Druid"
-        self._preaggregated_count_col = "count"
+        self._preaggregated_count_col = self.kpi_info["count_column"]
 
         logger.info(f"Anomaly controller initialized for KPI ID: {kpi_info['id']}")
 

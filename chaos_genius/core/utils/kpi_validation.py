@@ -5,7 +5,7 @@ from datetime import date, datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
-from pandas.api.types import is_datetime64_any_dtype as is_datetime
+from pandas.api.types import is_datetime64_any_dtype as is_datetime, is_integer_dtype as is_integer
 
 from chaos_genius.core.rca.root_cause_analysis import SUPPORTED_AGGREGATIONS
 from chaos_genius.core.utils.data_loader import DataLoader
@@ -40,7 +40,7 @@ def validate_kpi(
     # TODO: Take in connection info as an argument instead of
     # getting it here as it will help with mocking for tests.
     connection_info = DataSource.get_by_id(kpi_info["data_source"]).as_dict
-    supports_date_string_parsing = connection_info["name"] == "Druid"
+    supports_date_string_parsing = connection_info["connection_type"] == "Druid"
 
     status, message = _validate_kpi_from_df(
         df,
@@ -48,6 +48,7 @@ def validate_kpi(
         kpi_column_name=kpi_info["metric"],
         agg_type=kpi_info["aggregation"],
         date_column_name=kpi_info["datetime_column"],
+        count_column_name=kpi_info["count_column"],
         supports_date_string_parsing=supports_date_string_parsing,
     )
 
@@ -68,6 +69,7 @@ def _validate_kpi_from_df(
     kpi_column_name: str,
     agg_type: str,
     date_column_name: str,
+    count_column_name: Optional[str],
     supports_date_string_parsing: bool = False,
 ) -> Tuple[bool, str]:
     """Invoke each validation check and break if there's a falsy check.
@@ -82,6 +84,8 @@ def _validate_kpi_from_df(
     :type agg_type: str
     :param date_column_name: Name of the date column
     :type date_column_name: str
+    :param count_column_name: Name of the count column, relevant for preaggregated data
+    :type count_column_name: Optional[str]
     :param supports_date_string_parsing: Bool for allowing parsing of strings, defaults to False
     :type supports_date_string_parsing: bool, optional
     :return: returns a tuple with the status as a bool and a status message
@@ -134,12 +138,19 @@ def _validate_kpi_from_df(
             ),
         },
         {
-            "debug_str": "Check #5: Validate dimensions",
+            "debug_str": "Check #5: Validate count column is of number type",
+            "status": lambda: _validate_count_column_is_number(
+                df,
+                count_column_name=count_column_name,
+            ),
+        },
+        {
+            "debug_str": "Check #6: Validate dimensions",
             "status": lambda: _validate_dimensions(kpi_info),
         },
         {
             "debug_str": (
-                "Check #6: Validate KPI has no more than "
+                "Check #7: Validate KPI has no more than "
                 f"{MAX_ROWS_IN_KPI} rows"
             ),
             "status": lambda: _validate_for_maximum_kpi_size(kpi_info),
@@ -282,6 +293,29 @@ def _validate_date_column_is_parseable(
         )
         return False, invalid_type_err_msg
 
+    return True, "Accepted!"
+
+def _validate_count_column_is_number(
+    df: pd.core.frame.DataFrame,
+    count_column_name: Optional[str],
+) -> Tuple[bool, str]:
+    """Validate if specified date column is parseable.
+
+    :param df: A pandas DataFrame
+    :type df: pd.core.frame.DataFrame
+    :param count_column_name: Name of the count column, relevant for preaggregated data
+    :type date_column_name: Optional[str]
+    :return: returns a tuple with the status as a bool and a status message
+    :rtype: Tuple[bool, str]
+    """
+    # has to be integer if count_column_name exists, only then proceed else exit
+    if count_column_name:
+        if not(is_integer(df[count_column_name])):
+            invalid_type_err_msg = (
+                "The count column is of the type"
+                f" {df[count_column_name].dtype}, use 'cast' to convert to integer."
+            )
+            return False, invalid_type_err_msg
     return True, "Accepted!"
 
 

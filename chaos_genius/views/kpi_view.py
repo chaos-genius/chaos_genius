@@ -84,6 +84,7 @@ def kpi():
             metric=data.get("metric"),
             aggregation=data.get("aggregation"),
             datetime_column=data.get("datetime_column"),
+            count_column=data.get("count_column"),
             filters=data.get("filters"),
             dimensions=data.get("dimensions"),
         )

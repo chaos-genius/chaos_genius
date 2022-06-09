@@ -36,6 +36,7 @@ def new_kpi_df():  # noqa: D103
         metric="metric_col",
         aggregation="sum",
         datetime_column="date_col",
+        count_column=None,
         filters=[],
         dimensions=["dim1", "dim2"],
     )
@@ -140,6 +141,7 @@ def check_kpi_validation(  # noqa: D103
         kpi_column_name=kpi_info["metric"],
         agg_type=kpi_info["aggregation"],
         date_column_name=kpi_info["datetime_column"],
+        count_column_name=kpi_info["count_column"],
         **extra_kpi_validation_data,
     )
 

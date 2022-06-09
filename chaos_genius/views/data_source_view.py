@@ -25,7 +25,7 @@ from chaos_genius.controllers.data_source_controller import (
 from chaos_genius.controllers.data_source_metadata_controller import (
     fetch_schema_list,
     fetch_table_info,
-    fetch_table_list
+    fetch_table_list,
 )
 from chaos_genius.databases.db_utils import create_sqlalchemy_uri
 from chaos_genius.databases.models.data_source_model import DataSource
@@ -53,6 +53,7 @@ from chaos_genius.utils.metadata_api_config import (
 )
 from chaos_genius.utils.pagination import pagination_args, pagination_info
 from chaos_genius.utils.search import SEARCH_PARAM_NAME, make_search_filter
+
 # from chaos_genius.jobs.metadata_prefetch import fetch_data_source_schema
 
 blueprint = Blueprint("api_data_source", __name__)
@@ -105,7 +106,8 @@ def data_source():
         if search_filter is not None:
             filters.append(search_filter)
         if datasource_types_list and datasource_types_list != [""]:
-            filters.append(DataSource.connection_type.in_(
+            filters.append(
+                DataSource.connection_type.in_(
                     [
                         datasource_type
                         for datasource_types in datasource_types_list
@@ -150,16 +152,18 @@ def data_source():
 
         logger.info("Found %d data sources", len(results))
 
-        return jsonify({
-            "count": len(results),
-            "data": results,
-            "pagination": (
-                pagination_info(data_sources_paginated)
-                if data_sources_paginated is not None
-                else None
-            ),
-            SEARCH_PARAM_NAME: search_query,
-        })
+        return jsonify(
+            {
+                "count": len(results),
+                "data": results,
+                "pagination": (
+                    pagination_info(data_sources_paginated)
+                    if data_sources_paginated is not None
+                    else None
+                ),
+                SEARCH_PARAM_NAME: search_query,
+            }
+        )
 
 
 @blueprint.route("/types", methods=["GET"])
@@ -315,7 +319,12 @@ def create_data_source():
         logger.info("Data source '%s' added successfully.", new_connection.name)
         connection_data = new_connection.safe_dict
         from chaos_genius.jobs.metadata_prefetch import fetch_data_source_schema
-        logger.info("prefetching metadata for  '%s', id '%s'", new_connection.name, new_connection.id)
+
+        logger.info(
+            "prefetching metadata for  '%s', id '%s'",
+            new_connection.name,
+            new_connection.id,
+        )
         fetch_data_source_schema.delay(new_connection.id)
     except Exception as err_msg:
         msg = str(err_msg)
@@ -611,7 +620,7 @@ def check_views_availability():
                 "schema": schema_exist,
                 "views": views,
                 "materialize_views": materialize_views,
-                "supported_aggregations": supported_aggregations
+                "supported_aggregations": supported_aggregations,
             },
         }
     )
@@ -680,7 +689,9 @@ def get_schema_tables():
 
             ds_name = getattr(ds_data, "connection_type")
             schema = (
-                None if (ds_data.is_third_party or not SCHEMAS_AVAILABLE[ds_name]) else schema
+                None
+                if (ds_data.is_third_party or not SCHEMAS_AVAILABLE[ds_name])
+                else schema
             )
             if ds_data.is_third_party:
                 table_names = ds_data.as_dict["dbConfig"]["tables"]
@@ -775,7 +786,9 @@ def get_table_info():
         ds_name = getattr(ds_data, "connection_type")
 
         schema = (
-            None if (ds_data.is_third_party or not SCHEMAS_AVAILABLE[ds_name]) else schema
+            None
+            if (ds_data.is_third_party or not SCHEMAS_AVAILABLE[ds_name])
+            else schema
         )
 
         if ds_data.is_third_party:

@@ -100,9 +100,9 @@ const ReportSettings = () => {
               {`(${globalSetting?.timezone})`}
             </p>
             <p>
-              Warning: Set to a time before which all KPIs are expected to
-              finish running. If not, some alerts for the day will be missed in
-              the report.
+              Warning: Set a time such that all KPIs analyses are completed for
+              the day. Selecting an earlier time will result in some KPI alerts
+              getting missed from the report.
             </p>
           </div>
         </div>{' '}

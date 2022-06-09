@@ -2,7 +2,6 @@
 """DataSource views for creating and viewing the data source."""
 import logging
 from copy import deepcopy
-from datetime import datetime
 from typing import List, Optional
 from uuid import uuid4
 
@@ -14,7 +13,7 @@ from sqlalchemy import func
 
 from chaos_genius.connectors import get_metadata, get_schema_names
 from chaos_genius.connectors import get_table_info as get_table_metadata
-from chaos_genius.connectors import get_table_list, get_view_list
+from chaos_genius.connectors import get_view_list
 from chaos_genius.controllers.data_source_controller import (
     get_datasource_data_from_id,
     mask_sensitive_info,
@@ -215,7 +214,7 @@ def create_data_source():
     # TODO: Better error handling and proper message in case of the failure
     connection_data = {}
     connection_status, msg, status = {}, "failed", False
-    sourceRecord, desinationRecord, connectionRecord, stream_tables = {}, {}, {}, []
+    source_record, desination_record, connection_record, stream_tables = {}, {}, {}, []
     db_connection_uri = ""
     database_timezone = "UTC"
     try:
@@ -228,27 +227,27 @@ def create_data_source():
         is_third_party = SOURCE_WHITELIST_AND_TYPE[source_form["sourceDefinitionId"]]
         if is_third_party and not AIRBYTE_ENABLED:
             raise Exception("Airbytes is not enabled.")
-        sourceCreationPayload = {
+        source_creation_payload = {
             "name": f"CG-{conn_name}",
             "sourceDefinitionId": source_form.get("sourceDefinitionId"),
             "connectionConfiguration": source_form.get("connectionConfiguration"),
         }
         if is_third_party:
             connector_client = connector.connection
-            sourceCreationPayload["workspaceId"] = connector_client.workspace_id
+            source_creation_payload["workspaceId"] = connector_client.workspace_id
             # Create the source
-            sourceRecord = connector_client.create_source(sourceCreationPayload)
-            sourceRecord["connectionConfiguration"] = sourceCreationPayload[
+            source_record = connector_client.create_source(source_creation_payload)
+            source_record["connectionConfiguration"] = source_creation_payload[
                 "connectionConfiguration"
             ]
 
             # create the destination record
-            desinationRecord = connector_client.create_destination(conn_name)
+            desination_record = connector_client.create_destination(conn_name)
             # create the third_party_connection
             mapping_config = SOURCE_CONFIG_MAPPING.get(
                 source_form.get("sourceDefinitionId"), {}
             )
-            source_schema = connector_client.get_source_schema(sourceRecord["sourceId"])
+            source_schema = connector_client.get_source_schema(source_record["sourceId"])
             stream_schema = source_schema["catalog"]["streams"]
             for stream in stream_schema:
                 stream["config"].update(mapping_config)
@@ -258,8 +257,8 @@ def create_data_source():
             table_prefix = f"{abbv_conn_type}_{random_conn_name}_"
             table_prefix = table_prefix.lower()
             conn_payload = {
-                "sourceId": sourceRecord["sourceId"],
-                "destinationId": desinationRecord["destinationId"],
+                "sourceId": source_record["sourceId"],
+                "destinationId": desination_record["destinationId"],
                 "schedule": {"units": 24, "timeUnit": "hours"},
                 "prefix": table_prefix,
                 "status": "active",
@@ -275,8 +274,8 @@ def create_data_source():
                 ],
                 "syncCatalog": {"streams": stream_schema},
             }
-            connectionRecord = connector_client.create_connection(conn_payload)
-            if not connectionRecord:
+            connection_record = connector_client.create_connection(conn_payload)
+            if not connection_record:
                 raise Exception("Connection not created")
             stream_tables = [stream["stream"]["name"] for stream in stream_schema]
             stream_tables = list(map(lambda x: f"{table_prefix}{x}", stream_tables))
@@ -285,7 +284,7 @@ def create_data_source():
             db_config["db_type"] = db_type
             db_connection_uri = create_sqlalchemy_uri(**db_config)
         else:
-            sourceRecord = sourceCreationPayload
+            source_record = source_creation_payload
             db_mapper = DATABASE_CONFIG_MAPPER[source_form.get("sourceDefinitionId")]
             input_configuration = source_form.get("connectionConfiguration")
             if db_mapper["db_type"] in ["mysql", "postgres"]:
@@ -309,9 +308,9 @@ def create_data_source():
             is_third_party=is_third_party,
             connection_status=status,
             database_timezone=database_timezone,
-            sourceConfig=sourceRecord,
-            destinationConfig=desinationRecord,
-            connectionConfig=connectionRecord,
+            sourceConfig=source_record,
+            destinationConfig=desination_record,
+            connectionConfig=connection_record,
             dbConfig={"tables": stream_tables, "db_connection_uri": db_connection_uri},
         )
         new_connection.save(commit=True)
@@ -404,7 +403,7 @@ def trigger_metadata_prefetch():
             else:
                 logger.error(f"Datasource with id: {data_source_id} not found!!")
                 status = "failure"
-                msg = f"Datasource was not found."
+                msg = "Datasource was not found."
 
     except Exception as err_msg:
         logger.error(
@@ -667,6 +666,8 @@ def get_schema_list():
 
 @blueprint.route("/get-table-list", methods=["POST"])
 def get_schema_tables():
+    """
+    """
     status = "failure"
     message = ""
     table_names = []
@@ -735,7 +736,7 @@ def get_schema_views():
                 )
 
             ds_name = getattr(ds_data, "connection_type")
-            schema = None if SCHEMAS_AVAILABLE[ds_name] == False else schema
+            schema = None if SCHEMAS_AVAILABLE[ds_name] == False else schema  # noqa: E712
 
             view_names = get_view_list(ds_data.as_dict, schema)
             if view_names is None:

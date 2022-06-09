@@ -29,6 +29,7 @@ from chaos_genius.alerts.constants import (
     ALERT_READABLE_DATE_FORMAT,
     ALERT_READABLE_DATETIME_FORMAT,
     ANOMALY_TABLE_COLUMN_NAMES_MAPPER,
+    ANOMALY_TABLE_COLUMN_NAMES_ORDERED,
     OVERALL_KPI_SERIES_TYPE_REPR,
 )
 from chaos_genius.alerts.slack import anomaly_alert_slack
@@ -852,15 +853,15 @@ def _make_anomaly_data_csv(anomaly_points: List[AnomalyPoint]) -> str:
         ]
     )
 
-    anomaly_df.rename(ANOMALY_TABLE_COLUMN_NAMES_MAPPER, inplace=True)
-
     # this is a property that is calculated, so it needs to be assigned separately
-    anomaly_df[ANOMALY_TABLE_COLUMN_NAMES_MAPPER["expected_value"]] = [
-        point.expected_value for point in anomaly_points
-    ]
+    anomaly_df["expected_value"] = [point.expected_value for point in anomaly_points]
+
+    anomaly_df = anomaly_df[ANOMALY_TABLE_COLUMN_NAMES_ORDERED]
+
+    anomaly_df.rename(ANOMALY_TABLE_COLUMN_NAMES_MAPPER, inplace=True, axis="columns")
 
     with io.StringIO() as buffer:
-        anomaly_df.to_csv(buffer, encoding="utf-8")
+        anomaly_df.to_csv(buffer, index=False, encoding="utf-8")
         csv_data = buffer.getvalue()
 
     return csv_data

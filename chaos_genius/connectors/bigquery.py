@@ -1,7 +1,9 @@
 import json
+
 import pandas as pd
-from sqlalchemy.engine import create_engine
 from sqlalchemy import text
+from sqlalchemy.engine import create_engine
+
 from .base_db import BaseDb
 from .connector_utils import merge_dataframe_chunks
 
@@ -9,6 +11,13 @@ from .connector_utils import merge_dataframe_chunks
 class BigQueryDb(BaseDb):
     db_name = "bigquery"
     test_db_query = "SELECT 1"
+
+    __SQL_IDENTIFIER = "`"
+
+    @property
+    def sql_identifier(self):
+        """Used to quote SQL illegal identifiers."""
+        return self.__SQL_IDENTIFIER
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -29,7 +38,9 @@ class BigQueryDb(BaseDb):
         if not credentials_info:
             raise NotImplementedError("Credentials JSON not found for Google BigQuery.")
         credentials_info = json.loads(credentials_info)
-        self.engine = create_engine(db_uri, credentials_info=credentials_info, echo=self.debug)
+        self.engine = create_engine(
+            db_uri, credentials_info=credentials_info, echo=self.debug
+        )
         return self.engine
 
     def test_connection(self):
@@ -41,10 +52,7 @@ class BigQueryDb(BaseDb):
             with self.engine.connect() as connection:
                 cursor = connection.execute(query_text)
                 results = cursor.all()
-                if results[0][0] == 1:
-                    status = True
-                else:
-                    status = False
+                status = results[0][0] == 1
         except Exception as err_msg:
             status = False
             message = str(err_msg)
@@ -52,10 +60,10 @@ class BigQueryDb(BaseDb):
 
     def run_query(self, query, as_df=True):
         engine = self.get_db_engine()
-        if as_df == True:
-            return merge_dataframe_chunks(pd.read_sql_query(query,
-                                                            engine,
-                                                            chunksize=self.CHUNKSIZE))
+        if as_df:
+            return merge_dataframe_chunks(
+                pd.read_sql_query(query, engine, chunksize=self.CHUNKSIZE)
+            )
         else:
             return []
 

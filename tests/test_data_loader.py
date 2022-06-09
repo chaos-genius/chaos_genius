@@ -1,16 +1,17 @@
+"""Tests for the data_loader module."""
+import re
 from dataclasses import dataclass
 from datetime import date, timedelta
-import re
 
 import pytest
-
 from _pytest.monkeypatch import MonkeyPatch
+
 from chaos_genius.core.utils import data_loader
 from chaos_genius.databases.models.data_source_model import DataSource
 
 
 def test_data_loader(monkeypatch: MonkeyPatch):
-
+    """Test the data_loader module."""
     # TODO: Add filters for testing
 
     kpi_info = {
@@ -93,13 +94,15 @@ def test_data_loader(monkeypatch: MonkeyPatch):
     end_date = date(2020, 1, 1)
     dl = data_loader.DataLoader(kpi_info, end_date=end_date)
     end_date = end_date + timedelta(days=1)
-    output_query = f"""select * from "cloud_cost" where "date" < '{end_date.strftime("%Y-%m-%d")}T00:00:00'"""
+    output_query = """select * from "cloud_cost" where "date" < """ \
+        + f"""'{end_date.strftime("%Y-%m-%d")}T00:00:00'"""
     assert output_query == dl._build_query().strip()
 
     # no end_date, start_date, no days_before
     start_date = date(2019, 1, 1)
     dl = data_loader.DataLoader(kpi_info, start_date=start_date)
-    output_query = f"""select * from "cloud_cost" where "date" >= '{start_date.strftime("%Y-%m-%d")}T00:00:00'"""
+    output_query = """select * from "cloud_cost" where "date" >= """ \
+        + f"""'{start_date.strftime("%Y-%m-%d")}T00:00:00'"""
     assert output_query == dl._build_query().strip()
 
     # end_date, start_date, no days_before
@@ -109,13 +112,16 @@ def test_data_loader(monkeypatch: MonkeyPatch):
         kpi_info, end_date=end_date, start_date=start_date
     )
     end_date = end_date + timedelta(days=1)
-    output_query = f"""select * from "cloud_cost" where "date" >= '{start_date.strftime("%Y-%m-%d")}T00:00:00' and "date" < '{end_date.strftime("%Y-%m-%d")}T00:00:00'"""
+    output_query = """select * from "cloud_cost" where "date" >= """ \
+        + f"""'{start_date.strftime("%Y-%m-%d")}T00:00:00' and "date" < """ \
+        + f"""'{end_date.strftime("%Y-%m-%d")}T00:00:00'"""
     assert output_query == dl._build_query().strip()
 
     # no end_date, no start_date, days_before
     with pytest.raises(
         ValueError,
-        match="If days_before is specified, either start_date or end_date must be specified",
+        match="If days_before is specified, "
+        "either start_date or end_date must be specified",
     ):
         dl = data_loader.DataLoader(kpi_info, days_before=1)
 
@@ -127,7 +133,9 @@ def test_data_loader(monkeypatch: MonkeyPatch):
     )
     start_date = end_date - timedelta(days=days_before)
     end_date = end_date + timedelta(days=1)
-    output_query = f"""select * from "cloud_cost" where "date" >= '{start_date.strftime("%Y-%m-%d")}T00:00:00' and "date" < '{end_date.strftime("%Y-%m-%d")}T00:00:00'"""
+    output_query = """select * from "cloud_cost" where "date" >= """ \
+        + f"""'{start_date.strftime("%Y-%m-%d")}T00:00:00' and "date" < """ \
+        + f"""'{end_date.strftime("%Y-%m-%d")}T00:00:00'"""
     assert output_query == dl._build_query().strip()
 
     # no end_date, start_date, days_before
@@ -138,7 +146,9 @@ def test_data_loader(monkeypatch: MonkeyPatch):
     )
     end_date = start_date + timedelta(days=days_before)
     end_date = end_date + timedelta(days=1)
-    output_query = f"""select * from "cloud_cost" where "date" >= '{start_date.strftime("%Y-%m-%d")}T00:00:00' and "date" < '{end_date.strftime("%Y-%m-%d")}T00:00:00'"""
+    output_query = """select * from "cloud_cost" where "date" >= """ \
+        + f"""'{start_date.strftime("%Y-%m-%d")}T00:00:00' and "date" < """ \
+        + f"""'{end_date.strftime("%Y-%m-%d")}T00:00:00'"""
     assert output_query == dl._build_query().strip()
 
     # end_date, start_date, days_before
@@ -147,7 +157,8 @@ def test_data_loader(monkeypatch: MonkeyPatch):
     days_before = 30
     with pytest.raises(
         ValueError,
-        match="end_date, start_date and days_before cannot be specified at the same time",
+        match="end_date, start_date and days_before cannot be "
+        "specified at the same time",
     ):
         dl = data_loader.DataLoader(
             kpi_info,
@@ -164,13 +175,17 @@ def test_data_loader(monkeypatch: MonkeyPatch):
         kpi_info, end_date=end_date, start_date=start_date
     )
     end_date = end_date + timedelta(days=1)
-    output_query = f"""select * from "cloud_cost" where "date" >= '{start_date.strftime("%Y-%m-%d")}T05:30:00' and "date" < '{end_date.strftime("%Y-%m-%d")}T05:30:00'"""
+    output_query = """select * from "cloud_cost" where "date" >= """ \
+        + f"""'{start_date.strftime("%Y-%m-%d")}T05:30:00' and "date" < """ \
+        + f"""'{end_date.strftime("%Y-%m-%d")}T05:30:00'"""
     assert output_query == dl._build_query().strip()
 
     data_source["database_timezone"] = "America/New_York"
     start_date = start_date - timedelta(days=1)
     end_date = end_date - timedelta(days=1)
-    output_query = f"""select * from "cloud_cost" where "date" >= '{start_date.strftime("%Y-%m-%d")}T20:00:00' and "date" < '{end_date.strftime("%Y-%m-%d")}T20:00:00'"""
+    output_query = """select * from "cloud_cost" where "date" >= """ \
+        + f"""'{start_date.strftime("%Y-%m-%d")}T20:00:00' and "date" < """ \
+        + f"""'{end_date.strftime("%Y-%m-%d")}T20:00:00'"""
 
     # tz aware testing
     kpi_info["timezone_aware"] = True
@@ -181,13 +196,17 @@ def test_data_loader(monkeypatch: MonkeyPatch):
         kpi_info, end_date=end_date, start_date=start_date
     )
     end_date = end_date + timedelta(days=1)
-    output_query = f"""select * from "cloud_cost" where "date" >= '{start_date.strftime("%Y-%m-%d")}T00:00:00+00:00' and "date" < '{end_date.strftime("%Y-%m-%d")}T00:00:00+00:00'"""
+    output_query = """select * from "cloud_cost" where "date" >= """ \
+        + f"""'{start_date.strftime("%Y-%m-%d")}T00:00:00+00:00' and "date" < """ \
+        + f"""'{end_date.strftime("%Y-%m-%d")}T00:00:00+00:00'"""
     assert output_query == dl._build_query().strip()
 
     data_source["database_timezone"] = "America/New_York"
     start_date = start_date - timedelta(days=1)
     end_date = end_date - timedelta(days=1)
-    output_query = f"""select * from "cloud_cost" where "date" >= '{start_date.strftime("%Y-%m-%d")}T00:00:00+00:00' and "date" < '{end_date.strftime("%Y-%m-%d")}T00:00:00+00:00'"""
+    output_query = """select * from "cloud_cost" where "date" >= """ \
+        + f"""'{start_date.strftime("%Y-%m-%d")}T00:00:00+00:00' and "date" < """ \
+        + f"""'{end_date.strftime("%Y-%m-%d")}T00:00:00+00:00'"""
 
     from chaos_genius import settings
 
@@ -205,7 +224,9 @@ def test_data_loader(monkeypatch: MonkeyPatch):
         kpi_info, end_date=end_date, start_date=start_date
     )
     end_date = end_date + timedelta(days=1)
-    output_query = f"""select * from "cloud_cost" where "date" >= '{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and "date" < '{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
+    output_query = """select * from "cloud_cost" where "date" >= """ \
+        + f"""'{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and "date" < """ \
+        + f"""'{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
     assert output_query == dl._build_query().strip()
 
     data_source["connection_type"] = "MySQL"
@@ -215,7 +236,9 @@ def test_data_loader(monkeypatch: MonkeyPatch):
         kpi_info, end_date=end_date, start_date=start_date
     )
     end_date = end_date + timedelta(days=1)
-    output_query = f"""select * from `cloud_cost` where `date` >= '{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and `date` < '{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
+    output_query = """select * from `cloud_cost` where `date` >= """ \
+        + f"""'{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and `date` < """ \
+        + f"""'{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
     assert output_query == dl._build_query().strip()
 
     # test for snowflake
@@ -227,7 +250,9 @@ def test_data_loader(monkeypatch: MonkeyPatch):
         kpi_info, end_date=end_date, start_date=start_date
     )
     end_date = end_date + timedelta(days=1)
-    output_query = f"""select * from "test-ILLEGAL-schema"."CLOUD_COST" where "DATE" >= '{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and "DATE" < '{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
+    output_query = """select * from "test-ILLEGAL-schema"."CLOUD_COST" where """ \
+        + f""""DATE" >= '{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and """ \
+        + f""""DATE" < '{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
     assert output_query == dl._build_query().strip()
 
     kpi_info["schema_name"] = "public"
@@ -237,7 +262,9 @@ def test_data_loader(monkeypatch: MonkeyPatch):
         kpi_info, end_date=end_date, start_date=start_date
     )
     end_date = end_date + timedelta(days=1)
-    output_query = f"""select * from "PUBLIC"."CLOUD_COST" where "DATE" >= '{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and "DATE" < '{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
+    output_query = """select * from "PUBLIC"."CLOUD_COST" where "DATE" >= """ \
+        + f"""'{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and "DATE" < """ \
+        + f"""'{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
     assert output_query == dl._build_query().strip()
 
     # test for redshift
@@ -248,7 +275,9 @@ def test_data_loader(monkeypatch: MonkeyPatch):
         kpi_info, end_date=end_date, start_date=start_date
     )
     end_date = end_date + timedelta(days=1)
-    output_query = f"""select * from "public"."cloud_cost" where "date" >= '{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and "date" < '{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
+    output_query = """select * from "public"."cloud_cost" where "date" >= """ \
+        + f"""'{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and "date" < """ \
+        + f"""'{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
     assert output_query == dl._build_query().strip()
 
     # test for driod
@@ -259,7 +288,9 @@ def test_data_loader(monkeypatch: MonkeyPatch):
         kpi_info, end_date=end_date, start_date=start_date
     )
     end_date = end_date + timedelta(days=1)
-    output_query = f"""select * from "public"."cloud_cost" where "date" >= '{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and "date" < '{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
+    output_query = """select * from "public"."cloud_cost" where "date" >= """ \
+        + f"""'{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and "date" < """ \
+        + f"""'{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
     assert output_query == dl._build_query().strip()
 
     # test for bigquery
@@ -270,5 +301,7 @@ def test_data_loader(monkeypatch: MonkeyPatch):
         kpi_info, end_date=end_date, start_date=start_date
     )
     end_date = end_date + timedelta(days=1)
-    output_query = f"""select * from `public`.`cloud_cost` where `date` >= '{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and `date` < '{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
+    output_query = """select * from `public`.`cloud_cost` where `date` >= """ \
+        + f"""'{start_date.strftime("%Y-%m-%d")}T00:00:00+05:30' and `date` < """ \
+        + f"""'{end_date.strftime("%Y-%m-%d")}T00:00:00+05:30'"""
     assert output_query == dl._build_query().strip()

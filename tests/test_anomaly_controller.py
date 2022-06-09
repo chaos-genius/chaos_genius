@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 import pandas as pd
+from pandas.core.base import NoNewAttributesMixin
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from pandas.testing import assert_frame_equal
@@ -25,6 +26,7 @@ kpi_info_daily = {
     "kpi_type": "table",
     "aggregation": "sum",
     "datetime_column": "dt",
+    "count_column": None,
     "table_name": "lyft_data",
     "metric": "y",
     "anomaly_params": {
@@ -43,6 +45,7 @@ kpi_info_hourly = {
     "kpi_type": "table",
     "aggregation": "sum",
     "datetime_column": "dt",
+    "count_column": None,
     "table_name": "cloud_cost",
     "metric": "y",
     "anomaly_params": {

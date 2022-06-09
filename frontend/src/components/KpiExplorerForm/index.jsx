@@ -226,7 +226,11 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           const foundIndex = option.datasource.find((item) => {
             return +kpiEditData.data_source === +item.id;
           });
-          if (foundIndex && foundIndex.value === 'Druid' && !hasDruidDropDown) {
+          if (
+            foundIndex &&
+            foundIndex.connection_type === 'Druid' &&
+            !hasDruidDropDown
+          ) {
             setHasDruidDropDown(true);
           }
         }
@@ -473,6 +477,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           optionArr.push({
             value: data.name,
             id: data.id,
+            connection_type: data.connection_type,
             label: <div className="optionlabel">{datasourceIcon(data)}</div>
           });
           setOption({ ...option, datasource: optionArr });
@@ -482,7 +487,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
 
   const formOption = (e) => {
     //Add extra dropDown column for Druid
-    if (e.value === 'Druid' && !hasDruidDropDown) {
+    if (e.connection_type === 'Druid' && !hasDruidDropDown) {
       setHasDruidDropDown(true);
     } else {
       setHasDruidDropDown(false);

@@ -4,6 +4,7 @@ import datetime as dt
 
 import sqlalchemy
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.sql.sqltypes import DateTime
 
 from chaos_genius.databases.base_model import Column, PkModel, db
 
@@ -74,3 +75,13 @@ class TriggeredAlerts(PkModel):
             ]
 
         }
+
+
+def triggered_alerts_data_datetime():
+    """Return a reference to the first data_datetime of the anomaly data.
+
+    This is meant to be used in SQLalchemy filters. Doesn't actually return any data.
+    """
+    return TriggeredAlerts.alert_metadata[
+        ("alert_data", 0, "data_datetime")
+    ].astext.cast(DateTime)

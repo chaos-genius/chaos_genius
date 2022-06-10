@@ -86,7 +86,7 @@ class AnomalyDetectionController(object):
             kpi_info["data_source"]
         ).as_dict["connection_type"]
         self._preaggregated = conn_type == "Druid"
-        self._preaggregated_count_col = "count"
+        self._preaggregated_count_col = self.kpi_info["count_column"]
 
         logger.info(f"Anomaly controller initialized for KPI ID: {kpi_info['id']}")
 
@@ -536,7 +536,7 @@ class AnomalyDetectionController(object):
                 try:
                     self._run_anomaly_for_series(input_data, "subdim", subgroup)
                 except Exception:  # noqa: B902
-                    logger.exception(f"Exception occured for: subdim - {subgroup}")
+                    logger.exception(f"Exception occurred for: subdim - {subgroup}")
         except Exception as e:
             self._checkpoint_failure("Subdimensions - Anomaly Detector", e)
             raise e
@@ -573,7 +573,7 @@ class AnomalyDetectionController(object):
                 try:
                     self._run_anomaly_for_series(input_data, "dq", dq)
                 except Exception:  # noqa: B902
-                    logger.exception(f"Exception occured for: data quality - {dq}")
+                    logger.exception(f"Exception occurred for: data quality - {dq}")
         except Exception as e:
             self._checkpoint_failure("Data Quality - Anomaly Detector", e)
             raise e
@@ -604,7 +604,7 @@ class AnomalyDetectionController(object):
                     e,
                 )
             logger.exception(
-                "(Task: %s, KPI: %d) " "Anomaly - %s - Exception occured.",
+                "(Task: %s, KPI: %d) " "Anomaly - %s - Exception occurred.",
                 str(self._task_id),
                 self.kpi_info["id"],
                 checkpoint,

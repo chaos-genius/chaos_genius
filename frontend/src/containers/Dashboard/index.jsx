@@ -184,7 +184,7 @@ const Dashboard = () => {
                               location[3] === 'deepdrills' ? 'active' : ''
                             }
                             onClick={() => onTabClick('deepdrills')}>
-                            DeepDrills
+                            KPI Summary
                           </li>
 
                           <li

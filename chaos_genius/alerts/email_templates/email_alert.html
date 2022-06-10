@@ -1,59 +1,42 @@
 {% extends "layout.html" %}
 
+{% import "common.html" as common %}
+
+{% block head %}
+<style>
+#alert-message a {
+    color: {{ common.button_color }};
+}
+</style>
+{% endblock %}
+
 {% block content %}
 
-<h2 style="margin-bottom: 15px; color: #F6F5F5">{{ alert_name }}</h2>
+<h2 style="margin-bottom: 15px; {{ common.main_text }}">{{ kpi_name }} ({{ date }})</h2>
 
 <hr>
 
-<div class="alert-container" style="color: #F6F5F5 !important;">
+<div class="alert-container" style="{{ common.main_text }}">
 
-<h3>Summary</h3>
+<h3 style="{{ common.main_text }}">Alert Message</h3>
 
-<h4><span style="font-weight: 400;">KPI Name: </span>{{ kpi_name }}</h4>
-
-<ul>
-    <li>Total alerts generated (overall KPI): <strong>{{ overall_count }}</strong></li>
-    <li>Total alerts generated (including subdimensions): <strong>{{ overall_count + subdim_count }}</strong></li>
-</ul>
-
-<h3>Alert Message</h3>
-
-<div style="margin-bottom: 1rem;">
+<div id="alert-message" style="{{ common.main_text }} margin-bottom: 1rem;">
 {{ alert_message }}
 </div>
 
-<a class="btn" href="{{ kpi_link }}" style="appearance: button;cursor: pointer;border-radius: 5px;border-width: 0;background-color: #60CA9A;height: 2rem;line-height: 2rem;padding: 0 1rem;margin-bottom: 1rem;text-decoration: none;display: inline-block;color: black !important;">View KPI</a>
-<a class="btn" href="{{ alert_dashboard_link }}" style="appearance: button;cursor: pointer;border-radius: 5px;border-width: 0;background-color: #60CA9A;height: 2rem;line-height: 2rem;padding: 0 1rem;margin-bottom: 1rem;text-decoration: none;display: inline-block;color: black !important;">Alerts Dashboard</a>
+<hr style="margin-top: 1rem;">
 
-<hr>
-
-<h3>Top Anomalies</h3>
+<h3 style="{{ common.main_text }}">Anomalies</h3>
 <ul>
     {% for point in top_anomalies %}
     <li>
-        <strong>{{kpi_name}} ({{point.series_type}})</strong>
-        <span style="color: lightgrey;">
-            changed to <strong>{{point.y_readable}}</strong>
-            {% if point.percent_change is string and "inf" not in point.percent_change %}
-                <span>
-            {% elif "+inf" in str(point.percent_change) or point.percent_change > 0 %}
-                <span style="color: lightgreen;">
-            {% elif "-inf" in str(point.percent_change) or point.percent_change < 0 %}
-                <span style="color: red;">
-            {% else %}
-                <span>
-            {% endif %}
-                ({{ point.formatted_change_percent }})
-                </span>
-            on {{ point.formatted_date }}
-            (expected: <strong>{{point.yhat_lower_readable}}</strong> to <strong>{{point.yhat_upper_readable}}</strong>,
-            severity:
-            <strong>{{point.severity}}</strong>)
-        </span>
+        {{ common.anomaly_point_formatting(point) }}
     </li>
     {% endfor %}
 </ul>
+
+{{ common.button_with_link("View KPI", kpi_link) }}
+{{ common.button_with_link("Alerts Dashboard", alert_dashboard_link) }}
 
 </div>
 {% endblock %}

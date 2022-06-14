@@ -16,7 +16,6 @@ import HumanReadableNumbers from '../HumanReadableNumbers';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { getHomeKpi } from '../../redux/actions';
-import Fuse from 'fuse.js';
 import Noresult from '../Noresult';
 import Homefilter from '../Homefilter';
 
@@ -27,6 +26,7 @@ import { CustomTooltip } from '../../utils/tooltip-helper';
 
 import store from '../../redux/store';
 import { debuncerReturn } from '../../utils/simple-debouncer';
+import Pagination from '../Pagination';
 
 const RESET_ACTION = {
   type: 'RESET_KPI_HOME_DATA'
@@ -53,7 +53,7 @@ const Kpihome = () => {
 
   const [dashboardId, setDashboardId] = useState(useParams()?.id);
 
-  const { homeKpiData, homeKpiLoading } = useSelector(
+  const { homeKpiData, homeKpiLoading, pagination } = useSelector(
     (state) => state.onboarding
   );
   const { timeCutsData } = useSelector((state) => state.TimeCuts);
@@ -66,6 +66,8 @@ const Kpihome = () => {
   const [kpiHomeData, setKpiHomeData] = useState(homeKpiData);
   const [kpiHomeloading, setKpiHomeLoading] = useState(homeKpiLoading);
   const [dashboard, setDashboard] = useState();
+  const [pgInfo, setPgInfo] = useState({ page: 1, per_page: 10, search: '' });
+  const [pages, setPages] = useState({});
   const [timeCutOptions, setTimeCutOptions] = useState([]);
 
   const [timeline, setTimeLine] = useState({});
@@ -77,6 +79,22 @@ const Kpihome = () => {
     history.push(`/${dashboardId}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dashboardId]);
+
+  useEffect(() => {
+    if (pgInfo.page > 0 && pgInfo.per_page > 0) {
+      if (![null, undefined, ''].includes(dashboard) && timeline.value) {
+        getHomeList();
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pgInfo]);
+
+  useEffect(() => {
+    if (pagination && pagination?.pages && +pagination.pages > 0) {
+      setPages(pagination);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pagination]);
 
   useEffect(() => {
     dispatch(getDashboard());
@@ -133,7 +151,11 @@ const Kpihome = () => {
   const getHomeList = () => {
     store.dispatch(RESET_ACTION);
     dispatch(
-      getHomeKpi({ timeline: timeline.value, dashboard_id: dashboardId })
+      getHomeKpi({
+        timeline: timeline.value,
+        dashboard_id: dashboardId,
+        ...pgInfo
+      })
     );
   };
 
@@ -150,39 +172,16 @@ const Kpihome = () => {
 
   useEffect(() => {
     clearDashboardDetails();
-    if (search !== '') {
-      searchKpi();
-    } else {
-      if (homeKpiData !== [] && homeKpiLoading === false) {
-        setKpiHomeData(homeKpiData);
-      }
+    if (homeKpiData !== [] && homeKpiLoading === false) {
+      setKpiHomeData(homeKpiData);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, homeKpiData]);
+  }, [homeKpiData]);
 
   useEffect(() => {
     setKpiHomeLoading(homeKpiLoading);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [homeKpiLoading]);
-
-  const searchKpi = () => {
-    if (search !== '') {
-      const options = {
-        keys: ['name']
-      };
-
-      const fuse = new Fuse(homeKpiData, options);
-
-      const result = fuse.search(search);
-      setKpiHomeData(
-        result.map((item) => {
-          return item.item;
-        })
-      );
-    } else {
-      setKpiHomeData(homeKpiData);
-    }
-  };
 
   const lineChart = (line) => {
     if (line) {
@@ -260,7 +259,16 @@ const Kpihome = () => {
   };
 
   const implementSearch = (e) => {
+    clearDashboardDetails();
     setSearch(e.target.value);
+    setPgInfo({ ...pgInfo, page: 1, search: e.target.value });
+  };
+
+  const handleBtnClick = (e) => {
+    setPgInfo({ ...pgInfo, page: e });
+  };
+  const handleSelectClick = (e) => {
+    setPgInfo({ ...pgInfo, page: 1, per_page: e.target.value });
   };
   const debounce = () => debuncerReturn(implementSearch, 500);
 
@@ -409,6 +417,14 @@ const Kpihome = () => {
                       </Link>
                     );
                   })}
+                  {pagination && kpiHomeData && kpiHomeData.length !== 0 && (
+                    <Pagination
+                      handleBtnClick={handleBtnClick}
+                      pagination={pages}
+                      pgInfo={pgInfo}
+                      handleSelectClick={handleSelectClick}
+                    />
+                  )}
                 </div>
               ) : (
                 kpiHomeData.length === 0 && (

@@ -28,10 +28,14 @@ import {
   SYNCSCHEMASUCCESS,
   TIMEZONESREQUEST,
   TIMEZONESFAILURE,
-  TIMEZONESSUCCESS
+  TIMEZONESSUCCESS,
+  GETALLDATASOURCESLISTFORFILTERREQUEST,
+  GETALLDATASOURCESLISTFORFILTERFAILURE,
+  GETALLDATASOURCESLISTFORFILTERSUCCESS
 } from './ActionConstants';
 
 import {
+  attachParams,
   CONNECTION_TYPE,
   CONNECTION_URL,
   CREATE_DATASOURCE,
@@ -39,7 +43,8 @@ import {
   DELETE_DATASOURCE,
   METADATA_PREFETCH_URL,
   TEST_CONNECTION,
-  TIMEZONE_URL
+  TIMEZONE_URL,
+  DATA_SOURCE_LIST_FOR_FILTER
 } from '../../utils/url-helper';
 import { env } from '../../env';
 
@@ -64,16 +69,17 @@ export const getAllDataSourceFailure = () => {
   };
 };
 
-export const getAllDataSources = () => {
+export const getAllDataSources = (pgInfo) => {
   return async (dispatch) => {
     dispatch(getAllDataSourceRequested());
+    const url = attachParams(CONNECTION_URL, pgInfo);
     const { data, error, status } = await getRequest({
-      url: CONNECTION_URL
+      url: url
     });
     if (error) {
       dispatch(getAllDataSourceFailure());
     } else if (data && status === 200) {
-      dispatch(getAllDataSourceSuccess(data.data));
+      dispatch(getAllDataSourceSuccess(data));
     }
   };
 };
@@ -407,4 +413,36 @@ export const updateDatasourceById = (id, updateData, customToast) => {
       }
     };
   }
+};
+
+export const getAllDataSourcesForFilterRequested = () => {
+  return {
+    type: GETALLDATASOURCESLISTFORFILTERREQUEST
+  };
+};
+export const getAllDataSourcesForFilterSuccess = (response) => {
+  return {
+    type: GETALLDATASOURCESLISTFORFILTERSUCCESS,
+    data: response.data
+  };
+};
+export const getAllDataSourcesForFilterFailure = () => {
+  return {
+    type: GETALLDATASOURCESLISTFORFILTERFAILURE
+  };
+};
+
+export const getAllDataSourcesForFilter = () => {
+  return async (dispatch) => {
+    dispatch(getAllDataSourcesForFilterRequested());
+
+    const { data, error, status } = await getRequest({
+      url: DATA_SOURCE_LIST_FOR_FILTER
+    });
+    if (error) {
+      dispatch(getAllDataSourcesForFilterFailure());
+    } else if (data && status === 200) {
+      dispatch(getAllDataSourcesForFilterSuccess(data));
+    }
+  };
 };

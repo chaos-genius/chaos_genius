@@ -59,7 +59,7 @@ const Dashboard = () => {
   }, []);
 
   const getAllDashboardSidebar = () => {
-    dispatch(getDashboardSidebar({ dashboard_id: dashboard }));
+    dispatch(getDashboardSidebar({ dashboard_id: dashboard, paginate: false }));
   };
 
   const getAnomalySetting = (id) => {
@@ -184,7 +184,7 @@ const Dashboard = () => {
                               location[3] === 'deepdrills' ? 'active' : ''
                             }
                             onClick={() => onTabClick('deepdrills')}>
-                            DeepDrills
+                            KPI Summary
                           </li>
 
                           <li

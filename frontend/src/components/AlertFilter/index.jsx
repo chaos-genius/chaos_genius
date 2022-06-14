@@ -1,55 +1,77 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import Search from '../../assets/images/search.svg';
 import { debuncerReturn } from '../../utils/simple-debouncer';
 
 const AlertFilter = ({
   setAlertSearch,
-  setAlertFilter,
-  alertData,
-  setAlertStatusFilter
+  alertSearch,
+  channelType,
+  channelStatus,
+  setPgInfo,
+  pgInfo
 }) => {
-  const [checked, setChecked] = useState([]);
-  const [channelType, setChannelType] = useState([]);
-  const [statusChecked, setStatusChecked] = useState([]);
+  const [checked, setChecked] = useState(pgInfo?.channel);
+  const [statusChecked, setStatusChecked] = useState(pgInfo?.active);
+  const [searchText, setSearchText] = useState(alertSearch);
+  const [channelChecked] = useState(
+    channelType.length &&
+      channelType.map((channel) => {
+        const foundIndex = pgInfo?.channel?.findIndex((item) => {
+          return item === channel.value.toLowerCase();
+        });
+        if (foundIndex > -1) {
+          return true;
+        }
+        return false;
+      })
+  );
+  const [activeChecked] = useState(
+    channelStatus.length &&
+      channelStatus.map((status) => {
+        const foundIndex = pgInfo?.active?.findIndex((item) => {
+          return item === status.value;
+        });
+        if (foundIndex > -1) {
+          return true;
+        }
+        return false;
+      })
+  );
   const onSearch = (e) => {
     setAlertSearch(e.target.value);
   };
 
   const debounce = (func) => debuncerReturn(func, 500);
 
-  useEffect(() => {
-    setAlertFilter(checked);
-    setAlertStatusFilter(statusChecked);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checked, statusChecked]);
-
-  useEffect(() => {
-    if (alertData) {
-      setChannelType([...new Set(alertData.map((item) => item.alert_channel))]);
-    }
-  }, [alertData]);
-
   const onChangeFilter = (e) => {
+    let selected = [];
     if (e.target.checked === true) {
-      let selected = checked.concat(e.target.name);
-      setChecked(selected);
-      setAlertFilter(checked);
+      selected = checked.concat(e.target.id);
     } else if (e.target.checked === false) {
-      let selected = checked.filter((data) => data !== e.target.name);
-      setChecked(selected);
+      selected = checked.filter((data) => data !== e.target.id);
     }
+    setChecked(selected);
+    setPgInfo({
+      ...pgInfo,
+      page: 1,
+      channel: selected.map((item) => item.toLowerCase())
+    });
   };
 
-  const onChangeStatusFilter = (e) => {
+  const onChangeStatusFilter = (e, value) => {
+    let selected = [];
     if (e.target.checked === true) {
-      let selected = statusChecked.concat(e.target.name);
-      setStatusChecked(selected);
-      setAlertStatusFilter(statusChecked);
+      selected = statusChecked.concat(value);
     } else if (e.target.checked === false) {
-      let selected = statusChecked.filter((data) => data !== e.target.name);
-      setStatusChecked(selected);
+      selected = statusChecked.filter((data) => data !== value);
     }
+    setStatusChecked(selected);
+    setPgInfo({
+      ...pgInfo,
+      page: 1,
+      active: selected.map((item) => item)
+    });
   };
 
   return (
@@ -61,7 +83,11 @@ const AlertFilter = ({
             type="text"
             className="form-control h-40"
             placeholder="Search Alert"
-            onChange={debounce(onSearch)}
+            value={searchText}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+              debounce(onSearch)(e);
+            }}
           />
           <span>
             <img src={Search} alt="Search Icon" />
@@ -73,18 +99,19 @@ const AlertFilter = ({
         {channelType &&
         channelType[0] !== undefined &&
         channelType.length !== 0 ? (
-          channelType.map((type) => {
+          channelType.map((type, index) => {
             return (
-              <div className="form-check check-box">
+              <div className="form-check check-box" key={index}>
                 <input
                   className="form-check-input"
                   type="checkbox"
-                  id={type}
-                  name={type}
+                  id={type.value}
+                  name={type.label}
+                  checked={channelChecked[index]}
                   onChange={(e) => onChangeFilter(e)}
                 />
-                <label className="form-check-label" htmlFor={type}>
-                  {type}
+                <label className="form-check-label" htmlFor={type.label}>
+                  {type.label}
                 </label>
               </div>
             );
@@ -95,30 +122,29 @@ const AlertFilter = ({
       </div>
       <div className="filter-layout">
         <h3>Status</h3>
-        <div className="form-check check-box">
-          <input
-            className="form-check-input"
-            type="checkbox"
-            id="active"
-            name="active"
-            onChange={(e) => onChangeStatusFilter(e)}
-          />
-          <label className="form-check-label" htmlFor="active">
-            Active
-          </label>
-        </div>
-        <div className="form-check check-box">
-          <input
-            className="form-check-input"
-            type="checkbox"
-            id="inactive"
-            name="inactive"
-            onChange={(e) => onChangeStatusFilter(e)}
-          />
-          <label className="form-check-label" htmlFor="inactive">
-            Inactive
-          </label>
-        </div>
+        {channelStatus &&
+        channelStatus[0] !== undefined &&
+        channelStatus.length !== 0 ? (
+          channelStatus.map((type, index) => {
+            return (
+              <div className="form-check check-box" key={index}>
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id={type.label}
+                  checked={activeChecked[index]}
+                  name={type.label}
+                  onChange={(e) => onChangeStatusFilter(e, type.value)}
+                />
+                <label className="form-check-label" htmlFor={type.label}>
+                  {type.label}
+                </label>
+              </div>
+            );
+          })
+        ) : (
+          <div className="empty-content">No Data Found</div>
+        )}
       </div>
     </div>
   );

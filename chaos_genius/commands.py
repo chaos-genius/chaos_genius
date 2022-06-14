@@ -162,13 +162,24 @@ def fetch_metadata(id):
 
 @click.command()
 @with_appcontext
-@click.option('--id', required=True, type=int, help="Perform the alert operation for provided Alert ID.")
-def run_alert(id):
+@click.option(
+    "--id",
+    required=True,
+    type=int,
+    help="Perform the alert operation for provided Alert ID."
+)
+@click.option(
+    "--last-anomaly-timestamp",
+    required=False,
+    type=click.DateTime(),
+    help="Timestamp after which to check for alerts."
+)
+def run_alert(id, last_anomaly_timestamp: datetime):
     """Check and perform the alert operation for provided Alert ID."""
     click.echo(f"Starting the alert check for ID: {id}.")
     from chaos_genius.alerts import check_and_trigger_alert
-    status = check_and_trigger_alert(id)
-    click.echo(f"Completed the alert check for ID: {id}.")
+    status = check_and_trigger_alert(id, last_anomaly_timestamp)
+    click.echo(f"Completed the alert check for ID: {id}, with status: {status}.")
 
 @click.command()
 @with_appcontext

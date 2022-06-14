@@ -14,8 +14,7 @@ import More from '../../assets/images/more.svg';
 import Sync from '../../assets/images/sync.svg';
 import Moreactive from '../../assets/images/more-active.svg';
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
-// import Viewlog from '../../assets/images/viewlog.svg';
-// import ViewlogActive from '../../assets/images/viewlog-active.svg';
+import Pagination from '../Pagination';
 
 import '../../assets/styles/table.scss';
 import '../Modal/modal.scss';
@@ -32,7 +31,14 @@ import { useToast } from 'react-toast-wnm';
 import { connectionContext } from '../context';
 import { CustomTooltip } from '../../utils/tooltip-helper';
 
-const DataSourceTable = ({ tableData, changeData, search }) => {
+const DataSourceTable = ({
+  tableData,
+  changeData,
+  search,
+  setPgInfo,
+  pagination,
+  pgInfo
+}) => {
   const dispatch = useDispatch();
   const connectionType = useContext(connectionContext);
   const toast = useToast();
@@ -66,6 +72,13 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
     setIsOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [changeData, deleteDataSourceResponse]);
+
+  const handleBtnClick = (e) => {
+    setPgInfo({ ...pgInfo, page: e });
+  };
+  const handleSelectClick = (e) => {
+    setPgInfo({ ...pgInfo, page: 1, per_page: e.target.value });
+  };
 
   const onDelete = (datasource) => {
     const payload = {
@@ -285,7 +298,14 @@ const DataSourceTable = ({ tableData, changeData, search }) => {
               )}
         </tbody>
       </table>
-
+      {pagination && tableData && tableData.length !== 0 && (
+        <Pagination
+          handleBtnClick={handleBtnClick}
+          pagination={pagination}
+          pgInfo={pgInfo}
+          handleSelectClick={handleSelectClick}
+        />
+      )}
       <Modal
         portalClassName="deletemodal"
         isOpen={isOpen}

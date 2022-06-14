@@ -3,11 +3,13 @@
 import logging
 from copy import deepcopy
 from datetime import datetime
+from typing import List, Optional
 from uuid import uuid4
 
 from flask.blueprints import Blueprint
 from flask.globals import request
 from flask.json import jsonify
+from flask_sqlalchemy import Pagination
 from sqlalchemy import func
 
 from chaos_genius.connectors import get_metadata, get_schema_names
@@ -18,6 +20,7 @@ from chaos_genius.controllers.data_source_controller import (
     mask_sensitive_info,
     test_data_source,
     update_third_party,
+    used_data_source_types,
 )
 from chaos_genius.controllers.data_source_metadata_controller import (
     fetch_schema_list,
@@ -48,6 +51,8 @@ from chaos_genius.utils.metadata_api_config import (
     TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY,
     TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY_THIRD_PARTY,
 )
+from chaos_genius.utils.pagination import pagination_args, pagination_info
+from chaos_genius.utils.search import SEARCH_PARAM_NAME, make_search_filter
 # from chaos_genius.jobs.metadata_prefetch import fetch_data_source_schema
 
 blueprint = Blueprint("api_data_source", __name__)
@@ -89,15 +94,43 @@ def data_source():
     elif request.method == "GET":
         logger.info("Listing data sources.")
 
-        data_sources = (
-            DataSource.query.filter(DataSource.active == True)  # noqa: E712
-            .order_by(DataSource.created_at.desc())
-            .all()
-        )
+        datasource_types_list = request.args.getlist("datasource_type")
+
+        paginate = request.args.get("paginate") != "false"
+        page, per_page = pagination_args(request)
+
+        search_query, search_filter = make_search_filter(request, DataSource.name)
+
+        filters = [DataSource.active == True]  # noqa: E712
+        if search_filter is not None:
+            filters.append(search_filter)
+        if datasource_types_list and datasource_types_list != [""]:
+            filters.append(DataSource.connection_type.in_(
+                    [
+                        datasource_type
+                        for datasource_types in datasource_types_list
+                        for datasource_type in datasource_types.split(",")
+                    ]
+                )
+            )
+
+        data_sources_paginated: Optional[Pagination]
+        data_sources: List[DataSource]
+        if paginate:
+            data_sources_paginated_: Pagination = (
+                DataSource.query.filter(*filters)
+                .order_by(DataSource.created_at.desc())
+                .paginate(page=page, per_page=per_page)
+            )
+            data_sources = data_sources_paginated_.items
+            data_sources_paginated = data_sources_paginated_
+        else:
+            data_sources = DataSource.query.filter(*filters).all()
+            data_sources_paginated = None
         ds_kpi_count = (
             db.session.query(DataSource.id, func.count(Kpi.id))
             .join(Kpi, Kpi.data_source == DataSource.id)
-            .filter(DataSource.active == True, Kpi.active == True)  # noqa: E712
+            .filter(*filters, Kpi.active == True)  # noqa: E712
             .group_by(DataSource.id)
             .order_by(DataSource.created_at.desc())
             .all()
@@ -117,7 +150,16 @@ def data_source():
 
         logger.info("Found %d data sources", len(results))
 
-        return jsonify({"count": len(results), "data": results})
+        return jsonify({
+            "count": len(results),
+            "data": results,
+            "pagination": (
+                pagination_info(data_sources_paginated)
+                if data_sources_paginated is not None
+                else None
+            ),
+            SEARCH_PARAM_NAME: search_query,
+        })
 
 
 @blueprint.route("/types", methods=["GET"])
@@ -754,3 +796,11 @@ def get_table_info():
             logger.error("Error in data source table info: %s", message)
 
     return jsonify({"table_info": table_info, "status": status, "message": message})
+
+
+@blueprint.route("/used-types", methods=["GET"])
+def used_data_source_types_endpoint():
+    """Returns a list of unique data source types currently in use."""
+    types = [{"value": type_, "label": type_} for type_ in used_data_source_types()]
+
+    return jsonify({"data": types, "status": "success", "message": ""})

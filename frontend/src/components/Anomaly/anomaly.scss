@@ -30,6 +30,41 @@
     }
   }
 }
+.ddgif_parent_container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.info-container {
+  width: 214px;
+  text-align: center;
+  margin-top: 20px;
+  span {
+    color: #7a7a7a;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .bold--info-text {
+    font-weight: 700;
+    color: #222222;
+  }
+}
+.ddGif-container {
+  display: flex;
+  align-items: center;
+  width: 270px;
+  height: 200px;
+  margin: 10px;
+  justify-content: center;
+  img {
+    height: 200px;
+    width: 250px;
+    box-shadow: 3px 3px 3px 3px rgba(22, 22, 22, 0.05);
+  }
+}
 .time-stamp {
   font-size: 12px;
   font-weight: 400;
@@ -77,5 +112,13 @@
     img {
       stroke: #0597f2;
     }
+  }
+}
+
+.gif-container {
+  padding: 12px 24px;
+  height: 430px;
+  &.drilldown-disable {
+    display: none;
   }
 }

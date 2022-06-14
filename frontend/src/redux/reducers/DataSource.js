@@ -28,7 +28,9 @@ import {
   SYNCSCHEMASUCCESS,
   TIMEZONESSUCCESS,
   TIMEZONESREQUEST,
-  TIMEZONESFAILURE
+  TIMEZONESFAILURE,
+  GETALLDATASOURCESLISTFORFILTERSUCCESS,
+  GETALLDATASOURCESLISTFORFILTERFAILURE
 } from '../actions/ActionConstants';
 
 const initialState = {
@@ -52,11 +54,25 @@ const initialState = {
   updateDatasource: [],
   updateDatasourceLoading: false,
   updateDatasourceError: false,
-  timeZones: []
+  timeZones: [],
+  pagination: {},
+  dataSourceType: []
 };
 
 export const dataSource = (state = initialState, action) => {
   switch (action.type) {
+    case GETALLDATASOURCESLISTFORFILTERSUCCESS: {
+      return {
+        ...state,
+        dataSourceType: action.data
+      };
+    }
+    case GETALLDATASOURCESLISTFORFILTERFAILURE: {
+      return {
+        ...state,
+        dataSourceType: []
+      };
+    }
     case DATASOURCEREQUEST: {
       return {
         ...state,
@@ -68,8 +84,9 @@ export const dataSource = (state = initialState, action) => {
       return {
         ...state,
         isLoading: false,
-        dataSourcesList: action.data,
-        error: false
+        dataSourcesList: action.data.data,
+        error: false,
+        pagination: action.data.pagination
       };
     }
     case DATASOURCEFAILURE: {
@@ -77,7 +94,8 @@ export const dataSource = (state = initialState, action) => {
         ...state,
         isLoading: false,
         dataSourcesList: [],
-        error: true
+        error: true,
+        pagination: {}
       };
     }
     case CONNECTIONTYPEREQUEST: {
@@ -265,7 +283,9 @@ export const dataSource = (state = initialState, action) => {
         testConnectionResponse: [],
         deleteDataSourceResponse: [],
         updateDatasource: [],
-        datasourceData: []
+        datasourceData: [],
+        pagination: {},
+        dataSourceType: []
       };
     }
     default:

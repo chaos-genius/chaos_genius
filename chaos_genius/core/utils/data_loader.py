@@ -6,19 +6,14 @@ from datetime import date, datetime, timedelta
 from typing import List, Optional
 
 import pandas as pd
-from pandas.api.types import is_datetime64_any_dtype as is_datetime
 import pytz
+from pandas.api.types import is_datetime64_any_dtype as is_datetime
 
 from chaos_genius.connectors import get_sqla_db_conn
 from chaos_genius.core.utils.constants import SUPPORTED_TIMEZONES
 from chaos_genius.core.utils.utils import randomword
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.settings import TIMEZONE
-
-_SQL_IDENTIFIERS = {
-    "MySQL": "`",
-    "Postgres": '"',
-}
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +52,8 @@ class DataLoader:
         :type tail: int, optional
         :param validation: if validation is True, we do not perform preprocessing
         :type validation: bool, optional
-        :raises ValueError: Raises error if start_date, end_date and days_before not in accepted combinations
+        :raises ValueError: Raises error if start_date, end_date and days_before
+        not in accepted combinations
         """
         self.kpi_info = kpi_info
         self.tail = tail
@@ -67,20 +63,38 @@ class DataLoader:
         self.start_date = start_date
         self.days_before = days_before
 
-        if self.end_date is None and self.start_date is None and self.days_before is not None:
+        if (
+            self.end_date is None
+            and self.start_date is None
+            and self.days_before is not None
+        ):
             raise ValueError(
-                "If days_before is specified, either start_date or end_date must be specified"
+                "If days_before is specified, either start_date "
+                + "or end_date must be specified"
             )
 
-        if self.end_date is not None and self.start_date is not None and self.days_before is not None:
+        if (
+            self.end_date is not None
+            and self.start_date is not None
+            and self.days_before is not None
+        ):
             raise ValueError(
-                "end_date, start_date and days_before cannot be specified at the same time"
+                "end_date, start_date and days_before cannot be "
+                + "specified at the same time"
             )
 
-        if self.end_date is None and self.start_date is not None and self.days_before is not None:
+        if (
+            self.end_date is None
+            and self.start_date is not None
+            and self.days_before is not None
+        ):
             self.end_date = self.start_date + timedelta(days=self.days_before)
 
-        if self.end_date is not None and self.start_date is None and self.days_before is not None:
+        if (
+            self.end_date is not None
+            and self.start_date is None
+            and self.days_before is not None
+        ):
             self.start_date = self.end_date - timedelta(days=self.days_before)
 
         # when we do date <= "6 Feb 2022", we get data till "6 Feb 2022 00:00:00"
@@ -89,30 +103,36 @@ class DataLoader:
         if self.end_date is not None:
             self.end_date = self.end_date + timedelta(days=1)
 
+        self.dt_col = self.kpi_info["datetime_column"]
+
         self.connection_info = DataSource.get_by_id(
             kpi_info["data_source"]
         ).as_dict
-        self.dt_col = self.kpi_info["datetime_column"]
-        self.identifier = _SQL_IDENTIFIERS.get(
-            self.connection_info["connection_type"], ""
+        self.db_connection = get_sqla_db_conn(
+            data_source_info=self.connection_info
         )
+        self.identifier = self.db_connection.sql_identifier
 
     def _get_id_string(self, value):
+        value = self.db_connection.resolve_identifier(value)
         return f"{self.identifier}{value}{self.identifier}"
 
     def _convert_date_to_string(self, date: date, offset: str):
         # TODO: Once SUPPOERTED_TIMEZONES is deprecated,
         # we shouldn't need to take offset as a string, but rather
         # take in a pytz timezone and skip using strings.
-        date = date.strftime("%Y-%m-%d")
-        date += f"T00:00:00{offset}"
+        date = date.strftime(self.db_connection.sql_date_format).format(offset)
         if not self.kpi_info.get("timezone_aware"):
             date = (
-                pd.Timestamp(datetime.strptime(date, "%Y-%m-%dT%H:%M:%S%z"))
+                pd.Timestamp(
+                    datetime.strptime(
+                        date, self.db_connection.sql_strptime_format
+                    )
+                )
                 .tz_convert(self.connection_info["database_timezone"])
                 .tz_localize(None)
                 # TODO: We should also use date.isoformat() here
-                .strftime("%Y-%m-%dT%H:%M:%S")
+                .strftime(self.db_connection.sql_strftime_format)
             )
         return date
 
@@ -124,16 +144,24 @@ class DataLoader:
         if TIMEZONE in SUPPORTED_TIMEZONES:
             tz_offset_string = SUPPORTED_TIMEZONES[TIMEZONE][-6:]
         else:
-            tz_offset_string = datetime.now(pytz.timezone(TIMEZONE)).strftime("%z")
-            tz_offset_string = tz_offset_string[:3] + ":" + tz_offset_string[3:]
+            tz_offset_string = datetime.now(pytz.timezone(TIMEZONE)).strftime(
+                "%z"
+            )
+            tz_offset_string = (
+                tz_offset_string[:3] + ":" + tz_offset_string[3:]
+            )
 
         filters = []
         if self.start_date is not None:
-            start_date_str = self._convert_date_to_string(self.start_date, tz_offset_string)
-            filters.append(f"{dt_col_str} >= '{start_date_str}'")
+            start_date_str = self._convert_date_to_string(
+                self.start_date, tz_offset_string
+            )
+            filters.append(f"{dt_col_str} >= {start_date_str}")
         if self.end_date is not None:
-            end_date_str = self._convert_date_to_string(self.end_date, tz_offset_string)
-            filters.append(f"{dt_col_str} < '{end_date_str}'")
+            end_date_str = self._convert_date_to_string(
+                self.end_date, tz_offset_string
+            )
+            filters.append(f"{dt_col_str} < {end_date_str}")
 
         return filters
 
@@ -158,7 +186,8 @@ class DataLoader:
 
     def _get_table_name(self):
         if self.kpi_info["kpi_type"] != "table":
-            return f"({self.kpi_info['kpi_query']}) as {self._get_id_string(randomword(10))}"
+            return f"({self.kpi_info['kpi_query']}) as " \
+                + f"{self._get_id_string(randomword(10))}"
         table_name = self._get_id_string(self.kpi_info["table_name"])
         schema_name = self.kpi_info.get("schema_name", None)
         if schema_name:
@@ -188,8 +217,7 @@ class DataLoader:
         return query
 
     def _run_query(self, query):
-        db_connection = get_sqla_db_conn(data_source_info=self.connection_info)
-        return db_connection.run_query(query)
+        return self.db_connection.run_query(query)
 
     def _prepare_date_column(self, df):
         if is_datetime(df[self.dt_col]):

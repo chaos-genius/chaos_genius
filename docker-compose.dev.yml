@@ -12,9 +12,14 @@ x-version:
 services:
   chaosgenius-server:
     container_name: chaosgenius-server
-    build: .
-    command: sh setup/run-backend-docker.sh
+    build:
+      context: .
+      args:
+        DEV: 1
+    command: sh setup/run-backend-docker.sh --reload
+    restart: on-failure:5
     volumes:
+      - ./:/usr/src/app/
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - chaosgenius-db
@@ -50,21 +55,23 @@ services:
       - TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN=${TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN}
       - MIN_DATA_IN_SUBGROUP=${MIN_DATA_IN_SUBGROUP}
       - TOP_SUBDIMENSIONS_FOR_ANOMALY=${TOP_SUBDIMENSIONS_FOR_ANOMALY}
-      - MAX_ROWS_FOR_DEEPDRILLS=${MAX_ROWS_FOR_DEEPDRILLS}
+      - MAX_ROWS_IN_KPI=${MAX_ROWS_IN_KPI}
       - MAX_FILTER_SUBGROUPS_ANOMALY=${MAX_FILTER_SUBGROUPS_ANOMALY}
-      - MAX_DEEPDRILLS_SLACK_DAYS=${MAX_DEEPDRILLS_SLACK_DAYS}
+      - MAX_SUMMARY_DEEPDRILLS_SLACK_DAYS=${MAX_SUMMARY_DEEPDRILLS_SLACK_DAYS}
       - MAX_ANOMALY_SLACK_DAYS=${MAX_ANOMALY_SLACK_DAYS}
       - DAYS_OFFSET_FOR_ANALTYICS=${DAYS_OFFSET_FOR_ANALTYICS}
       - HOURS_OFFSET_FOR_ANALTYICS=${HOURS_OFFSET_FOR_ANALTYICS}
       - DEEPDRILLS_HTABLE_MAX_PARENTS=${DEEPDRILLS_HTABLE_MAX_PARENTS}
       - DEEPDRILLS_HTABLE_MAX_CHILDREN=${DEEPDRILLS_HTABLE_MAX_CHILDREN}
       - DEEPDRILLS_HTABLE_MAX_DEPTH=${DEEPDRILLS_HTABLE_MAX_DEPTH}
-      - DEEPDRILLS_ENABLED_TIME_RANGES=${DEEPDRILLS_ENABLED_TIME_RANGES}
+      - SUMMARY_DEEPDRILLS_ENABLED_TIME_RANGES=${SUMMARY_DEEPDRILLS_ENABLED_TIME_RANGES}
+      - DEEPDRILLS_ENABLED=${DEEPDRILLS_ENABLED}
       - TIMEZONE=${TIMEZONE}
       - REACT_APP_EVENT_ALERT=${REACT_APP_EVENT_ALERT}
       - SENTRY_DSN=${SENTRY_DSN}
       - CHAOSGENIUS_ENTERPRISE_EDITION_KEY=${CHAOSGENIUS_ENTERPRISE_EDITION_KEY}
       - CHAOSGENIUS_WEBAPP_URL=${CHAOSGENIUS_WEBAPP_URL}
+      - CORS_ENABLED=${CORS_ENABLED}
 
   chaosgenius-webapp:
     container_name: chaosgenius-webapp
@@ -74,6 +81,7 @@ services:
     command: >
       sh -c "npx react-inject-env set -d ./ &&
              nginx -g 'daemon off;'"
+    restart: on-failure:5
     volumes:
       - ./frontend/nginx:/etc/nginx/conf.d/
     ports:
@@ -89,13 +97,12 @@ services:
   chaosgenius-db:
     container_name: chaosgenius-db
     image: postgres:13
-    restart: always
+    restart: on-failure:5
     healthcheck:
       test: [ "CMD", "pg_isready", "-q", "-d", "chaosgenius_data", "-U", "postgres" ]
       timeout: 45s
       interval: 10s
       retries: 10
-    restart: always
     environment:
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
@@ -108,11 +115,19 @@ services:
   chaosgenius-redis:
     container_name: chaosgenius-redis
     image: "redis:6.2-alpine"
+    restart: on-failure:5
     
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler
-    build: .
-    command: celery -A run.celery beat --loglevel=DEBUG
+    build:
+      context: .
+      args:
+        DEV: 1
+    command: scripts/celery/dev_scheduler.sh
+    restart: on-failure:5
+    volumes:
+      - ./:/usr/src/app/
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - IN_DOCKER=True
       - AIRBYTE_ENABLED=${AIRBYTE_ENABLED}
@@ -147,8 +162,15 @@ services:
   
   chaosgenius-worker-analytics:
     container_name: chaosgenius-worker-analytics
-    build: .
-    command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
+    build:
+      context: .
+      args:
+        DEV: 1
+    command: scripts/celery/dev_worker-analytics.sh
+    restart: on-failure:5
+    volumes:
+      - ./:/usr/src/app/
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - IN_DOCKER=True
       - AIRBYTE_ENABLED=${AIRBYTE_ENABLED}
@@ -178,16 +200,17 @@ services:
       - TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN=${TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN}
       - MIN_DATA_IN_SUBGROUP=${MIN_DATA_IN_SUBGROUP}
       - TOP_SUBDIMENSIONS_FOR_ANOMALY=${TOP_SUBDIMENSIONS_FOR_ANOMALY}
-      - MAX_ROWS_FOR_DEEPDRILLS=${MAX_ROWS_FOR_DEEPDRILLS}
+      - MAX_ROWS_IN_KPI=${MAX_ROWS_IN_KPI}
       - MAX_FILTER_SUBGROUPS_ANOMALY=${MAX_FILTER_SUBGROUPS_ANOMALY}
-      - MAX_DEEPDRILLS_SLACK_DAYS=${MAX_DEEPDRILLS_SLACK_DAYS}
+      - MAX_SUMMARY_DEEPDRILLS_SLACK_DAYS=${MAX_SUMMARY_DEEPDRILLS_SLACK_DAYS}
       - MAX_ANOMALY_SLACK_DAYS=${MAX_ANOMALY_SLACK_DAYS}
       - DAYS_OFFSET_FOR_ANALTYICS=${DAYS_OFFSET_FOR_ANALTYICS}
       - HOURS_OFFSET_FOR_ANALTYICS=${HOURS_OFFSET_FOR_ANALTYICS}
       - DEEPDRILLS_HTABLE_MAX_PARENTS=${DEEPDRILLS_HTABLE_MAX_PARENTS}
       - DEEPDRILLS_HTABLE_MAX_CHILDREN=${DEEPDRILLS_HTABLE_MAX_CHILDREN}
       - DEEPDRILLS_HTABLE_MAX_DEPTH=${DEEPDRILLS_HTABLE_MAX_DEPTH}
-      - DEEPDRILLS_ENABLED_TIME_RANGES=${DEEPDRILLS_ENABLED_TIME_RANGES}
+      - SUMMARY_DEEPDRILLS_ENABLED_TIME_RANGES=${SUMMARY_DEEPDRILLS_ENABLED_TIME_RANGES}
+      - DEEPDRILLS_ENABLED=${DEEPDRILLS_ENABLED}
       - TIMEZONE=${TIMEZONE}
       - REACT_APP_EVENT_ALERT=${REACT_APP_EVENT_ALERT}
       - SENTRY_DSN=${SENTRY_DSN}
@@ -199,8 +222,15 @@ services:
 
   chaosgenius-worker-alerts:
     container_name: chaosgenius-worker-alerts
-    build: .
-    command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
+    build:
+      context: .
+      args:
+        DEV: 1
+    command: scripts/celery/dev_worker-alerts.sh
+    restart: on-failure:5
+    volumes:
+      - ./:/usr/src/app/
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - IN_DOCKER=True
       - AIRBYTE_ENABLED=${AIRBYTE_ENABLED}

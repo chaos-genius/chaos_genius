@@ -12,6 +12,9 @@ ALERT_READABLE_DATETIME_FORMAT = "%b %d, %I %p"
 
 ALERT_READABLE_DATA_TIMESTAMP_FORMAT = "%b %d %Y %H:%M:%S"
 
+ALERT_READABLE_DATA_TIME_ONLY_FORMAT = "%I %p"
+"""Format for time (without date) of anomaly."""
+
 ANOMALY_TABLE_COLUMN_NAMES_MAPPER = {
     "series_type": "Dimension",
     "data_datetime": "Time of Occurrence",
@@ -19,7 +22,17 @@ ANOMALY_TABLE_COLUMN_NAMES_MAPPER = {
     "severity": "Severity Score",
     "change_message": "Change",
     "expected_value": "Expected Value",
+    "previous_value": "Previous Value",
 }
+ANOMALY_TABLE_COLUMN_NAMES_ORDERED = [
+    "series_type",
+    "data_datetime",
+    "y",
+    "previous_value",
+    "change_message",
+    "severity",
+    "expected_value",
+]
 
 FREQUENCY_DICT = {
     "weekly": datetime.timedelta(days=7, hours=0, minutes=0),

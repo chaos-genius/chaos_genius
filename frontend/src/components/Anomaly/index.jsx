@@ -17,6 +17,8 @@ import { formatDateTime, getTimezone } from '../../utils/date-helper';
 import { HRNumbers } from '../../utils/Formatting/Numbers/humanReadableNumberFormatter';
 import './anomaly.scss';
 
+import deepDrillGif from '../../assets/Animations/PH_Animation.gif';
+
 import {
   anomalyDetection,
   anomalyDrilldown,
@@ -25,7 +27,6 @@ import {
 } from '../../redux/actions';
 import store from '../../redux/store';
 import SubdimensionEmpty from '../SubdimensionEmpty';
-import EmptyDataQualityAnomaly from '../EmptyDataQualityAnomaly';
 
 import { useToast } from 'react-toast-wnm';
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
@@ -59,8 +60,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
   const [subDimLoading, setSubDimloading] = useState(true);
   const [retrainOn, setRetrainOn] = useState(false);
   const [subDimList, setSubDimList] = useState([]);
-  const [drilldownCollapse, setDrilldownCollapse] = useState(false);
-  const [dataQualityCollapse, setDataQualityCollapse] = useState(false);
+  const [drilldownCollapse, setDrilldownCollapse] = useState(true);
   const [anomalStatusInfo, setAnomalyStatusInfo] = useState(false);
   const [kpiTab, setKPITab] = useState('Overall KPI');
 
@@ -570,9 +570,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                   )}
                 </div>
               </div>
-              {itemList &&
-              anomalyDrilldownData !== '' &&
-              kpiTab === 'Overall KPI' ? (
+              {kpiTab === 'Overall KPI' ? (
                 <div className="dashboard-layout">
                   <div
                     className={
@@ -593,7 +591,29 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                       <img src={Toparrow} alt="CollapseOpen" />
                     </div>
                   </div>
-                  {drilldownCollapse ? (
+                  {itemList.length === 0 && (
+                    <div
+                      className={
+                        drilldownCollapse
+                          ? 'gif-container'
+                          : 'gif-container drilldown-disable'
+                      }>
+                      <div className="ddgif_parent_container">
+                        <div className="ddGif-container">
+                          <img src={deepDrillGif} alt="deepDrillclick" />
+                        </div>
+                        <div className="info-container">
+                          <span>
+                            Click on the above graph to view{' '}
+                            <span className="bold--info-text">Drill Downs</span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {drilldownCollapse &&
+                  itemList &&
+                  anomalyDrilldownData !== '' ? (
                     <>
                       {itemList.length ? (
                         <div
@@ -608,54 +628,6 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                         <div className="anomaly-drilldown-empty">
                           <EmptyAnomalyDrilldown />
                         </div>
-                      )}
-                    </>
-                  ) : null}
-                </div>
-              ) : null}
-
-              {kpiTab === 'Overall KPI' ? (
-                <div className="dashboard-layout">
-                  <div
-                    className={
-                      !dataQualityCollapse
-                        ? 'dashboard-header-wrapper header-wrapper-disable'
-                        : 'dashboard-header-wrapper'
-                    }
-                    onClick={() =>
-                      setDataQualityCollapse(!dataQualityCollapse)
-                    }>
-                    <div className="dashboard-header">
-                      <h3>Data Quality</h3>
-                    </div>
-                    <div
-                      className={
-                        !dataQualityCollapse
-                          ? 'header-collapse header-disable'
-                          : 'header-collapse'
-                      }>
-                      <img src={Toparrow} alt="CollapseOpen" />
-                    </div>
-                  </div>
-                  {dataQualityCollapse ? (
-                    <>
-                      {anomalyQualityData !== '' &&
-                      dataQualityList &&
-                      dataQualityList.length !== 0 ? (
-                        <div
-                          className={
-                            dataQualityCollapse
-                              ? 'dashboard-container'
-                              : 'dashboard-container drilldown-disable'
-                          }>
-                          {dataQualityList}
-                        </div>
-                      ) : (
-                        anomalyQualityData !== '' && (
-                          <div className="anomaly-drilldown-empty">
-                            <EmptyDataQualityAnomaly />
-                          </div>
-                        )
                       )}
                     </>
                   ) : null}

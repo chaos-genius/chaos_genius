@@ -87,7 +87,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     addfilter: [],
     dimensions: [],
     dashboardNameList: [],
-    dashboardName: ''
+    dashboardName: '',
+    count_column: ''
   });
 
   const [editedFormData, setEditedFormData] = useState({});
@@ -106,7 +107,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     datetimecolumns: false,
     dimension: false,
     dashboardName: false,
-    dashboardNameList: false
+    dashboardNameList: false,
+    count_column: false
   });
 
   const [dataset, setDataset] = useState({ value: 'Table', label: 'Table' });
@@ -116,6 +118,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
     tabledimension: false
   });
 
+  const [hasDruidDropDown, setHasDruidDropDown] = useState(false);
   const [datasourceid, setDataSourceId] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
@@ -200,6 +203,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       obj['datetimecolumns'] = kpiEditData?.datetime_column || '';
       obj['addfilter'] = kpiEditData?.filters || [];
       obj['dimensions'] = kpiEditData?.dimensions || [];
+      obj['count_column'] = kpiEditData?.count_column || '';
       let arr = [];
       kpiEditData?.dashboards &&
         kpiEditData?.dashboards.map((data) =>
@@ -218,6 +222,18 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         kpiEditData?.data_source !== null &&
         kpiEditData?.data_source !== undefined
       ) {
+        if (option && option.datasource) {
+          const foundIndex = option.datasource.find((item) => {
+            return +kpiEditData.data_source === +item.id;
+          });
+          if (
+            foundIndex &&
+            foundIndex.connection_type === 'Druid' &&
+            !hasDruidDropDown
+          ) {
+            setHasDruidDropDown(true);
+          }
+        }
         setDataSourceId(kpiEditData?.data_source);
         if (kpiEditData?.schema_name) {
           dispatchGetTableListOnSchema({
@@ -272,6 +288,16 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
             label: item.name,
             value: item.name
           });
+          if (
+            hasDruidDropDown &&
+            item.name === 'count' &&
+            formdata.count_column === ''
+          ) {
+            setFormdata({
+              ...formdata,
+              count_column: item.name
+            });
+          }
         });
     } else {
       arr = [];
@@ -451,6 +477,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           optionArr.push({
             value: data.name,
             id: data.id,
+            connection_type: data.connection_type,
             label: <div className="optionlabel">{datasourceIcon(data)}</div>
           });
           setOption({ ...option, datasource: optionArr });
@@ -459,6 +486,12 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   };
 
   const formOption = (e) => {
+    //Add extra dropDown column for Druid
+    if (e.connection_type === 'Druid' && !hasDruidDropDown) {
+      setHasDruidDropDown(true);
+    } else {
+      setHasDruidDropDown(false);
+    }
     setDataSourceId(e.id);
     setFormdata({
       ...formdata,
@@ -470,7 +503,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       aggregate: '',
       datetimecolumns: '',
       dimensions: [],
-      dashboardNameList: []
+      dashboardNameList: [],
+      count_column: ''
     });
     setTableAdditional({
       ...tableAdditional,
@@ -645,7 +679,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         metriccolumns: '',
         aggregate: '',
         datetimecolumns: '',
-        dimensions: []
+        dimensions: [],
+        count_column: ''
       });
       setEditedFormData({
         ...editedFormData,
@@ -669,7 +704,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       metriccolumns: '',
       aggregate: '',
       datetimecolumns: '',
-      dimensions: []
+      dimensions: [],
+      count_column: ''
     });
     setEditedFormData({
       ...editedFormData,
@@ -700,6 +736,16 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           label: value.name,
           value: value.name
         });
+        if (
+          hasDruidDropDown &&
+          value.name === 'count' &&
+          formdata.count_column === ''
+        ) {
+          setFormdata({
+            ...formdata,
+            count_column: value.name
+          });
+        }
       }
       setOption({ ...option, metricOption: optionArr });
     }
@@ -732,7 +778,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       dimensions: [],
       tablename: '',
       schemaName: '',
-      dashboardNameList: []
+      dashboardNameList: [],
+      count_column: ''
     });
     setEditedFormData({
       ...editedFormData,
@@ -801,6 +848,14 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         };
       });
     }
+    if (hasDruidDropDown && formdata.count_column === '') {
+      setErrorMsg((prev) => {
+        return {
+          ...prev,
+          count_column: true
+        };
+      });
+    }
     if (formdata.aggregate === '') {
       setErrorMsg((prev) => {
         return {
@@ -851,7 +906,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         formdata.metriccolumns &&
         formdata.aggregate &&
         formdata.datetimecolumns) !== '' &&
-      formdata.dashboardNameList.length !== 0
+      formdata.dashboardNameList.length !== 0 &&
+      (hasDruidDropDown ? formdata.count_column : true)
     ) {
       const kpiInfo = {
         name: formdata.kpiname,
@@ -868,6 +924,10 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         filters: formdata.addfilter,
         dashboards: formdata.dashboardNameList.map((el) => el.value)
       };
+
+      if (hasDruidDropDown) {
+        kpiInfo['count_column'] = formdata.count_column;
+      }
 
       if (data[2] === 'edit' && present) {
         if (Object.keys(needForCleanup)?.length) {
@@ -897,7 +957,8 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       metriccolumns: '',
       aggregate: '',
       datetimecolumns: '',
-      dimensions: []
+      dimensions: [],
+      count_column: ''
     });
   };
   const closeModal = () => {
@@ -1262,6 +1323,66 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                 </div>
               ) : null}
             </div>
+
+            {hasDruidDropDown && (
+              <div className="form-group">
+                <label>Count Column *</label>
+                <Select
+                  options={
+                    option.metricOption && option.metricOption.length !== 0
+                      ? option.metricOption
+                      : []
+                  }
+                  value={
+                    formdata.count_column !== '' && {
+                      label: formdata.count_column,
+                      value: formdata.count_column
+                    }
+                  }
+                  isDisabled={
+                    data[2] === 'edit' ? editableStatus('count_column') : false
+                  }
+                  classNamePrefix="selectcategory"
+                  placeholder="Select Count Column"
+                  noOptionsMessage={() => {
+                    return tableInfoLoading || kpiFieldLoading
+                      ? 'Loading...'
+                      : 'No Options';
+                  }}
+                  onChange={(e) => {
+                    setFormdata({ ...formdata, count_column: e.value });
+                    setEditedFormData({
+                      ...editedFormData,
+                      count_column: e.value
+                    });
+                    if (kpiEditData?.count_column !== e.value) {
+                      setNeedForCleanUp({
+                        ...needForCleanup,
+                        count_column: true
+                      });
+                    } else {
+                      const { count_column, ...newItems } = needForCleanup;
+                      setNeedForCleanUp(newItems);
+                    }
+                    setErrorMsg((prev) => {
+                      return {
+                        ...prev,
+                        count_column: false
+                      };
+                    });
+                  }}
+                />
+                {errorMsg.count_column === true ? (
+                  <div className="connection__fail">
+                    <p>Select Count Column</p>
+                  </div>
+                ) : null}
+                <div className="channel-tip">
+                  <p>This column can be a proxy for frequency</p>
+                </div>
+              </div>
+            )}
+
             <div className="form-group">
               <label>Aggregate by *</label>
               <Select

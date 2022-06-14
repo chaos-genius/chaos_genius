@@ -1,6 +1,7 @@
 import {
   attachParams,
   RCA_RELATIVE_URL,
+  SUMMARY_URL,
   BASE_URL
 } from '../../utils/url-helper';
 import {
@@ -46,10 +47,7 @@ export const dashboardAggregationFailure = () => {
 
 export const getDashboardAggregation = (id, params) => {
   return async (dispatch) => {
-    const url = attachParams(
-      `${RCA_RELATIVE_URL}/${id}/kpi-aggregations`,
-      params
-    );
+    const url = attachParams(`${SUMMARY_URL}/${id}/kpi-aggregations`, params);
     dispatch(dashboardAggregationRequested());
     const { data, error, status } = await getRequest({
       url: url

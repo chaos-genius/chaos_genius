@@ -1,6 +1,6 @@
 import pandas as pd
-from sqlalchemy import create_engine
-from sqlalchemy import text
+from sqlalchemy import create_engine, text
+
 from .base_db import BaseDb
 from .connector_utils import merge_dataframe_chunks
 
@@ -8,6 +8,13 @@ from .connector_utils import merge_dataframe_chunks
 class Redshift(BaseDb):
     db_name = "redshift"
     test_db_query = "SELECT 1"
+
+    __SQL_IDENTIFIER = '"'
+
+    @property
+    def sql_identifier(self):
+        """Used to quote SQL illegal identifiers."""
+        return self.__SQL_IDENTIFIER
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -21,7 +28,9 @@ class Redshift(BaseDb):
         password = db_info.get("password")
         if not(host and port and username and password and database):
             raise NotImplementedError("Database Credential not found for Redshift.")
-        self.sqlalchemy_db_uri = f"redshift+psycopg2://{username}:{password}@{host}:{port}/{database}"
+        self.sqlalchemy_db_uri = (
+            f"redshift+psycopg2://{username}:{password}@{host}:{port}/{database}"
+        )
         return self.sqlalchemy_db_uri
 
     def get_db_engine(self):
@@ -38,10 +47,7 @@ class Redshift(BaseDb):
             with self.engine.connect() as connection:
                 cursor = connection.execute(query_text)
                 results = cursor.all()
-                if results[0][0] == 1:
-                    status = True
-                else:
-                    status = False
+                status = results[0][0] == 1
         except Exception as err_msg:
             status = False
             message = str(err_msg)
@@ -49,7 +55,7 @@ class Redshift(BaseDb):
 
     def run_query(self, query, as_df=True):
         engine = self.get_db_engine()
-        if as_df == True:
+        if as_df:
             return merge_dataframe_chunks(pd.read_sql_query(query,
                                                             engine,
                                                             chunksize=self.CHUNKSIZE))
@@ -58,13 +64,8 @@ class Redshift(BaseDb):
 
     def get_schema(self):
         schema_name = self.ds_info.get('schema')
-        if schema_name:
-            self.schema = schema_name
-        else:
-            self.schema = 'public'
+        self.schema = schema_name or 'public'
         return self.schema
 
     def get_schema_names_list(self):
-        data = self.inspector.get_schema_names()
-        return data
-        
+        return self.inspector.get_schema_names()

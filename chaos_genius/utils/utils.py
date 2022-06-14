@@ -120,6 +120,8 @@ DEMO_ENDPOINT_WHITELIST = {
     "api_rca.kpi_get_line_data": ["GET"],
     "api_rca.kpi_rca_analysis": ["GET"],
     "api_rca.kpi_rca_hierarchical_data": ["GET"],
+    "api_summary.kpi_get_aggregation": ["GET"],
+    "api_summary.kpi_get_line_data": ["GET"],
     "config_settings.get_all_config": ["GET"],
     "config_settings.get_config": ["POST"],
     "config_settings.set_config": ["POST"],

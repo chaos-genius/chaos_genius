@@ -26,7 +26,7 @@ pydruid[sqlalchemy]~=0.6.2
 Flask-Migrate==2.7.0
 
 # Alert
-slack-sdk==3.8.0
+slack-sdk==3.17.1
 tabulate==0.8.9
 
 # Data Analysis

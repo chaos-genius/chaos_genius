@@ -5,7 +5,8 @@ from datetime import date, datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
-from pandas.api.types import is_datetime64_any_dtype as is_datetime, is_integer_dtype as is_integer
+from pandas.api.types import is_datetime64_any_dtype as is_datetime
+from pandas.api.types import is_integer_dtype as is_integer
 
 from chaos_genius.core.rca.root_cause_analysis import SUPPORTED_AGGREGATIONS
 from chaos_genius.core.utils.data_loader import DataLoader
@@ -25,7 +26,9 @@ def validate_kpi(
     :param kpi_info: Dictionary with all params for the KPI
     :type kpi_info: Dict[str, Any]
     :param check_tz_aware: Bool for checking if the data is timezone aware
-    :return: Returns a tuple with the status as a bool, a status message and None if check_tz_aware is False otherwise a bool telling whether the data is timezone aware
+    :return: Returns a tuple with the status as a bool, a status message
+    and None if check_tz_aware is False otherwise a bool telling whether
+    the data is timezone aware
     :rtype: Tuple[bool, str, Optional[bool]]
     """
     try:
@@ -33,14 +36,16 @@ def validate_kpi(
             kpi_info, tail=KPI_VALIDATION_TAIL_SIZE, validation=True
         ).get_data()
         logger.info(f"Created df with {len(df)} rows for validation")
-    except Exception as e:
+    except Exception as e:  # noqa: B902
         logger.error("Unable to load data for KPI validation", exc_info=1)
         return False, f"Could not load data. Error: {str(e)}", None
 
     # TODO: Take in connection info as an argument instead of
     # getting it here as it will help with mocking for tests.
     connection_info = DataSource.get_by_id(kpi_info["data_source"]).as_dict
-    supports_date_string_parsing = connection_info["connection_type"] == "Druid"
+    supports_date_string_parsing = (
+        connection_info["connection_type"] == "Druid"
+    )
 
     status, message = _validate_kpi_from_df(
         df,
@@ -86,7 +91,8 @@ def _validate_kpi_from_df(
     :type date_column_name: str
     :param count_column_name: Name of the count column, relevant for preaggregated data
     :type count_column_name: Optional[str]
-    :param supports_date_string_parsing: Bool for allowing parsing of strings, defaults to False
+    :param supports_date_string_parsing: Bool for allowing parsing of strings,
+    defaults to False
     :type supports_date_string_parsing: bool, optional
     :return: returns a tuple with the status as a bool and a status message
     :rtype: Tuple[bool, str]
@@ -295,6 +301,7 @@ def _validate_date_column_is_parseable(
 
     return True, "Accepted!"
 
+
 def _validate_count_column_is_number(
     df: pd.core.frame.DataFrame,
     count_column_name: Optional[str],
@@ -309,20 +316,20 @@ def _validate_count_column_is_number(
     :rtype: Tuple[bool, str]
     """
     # has to be integer if count_column_name exists, only then proceed else exit
-    if count_column_name:
-        if not(is_integer(df[count_column_name])):
-            invalid_type_err_msg = (
-                "The count column is of the type"
-                f" {df[count_column_name].dtype}, use 'cast' to convert to integer."
-            )
-            return False, invalid_type_err_msg
+    if count_column_name and not (is_integer(df[count_column_name])):
+        invalid_type_err_msg = (
+            "The count column is of the type"
+            f" {df[count_column_name].dtype}, use 'cast' to convert to integer."
+        )
+        return False, invalid_type_err_msg
     return True, "Accepted!"
 
 
 def _validate_for_maximum_kpi_size(
     kpi_info: Dict[str, Any],
 ) -> Tuple[bool, str]:
-    """Validate if KPI size is less than maximum permissible size
+    """Validate if KPI size is less than maximum permissible size.
+
     :param kpi_info: Dictionary with all params for the KPI
     :type kpi_info: Dict[str, Any]
     :return: returns a tuple with the status as a bool and a status message

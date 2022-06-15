@@ -25,6 +25,7 @@ def anomaly_alert_slack(
     points: "Sequence[anomaly_alerts.AnomalyPointFormatted]",
     overall_count: int,
     subdim_count: int,
+    date: str,
 ) -> str:
     """Sends an anomaly alert on slack.
 
@@ -37,35 +38,12 @@ def anomaly_alert_slack(
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": f"{alert_name}",
+                    "text": f"{alert_name} - {kpi_name} ({date}) ",
                     "emoji": True,
                 },
             },
             {
                 "type": "divider",
-            },
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": "Summary",
-                    "emoji": True,
-                },
-            },
-            {
-                "type": "section",
-                "text": {"type": "mrkdwn", "text": f"KPI name: *{kpi_name}*\n"},
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": (
-                        f"- Total alerts generated (Overall KPI): *{overall_count}*\n"
-                        + "- Total alerts generated (including subdimenions): "
-                        + f"*{subdim_count + overall_count}*\n"
-                    ),
-                },
             },
             {
                 "type": "header",
@@ -78,6 +56,28 @@ def anomaly_alert_slack(
             {
                 "type": "section",
                 "text": {"type": "mrkdwn", "text": f"{alert_message}\n"},
+            },
+            {
+                "type": "divider",
+            },
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Anomalies",
+                    "emoji": True,
+                },
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": _format_slack_anomalies(
+                        points,
+                        kpi_name=kpi_name,
+                        include_kpi_info=False,
+                    ),
+                },
             },
             {
                 "type": "actions",
@@ -97,26 +97,6 @@ def anomaly_alert_slack(
                         "style": "primary",
                     },
                 ],
-            },
-            {
-                "type": "divider",
-            },
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": "Top anomalies",
-                    "emoji": True,
-                },
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": _format_slack_anomalies(
-                        points, kpi_name=kpi_name, include_kpi_link=False
-                    ),
-                },
             },
         ],
     )
@@ -172,31 +152,64 @@ def event_alert_slack(alert_name, alert_frequency, alert_message, alert_overview
 def _format_slack_anomalies(
     top10: "Sequence[anomaly_alerts.AnomalyPointFormatted]",
     kpi_name: Optional[str] = None,
-    include_kpi_link: bool = True,
+    include_kpi_info: bool = True,
 ) -> str:
     out = ""
 
     for point in top10:
 
-        if include_kpi_link:
+        if include_kpi_info:
             kpi_name_link = (
                 f"<{webapp_url_prefix()}#/dashboard/0/anomaly/{point.kpi_id}"
-                + f"|{point.kpi_name} (*{point.series_type}*)>"
+                + f"|{point.kpi_name}>"
             )
         else:
-            kpi_name_link = f"{kpi_name} ({point.series_type})"
+            kpi_name_link = f"{kpi_name}"
 
-        date = point.formatted_date
+        if point.previous_value is None or point.y == point.previous_value:
+            out += "- :black_circle_for_record: Anomalous behavior"
+            if include_kpi_info:
+                out += f" in *{kpi_name_link}* "
+            else:
+                out += " detected "
+            if point.previous_value is None:
+                out += f"- changed to *{point.y_readable}*"
+                if point.is_hourly:
+                    out += (
+                        f" from {point.previous_point_time_only}"
+                        + f" to {point.anomaly_time_only}"
+                    )
+            else:
+                if point.is_hourly:
+                    out += (
+                        f"- with constant value *{point.y_readable}*"
+                        + f" from {point.previous_point_time_only}"
+                        + f" to {point.anomaly_time_only}"
+                    )
+                else:
+                    out += f"- with same value *{point.y_readable}* as previous day"
 
-        threshold_message = (
-            f"expected: *{point.yhat_lower_readable} to {point.yhat_upper_readable}*"
-        )
-
-        out += (
-            f"- *{kpi_name_link}* changed to "
-            + f"*{point.y_readable}* (*{point.formatted_change_percent}*) "
-            + f"on {date} ({threshold_message}, severity: *{point.severity}*)\n"
-        )
+        else:
+            if point.y > point.previous_value:
+                out += "- :arrow_up: Spike"
+            elif point.y < point.previous_value:
+                out += "- :arrow_down_small: Drop"
+            if include_kpi_info:
+                out += f" in *{kpi_name_link}* "
+            else:
+                out += " detected "
+            out += f" -  changed to *{point.y_readable}*"
+            if point.previous_value_readable is not None:
+                out += (
+                    f" from {point.previous_value_readable} "
+                    + f"({point.formatted_change_percent})"
+                )
+            if point.is_hourly:
+                out += (
+                    f" from {point.previous_point_time_only}"
+                    + f" to {point.anomaly_time_only}"
+                )
+        out += "\n"
 
     return out
 
@@ -206,6 +219,7 @@ def alert_digest_slack_formatted(
     top10: "Sequence[anomaly_alerts.AnomalyPointFormatted]",
     overall_count: int,
     subdim_count: int,
+    report_date: str,
 ) -> str:
     """Sends an anomaly digest on slack.
 
@@ -221,7 +235,7 @@ def alert_digest_slack_formatted(
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": f"{frequency.title()} Alerts Report",
+                    "text": f"{frequency.title()} Alerts Report ({report_date})",
                     "emoji": True,
                 },
             },
@@ -232,7 +246,7 @@ def alert_digest_slack_formatted(
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": "Summary",
+                    "text": "Top Anomalies",
                     "emoji": True,
                 },
             },
@@ -240,11 +254,7 @@ def alert_digest_slack_formatted(
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": (
-                        f"- Total alerts generated (Overall KPI): *{overall_count}*\n"
-                        + "- Total alerts generated (including subdimenions): "
-                        + f"*{subdim_count + overall_count}*\n"
-                    ),
+                    "text": _format_slack_anomalies(top10),
                 },
             },
             {
@@ -258,24 +268,6 @@ def alert_digest_slack_formatted(
                         "style": "primary",
                     }
                 ],
-            },
-            {
-                "type": "divider",
-            },
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": "Top 10 anomalies",
-                    "emoji": True,
-                },
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": _format_slack_anomalies(top10),
-                },
             },
         ]
     )

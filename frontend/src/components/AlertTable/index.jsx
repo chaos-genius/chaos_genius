@@ -64,10 +64,12 @@ const AlertTable = ({
   };
 
   const handleBtnClick = (e) => {
+    window.scrollTo({ top: 0 });
     setPgInfo({ ...pgInfo, page: e });
   };
 
   const handleSelectClick = (e) => {
+    window.scrollTo({ top: 0 });
     setPgInfo({ ...pgInfo, page: 1, per_page: e.target.value });
   };
 

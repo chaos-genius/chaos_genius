@@ -17,8 +17,6 @@ services:
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    depends_on:
-      - chaosgenius-db
     environment:
       - *chaosgenius-version
       - IN_DOCKER=True
@@ -85,22 +83,6 @@ services:
       - REACT_APP_EVENT_ALERT=${REACT_APP_EVENT_ALERT}
     depends_on:
       - chaosgenius-server
-
-  chaosgenius-db:
-    container_name: chaosgenius-db
-    image: postgres:13
-    restart: unless-stopped
-    healthcheck:
-      test: [ "CMD", "pg_isready", "-q", "-d", "chaosgenius_data", "-U", "postgres" ]
-      timeout: 45s
-      interval: 10s
-      retries: 10
-    environment:
-      - POSTGRES_USER=${DB_USERNAME}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-    volumes:
-      - ./docker/cg-db-setup:/docker-entrypoint-initdb.d/
-      - cg-db:/var/lib/postgresql/data
 
   chaosgenius-redis:
     container_name: chaosgenius-redis
@@ -196,7 +178,6 @@ services:
       - CHAOSGENIUS_WEBAPP_URL=${CHAOSGENIUS_WEBAPP_URL}
     depends_on:
       - chaosgenius-redis
-      - chaosgenius-db
 
   chaosgenius-worker-alerts:
     container_name: chaosgenius-worker-alerts
@@ -234,7 +215,6 @@ services:
       - TIMEZONE=${TIMEZONE}
     depends_on:
       - chaosgenius-redis
-      - chaosgenius-db
 
 volumes:
   cg-db:

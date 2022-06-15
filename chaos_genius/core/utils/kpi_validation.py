@@ -57,7 +57,7 @@ def validate_kpi(
         supports_date_string_parsing=supports_date_string_parsing,
     )
 
-    if check_tz_aware:
+    if status and check_tz_aware:
         df[kpi_info["datetime_column"]] = pd.to_datetime(
             df[kpi_info["datetime_column"]]
         )

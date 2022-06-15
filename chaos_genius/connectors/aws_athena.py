@@ -14,6 +14,12 @@ class AwsAthenaDb(BaseDb):
     __SQL_DATE_FORMAT = "timestamp '%Y-%m-%d 00:00:00{}'"
     __SQL_STRPTIME_FORMAT = "timestamp '%Y-%m-%d %H:%M:%S%z'"
     __SQL_STRFTIME_FORMAT = "timestamp '%Y-%m-%d %H:%M:%S'"
+    __SQL_IDENTIFIER = '"'
+
+    @property
+    def sql_identifier(self):
+        """Used to quote SQL illegal identifiers."""
+        return self.__SQL_IDENTIFIER
 
     @property
     def sql_date_format(self):

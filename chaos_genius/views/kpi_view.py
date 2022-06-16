@@ -391,6 +391,7 @@ def edit_kpi(kpi_id):
     status, message = "", ""
     do_not_run_analytics_list = ["name", "dashboards"]
     run_analytics = False
+    run_validation = False
 
     try:
         kpi_obj = Kpi.get_by_id(kpi_id)
@@ -404,6 +405,7 @@ def edit_kpi(kpi_id):
             for key, value in data.items():
                 if key not in do_not_run_analytics_list:
                     run_analytics = True
+                    run_validation = True
                 if chech_editable_field(meta_info, key):
                     setattr(kpi_obj, key, value)
 
@@ -431,6 +433,14 @@ def edit_kpi(kpi_id):
                 ):
                     kpi_obj.anomaly_params["run_optional"] = run_optional
                     flag_modified(kpi_obj, "anomaly_params")
+            if run_validation:
+                status, message, tz_aware = validate_kpi(
+                    kpi_obj.as_dict, check_tz_aware=True
+                )
+                if status is not True:
+                    return jsonify(
+                        {"error": message, "status": "failure", "is_critical": "true"}
+                    )
 
             if run_analytics:
                 logger.info(

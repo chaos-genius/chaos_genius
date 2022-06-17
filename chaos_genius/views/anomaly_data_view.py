@@ -362,21 +362,19 @@ def _get_dimensions_values(kpi_id: int) -> Dict[str, List[str]]:
 
     :param kpi_id: ID of the KPI
     :type kpi_id: int
-    :return dimensions_vals: dictionary of {dimension:list(vals)}
+    :return dimension_values_dict: dictionary of {dimension:list(vals)}
     :rtype: dict
     """
     # Get unique list of subdims and values from DB
-    query = (
+    results = (
         db.session.query(
             func.distinct(AnomalyDataOutput.series_type)
         )
         .filter(
             (AnomalyDataOutput.kpi_id == kpi_id)
             & (AnomalyDataOutput.anomaly_type == "subdim")
-        )
+        ).all()
     )
-
-    results = pd.read_sql(query.statement, query.session.bind)
 
     if len(results) == 0:
         current_app.logger.info("No Subdimension Anomaly Found")
@@ -387,8 +385,9 @@ def _get_dimensions_values(kpi_id: int) -> Dict[str, List[str]]:
     # series_type strings are in the format "`dimension` == "value""
     # split string into dimension and value to get [`dimension`, "value"]
     dimension_values_list = list(
-        map(lambda dim_val: dim_val.split(" == "), results["distinct_1"].to_list())
+        map(lambda dim_val: dim_val[0].split(" == "), results)
     )
+
     for dim_val in dimension_values_list:
         # remove extra quotation marks
         dimension, values = map(lambda string: string[1:-1], dim_val)
@@ -475,7 +474,7 @@ def get_overall_data_points(kpi_id: int, n: int = 60) -> List:
 
     return data_points
 
-def get_overall_data(kpi_id, end_date: datetime, n=90):
+def  get_overall_data(kpi_id, end_date: datetime, n=90):
     start_date = end_date - timedelta(days=n)
     start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
     end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")

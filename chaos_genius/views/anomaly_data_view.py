@@ -4,6 +4,7 @@ import csv
 import io
 import time
 from datetime import date, datetime, timedelta
+from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple, cast
 
 import pandas as pd
@@ -62,12 +63,21 @@ def kpi_anomaly_detection(kpi_id):
                 }
             )
 
+        dimensions_values = _get_dimensions_values(kpi_id)
+
         period = kpi_info["anomaly_params"]["anomaly_period"]
         hourly = kpi_info["anomaly_params"]["frequency"] == "H"
 
         end_date = get_anomaly_output_end_date(kpi_info)
 
-        anom_data = get_overall_data(kpi_id, end_date, period)
+        dimension = request.args.get("dimension", default=None)
+        value = request.args.get("value", default=None)
+        subdim = ""
+
+        if dimension and value:
+            anom_data = get_dq_and_subdim_data(kpi_id, end_date, "subdim", subdim, period)
+        else:
+            anom_data = get_overall_data(kpi_id, end_date, period)
 
         anom_data["x_axis_limits"] = get_anomaly_graph_x_lims(end_date, period, hourly)
 
@@ -91,6 +101,7 @@ def kpi_anomaly_detection(kpi_id):
     return jsonify(
         {
             "data": data,
+            "dimensions_values": dimensions_values,
             "msg": "",
             "anomaly_end_date": end_date,
             "last_run_time_anomaly": anomaly_last_scan,
@@ -423,6 +434,45 @@ def kpi_anomaly_retraining(kpi_id):
         return jsonify({"msg": f"retraining started for KPI: {kpi_id}"})
     else:
         return jsonify({"msg": f"retraining failed for KPI: {kpi_id}, KPI id is None"})
+
+
+def _get_dimensions_values(kpi_id):
+    """Creates a dictionaryy of KPI dimension and their values.
+
+    :param kpi_id: ID of the KPI
+    :type row: integer
+    :return dimensions_vals: dictionary of {dimension:list(vals)}
+    :rtype: dictionary
+    """
+    query = (
+        db.session.query(
+            func.distinct(AnomalyDataOutput.series_type)
+        )
+        .filter(
+            (AnomalyDataOutput.kpi_id == kpi_id)
+            & (AnomalyDataOutput.anomaly_type == "subdim")
+        )
+    )
+
+    results = pd.read_sql(query.statement, query.session.bind)
+
+    if len(results) == 0:
+        current_app.logger.info("No Subdimension Anomaly Found")
+        return {}
+
+    dimension_values_dict = defaultdict(list)
+
+    # series_type strings are in the format "`dimension` == "value""
+    # split string into dimension and value to get [`dimension`, "value"]
+    dimension_values_list = list(
+        map(lambda dim_val: dim_val.split(" == "), results["distinct_1"].to_list())
+    )
+    for dim_val in dimension_values_list:
+        # remove extra quotation marks
+        dim_val_formatted = list(map(lambda string: string[1:-1], dim_val))
+        dimension_values_dict[dim_val_formatted[0]].append(dim_val_formatted[1])
+
+    return dimension_values_dict
 
 
 def fill_graph_data(row, graph_data):

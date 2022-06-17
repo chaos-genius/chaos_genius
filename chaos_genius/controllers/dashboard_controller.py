@@ -6,6 +6,7 @@ from typing import (
     Dict,
     List,
     Literal,
+    Optional,
     Tuple,
     Union,
     overload,
@@ -68,14 +69,18 @@ def get_mapper_obj_by_kpi_ids(kpi_list):
     ).all()
 
 
-def get_dashboard_list(sort_by: str = DEFAULT_SORT_BY) -> List[Dict[str, Any]]:
+def get_dashboard_list(
+    sort_by: str = DEFAULT_SORT_BY,
+    dashboard_ids: Optional[List[int]] = None
+) -> List[Dict[str, Any]]:
     """Retrieve all dashboards with the IDs of KPIs it contains.
 
     Arguments:
         sort_by: the key to sort by. Assumed to be present in `SORTER_MAPPING`. Will
             fail if it's not in the mapping.
+        dashboard_ids: if given, only these dashboards will be retrieved.
     """
-    dashboard_list = get_dashboard_list_by_ids()
+    dashboard_list = get_dashboard_list_by_ids(dashboard_ids)
     dashboard_dict_list: List[Dict[str, Any]] = []
 
     for dashboard in dashboard_list:

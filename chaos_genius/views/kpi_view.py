@@ -14,6 +14,7 @@ from chaos_genius.controllers.dashboard_controller import (
     disable_mapper_for_kpi_ids,
     edit_kpi_dashboards,
     enable_mapper_for_kpi_ids,
+    get_dashboard_list,
     get_dashboard_list_by_ids,
     get_mapper_obj_by_kpi_ids,
     kpi_dashboard_mapper_dict,
@@ -153,6 +154,7 @@ def kpi():
 
         kpis: List[Tuple[Kpi, DataSource]]
         kpis_paginated: Optional[Pagination] = None
+        dashboard_ids: Optional[List[int]] = None
 
         if dashboard_ids_list and dashboard_ids_list != [""]:
             dashboard_ids = [
@@ -207,6 +209,8 @@ def kpi():
             kpi_info["dashboards"] = dashboards
             kpi_infos.append(kpi_info)
 
+        dashboards_data = get_dashboard_list(dashboard_ids=dashboard_ids)
+
         return jsonify(
             {
                 "count": len(kpi_infos),
@@ -216,6 +220,7 @@ def kpi():
                     if kpis_paginated is not None
                     else None
                 ),
+                "dashboards": dashboards_data,
                 SEARCH_PARAM_NAME: search_query,
             }
         )

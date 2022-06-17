@@ -65,6 +65,8 @@ class AnomalyPointOriginal(BaseModel):
 
     # TODO: could be generated from AnomalyDataOutput model
 
+    # TODO(Samyak): these comments descriptions of fields could be actual docstrings.
+
     # y-value of point
     y: float
     # lower bound of expected value
@@ -142,6 +144,15 @@ class AnomalyPoint(AnomalyPointOriginal):
     percent_change: Union[StrictFloat, StrictInt, str]
     # human readable message describing the percent_change
     change_message: str
+
+    relevant_subdims: Optional[List["AnomalyPoint"]]
+    """Subdimensional anomalies associated with this anomaly.
+
+    Only available when:
+    - this anomaly is for Overall KPI.
+    - there are subdimensional level anomalies for the same timestamp
+      and they are above the severity threshold.
+    """
 
     @staticmethod
     def from_original(

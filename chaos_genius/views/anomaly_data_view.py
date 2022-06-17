@@ -72,9 +72,9 @@ def kpi_anomaly_detection(kpi_id):
 
         dimension = request.args.get("dimension", default=None)
         value = request.args.get("value", default=None)
-        subdim = ""
 
         if dimension and value:
+            subdim = f"`{dimension}` == \"{value}\""
             anom_data = get_dq_and_subdim_data(kpi_id, end_date, "subdim", subdim, period)
         else:
             anom_data = get_overall_data(kpi_id, end_date, period)
@@ -87,7 +87,7 @@ def kpi_anomaly_detection(kpi_id):
             # remove from here once updated in frontend
             "base_anomaly_id": kpi_id,
         }
-        data["chart_data"]["title"] = kpi_info["name"]
+
         current_app.logger.info(f"Anomaly DD Retrieval Completed for KPI ID: {kpi_id}")
 
         end_date = get_datetime_string_with_tz(end_date, hourly)

@@ -63,12 +63,12 @@ def kpi_anomaly_detection(kpi_id):
                 }
             )
 
-        dimensions_values = _get_dimensions_values(kpi_id)
-
         period = kpi_info["anomaly_params"]["anomaly_period"]
         hourly = kpi_info["anomaly_params"]["frequency"] == "H"
 
         end_date = get_anomaly_output_end_date(kpi_info)
+
+        dimensions_values = _get_dimensions_values(kpi_id, end_date, period)
 
         dimension = request.args.get("dimension", default=None)
         value = request.args.get("value", default=None)
@@ -357,7 +357,9 @@ def kpi_anomaly_retraining(kpi_id):
         return jsonify({"msg": f"retraining failed for KPI: {kpi_id}, KPI id is None"})
 
 
-def _get_dimensions_values(kpi_id: int) -> Dict[str, List[str]]:
+def _get_dimensions_values(
+    kpi_id: int, end_date: datetime, period=90
+) -> Dict[str, List[str]]:
     """Creates a dictionary of KPI dimension and their values.
 
     :param kpi_id: ID of the KPI
@@ -365,6 +367,10 @@ def _get_dimensions_values(kpi_id: int) -> Dict[str, List[str]]:
     :return dimension_values_dict: dictionary of {dimension:list(vals)}
     :rtype: dict
     """
+    start_date = pd.to_datetime(end_date) - timedelta(days=period)
+    start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
+    end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
+
     # Get unique list of subdims and values from DB
     results = (
         db.session.query(
@@ -372,6 +378,8 @@ def _get_dimensions_values(kpi_id: int) -> Dict[str, List[str]]:
         )
         .filter(
             (AnomalyDataOutput.kpi_id == kpi_id)
+            & (AnomalyDataOutput.data_datetime >= start_date)
+            & (AnomalyDataOutput.data_datetime <= end_date)
             & (AnomalyDataOutput.anomaly_type == "subdim")
         ).all()
     )
@@ -474,7 +482,8 @@ def get_overall_data_points(kpi_id: int, n: int = 60) -> List:
 
     return data_points
 
-def  get_overall_data(kpi_id, end_date: datetime, n=90):
+
+def get_overall_data(kpi_id, end_date: datetime, n=90):
     start_date = end_date - timedelta(days=n)
     start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
     end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")

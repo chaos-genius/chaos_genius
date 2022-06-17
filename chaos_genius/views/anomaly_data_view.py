@@ -3,8 +3,8 @@
 import csv
 import io
 import time
-from datetime import date, datetime, timedelta
 from collections import defaultdict
+from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple, cast
 
 import pandas as pd
@@ -357,13 +357,13 @@ def kpi_anomaly_retraining(kpi_id):
         return jsonify({"msg": f"retraining failed for KPI: {kpi_id}, KPI id is None"})
 
 
-def _get_dimensions_values(kpi_id):
-    """Creates a dictionaryy of KPI dimension and their values.
+def _get_dimensions_values(kpi_id: int) -> Dict[str, List[str]]:
+    """Creates a dictionary of KPI dimension and their values.
 
     :param kpi_id: ID of the KPI
-    :type row: integer
+    :type kpi_id: int
     :return dimensions_vals: dictionary of {dimension:list(vals)}
-    :rtype: dictionary
+    :rtype: dict
     """
     # Get unique list of subdims and values from DB
     query = (
@@ -391,8 +391,8 @@ def _get_dimensions_values(kpi_id):
     )
     for dim_val in dimension_values_list:
         # remove extra quotation marks
-        dim_val_formatted = list(map(lambda string: string[1:-1], dim_val))
-        dimension_values_dict[dim_val_formatted[0]].append(dim_val_formatted[1])
+        dimension, values = map(lambda string: string[1:-1], dim_val)
+        dimension_values_dict[dimension].append(values)
 
     return dimension_values_dict
 

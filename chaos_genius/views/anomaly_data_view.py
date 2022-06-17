@@ -444,6 +444,7 @@ def _get_dimensions_values(kpi_id):
     :return dimensions_vals: dictionary of {dimension:list(vals)}
     :rtype: dictionary
     """
+    # Get unique list of subdims and values from DB
     query = (
         db.session.query(
             func.distinct(AnomalyDataOutput.series_type)

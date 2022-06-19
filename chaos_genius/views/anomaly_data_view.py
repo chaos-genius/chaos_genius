@@ -368,8 +368,8 @@ def _get_dimensions_values(
     :rtype: dict
     """
     start_date = pd.to_datetime(end_date) - timedelta(days=period)
-    start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
-    end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
+    start_date_str = start_date.strftime("%Y-%m-%d %H:%M:%S")
+    end_date_str = end_date.strftime("%Y-%m-%d %H:%M:%S")
 
     # Get unique list of subdims and values from DB
     results = (
@@ -378,8 +378,8 @@ def _get_dimensions_values(
         )
         .filter(
             (AnomalyDataOutput.kpi_id == kpi_id)
-            & (AnomalyDataOutput.data_datetime >= start_date)
-            & (AnomalyDataOutput.data_datetime <= end_date)
+            & (AnomalyDataOutput.data_datetime >= start_date_str)
+            & (AnomalyDataOutput.data_datetime <= end_date_str)
             & (AnomalyDataOutput.anomaly_type == "subdim")
         ).all()
     )

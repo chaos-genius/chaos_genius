@@ -364,6 +364,10 @@ def _get_dimensions_values(
 
     :param kpi_id: ID of the KPI
     :type kpi_id: int
+    :param end_date: last data entry of the KPI
+    :type end_date: datetime
+    :param period: time window of KPI
+    :type period: int
     :return dimension_values_dict: dictionary of {dimension:list(vals)}
     :rtype: dict
     """
@@ -388,17 +392,16 @@ def _get_dimensions_values(
         current_app.logger.info("No Subdimension Anomaly Found")
         return {}
 
-    dimension_values_dict = defaultdict(list)
-
     # series_type strings are in the format "`dimension` == "value""
     # split string into dimension and value to get [`dimension`, "value"]
     dimension_values_list = list(
         map(lambda dim_val: dim_val[0].split(" == "), results)
     )
 
+    dimension_values_dict = defaultdict(list)
     for dim_val in dimension_values_list:
         # remove extra quotation marks
-        dimension, values = map(lambda string: string[1:-1], dim_val)
+        dimension, values = map(lambda dim_val_string: dim_val_string[1:-1], dim_val)
         dimension_values_dict[dimension].append(values)
 
     return dimension_values_dict

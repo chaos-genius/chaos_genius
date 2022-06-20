@@ -155,20 +155,13 @@ class AnomalyPoint(AnomalyPointOriginal):
     """
 
     @staticmethod
-    def from_original(
+    def _construct_from_original(
         point: AnomalyPointOriginal,
-        previous_anomaly_point: Optional[AnomalyPointOriginal] = None,
+        previous_anomaly_point: Optional[AnomalyPointOriginal],
+        relevant_subdims: Optional[List["AnomalyPoint"]],
         fixed_change_message: Optional[str] = None,
     ) -> "AnomalyPoint":
-        """Constructs a formatted AnomalyPoint from AnomalyPointOriginal.
-
-        Arguments:
-            point: original anomaly point
-            previous_anomaly_point: the anomaly point from which change percent will be
-                calculated.
-            fixed_change_message: the change message to use when previous anomaly point
-                cannot be found. If specified, change percent will not be calculated.
-        """
+        # TODO: check if this has any effect
         series_type = (
             OVERALL_KPI_SERIES_TYPE_REPR
             if point.series_type == "overall"
@@ -209,7 +202,74 @@ class AnomalyPoint(AnomalyPointOriginal):
             previous_value=previous_value,
             percent_change=percent_change,
             change_message=change_message,
+            relevant_subdims=relevant_subdims,
         )
+
+    @staticmethod
+    def from_original(
+        points: List[AnomalyPointOriginal],
+        previous_anomaly_points: List[Optional[AnomalyPointOriginal]],
+        fixed_change_message: Optional[str] = None,
+    ) -> List["AnomalyPoint"]:
+        """Constructs formatted `AnomalyPoint`s from `AnomalyPointOriginal`s.
+
+        Arguments:
+            points: original anomaly points
+            previous_anomaly_points: the anomaly point from which change percent will be
+                calculated. There must be entry for each anomaly point.
+            fixed_change_message: the change message to use when previous anomaly point
+                cannot be found. If specified, change percent will not be calculated.
+        """
+        anomaly_points: List[AnomalyPoint] = []
+
+        overall_points = list(
+            filter(
+                lambda point: point[0].anomaly_type == "overall",
+                zip(points, previous_anomaly_points),
+            )
+        )
+
+        subdim_points = list(
+            AnomalyPoint._construct_from_original(
+                point, prev_point, None, fixed_change_message
+            )
+            for point, prev_point in filter(
+                lambda point: point[0].series_type != "overall",
+                zip(points, previous_anomaly_points),
+            )
+        )
+
+        def _get_relevant_subdims(point: AnomalyPointOriginal):
+            # subdim points with same timestamp
+            relevant_subdims = [
+                subdim_point
+                for subdim_point in subdim_points
+                if subdim_point.data_datetime == point.data_datetime
+            ]
+
+            relevant_subdims.sort(key=lambda point: point.severity, reverse=True)
+
+            # remove them from original list
+            for subdim_point in relevant_subdims:
+                subdim_points.remove(subdim_point)
+
+            return relevant_subdims
+
+        for point, prev_point in overall_points:
+            relevant_subdims = _get_relevant_subdims(point)
+
+            point = AnomalyPoint._construct_from_original(
+                point, prev_point, relevant_subdims, fixed_change_message
+            )
+
+            anomaly_points.append(point)
+
+        # add remaining subdim points
+        anomaly_points.extend(subdim_points)
+
+        anomaly_points.sort(key=lambda point: point.severity, reverse=True)
+
+        return anomaly_points
 
     @root_validator(pre=True)
     def _support_old_field_names(cls, values: Dict[str, Any]) -> Dict[str, Any]:
@@ -342,6 +402,16 @@ class AnomalyPointFormatted(AnomalyPoint):
             format = "%I"
 
         return (previous_point_time).strftime(format).lstrip("0")
+
+
+def _find_point(point: AnomalyPointOriginal, prev_data: List[AnomalyPointOriginal]):
+    """Finds same type of point in previous data."""
+    intended_point = None
+    for prev_point in prev_data:
+        if prev_point.series_type == point.series_type:
+            intended_point = prev_point
+            break
+    return intended_point
 
 
 GenericAnomalyPoint = TypeVar("GenericAnomalyPoint", bound=AnomalyPointOriginal)
@@ -534,7 +604,7 @@ class AnomalyAlertController:
         )
 
         logger.info(
-            f"Checking for anomalies for (KPI: {self.kpi_id}, Alert: "
+            f"Getting anomaly data for (KPI: {self.kpi_id}, Alert: "
             f"{self.alert_id}) in the range - start: {start_timestamp} (included: "
             f"{include_start_timestamp}) and end: {end_timestamp} "
             f"(included: {include_end_timestamp})"
@@ -597,30 +667,57 @@ class AnomalyAlertController:
             "The triggered alert data was successfully stored.",
         )
 
-    def _find_point(
-        self, point: AnomalyPointOriginal, prev_data: List[AnomalyPointOriginal]
-    ):
-        """Finds same type of point in previous data."""
-        intended_point = None
-        for prev_point in prev_data:
-            if prev_point.series_type == point.series_type:
-                intended_point = prev_point
-                break
-        return intended_point
-
-    def _format_anomaly_data(
+    def _find_previous_points(
         self, anomaly_data: List[AnomalyPointOriginal], date: datetime.date
-    ) -> List[AnomalyPoint]:
+    ) -> List[Optional[AnomalyPointOriginal]]:
         kpi = self._get_kpi()
 
         time_series_freq: Optional[str] = kpi.anomaly_params.get("frequency")
 
+        current_day_start = datetime.datetime.combine(date, datetime.time())
+
+        # get previous anomaly point for comparison
+        prev_day_data = self._get_anomalies(
+            this_date_after_time_only=(
+                current_day_start - datetime.timedelta(days=1, hours=0, minutes=0)
+            ),
+            anomalies_only=False,
+            include_severity_cutoff=False,
+        )
+
+        previous_points: List[Optional[AnomalyPointOriginal]]
+
         if time_series_freq == "D":
-            formatted_anomaly_data = self._format_anomaly_data_daily(anomaly_data, date)
+            # daily granularity - find point in the previous day
+            previous_points = [
+                _find_point(point, prev_day_data) for point in anomaly_data
+            ]
         elif time_series_freq == "H":
-            formatted_anomaly_data = self._format_anomaly_data_hourly(
-                anomaly_data, date
+            # get current day's data for comparison
+            cur_day_data = self._get_anomalies(
+                this_date_after_time_only=current_day_start,
+                anomalies_only=False,
+                include_severity_cutoff=False,
             )
+
+            # store a mapping of hour => list of anomaly points for that hour
+            hourly_data: DefaultDict[int, List[AnomalyPointOriginal]] = defaultdict(
+                list
+            )
+            for point in cur_day_data:
+                hourly_data[point.data_datetime.hour].append(point)
+
+            # used only when a point is present for 00:00
+            #  - the previous point in that case will be previous day's 11PM data
+            for point in prev_day_data:
+                if point.data_datetime.hour == 23:
+                    hourly_data[-1].append(point)
+
+            # hourly granularity - find previous hour data
+            previous_points = [
+                _find_point(point, hourly_data.get(point.data_datetime.hour - 1, []))
+                for point in anomaly_data
+            ]
         else:
             raise AlertException(
                 f"Time series frequency not found or invalid: {time_series_freq}",
@@ -628,79 +725,17 @@ class AnomalyAlertController:
                 kpi_id=self.kpi_id,
             )
 
-        # Sort in descending order according to severity
-        formatted_anomaly_data.sort(key=lambda point: point.severity, reverse=True)
+        return previous_points
 
-        return formatted_anomaly_data
-
-    def _format_anomaly_data_daily(
+    def _format_anomaly_data(
         self, anomaly_data: List[AnomalyPointOriginal], date: datetime.date
     ) -> List[AnomalyPoint]:
-        formatted_anomaly_data: List[AnomalyPoint] = []
 
-        # get previous anomaly point for comparison
-        prev_day_data = self._get_anomalies(
-            this_date_after_time_only=(
-                datetime.datetime.combine(date, datetime.time())
-                - datetime.timedelta(days=1, hours=0, minutes=0)
-            ),
-            anomalies_only=False,
-            include_severity_cutoff=False,
+        previous_points = self._find_previous_points(anomaly_data, date)
+
+        formatted_anomaly_data = AnomalyPoint.from_original(
+            anomaly_data, previous_points
         )
-
-        formatted_anomaly_data: List[AnomalyPoint] = []
-        for point in anomaly_data:
-            # daily granularity - find point in the previous day
-            previous_point = self._find_point(point, prev_day_data)
-
-            formatted_anomaly_data.append(
-                AnomalyPoint.from_original(point, previous_point)
-            )
-
-        return formatted_anomaly_data
-
-    def _format_anomaly_data_hourly(
-        self, anomaly_data: List[AnomalyPointOriginal], date: datetime.date
-    ) -> List[AnomalyPoint]:
-        formatted_anomaly_data: List[AnomalyPoint] = []
-
-        current_day_start = datetime.datetime.combine(date, datetime.time())
-
-        # get current day's data for comparison
-        cur_day_data = self._get_anomalies(
-            this_date_after_time_only=current_day_start,
-            anomalies_only=False,
-            include_severity_cutoff=False,
-        )
-        # get previous day 11PM (23:00) data too
-        # used only when a point is present for 00:00
-        #  - the previous point in that case will be previous day's 11PM data
-        prev_day_data = self._get_anomalies(
-            this_date_after_time_only=(
-                current_day_start - datetime.timedelta(days=0, hours=1, minutes=0)
-            ),
-            anomalies_only=False,
-            include_severity_cutoff=False,
-        )
-
-        # store a mapping of hour => list of anomaly points for that hour
-        hourly_data: DefaultDict[int, List[AnomalyPointOriginal]] = defaultdict(list)
-        for point in cur_day_data:
-            hourly_data[point.data_datetime.hour].append(point)
-        for point in prev_day_data:
-            if point.data_datetime.hour == 23:
-                hourly_data[-1].append(point)
-
-        formatted_anomaly_data: List[AnomalyPoint] = []
-        for point in anomaly_data:
-            # hourly granularity - find previous hour data
-            previous_point = self._find_point(
-                point, hourly_data.get(point.data_datetime.hour - 1, [])
-            )
-
-            formatted_anomaly_data.append(
-                AnomalyPoint.from_original(point, previous_point)
-            )
 
         return formatted_anomaly_data
 

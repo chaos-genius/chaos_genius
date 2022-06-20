@@ -398,23 +398,23 @@ def _get_dimensions_values(
         map(lambda dim_val: dim_val[0].split(" == "), results)
     )
 
-    dimension_values_list = []
-
+    dimension_values_dict = defaultdict(list)
     for dim_val in split_dimension_value:
-        dimension, value = map(lambda dim_val_string: dim_val_string[1:-1], dim_val)
-        for dim_val_dict in dimension_values_list:
-            if dim_val_dict["label"] == dimension:
-                dim_val_dict["subdim_value_options"].append(
-                    {"label": value, "value": value}
-                )
-                break
-        else:
-            dim_val_dict = {
-                "label": dimension,
-                "value": dimension,
-                "subdim_value_options": [{"label": value, "value": value}],
-            }
-            dimension_values_list.append(dim_val_dict)
+        # remove extra quotation marks
+        dimension, values = map(lambda dim_val_string: dim_val_string[1:-1], dim_val)
+        dimension_values_dict[dimension].append(values)
+
+    dimension_values_list = [
+        {
+            "label": dimension,
+            "value": dimension,
+            "subdim_value_options": [
+                {"label": value, "value": value}
+                for value in dimension_values_dict[dimension]
+            ],
+        }
+        for dimension in dimension_values_dict
+    ]
 
     return dimension_values_list
 

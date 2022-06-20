@@ -68,7 +68,6 @@ const KpiExplorer = () => {
   }, []);
 
   useEffect(() => {
-    console.log(data);
     if (data !== null) {
       store.dispatch(KPI_RESET);
       store.dispatch(SETTING_RESET);
@@ -104,7 +103,6 @@ const KpiExplorer = () => {
   }, [pagination]);
 
   useEffect(() => {
-    console.log('hello');
     if (pgInfo.page > 0 && pgInfo.per_page > 0) {
       setData((prev) => !prev);
     }

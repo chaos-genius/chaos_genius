@@ -19,9 +19,8 @@ DB_CLASS_MAPPER = {
 }
 
 
-def get_sqla_db_conn(data_source_info=None, connection_config=None, extras=None) -> BaseDb:
+def get_sqla_db_conn(data_source_info=None, connection_config=None) -> BaseDb:
     database = None
-    extras = extras or {}
     if not (data_source_info or connection_config):
         raise Exception(
             "Either provide the data source info or the database connection config"
@@ -34,7 +33,7 @@ def get_sqla_db_conn(data_source_info=None, connection_config=None, extras=None)
             db_connection_info = data_source_info["sourceConfig"][
                 "connectionConfiguration"
             ]
-            database = db_class(connection_info=db_connection_info, extras=extras)
+            database = db_class(connection_info=db_connection_info)
         else:
             # TODO: Make this configurable from the integration constants
             db_class = DB_CLASS_MAPPER["Postgres"]

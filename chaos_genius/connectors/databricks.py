@@ -16,37 +16,40 @@ class Databricks(BaseDb):
     def get_db_uri(self):
         """Create SQLAlchemy URI from data source info."""
         db_info = self.ds_info
-        extras = self.extras
+
         if db_info is None:
             raise Exception("Datasource info not found for Databricks.")
 
         host = db_info.get("host")
-        access_token = int(db_info.get("access_token"))
+        access_token = db_info.get("access_token")
         cluster_http_path = db_info.get("cluster_http_path")
-        catalog = db_info.get("catalog")
+
         if not (host and access_token and cluster_http_path):
             raise Exception("Database Credential not found for Databricks.")
 
-        self.sqlalchemy_db_uri = (
-            f"databricks+connector://token:{access_token}@{host}:443/{schema}"
-
-        )
-#         engine = create_engine(
-#     "databricks+connector://token:<databricks_token>@<databricks_host>:443/<database_or_schema_name>",
-#     connect_args={
-#         "http_path": "<cluster_http_path>",
-#     },
-# )
-    
+        self.sqlalchemy_db_uri = f"databricks+connector://token:{access_token}@{host}:443"
         return self.sqlalchemy_db_uri
+
+    def get_tables(self, use_schema=None):
+        """Returns an array with the names of all tables in the db's schema."""
+        # TODO: Replace catchall with specific error handling for schema with no tables
+        try:
+            return self.inspector.get_table_names(schema=use_schema)
+        except Exception as e:
+            return []
 
     def get_db_engine(self):
         """Create an SQLAlchemy engine from data source info."""
         db_info = self.ds_info
         db_uri = self.get_db_uri()
-        self.engine = create_engine(
-            db_uri, echo=self.debug, connect_args={"cluster_http_path": db_info.get("db_info")}
-        )
+
+        catalog = db_info.get("catalog", "").strip()
+        cluster_http_path = db_info.get("cluster_http_path")
+        connect_args = {"http_path": cluster_http_path}
+        if catalog:
+            connect_args["catalog"] = catalog
+
+        self.engine = create_engine(db_uri, echo=self.debug, connect_args=connect_args)
         return self.engine
 
     def test_connection(self):
@@ -84,7 +87,7 @@ class Databricks(BaseDb):
         if schema_name:
             self.schema = schema_name
         else:
-            self.schema = "public"
+            self.schema = "" # typically "hive_metastore"
         return self.schema
 
     def get_schema_names_list(self):

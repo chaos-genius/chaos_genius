@@ -5,7 +5,7 @@ SCHEMAS_AVAILABLE = {
     "BigQuery": False,
     "Snowflake": True,
     "Druid": False,
-    "Databricks": False
+    "Databricks": True
 }
 
 TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY = {

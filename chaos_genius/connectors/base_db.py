@@ -36,7 +36,6 @@ class BaseDb:
 
     def __init__(self, *args, **kwargs):
         self.ds_info = kwargs.get("connection_info")
-        self.extras = kwargs.get("extras")
         self.CHUNKSIZE = 20000
         self.debug = False
 

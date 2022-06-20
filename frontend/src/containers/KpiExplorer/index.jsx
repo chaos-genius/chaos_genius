@@ -34,7 +34,7 @@ const KpiExplorer = () => {
   const query = new URLSearchParams(location.search);
 
   const [kpiSearch, setKpiSearch] = useState('');
-  const [data, setData] = useState(false);
+  const [data, setData] = useState(null);
   const [dashboard, setDashboard] = useState([]);
   const [datasourceType, setDatasourceType] = useState([]);
   const [dashboardTypeList, setDashboardTypeList] = useState([]);
@@ -68,9 +68,12 @@ const KpiExplorer = () => {
   }, []);
 
   useEffect(() => {
-    store.dispatch(KPI_RESET);
-    store.dispatch(SETTING_RESET);
-    dispatchGetAllKpiExplorer();
+    console.log(data);
+    if (data !== null) {
+      store.dispatch(KPI_RESET);
+      store.dispatch(SETTING_RESET);
+      dispatchGetAllKpiExplorer();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
@@ -101,6 +104,7 @@ const KpiExplorer = () => {
   }, [pagination]);
 
   useEffect(() => {
+    console.log('hello');
     if (pgInfo.page > 0 && pgInfo.per_page > 0) {
       setData((prev) => !prev);
     }
@@ -115,7 +119,9 @@ const KpiExplorer = () => {
   }, [kpiExplorerList]);
 
   useEffect(() => {
-    setPgInfo({ ...pgInfo, page: 1, search: kpiSearch });
+    if (kpiSearch !== pgInfo.search) {
+      setPgInfo({ ...pgInfo, page: 1, search: kpiSearch });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiSearch]);
 

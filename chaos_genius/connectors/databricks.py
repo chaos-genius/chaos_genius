@@ -1,4 +1,5 @@
 """Apache Databricks connector."""
+import logging
 
 import pandas as pd
 from sqlalchemy import create_engine, text
@@ -7,6 +8,7 @@ from chaos_genius.connectors.base_db import BaseDb
 
 from .connector_utils import merge_dataframe_chunks
 
+logger = logging.getLogger(__name__)
 
 class Databricks(BaseDb):
     """Apache Databricks connector."""
@@ -35,7 +37,10 @@ class Databricks(BaseDb):
         # TODO: Replace catchall with specific error handling for schema with no tables
         try:
             return self.inspector.get_table_names(schema=use_schema)
-        except Exception as e:
+        except Exception as err_msg:
+            logger.warn(
+                f"Failed to fetch tables for schema: {use_schema} for Databricks datasource, with error msg: {err_msg}"
+            )
             return []
 
     def get_db_engine(self):
@@ -69,6 +74,9 @@ class Databricks(BaseDb):
         except Exception as err_msg:  # noqa: B902
             status = False
             message = str(err_msg)
+            logger.warn(
+                f"Test connection failed while adding databricks Datasource, with error msg: {message}"
+            )
         return status, message
 
     def run_query(self, query, as_df=True):

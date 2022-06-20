@@ -178,7 +178,6 @@ const KpiExplorer = () => {
               <div className="table-section">
                 <KPITable
                   kpiData={kpiExplorerData}
-                  setKpiSearch={setKpiSearch}
                   kpiSearch={kpiSearch}
                   changeData={setData}
                   kpiLoading={isLoading}

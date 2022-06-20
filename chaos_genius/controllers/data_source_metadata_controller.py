@@ -221,6 +221,7 @@ def scan_db_and_save_table_info(
     """
     table_info = {}
     try:
+        # get the table information from the original data source
         table_info = get_table_info(
             {}, schema, table, from_db_conn=True, db_conn=db_connection
         )
@@ -231,6 +232,9 @@ def scan_db_and_save_table_info(
             exc_info=err,
         )
 
+    # get the table information from the CG metadata store
+    old_table_info = fetch_table_info(data_source_id, schema, table, as_obj=True)
+
     if table_info:
         data_source_metadata = DataSourceMetadata(
             data_source_id=data_source_id,
@@ -240,7 +244,6 @@ def scan_db_and_save_table_info(
         )
         data_source_metadata.save(commit=True)
 
-    old_table_info = fetch_table_info(data_source_id, schema, table, as_obj=True)
     if old_table_info:
         old_table_info.delete(commit=True)
     return table_info

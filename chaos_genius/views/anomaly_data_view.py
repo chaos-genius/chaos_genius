@@ -394,17 +394,29 @@ def _get_dimensions_values(
 
     # series_type strings are in the format "`dimension` == "value""
     # split string into dimension and value to get [`dimension`, "value"]
-    dimension_values_list = list(
+    split_dimension_value = list(
         map(lambda dim_val: dim_val[0].split(" == "), results)
     )
 
-    dimension_values_dict = defaultdict(list)
-    for dim_val in dimension_values_list:
-        # remove extra quotation marks
-        dimension, values = map(lambda dim_val_string: dim_val_string[1:-1], dim_val)
-        dimension_values_dict[dimension].append(values)
+    dimension_values_list = []
 
-    return dimension_values_dict
+    for dim_val in split_dimension_value:
+        dimension, value = map(lambda dim_val_string: dim_val_string[1:-1], dim_val)
+        for dim_val_dict in dimension_values_list:
+            if dim_val_dict["label"] == dimension:
+                dim_val_dict["subdim_value_options"].append(
+                    {"label": value, "value": value}
+                )
+                break
+        else:
+            dim_val_dict = {
+                "label": dimension,
+                "value": dimension,
+                "subdim_value_options": [{"label": value, "value": value}],
+            }
+            dimension_values_list.append(dim_val_dict)
+
+    return dimension_values_list
 
 
 def fill_graph_data(row, graph_data):

@@ -5,6 +5,7 @@ from chaos_genius.connectors.mysql import MysqlDb
 from chaos_genius.connectors.snowflake import SnowflakeDb
 from chaos_genius.connectors.redshift import Redshift
 from chaos_genius.connectors.druid import Druid
+from chaos_genius.connectors.databricks import Databricks
 
 
 DB_CLASS_MAPPER = {
@@ -14,11 +15,13 @@ DB_CLASS_MAPPER = {
     "Snowflake": SnowflakeDb,
     "Redshift": Redshift,
     "Druid": Druid,
+    "Databricks": Databricks,
 }
 
 
-def get_sqla_db_conn(data_source_info=None, connection_config=None) -> BaseDb:
+def get_sqla_db_conn(data_source_info=None, connection_config=None, extras=None) -> BaseDb:
     database = None
+    extras = extras or {}
     if not (data_source_info or connection_config):
         raise Exception(
             "Either provide the data source info or the database connection config"
@@ -31,7 +34,7 @@ def get_sqla_db_conn(data_source_info=None, connection_config=None) -> BaseDb:
             db_connection_info = data_source_info["sourceConfig"][
                 "connectionConfiguration"
             ]
-            database = db_class(connection_info=db_connection_info)
+            database = db_class(connection_info=db_connection_info, extras=extras)
         else:
             # TODO: Make this configurable from the integration constants
             db_class = DB_CLASS_MAPPER["Postgres"]

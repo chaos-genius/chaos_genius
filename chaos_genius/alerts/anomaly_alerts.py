@@ -92,6 +92,16 @@ class AnomalyPointOriginal(BaseModel):
         return f"{self.yhat_lower} to {self.yhat_upper}"
 
     @property
+    def is_subdim(self) -> bool:
+        """Whether this point is a sub-dimensional anomaly."""
+        return self.anomaly_type == "subdim"
+
+    @property
+    def is_overall(self) -> bool:
+        """Whether this point is a overall anomaly."""
+        return self.anomaly_type == "overall"
+
+    @property
     def readable_data_timestamp(self) -> str:
         """Date timestmap as a readable string.
 
@@ -155,19 +165,11 @@ class AnomalyPoint(AnomalyPointOriginal):
     """
 
     @staticmethod
-    def _construct_from_original(
+    def _from_original_single(
         point: AnomalyPointOriginal,
         previous_anomaly_point: Optional[AnomalyPointOriginal],
         relevant_subdims: Optional[List["AnomalyPoint"]],
-        fixed_change_message: Optional[str] = None,
     ) -> "AnomalyPoint":
-        # TODO: check if this has any effect
-        series_type = (
-            OVERALL_KPI_SERIES_TYPE_REPR
-            if point.series_type == "overall"
-            else point.series_type
-        )
-
         y = round(point.y, 2)
         yhat_lower = round(point.yhat_lower, 2)
         yhat_upper = round(point.yhat_upper, 2)
@@ -175,14 +177,10 @@ class AnomalyPoint(AnomalyPointOriginal):
 
         series_type = _format_series_type(point.anomaly_type, point.series_type)
 
-        if fixed_change_message is not None:
-            change_message = fixed_change_message
-            percent_change = "-"
-        else:
-            percent_change = find_percentage_change(
-                point.y, previous_anomaly_point.y if previous_anomaly_point else None
-            )
-            change_message = change_message_from_percent(percent_change)
+        percent_change = find_percentage_change(
+            point.y, previous_anomaly_point.y if previous_anomaly_point else None
+        )
+        change_message = change_message_from_percent(percent_change)
 
         previous_value = (
             round(previous_anomaly_point.y, 2)
@@ -209,7 +207,6 @@ class AnomalyPoint(AnomalyPointOriginal):
     def from_original(
         points: List[AnomalyPointOriginal],
         previous_anomaly_points: List[Optional[AnomalyPointOriginal]],
-        fixed_change_message: Optional[str] = None,
     ) -> List["AnomalyPoint"]:
         """Constructs formatted `AnomalyPoint`s from `AnomalyPointOriginal`s.
 
@@ -217,24 +214,20 @@ class AnomalyPoint(AnomalyPointOriginal):
             points: original anomaly points
             previous_anomaly_points: the anomaly point from which change percent will be
                 calculated. There must be entry for each anomaly point.
-            fixed_change_message: the change message to use when previous anomaly point
-                cannot be found. If specified, change percent will not be calculated.
         """
         anomaly_points: List[AnomalyPoint] = []
 
         overall_points = list(
             filter(
-                lambda point: point[0].anomaly_type == "overall",
+                lambda point: point[0].is_overall,
                 zip(points, previous_anomaly_points),
             )
         )
 
         subdim_points = list(
-            AnomalyPoint._construct_from_original(
-                point, prev_point, None, fixed_change_message
-            )
+            AnomalyPoint._from_original_single(point, prev_point, None)
             for point, prev_point in filter(
-                lambda point: point[0].series_type != "overall",
+                lambda point: point[0].is_subdim,
                 zip(points, previous_anomaly_points),
             )
         )
@@ -258,8 +251,8 @@ class AnomalyPoint(AnomalyPointOriginal):
         for point, prev_point in overall_points:
             relevant_subdims = _get_relevant_subdims(point)
 
-            point = AnomalyPoint._construct_from_original(
-                point, prev_point, relevant_subdims, fixed_change_message
+            point = AnomalyPoint._from_original_single(
+                point, prev_point, relevant_subdims
             )
 
             anomaly_points.append(point)

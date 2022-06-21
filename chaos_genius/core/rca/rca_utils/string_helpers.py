@@ -1,6 +1,7 @@
 """Provides helper functions for string manipulations related to RCA."""
 
 import re
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
@@ -69,3 +70,25 @@ def convert_query_string_to_user_string(in_str: str) -> str:
     except Exception:  # noqa: B902
         print(f"Could not convert {in_str} to user string.")
         return in_str
+
+
+def extract_dim_value_from_series_type(series_type: str) -> Tuple[str, str]:
+    """Parse dimension name and value from Anomaly Data's `series_type` query string."""
+    # series_type strings are in the format "`dimension` == "value""
+    splits = series_type.split(" == ")
+
+    if len(splits) < 2:
+        raise Exception(
+            "Invalid series_type, could not find dimension and value parts. "
+            f"Got: {series_type}"
+        )
+    elif len(splits) > 2:
+        raise Exception(
+            "series_type with multiple subdims not are supported yet. "
+            f"Got: {series_type}"
+        )
+
+    # remove extra quotation marks
+    dimension, value = map(lambda dim_val: dim_val[1:-1], splits)
+
+    return dimension, value

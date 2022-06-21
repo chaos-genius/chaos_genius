@@ -28,6 +28,7 @@ from chaos_genius.alerts.constants import (
     ALERT_READABLE_DATA_TIMESTAMP_FORMAT,
     ALERT_READABLE_DATE_FORMAT,
     ALERT_READABLE_DATETIME_FORMAT,
+    ALERT_RELEVANT_SUBDIMS_TOP_N,
     ANOMALY_TABLE_COLUMN_NAMES_MAPPER,
     ANOMALY_TABLE_COLUMN_NAMES_ORDERED,
     OVERALL_KPI_SERIES_TYPE_REPR,
@@ -50,6 +51,7 @@ from chaos_genius.controllers.kpi_controller import (
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.core.rca.rca_utils.string_helpers import (
     convert_query_string_to_user_string,
+    extract_dim_value_from_series_type,
 )
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
@@ -114,14 +116,6 @@ class AnomalyPointOriginal(BaseModel):
         """Only date part of the data timestamp (data_datetime)."""
         return self.data_datetime.strftime(ALERT_DATE_FORMAT)
 
-    def format_series_type(self):
-        """Format series_type to be more readable for use in alerts.
-
-        Note: do not call this twice on the same instance.
-        """
-        # TODO: make this idempotent
-        self.series_type = _format_series_type(self.anomaly_type, self.series_type)
-
     # -- pydantic specific configuration starts here --
 
     # use custom datetime format
@@ -155,6 +149,9 @@ class AnomalyPoint(AnomalyPointOriginal):
     # human readable message describing the percent_change
     change_message: str
 
+    series_type_original: Optional[str]
+    """series_type from AnomalyPointOriginal, before being converted to user string."""
+
     relevant_subdims: Optional[List["AnomalyPoint"]]
     """Subdimensional anomalies associated with this anomaly.
 
@@ -175,6 +172,7 @@ class AnomalyPoint(AnomalyPointOriginal):
         yhat_upper = round(point.yhat_upper, 2)
         severity = round(point.severity)
 
+        series_type_original = point.series_type
         series_type = _format_series_type(point.anomaly_type, point.series_type)
 
         percent_change = find_percentage_change(
@@ -195,6 +193,7 @@ class AnomalyPoint(AnomalyPointOriginal):
             severity=severity,
             anomaly_type=point.anomaly_type,
             series_type=series_type,
+            series_type_original=series_type_original,
             created_at=point.created_at,
             data_datetime=point.data_datetime,
             previous_value=previous_value,
@@ -395,6 +394,28 @@ class AnomalyPointFormatted(AnomalyPoint):
             format = "%I"
 
         return (previous_point_time).strftime(format).lstrip("0")
+
+    @property
+    def relevant_subdims_formatted(self) -> Optional[List[str]]:
+        """Returns a list of top relevant subdims, formatted."""
+        if self.relevant_subdims is None:
+            return None
+
+        relevant_subdims = (
+            extract_dim_value_from_series_type(point.series_type_original)
+            for point in self.relevant_subdims
+            if point.series_type_original is not None
+        )
+
+        # take top N
+        # since relevant_subdims was a generator, we only process the top N
+        # (using a list would process all the elements)
+        relevant_subdims = [
+            subdim
+            for _, subdim in zip(range(ALERT_RELEVANT_SUBDIMS_TOP_N), relevant_subdims)
+        ]
+
+        return [value for _, value in relevant_subdims]
 
 
 def _find_point(point: AnomalyPointOriginal, prev_data: List[AnomalyPointOriginal]):
@@ -866,7 +887,7 @@ class AnomalyAlertController:
 
 
 def _format_series_type(anomaly_type: str, series_type: Optional[str]) -> str:
-    """Format a anomaly point's series type for use in alerts.
+    """Format an anomaly point's series type for use in alerts.
 
     Do not call this function twice on the same data.
 

@@ -141,18 +141,19 @@ class BaseDb:
         db_columns = self.inspector.get_columns(
             table_name=use_table, schema=use_schema
         )
-        for i in range(len(db_columns)):
-            # Put in Try-Except because some DBs like SQLite
-            # do not have comments for columns.
-            try:
-                if db_columns[i]["comment"] is None:
-                    db_columns[i]["comment"] = "None"
-            except Exception as err_msg:
-                print(err_msg)
-            if db_columns[i]["default"] is None:
-                db_columns[i]["default"] = "None"
 
-            db_columns[i]["type"] = str(db_columns[i]["type"])
+        for column in db_columns:
+            try:
+                if column.get("comment") is None:
+                    column["comment"] = "None"
+                if column.get("default") is None:
+                    column["default"] = "None"
+                column["type"] = str(column["type"])
+            except Exception as error:
+                logger.warn(f"Get Columns details failed for table: {use_table}")
+                logger.warn(f"{error}")
+                continue
+
         return db_columns
 
     def get_primary_key(self, use_table, use_schema=None):

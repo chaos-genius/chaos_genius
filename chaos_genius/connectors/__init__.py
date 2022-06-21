@@ -6,6 +6,8 @@ from chaos_genius.connectors.snowflake import SnowflakeDb
 from chaos_genius.connectors.redshift import Redshift
 from chaos_genius.connectors.druid import Druid
 from chaos_genius.connectors.aws_athena import AwsAthenaDb
+from chaos_genius.connectors.databricks import Databricks
+
 
 DB_CLASS_MAPPER = {
     "Postgres": PostgresDb,
@@ -15,6 +17,7 @@ DB_CLASS_MAPPER = {
     "Redshift": Redshift,
     "Druid": Druid,
     "AWS Athena": AwsAthenaDb,
+    "Databricks": Databricks,
 }
 
 

@@ -140,6 +140,14 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
     setDimension(null);
     setValue(null);
     setValueOptions(null);
+    const params = new URLSearchParams(location.search);
+    params?.delete('dimension');
+    params?.delete('value');
+    history.push({
+      pathname: kpi,
+      search: params?.toString()
+    });
+
     store.dispatch(RESET_ACTION);
     dispatch(anomalyDetection(kpi, null));
   };
@@ -202,6 +210,20 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
       renderChart(anomalyDetectionData?.data?.chart_data);
       handleDataQuality(anomalyDetectionData?.data?.base_anomaly_id);
       setDimensionOptions(anomalyDetectionData?.dimensions_values);
+      if (dimension?.value) {
+        const dimensionIndex =
+          anomalyDetectionData.dimensions_values?.findIndex((dimensionItem) => {
+            return (
+              dimension.value.toString() === dimensionItem.value.toString()
+            );
+          });
+        if (dimensionIndex >= 0) {
+          setValueOptions(
+            anomalyDetectionData.dimensions_values[dimensionIndex]
+              .subdim_value_options
+          );
+        }
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anomalyDetectionData]);
@@ -614,7 +636,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                     />
                   )}
 
-                  {!dimension && !value && (
+                  {anomalyDetectionData?.is_overall && (
                     <div className="retrain-button-container">
                       <div
                         className="retrain-button"
@@ -627,7 +649,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                 </div>
               </div>
 
-              {!dimension && !value && (
+              {anomalyDetectionData?.is_overall && (
                 <div className="dashboard-layout">
                   <div
                     className={

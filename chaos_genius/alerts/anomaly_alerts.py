@@ -28,6 +28,7 @@ from chaos_genius.alerts.constants import (
     ALERT_READABLE_DATA_TIMESTAMP_FORMAT,
     ALERT_READABLE_DATE_FORMAT,
     ALERT_READABLE_DATETIME_FORMAT,
+    ALERT_RELEVANT_SUBDIMS_TOP_N,
     ANOMALY_TABLE_COLUMN_NAMES_MAPPER,
     ANOMALY_TABLE_COLUMN_NAMES_ORDERED,
     OVERALL_KPI_SERIES_TYPE_REPR,
@@ -50,6 +51,7 @@ from chaos_genius.controllers.kpi_controller import (
 # from chaos_genius.connectors.base_connector import get_df_from_db_uri
 from chaos_genius.core.rca.rca_utils.string_helpers import (
     convert_query_string_to_user_string,
+    extract_dim_value_from_series_type,
 )
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
@@ -92,6 +94,16 @@ class AnomalyPointOriginal(BaseModel):
         return f"{self.yhat_lower} to {self.yhat_upper}"
 
     @property
+    def is_subdim(self) -> bool:
+        """Whether this point is a sub-dimensional anomaly."""
+        return self.anomaly_type == "subdim"
+
+    @property
+    def is_overall(self) -> bool:
+        """Whether this point is a overall anomaly."""
+        return self.anomaly_type == "overall"
+
+    @property
     def readable_data_timestamp(self) -> str:
         """Date timestmap as a readable string.
 
@@ -103,14 +115,6 @@ class AnomalyPointOriginal(BaseModel):
     def date_only(self) -> str:
         """Only date part of the data timestamp (data_datetime)."""
         return self.data_datetime.strftime(ALERT_DATE_FORMAT)
-
-    def format_series_type(self):
-        """Format series_type to be more readable for use in alerts.
-
-        Note: do not call this twice on the same instance.
-        """
-        # TODO: make this idempotent
-        self.series_type = _format_series_type(self.anomaly_type, self.series_type)
 
     # -- pydantic specific configuration starts here --
 
@@ -145,6 +149,9 @@ class AnomalyPoint(AnomalyPointOriginal):
     # human readable message describing the percent_change
     change_message: str
 
+    series_type_original: Optional[str]
+    """series_type from AnomalyPointOriginal, before being converted to user string."""
+
     relevant_subdims: Optional[List["AnomalyPoint"]]
     """Subdimensional anomalies associated with this anomaly.
 
@@ -155,34 +162,23 @@ class AnomalyPoint(AnomalyPointOriginal):
     """
 
     @staticmethod
-    def _construct_from_original(
+    def _from_original_single(
         point: AnomalyPointOriginal,
         previous_anomaly_point: Optional[AnomalyPointOriginal],
         relevant_subdims: Optional[List["AnomalyPoint"]],
-        fixed_change_message: Optional[str] = None,
     ) -> "AnomalyPoint":
-        # TODO: check if this has any effect
-        series_type = (
-            OVERALL_KPI_SERIES_TYPE_REPR
-            if point.series_type == "overall"
-            else point.series_type
-        )
-
         y = round(point.y, 2)
         yhat_lower = round(point.yhat_lower, 2)
         yhat_upper = round(point.yhat_upper, 2)
         severity = round(point.severity)
 
+        series_type_original = point.series_type
         series_type = _format_series_type(point.anomaly_type, point.series_type)
 
-        if fixed_change_message is not None:
-            change_message = fixed_change_message
-            percent_change = "-"
-        else:
-            percent_change = find_percentage_change(
-                point.y, previous_anomaly_point.y if previous_anomaly_point else None
-            )
-            change_message = change_message_from_percent(percent_change)
+        percent_change = find_percentage_change(
+            point.y, previous_anomaly_point.y if previous_anomaly_point else None
+        )
+        change_message = change_message_from_percent(percent_change)
 
         previous_value = (
             round(previous_anomaly_point.y, 2)
@@ -197,6 +193,7 @@ class AnomalyPoint(AnomalyPointOriginal):
             severity=severity,
             anomaly_type=point.anomaly_type,
             series_type=series_type,
+            series_type_original=series_type_original,
             created_at=point.created_at,
             data_datetime=point.data_datetime,
             previous_value=previous_value,
@@ -209,7 +206,6 @@ class AnomalyPoint(AnomalyPointOriginal):
     def from_original(
         points: List[AnomalyPointOriginal],
         previous_anomaly_points: List[Optional[AnomalyPointOriginal]],
-        fixed_change_message: Optional[str] = None,
     ) -> List["AnomalyPoint"]:
         """Constructs formatted `AnomalyPoint`s from `AnomalyPointOriginal`s.
 
@@ -217,24 +213,20 @@ class AnomalyPoint(AnomalyPointOriginal):
             points: original anomaly points
             previous_anomaly_points: the anomaly point from which change percent will be
                 calculated. There must be entry for each anomaly point.
-            fixed_change_message: the change message to use when previous anomaly point
-                cannot be found. If specified, change percent will not be calculated.
         """
         anomaly_points: List[AnomalyPoint] = []
 
         overall_points = list(
             filter(
-                lambda point: point[0].anomaly_type == "overall",
+                lambda point: point[0].is_overall,
                 zip(points, previous_anomaly_points),
             )
         )
 
         subdim_points = list(
-            AnomalyPoint._construct_from_original(
-                point, prev_point, None, fixed_change_message
-            )
+            AnomalyPoint._from_original_single(point, prev_point, None)
             for point, prev_point in filter(
-                lambda point: point[0].series_type != "overall",
+                lambda point: point[0].is_subdim,
                 zip(points, previous_anomaly_points),
             )
         )
@@ -258,8 +250,8 @@ class AnomalyPoint(AnomalyPointOriginal):
         for point, prev_point in overall_points:
             relevant_subdims = _get_relevant_subdims(point)
 
-            point = AnomalyPoint._construct_from_original(
-                point, prev_point, relevant_subdims, fixed_change_message
+            point = AnomalyPoint._from_original_single(
+                point, prev_point, relevant_subdims
             )
 
             anomaly_points.append(point)
@@ -310,7 +302,7 @@ class AnomalyPointFormatted(AnomalyPoint):
     is_hourly: bool
 
     @staticmethod
-    def from_point(
+    def _from_point_single(
         point: AnomalyPoint,
         time_series_frequency: Optional[str],
         kpi_id: int,
@@ -320,7 +312,6 @@ class AnomalyPointFormatted(AnomalyPoint):
         alert_channel: str,
         alert_channel_conf: Any,
     ) -> "AnomalyPointFormatted":
-        """Constructs a formatted point from an AnomalyPoint."""
         dt_format = ALERT_READABLE_DATETIME_FORMAT
         if time_series_frequency is not None and time_series_frequency == "D":
             dt_format = ALERT_READABLE_DATE_FORMAT
@@ -353,6 +344,37 @@ class AnomalyPointFormatted(AnomalyPoint):
             formatted_change_percent=str(formatted_change_percent),
             is_hourly=is_hourly,
         )
+
+    @staticmethod
+    def from_points(
+        points: Sequence[AnomalyPoint],
+        time_series_frequency: Optional[str],
+        kpi_id: int,
+        kpi_name: str,
+        alert_id: int,
+        alert_name: str,
+        alert_channel: str,
+        alert_channel_conf: Any,
+        include_subdims: bool,
+    ) -> List["AnomalyPointFormatted"]:
+        """Constructs formatted points from `AnomalyPoint`s.
+
+        All the points must be from a single alert.
+        """
+        return [
+            AnomalyPointFormatted._from_point_single(
+                point,
+                time_series_frequency,
+                kpi_id,
+                kpi_name,
+                alert_id,
+                alert_name,
+                alert_channel,
+                alert_channel_conf,
+            )
+            for point in points
+            if point.is_overall or (point.is_subdim and include_subdims)
+        ]
 
     @property
     def y_readable(self):
@@ -402,6 +424,28 @@ class AnomalyPointFormatted(AnomalyPoint):
             format = "%I"
 
         return (previous_point_time).strftime(format).lstrip("0")
+
+    @property
+    def relevant_subdims_formatted(self) -> Optional[List[str]]:
+        """Returns a list of top relevant subdims, formatted."""
+        if self.relevant_subdims is None:
+            return None
+
+        relevant_subdims = (
+            extract_dim_value_from_series_type(point.series_type_original)
+            for point in self.relevant_subdims
+            if point.series_type_original is not None
+        )
+
+        # take top N
+        # since relevant_subdims was a generator, we only process the top N
+        # (using a list would process all the elements)
+        relevant_subdims = [
+            subdim
+            for _, subdim in zip(range(ALERT_RELEVANT_SUBDIMS_TOP_N), relevant_subdims)
+        ]
+
+        return [value for _, value in relevant_subdims]
 
 
 def _find_point(point: AnomalyPointOriginal, prev_data: List[AnomalyPointOriginal]):
@@ -873,7 +917,7 @@ class AnomalyAlertController:
 
 
 def _format_series_type(anomaly_type: str, series_type: Optional[str]) -> str:
-    """Format a anomaly point's series type for use in alerts.
+    """Format an anomaly point's series type for use in alerts.
 
     Do not call this function twice on the same data.
 
@@ -917,20 +961,16 @@ def _format_anomaly_point_for_template(
     points: Sequence[AnomalyPoint], kpi: Kpi, alert: Alert
 ) -> Sequence[AnomalyPointFormatted]:
     """Formats fields of each point, to be used in alert templates."""
-    return list(
-        map(
-            lambda point: AnomalyPointFormatted.from_point(
-                point,
-                kpi.anomaly_params.get("frequency"),
-                kpi.id,
-                kpi.name,
-                alert.id,
-                alert.alert_name,
-                alert.alert_channel,
-                alert.alert_channel_conf,
-            ),
-            points,
-        )
+    return AnomalyPointFormatted.from_points(
+        points,
+        kpi.anomaly_params.get("frequency"),
+        kpi.id,
+        kpi.name,
+        alert.id,
+        alert.alert_name,
+        alert.alert_channel,
+        alert.alert_channel_conf,
+        True,  # TODO(Samyak): use include_subdims flag here
     )
 
 

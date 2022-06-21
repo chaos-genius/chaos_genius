@@ -390,7 +390,7 @@ def _get_dimensions_values(
 
     if len(results) == 0:
         current_app.logger.info("No Subdimension Anomaly Found")
-        return {}
+        return []
 
     # series_type strings are in the format "`dimension` == "value""
     # split string into dimension and value to get [`dimension`, "value"]

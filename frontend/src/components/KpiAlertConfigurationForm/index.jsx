@@ -642,7 +642,9 @@ const KpiAlertConfigurationForm = ({
             }}
           />
 
-          <label className="form-check-label name-tooltip" htmlFor="testbox">
+          <label
+            className="form-check-label name-tooltip"
+            htmlFor="include-subdims">
             Include Alerts by Dimensions
           </label>
         </div>

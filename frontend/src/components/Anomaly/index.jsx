@@ -588,7 +588,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                               onChange={(e) => handleValueChange(e)}
                             />
                           </div>
-                          {dimension && value && (
+                          {(dimension || value) && (
                             <div className="filter-container">
                               <span
                                 class="clear-filter"
@@ -614,7 +614,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                     />
                   )}
 
-                  {(!dimension || !value) && (
+                  {!dimension && !value && (
                     <div className="retrain-button-container">
                       <div
                         className="retrain-button"
@@ -627,7 +627,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                 </div>
               </div>
 
-              {(!dimension || !value) && (
+              {!dimension && !value && (
                 <div className="dashboard-layout">
                   <div
                     className={

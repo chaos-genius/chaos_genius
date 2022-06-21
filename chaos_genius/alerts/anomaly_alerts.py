@@ -302,7 +302,7 @@ class AnomalyPointFormatted(AnomalyPoint):
     is_hourly: bool
 
     @staticmethod
-    def from_point(
+    def _from_point_single(
         point: AnomalyPoint,
         time_series_frequency: Optional[str],
         kpi_id: int,
@@ -312,7 +312,6 @@ class AnomalyPointFormatted(AnomalyPoint):
         alert_channel: str,
         alert_channel_conf: Any,
     ) -> "AnomalyPointFormatted":
-        """Constructs a formatted point from an AnomalyPoint."""
         dt_format = ALERT_READABLE_DATETIME_FORMAT
         if time_series_frequency is not None and time_series_frequency == "D":
             dt_format = ALERT_READABLE_DATE_FORMAT
@@ -345,6 +344,37 @@ class AnomalyPointFormatted(AnomalyPoint):
             formatted_change_percent=str(formatted_change_percent),
             is_hourly=is_hourly,
         )
+
+    @staticmethod
+    def from_points(
+        points: Sequence[AnomalyPoint],
+        time_series_frequency: Optional[str],
+        kpi_id: int,
+        kpi_name: str,
+        alert_id: int,
+        alert_name: str,
+        alert_channel: str,
+        alert_channel_conf: Any,
+        include_subdims: bool,
+    ) -> List["AnomalyPointFormatted"]:
+        """Constructs formatted points from `AnomalyPoint`s.
+
+        All the points must be from a single alert.
+        """
+        return [
+            AnomalyPointFormatted._from_point_single(
+                point,
+                time_series_frequency,
+                kpi_id,
+                kpi_name,
+                alert_id,
+                alert_name,
+                alert_channel,
+                alert_channel_conf,
+            )
+            for point in points
+            if point.is_overall or (point.is_subdim and include_subdims)
+        ]
 
     @property
     def y_readable(self):
@@ -931,20 +961,16 @@ def _format_anomaly_point_for_template(
     points: Sequence[AnomalyPoint], kpi: Kpi, alert: Alert
 ) -> Sequence[AnomalyPointFormatted]:
     """Formats fields of each point, to be used in alert templates."""
-    return list(
-        map(
-            lambda point: AnomalyPointFormatted.from_point(
-                point,
-                kpi.anomaly_params.get("frequency"),
-                kpi.id,
-                kpi.name,
-                alert.id,
-                alert.alert_name,
-                alert.alert_channel,
-                alert.alert_channel_conf,
-            ),
-            points,
-        )
+    return AnomalyPointFormatted.from_points(
+        points,
+        kpi.anomaly_params.get("frequency"),
+        kpi.id,
+        kpi.name,
+        alert.id,
+        alert.alert_name,
+        alert.alert_channel,
+        alert.alert_channel_conf,
+        True,  # TODO(Samyak): use include_subdims flag here
     )
 
 

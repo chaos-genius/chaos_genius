@@ -97,28 +97,30 @@ def extract_anomaly_points_from_triggered_alerts(
     """
     anomaly_points: List[AnomalyPointFormatted] = []
     for triggered_alert in triggered_alerts:
+        trig_alert_points: List[AnomalyPoint] = []
         for point in triggered_alert.alert_metadata["alert_data"]:
-
             try:
-                point = AnomalyPointFormatted.from_point(
-                    AnomalyPoint.parse_obj(point),
-                    time_series_frequency=getattr(
-                        kpi_cache.get(triggered_alert.kpi_id), "anomaly_params", {}
-                    ).get("frequency"),
-                    kpi_id=triggered_alert.kpi_id,
-                    kpi_name=triggered_alert.kpi_name,
-                    alert_id=triggered_alert.alert_conf_id,
-                    alert_name=triggered_alert.alert_name,
-                    alert_channel=triggered_alert.alert_channel,
-                    alert_channel_conf=triggered_alert.alert_channel_conf,
-                )
-
-                anomaly_points.append(point)
+                trig_alert_points.append(AnomalyPoint.parse_obj(point))
             except OverflowError as e:
                 logger.error(
                     "Error in extracting an anomaly point from triggered alert",
                     exc_info=e,
                 )
+        anomaly_points.extend(
+            AnomalyPointFormatted.from_points(
+                trig_alert_points,
+                time_series_frequency=getattr(
+                    kpi_cache.get(triggered_alert.kpi_id), "anomaly_params", {}
+                ).get("frequency"),
+                kpi_id=triggered_alert.kpi_id,
+                kpi_name=triggered_alert.kpi_name,
+                alert_id=triggered_alert.alert_conf_id,
+                alert_name=triggered_alert.alert_name,
+                alert_channel=triggered_alert.alert_channel,
+                alert_channel_conf=triggered_alert.alert_channel_conf,
+                include_subdims=True,  # TODO(Samyak): include_subdims
+            )
+        )
 
     return anomaly_points
 

@@ -49,6 +49,7 @@ def kpi_anomaly_detection(kpi_id):
     current_app.logger.info(f"Anomaly Detection Started for KPI ID: {kpi_id}")
     data = []
     end_date = None
+    is_overall = True
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
 
@@ -74,9 +75,11 @@ def kpi_anomaly_detection(kpi_id):
         value = request.args.get("value", default=None)
 
         if dimension and value:
+            is_overall = False
             subdim = f"`{dimension}` == \"{value}\""
             anom_data = get_dq_and_subdim_data(kpi_id, end_date, "subdim", subdim, period)
         else:
+            is_overall = True
             anom_data = get_overall_data(kpi_id, end_date, period)
 
         anom_data["x_axis_limits"] = get_anomaly_graph_x_lims(end_date, period, hourly)
@@ -105,6 +108,7 @@ def kpi_anomaly_detection(kpi_id):
             "msg": "",
             "anomaly_end_date": end_date,
             "last_run_time_anomaly": anomaly_last_scan,
+            "is_overall": is_overall,
         }
     )
 

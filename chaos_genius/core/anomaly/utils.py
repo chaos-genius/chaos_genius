@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 import pandas as pd
+from chaos_genius.core.utils.utils import get_user_string_from_subgroup_dict
 
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 
@@ -13,18 +14,24 @@ def bound_between(min_val, val, max_val):
     return min(max(val, min_val), max_val)
 
 
-def get_last_date_in_db(kpi_id: int, series: str, subgroup: str = None) -> Any or None:
+def get_last_date_in_db(kpi_id: int, series: str, subgroup: dict = None) -> Any or None:
     """Get last date for which anomaly was computed.
 
     :param kpi_id: kpi id to check for
     :type kpi_id: int
     :param series: series type
     :type series: str
-    :param subgroup: subgroup id, defaults to None
-    :type subgroup: str, optional
+    :param subgroup: subgroup details, defaults to None
+    :type subgroup: dict, optional
     :return: last date for which anomaly was computed
     :rtype: Any | None
     """
+    if subgroup:
+        if series == "dq":
+            subgroup = subgroup["dq"]
+        else:
+            subgroup = get_user_string_from_subgroup_dict(subgroup)
+
     results = (
         AnomalyDataOutput.query.filter(
             (AnomalyDataOutput.kpi_id == kpi_id)
@@ -35,10 +42,7 @@ def get_last_date_in_db(kpi_id: int, series: str, subgroup: str = None) -> Any o
         .first()
     )
 
-    if results:
-        return results.data_datetime
-    else:
-        return None
+    return results.data_datetime if results else None
 
 
 def get_dq_missing_data(

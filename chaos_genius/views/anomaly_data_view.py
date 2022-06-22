@@ -16,10 +16,8 @@ from chaos_genius.controllers.kpi_controller import (
     get_kpi_data_from_id,
 )
 from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
-from chaos_genius.core.rca.rca_utils.string_helpers import (
-    convert_query_string_to_user_string,
-)
 from chaos_genius.core.utils.round import round_number
+from chaos_genius.core.utils.utils import get_user_string_from_subgroup_dict
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.rca_data_model import RcaData
@@ -466,7 +464,7 @@ def convert_to_graph_json(
     if anomaly_type == "overall":
         title = kpi_info["name"]
     elif anomaly_type == "subdim":
-        title = convert_query_string_to_user_string(series_type)
+        title = get_user_string_from_subgroup_dict(series_type)
     else:
         title = series_type.title()
 

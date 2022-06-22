@@ -2,7 +2,7 @@
 
 import logging
 from datetime import date, datetime, timedelta
-from typing import Optional
+from typing import Optional, List, Dict
 
 import pandas as pd
 
@@ -16,6 +16,10 @@ from chaos_genius.core.anomaly.utils import (
 )
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.core.utils.end_date import load_input_data_end_date
+from chaos_genius.core.utils.utils import (
+    get_subgroup_from_df,
+    get_user_string_from_subgroup_dict
+)
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, db
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.kpi_model import Kpi
@@ -194,7 +198,7 @@ class AnomalyDetectionController(object):
         ).predict()
 
     def _save_anomaly_output(
-        self, anomaly_output: pd.DataFrame, series: str, subgroup: str = None
+        self, anomaly_output: pd.DataFrame, series: str, subgroup: dict = None
     ) -> None:
         """Save anomaly output to the DB.
 
@@ -203,10 +207,16 @@ class AnomalyDetectionController(object):
         :param series: Type of series
         :type series: str
         :param subgroup: Subgroup of the KPI
-        :type subgroup: str
+        :type subgroup: dict
         """
         if self.debug:
             print("SAVING", series, subgroup, len(anomaly_output))
+
+        if subgroup:
+            if series == "dq":
+                subgroup = subgroup["dq"]
+            else:
+                subgroup = get_user_string_from_subgroup_dict(subgroup)
 
         anomaly_output = anomaly_output.rename(
             columns={"dt": "data_datetime", "anomaly": "is_anomaly"}
@@ -251,11 +261,14 @@ class AnomalyDetectionController(object):
         #   combinations(s, r) for r in range(1,len(s)+1)
         # )
 
-    def _get_subgroup_list(self, input_data: pd.DataFrame) -> list:
+    def _get_subgroup_list(self, input_data: pd.DataFrame) -> List[Dict[str, str]]:
         """Return list of subgroups for which to run anomaly detection.
 
+        Output is in the format:
+        [{"dimension1": "value1", "dimension2": "value2"}, ...]
+
         :return: List of subgroups
-        :rtype: list
+        :rtype: List[Dict[str, str]]
         """
         valid_subdims = []
         for dim in self.kpi_info["dimensions"]:
@@ -272,9 +285,10 @@ class AnomalyDetectionController(object):
         dim_comb = self._get_dimension_combinations(valid_subdims)
         for dim_list in dim_comb:
             grouped_dims = input_data.groupby(dim_list)
-            subgroup_raw = list(grouped_dims.groups.keys())
-            subgroup_querified = self._querify(dim_list, subgroup_raw)
-            group_list.extend(subgroup_querified)
+            subgroups_raw = list(grouped_dims.groups.keys())
+            group_list.extend(
+                dict(zip(dim_list, subgroup)) for subgroup in subgroups_raw
+            )
         return group_list
 
     def _filter_subgroups(self, subgroups: list, input_data: pd.DataFrame) -> list:
@@ -300,7 +314,9 @@ class AnomalyDetectionController(object):
 
         for subgroup in subgroups:
             try:
-                filter_data_len = grouped_input_data.query(subgroup)[
+                filter_data_len = get_subgroup_from_df(
+                    grouped_input_data.reset_index(), subgroup
+                )[
                     self.kpi_info["metric"]
                 ].sum()
                 if filter_data_len >= MIN_DATA_IN_SUBGROUP:
@@ -313,14 +329,14 @@ class AnomalyDetectionController(object):
         return [x[0] for x in filtered_subgroups[:MAX_FILTER_SUBGROUPS_ANOMALY]]
 
     def _run_anomaly_for_series(
-        self, input_data: pd.DataFrame, series: str, subgroup: str = None
+        self, input_data: pd.DataFrame, series: str, subgroup: Dict[str, str] = None
     ) -> None:
         """Run anomaly detection for the given series.
 
         :param series: Type of series
         :type series: str
         :param subgroup: Subgroup of the KPI
-        :type subgroup: str
+        :type subgroup: Dict[str, str]
         """
         is_overall = series == "overall"
 
@@ -341,6 +357,7 @@ class AnomalyDetectionController(object):
 
             relevant_cols = [dt_col, metric_col, self._preaggregated_count_col] if self._preaggregated else [dt_col, metric_col]
             if series == "dq":
+                subgroup_str = subgroup["dq"]
                 temp_input_data = input_data[relevant_cols]
                 temp_input_data = fill_data(
                     temp_input_data,
@@ -353,7 +370,7 @@ class AnomalyDetectionController(object):
                     self._preaggregated_count_col if self._preaggregated else None,
                 )
 
-                if subgroup == "missing":
+                if subgroup_str == "missing":
                     series_data = get_dq_missing_data(
                         temp_input_data,
                         dt_col,
@@ -363,7 +380,7 @@ class AnomalyDetectionController(object):
                     )
 
                 else:
-                    if self._preaggregated and subgroup == "count":
+                    if self._preaggregated and subgroup_str == "count":
                         series_data = (
                             temp_input_data.set_index(dt_col)
                             .resample(RESAMPLE_FREQUENCY[freq])
@@ -376,11 +393,11 @@ class AnomalyDetectionController(object):
                         series_data = (
                             temp_input_data.set_index(dt_col)
                             .resample(RESAMPLE_FREQUENCY[freq])
-                            .agg({metric_col: subgroup})
+                            .agg({metric_col: subgroup_str})
                         )
 
             elif series == "subdim":
-                temp_input_data = input_data.query(subgroup)[relevant_cols]
+                temp_input_data = get_subgroup_from_df(input_data, subgroup)[relevant_cols]
                 temp_input_data = fill_data(
                     temp_input_data,
                     dt_col,
@@ -561,6 +578,7 @@ class AnomalyDetectionController(object):
             )
             if agg == "count" and is_categorical_metric:
                 dq_list = []
+            dq_list = [{"dq": dq} for dq in dq_list]
         except Exception as e:
             self._checkpoint_failure("Data Quality - Preprocessor", e)
             raise e

@@ -64,6 +64,7 @@ SOURCE_WHITELIST_AND_TYPE = {
     "e2d65910-8c8b-40a1-ae7d-ee2416b2bfa2": False,  # Snowflake
     "e87ffa8e-a3b5-f69c-9076-6011339de1f6": False,  # Redshift
     "5B45DB62-303C-4E70-92DA-419D3CDBD506": False,  # Druid
+    "ba49e8e6-eed6-11ec-8ea0-0242ac120002": False,  # Databricks
     # "29b409d9-30a5-4cc8-ad50-886eb846fea3", # Quickbooks
 }
 
@@ -116,6 +117,13 @@ DATABASE_CONFIG_MAPPER = {
         "username": "username",
         "password": "password",
         "db_type": "druid"
+    },
+    "ba49e8e6-eed6-11ec-8ea0-0242ac120002": {
+        "host": "host",
+        "cluster_http_path": "cluster_http_path",
+        "access_token": "access_token",
+        "catalog": "catalog",
+        "db_type": "databricks"
     }
 }
 

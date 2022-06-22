@@ -66,6 +66,7 @@ def preprocess_triggered_alert(
     triggered_alert.alert_channel = alert_conf.alert_channel
     triggered_alert.alert_channel_conf = alert_conf.alert_channel_conf
     triggered_alert.alert_message = alert_conf.alert_message
+    triggered_alert.include_subdims = alert_conf.include_subdims
 
     if not isinstance(alert_conf.alert_channel_conf, dict):
         triggered_alert.alert_channel_conf = None
@@ -118,7 +119,7 @@ def extract_anomaly_points_from_triggered_alerts(
                 alert_name=triggered_alert.alert_name,
                 alert_channel=triggered_alert.alert_channel,
                 alert_channel_conf=triggered_alert.alert_channel_conf,
-                include_subdims=True,  # TODO(Samyak): include_subdims
+                include_subdims=triggered_alert.include_subdims,
             )
         )
 

@@ -970,7 +970,7 @@ def _format_anomaly_point_for_template(
         alert.alert_name,
         alert.alert_channel,
         alert.alert_channel_conf,
-        True,  # TODO(Samyak): use include_subdims flag here
+        alert.include_subdims,
     )
 
 

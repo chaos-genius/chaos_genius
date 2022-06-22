@@ -301,6 +301,9 @@ class AnomalyPointFormatted(AnomalyPoint):
 
     is_hourly: bool
 
+    relevant_subdims: Optional[List["AnomalyPointFormatted"]]
+    """Subdimensional anomalies associated with this anomaly."""
+
     @staticmethod
     def _from_point_single(
         point: AnomalyPoint,
@@ -332,8 +335,25 @@ class AnomalyPointFormatted(AnomalyPoint):
 
         is_hourly = time_series_frequency is not None and time_series_frequency == "H"
 
+        orig_point = point.dict()
+        orig_point["relevant_subdims"] = (
+            AnomalyPointFormatted.from_points(
+                point.relevant_subdims,
+                time_series_frequency,
+                kpi_id,
+                kpi_name,
+                alert_id,
+                alert_name,
+                alert_channel,
+                alert_channel_conf,
+                include_subdims=True,
+            )
+            if point.relevant_subdims is not None
+            else None
+        )
+
         return AnomalyPointFormatted(
-            **point.dict(),
+            **orig_point,
             kpi_id=kpi_id,
             kpi_name=kpi_name,
             alert_id=alert_id,
@@ -446,6 +466,55 @@ class AnomalyPointFormatted(AnomalyPoint):
         ]
 
         return [value for _, value in relevant_subdims]
+
+
+class AlertsIndividualData(BaseModel):
+    """Data for formatting an individual alert."""
+
+    top_overall_points: List[AnomalyPointFormatted]
+    top_subdim_points: List[AnomalyPointFormatted]
+
+    include_subdims: bool
+
+    alert_id: int
+    alert_name: str
+    alert_message: str
+
+    kpi_id: int
+    kpi_name: str
+
+    date: datetime.date
+
+    @staticmethod
+    def from_points(
+        points: List[AnomalyPoint], alert: Alert, kpi: Kpi, date: datetime.date
+    ):
+        """Constructs data for formatting an individual alert from anomaly points."""
+        top_overall_points = deepcopy(
+            _top_anomalies([point for point in points if point.is_overall], 5)
+        )
+        top_subdim_points = deepcopy(
+            _top_anomalies([point for point in points if point.is_subdim], 5)
+        )
+
+        top_overall_points = list(
+            _format_anomaly_point_for_template(top_overall_points, kpi, alert)
+        )
+        top_subdim_points = list(
+            _format_anomaly_point_for_template(top_subdim_points, kpi, alert)
+        )
+
+        return AlertsIndividualData(
+            top_overall_points=top_overall_points,
+            top_subdim_points=top_subdim_points,
+            include_subdims=alert.include_subdims,
+            alert_id=alert.id,
+            alert_name=alert.name,
+            alert_message=alert.message,
+            kpi_id=kpi.id,
+            kpi_name=kpi.name,
+            date=date,
+        )
 
 
 def _find_point(point: AnomalyPointOriginal, prev_data: List[AnomalyPointOriginal]):
@@ -563,10 +632,15 @@ class AnomalyAlertController:
                     "No overall anomalies found. Not sending alerts only storing them."
                 )
             else:
+                kpi = self._get_kpi()
+                individual_data = AlertsIndividualData.from_points(
+                    latest_day_data, self.alert, kpi, latest_day
+                )
+
                 if self.alert.alert_channel == "email":
-                    self._send_email_alert(latest_day_data, latest_day)
+                    self._send_email_alert(individual_data)
                 elif self.alert.alert_channel == "slack":
-                    self._send_slack_alert(latest_day_data, latest_day)
+                    self._send_slack_alert(individual_data)
                 else:
                     raise AlertException(
                         f"Unknown alert channel: {self.alert.alert_channel}",
@@ -817,8 +891,10 @@ class AnomalyAlertController:
         return top_anomalies_, overall_count, subdim_count
 
     def _send_email_alert(
-        self, formatted_anomaly_data: List[AnomalyPoint], date: datetime.date
+        self,
+        individual_data: AlertsIndividualData,
     ) -> None:
+        # TODO(Samyak): Fix this implementation to use AlertsIndividualData
         alert_channel_conf = self.alert.alert_channel_conf
 
         if not isinstance(alert_channel_conf, dict):
@@ -882,8 +958,10 @@ class AnomalyAlertController:
         )
 
     def _send_slack_alert(
-        self, formatted_anomaly_data: List[AnomalyPoint], date: datetime.date
+        self,
+        individual_data: AlertsIndividualData,
     ):
+        # TODO(Samyak): Fix this implementation to use AlertsIndividualData
         kpi = self._get_kpi()
 
         (

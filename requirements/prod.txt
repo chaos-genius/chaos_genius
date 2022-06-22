@@ -18,7 +18,7 @@ psycopg2-binary==2.9.3
 PyMySQL==1.0.2
 sqlalchemy-bigquery==1.2.0
 snowflake-sqlalchemy==1.2.4
-sqlalchemy-redshift==0.8.6
+sqlalchemy-redshift==0.8.9
 # For apache druid
 pydruid[sqlalchemy]~=0.6.2
 PyAthena[SQLAlchemy,Pandas]==2.5.2

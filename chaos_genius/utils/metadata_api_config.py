@@ -5,7 +5,7 @@ SCHEMAS_AVAILABLE = {
     "BigQuery": False,
     "Snowflake": True,
     "Druid": False,
-    "AWS Athena": True
+    "AWS Athena": True,
     "Databricks": True
 }
 

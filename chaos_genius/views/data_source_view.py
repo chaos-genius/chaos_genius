@@ -282,19 +282,6 @@ def create_data_source():
             db_connection_uri = create_sqlalchemy_uri(**db_config)
         else:
             sourceRecord = sourceCreationPayload
-            # TODO: delete this
-            # db_mapper = DATABASE_CONFIG_MAPPER[source_form.get("sourceDefinitionId")]
-            # input_configuration = source_form.get("connectionConfiguration")
-            # if db_mapper["db_type"] in ["mysql", "postgres"]:
-            #     db_config = {
-            #         "host": input_configuration[db_mapper["host"]],
-            #         "port": input_configuration[db_mapper["port"]],
-            #         "database": input_configuration[db_mapper["database"]],
-            #         "username": input_configuration[db_mapper["username"]],
-            #         "password": input_configuration[db_mapper["password"]],
-            #         "db_type": db_mapper["db_type"],
-            #     }
-            #     db_connection_uri = create_sqlalchemy_uri(**db_config)
         status = "connected"
 
         # Save in the database

@@ -960,6 +960,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       dimensions: [],
       count_column: ''
     });
+    setEditedFormData({ ...editedFormData, dimensions: [] });
   };
   const closeModal = () => {
     setIsOpen(false);

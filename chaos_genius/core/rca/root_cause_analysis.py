@@ -705,9 +705,10 @@ class RootCauseAnalysis:
             single_dim, max_waterfall_columns, max_subgroups_considered
         )
 
-        best_subgroups["subgroup"] = best_subgroups["subgroup"].apply(
+        best_subgroups["string"] = best_subgroups["subgroup"].apply(
             get_user_string_from_subgroup_dict
         )
+        best_subgroups.drop("subgroup", axis=1, inplace=True)
 
         # Check for any nan values in best subgroups and raise ValueError if found
         self._check_nan(

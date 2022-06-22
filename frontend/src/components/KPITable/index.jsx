@@ -39,7 +39,6 @@ const KPITable = ({
   changeData,
   pagination,
   pgInfo,
-  setKpiSearch,
   setPgInfo
 }) => {
   const connectionType = useContext(connectionContext);
@@ -67,7 +66,7 @@ const KPITable = ({
         header: 'KPI deleted successfully',
         description: kpiDisableData.message
       });
-      setKpiSearch('');
+      changeData((prev) => !prev);
     } else if (kpiDisableData && kpiDisableData.status === 'failed') {
       customToast({
         type: 'error',

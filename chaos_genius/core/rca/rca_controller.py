@@ -9,10 +9,7 @@ import numpy as np
 import pandas as pd
 from numpyencoder import NumpyEncoder
 
-from chaos_genius.controllers.task_monitor import (
-    checkpoint_failure,
-    checkpoint_success,
-)
+from chaos_genius.controllers.task_monitor import checkpoint_failure, checkpoint_success
 from chaos_genius.core.rca.constants import (
     LINE_DATA_TIMESTAMP_FORMAT,
     TIME_RANGES_BY_KEY,
@@ -224,7 +221,6 @@ class RootCauseAnalysisController:
         :return: dictionary with aggregations for KPI
         :rtype: dict
         """
-
         return rca.get_panel_metrics()
 
     def _process_rca_output(self, impact_table: dict) -> dict:
@@ -236,7 +232,7 @@ class RootCauseAnalysisController:
         :rtype: dict
         """
         rename_dict = {
-            "string": "subgroup",
+            "subgroup": "subgroup",
             "size_g1": "g1_size",
             "val_g1": "g1_agg",
             "count_g1": "g1_count",

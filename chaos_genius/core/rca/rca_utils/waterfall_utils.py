@@ -35,25 +35,27 @@ def get_best_subgroups_using_superset_algo(
     ):
 
         i += 1
-        curr_filter_string = df_subgroups.iloc[i]["string"]
-        curr_filter_split = curr_filter_string.split(" and ")
-        len_curr_filters = len(curr_filter_split)
+        curr_filter_dict = df_subgroups.iloc[i]["subgroup"]
+        curr_filter_split_dict = [{k: v} for k, v in curr_filter_dict.items()]
+        len_curr_filters = len(curr_filter_split_dict)
 
         # check if filters of subgroup are already
         # in current combination.
         curr_filters_exist_in_comb = False
 
-        for comb_filter_string, len_comb_filter in current_comb_filters:
+        for comb_filter_dict, len_comb_filter in current_comb_filters:
 
             if len_curr_filters == len_comb_filter:
-                if curr_filter_string == comb_filter_string:
+                if curr_filter_dict == comb_filter_dict:
                     curr_filters_exist_in_comb = True
                     break
 
             elif len_curr_filters > len_comb_filter:
-                curr_filter_combs = combinations(curr_filter_split, len_comb_filter)
-                curr_filter_combs = [" and ".join(i) for i in curr_filter_combs]
-                if comb_filter_string in curr_filter_combs:
+                curr_filter_combs = list(
+                    combinations(curr_filter_split_dict, len_comb_filter)
+                )
+                curr_filter_combs = [dict(comb[0]) for comb in curr_filter_combs]
+                if comb_filter_dict in curr_filter_combs:
                     curr_filters_exist_in_comb = True
                     break
 
@@ -62,11 +64,11 @@ def get_best_subgroups_using_superset_algo(
 
         ignored = curr_filters_exist_in_comb
         if not ignored:
-            current_comb_filters.append((curr_filter_string, len_curr_filters))
+            current_comb_filters.append((curr_filter_dict, len_curr_filters))
 
-        current_comb.append([df_subgroups.iloc[i]["string"], ignored])
+        current_comb.append([df_subgroups.iloc[i]["subgroup"], ignored])
 
-    return pd.DataFrame(current_comb, columns=["string", "ignored"])
+    return pd.DataFrame(current_comb, columns=["subgroup", "ignored"])
 
 
 def get_waterfall_ylims(trans: pd.DataFrame, col: str) -> Tuple[float, float]:

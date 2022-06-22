@@ -11,16 +11,16 @@ import numpy as np
 import pandas as pd
 
 from chaos_genius.core.rca.constants import TIME_RANGES_BY_KEY
-from chaos_genius.core.rca.rca_utils.string_helpers import (
-    convert_df_dims_to_query_strings,
-    convert_query_string_to_user_string,
-)
 from chaos_genius.core.rca.rca_utils.waterfall_utils import (
     get_best_subgroups_using_superset_algo,
     get_waterfall_ylims,
     waterfall_plot_mpl,
 )
 from chaos_genius.core.utils.round import round_df, round_number
+from chaos_genius.core.utils.utils import (
+    get_subgroup_from_df,
+    get_user_string_from_subgroup_dict,
+)
 
 SUPPORTED_AGGREGATIONS = ["mean", "sum", "count"]
 EPSILON = 1e-8
@@ -118,9 +118,13 @@ class RootCauseAnalysis:
             ignore_index=True,
         )
 
-        # add query string
-        impact_table.loc[:, "string"] = impact_table[self._dims].apply(
-            lambda inp: convert_df_dims_to_query_strings(inp), axis=1
+        # add subgroup information
+        impact_table["subgroup"] = impact_table[self._dims].apply(
+            lambda inp: {
+                col: inp[col] for col in inp.index.sort_values()
+                if inp[col] is not np.nan
+            },
+            axis=1
         )
 
         # keeping only relevant features
@@ -134,7 +138,7 @@ class RootCauseAnalysis:
             "count_g1",
             "count_g2",
         ]
-        impact_table = impact_table[["string"] + self._dims + metric_columns]
+        impact_table = impact_table[["subgroup"] + self._dims + metric_columns]
 
         return impact_table
 
@@ -175,9 +179,21 @@ class RootCauseAnalysis:
         best_subgroups = best_subgroups[
             best_subgroups["ignored"] == False  # noqa E712
         ]
-        best_subgroups = best_subgroups.merge(
-            impact_table[["string", "impact"]], how="inner", on="string"
+
+        # convert to tuple to allow merge as dict is non hashable
+        best_subgroups["subgroup"] = best_subgroups["subgroup"].apply(
+            lambda x: tuple(x.items())
         )
+        impact_table["subgroup"] = impact_table["subgroup"].apply(
+            lambda x: tuple(x.items())
+        )
+        best_subgroups = best_subgroups.merge(
+            impact_table[["subgroup", "impact"]], how="inner", on="subgroup"
+        )
+        # convert back to dict
+        best_subgroups["subgroup"] = best_subgroups["subgroup"].apply(dict)
+        impact_table["subgroup"] = impact_table["subgroup"].apply(dict)
+
         best_subgroups["impact_non_overlap"] = best_subgroups["impact"]
         best_subgroups.rename(
             columns={"impact": "impact_full_group"}, inplace=True
@@ -339,28 +355,32 @@ class RootCauseAnalysis:
         len_d1 = self._grp1_df[self._metric].count()
         len_d2 = self._grp2_df[self._metric].count()
 
-        for subgroup in subgroups_df_output["string"]:
+        for subgroup in subgroups_df_output["subgroup"]:
             all_indices = set()
 
             # others are all subgroups minus the current subgroup
-            other_subgroups = subgroups_df_output["string"].values.tolist()
+            other_subgroups = subgroups_df_output["subgroup"].values.tolist()
             other_subgroups.remove(subgroup)
             other_combinations = {
                 i: combinations(other_subgroups, i)
                 for i in range(1, len(subgroups_df_output))
             }
 
-            d1_idxs = set(self._grp1_df.query(subgroup).index)
-            d2_idxs = set(self._grp2_df.query(subgroup).index)
+            d1_idxs = set(get_subgroup_from_df(self._grp1_df, subgroup).index)
+            d2_idxs = set(get_subgroup_from_df(self._grp2_df, subgroup).index)
 
             overlap_indices_count = 0
             curr_loc = 0
 
             for i in range(1, len(subgroups_df_output)):
                 for combo in other_combinations[i]:
-                    query = " and ".join(combo)
-                    d1_combo = set(self._grp1_df.query(query).index)
-                    d2_combo = set(self._grp2_df.query(query).index)
+                    query_dict = {k: v for d in combo for k, v in d.items()}
+                    d1_combo = set(
+                        get_subgroup_from_df(self._grp1_df, query_dict).index
+                    )
+                    d2_combo = set(
+                        get_subgroup_from_df(self._grp2_df, query_dict).index
+                    )
                     overlap_points_d1 = (
                         d1_idxs.intersection(d1_combo) - all_indices
                     )
@@ -396,7 +416,7 @@ class RootCauseAnalysis:
                     if np.isnan(overlap_impact):
                         overlap_impact = 0
                     curr_loc = subgroups_df_output[
-                        subgroups_df_output["string"] == subgroup
+                        subgroups_df_output["subgroup"] == subgroup
                     ].index[0]
 
                     subgroups_df_output.loc[
@@ -448,22 +468,26 @@ class RootCauseAnalysis:
         impact = d2_agg - d1_agg
         non_overlap_impact = df_subgroups["impact_non_overlap"].sum()
 
-        waterfall_df = df_subgroups[["string", "impact_non_overlap"]].copy()
+        waterfall_df = df_subgroups[["subgroup", "impact_non_overlap"]].copy()
         others_impact = impact - non_overlap_impact
         # only if impact of others is not close to 0, we add it
         if not isclose(others_impact, 0, rel_tol=0.0001, abs_tol=EPSILON):
             waterfall_df = waterfall_df.append(
-                {"string": "others", "impact_non_overlap": others_impact},
+                {"subgroup": "others", "impact_non_overlap": others_impact},
                 ignore_index=True,
             )
 
+        waterfall_df["subgroup_str"] = waterfall_df["subgroup"].apply(
+            lambda x: get_user_string_from_subgroup_dict(x) if type(x) == dict else x
+        )
         col_names_for_mpl = [
             "start",
             *[
                 "\n".join(wrap(i, word_wrap_num))
-                for i in waterfall_df["string"].values.tolist()
+                for i in waterfall_df["subgroup_str"].values.tolist()
             ],
         ]
+        waterfall_df.drop("subgroup_str", axis=1, inplace=True)
         col_values = [
             d1_agg,
             *waterfall_df["impact_non_overlap"].values.tolist(),
@@ -500,7 +524,7 @@ class RootCauseAnalysis:
             data={
                 "value": col_values,
                 "category": ["start"]
-                + waterfall_df["string"].values.tolist()
+                + waterfall_df["subgroup"].values.tolist()
                 + ["end"],
                 "stepValue": col_values,
             }
@@ -591,9 +615,7 @@ class RootCauseAnalysis:
             "group1_value": round_number(g1_agg),
             "group2_value": round_number(g2_agg),
             "difference": round_number(impact),
-            "perc_change": round_number(perc_diff)
-            if not np.isinf(perc_diff)
-            else "inf",
+            "perc_change": "inf" if np.isinf(perc_diff) else round_number(perc_diff)
         }
 
         # Check for None or NaN values in output
@@ -624,8 +646,8 @@ class RootCauseAnalysis:
 
         impact_table.drop(self._dims, axis=1, inplace=True)
 
-        impact_table["string"] = impact_table["string"].apply(
-            convert_query_string_to_user_string
+        impact_table["subgroup"] = impact_table["subgroup"].apply(
+            get_user_string_from_subgroup_dict
         )
 
         # Check for any nan values in impact values and raise ValueError if found
@@ -683,8 +705,8 @@ class RootCauseAnalysis:
             single_dim, max_waterfall_columns, max_subgroups_considered
         )
 
-        best_subgroups["string"] = best_subgroups["string"].apply(
-            convert_query_string_to_user_string
+        best_subgroups["subgroup"] = best_subgroups["subgroup"].apply(
+            get_user_string_from_subgroup_dict
         )
 
         # Check for any nan values in best subgroups and raise ValueError if found
@@ -727,7 +749,7 @@ class RootCauseAnalysis:
 
         # convert query strings to user strings
         waterfall_df["category"] = waterfall_df["category"].apply(
-            convert_query_string_to_user_string
+            lambda x: get_user_string_from_subgroup_dict(x) if type(x) == dict else x
         )
 
         # Check for any nan values in waterfall df and raise ValueError if found
@@ -777,14 +799,12 @@ class RootCauseAnalysis:
         for depth in range(1, max_depth):
             parents = output_table[output_table["depth"] == depth]
             for index, row in parents.iterrows():
-                string = row["string"]
-                filters = string.split(" and ")
+                filters = row["subgroup"]
                 children = impact_table
-                for filter_string in filters:
+                for dimension, subgroup in filters.items():
                     children = children[
-                        children["string"].str.contains(
-                            filter_string, regex=False
-                        )
+                        children["subgroup"].apply(
+                            lambda x: (dimension, subgroup) in x.items())
                     ]
                 children = children[
                     children[other_dims].isna().sum(axis=1)
@@ -801,8 +821,8 @@ class RootCauseAnalysis:
             columns={"index": "id"}
         )
 
-        output_table["string"] = output_table["string"].apply(
-            convert_query_string_to_user_string
+        output_table["subgroup"] = output_table["subgroup"].apply(
+            get_user_string_from_subgroup_dict
         )
 
         # Check for any nan values in output table and raise ValueError if found

@@ -1,9 +1,10 @@
-import pandas as pd
 from urllib.parse import quote_plus
-from sqlalchemy.engine import create_engine
-from sqlalchemy import text
+
+import pandas as pd
 from pyathena import connect
 from pyathena.pandas.cursor import PandasCursor
+from sqlalchemy import text
+from sqlalchemy.engine import create_engine
 
 from .base_db import BaseDb
 from .connector_utils import merge_dataframe_chunks
@@ -59,12 +60,11 @@ class AwsAthenaDb(BaseDb):
                 "Database Credential not found for AWS Athena."
             )
 
-        conn_string = "awsathena+rest://{aws_access_key_id}:{aws_secret_access_key}@athena.{region_name}.amazonaws.com/{schema_name}?s3_staging_dir={s3_staging_dir}".format(
-            aws_access_key_id=quote_plus(aws_access_key_id),
-            aws_secret_access_key=quote_plus(aws_secret_access_key),
-            region_name=region_name,
-            schema_name=schema_name,
-            s3_staging_dir=quote_plus(s3_staging_dir),
+        conn_string = (
+            "awsathena+rest://"
+            + f"{quote_plus(aws_access_key_id)}:{quote_plus(aws_secret_access_key)}"
+            + f"@athena.{region_name}.amazonaws.com/{schema_name}"
+            + f"?s3_staging_dir={quote_plus(s3_staging_dir)}"
         )
         self.sqlalchemy_db_uri = conn_string
         return self.sqlalchemy_db_uri
@@ -89,14 +89,13 @@ class AwsAthenaDb(BaseDb):
             raise NotImplementedError(
                 "Database Credential not found for AWS Athena."
             )
-        cursor = connect(
+        return connect(
             aws_access_key_id=aws_access_key_id,
             aws_secret_access_key=aws_secret_access_key,
             s3_staging_dir=s3_staging_dir,
             region_name=region_name,
             cursor_class=PandasCursor,
         ).cursor()
-        return cursor
 
     def test_connection(self):
         if not hasattr(self, "engine") or not self.engine:
@@ -107,11 +106,8 @@ class AwsAthenaDb(BaseDb):
             with self.engine.connect() as connection:
                 cursor = connection.execute(query_text)
                 results = cursor.all()
-                if results[0][0] == 1:
-                    status = True
-                else:
-                    status = False
-        except Exception as err_msg:
+                status = results[0][0] == 1
+        except Exception as err_msg:  # noqa B902
             status = False
             message = str(err_msg)
         return status, message
@@ -127,12 +123,8 @@ class AwsAthenaDb(BaseDb):
 
     def get_schema(self):
         schema_name = self.ds_info.get("schema")
-        if schema_name:
-            self.schema = schema_name
-        else:
-            self.schema = "default"
+        self.schema = schema_name or "default"
         return self.schema
 
     def get_schema_names_list(self):
-        data = self.inspector.get_schema_names()
-        return data
+        return self.inspector.get_schema_names()

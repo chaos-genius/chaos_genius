@@ -2,7 +2,6 @@
 """DataSource views for creating and viewing the data source."""
 import logging
 from copy import deepcopy
-from datetime import datetime
 from typing import List, Optional
 from uuid import uuid4
 
@@ -14,7 +13,7 @@ from sqlalchemy import func
 
 from chaos_genius.connectors import get_metadata, get_schema_names
 from chaos_genius.connectors import get_table_info as get_table_metadata
-from chaos_genius.connectors import get_table_list, get_view_list
+from chaos_genius.connectors import get_view_list
 from chaos_genius.controllers.data_source_controller import (
     get_datasource_data_from_id,
     mask_sensitive_info,
@@ -25,7 +24,7 @@ from chaos_genius.controllers.data_source_controller import (
 from chaos_genius.controllers.data_source_metadata_controller import (
     fetch_schema_list,
     fetch_table_info,
-    fetch_table_list
+    fetch_table_list,
 )
 from chaos_genius.databases.db_utils import create_sqlalchemy_uri
 from chaos_genius.databases.models.data_source_model import DataSource
@@ -34,12 +33,9 @@ from chaos_genius.extensions import cache, db
 from chaos_genius.extensions import integration_connector as connector
 from chaos_genius.settings import AIRBYTE_ENABLED
 from chaos_genius.third_party.integration_client import get_localhost_host
+from chaos_genius.third_party.integration_server_config import DATA_SOURCE_ABBREVIATION
 from chaos_genius.third_party.integration_server_config import (
-    DATA_SOURCE_ABBREVIATION,
-    DATABASE_CONFIG_MAPPER,
-)
-from chaos_genius.third_party.integration_server_config import (
-    DESTINATION_TYPE as db_type,
+    DESTINATION_TYPE as DB_TYPE,
 )
 from chaos_genius.third_party.integration_server_config import (
     SOURCE_CONFIG_MAPPING,
@@ -53,6 +49,7 @@ from chaos_genius.utils.metadata_api_config import (
 )
 from chaos_genius.utils.pagination import pagination_args, pagination_info
 from chaos_genius.utils.search import SEARCH_PARAM_NAME, make_search_filter
+
 # from chaos_genius.jobs.metadata_prefetch import fetch_data_source_schema
 
 blueprint = Blueprint("api_data_source", __name__)
@@ -78,11 +75,14 @@ def data_source():
             )
             new_data_source.save()
 
-            logger.info("Data source '%s' added successfully.", new_data_source.name)
+            logger.info(
+                "Data source '%s' added successfully.", new_data_source.name
+            )
 
             return jsonify(
                 {
-                    "message": f"DataSource {new_data_source.name} has been created successfully."
+                    "message": f"DataSource {new_data_source.name} has "
+                    + "been created successfully."
                 }
             )
         else:
@@ -99,13 +99,16 @@ def data_source():
         paginate = request.args.get("paginate") != "false"
         page, per_page = pagination_args(request)
 
-        search_query, search_filter = make_search_filter(request, DataSource.name)
+        search_query, search_filter = make_search_filter(
+            request, DataSource.name
+        )
 
         filters = [DataSource.active == True]  # noqa: E712
         if search_filter is not None:
             filters.append(search_filter)
         if datasource_types_list and datasource_types_list != [""]:
-            filters.append(DataSource.connection_type.in_(
+            filters.append(
+                DataSource.connection_type.in_(
                     [
                         datasource_type
                         for datasource_types in datasource_types_list
@@ -144,22 +147,26 @@ def data_source():
             conn_detail = conn.safe_dict
             if not conn_detail["last_sync"]:
                 conn_detail["last_sync"] = conn_detail["created_at"]
-            conn_detail["kpi_count"] = data_source_kpi_map.get(conn_detail["id"], 0)
+            conn_detail["kpi_count"] = data_source_kpi_map.get(
+                conn_detail["id"], 0
+            )
             results.append(conn_detail)
         results = sorted(results, reverse=True, key=lambda x: x["id"])
 
         logger.info("Found %d data sources", len(results))
 
-        return jsonify({
-            "count": len(results),
-            "data": results,
-            "pagination": (
-                pagination_info(data_sources_paginated)
-                if data_sources_paginated is not None
-                else None
-            ),
-            SEARCH_PARAM_NAME: search_query,
-        })
+        return jsonify(
+            {
+                "count": len(results),
+                "data": results,
+                "pagination": (
+                    pagination_info(data_sources_paginated)
+                    if data_sources_paginated is not None
+                    else None
+                ),
+                SEARCH_PARAM_NAME: search_query,
+            }
+        )
 
 
 @blueprint.route("/types", methods=["GET"])
@@ -171,7 +178,7 @@ def list_data_source_type():
     connection_types, msg, status = [], "", "success"
     try:
         connection_types = get_connection_config()
-    except Exception as err_msg:
+    except Exception as err_msg:  # noqa B902
         logger.error(
             "Error in listing data source types: %s", err_msg, exc_info=err_msg
         )
@@ -193,10 +200,14 @@ def test_data_source_connection():
             logger.error("Error in testing data source: %s", msg)
         else:
             connection_status = test_data_source(payload)
-            logger.info("Testing a data source. Results: %s", connection_status)
+            logger.info(
+                "Testing a data source. Results: %s", connection_status
+            )
 
-    except Exception as err_msg:
-        logger.error("Error in testing data source: %s", err_msg, exc_info=err_msg)
+    except Exception as err_msg:  # noqa B902
+        logger.error(
+            "Error in testing data source: %s", err_msg, exc_info=err_msg
+        )
         msg = str(err_msg)
         status = "failed"
 
@@ -210,8 +221,13 @@ def create_data_source():
 
     # TODO: Better error handling and proper message in case of the failure
     connection_data = {}
-    connection_status, msg, status = {}, "failed", False
-    sourceRecord, desinationRecord, connectionRecord, stream_tables = {}, {}, {}, []
+    msg, status = "failed", False
+    source_record, desination_record, connection_record, stream_tables = (
+        {},
+        {},
+        {},
+        [],
+    )
     db_connection_uri = ""
     database_timezone = "UTC"
     try:
@@ -221,30 +237,40 @@ def create_data_source():
         source_form = payload.get("sourceForm")
         # TODO: Validation for the timezone
         database_timezone = payload.get("database_timezone")
-        is_third_party = SOURCE_WHITELIST_AND_TYPE[source_form["sourceDefinitionId"]]
+        is_third_party = SOURCE_WHITELIST_AND_TYPE[
+            source_form["sourceDefinitionId"]
+        ]
         if is_third_party and not AIRBYTE_ENABLED:
             raise Exception("Airbytes is not enabled.")
-        sourceCreationPayload = {
+        source_creation_payload = {
             "name": f"CG-{conn_name}",
             "sourceDefinitionId": source_form.get("sourceDefinitionId"),
-            "connectionConfiguration": source_form.get("connectionConfiguration"),
+            "connectionConfiguration": source_form.get(
+                "connectionConfiguration"
+            ),
         }
         if is_third_party:
             connector_client = connector.connection
-            sourceCreationPayload["workspaceId"] = connector_client.workspace_id
+            source_creation_payload[
+                "workspaceId"
+            ] = connector_client.workspace_id
             # Create the source
-            sourceRecord = connector_client.create_source(sourceCreationPayload)
-            sourceRecord["connectionConfiguration"] = sourceCreationPayload[
+            source_record = connector_client.create_source(
+                source_creation_payload
+            )
+            source_record["connectionConfiguration"] = source_creation_payload[
                 "connectionConfiguration"
             ]
 
             # create the destination record
-            desinationRecord = connector_client.create_destination(conn_name)
+            desination_record = connector_client.create_destination(conn_name)
             # create the third_party_connection
             mapping_config = SOURCE_CONFIG_MAPPING.get(
                 source_form.get("sourceDefinitionId"), {}
             )
-            source_schema = connector_client.get_source_schema(sourceRecord["sourceId"])
+            source_schema = connector_client.get_source_schema(
+                source_record["sourceId"]
+            )
             stream_schema = source_schema["catalog"]["streams"]
             for stream in stream_schema:
                 stream["config"].update(mapping_config)
@@ -254,8 +280,8 @@ def create_data_source():
             table_prefix = f"{abbv_conn_type}_{random_conn_name}_"
             table_prefix = table_prefix.lower()
             conn_payload = {
-                "sourceId": sourceRecord["sourceId"],
-                "destinationId": desinationRecord["destinationId"],
+                "sourceId": source_record["sourceId"],
+                "destinationId": desination_record["destinationId"],
                 "schedule": {"units": 24, "timeUnit": "hours"},
                 "prefix": table_prefix,
                 "status": "active",
@@ -271,17 +297,21 @@ def create_data_source():
                 ],
                 "syncCatalog": {"streams": stream_schema},
             }
-            connectionRecord = connector_client.create_connection(conn_payload)
-            if not connectionRecord:
+            connection_record = connector_client.create_connection(conn_payload)
+            if not connection_record:
                 raise Exception("Connection not created")
-            stream_tables = [stream["stream"]["name"] for stream in stream_schema]
-            stream_tables = list(map(lambda x: f"{table_prefix}{x}", stream_tables))
+            stream_tables = [
+                stream["stream"]["name"] for stream in stream_schema
+            ]
+            stream_tables = list(
+                map(lambda x: f"{table_prefix}{x}", stream_tables)
+            )
             db_config = connector_client.destination_db
             db_config["host"] = get_localhost_host(db_config["host"])
-            db_config["db_type"] = db_type
+            db_config["db_type"] = DB_TYPE
             db_connection_uri = create_sqlalchemy_uri(**db_config)
         else:
-            sourceRecord = sourceCreationPayload
+            source_record = source_creation_payload
         status = "connected"
 
         # Save in the database
@@ -293,21 +323,35 @@ def create_data_source():
             is_third_party=is_third_party,
             connection_status=status,
             database_timezone=database_timezone,
-            sourceConfig=sourceRecord,
-            destinationConfig=desinationRecord,
-            connectionConfig=connectionRecord,
-            dbConfig={"tables": stream_tables, "db_connection_uri": db_connection_uri},
+            sourceConfig=source_record,
+            destinationConfig=desination_record,
+            connectionConfig=connection_record,
+            dbConfig={
+                "tables": stream_tables,
+                "db_connection_uri": db_connection_uri,
+            },
         )
         new_connection.save(commit=True)
-        msg = f"Connection {new_connection.name} has been created successfully."
-        logger.info("Data source '%s' added successfully.", new_connection.name)
+        msg = (
+            f"Connection {new_connection.name} has been created successfully."
+        )
+        logger.info(
+            "Data source '%s' added successfully.", new_connection.name
+        )
         connection_data = new_connection.safe_dict
         from chaos_genius.jobs.metadata_prefetch import fetch_data_source_schema
-        logger.info("prefetching metadata for  '%s', id '%s'", new_connection.name, new_connection.id)
+
+        logger.info(
+            "prefetching metadata for  '%s', id '%s'",
+            new_connection.name,
+            new_connection.id,
+        )
         fetch_data_source_schema.delay(new_connection.id)
-    except Exception as err_msg:
+    except Exception as err_msg:  # noqa B902
         msg = str(err_msg)
-        logger.error("Error in creating data source: %s", err_msg, exc_info=err_msg)
+        logger.error(
+            "Error in creating data source: %s", err_msg, exc_info=err_msg
+        )
 
     return jsonify({"data": connection_data, "msg": msg, "status": status})
 
@@ -343,14 +387,18 @@ def delete_data_source():
                 )
                 # delete the source
                 source_details = ds_data["sourceConfig"]
-                status = connector_client.delete_source(source_details["sourceId"])
+                status = connector_client.delete_source(
+                    source_details["sourceId"]
+                )
             # delete the data source record
             data_source_obj.active = False
             data_source_obj.save(commit=True)
             msg = "deleted"
             status = True
-    except Exception as err_msg:
-        logger.error("Error in deleting data source: %s", err_msg, exc_info=err_msg)
+    except Exception as err_msg:  # noqa B902
+        logger.error(
+            "Error in deleting data source: %s", err_msg, exc_info=err_msg
+        )
         msg = str(err_msg)
 
     return jsonify({"data": {}, "msg": msg, "status": status})
@@ -376,16 +424,19 @@ def trigger_metadata_prefetch():
             if data_source and data_source.active:
                 msg = "Metadata prefetch triggered."
                 logger.info(
-                    "Trigger Metadata prefetch for Datasource: %s", data_source_id
+                    "Trigger Metadata prefetch for Datasource: %s",
+                    data_source_id,
                 )
                 fetch_data_source_schema.delay(data_source_id)
                 sync_status = "In Progress"
             else:
-                logger.error(f"Datasource with id: {data_source_id} not found!!")
+                logger.error(
+                    f"Datasource with id: {data_source_id} not found!!"
+                )
                 status = "failure"
-                msg = f"Datasource was not found."
+                msg = "Datasource was not found."
 
-    except Exception as err_msg:
+    except Exception as err_msg:  # noqa B902
         logger.error(
             "Error in trigger metadata prefetch: %s", err_msg, exc_info=err_msg
         )
@@ -410,7 +461,9 @@ def metadata_data_source():
         else:
             data_source_id = payload["data_source_id"]
 
-            logger.info("Retrieving data source metadata. ID: %s", data_source_id)
+            logger.info(
+                "Retrieving data source metadata. ID: %s", data_source_id
+            )
 
             from_query = payload["from_query"]
             query = payload["query"]
@@ -423,8 +476,10 @@ def metadata_data_source():
             else:
                 status = "failure"
 
-    except Exception as err_msg:
-        logger.error("Error in data source metadata: %s", err_msg, exc_info=err_msg)
+    except Exception as err_msg:  # noqa B902
+        logger.error(
+            "Error in data source metadata: %s", err_msg, exc_info=err_msg
+        )
         msg = str(err_msg)
         status = "failure"
 
@@ -451,8 +506,10 @@ def log_data_source():
             logs_details = connector_client.get_job_list(connection_id)
 
         status = True
-    except Exception as err_msg:
-        logger.error("Error in data source logs: %s", err_msg, exc_info=err_msg)
+    except Exception as err_msg:  # noqa B902
+        logger.error(
+            "Error in data source logs: %s", err_msg, exc_info=err_msg
+        )
 
     return jsonify({"data": logs_details, "status": status})
 
@@ -481,12 +538,13 @@ def get_data_source_info(datasource_id):
             masked_details = {}
             if connection_def:
                 masked_details = mask_sensitive_info(
-                    connection_def, ds_obj.sourceConfig["connectionConfiguration"]
+                    connection_def,
+                    ds_obj.sourceConfig["connectionConfiguration"],
                 )
         data = ds_obj.safe_dict
         data["sourceForm"] = masked_details
         status = "success"
-    except Exception as err:
+    except Exception as err:  # noqa B902
         status = "failure"
         message = str(err)
         logger.error("Error in retrieving data source: %s", err, exc_info=err)
@@ -534,7 +592,7 @@ def update_data_source_info(datasource_id):
             ds_obj.sourceConfig = connection_config
         ds_obj.save(commit=True)
         status = "success"
-    except Exception as err:
+    except Exception as err:  # noqa B902
         status = "failure"
         message = str(err)
         logger.error("Error in updating data source: %s", err, exc_info=err)
@@ -570,7 +628,8 @@ def check_views_availability():
             ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
             if not ds_data or not getattr(ds_data, "active"):
                 raise ValueError(
-                    f"There exists no active datasource matching the provided id: {datasource_id}"
+                    "There exists no active datasource matching the "
+                    + f"provided id: {datasource_id}"
                 )
 
             datasource_name = getattr(ds_data, "connection_type")
@@ -581,11 +640,13 @@ def check_views_availability():
             )
             schema_exist = SCHEMAS_AVAILABLE.get(datasource_name, False)
             views = datasource_capability["views"]
-            supported_aggregations = datasource_capability["supported_aggregations"]
+            supported_aggregations = datasource_capability[
+                "supported_aggregations"
+            ]
             materialize_views = datasource_capability["materialized_views"]
             status = "success"
-    except Exception as err:
-        message = "Error in fetching table info: {}".format(err)
+    except Exception as err:  # noqa B902
+        message = f"Error in fetching table info: {err}"
         logger.error("Error in data source availability: %s", err, exc_info=err)
     else:
         if status == "failure":
@@ -599,7 +660,7 @@ def check_views_availability():
                 "schema": schema_exist,
                 "views": views,
                 "materialize_views": materialize_views,
-                "supported_aggregations": supported_aggregations
+                "supported_aggregations": supported_aggregations,
             },
         }
     )
@@ -623,7 +684,8 @@ def get_schema_list():
             ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
             if not ds_data or not getattr(ds_data, "active"):
                 raise ValueError(
-                    f"There exists no active datasource matching the provided id: {datasource_id}"
+                    "There exists no active datasource matching the "
+                    + f"provided id: {datasource_id}"
                 )
             if ds_data.is_third_party:
                 data = get_schema_names(ds_data.as_dict)
@@ -634,8 +696,8 @@ def get_schema_list():
                 data = []
             else:
                 status = "success"
-    except Exception as err:
-        message = "Error in fetching table info: {}".format(err)
+    except Exception as err:  # noqa B902
+        message = f"Error in fetching table info: {err}"
         logger.error("Error in data source schema list: %s", err, exc_info=err)
     else:
         if status == "failure":
@@ -663,12 +725,15 @@ def get_schema_tables():
             ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
             if not ds_data or not getattr(ds_data, "active"):
                 raise ValueError(
-                    f"There exists no active datasource matching the provided id: {datasource_id}"
+                    "There exists no active datasource matching the "
+                    + f"provided id: {datasource_id}"
                 )
 
             ds_name = getattr(ds_data, "connection_type")
             schema = (
-                None if (ds_data.is_third_party or not SCHEMAS_AVAILABLE[ds_name]) else schema
+                None
+                if (ds_data.is_third_party or not SCHEMAS_AVAILABLE[ds_name])
+                else schema
             )
             if ds_data.is_third_party:
                 table_names = ds_data.as_dict["dbConfig"]["tables"]
@@ -679,14 +744,16 @@ def get_schema_tables():
                 table_names = []
             else:
                 status = "success"
-    except Exception as err:
-        message = "Error in fetching table info: {}".format(err)
+    except Exception as err:  # noqa B902
+        message = f"Error in fetching table info: {err}"
         logger.error("Error in data source table list: %s", err, exc_info=err)
     else:
         if status == "failure":
             logger.error("Error in data source table list: %s", message)
 
-    return jsonify({"message": message, "status": status, "table_names": table_names})
+    return jsonify(
+        {"message": message, "status": status, "table_names": table_names}
+    )
 
 
 @blueprint.route("/get-view-list", methods=["POST"])
@@ -708,11 +775,12 @@ def get_schema_views():
             ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
             if not ds_data or not getattr(ds_data, "active"):
                 raise ValueError(
-                    f"There exists no active datasource matching the provided id: {datasource_id}"
+                    "There exists no active datasource matching the "
+                    + f"provided id: {datasource_id}"
                 )
 
             ds_name = getattr(ds_data, "connection_type")
-            schema = None if SCHEMAS_AVAILABLE[ds_name] == False else schema
+            schema = None if SCHEMAS_AVAILABLE[ds_name] is False else schema
 
             view_names = get_view_list(ds_data.as_dict, schema)
             if view_names is None:
@@ -720,14 +788,16 @@ def get_schema_views():
                 view_names = []
             else:
                 status = "success"
-    except Exception as err:
-        message = "Error in fetching table info: {}".format(err)
+    except Exception as err:  # noqa B902
+        message = f"Error in fetching table info: {err}"
         logger.error("Error in data source views list: %s", err, exc_info=err)
     else:
         if status == "failure":
             logger.error("Error in data source views list: %s", message)
 
-    return jsonify({"message": message, "status": status, "view_names": view_names})
+    return jsonify(
+        {"message": message, "status": status, "view_names": view_names}
+    )
 
 
 @blueprint.route("/table-info", methods=["POST"])
@@ -742,10 +812,16 @@ def get_table_info():
         params_list = ["datasource_id", "schema", "table_name"]
         if not set(params_list).issubset(list(data.keys())):
             status = "failure"
-            message = "Missing required parameters. Please follow request format"
+            message = (
+                "Missing required parameters. Please follow request format"
+            )
             logger.error("Error in data source table info: %s", message)
             return jsonify(
-                {"status": status, "message": message, "table_info": table_info}
+                {
+                    "status": status,
+                    "message": message,
+                    "table_info": table_info,
+                }
             )
 
         datasource_id = data["datasource_id"]
@@ -757,38 +833,49 @@ def get_table_info():
         ds_data = get_datasource_data_from_id(datasource_id, as_obj=True)
         if not ds_data or not getattr(ds_data, "active"):
             raise ValueError(
-                f"There exists no active datasource matching the provided id: {datasource_id}"
+                "There exists no active datasource matching the "
+                + f"provided id: {datasource_id}"
             )
 
         ds_name = getattr(ds_data, "connection_type")
 
         schema = (
-            None if (ds_data.is_third_party or not SCHEMAS_AVAILABLE[ds_name]) else schema
+            None
+            if (ds_data.is_third_party or not SCHEMAS_AVAILABLE[ds_name])
+            else schema
         )
 
         if ds_data.is_third_party:
-            table_info = get_table_metadata(ds_data.as_dict, schema, table_name)
+            table_info = get_table_metadata(
+                ds_data.as_dict, schema, table_name
+            )
         else:
             table_info = fetch_table_info(ds_data.id, schema, table_name)
         if table_info is None:
-            raise Exception("Unable to fetch table info for the requested table")
+            raise Exception(
+                "Unable to fetch table info for the requested table"
+            )
         else:
             status = "success"
-    except Exception as e:
+    except Exception as e:  # noqa B902
         status = "failure"
-        message = "Error in fetching table info: {}".format(e)
+        message = f"Error in fetching table info: {e}"
         table_info = {}
         logger.error("Error in data source table info: %s", e, exc_info=e)
     else:
         if status == "failure":
             logger.error("Error in data source table info: %s", message)
 
-    return jsonify({"table_info": table_info, "status": status, "message": message})
+    return jsonify(
+        {"table_info": table_info, "status": status, "message": message}
+    )
 
 
 @blueprint.route("/used-types", methods=["GET"])
 def used_data_source_types_endpoint():
     """Returns a list of unique data source types currently in use."""
-    types = [{"value": type_, "label": type_} for type_ in used_data_source_types()]
+    types = [
+        {"value": type_, "label": type_} for type_ in used_data_source_types()
+    ]
 
     return jsonify({"data": types, "status": "success", "message": ""})

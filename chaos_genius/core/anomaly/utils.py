@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 from typing import Any
 
 import pandas as pd
-from chaos_genius.core.utils.utils import get_user_string_from_subgroup_dict
 
+from chaos_genius.core.utils.utils import get_user_string_from_subgroup_dict
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 
 
@@ -71,7 +71,9 @@ def get_dq_missing_data(
 
     data[dt_col] = pd.to_datetime(data[dt_col])
 
-    col_list = [dt_col, metric_col, preagg_count_col] if preagg_count_col else [dt_col, metric_col]
+    col_list = [
+        dt_col, metric_col, preagg_count_col
+    ] if preagg_count_col else [dt_col, metric_col]
     missing_data = (
         data.set_index(dt_col)
         .isna()
@@ -155,7 +157,6 @@ def fill_data(
     :return: filled dataframe
     :rtype: pd.DataFrame
     """
-
     input_data = input_data.copy()
     input_data.loc[:, dt_col] = pd.to_datetime(input_data[dt_col])
 

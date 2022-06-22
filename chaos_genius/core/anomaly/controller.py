@@ -1,8 +1,10 @@
 """Provides AnomalyDetectionController to compute Anomaly Detection."""
 
+
+import contextlib
 import logging
 from datetime import date, datetime, timedelta
-from typing import Optional, List, Dict
+from typing import Dict, List, Optional
 
 import pandas as pd
 
@@ -18,18 +20,18 @@ from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.core.utils.end_date import load_input_data_end_date
 from chaos_genius.core.utils.utils import (
     get_subgroup_from_df,
-    get_user_string_from_subgroup_dict
+    get_user_string_from_subgroup_dict,
 )
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, db
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.settings import (
+    HOURS_OFFSET_FOR_ANALTYICS,
     MAX_ANOMALY_SLACK_DAYS,
     MAX_FILTER_SUBGROUPS_ANOMALY,
     MAX_SUBDIM_CARDINALITY,
     MIN_DATA_IN_SUBGROUP,
     MULTIDIM_ANALYSIS_FOR_ANOMALY,
-    HOURS_OFFSET_FOR_ANALTYICS,
 )
 
 logger = logging.getLogger(__name__)
@@ -79,8 +81,7 @@ class AnomalyDetectionController(object):
         self.slack = MAX_ANOMALY_SLACK_DAYS
 
         if self.kpi_info["anomaly_params"]["frequency"] == "H":
-            period = int(self.kpi_info["anomaly_params"]["anomaly_period"])
-            period *= 24
+            period = int(self.kpi_info["anomaly_params"]["anomaly_period"]) * 24
             self.kpi_info["anomaly_params"]["anomaly_period"] = period
 
         self._task_id = task_id
@@ -108,19 +109,18 @@ class AnomalyDetectionController(object):
         if self.kpi_info["anomaly_params"]["frequency"] == "H":
             period /= 24
 
-        if last_date:
-            start_date = last_date - timedelta(days=period)
-            return DataLoader(
-                self.kpi_info,
-                end_date=self.end_date,
-                start_date=start_date,
-            ).get_data()
-        else:
+        if not last_date:
             return DataLoader(
                 self.kpi_info,
                 end_date=self.end_date,
                 days_before=period,
             ).get_data()
+        start_date = last_date - timedelta(days=period)
+        return DataLoader(
+            self.kpi_info,
+            end_date=self.end_date,
+            start_date=start_date,
+        ).get_data()
 
     def _get_last_date_in_db(self, series: str, subgroup: str = None) -> datetime:
         """Return the last date for which we have data for the given series.
@@ -144,12 +144,17 @@ class AnomalyDetectionController(object):
         """
         last_datetime = input_data[self.kpi_info["datetime_column"]].max()
 
-        # If last_datetime=2022-02-03 04:45:50 & offset=0, then end_date_str=2022-02-03 04:00:00
-        end_date_str = last_datetime.floor(freq='H') - timedelta(hours=HOURS_OFFSET_FOR_ANALTYICS)
-
-        # If end_date_str=2022-02-03 04:00:00 then we have complete data until 4PM (not inclusive)
+        # If last_datetime=2022-02-03 04:45:50 & offset=0,
+        # then end_date_str=2022-02-03 04:00:00
+        end_date_str = (
+            last_datetime.floor(freq='H') - timedelta(hours=HOURS_OFFSET_FOR_ANALTYICS)
+        )
+        # If end_date_str=2022-02-03 04:00:00
+        # then we have complete data until 4PM (not inclusive)
         # Fetch all data <  2022-02-03 04:00:00 i.e. end_date_str
-        input_data = input_data[input_data[self.kpi_info["datetime_column"]] < end_date_str]
+        input_data = input_data[
+            input_data[self.kpi_info["datetime_column"]] < end_date_str
+        ]
 
         self.end_date = input_data[self.kpi_info["datetime_column"]].max()
         return input_data
@@ -313,7 +318,7 @@ class AnomalyDetectionController(object):
         filtered_subgroups = []
 
         for subgroup in subgroups:
-            try:
+            with contextlib.suppress(IndexError):
                 filter_data_len = get_subgroup_from_df(
                     grouped_input_data.reset_index(), subgroup
                 )[
@@ -321,9 +326,6 @@ class AnomalyDetectionController(object):
                 ].sum()
                 if filter_data_len >= MIN_DATA_IN_SUBGROUP:
                     filtered_subgroups.append((subgroup, filter_data_len))
-            except IndexError:
-                pass
-
         filtered_subgroups.sort(key=lambda x: x[1], reverse=True)
 
         return [x[0] for x in filtered_subgroups[:MAX_FILTER_SUBGROUPS_ANOMALY]]
@@ -355,7 +357,12 @@ class AnomalyDetectionController(object):
 
             logger.info(f"Formatting input data for {series}-{subgroup}")
 
-            relevant_cols = [dt_col, metric_col, self._preaggregated_count_col] if self._preaggregated else [dt_col, metric_col]
+            relevant_cols = [
+                dt_col,
+                metric_col,
+                self._preaggregated_count_col
+            ] if self._preaggregated else [dt_col, metric_col]
+
             if series == "dq":
                 subgroup_str = subgroup["dq"]
                 temp_input_data = input_data[relevant_cols]
@@ -380,24 +387,19 @@ class AnomalyDetectionController(object):
                     )
 
                 else:
-                    if self._preaggregated and subgroup_str == "count":
-                        series_data = (
-                            temp_input_data.set_index(dt_col)
-                            .resample(RESAMPLE_FREQUENCY[freq])
-                            .agg({self._preaggregated_count_col: "sum"})
-                            .rename(columns={
-                                self._preaggregated_count_col: metric_col
-                            })
-                        )
-                    else:
-                        series_data = (
-                            temp_input_data.set_index(dt_col)
-                            .resample(RESAMPLE_FREQUENCY[freq])
-                            .agg({metric_col: subgroup_str})
-                        )
+                    series_data = (
+                        temp_input_data.set_index(dt_col)
+                        .resample(RESAMPLE_FREQUENCY[freq])
+                        .agg({self._preaggregated_count_col: "sum"})
+                        .rename(columns={self._preaggregated_count_col: metric_col})
+                    ) if self._preaggregated and subgroup_str == "count" else (
+                        temp_input_data.set_index(dt_col)
+                        .resample(RESAMPLE_FREQUENCY[freq])
+                        .agg({metric_col: subgroup_str})
+                    )
 
-            elif series == "subdim":
-                temp_input_data = get_subgroup_from_df(input_data, subgroup)[relevant_cols]
+            elif series == "overall":
+                temp_input_data = input_data[relevant_cols]
                 temp_input_data = fill_data(
                     temp_input_data,
                     dt_col,
@@ -436,8 +438,10 @@ class AnomalyDetectionController(object):
                         .agg({metric_col: agg})
                     )
 
-            elif series == "overall":
-                temp_input_data = input_data[relevant_cols]
+            elif series == "subdim":
+                temp_input_data = get_subgroup_from_df(
+                    input_data, subgroup
+                )[relevant_cols]
                 temp_input_data = fill_data(
                     temp_input_data,
                     dt_col,
@@ -483,13 +487,15 @@ class AnomalyDetectionController(object):
 
             # TODO: fix missing dates/values issue more robustly
             series_data[metric_col] = series_data[metric_col].fillna(0)
-            
+
             # Fix end_date for hourly anomaly alerts
             if self.kpi_info["scheduler_params"]["scheduler_frequency"] == "H":
                 self.end_date = self.end_date.floor(freq='H')
-                logger.info(f"End Date for Hourly Input Dataframe for KPI {self.end_date}")
+                logger.info(
+                    f"End Date for Hourly Input Dataframe for KPI {self.end_date}"
+                )
 
-        except Exception as e:
+        except Exception as e:  # noqa B902
             self._checkpoint_failure("Overall KPI - Preprocessor", e, is_overall)
             raise e
         else:
@@ -500,7 +506,7 @@ class AnomalyDetectionController(object):
             overall_anomaly_output = self._detect_anomaly(
                 model_name, series_data, last_date, series, subgroup, freq
             )
-        except Exception as e:
+        except Exception as e:  # noqa B902
             self._checkpoint_failure("Overall KPI - Anomaly Detector", e, is_overall)
             raise e
         else:
@@ -509,7 +515,7 @@ class AnomalyDetectionController(object):
         try:
             logger.info(f"Saving Anomaly output for {series}-{subgroup}")
             self._save_anomaly_output(overall_anomaly_output, series, subgroup)
-        except Exception as e:
+        except Exception as e:  # noqa B902
             self._checkpoint_failure("Overall KPI - Result Ingestor", e, is_overall)
             raise e
         else:
@@ -541,7 +547,7 @@ class AnomalyDetectionController(object):
             if self.debug:
                 filtered_subgroups = filtered_subgroups[:DEBUG_MAX_SUBGROUPS]
 
-        except Exception as e:
+        except Exception as e:  # noqa B902
             self._checkpoint_failure("Subdimensions - Subdimension Generator", e)
             raise e
         else:
@@ -554,7 +560,7 @@ class AnomalyDetectionController(object):
                     self._run_anomaly_for_series(input_data, "subdim", subgroup)
                 except Exception:  # noqa: B902
                     logger.exception(f"Exception occurred for: subdim - {subgroup}")
-        except Exception as e:
+        except Exception as e:  # noqa B902
             self._checkpoint_failure("Subdimensions - Anomaly Detector", e)
             raise e
         else:
@@ -572,14 +578,16 @@ class AnomalyDetectionController(object):
             if self._preaggregated:
                 dq_list = ["count"]
             else:
-                dq_list = ["max", "count", "mean"] if agg != "mean" else ["max", "count"]
+                dq_list = [
+                    "max", "count", "mean"
+                ] if agg != "mean" else ["max", "count"]
             is_categorical_metric = (
                 1 if input_data[self.kpi_info["metric"]].dtypes == "object" else 0
             )
             if agg == "count" and is_categorical_metric:
                 dq_list = []
             dq_list = [{"dq": dq} for dq in dq_list]
-        except Exception as e:
+        except Exception as e:  # noqa B902
             self._checkpoint_failure("Data Quality - Preprocessor", e)
             raise e
         else:
@@ -592,7 +600,7 @@ class AnomalyDetectionController(object):
                     self._run_anomaly_for_series(input_data, "dq", dq)
                 except Exception:  # noqa: B902
                     logger.exception(f"Exception occurred for: data quality - {dq}")
-        except Exception as e:
+        except Exception as e:  # noqa B902
             self._checkpoint_failure("Data Quality - Anomaly Detector", e)
             raise e
         else:
@@ -658,7 +666,7 @@ class AnomalyDetectionController(object):
         logger.info(f"Loading Input Data for KPI {kpi_id}")
         try:
             input_data = self._load_anomaly_data()
-        except Exception as e:
+        except Exception as e:  # noqa B902
             self._checkpoint_failure("Data Loader", e)
             raise e
         else:
@@ -667,7 +675,9 @@ class AnomalyDetectionController(object):
         if self.kpi_info["scheduler_params"]["scheduler_frequency"] == "H":
             logger.info(f"Creating Hourly Input Dataframe for KPI {kpi_id}")
             input_data = self._create_hourly_input_data(input_data)
-            logger.info(f"Last Data Point for Hourly Input Dataframe for KPI {self.end_date}")
+            logger.info(
+                f"Last Data Point for Hourly Input Dataframe for KPI {self.end_date}"
+            )
 
         logger.info(f"Loaded {len(input_data)} rows of input data.")
 

@@ -9,6 +9,7 @@ from typing import (
     Any,
     DefaultDict,
     Dict,
+    Iterator,
     List,
     Optional,
     Sequence,
@@ -160,6 +161,23 @@ class AnomalyPoint(AnomalyPointOriginal):
     - there are subdimensional level anomalies for the same timestamp
       and they are above the severity threshold.
     """
+
+    def subdim_name_value(self) -> Optional[Tuple[str, str]]:
+        """Return subdimension name and value."""
+        return (
+            extract_dim_value_from_series_type(self.series_type_original)
+            if self.series_type_original is not None
+            else None
+        )
+
+    def subdim_formatted(self) -> Optional[str]:
+        """Return subdimension name and value formatted as a string."""
+        subdim = self.subdim_name_value()
+        if subdim is None:
+            return None
+
+        dimension, value = subdim
+        return f"[{dimension} = {value}]"
 
     @staticmethod
     def _from_original_single(
@@ -445,16 +463,15 @@ class AnomalyPointFormatted(AnomalyPoint):
 
         return (previous_point_time).strftime(format).lstrip("0")
 
-    @property
     def relevant_subdims_formatted(self) -> Optional[List[str]]:
         """Returns a list of top relevant subdims, formatted."""
         if self.relevant_subdims is None:
             return None
 
         relevant_subdims = (
-            extract_dim_value_from_series_type(point.series_type_original)
-            for point in self.relevant_subdims
-            if point.series_type_original is not None
+            subdim
+            for subdim in (point.subdim_name_value() for point in self.relevant_subdims)
+            if subdim is not None
         )
 
         # take top N
@@ -465,12 +482,13 @@ class AnomalyPointFormatted(AnomalyPoint):
             for _, subdim in zip(range(ALERT_RELEVANT_SUBDIMS_TOP_N), relevant_subdims)
         ]
 
-        return [value for _, value in relevant_subdims]
+        return [f"[{value}]" for _, value in relevant_subdims]
 
 
 class AlertsIndividualData(BaseModel):
     """Data for formatting an individual alert."""
 
+    all_points: List[AnomalyPoint]
     top_overall_points: List[AnomalyPointFormatted]
     top_subdim_points: List[AnomalyPointFormatted]
 
@@ -479,11 +497,20 @@ class AlertsIndividualData(BaseModel):
     alert_id: int
     alert_name: str
     alert_message: str
+    alert_channel_conf: Any
 
     kpi_id: int
     kpi_name: str
 
     date: datetime.date
+
+    def kpi_link(self):
+        """Returns a link to the KPI."""
+        return f"{webapp_url_prefix()}#/dashboard/0/anomaly/{self.kpi_id}"
+
+    def alert_dashboard_link(self):
+        """Returns a link to the alert dashboard."""
+        return f"{webapp_url_prefix()}api/digest"
 
     @staticmethod
     def from_points(
@@ -494,7 +521,10 @@ class AlertsIndividualData(BaseModel):
             _top_anomalies([point for point in points if point.is_overall], 5)
         )
         top_subdim_points = deepcopy(
-            _top_anomalies([point for point in points if point.is_subdim], 5)
+            _top_anomalies(
+                [point for point in _iterate_all_points(points) if point.is_subdim],
+                5,
+            )
         )
 
         top_overall_points = list(
@@ -505,12 +535,14 @@ class AlertsIndividualData(BaseModel):
         )
 
         return AlertsIndividualData(
+            all_points=points,
             top_overall_points=top_overall_points,
             top_subdim_points=top_subdim_points,
             include_subdims=alert.include_subdims,
             alert_id=alert.id,
-            alert_name=alert.name,
-            alert_message=alert.message,
+            alert_name=alert.alert_name,
+            alert_message=alert.alert_message,
+            alert_channel_conf=alert.alert_channel_conf,
             kpi_id=kpi.id,
             kpi_name=kpi.name,
             date=date,
@@ -895,13 +927,13 @@ class AnomalyAlertController:
         individual_data: AlertsIndividualData,
     ) -> None:
         # TODO(Samyak): Fix this implementation to use AlertsIndividualData
-        alert_channel_conf = self.alert.alert_channel_conf
+        alert_channel_conf = individual_data.alert_channel_conf
 
         if not isinstance(alert_channel_conf, dict):
             raise AlertException(
                 f"Alert channel config was not a dict. Got: {alert_channel_conf}",
-                alert_id=self.alert_id,
-                kpi_id=self.kpi_id,
+                alert_id=individual_data.alert_id,
+                kpi_id=individual_data.kpi_id,
             )
 
         recipient_emails = alert_channel_conf.get("email")
@@ -909,47 +941,31 @@ class AnomalyAlertController:
         if not recipient_emails:
             raise AlertException(
                 f"No recipient emails found. Got: {recipient_emails}",
-                alert_id=self.alert_id,
-                kpi_id=self.kpi_id,
+                alert_id=individual_data.alert_id,
+                kpi_id=individual_data.kpi_id,
             )
 
         subject = (
-            f"{self.alert.alert_name} - Chaos Genius Alert "
-            f"({date.strftime('%b %d')})❗"
+            f"{individual_data.alert_name} - Chaos Genius Alert "
+            f"({individual_data.date.strftime('%b %d')})❗"
         )
 
         # attach CSV of anomaly data
         files = [
             {
                 "fname": "data.csv",
-                "fdata": _make_anomaly_data_csv(formatted_anomaly_data),
+                "fdata": _make_anomaly_data_csv(individual_data.all_points),
             }
         ]
-
-        kpi = self._get_kpi()
-
-        (
-            top_anomalies_,
-            overall_count,
-            subdim_count,
-        ) = self._get_top_anomalies_and_counts(formatted_anomaly_data, kpi)
 
         send_email_using_template(
             "email_alert.html",
             recipient_emails,
             subject,
             files,
-            top_anomalies=top_anomalies_,
-            alert_message=self.alert.alert_message,
-            kpi_name=kpi.name,
+            data=individual_data,
             preview_text="Anomaly Alert",
-            alert_name=self.alert.alert_name,
-            kpi_link=f"{webapp_url_prefix()}#/dashboard/0/anomaly/" f"{self.kpi_id}",
-            alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
-            overall_count=overall_count,
-            subdim_count=subdim_count,
             str=str,
-            date=date.strftime(ALERT_DATE_FORMAT),
         )
 
         logger.info(
@@ -1017,12 +1033,16 @@ def _make_anomaly_data_csv(anomaly_points: List[AnomalyPoint]) -> str:
     anomaly_df = pd.DataFrame(
         [
             point.dict(include=ANOMALY_TABLE_COLUMN_NAMES_MAPPER.keys())
-            for point in anomaly_points
+            for point in _iterate_all_points(anomaly_points)
         ]
     )
 
+    anomaly_df.sort_values(by="severity", inplace=True)
+
     # this is a property that is calculated, so it needs to be assigned separately
-    anomaly_df["expected_value"] = [point.expected_value for point in anomaly_points]
+    anomaly_df["expected_value"] = [
+        point.expected_value for point in _iterate_all_points(anomaly_points)
+    ]
 
     anomaly_df = anomaly_df[ANOMALY_TABLE_COLUMN_NAMES_ORDERED]
 
@@ -1069,6 +1089,18 @@ def _count_anomalies(points: Sequence[TAnomalyPoint]) -> Tuple[int, int]:
     )
     subdims = total - overall
     return overall, subdims
+
+
+def _iterate_all_points(points: List[AnomalyPoint]) -> Iterator[AnomalyPoint]:
+    """Iterator over all points (overall and subdims) in the list.
+
+    Not sorted, but the order can be expected to be the same everytime.
+    """
+    for point in points:
+        yield point
+        if point.is_overall and point.relevant_subdims is not None:
+            for subdim_point in point.relevant_subdims:
+                yield subdim_point
 
 
 def get_top_anomalies_and_counts(

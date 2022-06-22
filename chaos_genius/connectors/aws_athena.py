@@ -117,13 +117,11 @@ class AwsAthenaDb(BaseDb):
         return status, message
 
     def run_query(self, query, as_df=True):
-        cursor = self.get_pyathena_engine()
-        if as_df == True:
-            # TODO: Test the performance
-            return cursor.execute(query).as_pandas()
-            # return merge_dataframe_chunks(
-            #     pd.read_sql_query(query, engine, chunksize=self.CHUNKSIZE)
-            # )
+        engine = self.get_db_engine()
+        if as_df:
+            return merge_dataframe_chunks(
+                pd.read_sql_query(query, engine, chunksize=self.CHUNKSIZE)
+            )
         else:
             return []
 

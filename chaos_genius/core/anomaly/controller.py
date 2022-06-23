@@ -2,6 +2,7 @@
 
 
 import contextlib
+import json
 import logging
 from datetime import date, datetime, timedelta
 from typing import Dict, List, Optional
@@ -18,10 +19,7 @@ from chaos_genius.core.anomaly.utils import (
 )
 from chaos_genius.core.utils.data_loader import DataLoader
 from chaos_genius.core.utils.end_date import load_input_data_end_date
-from chaos_genius.core.utils.utils import (
-    get_subgroup_from_df,
-    get_user_string_from_subgroup_dict,
-)
+from chaos_genius.core.utils.utils import get_subgroup_from_df
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput, db
 from chaos_genius.databases.models.data_source_model import DataSource
 from chaos_genius.databases.models.kpi_model import Kpi
@@ -217,18 +215,16 @@ class AnomalyDetectionController(object):
         if self.debug:
             print("SAVING", series, subgroup, len(anomaly_output))
 
-        if subgroup:
-            if series == "dq":
-                subgroup = subgroup["dq"]
-            else:
-                subgroup = get_user_string_from_subgroup_dict(subgroup)
-
         anomaly_output = anomaly_output.rename(
             columns={"dt": "data_datetime", "anomaly": "is_anomaly"}
         )
         anomaly_output["kpi_id"] = self.kpi_info["id"]
         anomaly_output["anomaly_type"] = series
+
+        if subgroup is not None:
+            subgroup = json.dumps(subgroup)
         anomaly_output["series_type"] = subgroup
+
         anomaly_output["created_at"] = datetime.now()
 
         anomaly_output.to_sql(

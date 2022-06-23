@@ -1,11 +1,11 @@
 """Provides utility functions for anomaly detection."""
 
+import json
 from datetime import datetime, timedelta
 from typing import Any
 
 import pandas as pd
 
-from chaos_genius.core.utils.utils import get_user_string_from_subgroup_dict
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 
 
@@ -26,11 +26,8 @@ def get_last_date_in_db(kpi_id: int, series: str, subgroup: dict = None) -> Any 
     :return: last date for which anomaly was computed
     :rtype: Any | None
     """
-    if subgroup:
-        if series == "dq":
-            subgroup = subgroup["dq"]
-        else:
-            subgroup = get_user_string_from_subgroup_dict(subgroup)
+    if subgroup is not None:
+        subgroup = json.dumps(subgroup)
 
     results = (
         AnomalyDataOutput.query.filter(

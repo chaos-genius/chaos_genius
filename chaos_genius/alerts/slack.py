@@ -18,19 +18,13 @@ def get_webhook_client() -> WebhookClient:
 
 
 def anomaly_alert_slack(
-    kpi_name: str,
-    alert_name: str,
-    kpi_id: int,
-    alert_message: str,
-    points: "Sequence[anomaly_alerts.AnomalyPointFormatted]",
-    overall_count: int,
-    subdim_count: int,
-    date: str,
+    data: "anomaly_alerts.AlertsIndividualData",
 ) -> str:
     """Sends an anomaly alert on slack.
 
     Returns an empty string if successful or the error as a string if not.
     """
+    # TODO: Fix this implementation to use AlertsIndividualData
     client = get_webhook_client()
     response = client.send(
         blocks=[
@@ -38,7 +32,10 @@ def anomaly_alert_slack(
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": f"{alert_name} - {kpi_name} ({date}) ",
+                    "text": (
+                        f"{data.alert_name} - {data.kpi_name} "
+                        f"({data.date_formatted()}) "
+                    ),
                     "emoji": True,
                 },
             },
@@ -55,7 +52,7 @@ def anomaly_alert_slack(
             },
             {
                 "type": "section",
-                "text": {"type": "mrkdwn", "text": f"{alert_message}\n"},
+                "text": {"type": "mrkdwn", "text": f"{data.alert_message}\n"},
             },
             {
                 "type": "divider",
@@ -73,8 +70,8 @@ def anomaly_alert_slack(
                 "text": {
                     "type": "mrkdwn",
                     "text": _format_slack_anomalies(
-                        points,
-                        kpi_name=kpi_name,
+                        data.top_overall_points,
+                        kpi_name=data.kpi_name,
                         include_kpi_info=False,
                     ),
                 },
@@ -85,14 +82,14 @@ def anomaly_alert_slack(
                     {
                         "type": "button",
                         "text": {"type": "plain_text", "text": "View KPI"},
-                        "url": f"{webapp_url_prefix()}#/dashboard/0/anomaly/{kpi_id}",
+                        "url": data.kpi_link(),
                         "action_id": "kpi_link",
                         "style": "primary",
                     },
                     {
                         "type": "button",
                         "text": {"type": "plain_text", "text": "Alerts Dashboard"},
-                        "url": f"{webapp_url_prefix()}api/digest",
+                        "url": data.alert_dashboard_link(),
                         "action_id": "alert_dashboard",
                         "style": "primary",
                     },

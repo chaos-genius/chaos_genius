@@ -512,6 +512,10 @@ class AlertsIndividualData(BaseModel):
         """Returns a link to the alert dashboard."""
         return f"{webapp_url_prefix()}api/digest"
 
+    def date_formatted(self):
+        """Returns date formatted for readability."""
+        return self.date.strftime(ALERT_DATE_FORMAT)
+
     @staticmethod
     def from_points(
         points: List[AnomalyPoint], alert: Alert, kpi: Kpi, date: datetime.date
@@ -977,24 +981,8 @@ class AnomalyAlertController:
         self,
         individual_data: AlertsIndividualData,
     ):
-        # TODO(Samyak): Fix this implementation to use AlertsIndividualData
-        kpi = self._get_kpi()
-
-        (
-            top_anomalies_,
-            overall_count,
-            subdim_count,
-        ) = self._get_top_anomalies_and_counts(formatted_anomaly_data, kpi)
-
         err = anomaly_alert_slack(
-            kpi.name,
-            self.alert.alert_name,
-            self.kpi_id,
-            self.alert.alert_message,
-            top_anomalies_,
-            overall_count,
-            subdim_count,
-            date.strftime(ALERT_DATE_FORMAT),
+            individual_data,
         )
 
         if err == "":

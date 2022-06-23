@@ -510,7 +510,9 @@ class AlertsIndividualData(BaseModel):
 
     def alert_dashboard_link(self):
         """Returns a link to the alert dashboard."""
-        return f"{webapp_url_prefix()}api/digest"
+        return (
+            f"{webapp_url_prefix()}api/digest?alert={self.alert_name} ({self.alert_id})"
+        )
 
     def date_formatted(self):
         """Returns date formatted for readability."""

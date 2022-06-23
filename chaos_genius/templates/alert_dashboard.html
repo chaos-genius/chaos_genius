@@ -712,11 +712,14 @@
 
     <!-- Script for filtering search according to alert configuration selected-->
     <script type="text/javascript">
+        const dropdownAlerts = document.getElementById("alert-config-select");
+        const alertConfigSeparator = ";;;";
+
         function initAlertConfigs(currentTable) {
             const alertConfigs = new Set();
 
             currentTable.origData.forEach(datapoint => {
-                    alertConfigs.add(datapoint[currentTable.alertColIndex]);
+                alertConfigs.add(datapoint[currentTable.alertColIndex]);
             });
 
             alertSelect.clear(false);
@@ -727,25 +730,48 @@
             alertSelect.refreshOptions(false);
             alertSelect.refreshItems();
 
+            // get data from URL params
+            const params = new URLSearchParams(window.location.search);
+            if (params.get("alert")) {
+                const alert_str = params.get("alert");
+                const alerts = alert_str.split(alertConfigSeparator);
+                for (const alert of alerts) {
+                    alertSelect.addItem(alert, false);
+                }
+            }
+            updateAlertConfigs();
+
             return alertConfigs;
         }
 
         let alertConfigs = initAlertConfigs(currentTable);
-        const dropdownAlerts = document.getElementById("alert-config-select");
-        dropdownAlerts.addEventListener("input", () => {
-            const selected = Array.from(dropdownAlerts.options).filter(option => option.selected).map(option => option.value);
+
+        function updateAlertConfigs() {
+            const selected = Array
+                .from(dropdownAlerts.options)
+                .filter(option => option.selected)
+                .map(option => option.value);
             const selectedSet = new Set(selected);
+            const urlParser = new URL(window.location);
 
             if(selectedSet.size > 0){
                 addFilter("alert-name", row => {
                     return selectedSet.has(row[currentTable.alertColIndex])
                 });
+                urlParser.searchParams.set("alert", Array.from(selectedSet).join(alertConfigSeparator));
             }
             else{
                 removeFilter("alert-name");
+                urlParser.searchParams.delete("alert");
             }
 
+            // set URL params
+            window.history.replaceState({}, null, urlParser.href);
+
             applyFilters(currentTable);
+        }
+        dropdownAlerts.addEventListener("input", () => {
+            updateAlertConfigs();
         });
     </script>
 
@@ -824,20 +850,21 @@
         function updateDateSelect() {
             const selected = Array.from(dropdownDates.options).filter(option => option.selected).map(option => option.value);
             const selectedSet = new Set(selected);
+            const urlParser = new URL(window.location);
 
             if(selectedSet.size > 0){
                 addFilter("date", row => {
                     return selectedSet.has(row[currentTable.dateOnlyColIndex])
                 });
+                urlParser.searchParams.set("date", Array.from(selectedSet).join(","));
             }
             else{
                 removeFilter("date");
+                urlParser.searchParams.delete("date");
             }
 
             // set URL params
-            const parser = new URL(window.location);
-            parser.searchParams.set("date", Array.from(selectedSet).join(","));
-            window.history.replaceState({}, null, parser.href);
+            window.history.replaceState({}, null, urlParser.href);
 
             applyFilters(currentTable);
         }

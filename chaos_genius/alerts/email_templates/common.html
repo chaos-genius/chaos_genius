@@ -183,11 +183,11 @@
             </span>
             <span style="{{ important_text }}">{{point.previous_value_readable}}</span>
 
-        {%- endif %}
+        {%- endif %}<!--
 
-        (<span style="{{ important_text }}">{{ point.formatted_change_percent }}</span>)
+     -->(<span style="{{ important_text }}">{{ point.formatted_change_percent }}</span>)<!--
 
-        {% if point.is_hourly -%}
+     -->{% if point.is_hourly -%}
             <span style="{{ non_important_text }}">
                 from
             </span>

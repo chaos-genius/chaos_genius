@@ -378,7 +378,7 @@ class AnomalyPointFormatted(AnomalyPoint):
         is_hourly = time_series_frequency is not None and time_series_frequency == "H"
 
         orig_point = point.dict()
-        orig_point["relevant_subdims"] = (
+        orig_point["relevant_subdims_"] = (
             AnomalyPointFormatted.from_points(
                 point.relevant_subdims,
                 time_series_frequency,

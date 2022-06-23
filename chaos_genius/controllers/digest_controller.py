@@ -9,12 +9,12 @@ from sqlalchemy import and_, or_
 from chaos_genius.alerts.anomaly_alerts import (
     AnomalyPoint,
     AnomalyPointFormatted,
+    iterate_over_all_points,
     top_anomalies,
 )
 from chaos_genius.alerts.constants import (
     ALERT_DATE_FORMAT,
     ALERT_READABLE_DATA_TIMESTAMP_FORMAT,
-    OVERALL_KPI_SERIES_TYPE_REPR,
 )
 from chaos_genius.alerts.utils import webapp_url_prefix
 from chaos_genius.databases.models.alert_model import Alert
@@ -81,7 +81,11 @@ class AlertsReportData(BaseModel):
     ) -> "AlertsReportData":
         """Create an AlertsReportData."""
         top_anomalies_ = top_anomalies(
-            [point for trig_alert in triggered_alerts for point in trig_alert.points],
+            [
+                point
+                for trig_alert in triggered_alerts
+                for point in iterate_over_all_points(trig_alert.points)
+            ],
             10,
         )
 
@@ -230,11 +234,7 @@ def _filter_anomaly_alerts(
     anomaly_points: Sequence[AnomalyPointFormatted], include_subdims: bool = False
 ) -> List[AnomalyPointFormatted]:
     if not include_subdims:
-        return [
-            point
-            for point in anomaly_points
-            if point.series_type == OVERALL_KPI_SERIES_TYPE_REPR
-        ]
+        return [point for point in anomaly_points if point.is_overall]
     else:
         counts: DefaultDict[Tuple[int, datetime.datetime], int] = defaultdict(lambda: 0)
         filtered_points: List[AnomalyPointFormatted] = []
@@ -242,7 +242,7 @@ def _filter_anomaly_alerts(
 
         for point in anomaly_points:
 
-            if point.series_type != OVERALL_KPI_SERIES_TYPE_REPR:
+            if point.is_subdim:
                 counts[(point.alert_id, point.data_datetime)] += 1
                 if counts[(point.alert_id, point.data_datetime)] > max_subdims:
                     continue
@@ -323,6 +323,7 @@ def get_digest_view_data(
         [alert for alert in triggered_alerts_data if alert.alert_type == "KPI Alert"],
         kpi_cache,
     )
+    anomaly_alerts = list(iterate_over_all_points(anomaly_alerts))
     anomaly_alerts = _filter_anomaly_alerts(anomaly_alerts, include_subdims)
     # newest data first
     anomaly_alerts.sort(key=lambda point: point.data_datetime, reverse=True)

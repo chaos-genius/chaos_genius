@@ -484,6 +484,14 @@ class AnomalyPointFormatted(AnomalyPoint):
 
         return [f"[{value}]" for _, value in relevant_subdims]
 
+    def kpi_link(self):
+        """Returns a link to the KPI."""
+        return f"{webapp_url_prefix()}#/dashboard/0/anomaly/{self.kpi_id}"
+
+    def alert_link(self):
+        """Returns a link to the edit alert page."""
+        return f"{webapp_url_prefix()}#/alerts/edit/kpi-alert/{self.alert_id}"
+
 
 class AlertsIndividualData(BaseModel):
     """Data for formatting an individual alert."""
@@ -510,9 +518,7 @@ class AlertsIndividualData(BaseModel):
 
     def alert_dashboard_link(self):
         """Returns a link to the alert dashboard."""
-        return (
-            f"{webapp_url_prefix()}api/digest?alert={self.alert_name} ({self.alert_id})"
-        )
+        return f"{webapp_url_prefix()}api/digest?alert={self.alert_id}"
 
     def date_formatted(self):
         """Returns date formatted for readability."""

@@ -88,6 +88,12 @@
                                             KPI Name (ID)
                                         </th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                            Alert ID
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                            KPI ID
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
                                             Dimension
                                         </th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle desc">
@@ -133,6 +139,9 @@
                                     <tr>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
                                             Alert Name (ID)
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                            Alert ID
                                         </th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
                                             Alert Message
@@ -339,8 +348,10 @@
     <script>
         const dataAnomaly = [
             {% for point in anomaly_alerts_data %}
-                [ "{{ point.alert_name }} ({{ point.alert_id }})",
-                  "{{ point.kpi_name }} ({{ point.kpi_id }})",
+                [ "<a href=\"{{ point.alert_link() }}\" style=\"text-decoration: underline;\">{{ point.alert_name }}</a> ({{ point.alert_id }})",
+                  "<a href=\"{{ point.kpi_link() }}\" style=\"text-decoration: underline;\">{{ point.kpi_name }}</a> ({{ point.kpi_id }})",
+                  "{{ point.alert_id }}",
+                  "{{ point.kpi_id }}",
                   "{{ point.series_type }}",
                   "{{ point.readable_data_timestamp }}",
                   "{{ point.y }}",
@@ -374,24 +385,33 @@
         // hide user emails and alert channel columns
         dataTableAnomaly.alertColIndex = 0;
         dataTableAnomaly.kpiColIndex = 1;
-        dataTableAnomaly.emailColIndex = 6;
-        dataTableAnomaly.channelColIndex = 7;
-        dataTableAnomaly.dateOnlyColIndex = 9;
-        dataTableAnomaly.valueColIndex = 4;
-        dataTableAnomaly.previousValueColIndex = 5;
-        dataTableAnomaly.dimensionColIndex = 2;
+        dataTableAnomaly.alertIdColIndex = 2;
+        dataTableAnomaly.kpiIdColIndex = 3;
+        dataTableAnomaly.emailColIndex = 8;
+        dataTableAnomaly.channelColIndex = 9;
+        dataTableAnomaly.dateOnlyColIndex = 11;
+        dataTableAnomaly.valueColIndex = 6;
+        dataTableAnomaly.previousValueColIndex = 7;
+        dataTableAnomaly.dimensionColIndex = 4;
         // dataTableAnomaly.severityColIndex = -1;
-        dataTableAnomaly.timeStampColIndex = 3;
-        dataTableAnomaly.columns().hide([dataTableAnomaly.emailColIndex, dataTableAnomaly.channelColIndex, dataTableAnomaly.dateOnlyColIndex]);
-        if ((new URL(window.location)).searchParams.get("subdims") != "true") {
-            dataTableAnomaly.columns().hide([dataTableAnomaly.dimensionColIndex]);
-        }
+        dataTableAnomaly.timeStampColIndex = 5;
 
         dataTableAnomaly.on('datatable.init', function(args) {
             dataTableAnomaly.head.getElementsByTagName('th')[dataTableAnomaly.valueColIndex].getElementsByTagName('a')[0].classList.add('desc');
             dataTableAnomaly.head.getElementsByTagName('th')[dataTableAnomaly.previousValueColIndex].getElementsByTagName('a')[0].classList.add('desc');
             // dataTableAnomaly.head.getElementsByTagName('th')[dataTableAnomaly.severityColIndex].getElementsByTagName('a')[0].classList.add('desc');
             dataTableAnomaly.head.getElementsByTagName('th')[dataTableAnomaly.timeStampColIndex].getElementsByTagName('a')[0].classList.add('desc');
+
+            dataTableAnomaly.columns().hide([
+                dataTableAnomaly.alertIdColIndex,
+                dataTableAnomaly.kpiIdColIndex,
+                dataTableAnomaly.emailColIndex,
+                dataTableAnomaly.channelColIndex,
+                dataTableAnomaly.dateOnlyColIndex,
+            ]);
+            if ((new URL(window.location)).searchParams.get("subdims") != "true") {
+                dataTableAnomaly.columns().hide([dataTableAnomaly.dimensionColIndex]);
+            }
         });
         dataTables.push(dataTableAnomaly);
 
@@ -400,6 +420,7 @@
             {% for triggered_alert in event_alerts_data %}
             [
                 "{{ triggered_alert.alert_name }} ({{ triggered_alert.alert_conf_id }})",
+                "{{ triggered_alert.alert_conf_id }}",
                 "{{ triggered_alert.alert_message }}",
                 "{{ triggered_alert.created_at }}",
                 "{{ triggered_alert.alert_channel }}",
@@ -419,10 +440,16 @@
         });
         dataTableEvent.origData = dataEvent;
         dataTableEvent.alertColIndex = 0;
-        dataTableEvent.emailColIndex = 4;
-        dataTableEvent.channelColIndex = 3;
-        dataTableEvent.dateOnlyColIndex = 5;
-        dataTableEvent.columns().hide([dataTableEvent.emailColIndex, dataTableEvent.channelColIndex, dataTableEvent.dateOnlyColIndex]);
+        dataTableEvent.alertIdColIndex = 1;
+        dataTableEvent.emailColIndex = 5;
+        dataTableEvent.channelColIndex = 4;
+        dataTableEvent.dateOnlyColIndex = 6;
+        dataTableEvent.columns().hide([
+            dataTableEvent.alertIdColIndex,
+            dataTableEvent.emailColIndex,
+            dataTableEvent.channelColIndex,
+            dataTableEvent.dateOnlyColIndex
+        ]);
         dataTables.push(dataTableEvent);
         {% endif %}
 
@@ -668,6 +695,18 @@
         });
     </script>
 
+    <!-- Script for filtering helpers -->
+    <script type="text/javascript">
+        function stripTags(str) {
+            // render it into a div and extract text
+            // removes all html tags
+            const tempDiv = document.createElement("div");
+            tempDiv.innerHTML = str;
+            const textOnly = tempDiv.textContent || tempDiv.innerText || "";
+            return textOnly;
+        }
+    </script>
+
     <!-- Script for filtering search according to email selected-->
     <script type="text/javascript">
         function initUserEmails(currentTable) {
@@ -713,20 +752,28 @@
     <!-- Script for filtering search according to alert configuration selected-->
     <script type="text/javascript">
         const dropdownAlerts = document.getElementById("alert-config-select");
-        const alertConfigSeparator = ";;;";
+        const alertConfigSeparator = ",";
 
         function initAlertConfigs(currentTable) {
-            const alertConfigs = new Set();
+            const alertConfigs = new Map();
 
             currentTable.origData.forEach(datapoint => {
-                alertConfigs.add(datapoint[currentTable.alertColIndex]);
+                alertConfigs.set(
+                    datapoint[currentTable.alertIdColIndex],
+                    stripTags(datapoint[currentTable.alertColIndex])
+                );
             });
 
             alertSelect.clear(false);
             alertSelect.clearOptions();
-            alertSelect.addOptions(Array.from(alertConfigs).map((alert) => {
-                return {value: alert, text: alert};
-            }), false);
+            alertSelect.addOptions(
+                Array.
+                    from(alertConfigs).
+                    map(([alertId, alertName]) => {
+                        return {value: alertId, text: alertName};
+                    }),
+                false
+            );
             alertSelect.refreshOptions(false);
             alertSelect.refreshItems();
 
@@ -756,7 +803,7 @@
 
             if(selectedSet.size > 0){
                 addFilter("alert-name", row => {
-                    return selectedSet.has(row[currentTable.alertColIndex])
+                    return selectedSet.has(row[currentTable.alertIdColIndex])
                 });
                 urlParser.searchParams.set("alert", Array.from(selectedSet).join(alertConfigSeparator));
             }
@@ -778,17 +825,25 @@
     <!-- Script for filtering search accoring to KPI configuration selected-->
     <script type="text/javascript">
         function initKpiSelect(currentTable) {
-            const kpiNames = new Set();
+            const kpiNames = new Map();
 
             currentTable.origData.forEach(datapoint => {
-                kpiNames.add(datapoint[currentTable.kpiColIndex]);
+                kpiNames.set(
+                    datapoint[currentTable.kpiIdColIndex],
+                    stripTags(datapoint[currentTable.kpiColIndex])
+                );
             });
 
             kpiSelect.clear(false);
             kpiSelect.clearOptions();
-            kpiSelect.addOptions(Array.from(kpiNames).map((kpi) => {
-                return {value: kpi, text: kpi};
-            }), false);
+            kpiSelect.addOptions(
+                Array
+                    .from(kpiNames)
+                    .map(([kpiId, kpiName]) => {
+                        return {value: kpiId, text: kpiName};
+                    }),
+                false
+            );
             kpiSelect.refreshOptions(false);
             kpiSelect.refreshItems();
 
@@ -803,7 +858,7 @@
 
             if(selectedSet.size > 0){
                 addFilter("kpi-name", row => {
-                    return selectedSet.has(row[currentTable.kpiColIndex])
+                    return selectedSet.has(row[currentTable.kpiIdColIndex])
                 });
             }
             else{

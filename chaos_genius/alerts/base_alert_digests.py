@@ -8,7 +8,7 @@ from chaos_genius.alerts.anomaly_alerts import (
     AnomalyPointFormatted,
     get_top_anomalies_and_counts,
 )
-from chaos_genius.alerts.constants import ALERT_DATE_FORMAT, FREQUENCY_DICT
+from chaos_genius.alerts.constants import FREQUENCY_DICT
 from chaos_genius.alerts.slack import alert_digest_slack_formatted
 from chaos_genius.alerts.utils import send_email_using_template
 from chaos_genius.controllers.config_controller import get_config_object

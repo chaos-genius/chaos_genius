@@ -1,13 +1,16 @@
 """Utilities for sending slack alert messages."""
 import logging
-from typing import Optional, Sequence
+from typing import TYPE_CHECKING, Optional, Sequence
 
 from slack_sdk.webhook.client import WebhookClient
 
 import chaos_genius.alerts.anomaly_alerts as anomaly_alerts
+
+if TYPE_CHECKING:
+    from chaos_genius.controllers.digest_controller import AlertsReportData
+
 from chaos_genius.alerts.alert_channel_creds import get_slack_creds
 from chaos_genius.alerts.utils import webapp_url_prefix
-from chaos_genius.controllers.digest_controller import AlertsReportData
 
 logger = logging.getLogger(__name__)
 
@@ -212,7 +215,7 @@ def _format_slack_anomalies(
     return out
 
 
-def alert_digest_slack_formatted(data: AlertsReportData) -> str:
+def alert_digest_slack_formatted(data: "AlertsReportData") -> str:
     """Sends an anomaly digest on slack.
 
     Returns an empty string if successful or the error as a string if not.

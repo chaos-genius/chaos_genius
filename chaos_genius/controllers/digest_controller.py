@@ -3,6 +3,8 @@ import logging
 from collections import defaultdict
 from typing import DefaultDict, Dict, List, NamedTuple, Optional, Sequence, Tuple
 
+from sqlalchemy import and_, or_
+
 from chaos_genius.alerts.anomaly_alerts import AnomalyPoint, AnomalyPointFormatted
 from chaos_genius.alerts.constants import (
     ALERT_DATE_FORMAT,
@@ -188,24 +190,28 @@ def get_digest_view_data(
         time_diff = datetime.timedelta(days=7)
         time_lower_bound = curr_time - time_diff
 
-        filters.append(triggered_alerts_data_datetime() >= time_lower_bound)
+        filters.append(
+            or_(
+                triggered_alerts_data_datetime() >= time_lower_bound,
+                TriggeredAlerts.alert_type == "Event Alert",
+            )
+        )
         logger.info(
             "Digest: looking for anomalies after %s", time_lower_bound.isoformat()
         )
     else:
-        filters.extend(
-            [
-                (
+        filters.append(
+            or_(
+                and_(
                     triggered_alerts_data_datetime()
-                    >= datetime.datetime.combine(date, datetime.time())
-                ),
-                (
+                    >= datetime.datetime.combine(date, datetime.time()),
                     triggered_alerts_data_datetime()
                     < datetime.datetime.combine(
                         date + datetime.timedelta(days=1), datetime.time()
-                    )
+                    ),
                 ),
-            ]
+                TriggeredAlerts.alert_type == "Event Alert",
+            )
         )
         logger.info("Digest: looking for anomalies on %s", date)
 

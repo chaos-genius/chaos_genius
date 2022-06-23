@@ -63,6 +63,13 @@ from chaos_genius.utils.utils import jsonable_encoder
 logger = logging.getLogger(__name__)
 
 
+# ref: https://stackoverflow.com/a/53287607/11199009
+TAnomalyPointOrig = TypeVar("TAnomalyPointOrig", bound="AnomalyPointOriginal")
+
+
+TAnomalyPoint = TypeVar("TAnomalyPoint", bound="AnomalyPoint")
+
+
 class AnomalyPointOriginal(BaseModel):
     """Representation of a point of anomaly data as received from raw anomaly data."""
 
@@ -153,14 +160,23 @@ class AnomalyPoint(AnomalyPointOriginal):
     series_type_original: Optional[str]
     """series_type from AnomalyPointOriginal, before being converted to user string."""
 
-    relevant_subdims: Optional[List["AnomalyPoint"]]
-    """Subdimensional anomalies associated with this anomaly.
+    _relevant_subdims: Optional[List]
 
-    Only available when:
-    - this anomaly is for Overall KPI.
-    - there are subdimensional level anomalies for the same timestamp
-      and they are above the severity threshold.
-    """
+    @property
+    def relevant_subdims(self: TAnomalyPoint) -> Optional[List[TAnomalyPoint]]:
+        """Subdimensional anomalies associated with this anomaly.
+
+        Only available when:
+        - this anomaly is for Overall KPI.
+        - there are subdimensional level anomalies for the same timestamp
+          and they are above the severity threshold.
+
+        Why is this an @property instead of just a field?
+        - to tie the type of the points returned to the class type.
+        - this wouldn't be needed if python had a `Self` type.
+        - disadvantage: pydantic cannot check type of `_relevant_subdims` field any more
+        """
+        return self._relevant_subdims
 
     def subdim_name_value(self) -> Optional[Tuple[str, str]]:
         """Return subdimension name and value."""
@@ -217,7 +233,7 @@ class AnomalyPoint(AnomalyPointOriginal):
             previous_value=previous_value,
             percent_change=percent_change,
             change_message=change_message,
-            relevant_subdims=relevant_subdims,
+            _relevant_subdims=relevant_subdims,
         )
 
     @staticmethod
@@ -318,9 +334,6 @@ class AnomalyPointFormatted(AnomalyPoint):
     formatted_change_percent: str
 
     is_hourly: bool
-
-    relevant_subdims: Optional[List["AnomalyPointFormatted"]]
-    """Subdimensional anomalies associated with this anomaly."""
 
     @staticmethod
     def _from_point_single(
@@ -1068,16 +1081,14 @@ def _format_anomaly_point_for_template(
     )
 
 
-# ref: https://stackoverflow.com/a/53287607/11199009
-TAnomalyPoint = TypeVar("TAnomalyPoint", bound=AnomalyPointOriginal)
-
-
-def _top_anomalies(points: Sequence[TAnomalyPoint], n=10) -> Sequence[TAnomalyPoint]:
+def _top_anomalies(
+    points: Sequence[TAnomalyPointOrig], n=10
+) -> Sequence[TAnomalyPointOrig]:
     """Returns top n anomalies according to severity."""
     return heapq.nlargest(n, points, key=lambda point: point.severity)
 
 
-def _count_anomalies(points: Sequence[TAnomalyPoint]) -> Tuple[int, int]:
+def _count_anomalies(points: Sequence[TAnomalyPointOrig]) -> Tuple[int, int]:
     """Returns a count of overall anomalies and subdim anomalies."""
     total = len(points)
     overall = sum(
@@ -1087,7 +1098,7 @@ def _count_anomalies(points: Sequence[TAnomalyPoint]) -> Tuple[int, int]:
     return overall, subdims
 
 
-def _iterate_all_points(points: List[AnomalyPoint]) -> Iterator[AnomalyPoint]:
+def _iterate_all_points(points: List[TAnomalyPoint]) -> Iterator[TAnomalyPoint]:
     """Iterator over all points (overall and subdims) in the list.
 
     Not sorted, but the order can be expected to be the same everytime.

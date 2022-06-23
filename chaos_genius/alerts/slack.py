@@ -7,6 +7,7 @@ from slack_sdk.webhook.client import WebhookClient
 import chaos_genius.alerts.anomaly_alerts as anomaly_alerts
 from chaos_genius.alerts.alert_channel_creds import get_slack_creds
 from chaos_genius.alerts.utils import webapp_url_prefix
+from chaos_genius.controllers.digest_controller import AlertsReportData
 
 logger = logging.getLogger(__name__)
 
@@ -211,13 +212,7 @@ def _format_slack_anomalies(
     return out
 
 
-def alert_digest_slack_formatted(
-    frequency: str,
-    top10: "Sequence[anomaly_alerts.AnomalyPointFormatted]",
-    overall_count: int,
-    subdim_count: int,
-    report_date: str,
-) -> str:
+def alert_digest_slack_formatted(data: AlertsReportData) -> str:
     """Sends an anomaly digest on slack.
 
     Returns an empty string if successful or the error as a string if not.
@@ -232,7 +227,7 @@ def alert_digest_slack_formatted(
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": f"{frequency.title()} Alerts Report ({report_date})",
+                    "text": f"Daily Alerts Report ({data.report_date_formatted()})",
                     "emoji": True,
                 },
             },
@@ -251,7 +246,7 @@ def alert_digest_slack_formatted(
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": _format_slack_anomalies(top10),
+                    "text": _format_slack_anomalies(data.top_anomalies),
                 },
             },
             {
@@ -260,7 +255,7 @@ def alert_digest_slack_formatted(
                     {
                         "type": "button",
                         "text": {"type": "plain_text", "text": "Alerts Dashboard"},
-                        "url": f"{webapp_url_prefix()}api/digest",
+                        "url": data.alert_dashboard_link(),
                         "action_id": "alert_dashboard",
                         "style": "primary",
                     }

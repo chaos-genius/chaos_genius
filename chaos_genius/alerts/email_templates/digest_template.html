@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<h2 style="margin-bottom: 15px; {{ common.main_text }}">Alert Digest ({{ report_date }})</h2>
+<h2 style="margin-bottom: 15px; {{ common.main_text }}">Alert Digest ({{ data.report_date_formatted() }})</h2>
 
 <div class="digest-container" style="{{ common.main_text }}">
 
@@ -12,14 +12,14 @@
 
 <h3 style="{{ common.main_text }}">Top Anomalies</h3>
 <ul>
-    {% for point in top_anomalies %}
+    {% for point in data.top_anomalies %}
     <li>
-        {{ common.anomaly_point_formatting(point, kpi_link_prefix) }}
+        {{ common.anomaly_point_formatting(point, data.kpi_link_prefix()) }}
     </li>
     {% endfor %}
 </ul>
 
-{{ common.button_with_link("Alerts Dashboard", alert_dashboard_link) }}
+{{ common.button_with_link("Alerts Dashboard", data.alert_dashboard_link()) }}
 
 </div>
 

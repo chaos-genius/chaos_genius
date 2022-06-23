@@ -160,7 +160,7 @@ class AnomalyPoint(AnomalyPointOriginal):
     series_type_original: Optional[str]
     """series_type from AnomalyPointOriginal, before being converted to user string."""
 
-    _relevant_subdims: Optional[List]
+    relevant_subdims_: Optional[List]
 
     @property
     def relevant_subdims(self: TAnomalyPoint) -> Optional[List[TAnomalyPoint]]:
@@ -174,9 +174,9 @@ class AnomalyPoint(AnomalyPointOriginal):
         Why is this an @property instead of just a field?
         - to tie the type of the points returned to the class type.
         - this wouldn't be needed if python had a `Self` type.
-        - disadvantage: pydantic cannot check type of `_relevant_subdims` field any more
+        - disadvantage: pydantic cannot check type of `relevant_subdims_` field any more
         """
-        return self._relevant_subdims
+        return self.relevant_subdims_
 
     def subdim_name_value(self) -> Optional[Tuple[str, str]]:
         """Return subdimension name and value."""
@@ -233,7 +233,7 @@ class AnomalyPoint(AnomalyPointOriginal):
             previous_value=previous_value,
             percent_change=percent_change,
             change_message=change_message,
-            _relevant_subdims=relevant_subdims,
+            relevant_subdims_=relevant_subdims,
         )
 
     @staticmethod
@@ -310,6 +310,17 @@ class AnomalyPoint(AnomalyPointOriginal):
                     values[field_name] = values[alias]
 
         return values
+
+    @validator("relevant_subdims_", pre=True)
+    def _convert_relevant_subdims(cls, v: Any) -> Optional[List["AnomalyPoint"]]:
+        """Convert relevant_subdims_ from `Dict` to `AnomalyPoint`s."""
+        if v is None:
+            return None
+
+        if all(isinstance(point, dict) for point in v):
+            return [AnomalyPoint.parse_obj(point) for point in v]
+
+        return v
 
 
 class AnomalyPointFormatted(AnomalyPoint):
@@ -543,11 +554,11 @@ class AlertsIndividualData(BaseModel):
     ):
         """Constructs data for formatting an individual alert from anomaly points."""
         top_overall_points = deepcopy(
-            _top_anomalies([point for point in points if point.is_overall], 5)
+            top_anomalies([point for point in points if point.is_overall], 5)
         )
         top_subdim_points = deepcopy(
-            _top_anomalies(
-                [point for point in _iterate_all_points(points) if point.is_subdim],
+            top_anomalies(
+                [point for point in iterate_over_all_points(points) if point.is_subdim],
                 5,
             )
         )
@@ -940,7 +951,7 @@ class AnomalyAlertController:
     ) -> Tuple[Sequence[AnomalyPointFormatted], int, int]:
         overall_count, subdim_count = _count_anomalies(formatted_anomaly_data)
 
-        top_anomalies_ = deepcopy(_top_anomalies(formatted_anomaly_data, 5))
+        top_anomalies_ = deepcopy(top_anomalies(formatted_anomaly_data, 5))
         top_anomalies_ = _format_anomaly_point_for_template(
             top_anomalies_, kpi, self.alert
         )
@@ -990,7 +1001,6 @@ class AnomalyAlertController:
             files,
             data=individual_data,
             preview_text="Anomaly Alert",
-            str=str,
         )
 
         logger.info(
@@ -1042,7 +1052,7 @@ def _make_anomaly_data_csv(anomaly_points: List[AnomalyPoint]) -> str:
     anomaly_df = pd.DataFrame(
         [
             point.dict(include=ANOMALY_TABLE_COLUMN_NAMES_MAPPER.keys())
-            for point in _iterate_all_points(anomaly_points)
+            for point in iterate_over_all_points(anomaly_points)
         ]
     )
 
@@ -1050,7 +1060,7 @@ def _make_anomaly_data_csv(anomaly_points: List[AnomalyPoint]) -> str:
 
     # this is a property that is calculated, so it needs to be assigned separately
     anomaly_df["expected_value"] = [
-        point.expected_value for point in _iterate_all_points(anomaly_points)
+        point.expected_value for point in iterate_over_all_points(anomaly_points)
     ]
 
     anomaly_df = anomaly_df[ANOMALY_TABLE_COLUMN_NAMES_ORDERED]
@@ -1081,7 +1091,7 @@ def _format_anomaly_point_for_template(
     )
 
 
-def _top_anomalies(
+def top_anomalies(
     points: Sequence[TAnomalyPointOrig], n=10
 ) -> Sequence[TAnomalyPointOrig]:
     """Returns top n anomalies according to severity."""
@@ -1098,8 +1108,8 @@ def _count_anomalies(points: Sequence[TAnomalyPointOrig]) -> Tuple[int, int]:
     return overall, subdims
 
 
-def _iterate_all_points(points: List[TAnomalyPoint]) -> Iterator[TAnomalyPoint]:
-    """Iterator over all points (overall and subdims) in the list.
+def iterate_over_all_points(points: List[TAnomalyPoint]) -> Iterator[TAnomalyPoint]:
+    """Return an iterator over all points (overall and subdims) in the list.
 
     Not sorted, but the order can be expected to be the same everytime.
     """
@@ -1122,6 +1132,6 @@ def get_top_anomalies_and_counts(
     """
     overall_count, subdim_count = _count_anomalies(formatted_anomaly_data)
 
-    top_anomalies_ = deepcopy(_top_anomalies(formatted_anomaly_data, n))
+    top_anomalies_ = deepcopy(top_anomalies(formatted_anomaly_data, n))
 
     return top_anomalies_, overall_count, subdim_count

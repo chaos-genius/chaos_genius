@@ -691,18 +691,13 @@ class AnomalyAlertController:
                 latest_day.isoformat(),
             )
 
-            # send alert only for overall KPI, not subdims
-            latest_day_data = list(
-                filter(
-                    lambda point: point.series_type == OVERALL_KPI_SERIES_TYPE_REPR,
-                    latest_day_data,
-                )
-            )
-
-            if not latest_day_data:
+            # check if anomalies actually exist.
+            # in case subdims is disabled, this won't send an alert
+            #   if no overall anomalies are detected.
+            if not any(iterate_over_all_points(latest_day_data)):
                 logger.info(
                     f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) "
-                    "No overall anomalies found. Not sending alerts only storing them."
+                    "No anomalies found. Not sending alerts only storing them."
                 )
             else:
                 kpi = self._get_kpi()
@@ -951,18 +946,6 @@ class AnomalyAlertController:
 
         return not (daily_digest or weekly_digest)
 
-    def _get_top_anomalies_and_counts(
-        self, formatted_anomaly_data: List[AnomalyPoint], kpi: Kpi
-    ) -> Tuple[Sequence[AnomalyPointFormatted], int, int]:
-        overall_count, subdim_count = _count_anomalies(formatted_anomaly_data)
-
-        top_anomalies_ = deepcopy(top_anomalies(formatted_anomaly_data, 5))
-        top_anomalies_ = _format_anomaly_point_for_template(
-            top_anomalies_, kpi, self.alert
-        )
-
-        return top_anomalies_, overall_count, subdim_count
-
     def _send_email_alert(
         self,
         individual_data: AlertsIndividualData,
@@ -1103,16 +1086,6 @@ def top_anomalies(
     return heapq.nlargest(n, points, key=lambda point: point.severity)
 
 
-def _count_anomalies(points: Sequence[TAnomalyPointOrig]) -> Tuple[int, int]:
-    """Returns a count of overall anomalies and subdim anomalies."""
-    total = len(points)
-    overall = sum(
-        1 for point in points if point.series_type == OVERALL_KPI_SERIES_TYPE_REPR
-    )
-    subdims = total - overall
-    return overall, subdims
-
-
 def iterate_over_all_points(points: List[TAnomalyPoint]) -> Iterator[TAnomalyPoint]:
     """Return an iterator over all points (overall and subdims) in the list.
 
@@ -1123,20 +1096,3 @@ def iterate_over_all_points(points: List[TAnomalyPoint]) -> Iterator[TAnomalyPoi
         if point.is_overall and point.relevant_subdims is not None:
             for subdim_point in point.relevant_subdims:
                 yield subdim_point
-
-
-def get_top_anomalies_and_counts(
-    formatted_anomaly_data: Sequence[AnomalyPointFormatted],
-    n: int = 10,
-) -> Tuple[Sequence[AnomalyPointFormatted], int, int]:
-    """Returns top anomalies and counts of all anomalies for digests.
-
-    Arguments:
-        formatted_anomaly_data: list of `AnomalyPointFormatted`s
-        n: number of top anomalies to be returned
-    """
-    overall_count, subdim_count = _count_anomalies(formatted_anomaly_data)
-
-    top_anomalies_ = deepcopy(top_anomalies(formatted_anomaly_data, n))
-
-    return top_anomalies_, overall_count, subdim_count

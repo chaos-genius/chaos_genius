@@ -27,6 +27,10 @@
 <hr style="margin-top: 1rem;">
 
 <h3 style="{{ common.main_text }}">Anomalies</h3>
+
+{% if not data.top_overall_points %}
+<p style="{{ common.main_text }}">No anomalies observed.</p>
+{% else %}
 <ul>
     {% for point in data.top_overall_points %}
     <li>
@@ -34,6 +38,7 @@
     </li>
     {% endfor %}
 </ul>
+{% endif %}
 
 {% if data.include_subdims %}
 <h3 style="{{ common.main_text }}">Sub-dimensional anomalies</h3>

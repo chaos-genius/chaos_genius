@@ -2,12 +2,8 @@
 import datetime
 import logging
 from collections import defaultdict
-from typing import DefaultDict, Dict, List, Sequence, Set, Tuple
+from typing import DefaultDict, Dict, List, Set, Tuple
 
-from chaos_genius.alerts.anomaly_alerts import (
-    AnomalyPointFormatted,
-    get_top_anomalies_and_counts,
-)
 from chaos_genius.alerts.constants import FREQUENCY_DICT
 from chaos_genius.alerts.slack import alert_digest_slack_formatted
 from chaos_genius.alerts.utils import send_email_using_template
@@ -150,18 +146,6 @@ class AlertDigestController:
                     data.report_date,
                 ),
             )
-
-    def _get_top_anomalies_and_counts(
-        self, triggered_alerts: List[TriggeredAlertWithPoints]
-    ) -> Tuple[Sequence[AnomalyPointFormatted], int, int]:
-        return get_top_anomalies_and_counts(
-            [
-                point
-                for triggered_alert in triggered_alerts
-                for point in triggered_alert.points
-            ],
-            n=10,
-        )
 
     def _send_email_digest(self, recipient: str, data: AlertsReportData):
         send_email_using_template(

@@ -11,10 +11,8 @@
         <a
             class="kpi-link"
             href="{{ kpi_link_prefix }}/{{ point.kpi_id }}"
-            style="{{ important_text }} text-decoration-line: none;"
-        >
-            {{point.kpi_name}}
-        </a>
+            style="{{ important_text }} text-decoration: underline dotted;"
+        >{{point.kpi_name}}</a>
     </strong>
 {%- endmacro %}
 
@@ -59,7 +57,7 @@
             {{ kpi_name_link(kpi_link_prefix, point) }}
 
             {% if point.is_subdim %}
-                {{ point.subdim_formatted() }}
+            <span style="{{ important_text }}">{{ point.subdim_formatted() }}</span>
             {% endif %}
         {% else -%}
             <span style="{{ non_important_text }}">
@@ -75,7 +73,7 @@
 
                 </span>
 
-                {{ point.subdim_formatted() }}
+                <span style="{{ important_text }}">{{ point.subdim_formatted() }}</span>
             {%- endif %}
         {%- endif %}
 
@@ -124,11 +122,13 @@
     {% else -%}
         {% if point.y > point.previous_value %}
             <strong style="color: rgb(6, 182, 212);">
-                ↑ Spike
+                ↑ {{ point.formatted_change_percent }}
+                Spike
             </strong>
         {% elif point.y < point.previous_value %}
             <strong style="color: orange;">
-                ↓ Drop
+                ↓ {{ point.formatted_change_percent }}
+                Drop
             </strong>
         {% endif %}
 
@@ -142,7 +142,7 @@
             {{ kpi_name_link(kpi_link_prefix, point) }}
 
             {% if point.is_subdim %}
-                {{ point.subdim_formatted() }}
+                <span style="{{ important_text }}">{{ point.subdim_formatted() }}</span>
             {% endif %}
         {% else %}
             <span style="{{ non_important_text }}">
@@ -158,7 +158,7 @@
 
                 </span>
 
-                {{ point.subdim_formatted() }}
+                <span style="{{ important_text }}">{{ point.subdim_formatted() }}</span>
             {% endif %}
         {% endif %}
 
@@ -183,9 +183,9 @@
             </span>
             <span style="{{ important_text }}">{{point.previous_value_readable}}</span>
 
-        {%- endif %}<!--
+        {%- endif %}
 
-     -->(<span style="{{ important_text }}">{{ point.formatted_change_percent }}</span>)<!--
+        <!--(<span style="{{ important_text }}">{{ point.formatted_change_percent }}</span>)--><!--
 
      -->{% if point.is_hourly -%}
             <span style="{{ non_important_text }}">
@@ -200,14 +200,17 @@
         {%- endif %}
     {%- endif %}<!--
 
- -->{% if point.relevant_subdims is not none -%}<!--
-     --><span style="{{ non_important_text }}">; key dimensions impact</span>
-
-        {% for subdim in point.relevant_subdims_formatted() %}
-            <span style="{{ main_text }}">{{ subdim }}</span><!--
-         -->{% if not loop.last -%}
-            <span style="{{ non_important_text }}">,</span>
-            {%- endif %}
-        {% endfor %}
+ -->{% if point.relevant_subdims is not none -%}
+        <ul>
+            <li>
+                <span style="{{ non_important_text }}">Key dimensions impacted:</span>
+                {% for subdim in point.relevant_subdims_formatted() %}
+                <span style="{{ important_text }}">{{ subdim }}</span><!--
+                 -->{% if not loop.last -%}
+                    <span style="{{ non_important_text }}">,</span>
+                    {%- endif %}
+                {% endfor %}
+            </li>
+        </ul>
     {%- endif %}
 {%- endmacro %}

@@ -364,10 +364,15 @@ class AnomalyPointFormatted(AnomalyPoint):
 
         formatted_change_percent = point.percent_change
         if isinstance(point.percent_change, (int, float)):
+            change_percent = (
+                f"{point.percent_change:.0f}"
+                if abs(point.percent_change) < 10
+                else f"{point.percent_change:.0f}"
+            )
             if point.percent_change > 0:
-                formatted_change_percent = f"+{point.percent_change}%"
+                formatted_change_percent = f"{change_percent}%"
             else:
-                formatted_change_percent = f"{point.percent_change}%"
+                formatted_change_percent = f"{change_percent[1:]}%"
         if (
             isinstance(point.percent_change, str)
             and point.percent_change.endswith("inf")
@@ -559,7 +564,7 @@ class AlertsIndividualData(BaseModel):
         top_subdim_points = deepcopy(
             top_anomalies(
                 [point for point in iterate_over_all_points(points) if point.is_subdim],
-                5,
+                3,
             )
         )
 

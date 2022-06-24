@@ -11,13 +11,29 @@
 <hr>
 
 <h3 style="{{ common.main_text }}">Top Anomalies</h3>
+
+{% if not data.top_overall_anomalies %}
+<p style="{{ common.main_text }}">No anomalies observed.</p>
+{% else %}
 <ul>
-    {% for point in data.top_anomalies %}
+    {% for point in data.top_overall_anomalies %}
     <li>
         {{ common.anomaly_point_formatting(point, data.kpi_link_prefix()) }}
     </li>
     {% endfor %}
 </ul>
+{% endif %}
+
+{% if data.top_subdim_anomalies %}
+<h3 style="{{ common.main_text }}">Top sub-dimensional anomalies</h3>
+<ul>
+    {% for point in data.top_subdim_anomalies %}
+    <li>
+        {{ common.anomaly_point_formatting(point, data.kpi_link_prefix()) }}
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
 
 {{ common.button_with_link("Alerts Dashboard", data.alert_dashboard_link()) }}
 

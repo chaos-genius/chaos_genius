@@ -65,22 +65,14 @@ class AlertDigestController:
                 triggered_alert, self.alert_config_cache, self.kpi_cache
             )
 
-            if not triggered_alert.points:
-                logger.info(
-                    f"(frequency: {self.frequency}) "
-                    "No overall anomalies found for TriggeredAlerts with id %d, "
-                    "skipping.",
-                    triggered_alert.id,
-                )
-            else:
-                if getattr(
-                    self.alert_config_cache[triggered_alert.alert_conf_id],
-                    ALERT_ATTRIBUTES_MAPPER[self.frequency],
-                ):
-                    if triggered_alert.alert_channel == "slack":
-                        slack_alerts.append(triggered_alert)
-                    if triggered_alert.alert_channel == "email":
-                        email_alerts.append(triggered_alert)
+            if getattr(
+                self.alert_config_cache[triggered_alert.alert_conf_id],
+                ALERT_ATTRIBUTES_MAPPER[self.frequency],
+            ):
+                if triggered_alert.alert_channel == "slack":
+                    slack_alerts.append(triggered_alert)
+                if triggered_alert.alert_channel == "email":
+                    email_alerts.append(triggered_alert)
 
         if len(email_alerts) > 0:
             report_data = AlertsReportData.from_triggered_alerts(
@@ -148,6 +140,16 @@ class AlertDigestController:
             )
 
     def _send_email_digest(self, recipient: str, data: AlertsReportData):
+        if not data.has_anomalies:
+            logger.info(
+                f"(frequency: {self.frequency}) "
+                "No anomalies found for email report of recipient %s with date %s, "
+                "skipping.",
+                recipient,
+                data.report_date.isoformat(),
+            )
+            return
+
         send_email_using_template(
             "digest_template.html",
             [recipient],
@@ -165,6 +167,15 @@ class AlertDigestController:
         data: AlertsReportData,
     ):
         """Sends a slack alert containing a summary of triggered alerts."""
+        if not data.has_anomalies:
+            logger.info(
+                f"(frequency: {self.frequency}) "
+                "No anomalies found for Slack report with date %s, "
+                "skipping.",
+                data.report_date.isoformat(),
+            )
+            return
+
         err = alert_digest_slack_formatted(data)
 
         if err == "":

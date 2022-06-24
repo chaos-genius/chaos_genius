@@ -15,6 +15,8 @@ from chaos_genius.alerts.anomaly_alerts import (
 from chaos_genius.alerts.constants import (
     ALERT_DATE_FORMAT,
     ALERT_READABLE_DATA_TIMESTAMP_FORMAT,
+    ALERT_REPORT_OVERALL_TOP_N,
+    ALERT_REPORT_SUBDIM_TOP_N,
 )
 from chaos_genius.alerts.utils import webapp_url_prefix
 from chaos_genius.databases.models.alert_model import Alert
@@ -72,28 +74,54 @@ class AlertsReportData(BaseModel):
 
     report_date: datetime.date
 
-    top_anomalies: List[AnomalyPointFormatted]
-    """Return top anomalies across overall and subdims."""
+    top_overall_anomalies: List[AnomalyPointFormatted]
+
+    top_subdim_anomalies: List[AnomalyPointFormatted]
 
     @staticmethod
     def from_triggered_alerts(
         triggered_alerts: List[TriggeredAlertWithPoints], report_date: datetime.date
     ) -> "AlertsReportData":
         """Create an AlertsReportData."""
-        top_anomalies_ = top_anomalies(
+        # consider only top 1 subdim per alert
+        subdim_points_per_trig_alert = [
+            top_anomalies(
+                (
+                    point
+                    for point in iterate_over_all_points(trig_alert.points)
+                    if point.is_subdim
+                ),
+                1,
+            )
+            for trig_alert in triggered_alerts
+        ]
+
+        top_overall_anomalies = top_anomalies(
             [
                 point
                 for trig_alert in triggered_alerts
-                for point in iterate_over_all_points(trig_alert.points)
+                for point in trig_alert.points
+                if point.is_overall
             ],
-            10,
+            ALERT_REPORT_OVERALL_TOP_N,
+        )
+
+        top_subdim_anomalies = top_anomalies(
+            [point for points in subdim_points_per_trig_alert for point in points],
+            ALERT_REPORT_SUBDIM_TOP_N,
         )
 
         return AlertsReportData(
             triggered_alerts=triggered_alerts,
             report_date=report_date,
-            top_anomalies=list(top_anomalies_),
+            top_overall_anomalies=top_overall_anomalies,
+            top_subdim_anomalies=top_subdim_anomalies,
         )
+
+    @property
+    def has_anomalies(self) -> bool:
+        """Whether any anomalies have been observed."""
+        return bool(self.top_overall_anomalies or self.top_subdim_anomalies)
 
     @staticmethod
     def kpi_link_prefix() -> str:

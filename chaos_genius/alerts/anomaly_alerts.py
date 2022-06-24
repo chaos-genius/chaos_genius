@@ -9,6 +9,7 @@ from typing import (
     Any,
     DefaultDict,
     Dict,
+    Iterable,
     Iterator,
     List,
     Optional,
@@ -25,11 +26,13 @@ from pydantic.tools import parse_obj_as
 from chaos_genius.alerts.constants import (
     ALERT_DATE_FORMAT,
     ALERT_DATETIME_FORMAT,
+    ALERT_OVERALL_TOP_N,
     ALERT_READABLE_DATA_TIME_ONLY_FORMAT,
     ALERT_READABLE_DATA_TIMESTAMP_FORMAT,
     ALERT_READABLE_DATE_FORMAT,
     ALERT_READABLE_DATETIME_FORMAT,
     ALERT_RELEVANT_SUBDIMS_TOP_N,
+    ALERT_SUBDIM_TOP_N,
     ANOMALY_TABLE_COLUMN_NAMES_MAPPER,
     ANOMALY_TABLE_COLUMN_NAMES_ORDERED,
     OVERALL_KPI_SERIES_TYPE_REPR,
@@ -364,6 +367,7 @@ class AnomalyPointFormatted(AnomalyPoint):
 
         formatted_change_percent = point.percent_change
         if isinstance(point.percent_change, (int, float)):
+            # TODO: decide on this and simplify
             change_percent = (
                 f"{point.percent_change:.0f}"
                 if abs(point.percent_change) < 10
@@ -559,12 +563,14 @@ class AlertsIndividualData(BaseModel):
     ):
         """Constructs data for formatting an individual alert from anomaly points."""
         top_overall_points = deepcopy(
-            top_anomalies([point for point in points if point.is_overall], 5)
+            top_anomalies(
+                [point for point in points if point.is_overall], ALERT_OVERALL_TOP_N
+            )
         )
         top_subdim_points = deepcopy(
             top_anomalies(
                 [point for point in iterate_over_all_points(points) if point.is_subdim],
-                3,
+                ALERT_SUBDIM_TOP_N,
             )
         )
 
@@ -1079,9 +1085,7 @@ def _format_anomaly_point_for_template(
     )
 
 
-def top_anomalies(
-    points: Sequence[TAnomalyPointOrig], n=10
-) -> Sequence[TAnomalyPointOrig]:
+def top_anomalies(points: Iterable[TAnomalyPointOrig], n=10) -> List[TAnomalyPointOrig]:
     """Returns top n anomalies according to severity."""
     return heapq.nlargest(n, points, key=lambda point: point.severity)
 

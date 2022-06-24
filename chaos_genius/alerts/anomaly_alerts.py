@@ -198,6 +198,15 @@ class AnomalyPoint(AnomalyPointOriginal):
         dimension, value = subdim
         return f"[{dimension} = {value}]"
 
+    def subdim_formatted_value_only(self) -> Optional[str]:
+        """Return subdimension value formatted as a string."""
+        subdim = self.subdim_name_value()
+        if subdim is None:
+            return None
+
+        _, value = subdim
+        return f"[{value}]"
+
     @staticmethod
     def _from_original_single(
         point: AnomalyPointOriginal,
@@ -496,15 +505,13 @@ class AnomalyPointFormatted(AnomalyPoint):
 
         return (previous_point_time).strftime(format).lstrip("0")
 
-    def relevant_subdims_formatted(self) -> Optional[List[str]]:
-        """Returns a list of top relevant subdims, formatted."""
+    def top_relevant_subdims(self) -> Optional[List["AnomalyPointFormatted"]]:
+        """Returns a list of top relevant subdims."""
         if self.relevant_subdims is None:
             return None
 
         relevant_subdims = (
-            subdim
-            for subdim in (point.subdim_name_value() for point in self.relevant_subdims)
-            if subdim is not None
+            subdim for subdim in self.relevant_subdims if subdim is not None
         )
 
         # take top N
@@ -515,7 +522,7 @@ class AnomalyPointFormatted(AnomalyPoint):
             for _, subdim in zip(range(ALERT_RELEVANT_SUBDIMS_TOP_N), relevant_subdims)
         ]
 
-        return [f"[{value}]" for _, value in relevant_subdims]
+        return relevant_subdims
 
     def kpi_link(self):
         """Returns a link to the KPI."""
@@ -524,6 +531,17 @@ class AnomalyPointFormatted(AnomalyPoint):
     def alert_link(self):
         """Returns a link to the edit alert page."""
         return f"{webapp_url_prefix()}#/alerts/edit/kpi-alert/{self.alert_id}"
+
+    def subdim_link(self):
+        """Returns a link to the anomaly page with the subdim pre-selected."""
+        subdim_name_value = self.subdim_name_value()
+
+        if not subdim_name_value:
+            return self.kpi_link()
+
+        dimension, value = subdim_name_value
+
+        return f"{self.kpi_link()}?dimension={dimension}&value={value}"
 
 
 class AlertsIndividualData(BaseModel):

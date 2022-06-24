@@ -9,11 +9,23 @@
 {% macro kpi_name_link(kpi_link_prefix, point) -%}
     <strong>
         <a
-            class="kpi-link"
             href="{{ kpi_link_prefix }}/{{ point.kpi_id }}"
-            style="{{ important_text }} text-decoration: underline dotted;"
+            style="{{ important_text }} text-decoration: underline dotted lightgrey;"
         >{{point.kpi_name}}</a>
     </strong>
+{%- endmacro %}
+
+{% macro subdim_name_link(point, value_only=false) -%}
+    <a
+        href="{{ point.subdim_link() }}"
+        style="{{ important_text }} text-decoration: underline dotted lightgrey;"
+    >
+        {% if value_only -%}
+            <span>{{ point.subdim_formatted_value_only() }}</span>
+        {% else -%}
+            <span>{{ point.subdim_formatted() }}</span>
+        {%- endif %}
+    </a>
 {%- endmacro %}
 
 {% macro button_with_link(text, link) -%}
@@ -57,7 +69,7 @@
             {{ kpi_name_link(kpi_link_prefix, point) }}
 
             {% if point.is_subdim %}
-            <span style="{{ important_text }}">{{ point.subdim_formatted() }}</span>
+                {{ subdim_name_link(point) }}
             {% endif %}
         {% else -%}
             <span style="{{ non_important_text }}">
@@ -73,7 +85,7 @@
 
                 </span>
 
-                <span style="{{ important_text }}">{{ point.subdim_formatted() }}</span>
+                {{ subdim_name_link(point) }}
             {%- endif %}
         {%- endif %}
 
@@ -142,7 +154,7 @@
             {{ kpi_name_link(kpi_link_prefix, point) }}
 
             {% if point.is_subdim %}
-                <span style="{{ important_text }}">{{ point.subdim_formatted() }}</span>
+                {{ subdim_name_link(point) }}
             {% endif %}
         {% else %}
             <span style="{{ non_important_text }}">
@@ -158,7 +170,7 @@
 
                 </span>
 
-                <span style="{{ important_text }}">{{ point.subdim_formatted() }}</span>
+                {{ subdim_name_link(point) }}
             {% endif %}
         {% endif %}
 
@@ -204,8 +216,8 @@
         <ul>
             <li>
                 <span style="{{ non_important_text }}">Key dimensions impacted:</span>
-                {% for subdim in point.relevant_subdims_formatted() %}
-                <span style="{{ important_text }}">{{ subdim }}</span><!--
+                {% for point in point.top_relevant_subdims() %}
+                {{ subdim_name_link(point, value_only=true) }}<!--
                  -->{% if not loop.last -%}
                     <span style="{{ non_important_text }}">,</span>
                     {%- endif %}

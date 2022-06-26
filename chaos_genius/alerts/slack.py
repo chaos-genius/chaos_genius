@@ -220,13 +220,17 @@ def _display_anomalies_digest(anomaly_data, subdim: bool = False):
         else:
             alerts_string = ""
             for point in anomaly_data.top_overall_anomalies:
-                alerts_string += anomaly_point_formatting(point, anomaly_data.kpi_link_prefix())
+                alerts_string += anomaly_point_formatting(
+                    point, anomaly_data.kpi_link_prefix()
+                )
             return alerts_string
     else:
         if anomaly_data.top_subdim_anomalies:
             alerts_string = ""
             for point in anomaly_data.top_subdim_anomalies:
-                alerts_string += anomaly_point_formatting(point, anomaly_data.kpi_link_prefix())
+                alerts_string += anomaly_point_formatting(
+                    point, anomaly_data.kpi_link_prefix()
+                )
             return alerts_string
         else:
             return "No Sub-Dimensional anomalies."

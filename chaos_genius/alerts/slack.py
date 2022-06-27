@@ -69,28 +69,8 @@ def anomaly_alert_slack(
                     "emoji": True,
                 },
             },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": _display_anomalies_individual(data),
-                },
-            },
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": "Sub-dimensional anomalies",
-                    "emoji": True,
-                },
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": _display_anomalies_individual(data, subdim=True),
-                },
-            },
+            *_display_anomalies_individual(data),
+            *_display_anomalies_individual(data, subdim=True),
             {
                 "type": "actions",
                 "elements": [
@@ -149,14 +129,6 @@ def alert_digest_slack_formatted(data: "AlertsReportData") -> str:
                 },
             },
             *_display_anomalies_digest(data),
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": "Top sub-dimensional anomalies",
-                    "emoji": True,
-                },
-            },
             *_display_anomalies_digest(data, subdim=True),
             {
                 "type": "actions",
@@ -182,29 +154,49 @@ def alert_digest_slack_formatted(data: "AlertsReportData") -> str:
 
 def _display_anomalies_individual(anomaly_data, subdim: bool = False):
     """Creates Individual Alert message."""
+    sections: List[Dict[str, Any]] = []
+    section = {
+        "type": "section",
+        "text": {
+            "type": "mrkdwn",
+            "text": ""
+        },
+    }
+
     if not subdim:
         if not anomaly_data.top_overall_points:
-            return "No anomalies observed."
+            section["text"]["text"] += "No anomalies observed."
         else:
-            alerts_string = ""
             for point in anomaly_data.top_overall_points:
-                alerts_string += anomaly_point_formatting(point)
-            return alerts_string
+                point_formatted = anomaly_point_formatting(point)
+                section["text"]["text"] += point_formatted
+        sections.append(section)
     else:
         if anomaly_data.include_subdims:
-            alerts_string = ""
+            header_section = {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Top Sub-Dimensional Anomalies",
+                    "emoji": True,
+                },
+            },
+            sections.append(header_section)
             for point in anomaly_data.top_subdim_points:
-                alerts_string += anomaly_point_formatting(point)
-            return alerts_string
+                point_formatted = anomaly_point_formatting(point)
+                section["text"]["text"] += point_formatted
+            sections.append(section)
         else:
-            return "No Sub-Dimensional anomalies."
+            return []
+
+    return sections
 
 
 def _display_anomalies_digest(anomaly_data, subdim: bool = False):
     """Creates Digest Alert message."""
     sections: List[Dict[str, Any]] = []
 
-    def _new_section() -> Dict[str, Any]:
+    def _new_text_section() -> Dict[str, Any]:
         section = {
             "type": "section",
             "text": {
@@ -215,36 +207,39 @@ def _display_anomalies_digest(anomaly_data, subdim: bool = False):
         sections.append(section)
         return section
 
-    def _append_text(section: Dict[str, Any], text: str):
-        section["text"]["text"] += text
-
-    def _text_len(section: Dict[str, Any]) -> int:
-        return len(section["text"]["text"])
-
-    section = _new_section()
-
     max_len = 2500
 
     if not subdim:
+        section = _new_text_section()
         if not anomaly_data.top_overall_anomalies:
-            _append_text(section, "No anomalies observed.")
+            section["text"]["text"] += "No anomalies observed."
         else:
             for point in anomaly_data.top_overall_anomalies:
                 point_formatted = anomaly_point_formatting(
                     point, anomaly_data.kpi_link_prefix()
                 )
-                if _text_len(section) + len(point_formatted) > max_len:
-                    section = _new_section()
-                _append_text(section, point_formatted)
+                if len(section["text"]["text"]) + len(point_formatted) > max_len:
+                    section = _new_text_section()
+                section["text"]["text"] += point_formatted
     else:
         if anomaly_data.top_subdim_anomalies:
+            header_section = {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Top Sub-Dimensional Anomalies",
+                    "emoji": True,
+                },
+            },
+            sections.append(header_section)
+            section = _new_text_section()
             for point in anomaly_data.top_subdim_anomalies:
                 point_formatted = anomaly_point_formatting(
                     point, anomaly_data.kpi_link_prefix()
                 )
-                if _text_len(section) + len(point_formatted) > max_len:
-                    section = _new_section()
-                _append_text(section, point_formatted)
+                if len(section["text"]["text"]) + len(point_formatted) > max_len:
+                    section = _new_text_section()
+                section["text"]["text"] += point_formatted
         else:
             return []
 

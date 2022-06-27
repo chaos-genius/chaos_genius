@@ -89,7 +89,9 @@ class AlertsReportData(BaseModel):
             top_anomalies(
                 (
                     point
-                    for point in iterate_over_all_points(trig_alert.points)
+                    for point in iterate_over_all_points(
+                        trig_alert.points, trig_alert.include_subdims
+                    )
                     if point.is_subdim
                 ),
                 1,
@@ -353,7 +355,7 @@ def get_digest_view_data(
         [alert for alert in triggered_alerts_data if alert.alert_type == "KPI Alert"],
         kpi_cache,
     )
-    anomaly_alerts = list(iterate_over_all_points(anomaly_alerts))
+    anomaly_alerts = list(iterate_over_all_points(anomaly_alerts, True))
     anomaly_alerts = _filter_anomaly_alerts(anomaly_alerts, include_subdims)
     # newest data first
     anomaly_alerts.sort(key=lambda point: point.data_datetime, reverse=True)

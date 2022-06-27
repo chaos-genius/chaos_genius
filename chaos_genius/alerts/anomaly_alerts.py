@@ -86,7 +86,7 @@ class AnomalyPointOriginal(BaseModel):
     # overall, subdim or data_quality
     anomaly_type: str
     # subdimension name (when it's a subdim)
-    series_type: Optional[str]
+    series_type: Optional[Dict[str, str]]
 
     # timestamp when this entry was added
     created_at: datetime.datetime
@@ -121,6 +121,51 @@ class AnomalyPointOriginal(BaseModel):
         """Only date part of the data timestamp (data_datetime)."""
         return self.data_datetime.strftime(ALERT_DATE_FORMAT)
 
+    def subdim_name_value(self) -> Optional[Tuple[str, str]]:
+        """Return subdimension name and value."""
+        return (
+            next(iter(self.series_type.items()))
+            if self.series_type is not None
+            else None
+        )
+
+    def subdim_formatted(self) -> Optional[str]:
+        """Return subdimension name and value formatted as a string."""
+        subdim = self.subdim_name_value()
+        if subdim is None:
+            return None
+
+        dimension, value = subdim
+        return f"[{dimension} = {value}]"
+
+    def subdim_formatted_value_only(self) -> Optional[str]:
+        """Return subdimension value formatted as a string."""
+        subdim = self.subdim_name_value()
+        if subdim is None:
+            return None
+
+        _, value = subdim
+        return f"[{value}]"
+
+    def is_of_same_type(self, other: "AnomalyPointOriginal") -> bool:
+        """Whether this point is of the same type as another point."""
+        return (
+            self.anomaly_type == other.anomaly_type
+            and self.series_type == other.series_type
+        )
+
+    @property
+    def series_type_name(self) -> str:
+        """Readable name of the series type - either Overall or the specific subdim."""
+        dim_value = self.subdim_name_value()
+
+        if dim_value is None:
+            return OVERALL_KPI_SERIES_TYPE_REPR
+
+        dimension, value = dim_value
+
+        return f"{dimension} = {value}"
+
     # -- pydantic specific configuration starts here --
 
     # use custom datetime format
@@ -154,9 +199,6 @@ class AnomalyPoint(AnomalyPointOriginal):
     # human readable message describing the percent_change
     change_message: str
 
-    series_type_original: Optional[str]
-    """series_type from AnomalyPointOriginal, before being converted to user string."""
-
     relevant_subdims_: Optional[List]
 
     @property
@@ -175,32 +217,6 @@ class AnomalyPoint(AnomalyPointOriginal):
         """
         return self.relevant_subdims_
 
-    def subdim_name_value(self) -> Optional[Tuple[str, str]]:
-        """Return subdimension name and value."""
-        return (
-            extract_dim_value_from_series_type(self.series_type_original)
-            if self.series_type_original is not None
-            else None
-        )
-
-    def subdim_formatted(self) -> Optional[str]:
-        """Return subdimension name and value formatted as a string."""
-        subdim = self.subdim_name_value()
-        if subdim is None:
-            return None
-
-        dimension, value = subdim
-        return f"[{dimension} = {value}]"
-
-    def subdim_formatted_value_only(self) -> Optional[str]:
-        """Return subdimension value formatted as a string."""
-        subdim = self.subdim_name_value()
-        if subdim is None:
-            return None
-
-        _, value = subdim
-        return f"[{value}]"
-
     @staticmethod
     def _from_original_single(
         point: AnomalyPointOriginal,
@@ -212,8 +228,7 @@ class AnomalyPoint(AnomalyPointOriginal):
         yhat_upper = round(point.yhat_upper, 2)
         severity = round(point.severity)
 
-        series_type_original = point.series_type
-        series_type = _format_series_type(point.anomaly_type, point.series_type)
+        series_type = point.series_type
 
         percent_change = find_percentage_change(
             point.y, previous_anomaly_point.y if previous_anomaly_point else None
@@ -233,7 +248,6 @@ class AnomalyPoint(AnomalyPointOriginal):
             severity=severity,
             anomaly_type=point.anomaly_type,
             series_type=series_type,
-            series_type_original=series_type_original,
             created_at=point.created_at,
             data_datetime=point.data_datetime,
             previous_value=previous_value,
@@ -581,7 +595,13 @@ class AlertsIndividualData(BaseModel):
         )
         top_subdim_points = deepcopy(
             top_anomalies(
-                [point for point in iterate_over_all_points(points) if point.is_subdim],
+                [
+                    point
+                    for point in iterate_over_all_points(
+                        points, include_subdims=alert.include_subdims
+                    )
+                    if point.is_subdim
+                ],
                 ALERT_SUBDIM_TOP_N,
             )
         )
@@ -612,7 +632,7 @@ def _find_point(point: AnomalyPointOriginal, prev_data: List[AnomalyPointOrigina
     """Finds same type of point in previous data."""
     intended_point = None
     for prev_point in prev_data:
-        if prev_point.series_type == point.series_type:
+        if prev_point.is_of_same_type(point):
             intended_point = prev_point
             break
     return intended_point
@@ -712,7 +732,12 @@ class AnomalyAlertController:
             # check if anomalies actually exist.
             # in case subdims is disabled, this won't send an alert
             #   if no overall anomalies are detected.
-            if not any(iterate_over_all_points(latest_day_data)):
+            if not any(
+                iterate_over_all_points(
+                    latest_day_data,
+                    include_subdims=self.alert.include_subdims,
+                ),
+            ):
                 logger.info(
                     f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) "
                     "No anomalies found. Not sending alerts only storing them."
@@ -996,7 +1021,10 @@ class AnomalyAlertController:
         files = [
             {
                 "fname": "data.csv",
-                "fdata": _make_anomaly_data_csv(individual_data.all_points),
+                "fdata": _make_anomaly_data_csv(
+                    individual_data.all_points,
+                    include_subdims=individual_data.include_subdims,
+                ),
             }
         ]
 
@@ -1035,30 +1063,14 @@ class AnomalyAlertController:
             )
 
 
-def _format_series_type(anomaly_type: str, series_type: Optional[str]) -> str:
-    """Format an anomaly point's series type for use in alerts.
-
-    Do not call this function twice on the same data.
-
-    Arguments:
-        anomaly_type: see AnomalyPointOriginal
-        series_type: see AnomalyPointOriginal
-    """
-    # series_type = (
-    #     OVERALL_KPI_SERIES_TYPE_REPR
-    #     if anomaly_type == "overall"
-    #     else convert_query_string_to_user_string(series_type or "")
-    # )
-
-    return series_type or ""
-
-
-def _make_anomaly_data_csv(anomaly_points: List[AnomalyPoint]) -> str:
+def _make_anomaly_data_csv(
+    anomaly_points: List[AnomalyPoint], include_subdims: bool
+) -> str:
     """Create an in-memory string containing the CSV of given anomaly data."""
     anomaly_df = pd.DataFrame(
         [
             point.dict(include=ANOMALY_TABLE_COLUMN_NAMES_MAPPER.keys())
-            for point in iterate_over_all_points(anomaly_points)
+            for point in iterate_over_all_points(anomaly_points, include_subdims)
         ]
     )
 
@@ -1066,7 +1078,13 @@ def _make_anomaly_data_csv(anomaly_points: List[AnomalyPoint]) -> str:
 
     # this is a property that is calculated, so it needs to be assigned separately
     anomaly_df["expected_value"] = [
-        point.expected_value for point in iterate_over_all_points(anomaly_points)
+        point.expected_value
+        for point in iterate_over_all_points(anomaly_points, include_subdims)
+    ]
+    # this is a property that is calculated, so it needs to be assigned separately
+    anomaly_df["series_type"] = [
+        point.series_type_name
+        for point in iterate_over_all_points(anomaly_points, include_subdims)
     ]
 
     anomaly_df = anomaly_df[ANOMALY_TABLE_COLUMN_NAMES_ORDERED]
@@ -1102,13 +1120,17 @@ def top_anomalies(points: Iterable[TAnomalyPointOrig], n=10) -> List[TAnomalyPoi
     return heapq.nlargest(n, points, key=lambda point: point.severity)
 
 
-def iterate_over_all_points(points: List[TAnomalyPoint]) -> Iterator[TAnomalyPoint]:
+def iterate_over_all_points(
+    points: List[TAnomalyPoint], include_subdims: bool
+) -> Iterator[TAnomalyPoint]:
     """Return an iterator over all points (overall and subdims) in the list.
 
     Not sorted, but the order can be expected to be the same everytime.
     """
     for point in points:
-        yield point
+        if point.is_overall or (point.is_subdim and include_subdims):
+            yield point
+
         if point.is_overall and point.relevant_subdims is not None:
             for subdim_point in point.relevant_subdims:
                 yield subdim_point

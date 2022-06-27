@@ -81,3 +81,5 @@ Pygments~=2.10.0
 # converting to/from JSON and custom classes
 pydantic~=1.9.0
 
+# pyarrow version compatible with both snowflake connector & PyAthena, check #1007
+pyarrow<6.1.0,>=6.0.0

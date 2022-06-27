@@ -177,7 +177,7 @@ def _display_anomalies_individual(anomaly_data, subdim: bool = False):
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": "Top Sub-Dimensional Anomalies",
+                    "text": "Sub-Dimensional Anomalies",
                     "emoji": True,
                 },
             },

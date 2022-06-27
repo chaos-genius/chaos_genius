@@ -46,11 +46,6 @@ from chaos_genius.controllers.kpi_controller import (
     get_anomaly_data,
     get_last_anomaly_timestamp,
 )
-
-# from chaos_genius.connectors.base_connector import get_df_from_db_uri
-from chaos_genius.core.rca.rca_utils.string_helpers import (
-    convert_query_string_to_user_string,
-)
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
@@ -835,13 +830,13 @@ def _format_series_type(anomaly_type: str, series_type: Optional[str]) -> str:
         anomaly_type: see AnomalyPointOriginal
         series_type: see AnomalyPointOriginal
     """
-    series_type = (
-        OVERALL_KPI_SERIES_TYPE_REPR
-        if anomaly_type == "overall"
-        else convert_query_string_to_user_string(series_type or "")
-    )
+    # series_type = (
+    #     OVERALL_KPI_SERIES_TYPE_REPR
+    #     if anomaly_type == "overall"
+    #     else convert_query_string_to_user_string(series_type or "")
+    # )
 
-    return series_type
+    return series_type or ""
 
 
 def _make_anomaly_data_csv(anomaly_points: List[AnomalyPoint]) -> str:

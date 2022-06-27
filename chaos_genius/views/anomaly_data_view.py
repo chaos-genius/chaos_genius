@@ -177,7 +177,7 @@ def kpi_anomaly_data_quality(kpi_id):
         )
         for dq in dq_list:
             anom_data = get_dq_and_subdim_data(
-                kpi_id, end_date, "dq", dq, period
+                kpi_id, end_date, "dq", {"dq": dq}, period
             )
             anom_data["x_axis_limits"] = graph_xlims
             if anom_data["values"] != []:

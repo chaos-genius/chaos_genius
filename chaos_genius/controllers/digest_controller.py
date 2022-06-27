@@ -2,6 +2,7 @@ import datetime
 import logging
 from collections import defaultdict
 from typing import Any, DefaultDict, Dict, List, Optional, Sequence, Tuple
+from urllib.parse import quote_plus
 
 from pydantic import BaseModel
 from sqlalchemy import and_, or_
@@ -132,7 +133,8 @@ class AlertsReportData(BaseModel):
         """Return the link to the alert dashboard."""
         return (
             f"{webapp_url_prefix()}api/digest"
-            f"?date={self.report_date.strftime(ALERT_DATE_FORMAT)}"
+            + "?date="
+            + quote_plus(self.report_date.strftime(ALERT_DATE_FORMAT))
         )
 
     def report_date_formatted(self) -> str:

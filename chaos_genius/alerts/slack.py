@@ -204,9 +204,9 @@ def _display_anomalies_individual(anomaly_data, subdim: bool = False):
             return alerts_string
     else:
         if anomaly_data.include_subdims:
-            string = ""
+            alerts_string = ""
             for point in anomaly_data.top_subdim_points:
-                string += anomaly_point_formatting(point)
+                alerts_string += anomaly_point_formatting(point)
             return alerts_string
         else:
             return "No Sub-Dimensional anomalies."
@@ -275,7 +275,7 @@ def anomaly_point_formatting(
         if include_kpi_name:
             out += f" in *{kpi_name_link(kpi_link_prefix, point)}* "
             if point.is_subdim:
-                out += subdim_name_link(point)
+                out += f"{subdim_name_link(point)} "
         else:
             out += " detected "
             if point.is_subdim:
@@ -302,16 +302,16 @@ def anomaly_point_formatting(
         if include_kpi_name:
             out += f" in *{kpi_name_link(kpi_link_prefix, point)}* "
             if point.is_subdim:
-                out += subdim_name_link(point)
+                out += f"{subdim_name_link(point)} "
         else:
             out += " detected "
             if point.is_subdim:
                 out += f" in {subdim_name_link(point)} "
 
-        out += f" -  changed to *{point.y_readable}*"
+        out += f"- changed to *{point.y_readable}*"
 
         if point.previous_value_readable is not None:
-            out += f" from {point.previous_value_readable} "
+            out += f" from {point.previous_value_readable}"
 
         if point.is_hourly:
             out += (

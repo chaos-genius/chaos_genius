@@ -116,6 +116,7 @@ def add_alert():
                 kpi=data.get("kpi"),
                 kpi_alert_type=data.get("kpi_alert_type"),
                 severity_cutoff_score=data.get("severity_cutoff_score"),
+                include_subdims=data.get("include_subdims", False),
                 alert_message=data.get("alert_message"),
                 alert_frequency=data.get("alert_frequency"),
                 alert_channel=data.get("alert_channel"),

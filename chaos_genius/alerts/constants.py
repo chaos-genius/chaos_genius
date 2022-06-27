@@ -43,3 +43,14 @@ FREQUENCY_DICT = {
 }
 
 OVERALL_KPI_SERIES_TYPE_REPR = "Overall KPI"
+
+ALERT_RELEVANT_SUBDIMS_TOP_N = 3
+"""Number of subdims to consider as relevant for an overall anomaly."""
+ALERT_OVERALL_TOP_N = 5
+"""Number of overall anomalies to show in an individual alert."""
+ALERT_SUBDIM_TOP_N = 3
+"""Number of subdim anomalies to show in an individual alert."""
+ALERT_REPORT_OVERALL_TOP_N = 10
+"""Number of top overall anomalies to show in an alert report."""
+ALERT_REPORT_SUBDIM_TOP_N = 10
+"""Number of top subdim anomalies to show in an alert report."""

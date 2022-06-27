@@ -23,6 +23,12 @@ class Alert(PkModel):
     kpi = Column(db.Integer)
     kpi_alert_type = Column(db.String(80))
     severity_cutoff_score = Column(db.Integer)
+    include_subdims = Column(
+        db.Boolean(),
+        default=False,
+        nullable=False,
+        server_default=sqlalchemy.sql.expression.literal(False),
+    )
 
     alert_message = Column(db.Text())
     alert_frequency = Column(db.String(80))
@@ -55,6 +61,7 @@ class Alert(PkModel):
             "kpi": self.kpi,
             "kpi_alert_type": self.kpi_alert_type,
             "severity_cutoff_score": self.severity_cutoff_score,
+            "include_subdims": self.include_subdims,
             "alert_message": self.alert_message,
             "alert_frequency": self.alert_frequency,
             "alert_channel": self.alert_channel,
@@ -116,6 +123,12 @@ class Alert(PkModel):
                 },
                 {
                     "name": "severity_cutoff_score",
+                    "is_editable": True,
+                    "is_sensitive": False,
+
+                },
+                {
+                    "name": "include_subdims",
                     "is_editable": True,
                     "is_sensitive": False,
 

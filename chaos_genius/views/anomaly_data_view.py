@@ -187,9 +187,9 @@ def kpi_anomaly_data_quality(kpi_id):
             f"Anomaly DQ Retrieval Completed for KPI ID: {kpi_id}"
         )
 
-    except Exception:  # noqa B902
+    except Exception as err:  # noqa B902
         current_app.logger.error(
-            "Error in Anomaly DQ Retrieval: {err}", exc_info=1
+            f"Error in Anomaly DQ Retrieval: {err}", exc_info=1
         )
 
     return jsonify({"data": data, "msg": ""})
@@ -494,10 +494,8 @@ def convert_to_graph_json(
 
     if anomaly_type == "overall":
         title = kpi_info["name"]
-    elif anomaly_type == "subdim":
-        title = get_user_string_from_subgroup_dict(series_type)
     else:
-        title = series_type.title()
+        title = get_user_string_from_subgroup_dict(series_type)
 
     kpi_name = kpi_info["metric"]
     graph_data = {

@@ -2,6 +2,8 @@
 """anomaly data model."""
 import datetime as dt
 
+from sqlalchemy.dialects.postgresql import JSONB
+
 from chaos_genius.databases.base_model import Column, Index, PkModel, db
 
 
@@ -20,7 +22,7 @@ class AnomalyDataOutput(PkModel):
     kpi_id = Column(db.Integer, nullable=False)
     # overall, drilldown, data_quality
     anomaly_type = Column(db.String(80), nullable=False)
-    series_type = Column(db.Text, nullable=True)
+    series_type = Column(JSONB, nullable=True)
     index = Column(db.BigInteger, nullable=False)
     created_at = Column(db.DateTime, nullable=True,
                         default=dt.datetime.utcnow)

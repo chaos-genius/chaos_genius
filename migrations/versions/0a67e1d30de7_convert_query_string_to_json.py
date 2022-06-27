@@ -30,10 +30,15 @@ def upgrade():
     def conv_query_str_to_json(string: str):
         if string is None:
             return None
+        if string in ("mean", "max", "count","min"):
+            return json.dumps({"dq": string})
         pattern = re.compile(r'`(.+?)` == "(.+?)"')
-        return json.dumps(dict(
-            pattern.match(s).groups() for s in string.split(" and ")
-        ))
+        try:
+            return json.dumps(dict(
+                pattern.match(s).groups() for s in string.split(" and ")
+            ))
+        except AttributeError():
+            raise ValueError(f"Could not coerce `{string}` into valid JSON.")
 
     df["series_type"] = df["series_type"].apply(conv_query_str_to_json)
 
@@ -41,7 +46,7 @@ def upgrade():
     op.drop_column('anomaly_data_output', 'series_type')
     op.add_column(
         'anomaly_data_output',
-        sa.Column('series_type', sa.Text(), autoincrement=False, nullable=True)
+        sa.Column('series_type', postgresql.JSONB(), autoincrement=False, nullable=True)
     )
     df.to_sql('anomaly_data_output', conn, if_exists='append', index=False)
     # ### end Alembic commands ###
@@ -53,10 +58,11 @@ def downgrade():
     conn = op.get_bind()
     df = pd.read_sql("SELECT * from anomaly_data_output;", conn)
 
-    def conv_json_to_query_str(json_string: str):
-        if json_string is None:
+    def conv_json_to_query_str(json_dict: dict):
+        if json_dict is None:
             return None
-        json_dict = json.loads(json_string)
+        if json_dict.get("dq"):
+            return json_dict["dq"]
         return " and ".join([f'`{k}` == "{v}"' for k, v in json_dict.items()])
 
     df["series_type"] = df["series_type"].apply(conv_json_to_query_str)
@@ -64,7 +70,7 @@ def downgrade():
     conn.execute("TRUNCATE TABLE anomaly_data_output;")
     op.alter_column(
         'anomaly_data_output', 'series_type',
-        existing_type=sa.Text(),
+        existing_type=postgresql.JSONB(),
         type_=sa.VARCHAR(length=500),
         existing_nullable=True
     )

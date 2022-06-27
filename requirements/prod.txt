@@ -80,4 +80,4 @@ Pygments~=2.10.0
 
 # converting to/from JSON and custom classes
 pydantic~=1.9.0
-
+pyarrow<6.1.0,>=6.0.0

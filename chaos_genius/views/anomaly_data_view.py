@@ -74,8 +74,8 @@ def kpi_anomaly_detection(kpi_id):
 
         if dimension and value:
             is_overall = False
-            subdim = f"`{dimension}` == \"{value}\""
-            anom_data = get_dq_and_subdim_data(kpi_id, end_date, "subdim", subdim, period)
+            series_type = {dimension: value}
+            anom_data = get_dq_and_subdim_data(kpi_id, end_date, "subdim", series_type, period)
         else:
             is_overall = True
             anom_data = get_overall_data(kpi_id, end_date, period)
@@ -90,7 +90,7 @@ def kpi_anomaly_detection(kpi_id):
             # remove from here once updated in frontend
             "base_anomaly_id": kpi_id,
         }
-        data["chart_data"]["title"] = kpi_info["name"]
+
         current_app.logger.info(
             f"Anomaly DD Retrieval Completed for KPI ID: {kpi_id}"
         )
@@ -431,17 +431,13 @@ def _get_dimensions_values(
         current_app.logger.info("No Subdimension Anomaly Found")
         return []
 
-    # series_type strings are in the format "`dimension` == "value""
-    # split string into dimension and value to get [`dimension`, "value"]
-    split_dimension_value = list(
-        map(lambda dim_val: dim_val[0].split(" == "), results)
-    )
-
+    # series_type strings are in format {dimension1 == value1, dimension2 == value2,}
+    # create a default dict mapping each dimension to a list of their values
     dimension_values_dict = defaultdict(list)
-    for dim_val in split_dimension_value:
-        # remove extra quotation marks
-        dimension, values = map(lambda dim_val_string: dim_val_string[1:-1], dim_val)
-        dimension_values_dict[dimension].append(values)
+    for dim_val_row in results:
+        for dimension in dim_val_row[0].keys():
+            if dim_val_row[0][dimension] not in dimension_values_dict[dimension]:
+                dimension_values_dict[dimension].append(dim_val_row[0][dimension])
 
     dimension_values_list = [
         {
@@ -534,7 +530,6 @@ def get_overall_data_points(kpi_id: int, n: int = 60) -> List:
         & (AnomalyDataOutput.data_datetime >= start_date)
         & (AnomalyDataOutput.anomaly_type == "overall")
     ).order_by(AnomalyDataOutput.data_datetime).all()
-
 
 
 def get_overall_data(kpi_id, end_date: datetime, n=90):

@@ -1,6 +1,6 @@
 """Utilities for sending slack alert messages."""
 import logging
-from typing import TYPE_CHECKING, Optional, Sequence
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from slack_sdk.webhook.client import WebhookClient
 
@@ -128,8 +128,7 @@ def alert_digest_slack_formatted(data: "AlertsReportData") -> str:
     if not client:
         raise Exception("Slack not configured properly.")
 
-    response = client.send(
-        blocks=[
+    blocks = [
             {
                 "type": "header",
                 "text": {
@@ -149,13 +148,7 @@ def alert_digest_slack_formatted(data: "AlertsReportData") -> str:
                     "emoji": True,
                 },
             },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": _display_anomalies_digest(data),
-                },
-            },
+            *_display_anomalies_digest(data),
             {
                 "type": "header",
                 "text": {
@@ -164,13 +157,7 @@ def alert_digest_slack_formatted(data: "AlertsReportData") -> str:
                     "emoji": True,
                 },
             },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": _display_anomalies_digest(data, subdim=True),
-                },
-            },
+            *_display_anomalies_digest(data, subdim=True),
             {
                 "type": "actions",
                 "elements": [
@@ -184,7 +171,8 @@ def alert_digest_slack_formatted(data: "AlertsReportData") -> str:
                 ],
             },
         ]
-    )
+
+    response = client.send(blocks=blocks)
 
     if response.body != "ok":
         return response.body
@@ -214,26 +202,53 @@ def _display_anomalies_individual(anomaly_data, subdim: bool = False):
 
 def _display_anomalies_digest(anomaly_data, subdim: bool = False):
     """Creates Digest Alert message."""
+    sections: List[Dict[str, Any]] = []
+
+    def _new_section() -> Dict[str, Any]:
+        section = {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": ""
+            },
+        }
+        sections.append(section)
+        return section
+
+    def _append_text(section: Dict[str, Any], text: str):
+        section["text"]["text"] += text
+
+    def _text_len(section: Dict[str, Any]) -> int:
+        return len(section["text"]["text"])
+
+    section = _new_section()
+
+    max_len = 2500
+
     if not subdim:
         if not anomaly_data.top_overall_anomalies:
-            return "No anomalies observed."
+            _append_text(section, "No anomalies observed.")
         else:
-            alerts_string = ""
             for point in anomaly_data.top_overall_anomalies:
-                alerts_string += anomaly_point_formatting(
+                point_formatted = anomaly_point_formatting(
                     point, anomaly_data.kpi_link_prefix()
                 )
-            return alerts_string
+                if _text_len(section) + len(point_formatted) > max_len:
+                    section = _new_section()
+                _append_text(section, point_formatted)
     else:
         if anomaly_data.top_subdim_anomalies:
-            alerts_string = ""
             for point in anomaly_data.top_subdim_anomalies:
-                alerts_string += anomaly_point_formatting(
+                point_formatted = anomaly_point_formatting(
                     point, anomaly_data.kpi_link_prefix()
                 )
-            return alerts_string
+                if _text_len(section) + len(point_formatted) > max_len:
+                    section = _new_section()
+                _append_text(section, point_formatted)
         else:
-            return "No Sub-Dimensional anomalies."
+            return []
+
+    return sections
 
 
 def kpi_name_link(kpi_link_prefix, point):
@@ -320,7 +335,7 @@ def anomaly_point_formatting(
             )
 
     if point.relevant_subdims is not None:
-        out += "\n      - Key Dimensions Impacted: "
+        out += "\n      - Reasons for change: "
         for point in point.top_relevant_subdims():
             out += f"{subdim_name_link(point, value_only=True)}, "
 

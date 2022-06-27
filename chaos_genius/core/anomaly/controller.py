@@ -286,10 +286,14 @@ class AnomalyDetectionController(object):
         dim_comb = self._get_dimension_combinations(valid_subdims)
         for dim_list in dim_comb:
             grouped_dims = input_data.groupby(dim_list)
-            subgroups_raw = list(grouped_dims.groups.keys())
+            subgroups_raw = list(
+                (subgroup,) if isinstance(subgroup, str) else subgroup
+                for subgroup in grouped_dims.groups.keys()
+            )
             group_list.extend(
                 dict(zip(dim_list, subgroup)) for subgroup in subgroups_raw
             )
+
         return group_list
 
     def _filter_subgroups(self, subgroups: list, input_data: pd.DataFrame) -> list:

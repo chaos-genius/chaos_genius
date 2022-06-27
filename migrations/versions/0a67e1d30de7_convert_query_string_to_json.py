@@ -37,7 +37,7 @@ def upgrade():
             return json.dumps(dict(
                 pattern.match(s).groups() for s in string.split(" and ")
             ))
-        except AttributeError():
+        except AttributeError:
             raise ValueError(f"Could not coerce `{string}` into valid JSON.")
 
     df["series_type"] = df["series_type"].apply(conv_query_str_to_json)

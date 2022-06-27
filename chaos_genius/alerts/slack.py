@@ -180,7 +180,7 @@ def _display_anomalies_individual(anomaly_data, subdim: bool = False):
                     "text": "Sub-Dimensional Anomalies",
                     "emoji": True,
                 },
-            },
+            }
             sections.append(header_section)
             for point in anomaly_data.top_subdim_points:
                 point_formatted = anomaly_point_formatting(point)
@@ -230,7 +230,7 @@ def _display_anomalies_digest(anomaly_data, subdim: bool = False):
                     "text": "Top Sub-Dimensional Anomalies",
                     "emoji": True,
                 },
-            },
+            }
             sections.append(header_section)
             section = _new_text_section()
             for point in anomaly_data.top_subdim_anomalies:
@@ -271,7 +271,7 @@ def subdim_name_link(point, value_only: bool = False):
 
 
 def anomaly_point_formatting(
-    point,
+    point: "anomaly_alerts.AnomalyPointFormatted",
     kpi_link_prefix: Optional[str] = None,
 ) -> str:
     """Creates format string for each point in alert."""
@@ -293,6 +293,8 @@ def anomaly_point_formatting(
 
         if point.previous_value is None:
             out += f"- changed to *{point.y_readable}*"
+            if point.is_hourly:
+                out += f" at {point.anomaly_time_only}"
         else:
             if point.is_hourly:
                 out += (
@@ -331,7 +333,7 @@ def anomaly_point_formatting(
 
     if point.relevant_subdims is not None:
         out += "\n      - Reasons for change: "
-        for point in point.top_relevant_subdims():
+        for point in point.top_relevant_subdims() or []:
             out += f"{subdim_name_link(point, value_only=True)}, "
 
     out += "\n"

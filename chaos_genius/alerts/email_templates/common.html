@@ -98,37 +98,41 @@
 
             </span>
             <strong style="{{ important_text }}">{{point.y_readable}}</strong>
+
+            {% if point.is_hourly -%}
+                <span style="{{ non_important_text }}">
+                    at
+                </span>
+                <span style="{{ important_text }}">{{ point.anomaly_time_only }}</span>
+            {%- endif %}
         {% else -%}
-            <span style="{{ non_important_text }}">
-
-                with
-
-            </span>
-
             {% if point.is_hourly %}
-                constant value
+                <span style="{{ non_important_text }}">
+                    with constant value
+                </span>
+
+                <strong style="{{ important_text }}">{{point.y_readable}}</strong>
+
+                <span style="{{ non_important_text }}">
+                    from
+                </span>
+                <span style="{{ important_text }}">{{ point.previous_point_time_only }}</span>
+
+                <span style="{{ non_important_text }}">
+                    to
+                </span>
+                <span style="{{ important_text }}">{{ point.anomaly_time_only }}</span>
             {% else %}
-                same value
+                <span style="{{ non_important_text }}">
+                    with same value
+                </span>
+
+                <strong style="{{ important_text }}">{{point.y_readable}}</strong>
+
+                <span style="{{ non_important_text }}">
+                    as previous day
+                </span>
             {% endif %}
-
-            <strong style="{{ important_text }}">{{point.y_readable}}</strong>
-
-            {% if point.is_hourly %}
-            {% else %}
-                as previous day
-            {% endif %}
-        {%- endif %}
-
-        {% if point.is_hourly -%}
-            <span style="{{ non_important_text }}">
-                from
-            </span>
-            <span style="{{ important_text }}">{{ point.previous_point_time_only }}</span>
-
-            <span style="{{ non_important_text }}">
-                to
-            </span>
-            <span style="{{ important_text }}">{{ point.anomaly_time_only }}</span>
         {%- endif %}
 
     {% else -%}

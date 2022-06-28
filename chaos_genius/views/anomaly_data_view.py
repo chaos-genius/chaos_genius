@@ -5,6 +5,7 @@ from collections import defaultdict
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple, cast
 
+import numpy as np
 import pandas as pd
 from flask import Blueprint, current_app, jsonify, request
 from sqlalchemy import func
@@ -498,17 +499,58 @@ def convert_to_graph_json(
         title = get_user_string_from_subgroup_dict(series_type)
 
     kpi_name = kpi_info["metric"]
+    results["timestamp"] = results["data_datetime"].astype("int64") / 1e6
+
+    def round_df(df, col):
+        df[col] = df[col].abs()
+        df[col] = np.where(
+            df[col] < 1,
+            df[col].round(3),
+            np.where(
+                (df[col] >= 1) & (df[col] < 100),
+                df[col].round(2),
+                np.where(
+                    (df[col] >= 100) & (df[col] < 10000),
+                    df[col].round(1),
+                    df[col].round(),
+                ),
+            ),
+        )
+
+    # def round_df(results, col):
+    #     results[col] = results[col].abs()
+
+    #     mask = results[col] >= 10000
+    #     results.loc[mask, col] = results[mask].round()
+
+    #     mask = (results[col] >= 100) & (results[col] < 10000)
+    #     results.loc[mask, col] = results[mask].round(1)
+
+    #     mask = (results[col] >= 1) & (results[col] < 100)
+    #     results.loc[mask, col] = results[mask].round(2)
+
+    #     mask = results[col] < 1
+    #     results.loc[mask, col] = results[mask].round(3)
+
+    round_df(results, "yhat_lower")
+    round_df(results, "yhat_upper")
+    round_df(results, "y")
+    round_df(results, "severity")
+
+    intervals = results[["timestamp", "yhat_lower", "yhat_upper"]].values.tolist()
+    values = results[["timestamp", "y"]].values.tolist()
+    severities = results[["timestamp", "severity"]].values.tolist()
+
+    # results.apply(lambda row: fill_graph_data(row, graph_data), axis=1)
     graph_data = {
         "title": title,
         "y_axis_label": kpi_name,
         "x_axis_label": "Datetime",
         "sub_dimension": anomaly_type,
-        "intervals": [],
-        "values": [],
-        "severity": [],
+        "intervals": intervals,
+        "values": values,
+        "severity": severities,
     }
-
-    results.apply(lambda row: fill_graph_data(row, graph_data), axis=1)
 
     return graph_data
 

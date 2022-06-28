@@ -455,36 +455,6 @@ def _get_dimensions_values(
     return dimension_values_list
 
 
-def fill_graph_data(row, graph_data):
-    """Fills graph_data with values for a given row.
-
-    :param row: A single row from the anomaly dataframe
-    :type row: pandas.core.series.Series
-    :param graph_data: Dictionary object with the current graph
-    :type graph_data: Dict
-    """
-    # Do not include rows where there is no data
-    if row.notna()["y"]:
-        # Convert to milliseconds for HighCharts
-        timestamp = row["data_datetime"].timestamp() * 1000
-
-        # Create and append a point for the interval
-        interval = [
-            timestamp,
-            round_number(row["yhat_lower"]),
-            round_number(row["yhat_upper"]),
-        ]
-        graph_data["intervals"].append(interval)
-
-        # Create and append a point for the value
-        value = [timestamp, round_number(row["y"])]
-        graph_data["values"].append(value)
-
-        # Create and append a point for the severity
-        severity = [timestamp, round_number(row["severity"])]
-        graph_data["severity"].append(severity)
-
-
 def convert_to_graph_json(
     results,
     kpi_id,
@@ -499,9 +469,10 @@ def convert_to_graph_json(
         title = get_user_string_from_subgroup_dict(series_type)
 
     kpi_name = kpi_info["metric"]
+
     results["timestamp"] = results["data_datetime"].astype("int64") / 1e6
 
-    def round_df(df, col):
+    def round_column_in_df(df: pd.DataFrame, col: str):
         df[col] = df[col].abs()
         df[col] = np.where(
             df[col] < 1,
@@ -517,31 +488,15 @@ def convert_to_graph_json(
             ),
         )
 
-    # def round_df(results, col):
-    #     results[col] = results[col].abs()
-
-    #     mask = results[col] >= 10000
-    #     results.loc[mask, col] = results[mask].round()
-
-    #     mask = (results[col] >= 100) & (results[col] < 10000)
-    #     results.loc[mask, col] = results[mask].round(1)
-
-    #     mask = (results[col] >= 1) & (results[col] < 100)
-    #     results.loc[mask, col] = results[mask].round(2)
-
-    #     mask = results[col] < 1
-    #     results.loc[mask, col] = results[mask].round(3)
-
-    round_df(results, "yhat_lower")
-    round_df(results, "yhat_upper")
-    round_df(results, "y")
-    round_df(results, "severity")
+    round_column_in_df(results, "yhat_lower")
+    round_column_in_df(results, "yhat_upper")
+    round_column_in_df(results, "y")
+    round_column_in_df(results, "severity")
 
     intervals = results[["timestamp", "yhat_lower", "yhat_upper"]].values.tolist()
     values = results[["timestamp", "y"]].values.tolist()
     severities = results[["timestamp", "severity"]].values.tolist()
 
-    # results.apply(lambda row: fill_graph_data(row, graph_data), axis=1)
     graph_data = {
         "title": title,
         "y_axis_label": kpi_name,

@@ -133,10 +133,15 @@ class AlertsReportData(BaseModel):
 
     def alert_dashboard_link(self) -> str:
         """Return the link to the alert dashboard."""
+        subdim_part = ""
+        if self.top_subdim_anomalies:
+            subdim_part = "&subdims=true"
+
         return (
             f"{webapp_url_prefix()}api/digest"
             + "?date="
             + quote_plus(self.report_date.strftime(ALERT_DATE_FORMAT))
+            + subdim_part
         )
 
     def report_date_formatted(self) -> str:

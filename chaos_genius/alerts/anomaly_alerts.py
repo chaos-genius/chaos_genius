@@ -577,7 +577,11 @@ class AlertsIndividualData(BaseModel):
 
     def alert_dashboard_link(self):
         """Returns a link to the alert dashboard."""
-        return f"{webapp_url_prefix()}api/digest?alert={self.alert_id}"
+        subdim_part = ""
+        if self.include_subdims:
+            subdim_part = "&subdims=true"
+
+        return f"{webapp_url_prefix()}api/digest?alert={self.alert_id}{subdim_part}"
 
     def date_formatted(self):
         """Returns date formatted for readability."""

@@ -21,11 +21,11 @@
         style="{{ important_text }} text-decoration: underline dotted lightgrey;"
     >
         {% if value_only -%}
-            <span>{{ point.subdim_formatted_value_only() }}</span>
-        {% else -%}
+           <span>{{ point.subdim_formatted_value_only() }}</span><!--
+     -->{% else -%}
             <span>{{ point.subdim_formatted() }}</span>
-        {%- endif %}
-    </a>
+        {%- endif %}<!--
+ --></a>
 {%- endmacro %}
 
 {% macro button_with_link(text, link) -%}

@@ -289,7 +289,7 @@ def anomaly_point_formatting(
         else:
             out += " detected "
             if point.is_subdim:
-                out += f" in {subdim_name_link(point)} "
+                out += f"in {subdim_name_link(point)} "
 
         if point.previous_value is None:
             out += f"- changed to *{point.y_readable}*"
@@ -318,7 +318,7 @@ def anomaly_point_formatting(
         else:
             out += " detected "
             if point.is_subdim:
-                out += f" in {subdim_name_link(point)} "
+                out += f"in {subdim_name_link(point)} "
 
         out += f"- changed to *{point.y_readable}*"
 
@@ -335,6 +335,7 @@ def anomaly_point_formatting(
         out += "\n      - Reasons for change: "
         for point in point.top_relevant_subdims() or []:
             out += f"{subdim_name_link(point, value_only=True)}, "
+        out = out[:-2]
 
     out += "\n"
 

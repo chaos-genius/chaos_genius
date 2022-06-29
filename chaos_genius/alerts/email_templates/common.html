@@ -219,7 +219,7 @@
  -->{% if point.relevant_subdims is not none -%}
         <ul>
             <li>
-                <span style="{{ non_important_text }}">Key dimensions impacted:</span>
+                <span style="{{ non_important_text }}">Reasons for change:</span>
                 {% for point in point.top_relevant_subdims() %}
                 {{ subdim_name_link(point, value_only=true) }}<!--
                  -->{% if not loop.last -%}

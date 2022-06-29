@@ -51,6 +51,9 @@ class TriggeredAlertData(BaseModel):
 
     created_at: datetime.datetime
 
+    # only used by event alerts
+    date_only: str = ""
+
 
 class TriggeredAlertWithPoints(TriggeredAlertData):
     """TriggeredAlertData but with anomaly points."""
@@ -188,8 +191,9 @@ def preprocess_triggered_alert(
         alert_type=triggered_alert.alert_type,
         alert_metadata=triggered_alert.alert_metadata,
         created_at=triggered_alert.created_at,
-        kpi_id=kpi_id,
-        kpi_name=kpi.name if kpi is not None else "Doesn't Exist",
+        # using sentinel values here since this is only possible for event alerts
+        kpi_id=kpi_id if kpi_id is not None else 0,
+        kpi_name=kpi.name if kpi is not None else "KPI does not exist",
         alert_name=alert_conf.alert_name,
         alert_channel=alert_conf.alert_channel,
         alert_channel_conf=alert_conf.alert_channel_conf,
@@ -206,9 +210,12 @@ def preprocess_triggered_alert(
             alert_conf, "alert_channel_conf", {}
         ).get(triggered_alert_data.alert_channel)
 
-    points = extract_anomaly_points_from_triggered_alerts(
-        [triggered_alert_data], kpi_cache
-    )
+    if triggered_alert.alert_type == "KPI Alert":
+        points = extract_anomaly_points_from_triggered_alerts(
+            [triggered_alert_data], kpi_cache
+        )
+    else:
+        points = []
 
     return TriggeredAlertWithPoints.from_triggered_alert_data(
         triggered_alert_data, points

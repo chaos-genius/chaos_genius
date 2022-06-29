@@ -63,7 +63,8 @@ const KpiAlertConfigurationForm = ({
     kpi_alert_type: '',
     severity_cutoff_score: '',
     alert_message: '',
-    alert_frequency: ''
+    alert_frequency: '',
+    include_subdims: true
   });
   const [option, setOption] = useState([]);
 
@@ -74,7 +75,8 @@ const KpiAlertConfigurationForm = ({
     kpi_alert_type: true,
     severity_cutoff_score: true,
     alert_message: true,
-    alert_frequency: true
+    alert_frequency: true,
+    include_subdims: true
   });
 
   const onSubmit = () => {
@@ -147,6 +149,7 @@ const KpiAlertConfigurationForm = ({
         alert_frequency: kpiAlertEditData?.alert_frequency,
         alert_channel: kpiAlertEditData?.alert_channel,
         alert_channel_conf: kpiAlertEditData?.alert_channel_conf,
+        include_subdims: kpiAlertEditData?.include_subdims,
         daily_digest:
           kpiAlertEditData?.daily_digest !== undefined &&
           kpiAlertEditData?.daily_digest !== null
@@ -623,6 +626,30 @@ const KpiAlertConfigurationForm = ({
               <p>{error.alert_message}</p>
             </div>
           )}
+        </div>
+        <div className="form-check check-box" key="include-subdims">
+          <input
+            className="form-check-input"
+            name="include-subdims"
+            id="include-subdims"
+            checked={alertFormData.include_subdims}
+            type="checkbox"
+            onChange={(e) => {
+              setAlertFormData({
+                ...alertFormData,
+                include_subdims: e.target.checked
+              });
+            }}
+          />
+
+          <label
+            className="form-check-label name-tooltip"
+            htmlFor="include-subdims">
+            Include Alerts by Dimensions
+          </label>
+        </div>
+        <div className="channel-tip">
+          <p>(e.g. 50% Drop in Revenue [country=France] to 100 from 200)</p>
         </div>
         <div className="form-action ">
           <button className="btn black-button" onClick={() => onSubmit()}>

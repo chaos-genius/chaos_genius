@@ -12,7 +12,7 @@
 
 {% block content %}
 
-<h2 style="margin-bottom: 15px; {{ common.main_text }}">{{ kpi_name }} ({{ date }})</h2>
+<h2 style="margin-bottom: 15px; {{ common.main_text }}">{{ data.kpi_name }} ({{ data.date_formatted() }})</h2>
 
 <hr>
 
@@ -21,22 +21,38 @@
 <h3 style="{{ common.main_text }}">Alert Message</h3>
 
 <div id="alert-message" style="{{ common.main_text }} margin-bottom: 1rem;">
-{{ alert_message }}
+{{ data.alert_message }}
 </div>
 
 <hr style="margin-top: 1rem;">
 
 <h3 style="{{ common.main_text }}">Anomalies</h3>
+
+{% if not data.top_overall_points %}
+<p style="{{ common.main_text }}">No anomalies observed.</p>
+{% else %}
 <ul>
-    {% for point in top_anomalies %}
+    {% for point in data.top_overall_points %}
     <li>
         {{ common.anomaly_point_formatting(point) }}
     </li>
     {% endfor %}
 </ul>
+{% endif %}
 
-{{ common.button_with_link("View KPI", kpi_link) }}
-{{ common.button_with_link("Alerts Dashboard", alert_dashboard_link) }}
+{% if data.include_subdims %}
+<h3 style="{{ common.main_text }}">Sub-dimensional anomalies</h3>
+<ul>
+    {% for point in data.top_subdim_points %}
+    <li>
+        {{ common.anomaly_point_formatting(point) }}
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+{{ common.button_with_link("View KPI", data.kpi_link()) }}
+{{ common.button_with_link("Alerts Dashboard", data.alert_dashboard_link()) }}
 
 </div>
 {% endblock %}

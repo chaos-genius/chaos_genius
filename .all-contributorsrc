@@ -284,6 +284,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "KShivendu",
+      "name": "Kumar Shivendu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/47217984?v=4",
+      "profile": "https://blog.kshivendu.dev/",
+      "contributions": [
+        "bug",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -10,7 +10,7 @@
 
 <p align="center">
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-<a href="#contributors-"><img src="https://img.shields.io/badge/all_contributors-27-orange.svg" alt="All Contributors"></a>
+<a href="#contributors-"><img src="https://img.shields.io/badge/all_contributors-28-orange.svg" alt="All Contributors"></a>
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 <a href="https://github.com/chaos-genius/chaos_genius/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/chaos-genius/chaos_genius" alt="License"></a>
 <a href="https://github.com/chaos-genius/chaos_genius/releases"><img src="https://img.shields.io/github/v/release/chaos-genius/chaos_genius" alt="Latest release"></a>
@@ -189,6 +189,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://buggydebugger.com/"><img src="https://avatars.githubusercontent.com/u/7734938?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Rajdeep Sharma</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=rjdp" title="Code">💻</a> <a href="https://github.com/chaos-genius/chaos_genius/pulls?q=is%3Apr+reviewed-by%3Arjdp" title="Reviewed Pull Requests">👀</a></td>
     <td align="center"><a href="https://github.com/balakumar9493"><img src="https://avatars.githubusercontent.com/u/98518511?v=4?s=100" width="100px;" alt=""/><br /><sub><b>balakumar9493</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=balakumar9493" title="Code">💻</a> <a href="#design-balakumar9493" title="Design">🎨</a></td>
     <td align="center"><a href="https://bandism.net/"><img src="https://avatars.githubusercontent.com/u/22633385?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ikko Ashimine</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/commits?author=eltociear" title="Code">💻</a></td>
+    <td align="center"><a href="https://blog.kshivendu.dev/"><img src="https://avatars.githubusercontent.com/u/47217984?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Kumar Shivendu</b></sub></a><br /><a href="https://github.com/chaos-genius/chaos_genius/issues?q=author%3AKShivendu" title="Bug reports">🐛</a> <a href="#ideas-KShivendu" title="Ideas, Planning, & Feedback">🤔</a></td>
   </tr>
 </table>
 

@@ -284,6 +284,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "athul-osmo",
+      "name": "athul-osmo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/99287880?v=4",
+      "profile": "https://github.com/athul-osmo",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -293,6 +293,34 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "athul-osmo",
+      "name": "athul-osmo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/99287880?v=4",
+      "profile": "https://github.com/athul-osmo",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "KShivendu",
+      "name": "Kumar Shivendu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/47217984?v=4",
+      "profile": "https://blog.kshivendu.dev/",
+      "contributions": [
+        "bug",
+        "ideas"
+      ]
+    },
+    {
+      "login": "prathamSharma25",
+      "name": "Pratham Sharma",
+      "avatar_url": "https://avatars.githubusercontent.com/u/63733573?v=4",
+      "profile": "https://pratham-sharma.com",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

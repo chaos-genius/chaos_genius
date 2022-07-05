@@ -933,7 +933,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
         if (Object.keys(needForCleanup)?.length) {
           setEditModalOpen(true);
         } else {
-          dispatch(getUpdatekpi(kpiId, editedFormData));
+          dispatch(getUpdatekpi(kpiId, editedFormData, customToast));
         }
       } else if (data[2] !== 'edit') {
         dispatchgetAllKpiExplorerSubmit(kpiInfo);
@@ -942,7 +942,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
   };
 
   const dispatchgetAllKpiExplorerSubmit = (kpiInfo) => {
-    dispatch(getAllKpiExplorerSubmit(kpiInfo));
+    dispatch(getAllKpiExplorerSubmit(kpiInfo, customToast));
   };
 
   const onTestQuery = () => {
@@ -1732,7 +1732,9 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
                   <button
                     className="btn black-button"
                     onClick={() => {
-                      dispatch(getUpdatekpi(kpiId, editedFormData));
+                      dispatch(
+                        getUpdatekpi(kpiId, editedFormData, customToast)
+                      );
                       setNeedForCleanUp({});
                       setEditModalOpen(false);
                     }}>

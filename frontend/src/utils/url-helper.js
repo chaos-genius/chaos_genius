@@ -2,7 +2,6 @@
 import { env } from '../env';
 
 export const BASE_URL = env.REACT_APP_BASE_URL || '';
-
 export const attachParams = (relativeUrl, params) => {
   let baseUrl = BASE_URL;
 
@@ -58,6 +57,22 @@ export const ORGANIZATION_UPDATE_URL = `${BASE_URL}/api/config/update`;
 export const GLOBAL_SETTING_URL = `${BASE_URL}/api/config/global-config`;
 export const TASK_MANAGER_API_STATUS_URL = `${BASE_URL}/api/status`;
 
+const urlBlackListForDemo = [
+  DASHBOARD_UPDATE_URL,
+  DASHBOARD_CREATE_URL,
+  DASHBOARD_DELETE_URL,
+  CREATE_DATASOURCE,
+  DELETE_DATASOURCE,
+  CREATE_KPI_ALERT_URL
+];
+
+export const checkBlackList = (url) => {
+  return urlBlackListForDemo.findIndex((item) => {
+    return item === url;
+  }) > -1
+    ? true
+    : false;
+};
 export const TIME_CUTS_URL = `${BASE_URL}/api/kpi/get-timecuts-list`;
 export const VERSION_SETTING_URL = `${BASE_URL}/api/meta/version`;
 export const METADATA_PREFETCH_URL = `${BASE_URL}/api/connection/trigger-metadata-prefetch`;

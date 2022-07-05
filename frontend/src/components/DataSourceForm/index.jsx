@@ -424,7 +424,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             sourceDefinitionId: sourceDefinitionId
           }
         };
-        dispatch(createDataSource(bingPayload));
+        dispatch(createDataSource(bingPayload, customToast));
       } else {
         const payload = {
           connection_type: selectedDatasource.value,
@@ -435,7 +435,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
             sourceDefinitionId: sourceDefinitionId
           }
         };
-        dispatch(createDataSource(payload));
+        dispatch(createDataSource(payload, customToast));
       }
     }
   };
@@ -478,7 +478,7 @@ const DataSourceForm = ({ onboarding, setModal, setText }) => {
           connectionConfiguration: editedForm
         }
       };
-      dispatch(updateDatasourceById(dsId, payload));
+      dispatch(updateDatasourceById(dsId, payload, customToast));
     }
   };
 

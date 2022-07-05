@@ -193,13 +193,13 @@ const DashboardForm = ({ setText, setModal, onboarding }) => {
           dashboard_name: formData.dashboardname,
           kpi_list: formData.kpi
         };
-        dispatch(getUpdateDashboard(payload));
+        dispatch(getUpdateDashboard(payload, customToast));
       } else {
         const dashboardData = {
           dashboard_name: formData.dashboardname,
           kpi_list: formData.kpi
         };
-        dispatch(getCreateDashboard(dashboardData));
+        dispatch(getCreateDashboard(dashboardData, customToast));
       }
     }
   };

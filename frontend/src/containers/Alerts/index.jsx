@@ -282,6 +282,7 @@ const Alerts = () => {
               <AlertTable
                 alertData={alertData}
                 alertSearch={alertSearch}
+                customToast={customToast}
                 setPgInfo={setPgInfo}
                 pagination={pages}
                 pgInfo={pgInfo}

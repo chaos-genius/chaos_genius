@@ -394,7 +394,7 @@ const AlertsForm = () => {
   };
 
   const dispatchGetAllAlertEmail = (data) => {
-    dispatch(getAllAlertEmail(data));
+    dispatch(getAllAlertEmail(data, customToast));
   };
 
   const editableStatus = (type) => {

@@ -41,7 +41,7 @@ const Dashboardcards = ({ dashboarddata, setChange }) => {
   };
 
   const onDelete = (value) => {
-    dispatch(getDashboardDelete({ dashboard_id: value.id }));
+    dispatch(getDashboardDelete({ dashboard_id: value.id }, customToast));
   };
 
   const customToast = (data) => {

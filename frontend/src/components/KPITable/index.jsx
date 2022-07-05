@@ -39,7 +39,6 @@ const KPITable = ({
   changeData,
   pagination,
   pgInfo,
-  setKpiSearch,
   setPgInfo
 }) => {
   const connectionType = useContext(connectionContext);
@@ -67,7 +66,7 @@ const KPITable = ({
         header: 'KPI deleted successfully',
         description: kpiDisableData.message
       });
-      setKpiSearch('');
+      changeData((prev) => !prev);
     } else if (kpiDisableData && kpiDisableData.status === 'failed') {
       customToast({
         type: 'error',
@@ -127,10 +126,12 @@ const KPITable = ({
   };
 
   const handleBtnClick = (e) => {
+    window.scrollTo({ top: 0 });
     setPgInfo({ ...pgInfo, page: e });
   };
 
   const handleSelectClick = (e) => {
+    window.scrollTo({ top: 0 });
     setPgInfo({ ...pgInfo, page: 1, per_page: e.target.value });
   };
 

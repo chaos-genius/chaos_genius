@@ -29,7 +29,9 @@ def fetch_schema_list(data_source_id: int, as_obj: bool = False):
         .first()
     )
     if data_source_metadata:
-        schema_list: List[str] = data_source_metadata.metadata_info.get("schema_list", [])
+        schema_list: List[str] = data_source_metadata.metadata_info.get(
+            "schema_list", []
+        )
 
     if as_obj:
         return data_source_metadata
@@ -37,7 +39,7 @@ def fetch_schema_list(data_source_id: int, as_obj: bool = False):
         return schema_list
 
 
-def fetch_table_list(data_source_id: int, schema: str, as_obj: bool=False):
+def fetch_table_list(data_source_id: int, schema: str, as_obj: bool = False):
     """Fetch the table list from the metadata of the given data source and schema."""
     table_list = []
     data_source_metadata: DataSourceMetadata = (
@@ -73,7 +75,9 @@ def delete_table_list(data_source_id: int, schema: str):
         data_source_metadata.delete(commit=True)
 
 
-def fetch_table_info(data_source_id: int, schema: str, table: str, as_obj: bool=False):
+def fetch_table_info(
+    data_source_id: int, schema: str, table: str, as_obj: bool = False
+):
     """Fetch the table info from the metadata of the given data source and table."""
     table_info = {}
     data_source_metadata: DataSourceMetadata = (
@@ -114,7 +118,9 @@ def delete_table_info(data_source_id: int, schema: str, table: str):
 def run_metadata_prefetch(data_source_id: int):
     """Fetch the metadata of the given data source."""
 
-    data_source_obj = cast(DataSource, get_datasource_data_from_id(data_source_id, as_obj=True))
+    data_source_obj = cast(
+        DataSource, get_datasource_data_from_id(data_source_id, as_obj=True)
+    )
     sync_error = False
 
     if data_source_obj.connection_type not in NON_THIRD_PARTY_DATASOURCES:
@@ -159,7 +165,9 @@ def run_metadata_prefetch(data_source_id: int):
         sync_error = True
         logger.error("Error in metadata prefetch.", exc_info=err)
 
-    data_source_obj = cast(DataSource, get_datasource_data_from_id(data_source_id, as_obj=True))
+    data_source_obj = cast(
+        DataSource, get_datasource_data_from_id(data_source_id, as_obj=True)
+    )
     data_source_obj.sync_status = "Completed" if not sync_error else "Error"
     data_source_obj.last_sync = datetime.now()
     data_source_obj.update(commit=True)
@@ -203,19 +211,39 @@ def scan_db_and_save_table_list(data_source_id, db_connection, schema):
     return table_list, old_tables_list
 
 
-def scan_db_and_save_table_info(data_source_id, db_connection, schema, table):
-    """Scan the database for table info."""
-    table_info = get_table_info(
-        {}, schema, table, from_db_conn=True, db_conn=db_connection
-    )
+def scan_db_and_save_table_info(
+    data_source_id: int, db_connection: object, schema: str, table: str
+) -> dict:
+    """Scan the database for table info. After scanning save the table info
+    and delete the older record.
+    If the connection isn't able to get the table info becuase of permission
+    or any other issues just only delete the older record
+    """
+    table_info = {}
+    try:
+        # get the table information from the original data source
+        table_info = get_table_info(
+            {}, schema, table, from_db_conn=True, db_conn=db_connection
+        )
+    except Exception as err:
+        logger.error(
+            f"Not able to fetch the table info for table: {table}"
+            f" from schema: {schema}",
+            exc_info=err,
+        )
+
+    # get the table information from the CG metadata store
     old_table_info = fetch_table_info(data_source_id, schema, table, as_obj=True)
-    data_source_metadata = DataSourceMetadata(
-        data_source_id=data_source_id,
-        metadata_type="table_info",
-        metadata_param=get_metadata_param_str([schema, table]),
-        metadata_info=table_info,
-    )
-    data_source_metadata.save(commit=True)
+
+    if table_info:
+        data_source_metadata = DataSourceMetadata(
+            data_source_id=data_source_id,
+            metadata_type="table_info",
+            metadata_param=get_metadata_param_str([schema, table]),
+            metadata_info=table_info,
+        )
+        data_source_metadata.save(commit=True)
+
     if old_table_info:
         old_table_info.delete(commit=True)
     return table_info

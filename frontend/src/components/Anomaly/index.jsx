@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
-
+import { useHistory, useLocation } from 'react-router-dom';
+import Select from 'react-select';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import highchartsMore from 'highcharts/highcharts-more';
@@ -17,6 +17,7 @@ import { formatDateTime, getTimezone } from '../../utils/date-helper';
 import { HRNumbers } from '../../utils/Formatting/Numbers/humanReadableNumberFormatter';
 import { useToast } from 'react-toast-wnm';
 import { CustomContent, CustomActions } from '../../utils/toast-helper';
+import subdimFilterImage from '../../assets/images/subdim_filter.svg';
 import './anomaly.scss';
 
 import deepDrillGif from '../../assets/Animations/PH_Animation.gif';
@@ -28,7 +29,6 @@ import {
   setRetrain
 } from '../../redux/actions';
 import store from '../../redux/store';
-import SubdimensionEmpty from '../SubdimensionEmpty';
 
 import { downloadCsv } from '../../utils/download-helper';
 import { anomalyDownloadCsv } from '../../redux/actions/Anomaly';
@@ -50,6 +50,13 @@ const RESET = {
 
 const RESET_CSV = {
   type: 'RESET_CSV'
+};
+
+const customStyles = {
+  container: (provided) => ({
+    ...provided,
+    width: 140
+  })
 };
 
 const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
@@ -81,20 +88,88 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
       )
     });
   };
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
   const dispatch = useDispatch();
   const history = useHistory();
   const [chartData, setChartData] = useState([]);
-  const [subDimLoading, setSubDimloading] = useState(true);
   const [retrainOn, setRetrainOn] = useState(false);
-  const [subDimList, setSubDimList] = useState([]);
   const [drilldownCollapse, setDrilldownCollapse] = useState(true);
   const [anomalStatusInfo, setAnomalyStatusInfo] = useState(false);
-  const [kpiTab, setKPITab] = useState('Overall KPI');
+  const [dimension, setDimension] = useState(
+    query.getAll('dimension')?.length > 0
+      ? {
+          value: query.getAll('dimension')[0],
+          label: query.getAll('dimension')[0]
+        }
+      : null
+  );
+  const [value, setValue] = useState(
+    query.getAll('value')?.length > 0
+      ? { value: query.getAll('value')[0], label: query.getAll('value')[0] }
+      : null
+  );
+  const [dimensionOptions, setDimensionOptions] = useState([]);
+  const [valueOptions, setValueOptions] = useState([]);
 
   const idRef = useRef(0);
-  const isFirstRun = useRef(true);
 
-  const KPITabs = [{ name: 'Overall KPI' }, { name: 'Sub-dimensions' }];
+  const handleDimensionChange = (e) => {
+    let params = new URLSearchParams();
+    params.append('dimension', e.value);
+    history.push({
+      pathname: kpi,
+      search: '?' + params.toString()
+    });
+    setDimension(e);
+    if (anomalyDetectionData && anomalyDetectionData.dimensions_values) {
+      const dimensionIndex = anomalyDetectionData.dimensions_values?.findIndex(
+        (dimensionItem) => {
+          return e.value.toString() === dimensionItem.value.toString();
+        }
+      );
+      if (dimensionIndex >= 0) {
+        setValueOptions(
+          anomalyDetectionData.dimensions_values[dimensionIndex]
+            .subdim_value_options
+        );
+      }
+    }
+    setValue(null);
+  };
+
+  const handleValueChange = (e) => {
+    setValue(e);
+    let params = new URLSearchParams();
+    params.append('dimension', dimension?.value);
+    params.append('value', e.value);
+    history.push({
+      pathname: kpi,
+      search: '?' + params.toString()
+    });
+    store.dispatch(RESET_ACTION);
+    let dimFilterObj = undefined;
+    if (dimension && e) {
+      dimFilterObj = { dimension: dimension.value, value: e.value };
+    }
+    dispatch(anomalyDetection(kpi, dimFilterObj));
+  };
+
+  const clearSubdimFilters = () => {
+    setDimension(null);
+    setValue(null);
+    setValueOptions(null);
+    const params = new URLSearchParams(location.search);
+    params?.delete('dimension');
+    params?.delete('value');
+    history.push({
+      pathname: kpi,
+      search: params?.toString()
+    });
+
+    store.dispatch(RESET_ACTION);
+    dispatch(anomalyDetection(kpi, null));
+  };
 
   const {
     anomalyDetectionData,
@@ -131,7 +206,11 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
 
   useEffect(() => {
     store.dispatch(RESET_ACTION);
-    getAnomaly(kpiTab);
+    let dimFilterObj = undefined;
+    if (dimension && value) {
+      dimFilterObj = { dimension: dimension.value, value: value.value };
+    }
+    dispatch(anomalyDetection(kpi, dimFilterObj));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpi]);
 
@@ -145,39 +224,24 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
   }, [retrain]);
 
   useEffect(() => {
-    if (isFirstRun.current) {
-      isFirstRun.current = false;
-      return;
-    }
-    store.dispatch(RESET_ACTION);
-    getAnomaly(kpiTab);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kpiTab]);
-
-  const getAnomaly = (tab) => {
-    if (tab === 'Sub-dimensions') {
-      setSubDimloading(true);
-    }
-    dispatch(anomalyDetection(kpi, tab));
-  };
-
-  useEffect(() => {
-    let subDimesionList = [];
-    if (kpiTab === 'Overall KPI') {
-      if (anomalyDetectionData) {
-        idRef.current = anomalyDetectionData?.data?.base_anomaly_id;
-        renderChart(anomalyDetectionData?.data?.chart_data);
-        handleDataQuality(anomalyDetectionData?.data?.base_anomaly_id);
-      }
-    } else if (kpiTab === 'Sub-dimensions') {
-      setSubDimloading(false);
-      if (anomalyDetectionData) {
-        subDimesionList =
-          anomalyDetectionData?.data?.length &&
-          anomalyDetectionData?.data?.map((anomaly) => (
-            <Anomalygraph key={`dl-${anomaly.title}`} drilldown={anomaly} />
-          ));
-        setSubDimList(subDimesionList);
+    if (anomalyDetectionData) {
+      idRef.current = anomalyDetectionData?.data?.base_anomaly_id;
+      renderChart(anomalyDetectionData?.data?.chart_data);
+      handleDataQuality(anomalyDetectionData?.data?.base_anomaly_id);
+      setDimensionOptions(anomalyDetectionData?.dimensions_values);
+      if (dimension?.value) {
+        const dimensionIndex =
+          anomalyDetectionData.dimensions_values?.findIndex((dimensionItem) => {
+            return (
+              dimension.value.toString() === dimensionItem.value.toString()
+            );
+          });
+        if (dimensionIndex >= 0) {
+          setValueOptions(
+            anomalyDetectionData.dimensions_values[dimensionIndex]
+              .subdim_value_options
+          );
+        }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -519,19 +583,42 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                     <div className="option-selections-container">
                       <div className="download-container">
                         <div className="option-selections">
-                          {KPITabs?.length &&
-                            KPITabs.map(function (tab, i) {
-                              return (
-                                <span
-                                  onClick={() => setKPITab(tab.name)}
-                                  className={
-                                    tab.name === kpiTab ? 'active' : 'inactive'
-                                  }
-                                  key={i}>
-                                  {tab.name}
-                                </span>
-                              );
-                            })}
+                          <div className="filter-container">
+                            <img src={subdimFilterImage} alt="filter" />
+                          </div>
+                          <div className="filter-container">
+                            <span>Dimension =</span>
+                            <Select
+                              value={dimension}
+                              placeholder="select"
+                              styles={customStyles}
+                              classNamePrefix="selectcategory"
+                              isSearchable={false}
+                              options={dimensionOptions}
+                              onChange={(e) => handleDimensionChange(e)}
+                            />
+                          </div>
+                          <div className="filter-container">
+                            <span>Value =</span>
+                            <Select
+                              value={value}
+                              placeholder="select"
+                              styles={customStyles}
+                              classNamePrefix="selectcategory"
+                              isSearchable={false}
+                              options={valueOptions}
+                              onChange={(e) => handleValueChange(e)}
+                            />
+                          </div>
+                          {(dimension || value) && (
+                            <div className="filter-container">
+                              <span
+                                class="clear-filter"
+                                onClick={() => clearSubdimFilters()}>
+                                Clear filter
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <div
                           className="download-icon"
@@ -541,23 +628,15 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                       </div>
                     </div>
                   </div>
-
-                  {kpiTab === 'Overall KPI' &&
-                  chartData &&
-                  chartData.length !== 0 ? (
+                  {chartData && Object.keys(chartData)?.length && (
                     <HighchartsReact
                       containerProps={{ className: 'chartContainer' }}
                       highcharts={Highcharts}
                       options={chartData}
                     />
-                  ) : subDimLoading ? null : subDimList && subDimList.length ? (
-                    subDimList
-                  ) : (
-                    <div className="dashboard-layout setup-layout-empty">
-                      <SubdimensionEmpty />
-                    </div>
                   )}
-                  {kpiTab === 'Overall KPI' && (
+
+                  {anomalyDetectionData?.is_overall && (
                     <div className="retrain-button-container">
                       <div
                         className="retrain-button"
@@ -569,7 +648,8 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                   )}
                 </div>
               </div>
-              {kpiTab === 'Overall KPI' ? (
+
+              {anomalyDetectionData?.is_overall && (
                 <div className="dashboard-layout">
                   <div
                     className={
@@ -631,7 +711,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                     </>
                   ) : null}
                 </div>
-              ) : null}
+              )}
             </>
           ) : (
             anomalyDetectionData !== '' && <Noresult title="Anomaly" />

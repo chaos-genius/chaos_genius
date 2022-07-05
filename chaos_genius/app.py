@@ -46,7 +46,7 @@ def create_app(config_object="chaos_genius.settings"):
 
     :param config_object: The configuration object to use.
     """
-    app = Flask(__name__.split(".")[0])
+    app = Flask(__name__.split(".")[0], static_url_path="/api/static")
     app.config.from_object(config_object)
     register_extensions(app)
     register_blueprints(app)

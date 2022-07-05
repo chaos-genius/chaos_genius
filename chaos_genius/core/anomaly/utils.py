@@ -1,5 +1,6 @@
 """Provides utility functions for anomaly detection."""
 
+import json
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -13,18 +14,21 @@ def bound_between(min_val, val, max_val):
     return min(max(val, min_val), max_val)
 
 
-def get_last_date_in_db(kpi_id: int, series: str, subgroup: str = None) -> Any or None:
+def get_last_date_in_db(kpi_id: int, series: str, subgroup: dict = None) -> Any or None:
     """Get last date for which anomaly was computed.
 
     :param kpi_id: kpi id to check for
     :type kpi_id: int
     :param series: series type
     :type series: str
-    :param subgroup: subgroup id, defaults to None
-    :type subgroup: str, optional
+    :param subgroup: subgroup details, defaults to None
+    :type subgroup: dict, optional
     :return: last date for which anomaly was computed
     :rtype: Any | None
     """
+    if subgroup is not None:
+        subgroup = json.dumps(subgroup)
+
     results = (
         AnomalyDataOutput.query.filter(
             (AnomalyDataOutput.kpi_id == kpi_id)
@@ -35,10 +39,7 @@ def get_last_date_in_db(kpi_id: int, series: str, subgroup: str = None) -> Any o
         .first()
     )
 
-    if results:
-        return results.data_datetime
-    else:
-        return None
+    return results.data_datetime if results else None
 
 
 def get_dq_missing_data(
@@ -67,7 +68,9 @@ def get_dq_missing_data(
 
     data[dt_col] = pd.to_datetime(data[dt_col])
 
-    col_list = [dt_col, metric_col, preagg_count_col] if preagg_count_col else [dt_col, metric_col]
+    col_list = [
+        dt_col, metric_col, preagg_count_col
+    ] if preagg_count_col else [dt_col, metric_col]
     missing_data = (
         data.set_index(dt_col)
         .isna()
@@ -151,7 +154,6 @@ def fill_data(
     :return: filled dataframe
     :rtype: pd.DataFrame
     """
-
     input_data = input_data.copy()
     input_data.loc[:, dt_col] = pd.to_datetime(input_data[dt_col])
 

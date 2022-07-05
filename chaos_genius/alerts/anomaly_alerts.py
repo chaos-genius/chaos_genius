@@ -9,6 +9,8 @@ from typing import (
     Any,
     DefaultDict,
     Dict,
+    Iterable,
+    Iterator,
     List,
     Optional,
     Sequence,
@@ -24,10 +26,13 @@ from pydantic.tools import parse_obj_as
 from chaos_genius.alerts.constants import (
     ALERT_DATE_FORMAT,
     ALERT_DATETIME_FORMAT,
+    ALERT_OVERALL_TOP_N,
     ALERT_READABLE_DATA_TIME_ONLY_FORMAT,
     ALERT_READABLE_DATA_TIMESTAMP_FORMAT,
     ALERT_READABLE_DATE_FORMAT,
     ALERT_READABLE_DATETIME_FORMAT,
+    ALERT_RELEVANT_SUBDIMS_TOP_N,
+    ALERT_SUBDIM_TOP_N,
     ANOMALY_TABLE_COLUMN_NAMES_MAPPER,
     ANOMALY_TABLE_COLUMN_NAMES_ORDERED,
     OVERALL_KPI_SERIES_TYPE_REPR,
@@ -46,11 +51,6 @@ from chaos_genius.controllers.kpi_controller import (
     get_anomaly_data,
     get_last_anomaly_timestamp,
 )
-
-# from chaos_genius.connectors.base_connector import get_df_from_db_uri
-from chaos_genius.core.rca.rca_utils.string_helpers import (
-    convert_query_string_to_user_string,
-)
 from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
@@ -60,10 +60,19 @@ from chaos_genius.utils.utils import jsonable_encoder
 logger = logging.getLogger(__name__)
 
 
+# ref: https://stackoverflow.com/a/53287607/11199009
+TAnomalyPointOrig = TypeVar("TAnomalyPointOrig", bound="AnomalyPointOriginal")
+
+
+TAnomalyPoint = TypeVar("TAnomalyPoint", bound="AnomalyPoint")
+
+
 class AnomalyPointOriginal(BaseModel):
     """Representation of a point of anomaly data as received from raw anomaly data."""
 
     # TODO: could be generated from AnomalyDataOutput model
+
+    # TODO(Samyak): these comments descriptions of fields could be actual docstrings.
 
     # y-value of point
     y: float
@@ -77,7 +86,7 @@ class AnomalyPointOriginal(BaseModel):
     # overall, subdim or data_quality
     anomaly_type: str
     # subdimension name (when it's a subdim)
-    series_type: Optional[str]
+    series_type: Optional[Dict[str, str]]
 
     # timestamp when this entry was added
     created_at: datetime.datetime
@@ -88,6 +97,16 @@ class AnomalyPointOriginal(BaseModel):
     def expected_value(self) -> str:
         """Expected values represented in a string."""
         return f"{self.yhat_lower} to {self.yhat_upper}"
+
+    @property
+    def is_subdim(self) -> bool:
+        """Whether this point is a sub-dimensional anomaly."""
+        return self.anomaly_type == "subdim"
+
+    @property
+    def is_overall(self) -> bool:
+        """Whether this point is a overall anomaly."""
+        return self.anomaly_type == "overall"
 
     @property
     def readable_data_timestamp(self) -> str:
@@ -102,13 +121,50 @@ class AnomalyPointOriginal(BaseModel):
         """Only date part of the data timestamp (data_datetime)."""
         return self.data_datetime.strftime(ALERT_DATE_FORMAT)
 
-    def format_series_type(self):
-        """Format series_type to be more readable for use in alerts.
+    def subdim_name_value(self) -> Optional[Tuple[str, str]]:
+        """Return subdimension name and value."""
+        return (
+            next(iter(self.series_type.items()))
+            if self.series_type is not None
+            else None
+        )
 
-        Note: do not call this twice on the same instance.
-        """
-        # TODO: make this idempotent
-        self.series_type = _format_series_type(self.anomaly_type, self.series_type)
+    def subdim_formatted(self) -> Optional[str]:
+        """Return subdimension name and value formatted as a string."""
+        subdim = self.subdim_name_value()
+        if subdim is None:
+            return None
+
+        dimension, value = subdim
+        return f"[{dimension} = {value}]"
+
+    def subdim_formatted_value_only(self) -> Optional[str]:
+        """Return subdimension value formatted as a string."""
+        subdim = self.subdim_name_value()
+        if subdim is None:
+            return None
+
+        _, value = subdim
+        return f"[{value}]"
+
+    def is_of_same_type(self, other: "AnomalyPointOriginal") -> bool:
+        """Whether this point is of the same type as another point."""
+        return (
+            self.anomaly_type == other.anomaly_type
+            and self.series_type == other.series_type
+        )
+
+    @property
+    def series_type_name(self) -> str:
+        """Readable name of the series type - either Overall or the specific subdim."""
+        dim_value = self.subdim_name_value()
+
+        if dim_value is None:
+            return OVERALL_KPI_SERIES_TYPE_REPR
+
+        dimension, value = dim_value
+
+        return f"{dimension} = {value}"
 
     # -- pydantic specific configuration starts here --
 
@@ -143,42 +199,41 @@ class AnomalyPoint(AnomalyPointOriginal):
     # human readable message describing the percent_change
     change_message: str
 
-    @staticmethod
-    def from_original(
-        point: AnomalyPointOriginal,
-        previous_anomaly_point: Optional[AnomalyPointOriginal] = None,
-        fixed_change_message: Optional[str] = None,
-    ) -> "AnomalyPoint":
-        """Constructs a formatted AnomalyPoint from AnomalyPointOriginal.
+    relevant_subdims_: Optional[List]
 
-        Arguments:
-            point: original anomaly point
-            previous_anomaly_point: the anomaly point from which change percent will be
-                calculated.
-            fixed_change_message: the change message to use when previous anomaly point
-                cannot be found. If specified, change percent will not be calculated.
+    @property
+    def relevant_subdims(self: TAnomalyPoint) -> Optional[List[TAnomalyPoint]]:
+        """Subdimensional anomalies associated with this anomaly.
+
+        Only available when:
+        - this anomaly is for Overall KPI.
+        - there are subdimensional level anomalies for the same timestamp
+          and they are above the severity threshold.
+
+        Why is this an @property instead of just a field?
+        - to tie the type of the points returned to the class type.
+        - this wouldn't be needed if python had a `Self` type.
+        - disadvantage: pydantic cannot check type of `relevant_subdims_` field any more
         """
-        series_type = (
-            OVERALL_KPI_SERIES_TYPE_REPR
-            if point.series_type == "overall"
-            else point.series_type
-        )
+        return self.relevant_subdims_
 
+    @staticmethod
+    def _from_original_single(
+        point: AnomalyPointOriginal,
+        previous_anomaly_point: Optional[AnomalyPointOriginal],
+        relevant_subdims: Optional[List["AnomalyPoint"]],
+    ) -> "AnomalyPoint":
         y = round(point.y, 2)
         yhat_lower = round(point.yhat_lower, 2)
         yhat_upper = round(point.yhat_upper, 2)
         severity = round(point.severity)
 
-        series_type = _format_series_type(point.anomaly_type, point.series_type)
+        series_type = point.series_type
 
-        if fixed_change_message is not None:
-            change_message = fixed_change_message
-            percent_change = "-"
-        else:
-            percent_change = find_percentage_change(
-                point.y, previous_anomaly_point.y if previous_anomaly_point else None
-            )
-            change_message = change_message_from_percent(percent_change)
+        percent_change = find_percentage_change(
+            point.y, previous_anomaly_point.y if previous_anomaly_point else None
+        )
+        change_message = change_message_from_percent(percent_change)
 
         previous_value = (
             round(previous_anomaly_point.y, 2)
@@ -198,7 +253,69 @@ class AnomalyPoint(AnomalyPointOriginal):
             previous_value=previous_value,
             percent_change=percent_change,
             change_message=change_message,
+            relevant_subdims_=relevant_subdims,
         )
+
+    @staticmethod
+    def from_original(
+        points: List[AnomalyPointOriginal],
+        previous_anomaly_points: List[Optional[AnomalyPointOriginal]],
+    ) -> List["AnomalyPoint"]:
+        """Constructs formatted `AnomalyPoint`s from `AnomalyPointOriginal`s.
+
+        Arguments:
+            points: original anomaly points
+            previous_anomaly_points: the anomaly point from which change percent will be
+                calculated. There must be entry for each anomaly point.
+        """
+        anomaly_points: List[AnomalyPoint] = []
+
+        overall_points = list(
+            filter(
+                lambda point: point[0].is_overall,
+                zip(points, previous_anomaly_points),
+            )
+        )
+
+        subdim_points = list(
+            AnomalyPoint._from_original_single(point, prev_point, None)
+            for point, prev_point in filter(
+                lambda point: point[0].is_subdim,
+                zip(points, previous_anomaly_points),
+            )
+        )
+
+        def _get_relevant_subdims(point: AnomalyPointOriginal):
+            # subdim points with same timestamp
+            relevant_subdims = [
+                subdim_point
+                for subdim_point in subdim_points
+                if subdim_point.data_datetime == point.data_datetime
+            ]
+
+            relevant_subdims.sort(key=lambda point: point.severity, reverse=True)
+
+            # remove them from original list
+            for subdim_point in relevant_subdims:
+                subdim_points.remove(subdim_point)
+
+            return relevant_subdims
+
+        for point, prev_point in overall_points:
+            relevant_subdims = _get_relevant_subdims(point)
+
+            point = AnomalyPoint._from_original_single(
+                point, prev_point, relevant_subdims
+            )
+
+            anomaly_points.append(point)
+
+        # add remaining subdim points
+        anomaly_points.extend(subdim_points)
+
+        anomaly_points.sort(key=lambda point: point.severity, reverse=True)
+
+        return anomaly_points
 
     @root_validator(pre=True)
     def _support_old_field_names(cls, values: Dict[str, Any]) -> Dict[str, Any]:
@@ -213,6 +330,17 @@ class AnomalyPoint(AnomalyPointOriginal):
                     values[field_name] = values[alias]
 
         return values
+
+    @validator("relevant_subdims_", pre=True)
+    def _convert_relevant_subdims(cls, v: Any) -> Optional[List["AnomalyPoint"]]:
+        """Convert relevant_subdims_ from `Dict` to `AnomalyPoint`s."""
+        if v is None:
+            return None
+
+        if all(isinstance(point, dict) for point in v):
+            return [AnomalyPoint.parse_obj(point) for point in v]
+
+        return v
 
 
 class AnomalyPointFormatted(AnomalyPoint):
@@ -239,7 +367,7 @@ class AnomalyPointFormatted(AnomalyPoint):
     is_hourly: bool
 
     @staticmethod
-    def from_point(
+    def _from_point_single(
         point: AnomalyPoint,
         time_series_frequency: Optional[str],
         kpi_id: int,
@@ -249,7 +377,6 @@ class AnomalyPointFormatted(AnomalyPoint):
         alert_channel: str,
         alert_channel_conf: Any,
     ) -> "AnomalyPointFormatted":
-        """Constructs a formatted point from an AnomalyPoint."""
         dt_format = ALERT_READABLE_DATETIME_FORMAT
         if time_series_frequency is not None and time_series_frequency == "D":
             dt_format = ALERT_READABLE_DATE_FORMAT
@@ -257,10 +384,16 @@ class AnomalyPointFormatted(AnomalyPoint):
 
         formatted_change_percent = point.percent_change
         if isinstance(point.percent_change, (int, float)):
+            # TODO: decide on this and simplify
+            change_percent = (
+                f"{point.percent_change:.0f}"
+                if abs(point.percent_change) < 10
+                else f"{point.percent_change:.0f}"
+            )
             if point.percent_change > 0:
-                formatted_change_percent = f"+{point.percent_change}%"
+                formatted_change_percent = f"{change_percent}%"
             else:
-                formatted_change_percent = f"{point.percent_change}%"
+                formatted_change_percent = f"{change_percent[1:]}%"
         if (
             isinstance(point.percent_change, str)
             and point.percent_change.endswith("inf")
@@ -270,8 +403,25 @@ class AnomalyPointFormatted(AnomalyPoint):
 
         is_hourly = time_series_frequency is not None and time_series_frequency == "H"
 
+        orig_point = point.dict()
+        orig_point["relevant_subdims_"] = (
+            AnomalyPointFormatted.from_points(
+                point.relevant_subdims,
+                time_series_frequency,
+                kpi_id,
+                kpi_name,
+                alert_id,
+                alert_name,
+                alert_channel,
+                alert_channel_conf,
+                include_subdims=True,
+            )
+            if point.relevant_subdims is not None
+            else None
+        )
+
         return AnomalyPointFormatted(
-            **point.dict(),
+            **orig_point,
             kpi_id=kpi_id,
             kpi_name=kpi_name,
             alert_id=alert_id,
@@ -282,6 +432,37 @@ class AnomalyPointFormatted(AnomalyPoint):
             formatted_change_percent=str(formatted_change_percent),
             is_hourly=is_hourly,
         )
+
+    @staticmethod
+    def from_points(
+        points: Sequence[AnomalyPoint],
+        time_series_frequency: Optional[str],
+        kpi_id: int,
+        kpi_name: str,
+        alert_id: int,
+        alert_name: str,
+        alert_channel: str,
+        alert_channel_conf: Any,
+        include_subdims: bool,
+    ) -> List["AnomalyPointFormatted"]:
+        """Constructs formatted points from `AnomalyPoint`s.
+
+        All the points must be from a single alert.
+        """
+        return [
+            AnomalyPointFormatted._from_point_single(
+                point,
+                time_series_frequency,
+                kpi_id,
+                kpi_name,
+                alert_id,
+                alert_name,
+                alert_channel,
+                alert_channel_conf,
+            )
+            for point in points
+            if point.is_overall or (point.is_subdim and include_subdims)
+        ]
 
     @property
     def y_readable(self):
@@ -331,6 +512,134 @@ class AnomalyPointFormatted(AnomalyPoint):
             format = "%I"
 
         return (previous_point_time).strftime(format).lstrip("0")
+
+    def top_relevant_subdims(self) -> Optional[List["AnomalyPointFormatted"]]:
+        """Returns a list of top relevant subdims."""
+        if self.relevant_subdims is None:
+            return None
+
+        relevant_subdims = (
+            subdim for subdim in self.relevant_subdims if subdim is not None
+        )
+
+        # take top N
+        # since relevant_subdims was a generator, we only process the top N
+        # (using a list would process all the elements)
+        relevant_subdims = [
+            subdim
+            for _, subdim in zip(range(ALERT_RELEVANT_SUBDIMS_TOP_N), relevant_subdims)
+        ]
+
+        return relevant_subdims
+
+    def kpi_link(self):
+        """Returns a link to the KPI."""
+        return f"{webapp_url_prefix()}#/dashboard/0/anomaly/{self.kpi_id}"
+
+    def alert_link(self):
+        """Returns a link to the edit alert page."""
+        return f"{webapp_url_prefix()}#/alerts/edit/kpi-alert/{self.alert_id}"
+
+    def subdim_link(self):
+        """Returns a link to the anomaly page with the subdim pre-selected."""
+        subdim_name_value = self.subdim_name_value()
+
+        if not subdim_name_value:
+            return self.kpi_link()
+
+        dimension, value = subdim_name_value
+
+        return f"{self.kpi_link()}?dimension={dimension}&value={value}"
+
+
+class AlertsIndividualData(BaseModel):
+    """Data for formatting an individual alert."""
+
+    all_points: List[AnomalyPoint]
+    top_overall_points: List[AnomalyPointFormatted]
+    top_subdim_points: List[AnomalyPointFormatted]
+
+    include_subdims: bool
+
+    alert_id: int
+    alert_name: str
+    alert_message: str
+    alert_channel_conf: Any
+
+    kpi_id: int
+    kpi_name: str
+
+    date: datetime.date
+
+    def kpi_link(self):
+        """Returns a link to the KPI."""
+        return f"{webapp_url_prefix()}#/dashboard/0/anomaly/{self.kpi_id}"
+
+    def alert_dashboard_link(self):
+        """Returns a link to the alert dashboard."""
+        subdim_part = ""
+        if self.include_subdims:
+            subdim_part = "&subdims=true"
+
+        return f"{webapp_url_prefix()}api/digest?alert={self.alert_id}{subdim_part}"
+
+    def date_formatted(self):
+        """Returns date formatted for readability."""
+        return self.date.strftime(ALERT_DATE_FORMAT)
+
+    @staticmethod
+    def from_points(
+        points: List[AnomalyPoint], alert: Alert, kpi: Kpi, date: datetime.date
+    ):
+        """Constructs data for formatting an individual alert from anomaly points."""
+        top_overall_points = deepcopy(
+            top_anomalies(
+                [point for point in points if point.is_overall], ALERT_OVERALL_TOP_N
+            )
+        )
+        top_subdim_points = deepcopy(
+            top_anomalies(
+                [
+                    point
+                    for point in iterate_over_all_points(
+                        points, include_subdims=alert.include_subdims
+                    )
+                    if point.is_subdim
+                ],
+                ALERT_SUBDIM_TOP_N,
+            )
+        )
+
+        top_overall_points = list(
+            _format_anomaly_point_for_template(top_overall_points, kpi, alert)
+        )
+        top_subdim_points = list(
+            _format_anomaly_point_for_template(top_subdim_points, kpi, alert)
+        )
+
+        return AlertsIndividualData(
+            all_points=points,
+            top_overall_points=top_overall_points,
+            top_subdim_points=top_subdim_points,
+            include_subdims=alert.include_subdims,
+            alert_id=alert.id,
+            alert_name=alert.alert_name,
+            alert_message=alert.alert_message,
+            alert_channel_conf=alert.alert_channel_conf,
+            kpi_id=kpi.id,
+            kpi_name=kpi.name,
+            date=date,
+        )
+
+
+def _find_point(point: AnomalyPointOriginal, prev_data: List[AnomalyPointOriginal]):
+    """Finds same type of point in previous data."""
+    intended_point = None
+    for prev_point in prev_data:
+        if prev_point.is_of_same_type(point):
+            intended_point = prev_point
+            break
+    return intended_point
 
 
 GenericAnomalyPoint = TypeVar("GenericAnomalyPoint", bound=AnomalyPointOriginal)
@@ -424,24 +733,29 @@ class AnomalyAlertController:
                 latest_day.isoformat(),
             )
 
-            # send alert only for overall KPI, not subdims
-            latest_day_data = list(
-                filter(
-                    lambda point: point.series_type == OVERALL_KPI_SERIES_TYPE_REPR,
+            # check if anomalies actually exist.
+            # in case subdims is disabled, this won't send an alert
+            #   if no overall anomalies are detected.
+            if not any(
+                iterate_over_all_points(
                     latest_day_data,
-                )
-            )
-
-            if not latest_day_data:
+                    include_subdims=self.alert.include_subdims,
+                ),
+            ):
                 logger.info(
                     f"(Alert: {self.alert_id}, KPI: {self.kpi_id}) "
-                    "No overall anomalies found. Not sending alerts only storing them."
+                    "No anomalies found. Not sending alerts only storing them."
                 )
             else:
+                kpi = self._get_kpi()
+                individual_data = AlertsIndividualData.from_points(
+                    latest_day_data, self.alert, kpi, latest_day
+                )
+
                 if self.alert.alert_channel == "email":
-                    self._send_email_alert(latest_day_data, latest_day)
+                    self._send_email_alert(individual_data)
                 elif self.alert.alert_channel == "slack":
-                    self._send_slack_alert(latest_day_data, latest_day)
+                    self._send_slack_alert(individual_data)
                 else:
                     raise AlertException(
                         f"Unknown alert channel: {self.alert.alert_channel}",
@@ -523,7 +837,7 @@ class AnomalyAlertController:
         )
 
         logger.info(
-            f"Checking for anomalies for (KPI: {self.kpi_id}, Alert: "
+            f"Getting anomaly data for (KPI: {self.kpi_id}, Alert: "
             f"{self.alert_id}) in the range - start: {start_timestamp} (included: "
             f"{include_start_timestamp}) and end: {end_timestamp} "
             f"(included: {include_end_timestamp})"
@@ -586,30 +900,57 @@ class AnomalyAlertController:
             "The triggered alert data was successfully stored.",
         )
 
-    def _find_point(
-        self, point: AnomalyPointOriginal, prev_data: List[AnomalyPointOriginal]
-    ):
-        """Finds same type of point in previous data."""
-        intended_point = None
-        for prev_point in prev_data:
-            if prev_point.series_type == point.series_type:
-                intended_point = prev_point
-                break
-        return intended_point
-
-    def _format_anomaly_data(
+    def _find_previous_points(
         self, anomaly_data: List[AnomalyPointOriginal], date: datetime.date
-    ) -> List[AnomalyPoint]:
+    ) -> List[Optional[AnomalyPointOriginal]]:
         kpi = self._get_kpi()
 
         time_series_freq: Optional[str] = kpi.anomaly_params.get("frequency")
 
+        current_day_start = datetime.datetime.combine(date, datetime.time())
+
+        # get previous anomaly point for comparison
+        prev_day_data = self._get_anomalies(
+            this_date_after_time_only=(
+                current_day_start - datetime.timedelta(days=1, hours=0, minutes=0)
+            ),
+            anomalies_only=False,
+            include_severity_cutoff=False,
+        )
+
+        previous_points: List[Optional[AnomalyPointOriginal]]
+
         if time_series_freq == "D":
-            formatted_anomaly_data = self._format_anomaly_data_daily(anomaly_data, date)
+            # daily granularity - find point in the previous day
+            previous_points = [
+                _find_point(point, prev_day_data) for point in anomaly_data
+            ]
         elif time_series_freq == "H":
-            formatted_anomaly_data = self._format_anomaly_data_hourly(
-                anomaly_data, date
+            # get current day's data for comparison
+            cur_day_data = self._get_anomalies(
+                this_date_after_time_only=current_day_start,
+                anomalies_only=False,
+                include_severity_cutoff=False,
             )
+
+            # store a mapping of hour => list of anomaly points for that hour
+            hourly_data: DefaultDict[int, List[AnomalyPointOriginal]] = defaultdict(
+                list
+            )
+            for point in cur_day_data:
+                hourly_data[point.data_datetime.hour].append(point)
+
+            # used only when a point is present for 00:00
+            #  - the previous point in that case will be previous day's 11PM data
+            for point in prev_day_data:
+                if point.data_datetime.hour == 23:
+                    hourly_data[-1].append(point)
+
+            # hourly granularity - find previous hour data
+            previous_points = [
+                _find_point(point, hourly_data.get(point.data_datetime.hour - 1, []))
+                for point in anomaly_data
+            ]
         else:
             raise AlertException(
                 f"Time series frequency not found or invalid: {time_series_freq}",
@@ -617,79 +958,17 @@ class AnomalyAlertController:
                 kpi_id=self.kpi_id,
             )
 
-        # Sort in descending order according to severity
-        formatted_anomaly_data.sort(key=lambda point: point.severity, reverse=True)
+        return previous_points
 
-        return formatted_anomaly_data
-
-    def _format_anomaly_data_daily(
+    def _format_anomaly_data(
         self, anomaly_data: List[AnomalyPointOriginal], date: datetime.date
     ) -> List[AnomalyPoint]:
-        formatted_anomaly_data: List[AnomalyPoint] = []
 
-        # get previous anomaly point for comparison
-        prev_day_data = self._get_anomalies(
-            this_date_after_time_only=(
-                datetime.datetime.combine(date, datetime.time())
-                - datetime.timedelta(days=1, hours=0, minutes=0)
-            ),
-            anomalies_only=False,
-            include_severity_cutoff=False,
+        previous_points = self._find_previous_points(anomaly_data, date)
+
+        formatted_anomaly_data = AnomalyPoint.from_original(
+            anomaly_data, previous_points
         )
-
-        formatted_anomaly_data: List[AnomalyPoint] = []
-        for point in anomaly_data:
-            # daily granularity - find point in the previous day
-            previous_point = self._find_point(point, prev_day_data)
-
-            formatted_anomaly_data.append(
-                AnomalyPoint.from_original(point, previous_point)
-            )
-
-        return formatted_anomaly_data
-
-    def _format_anomaly_data_hourly(
-        self, anomaly_data: List[AnomalyPointOriginal], date: datetime.date
-    ) -> List[AnomalyPoint]:
-        formatted_anomaly_data: List[AnomalyPoint] = []
-
-        current_day_start = datetime.datetime.combine(date, datetime.time())
-
-        # get current day's data for comparison
-        cur_day_data = self._get_anomalies(
-            this_date_after_time_only=current_day_start,
-            anomalies_only=False,
-            include_severity_cutoff=False,
-        )
-        # get previous day 11PM (23:00) data too
-        # used only when a point is present for 00:00
-        #  - the previous point in that case will be previous day's 11PM data
-        prev_day_data = self._get_anomalies(
-            this_date_after_time_only=(
-                current_day_start - datetime.timedelta(days=0, hours=1, minutes=0)
-            ),
-            anomalies_only=False,
-            include_severity_cutoff=False,
-        )
-
-        # store a mapping of hour => list of anomaly points for that hour
-        hourly_data: DefaultDict[int, List[AnomalyPointOriginal]] = defaultdict(list)
-        for point in cur_day_data:
-            hourly_data[point.data_datetime.hour].append(point)
-        for point in prev_day_data:
-            if point.data_datetime.hour == 23:
-                hourly_data[-1].append(point)
-
-        formatted_anomaly_data: List[AnomalyPoint] = []
-        for point in anomaly_data:
-            # hourly granularity - find previous hour data
-            previous_point = self._find_point(
-                point, hourly_data.get(point.data_datetime.hour - 1, [])
-            )
-
-            formatted_anomaly_data.append(
-                AnomalyPoint.from_original(point, previous_point)
-            )
 
         return formatted_anomaly_data
 
@@ -714,28 +993,18 @@ class AnomalyAlertController:
 
         return not (daily_digest or weekly_digest)
 
-    def _get_top_anomalies_and_counts(
-        self, formatted_anomaly_data: List[AnomalyPoint], kpi: Kpi
-    ) -> Tuple[Sequence[AnomalyPointFormatted], int, int]:
-        overall_count, subdim_count = _count_anomalies(formatted_anomaly_data)
-
-        top_anomalies_ = deepcopy(_top_anomalies(formatted_anomaly_data, 5))
-        top_anomalies_ = _format_anomaly_point_for_template(
-            top_anomalies_, kpi, self.alert
-        )
-
-        return top_anomalies_, overall_count, subdim_count
-
     def _send_email_alert(
-        self, formatted_anomaly_data: List[AnomalyPoint], date: datetime.date
+        self,
+        individual_data: AlertsIndividualData,
     ) -> None:
-        alert_channel_conf = self.alert.alert_channel_conf
+        # TODO(Samyak): Fix this implementation to use AlertsIndividualData
+        alert_channel_conf = individual_data.alert_channel_conf
 
         if not isinstance(alert_channel_conf, dict):
             raise AlertException(
                 f"Alert channel config was not a dict. Got: {alert_channel_conf}",
-                alert_id=self.alert_id,
-                kpi_id=self.kpi_id,
+                alert_id=individual_data.alert_id,
+                kpi_id=individual_data.kpi_id,
             )
 
         recipient_emails = alert_channel_conf.get("email")
@@ -743,47 +1012,33 @@ class AnomalyAlertController:
         if not recipient_emails:
             raise AlertException(
                 f"No recipient emails found. Got: {recipient_emails}",
-                alert_id=self.alert_id,
-                kpi_id=self.kpi_id,
+                alert_id=individual_data.alert_id,
+                kpi_id=individual_data.kpi_id,
             )
 
         subject = (
-            f"{self.alert.alert_name} - Chaos Genius Alert "
-            f"({date.strftime('%b %d')})❗"
+            f"{individual_data.alert_name} - Chaos Genius Alert "
+            f"({individual_data.date.strftime('%b %d')})❗"
         )
 
         # attach CSV of anomaly data
         files = [
             {
                 "fname": "data.csv",
-                "fdata": _make_anomaly_data_csv(formatted_anomaly_data),
+                "fdata": _make_anomaly_data_csv(
+                    individual_data.all_points,
+                    include_subdims=individual_data.include_subdims,
+                ),
             }
         ]
-
-        kpi = self._get_kpi()
-
-        (
-            top_anomalies_,
-            overall_count,
-            subdim_count,
-        ) = self._get_top_anomalies_and_counts(formatted_anomaly_data, kpi)
 
         send_email_using_template(
             "email_alert.html",
             recipient_emails,
             subject,
             files,
-            top_anomalies=top_anomalies_,
-            alert_message=self.alert.alert_message,
-            kpi_name=kpi.name,
+            data=individual_data,
             preview_text="Anomaly Alert",
-            alert_name=self.alert.alert_name,
-            kpi_link=f"{webapp_url_prefix()}#/dashboard/0/anomaly/" f"{self.kpi_id}",
-            alert_dashboard_link=f"{webapp_url_prefix()}api/digest",
-            overall_count=overall_count,
-            subdim_count=subdim_count,
-            str=str,
-            date=date.strftime(ALERT_DATE_FORMAT),
         )
 
         logger.info(
@@ -792,25 +1047,11 @@ class AnomalyAlertController:
         )
 
     def _send_slack_alert(
-        self, formatted_anomaly_data: List[AnomalyPoint], date: datetime.date
+        self,
+        individual_data: AlertsIndividualData,
     ):
-        kpi = self._get_kpi()
-
-        (
-            top_anomalies_,
-            overall_count,
-            subdim_count,
-        ) = self._get_top_anomalies_and_counts(formatted_anomaly_data, kpi)
-
         err = anomaly_alert_slack(
-            kpi.name,
-            self.alert.alert_name,
-            self.kpi_id,
-            self.alert.alert_message,
-            top_anomalies_,
-            overall_count,
-            subdim_count,
-            date.strftime(ALERT_DATE_FORMAT),
+            individual_data,
         )
 
         if err == "":
@@ -826,35 +1067,29 @@ class AnomalyAlertController:
             )
 
 
-def _format_series_type(anomaly_type: str, series_type: Optional[str]) -> str:
-    """Format a anomaly point's series type for use in alerts.
-
-    Do not call this function twice on the same data.
-
-    Arguments:
-        anomaly_type: see AnomalyPointOriginal
-        series_type: see AnomalyPointOriginal
-    """
-    series_type = (
-        OVERALL_KPI_SERIES_TYPE_REPR
-        if anomaly_type == "overall"
-        else convert_query_string_to_user_string(series_type or "")
-    )
-
-    return series_type
-
-
-def _make_anomaly_data_csv(anomaly_points: List[AnomalyPoint]) -> str:
+def _make_anomaly_data_csv(
+    anomaly_points: List[AnomalyPoint], include_subdims: bool
+) -> str:
     """Create an in-memory string containing the CSV of given anomaly data."""
     anomaly_df = pd.DataFrame(
         [
             point.dict(include=ANOMALY_TABLE_COLUMN_NAMES_MAPPER.keys())
-            for point in anomaly_points
+            for point in iterate_over_all_points(anomaly_points, include_subdims)
         ]
     )
 
+    anomaly_df.sort_values(by="severity", inplace=True)
+
     # this is a property that is calculated, so it needs to be assigned separately
-    anomaly_df["expected_value"] = [point.expected_value for point in anomaly_points]
+    anomaly_df["expected_value"] = [
+        point.expected_value
+        for point in iterate_over_all_points(anomaly_points, include_subdims)
+    ]
+    # this is a property that is calculated, so it needs to be assigned separately
+    anomaly_df["series_type"] = [
+        point.series_type_name
+        for point in iterate_over_all_points(anomaly_points, include_subdims)
+    ]
 
     anomaly_df = anomaly_df[ANOMALY_TABLE_COLUMN_NAMES_ORDERED]
 
@@ -871,54 +1106,35 @@ def _format_anomaly_point_for_template(
     points: Sequence[AnomalyPoint], kpi: Kpi, alert: Alert
 ) -> Sequence[AnomalyPointFormatted]:
     """Formats fields of each point, to be used in alert templates."""
-    return list(
-        map(
-            lambda point: AnomalyPointFormatted.from_point(
-                point,
-                kpi.anomaly_params.get("frequency"),
-                kpi.id,
-                kpi.name,
-                alert.id,
-                alert.alert_name,
-                alert.alert_channel,
-                alert.alert_channel_conf,
-            ),
-            points,
-        )
+    return AnomalyPointFormatted.from_points(
+        points,
+        kpi.anomaly_params.get("frequency"),
+        kpi.id,
+        kpi.name,
+        alert.id,
+        alert.alert_name,
+        alert.alert_channel,
+        alert.alert_channel_conf,
+        alert.include_subdims,
     )
 
 
-# ref: https://stackoverflow.com/a/53287607/11199009
-TAnomalyPoint = TypeVar("TAnomalyPoint", bound=AnomalyPointOriginal)
-
-
-def _top_anomalies(points: Sequence[TAnomalyPoint], n=10) -> Sequence[TAnomalyPoint]:
+def top_anomalies(points: Iterable[TAnomalyPointOrig], n=10) -> List[TAnomalyPointOrig]:
     """Returns top n anomalies according to severity."""
     return heapq.nlargest(n, points, key=lambda point: point.severity)
 
 
-def _count_anomalies(points: Sequence[TAnomalyPoint]) -> Tuple[int, int]:
-    """Returns a count of overall anomalies and subdim anomalies."""
-    total = len(points)
-    overall = sum(
-        1 for point in points if point.series_type == OVERALL_KPI_SERIES_TYPE_REPR
-    )
-    subdims = total - overall
-    return overall, subdims
+def iterate_over_all_points(
+    points: List[TAnomalyPoint], include_subdims: bool
+) -> Iterator[TAnomalyPoint]:
+    """Return an iterator over all points (overall and subdims) in the list.
 
-
-def get_top_anomalies_and_counts(
-    formatted_anomaly_data: Sequence[AnomalyPointFormatted],
-    n: int = 10,
-) -> Tuple[Sequence[AnomalyPointFormatted], int, int]:
-    """Returns top anomalies and counts of all anomalies for digests.
-
-    Arguments:
-        formatted_anomaly_data: list of `AnomalyPointFormatted`s
-        n: number of top anomalies to be returned
+    Not sorted, but the order can be expected to be the same everytime.
     """
-    overall_count, subdim_count = _count_anomalies(formatted_anomaly_data)
+    for point in points:
+        if point.is_overall or (point.is_subdim and include_subdims):
+            yield point
 
-    top_anomalies_ = deepcopy(_top_anomalies(formatted_anomaly_data, n))
-
-    return top_anomalies_, overall_count, subdim_count
+        if point.is_overall and point.relevant_subdims is not None:
+            for subdim_point in point.relevant_subdims:
+                yield subdim_point

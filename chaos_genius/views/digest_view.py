@@ -6,6 +6,7 @@ from flask.blueprints import Blueprint
 from flask.globals import request
 from flask.templating import render_template
 
+from chaos_genius.alerts.utils import webapp_url_prefix
 from chaos_genius.controllers.digest_controller import get_digest_view_data
 from chaos_genius.settings import EVENT_ALERTS_ENABLED
 
@@ -31,10 +32,7 @@ def task_monitor_view():
         "alert_dashboard.html",
         anomaly_alerts_data=anomaly_alerts_data,
         event_alerts_data=event_alerts_data,
-        enumerate=enumerate,
-        str=str,
-        repr=repr,
-        list=list,
         len=len,
+        cg_dashboard_link=f"{webapp_url_prefix()}#/alerts",
         EVENT_ALERTS_ENABLED=EVENT_ALERTS_ENABLED,
     )

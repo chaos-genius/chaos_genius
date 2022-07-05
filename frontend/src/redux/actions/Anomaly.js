@@ -41,24 +41,13 @@ export const anomalyDetectionFailure = () => {
   };
 };
 
-export const anomalyDetection = (kpi, tab) => {
+export const anomalyDetection = (kpi, dimFilterObj) => {
   return async (dispatch) => {
-    let URL = '';
+    let URL =
+      dimFilterObj && dimFilterObj.dimension && dimFilterObj.value
+        ? `${BASE_URL}/api/anomaly-data/${kpi}/anomaly-detection?dimension=${dimFilterObj?.dimension}&value=${dimFilterObj?.value}`
+        : `${BASE_URL}/api/anomaly-data/${kpi}/anomaly-detection`;
     dispatch(anomalyDetectionRequest());
-    switch (tab) {
-      case 'Overall KPI': {
-        URL = `${BASE_URL}/api/anomaly-data/${kpi}/anomaly-detection`;
-        break;
-      }
-      case 'Sub-dimensions': {
-        URL = `${BASE_URL}/api/anomaly-data/${kpi}/subdim-anomaly`;
-        break;
-      }
-      default: {
-        URL = `${BASE_URL}/api/anomaly-data/${kpi}/anomaly-detection`;
-        break;
-      }
-    }
     const { data, error, status } = await getRequest({
       url: URL
     });

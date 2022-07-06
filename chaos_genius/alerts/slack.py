@@ -28,7 +28,6 @@ def anomaly_alert_slack(
 
     Returns an empty string if successful or the error as a string if not.
     """
-    # TODO: Fix this implementation to use AlertsIndividualData
     client = get_webhook_client()
     response = client.send(
         blocks=[
@@ -169,7 +168,7 @@ def _display_anomalies_individual(anomaly_data, subdim: bool = False):
                 section["text"]["text"] += point_formatted
         sections.append(section)
     else:
-        if anomaly_data.include_subdims:
+        if anomaly_data.include_subdims and anomaly_data.top_subdim_points:
             header_section = {
                 "type": "header",
                 "text": {
@@ -321,7 +320,7 @@ def anomaly_point_formatting(
                 + f" to {point.anomaly_time_only}"
             )
 
-    if point.relevant_subdims is not None:
+    if point.relevant_subdims:
         out += "\n      - Reasons for change: "
         for point in point.top_relevant_subdims() or []:
             out += f"{subdim_name_link(point, value_only=True)}, "

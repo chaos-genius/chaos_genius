@@ -14,6 +14,7 @@ from chaos_genius.controllers.dashboard_controller import (
     disable_mapper_for_kpi_ids,
     edit_kpi_dashboards,
     enable_mapper_for_kpi_ids,
+    get_dashboard_list,
     get_dashboard_list_by_ids,
     get_mapper_obj_by_kpi_ids,
     kpi_dashboard_mapper_dict,
@@ -153,6 +154,7 @@ def kpi():
 
         kpis: List[Tuple[Kpi, DataSource]]
         kpis_paginated: Optional[Pagination] = None
+        dashboard_ids: Optional[List[int]] = None
 
         if dashboard_ids_list and dashboard_ids_list != [""]:
             dashboard_ids = [
@@ -207,6 +209,8 @@ def kpi():
             kpi_info["dashboards"] = dashboards
             kpi_infos.append(kpi_info)
 
+        dashboards_data = get_dashboard_list(dashboard_ids=dashboard_ids)
+
         return jsonify(
             {
                 "count": len(kpi_infos),
@@ -216,6 +220,7 @@ def kpi():
                     if kpis_paginated is not None
                     else None
                 ),
+                "dashboards": dashboards_data,
                 SEARCH_PARAM_NAME: search_query,
             }
         )
@@ -391,6 +396,7 @@ def edit_kpi(kpi_id):
     status, message = "", ""
     do_not_run_analytics_list = ["name", "dashboards"]
     run_analytics = False
+    run_validation = False
 
     try:
         kpi_obj = Kpi.get_by_id(kpi_id)
@@ -404,6 +410,7 @@ def edit_kpi(kpi_id):
             for key, value in data.items():
                 if key not in do_not_run_analytics_list:
                     run_analytics = True
+                    run_validation = True
                 if chech_editable_field(meta_info, key):
                     setattr(kpi_obj, key, value)
 
@@ -431,6 +438,14 @@ def edit_kpi(kpi_id):
                 ):
                     kpi_obj.anomaly_params["run_optional"] = run_optional
                     flag_modified(kpi_obj, "anomaly_params")
+            if run_validation:
+                status, message, tz_aware = validate_kpi(
+                    kpi_obj.as_dict, check_tz_aware=True
+                )
+                if status is not True:
+                    return jsonify(
+                        {"error": message, "status": "failure", "is_critical": "true"}
+                    )
 
             if run_analytics:
                 logger.info(

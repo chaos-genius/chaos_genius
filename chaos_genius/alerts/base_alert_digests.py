@@ -2,17 +2,14 @@
 import datetime
 import logging
 from collections import defaultdict
-from typing import DefaultDict, Dict, List, Sequence, Set, Tuple
+from typing import DefaultDict, Dict, List, Set, Tuple
 
-from chaos_genius.alerts.anomaly_alerts import (
-    AnomalyPointFormatted,
-    get_top_anomalies_and_counts,
-)
-from chaos_genius.alerts.constants import ALERT_DATE_FORMAT, FREQUENCY_DICT
+from chaos_genius.alerts.constants import FREQUENCY_DICT
 from chaos_genius.alerts.slack import alert_digest_slack_formatted
-from chaos_genius.alerts.utils import send_email_using_template, webapp_url_prefix
+from chaos_genius.alerts.utils import send_email_using_template
 from chaos_genius.controllers.config_controller import get_config_object
 from chaos_genius.controllers.digest_controller import (
+    AlertsReportData,
     TriggeredAlertWithPoints,
     get_alert_kpi_configurations,
     preprocess_triggered_alert,
@@ -56,8 +53,8 @@ class AlertDigestController:
         report_date, start_date, end_date = self._data_time_range()
         triggered_alerts = self._get_triggered_alerts(start_date, end_date)
 
-        slack_digests: List[TriggeredAlertWithPoints] = []
-        email_digests: List[TriggeredAlertWithPoints] = []
+        slack_alerts: List[TriggeredAlertWithPoints] = []
+        email_alerts: List[TriggeredAlertWithPoints] = []
 
         self.alert_config_cache, self.kpi_cache = get_alert_kpi_configurations(
             triggered_alerts
@@ -68,30 +65,26 @@ class AlertDigestController:
                 triggered_alert, self.alert_config_cache, self.kpi_cache
             )
 
-            if not triggered_alert.points:
-                logger.info(
-                    f"(frequency: {self.frequency}) "
-                    "No overall anomalies found for TriggeredAlerts with id %d, "
-                    "skipping.",
-                    triggered_alert.triggered_alert.id,
-                )
-            else:
-                if getattr(
-                    self.alert_config_cache[
-                        triggered_alert.triggered_alert.alert_conf_id
-                    ],
-                    ALERT_ATTRIBUTES_MAPPER[self.frequency],
-                ):
-                    if triggered_alert.triggered_alert.alert_channel == "slack":
-                        slack_digests.append(triggered_alert)
-                    if triggered_alert.triggered_alert.alert_channel == "email":
-                        email_digests.append(triggered_alert)
+            if getattr(
+                self.alert_config_cache[triggered_alert.alert_conf_id],
+                ALERT_ATTRIBUTES_MAPPER[self.frequency],
+            ):
+                if triggered_alert.alert_channel == "slack":
+                    slack_alerts.append(triggered_alert)
+                if triggered_alert.alert_channel == "email":
+                    email_alerts.append(triggered_alert)
 
-        if len(email_digests) > 0:
-            self._send_email_digests(email_digests, report_date)
+        if len(email_alerts) > 0:
+            report_data = AlertsReportData.from_triggered_alerts(
+                triggered_alerts=email_alerts, report_date=report_date
+            )
+            self._send_email_digests(report_data)
 
-        if len(slack_digests) > 0:
-            self._send_slack_digests(slack_digests, report_date)
+        if len(slack_alerts) > 0:
+            report_data = AlertsReportData.from_triggered_alerts(
+                triggered_alerts=slack_alerts, report_date=report_date
+            )
+            self._send_slack_digests(report_data)
 
     def _data_time_range(
         self,
@@ -125,93 +118,65 @@ class AlertDigestController:
             .all()
         )
 
-    def _send_email_digests(
-        self,
-        triggered_alerts: List[TriggeredAlertWithPoints],
-        report_date: datetime.date,
-    ):
+    def _send_email_digests(self, data: AlertsReportData):
         user_triggered_alerts: DefaultDict[str, Set[int]] = defaultdict(set)
-        for triggered_alert in triggered_alerts:
-            for user in triggered_alert.triggered_alert.alert_channel_conf:
-                user_triggered_alerts[user].add(triggered_alert.triggered_alert.id)
+        for triggered_alert in data.triggered_alerts:
+            for user in triggered_alert.alert_channel_conf:
+                user_triggered_alerts[user].add(triggered_alert.id)
 
         triggered_alert_dict: Dict[int, TriggeredAlertWithPoints] = {
-            alert.triggered_alert.id: alert for alert in triggered_alerts
+            alert.id: alert for alert in data.triggered_alerts
         }
         for recipient in user_triggered_alerts.keys():
             self._send_email_digest(
                 recipient,
-                user_triggered_alerts[recipient],
-                triggered_alert_dict,
-                report_date,
+                AlertsReportData.from_triggered_alerts(
+                    [
+                        triggered_alert_dict[id_]
+                        for id_ in user_triggered_alerts[recipient]
+                    ],
+                    data.report_date,
+                ),
             )
 
-    def _get_top_anomalies_and_counts(
-        self, triggered_alerts: List[TriggeredAlertWithPoints]
-    ) -> Tuple[Sequence[AnomalyPointFormatted], int, int]:
-        return get_top_anomalies_and_counts(
-            [
-                point
-                for triggered_alert in triggered_alerts
-                for point in triggered_alert.points
-            ],
-            n=10,
-        )
-
-    def _send_email_digest(
-        self,
-        recipient: str,
-        triggered_alert_ids: Set[int],
-        triggered_alert_dict: Dict[int, TriggeredAlertWithPoints],
-        report_date: datetime.date,
-    ):
-        triggered_alerts = [triggered_alert_dict[id_] for id_ in triggered_alert_ids]
-        (
-            top_anomalies_,
-            overall_count,
-            subdim_count,
-        ) = self._get_top_anomalies_and_counts(triggered_alerts)
+    def _send_email_digest(self, recipient: str, data: AlertsReportData):
+        if not data.has_anomalies:
+            logger.info(
+                f"(frequency: {self.frequency}) "
+                "No anomalies found for email report of recipient %s with date %s, "
+                "skipping.",
+                recipient,
+                data.report_date.isoformat(),
+            )
+            return
 
         send_email_using_template(
             "digest_template.html",
             [recipient],
             (
-                f"Daily Alerts Report ({report_date.strftime(ALERT_DATE_FORMAT)}) - "
+                f"Daily Alerts Report ({data.report_date_formatted()}) - "
                 "Chaos Genius Alert❗"
             ),
             [],
             preview_text="",
-            str=str,
-            overall_count=overall_count,
-            subdim_count=subdim_count,
-            alert_dashboard_link=(
-                f"{webapp_url_prefix()}api/digest"
-                f"?date={report_date.strftime(ALERT_DATE_FORMAT)}"
-            ),
-            kpi_link_prefix=f"{webapp_url_prefix()}#/dashboard/0/anomaly",
-            top_anomalies=top_anomalies_,
-            report_date=report_date.strftime(ALERT_DATE_FORMAT),
+            data=data,
         )
 
     def _send_slack_digests(
         self,
-        triggered_alerts: List[TriggeredAlertWithPoints],
-        report_date: datetime.date,
+        data: AlertsReportData,
     ):
         """Sends a slack alert containing a summary of triggered alerts."""
-        (
-            top_anomalies_,
-            overall_count,
-            subdim_count,
-        ) = self._get_top_anomalies_and_counts(triggered_alerts)
+        if not data.has_anomalies:
+            logger.info(
+                f"(frequency: {self.frequency}) "
+                "No anomalies found for Slack report with date %s, "
+                "skipping.",
+                data.report_date.isoformat(),
+            )
+            return
 
-        err = alert_digest_slack_formatted(
-            self.frequency,
-            top_anomalies_,
-            overall_count,
-            subdim_count,
-            report_date.strftime(ALERT_DATE_FORMAT),
-        )
+        err = alert_digest_slack_formatted(data)
 
         if err == "":
             logger.info(

@@ -21,6 +21,8 @@ snowflake-sqlalchemy==1.2.4
 sqlalchemy-redshift==0.8.6
 # For apache druid
 pydruid[sqlalchemy]~=0.6.2
+PyAthena[SQLAlchemy,Pandas]==2.5.2
+sqlalchemy-databricks==0.2.0
 
 # Migrations
 Flask-Migrate==2.7.0
@@ -79,3 +81,5 @@ Pygments~=2.10.0
 # converting to/from JSON and custom classes
 pydantic~=1.9.0
 
+# pyarrow version compatible with both snowflake connector & PyAthena, check #1007
+pyarrow<6.1.0,>=6.0.0

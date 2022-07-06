@@ -418,7 +418,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       customToast({
         type: 'error',
         header: 'Failed to update',
-        description: kpiUpdateData.message
+        description: kpiUpdateData.error
       });
     }
     if (kpiSubmit && kpiSubmit.status === 'success' && data[2] === 'add') {
@@ -960,6 +960,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
       dimensions: [],
       count_column: ''
     });
+    setEditedFormData({ ...editedFormData, dimensions: [] });
   };
   const closeModal = () => {
     setIsOpen(false);

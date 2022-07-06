@@ -6,8 +6,8 @@
     width: 170px !important;
   }
   .option-selections {
-    background: $white;
-    border: 1px solid rgba(34, 34, 34, 0.12);
+    background: #f5f5f5;
+    border: 1px solid #f5f5f5;
     box-sizing: border-box;
     border-radius: 6px;
     padding: 4px;
@@ -16,11 +16,10 @@
     justify-content: center;
     span {
       padding: 8px;
-      cursor: pointer;
       font-weight: $font-weight-400;
       font-size: $font-size-14;
       line-height: $line-height-16;
-      color: $grey_variation-3;
+      color: #222222;
       &.active {
         color: $green;
         font-weight: $font-weight-500;
@@ -28,6 +27,22 @@
         border-radius: 6px;
       }
     }
+    .clear-filter {
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 500;
+      color: #0597f2;
+      cursor: pointer;
+    }
+  }
+}
+.filter-container {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  .selectcategory__control {
+    border: 1px solid #bdbdbd !important;
+    background: #ffffff !important;
   }
 }
 .ddgif_parent_container {

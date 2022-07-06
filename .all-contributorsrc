@@ -284,6 +284,52 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "rsohlot",
+      "name": "rohit sohlot",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5600987?v=4",
+      "profile": "https://github.com/rsohlot",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "athul-osmo",
+      "name": "athul-osmo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/99287880?v=4",
+      "profile": "https://github.com/athul-osmo",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "KShivendu",
+      "name": "Kumar Shivendu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/47217984?v=4",
+      "profile": "https://blog.kshivendu.dev/",
+      "contributions": [
+        "bug",
+        "ideas"
+      ]
+    },
+    {
+      "login": "prathamSharma25",
+      "name": "Pratham Sharma",
+      "avatar_url": "https://avatars.githubusercontent.com/u/63733573?v=4",
+      "profile": "https://pratham-sharma.com",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "churchill1973",
+      "name": "churchill1973",
+      "avatar_url": "https://avatars.githubusercontent.com/u/62685164?v=4",
+      "profile": "https://github.com/churchill1973",
+      "contributions": [
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,

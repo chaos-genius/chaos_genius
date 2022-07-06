@@ -1,10 +1,14 @@
 """Utilities for sending slack alert messages."""
 import logging
-from typing import Optional, Sequence
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from slack_sdk.webhook.client import WebhookClient
 
 import chaos_genius.alerts.anomaly_alerts as anomaly_alerts
+
+if TYPE_CHECKING:
+    from chaos_genius.controllers.digest_controller import AlertsReportData
+
 from chaos_genius.alerts.alert_channel_creds import get_slack_creds
 from chaos_genius.alerts.utils import webapp_url_prefix
 
@@ -18,19 +22,13 @@ def get_webhook_client() -> WebhookClient:
 
 
 def anomaly_alert_slack(
-    kpi_name: str,
-    alert_name: str,
-    kpi_id: int,
-    alert_message: str,
-    points: "Sequence[anomaly_alerts.AnomalyPointFormatted]",
-    overall_count: int,
-    subdim_count: int,
-    date: str,
+    data: "anomaly_alerts.AlertsIndividualData",
 ) -> str:
     """Sends an anomaly alert on slack.
 
     Returns an empty string if successful or the error as a string if not.
     """
+    # TODO: Fix this implementation to use AlertsIndividualData
     client = get_webhook_client()
     response = client.send(
         blocks=[
@@ -38,7 +36,10 @@ def anomaly_alert_slack(
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": f"{alert_name} - {kpi_name} ({date}) ",
+                    "text": (
+                        f"{data.alert_name} - {data.kpi_name} "
+                        f"({data.date_formatted()}) "
+                    ),
                     "emoji": True,
                 },
             },
@@ -55,7 +56,7 @@ def anomaly_alert_slack(
             },
             {
                 "type": "section",
-                "text": {"type": "mrkdwn", "text": f"{alert_message}\n"},
+                "text": {"type": "mrkdwn", "text": f"{data.alert_message}\n"},
             },
             {
                 "type": "divider",
@@ -68,31 +69,22 @@ def anomaly_alert_slack(
                     "emoji": True,
                 },
             },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": _format_slack_anomalies(
-                        points,
-                        kpi_name=kpi_name,
-                        include_kpi_info=False,
-                    ),
-                },
-            },
+            *_display_anomalies_individual(data),
+            *_display_anomalies_individual(data, subdim=True),
             {
                 "type": "actions",
                 "elements": [
                     {
                         "type": "button",
                         "text": {"type": "plain_text", "text": "View KPI"},
-                        "url": f"{webapp_url_prefix()}#/dashboard/0/anomaly/{kpi_id}",
+                        "url": data.kpi_link(),
                         "action_id": "kpi_link",
                         "style": "primary",
                     },
                     {
                         "type": "button",
                         "text": {"type": "plain_text", "text": "Alerts Dashboard"},
-                        "url": f"{webapp_url_prefix()}api/digest",
+                        "url": data.alert_dashboard_link(),
                         "action_id": "alert_dashboard",
                         "style": "primary",
                     },
@@ -105,6 +97,249 @@ def anomaly_alert_slack(
         return response.body
 
     return ""
+
+
+def alert_digest_slack_formatted(data: "AlertsReportData") -> str:
+    """Sends an anomaly digest on slack.
+
+    Returns an empty string if successful or the error as a string if not.
+    """
+    client = get_webhook_client()
+    if not client:
+        raise Exception("Slack not configured properly.")
+
+    blocks = [
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": f"Daily Alerts Report ({data.report_date_formatted()})",
+                    "emoji": True,
+                },
+            },
+            {
+                "type": "divider",
+            },
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Top Anomalies",
+                    "emoji": True,
+                },
+            },
+            *_display_anomalies_digest(data),
+            *_display_anomalies_digest(data, subdim=True),
+            {
+                "type": "actions",
+                "elements": [
+                    {
+                        "type": "button",
+                        "text": {"type": "plain_text", "text": "Alerts Dashboard"},
+                        "url": data.alert_dashboard_link(),
+                        "action_id": "alert_dashboard",
+                        "style": "primary",
+                    }
+                ],
+            },
+        ]
+
+    response = client.send(blocks=blocks)
+
+    if response.body != "ok":
+        return response.body
+
+    return ""
+
+
+def _display_anomalies_individual(anomaly_data, subdim: bool = False):
+    """Creates Individual Alert message."""
+    sections: List[Dict[str, Any]] = []
+    section = {
+        "type": "section",
+        "text": {
+            "type": "mrkdwn",
+            "text": ""
+        },
+    }
+
+    if not subdim:
+        if not anomaly_data.top_overall_points:
+            section["text"]["text"] += "No anomalies observed."
+        else:
+            for point in anomaly_data.top_overall_points:
+                point_formatted = anomaly_point_formatting(point)
+                section["text"]["text"] += point_formatted
+        sections.append(section)
+    else:
+        if anomaly_data.include_subdims:
+            header_section = {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Sub-Dimensional Anomalies",
+                    "emoji": True,
+                },
+            }
+            sections.append(header_section)
+            for point in anomaly_data.top_subdim_points:
+                point_formatted = anomaly_point_formatting(point)
+                section["text"]["text"] += point_formatted
+            sections.append(section)
+        else:
+            return []
+
+    return sections
+
+
+def _display_anomalies_digest(anomaly_data, subdim: bool = False):
+    """Creates Digest Alert message."""
+    sections: List[Dict[str, Any]] = []
+
+    def _new_text_section() -> Dict[str, Any]:
+        section = {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": ""
+            },
+        }
+        sections.append(section)
+        return section
+
+    max_len = 2500
+
+    if not subdim:
+        section = _new_text_section()
+        if not anomaly_data.top_overall_anomalies:
+            section["text"]["text"] += "No anomalies observed."
+        else:
+            for point in anomaly_data.top_overall_anomalies:
+                point_formatted = anomaly_point_formatting(
+                    point, anomaly_data.kpi_link_prefix()
+                )
+                if len(section["text"]["text"]) + len(point_formatted) > max_len:
+                    section = _new_text_section()
+                section["text"]["text"] += point_formatted
+    else:
+        if anomaly_data.top_subdim_anomalies:
+            header_section = {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Top Sub-Dimensional Anomalies",
+                    "emoji": True,
+                },
+            }
+            sections.append(header_section)
+            section = _new_text_section()
+            for point in anomaly_data.top_subdim_anomalies:
+                point_formatted = anomaly_point_formatting(
+                    point, anomaly_data.kpi_link_prefix()
+                )
+                if len(section["text"]["text"]) + len(point_formatted) > max_len:
+                    section = _new_text_section()
+                section["text"]["text"] += point_formatted
+        else:
+            return []
+
+    return sections
+
+
+def kpi_name_link(kpi_link_prefix, point):
+    """Creates KPI name with link to respective anomaly page."""
+    kpi_name_link = (
+        f"<{webapp_url_prefix()}#/dashboard/0/anomaly/{point.kpi_id}"
+        + f"|{point.kpi_name}>"
+    )
+    return kpi_name_link
+
+
+def subdim_name_link(point, value_only: bool = False):
+    """Creates subdim name with link to respective subdim anomaly page."""
+    if value_only:
+        subdim_link = (
+            f"<{point.subdim_link()}"
+            + f"|{point.subdim_formatted_value_only()}>"
+        )
+    else:
+        subdim_link = (
+            f"<{point.subdim_link()}"
+            + f"|{point.subdim_formatted()}>"
+        )
+    return subdim_link
+
+
+def anomaly_point_formatting(
+    point: "anomaly_alerts.AnomalyPointFormatted",
+    kpi_link_prefix: Optional[str] = None,
+) -> str:
+    """Creates format string for each point in alert."""
+    out = ""
+
+    include_kpi_name = kpi_link_prefix is not None
+
+    if point.previous_value is None or point.y == point.previous_value:
+        out += "- :black_circle_for_record: Anomalous behavior"
+
+        if include_kpi_name:
+            out += f" in *{kpi_name_link(kpi_link_prefix, point)}* "
+            if point.is_subdim:
+                out += f"{subdim_name_link(point)} "
+        else:
+            out += " detected "
+            if point.is_subdim:
+                out += f"in {subdim_name_link(point)} "
+
+        if point.previous_value is None:
+            out += f"- changed to *{point.y_readable}*"
+            if point.is_hourly:
+                out += f" at {point.anomaly_time_only}"
+        else:
+            if point.is_hourly:
+                out += (
+                    f"- with constant value *{point.y_readable}*"
+                    + f" from {point.previous_point_time_only}"
+                    + f" to {point.anomaly_time_only}"
+                )
+            else:
+                out += f"- with same value *{point.y_readable}* as previous day"
+
+    else:
+        if point.y > point.previous_value:
+            out += f"- :arrow_up: {point.formatted_change_percent} Spike"
+        elif point.y < point.previous_value:
+            out += f"- :arrow_down_small: {point.formatted_change_percent} Drop"
+
+        if include_kpi_name:
+            out += f" in *{kpi_name_link(kpi_link_prefix, point)}* "
+            if point.is_subdim:
+                out += f"{subdim_name_link(point)} "
+        else:
+            out += " detected "
+            if point.is_subdim:
+                out += f"in {subdim_name_link(point)} "
+
+        out += f"- changed to *{point.y_readable}*"
+
+        if point.previous_value_readable is not None:
+            out += f" from {point.previous_value_readable}"
+
+        if point.is_hourly:
+            out += (
+                f" from {point.previous_point_time_only}"
+                + f" to {point.anomaly_time_only}"
+            )
+
+    if point.relevant_subdims is not None:
+        out += "\n      - Reasons for change: "
+        for point in point.top_relevant_subdims() or []:
+            out += f"{subdim_name_link(point, value_only=True)}, "
+        out = out[:-2]
+
+    out += "\n"
+
+    return out
 
 
 def event_alert_slack(alert_name, alert_frequency, alert_message, alert_overview):
@@ -147,135 +382,6 @@ def event_alert_slack(alert_name, alert_frequency, alert_message, alert_overview
         )
     response = client.send(text=f"Event Alert: {alert_name}", blocks=blocks)
     return response.body
-
-
-def _format_slack_anomalies(
-    top10: "Sequence[anomaly_alerts.AnomalyPointFormatted]",
-    kpi_name: Optional[str] = None,
-    include_kpi_info: bool = True,
-) -> str:
-    out = ""
-
-    for point in top10:
-
-        if include_kpi_info:
-            kpi_name_link = (
-                f"<{webapp_url_prefix()}#/dashboard/0/anomaly/{point.kpi_id}"
-                + f"|{point.kpi_name}>"
-            )
-        else:
-            kpi_name_link = f"{kpi_name}"
-
-        if point.previous_value is None or point.y == point.previous_value:
-            out += "- :black_circle_for_record: Anomalous behavior"
-            if include_kpi_info:
-                out += f" in *{kpi_name_link}* "
-            else:
-                out += " detected "
-            if point.previous_value is None:
-                out += f"- changed to *{point.y_readable}*"
-                if point.is_hourly:
-                    out += (
-                        f" from {point.previous_point_time_only}"
-                        + f" to {point.anomaly_time_only}"
-                    )
-            else:
-                if point.is_hourly:
-                    out += (
-                        f"- with constant value *{point.y_readable}*"
-                        + f" from {point.previous_point_time_only}"
-                        + f" to {point.anomaly_time_only}"
-                    )
-                else:
-                    out += f"- with same value *{point.y_readable}* as previous day"
-
-        else:
-            if point.y > point.previous_value:
-                out += "- :arrow_up: Spike"
-            elif point.y < point.previous_value:
-                out += "- :arrow_down_small: Drop"
-            if include_kpi_info:
-                out += f" in *{kpi_name_link}* "
-            else:
-                out += " detected "
-            out += f" -  changed to *{point.y_readable}*"
-            if point.previous_value_readable is not None:
-                out += (
-                    f" from {point.previous_value_readable} "
-                    + f"({point.formatted_change_percent})"
-                )
-            if point.is_hourly:
-                out += (
-                    f" from {point.previous_point_time_only}"
-                    + f" to {point.anomaly_time_only}"
-                )
-        out += "\n"
-
-    return out
-
-
-def alert_digest_slack_formatted(
-    frequency: str,
-    top10: "Sequence[anomaly_alerts.AnomalyPointFormatted]",
-    overall_count: int,
-    subdim_count: int,
-    report_date: str,
-) -> str:
-    """Sends an anomaly digest on slack.
-
-    Returns an empty string if successful or the error as a string if not.
-    """
-    client = get_webhook_client()
-    if not client:
-        raise Exception("Slack not configured properly.")
-
-    response = client.send(
-        blocks=[
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": f"{frequency.title()} Alerts Report ({report_date})",
-                    "emoji": True,
-                },
-            },
-            {
-                "type": "divider",
-            },
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": "Top Anomalies",
-                    "emoji": True,
-                },
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": _format_slack_anomalies(top10),
-                },
-            },
-            {
-                "type": "actions",
-                "elements": [
-                    {
-                        "type": "button",
-                        "text": {"type": "plain_text", "text": "Alerts Dashboard"},
-                        "url": f"{webapp_url_prefix()}api/digest",
-                        "action_id": "alert_dashboard",
-                        "style": "primary",
-                    }
-                ],
-            },
-        ]
-    )
-
-    if response.body != "ok":
-        return response.body
-
-    return ""
 
 
 def alert_table_sender(client, table_data):

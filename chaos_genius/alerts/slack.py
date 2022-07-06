@@ -109,40 +109,40 @@ def alert_digest_slack_formatted(data: "AlertsReportData") -> str:
         raise Exception("Slack not configured properly.")
 
     blocks = [
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": f"Daily Alerts Report ({data.report_date_formatted()})",
-                    "emoji": True,
-                },
+        {
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": f"Daily Alerts Report ({data.report_date_formatted()})",
+                "emoji": True,
             },
-            {
-                "type": "divider",
+        },
+        {
+            "type": "divider",
+        },
+        {
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": "Top Anomalies",
+                "emoji": True,
             },
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": "Top Anomalies",
-                    "emoji": True,
-                },
-            },
-            *_display_anomalies_digest(data),
-            *_display_anomalies_digest(data, subdim=True),
-            {
-                "type": "actions",
-                "elements": [
-                    {
-                        "type": "button",
-                        "text": {"type": "plain_text", "text": "Alerts Dashboard"},
-                        "url": data.alert_dashboard_link(),
-                        "action_id": "alert_dashboard",
-                        "style": "primary",
-                    }
-                ],
-            },
-        ]
+        },
+        *_display_anomalies_digest(data),
+        *_display_anomalies_digest(data, subdim=True),
+        {
+            "type": "actions",
+            "elements": [
+                {
+                    "type": "button",
+                    "text": {"type": "plain_text", "text": "Alerts Dashboard"},
+                    "url": data.alert_dashboard_link(),
+                    "action_id": "alert_dashboard",
+                    "style": "primary",
+                }
+            ],
+        },
+    ]
 
     response = client.send(blocks=blocks)
 
@@ -157,10 +157,7 @@ def _display_anomalies_individual(anomaly_data, subdim: bool = False):
     sections: List[Dict[str, Any]] = []
     section = {
         "type": "section",
-        "text": {
-            "type": "mrkdwn",
-            "text": ""
-        },
+        "text": {"type": "mrkdwn", "text": ""},
     }
 
     if not subdim:
@@ -199,10 +196,7 @@ def _display_anomalies_digest(anomaly_data, subdim: bool = False):
     def _new_text_section() -> Dict[str, Any]:
         section = {
             "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": ""
-            },
+            "text": {"type": "mrkdwn", "text": ""},
         }
         sections.append(section)
         return section
@@ -259,14 +253,10 @@ def subdim_name_link(point, value_only: bool = False):
     """Creates subdim name with link to respective subdim anomaly page."""
     if value_only:
         subdim_link = (
-            f"<{point.subdim_link()}"
-            + f"|{point.subdim_formatted_value_only()}>"
+            f"<{point.subdim_link()}" + f"|{point.subdim_formatted_value_only()}>"
         )
     else:
-        subdim_link = (
-            f"<{point.subdim_link()}"
-            + f"|{point.subdim_formatted()}>"
-        )
+        subdim_link = f"<{point.subdim_link()}" + f"|{point.subdim_formatted()}>"
     return subdim_link
 
 

@@ -627,7 +627,9 @@ const KpiAlertConfigurationForm = ({
             </div>
           )}
         </div>
-        <div className="form-check check-box" key="include-subdims">
+        <div
+          className="form-check check-box kpialertconfig"
+          key="include-subdims">
           <input
             className="form-check-input"
             name="include-subdims"

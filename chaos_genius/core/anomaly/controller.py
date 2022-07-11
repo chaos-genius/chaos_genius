@@ -645,6 +645,8 @@ class AnomalyDetectionController(object):
 
     @staticmethod
     def _to_run_subdim(kpi_info: dict):
+        if len(kpi_info.get("dimensions", [])) == 0:
+            return False
         run_optional = kpi_info.get("anomaly_params", {}).get("run_optional", None)
         return run_optional is None or run_optional["subdim"] is True
 

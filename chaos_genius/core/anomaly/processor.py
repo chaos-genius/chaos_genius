@@ -1,6 +1,7 @@
 """Provides processor class which computes anomaly detection."""
 import datetime
 import logging
+from typing import Dict
 
 import pandas as pd
 
@@ -28,6 +29,7 @@ class ProcessAnomalyDetection:
         slack: int,
         series: str,
         subgroup: str = None,
+        deviation_from_mean_dict: Dict[datetime, float] = {},
         model_kwargs={},
     ):
         """Initialize the processor.
@@ -68,6 +70,7 @@ class ProcessAnomalyDetection:
         self.freq = freq
         self.sensitivity = sensitivity
         self.slack = slack
+        self.deviation_from_mean_dict = deviation_from_mean_dict
 
     def predict(self) -> pd.DataFrame:
         """Run the prediction for anomalies.
@@ -77,10 +80,13 @@ class ProcessAnomalyDetection:
         """
         model = self._get_model()
 
-        logger.debug(f"Running Prediction and Detecting Severity for {self.series}-{self.subgroup}")
+        logger.debug(f"Running Prediction and Detecting Severity for {self.series}-{self.subgroup}") 
         anomaly_df = self._predict(model)
 
         self._save_model(model)
+
+        if self.series == "overall":
+            return anomaly_df, self.deviation_from_mean_dict
 
         return anomaly_df
 
@@ -90,7 +96,7 @@ class ProcessAnomalyDetection:
 
         input_data = self.input_data
 
-        pred_series = pd.DataFrame(columns=["dt", "y", "yhat_lower", "yhat_upper", "anomaly", "severity"])
+        pred_series = pd.DataFrame(columns=["dt", "y", "yhat_lower", "yhat_upper", "anomaly", "severity", "impact"])
 
         input_last_date = input_data["dt"].iloc[-1]
         input_first_date = input_data["dt"].iloc[0]
@@ -117,8 +123,17 @@ class ProcessAnomalyDetection:
                 )
 
                 prediction["y"] = input_data["y"]
-                prediction_with_severity = self._detect_severity(self._detect_anomalies(prediction))
-                pred_series = prediction_with_severity
+
+                mean = prediction["y"].mean()
+                prediction["deviation_from_mean"] = prediction["y"] - mean
+
+                prediction = self._detect_anomalies(prediction)
+
+                if self.series == "overall":
+                    self.deviation_from_mean_dict.update(dict(prediction.loc[prediction["anomaly"] != 0][["dt", "deviation_from_mean"]].values))
+
+                prediction_with_metrics = self._calculate_metrics(prediction, prediction["y"].std())
+                pred_series = prediction_with_metrics
             else:
                 logger.warning(f"Insufficient slack for {self.series}-{self.subgroup}")
 
@@ -137,10 +152,20 @@ class ProcessAnomalyDetection:
                         df.iloc[:-1], self.sensitivity, self.freq
                     )
                     prediction["y"] = df["y"].to_list()
-                    prediction_with_severity = self._detect_severity(self._detect_anomalies(prediction))
-                    to_append = prediction_with_severity.iloc[-1].copy()
 
-                    pred_series = pred_series.append(to_append, ignore_index=True)
+                    prediction = pd.DataFrame(prediction.iloc[-1].copy()).T.reset_index(drop=True)
+
+                    mean = df.iloc[:-1]["y"].mean()
+                    prediction["deviation_from_mean"] = prediction["y"] - mean
+
+                    prediction = self._detect_anomalies(prediction)
+
+                    if self.series == "overall":
+                        self.deviation_from_mean_dict.update(dict(prediction.loc[prediction["anomaly"] != 0][["dt", "deviation_from_mean"]].values))
+
+                    prediction_with_metrics = self._calculate_metrics(prediction, df.iloc[:-1]["y"].std())
+
+                    pred_series = pred_series.append(prediction_with_metrics, ignore_index=True)
 
                 date_to_predict += datetime.timedelta(**FREQUENCY_DELTA[self.freq])
 
@@ -155,20 +180,32 @@ class ProcessAnomalyDetection:
 
         return pred_series
 
-    def _detect_severity(self, anomaly_prediction):
-        std_dev = anomaly_prediction["y"].std()
-
-        anomaly_prediction["severity"] = 0
+    def _calculate_metrics(self, anomaly_prediction, std_dev):
+        anomaly_prediction["zscore"], anomaly_prediction["severity"] = 0, 0
+        anomaly_prediction["impact"] = 0
         if std_dev == 0:
             return anomaly_prediction
 
-        anomaly_prediction["severity"] = anomaly_prediction.apply(
-            lambda x: self._compute_severity(x, std_dev), axis=1
+        anomaly_prediction["zscore"] = anomaly_prediction.apply(
+            lambda x: self._compute_zscore(x, std_dev), axis=1
         )
+
+        # Map zscore of 0-3 to 0-100
+        # Bound between min and max score
+        # If above 100, we return 100; If below -100, we return -100
+        anomaly_prediction["severity"] = anomaly_prediction["zscore"].apply(
+            lambda x: bound_between(0, x * 100 / ZSCORE_UPPER_BOUND, 100)
+        )
+
+        if self.series == "subdim":
+            for anomaly_date, deviation_from_mean in self.deviation_from_mean_dict.items():
+                anomaly_prediction.loc[anomaly_prediction["dt"] == anomaly_date, "impact"] = ((anomaly_prediction["deviation_from_mean"]/deviation_from_mean)*anomaly_prediction["zscore"]).abs()
+
+        anomaly_prediction = anomaly_prediction.drop(["zscore", "deviation_from_mean"], axis=1)
 
         return anomaly_prediction
 
-    def _compute_severity(self, row, std_dev):
+    def _compute_zscore(self, row, std_dev):
         # TODO: Create docstring for these comments
         if row["anomaly"] == 0:
             # No anomaly. Severity is 0
@@ -178,15 +215,9 @@ class ProcessAnomalyDetection:
             zscore = (row["y"] - row["yhat_upper"]) / std_dev
         elif row["anomaly"] == -1:
             # Check num deviations from lower bound of CI
-            zscore = (row["y"] - row["yhat_lower"]) / std_dev
+            zscore = (row["yhat_lower"] - row["y"]) / std_dev
 
-        # Map zscore of 0-3 to 0-100
-        severity = zscore * 100 / ZSCORE_UPPER_BOUND
-        severity = abs(severity)
-
-        # Bound between min and max score
-        # If above 100, we return 100; If below -100, we return -100
-        return bound_between(0, severity, 100)
+        return zscore
 
     def _get_model(self) -> AnomalyModel:
         model = MODEL_MAPPER[self.model_name]

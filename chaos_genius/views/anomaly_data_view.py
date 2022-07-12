@@ -40,7 +40,7 @@ def list_anomaly_data():
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-detection", methods=["GET"])
-def kpi_anomaly_detection(kpi_id):
+def kpi_anomaly_detection(kpi_id: int):
     current_app.logger.info(f"Anomaly Detection Started for KPI ID: {kpi_id}")
     data = []
     end_date = None
@@ -98,7 +98,7 @@ def kpi_anomaly_detection(kpi_id):
         )
 
     except Exception:  # noqa B902
-        current_app.logger.error("Error in Anomaly Overall Retrieval", exc_info=1)
+        current_app.logger.error("Error in Anomaly Overall Retrieval", exc_info=True)
 
     return jsonify(
         {
@@ -113,7 +113,7 @@ def kpi_anomaly_detection(kpi_id):
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-drilldown", methods=["GET"])
-def kpi_anomaly_drilldown(kpi_id):
+def kpi_anomaly_drilldown(kpi_id: int):
     current_app.logger.info(f"Anomaly Drilldown Started for KPI ID: {kpi_id}")
     subdim_graphs = []
     end_date = None
@@ -146,13 +146,13 @@ def kpi_anomaly_drilldown(kpi_id):
         current_app.logger.info(f"Anomaly DD Retrieval Completed for KPI ID: {kpi_id}")
 
     except Exception:  # noqa B902
-        current_app.logger.error("Error in Anomaly DD Retrieval", exc_info=1)
+        current_app.logger.error("Error in Anomaly DD Retrieval", exc_info=True)
 
     return jsonify({"data": subdim_graphs, "msg": ""})
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-data-quality", methods=["GET"])
-def kpi_anomaly_data_quality(kpi_id):
+def kpi_anomaly_data_quality(kpi_id: int):
     current_app.logger.info(f"Anomaly Drilldown Started for KPI ID: {kpi_id}")
 
     data = []
@@ -179,7 +179,7 @@ def kpi_anomaly_data_quality(kpi_id):
         current_app.logger.info(f"Anomaly DQ Retrieval Completed for KPI ID: {kpi_id}")
 
     except Exception as err:  # noqa B902
-        current_app.logger.error(f"Error in Anomaly DQ Retrieval: {err}", exc_info=1)
+        current_app.logger.error(f"Error in Anomaly DQ Retrieval: {err}", exc_info=True)
 
     return jsonify({"data": data, "msg": ""})
 
@@ -318,7 +318,7 @@ def kpi_anomaly_params(kpi_id: int):
 
 
 @blueprint.route("/<int:kpi_id>/settings", methods=["GET"])
-def anomaly_settings_status(kpi_id):
+def anomaly_settings_status(kpi_id: int):
     current_app.logger.info(f"Retrieving anomaly settings for kpi: {kpi_id}")
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
 
@@ -358,7 +358,7 @@ def anomaly_settings_status(kpi_id):
 
 
 @blueprint.route("/<int:kpi_id>/retrain", methods=["POST", "GET"])
-def kpi_anomaly_retraining(kpi_id):
+def kpi_anomaly_retraining(kpi_id: int):
     # delete all data in anomaly output table
     delete_anomaly_output_for_kpi(kpi_id)
 
@@ -375,7 +375,7 @@ def kpi_anomaly_retraining(kpi_id):
 
 def _get_dimensions_values(
     kpi_id: int, end_date: datetime, period=90
-) -> Dict[str, List[str]]:
+) -> List[Dict[str, Any]]:
     """Creates a dictionary of KPI dimension and their values.
 
     :param kpi_id: ID of the KPI
@@ -430,7 +430,7 @@ def _get_dimensions_values(
     return dimension_values_list
 
 
-def fill_graph_data(row, graph_data):
+def fill_graph_data(row: pd.Series, graph_data: Dict[str, Any]):
     """Fills graph_data with values for a given row.
 
     :param row: A single row from the anomaly dataframe
@@ -461,16 +461,21 @@ def fill_graph_data(row, graph_data):
 
 
 def convert_to_graph_json(
-    results,
-    kpi_id,
+    results: pd.DataFrame,
+    kpi_id: int,
     anomaly_type="overall",
-    series_type=None,
-):
+    series_type: Optional[Dict[str, str]] = None,
+) -> Dict[str, Any]:
     kpi_info = get_kpi_data_from_id(kpi_id)
 
     if anomaly_type == "overall":
         title = kpi_info["name"]
     else:
+        if series_type is None:
+            raise ValueError(
+                f"series_type was missing for a subdim anomaly. KPI: {kpi_id}"
+            )
+
         title = get_user_string_from_subgroup_dict(series_type)
 
     kpi_name = kpi_info["metric"]
@@ -510,15 +515,15 @@ def get_overall_data_points(kpi_id: int, n: int = 60) -> List:
     )
 
 
-def get_overall_data(kpi_id, end_date: datetime, n=90):
+def get_overall_data(kpi_id: int, end_date: datetime, n=90):
     start_date = end_date - timedelta(days=n)
     start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
-    end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
+    end_date_str = end_date.strftime("%Y-%m-%d %H:%M:%S")
 
     # TODO: Add the series type filter
     query = AnomalyDataOutput.query.filter(
         (AnomalyDataOutput.kpi_id == kpi_id)
-        & (AnomalyDataOutput.data_datetime <= end_date)
+        & (AnomalyDataOutput.data_datetime <= end_date_str)
         & (AnomalyDataOutput.data_datetime >= start_date)
         & (AnomalyDataOutput.anomaly_type == "overall")
     ).order_by(AnomalyDataOutput.data_datetime)
@@ -529,15 +534,19 @@ def get_overall_data(kpi_id, end_date: datetime, n=90):
 
 
 def get_dq_and_subdim_data(
-    kpi_id, end_date, anomaly_type="dq", series_type="max", n=90
+    kpi_id: int,
+    end_date: datetime,
+    anomaly_type: str = "dq",
+    series_type: Dict[str, str] = {"dq": "max"},
+    n: int = 90,
 ):
     start_date = pd.to_datetime(end_date) - timedelta(days=n)
     start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
-    end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
+    end_date_str = end_date.strftime("%Y-%m-%d %H:%M:%S")
 
     query = AnomalyDataOutput.query.filter(
         (AnomalyDataOutput.kpi_id == kpi_id)
-        & (AnomalyDataOutput.data_datetime <= end_date)
+        & (AnomalyDataOutput.data_datetime <= end_date_str)
         & (AnomalyDataOutput.data_datetime >= start_date)
         & (AnomalyDataOutput.anomaly_type == anomaly_type)
         & (AnomalyDataOutput.series_type == series_type)
@@ -637,29 +646,37 @@ def get_anomaly_output_end_date(kpi_info: dict) -> datetime:
     :return: end date for use with anomaly data output
     :rtype: datetime
     """
-    end_date = None
-
-    if kpi_info["is_static"]:
-        end_date = kpi_info.get("static_params", {}).get("end_date", None)
-        if end_date is not None:
-            try:
-                end_date = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
-            except Exception:  # noqa B902
-                end_date = end_date + " 00:00:00"
-                end_date = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+    end_date: datetime
 
     hourly = kpi_info["anomaly_params"]["frequency"] == "H"
 
-    # TODO: caused the non viewing of data post 00:00
-    if end_date is None:
-        end_date = get_anomaly_end_date(kpi_info["id"], hourly=hourly)
+    if kpi_info["is_static"]:
+        end_date_str: Optional[str] = kpi_info.get("static_params", {}).get(
+            "end_date", None
+        )
+        if end_date_str is not None:
+            try:
+                end_date = datetime.strptime(end_date_str, "%Y-%m-%d %H:%M:%S")
+            except Exception:
+                end_date_str = end_date_str + " 00:00:00"
+                end_date = datetime.strptime(end_date_str, "%Y-%m-%d %H:%M:%S")
+        else:
+            raise Exception(
+                f"KPI {kpi_info['id']} is static but no static end_date was provided."
+            )
+    else:
+        # TODO: caused the non viewing of data post 00:00
+        maybe_end_date = get_anomaly_end_date(kpi_info["id"], hourly=hourly)
+        if maybe_end_date is not None:
+            end_date = maybe_end_date
+        else:
+            end_date = datetime.now()
 
-    if end_date is None:
-        end_date = datetime.now()
+    end_date_ts: pd.Timestamp = (
+        pd.to_datetime(end_date) if hourly else pd.to_datetime(end_date.date())
+    )
 
-    end_date = pd.to_datetime(end_date) if hourly else pd.to_datetime(end_date.date())
-
-    return end_date.to_pydatetime()
+    return end_date_ts.to_pydatetime()
 
 
 # --- anomaly params meta information --- #
@@ -1163,9 +1180,7 @@ def validate_scheduled_time(time):
     return "", time
 
 
-def get_anomaly_end_date(kpi_id: int, hourly: bool) -> datetime:
-    anomaly_end_date = None
-
+def get_anomaly_end_date(kpi_id: int, hourly: bool) -> Optional[datetime]:
     anomaly_end_date_data = (
         AnomalyDataOutput.query.filter(
             (AnomalyDataOutput.kpi_id == kpi_id)
@@ -1176,23 +1191,24 @@ def get_anomaly_end_date(kpi_id: int, hourly: bool) -> datetime:
     )
 
     try:
-        anomaly_end_date = anomaly_end_date_data.as_dict["data_datetime"]
+        anomaly_end_date: datetime = anomaly_end_date_data.as_dict["data_datetime"]
         if hourly:
-            anomaly_end_date = pd.to_datetime(anomaly_end_date)
+            anomaly_end_date_ts: pd.Timestamp = pd.to_datetime(anomaly_end_date)
         else:
-            anomaly_end_date = pd.to_datetime(anomaly_end_date.date())
-        anomaly_end_date = anomaly_end_date.to_pydatetime()
+            anomaly_end_date_ts: pd.Timestamp = pd.to_datetime(anomaly_end_date.date())
+
+        return anomaly_end_date_ts.to_pydatetime()
     except Exception as err:  # noqa B902
         current_app.logger.info(f"Error Found: {err}")
 
-    return anomaly_end_date
+    return None
 
 
-def get_anomaly_graph_x_lims(end_date: date, period: int, hourly: bool) -> List[int]:
+def get_anomaly_graph_x_lims(end_date: date, period: int, hourly: bool) -> List[float]:
     start_date = end_date - timedelta(days=period)
     start_date = start_date.timetuple()
     if hourly:
-        end_date = (end_date + timedelta(hours=12)).timetuple()
+        end_date_t = (end_date + timedelta(hours=12)).timetuple()
     else:
-        end_date = (end_date + timedelta(days=1)).timetuple()
-    return [time.mktime(start_date), time.mktime(end_date)]
+        end_date_t = (end_date + timedelta(days=1)).timetuple()
+    return [time.mktime(start_date), time.mktime(end_date_t)]

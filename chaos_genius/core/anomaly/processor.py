@@ -80,7 +80,9 @@ class ProcessAnomalyDetection:
         """
         model = self._get_model()
 
-        logger.debug(f"Running Prediction and Detecting Severity for {self.series}-{self.subgroup}") 
+        logger.debug(
+            f"Running Prediction and Detecting Severity for {self.series}-{self.subgroup}"
+        )
         anomaly_df = self._predict(model)
 
         self._save_model(model)
@@ -96,20 +98,33 @@ class ProcessAnomalyDetection:
 
         input_data = self.input_data
 
-        pred_series = pd.DataFrame(columns=["dt", "y", "yhat_lower", "yhat_upper", "anomaly", "severity", "impact"])
+        pred_series = pd.DataFrame(
+            columns=[
+                "dt",
+                "y",
+                "yhat_lower",
+                "yhat_upper",
+                "anomaly",
+                "severity",
+                "impact",
+            ]
+        )
 
         input_last_date = input_data["dt"].iloc[-1]
         input_first_date = input_data["dt"].iloc[0]
         max_period = get_timedelta(self.freq, self.period)
 
-        logger.info(f"Prediction data stats for {self.series}-{self.subgroup}", extra={
-            "period": self.period,
-            "inp_len": len(input_data),
-            "slack": self.slack,
-            "start_date": input_first_date,
-            "end_date": input_last_date,
-            "last_date": self.last_date
-        })
+        logger.info(
+            f"Prediction data stats for {self.series}-{self.subgroup}",
+            extra={
+                "period": self.period,
+                "inp_len": len(input_data),
+                "slack": self.slack,
+                "start_date": input_first_date,
+                "end_date": input_last_date,
+                "last_date": self.last_date,
+            },
+        )
 
         if self.last_date is None:
             # pass complete input data frame in here as pred_df
@@ -130,15 +145,25 @@ class ProcessAnomalyDetection:
                 prediction = self._detect_anomalies(prediction)
 
                 if self.series == "overall":
-                    self.deviation_from_mean_dict.update(dict(prediction.loc[prediction["anomaly"] != 0][["dt", "deviation_from_mean"]].values))
+                    self.deviation_from_mean_dict.update(
+                        dict(
+                            prediction.loc[prediction["anomaly"] != 0][
+                                ["dt", "deviation_from_mean"]
+                            ].values
+                        )
+                    )
 
-                prediction_with_metrics = self._calculate_metrics(prediction, prediction["y"].std())
+                prediction_with_metrics = self._calculate_metrics(
+                    prediction, prediction["y"].std()
+                )
                 pred_series = prediction_with_metrics
             else:
                 logger.warning(f"Insufficient slack for {self.series}-{self.subgroup}")
 
         else:
-            date_to_predict = self.last_date + datetime.timedelta(**FREQUENCY_DELTA[self.freq])
+            date_to_predict = self.last_date + datetime.timedelta(
+                **FREQUENCY_DELTA[self.freq]
+            )
             while date_to_predict <= input_last_date:
                 curr_period = date_to_predict - input_first_date
 
@@ -153,7 +178,9 @@ class ProcessAnomalyDetection:
                     )
                     prediction["y"] = df["y"].to_list()
 
-                    prediction = pd.DataFrame(prediction.iloc[-1].copy()).T.reset_index(drop=True)
+                    prediction = pd.DataFrame(prediction.iloc[-1].copy()).T.reset_index(
+                        drop=True
+                    )
 
                     mean = df.iloc[:-1]["y"].mean()
                     prediction["deviation_from_mean"] = prediction["y"] - mean
@@ -161,11 +188,21 @@ class ProcessAnomalyDetection:
                     prediction = self._detect_anomalies(prediction)
 
                     if self.series == "overall":
-                        self.deviation_from_mean_dict.update(dict(prediction.loc[prediction["anomaly"] != 0][["dt", "deviation_from_mean"]].values))
+                        self.deviation_from_mean_dict.update(
+                            dict(
+                                prediction.loc[prediction["anomaly"] != 0][
+                                    ["dt", "deviation_from_mean"]
+                                ].values
+                            )
+                        )
 
-                    prediction_with_metrics = self._calculate_metrics(prediction, df.iloc[:-1]["y"].std())
+                    prediction_with_metrics = self._calculate_metrics(
+                        prediction, df.iloc[:-1]["y"].std()
+                    )
 
-                    pred_series = pred_series.append(prediction_with_metrics, ignore_index=True)
+                    pred_series = pred_series.append(
+                        prediction_with_metrics, ignore_index=True
+                    )
 
                 date_to_predict += datetime.timedelta(**FREQUENCY_DELTA[self.freq])
 
@@ -198,10 +235,20 @@ class ProcessAnomalyDetection:
         )
 
         if self.series == "subdim":
-            for anomaly_date, deviation_from_mean in self.deviation_from_mean_dict.items():
-                anomaly_prediction.loc[anomaly_prediction["dt"] == anomaly_date, "impact"] = ((anomaly_prediction["deviation_from_mean"]/deviation_from_mean)*anomaly_prediction["zscore"]).abs()
+            for (
+                anomaly_date,
+                deviation_from_mean,
+            ) in self.deviation_from_mean_dict.items():
+                anomaly_prediction.loc[
+                    anomaly_prediction["dt"] == anomaly_date, "impact"
+                ] = (
+                    (anomaly_prediction["deviation_from_mean"] / deviation_from_mean)
+                    * anomaly_prediction["zscore"]
+                ).abs()
 
-        anomaly_prediction = anomaly_prediction.drop(["zscore", "deviation_from_mean"], axis=1)
+        anomaly_prediction = anomaly_prediction.drop(
+            ["zscore", "deviation_from_mean"], axis=1
+        )
 
         return anomaly_prediction
 

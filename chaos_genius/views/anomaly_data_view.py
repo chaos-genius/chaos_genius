@@ -50,6 +50,8 @@ def kpi_anomaly_detection(kpi_id: int):
     data = []
     end_date = None
     is_overall = True
+    dimensions_values = []
+    anomaly_last_scan = ""
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
 

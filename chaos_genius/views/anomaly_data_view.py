@@ -130,9 +130,11 @@ def kpi_anomaly_drilldown(kpi_id):
 
         drilldown_date = pd.to_datetime(drilldown_date, unit="ms")
 
-        subdims = get_drilldowns_series_type(kpi_id, drilldown_date)
-
         kpi_info = get_kpi_data_from_id(kpi_id)
+        frequency: str = kpi_info["anomaly_params"]["frequency"]
+
+        subdims = get_drilldowns_series_type(kpi_id, drilldown_date, frequency)
+
         period = kpi_info["anomaly_params"]["anomaly_period"]
         hourly = kpi_info["anomaly_params"]["frequency"] == "H"
 
@@ -568,7 +570,11 @@ def get_dq_and_subdim_data(
     return convert_to_graph_json(results, kpi_id, anomaly_type, series_type)
 
 
-def get_drilldowns_series_type(kpi_id, drilldown_date):
+def get_drilldowns_series_type(
+    kpi_id: int,
+    drilldown_date: pd.Timestamp,
+    frequency: str,
+):
     # First we get direction of anomaly
     # Then we get relevant subdims for that anomaly
     # TODO: Add the series type filter
@@ -598,8 +604,23 @@ def get_drilldowns_series_type(kpi_id, drilldown_date):
 
     results = pd.read_sql(query.statement, query.session.bind)
     if len(results) == 0:
-        start_date = drilldown_date - timedelta(days=1)
-        end_date = drilldown_date + timedelta(days=1)
+        if frequency == "H":
+            time_window = timedelta(hours=3)
+        else:
+            time_window = timedelta(days=1)
+
+        current_app.logger.info(
+            (
+                "Could not find any subdimensions for anomaly at"
+                " %s. Looking for time window %s beside the timestamp"
+            ),
+            drilldown_date,
+            time_window
+        )
+
+        start_date = drilldown_date - time_window
+        end_date = drilldown_date + time_window
+
         query = AnomalyDataOutput.query.filter(
             (AnomalyDataOutput.kpi_id == kpi_id)
             & (AnomalyDataOutput.data_datetime <= end_date)
@@ -619,6 +640,10 @@ def get_drilldowns_series_type(kpi_id, drilldown_date):
             ["distance", "severity"], ascending=[True, False], inplace=True
         )
         results.drop("distance", axis=1, inplace=True)
+
+        results = results.loc[
+            results["series_type"].astype(str).drop_duplicates(keep="first").index
+        ]
 
         results = results.iloc[:TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN]
 

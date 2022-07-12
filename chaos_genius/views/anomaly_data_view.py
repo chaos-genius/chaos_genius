@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """anomaly data view."""
+import logging
 import time
 from collections import defaultdict
 from datetime import date, datetime, timedelta
@@ -7,7 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple, cast
 
 import pandas as pd
 from flask.blueprints import Blueprint
-from flask.globals import current_app, request
+from flask.globals import request
 from flask.json import jsonify
 from sqlalchemy import func
 from sqlalchemy.orm.attributes import flag_modified
@@ -31,6 +32,8 @@ from chaos_genius.utils.datetime_helper import (
 
 blueprint = Blueprint("anomaly_data", __name__)
 
+logger = logging.getLogger(__name__)
+
 
 @blueprint.route("/", methods=["GET"])  # TODO: Remove this
 @blueprint.route("", methods=["GET"])
@@ -41,7 +44,7 @@ def list_anomaly_data():
 
 @blueprint.route("/<int:kpi_id>/anomaly-detection", methods=["GET"])
 def kpi_anomaly_detection(kpi_id: int):
-    current_app.logger.info(f"Anomaly Detection Started for KPI ID: {kpi_id}")
+    logger.info(f"Anomaly Detection Started for KPI ID: {kpi_id}")
     data = []
     end_date = None
     is_overall = True
@@ -49,9 +52,7 @@ def kpi_anomaly_detection(kpi_id: int):
         kpi_info = get_kpi_data_from_id(kpi_id)
 
         if not kpi_info["anomaly_params"]:
-            current_app.logger.info(
-                f"Anomaly settings not configured for KPI ID: {kpi_id}"
-            )
+            logger.info(f"Anomaly settings not configured for KPI ID: {kpi_id}")
             return jsonify(
                 {
                     "data": None,
@@ -90,7 +91,7 @@ def kpi_anomaly_detection(kpi_id: int):
             "base_anomaly_id": kpi_id,
         }
 
-        current_app.logger.info(f"Anomaly DD Retrieval Completed for KPI ID: {kpi_id}")
+        logger.info(f"Anomaly DD Retrieval Completed for KPI ID: {kpi_id}")
 
         end_date = get_datetime_string_with_tz(end_date, hourly)
         anomaly_last_scan = get_lastscan_string_with_tz(
@@ -98,7 +99,7 @@ def kpi_anomaly_detection(kpi_id: int):
         )
 
     except Exception:  # noqa B902
-        current_app.logger.error("Error in Anomaly Overall Retrieval", exc_info=True)
+        logger.error("Error in Anomaly Overall Retrieval", exc_info=True)
 
     return jsonify(
         {
@@ -114,7 +115,7 @@ def kpi_anomaly_detection(kpi_id: int):
 
 @blueprint.route("/<int:kpi_id>/anomaly-drilldown", methods=["GET"])
 def kpi_anomaly_drilldown(kpi_id: int):
-    current_app.logger.info(f"Anomaly Drilldown Started for KPI ID: {kpi_id}")
+    logger.info(f"Anomaly Drilldown Started for KPI ID: {kpi_id}")
     subdim_graphs = []
     end_date = None
     try:
@@ -143,17 +144,17 @@ def kpi_anomaly_drilldown(kpi_id: int):
             )
             anom_data["x_axis_limits"] = graph_xlims
             subdim_graphs.append(anom_data)
-        current_app.logger.info(f"Anomaly DD Retrieval Completed for KPI ID: {kpi_id}")
+        logger.info(f"Anomaly DD Retrieval Completed for KPI ID: {kpi_id}")
 
     except Exception:  # noqa B902
-        current_app.logger.error("Error in Anomaly DD Retrieval", exc_info=True)
+        logger.error("Error in Anomaly DD Retrieval", exc_info=True)
 
     return jsonify({"data": subdim_graphs, "msg": ""})
 
 
 @blueprint.route("/<int:kpi_id>/anomaly-data-quality", methods=["GET"])
 def kpi_anomaly_data_quality(kpi_id: int):
-    current_app.logger.info(f"Anomaly Drilldown Started for KPI ID: {kpi_id}")
+    logger.info(f"Anomaly Drilldown Started for KPI ID: {kpi_id}")
 
     data = []
     end_date = None
@@ -176,10 +177,10 @@ def kpi_anomaly_data_quality(kpi_id: int):
             if anom_data["values"] != []:
                 data.append(anom_data)
 
-        current_app.logger.info(f"Anomaly DQ Retrieval Completed for KPI ID: {kpi_id}")
+        logger.info(f"Anomaly DQ Retrieval Completed for KPI ID: {kpi_id}")
 
     except Exception as err:  # noqa B902
-        current_app.logger.error(f"Error in Anomaly DQ Retrieval: {err}", exc_info=True)
+        logger.error(f"Error in Anomaly DQ Retrieval: {err}", exc_info=True)
 
     return jsonify({"data": data, "msg": ""})
 
@@ -219,11 +220,9 @@ def kpi_anomaly_params(kpi_id: int):
     is_first_time = kpi.anomaly_params is None
 
     if is_first_time:
-        current_app.logger.info(f"Adding anomaly parameters for KPI ID: {kpi_id}")
+        logger.info(f"Adding anomaly parameters for KPI ID: {kpi_id}")
     else:
-        current_app.logger.info(
-            f"Updating existing anomaly parameters for KPI ID: {kpi_id}"
-        )
+        logger.info(f"Updating existing anomaly parameters for KPI ID: {kpi_id}")
 
     if not request.is_json:
         return (
@@ -278,7 +277,7 @@ def kpi_anomaly_params(kpi_id: int):
             run_anomaly = False
 
     if run_anomaly and err == "":
-        current_app.logger.info(
+        logger.info(
             "Deleting anomaly data and re-running anomaly since anomaly params was "
             + f"edited for KPI ID: {new_kpi.id}"
         )
@@ -288,9 +287,9 @@ def kpi_anomaly_params(kpi_id: int):
         anomaly_task = ready_anomaly_task(new_kpi.id)
         if anomaly_task is not None:
             anomaly_task.apply_async()
-            current_app.logger.info(f"Anomaly started for KPI ID: {new_kpi.id}")
+            logger.info(f"Anomaly started for KPI ID: {new_kpi.id}")
         else:
-            current_app.logger.info(
+            logger.info(
                 f"Anomaly failed since KPI was not found for KPI ID: {new_kpi.id}"
             )
 
@@ -306,7 +305,7 @@ def kpi_anomaly_params(kpi_id: int):
         anomaly_task = ready_anomaly_task(new_kpi.id)
         rca_task = ready_rca_task(new_kpi.id)
         if anomaly_task is None or rca_task is None:
-            print(
+            logger.info(
                 "Could not run anomaly task since newly configured KPI was not found: "
                 f"{new_kpi.id}"
             )
@@ -319,7 +318,7 @@ def kpi_anomaly_params(kpi_id: int):
 
 @blueprint.route("/<int:kpi_id>/settings", methods=["GET"])
 def anomaly_settings_status(kpi_id: int):
-    current_app.logger.info(f"Retrieving anomaly settings for kpi: {kpi_id}")
+    logger.info(f"Retrieving anomaly settings for kpi: {kpi_id}")
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
 
     if kpi is None:
@@ -353,7 +352,7 @@ def anomaly_settings_status(kpi_id: int):
     ).count()
     response["is_anomaly_precomputed"] = anomaly_data != 0
 
-    current_app.logger.info(f"Anomaly settings retrieved for kpi: {kpi_id}")
+    logger.info(f"Anomaly settings retrieved for kpi: {kpi_id}")
     return jsonify(response)
 
 
@@ -369,7 +368,7 @@ def kpi_anomaly_retraining(kpi_id: int):
     if anomaly_task is None:
         return jsonify({"msg": f"retraining failed for KPI: {kpi_id}, KPI id is None"})
     anomaly_task.apply_async()
-    current_app.logger.info(f"Retraining started for KPI ID: {kpi_id}")
+    logger.info(f"Retraining started for KPI ID: {kpi_id}")
     return jsonify({"msg": f"retraining started for KPI: {kpi_id}"})
 
 
@@ -404,7 +403,7 @@ def _get_dimensions_values(
     )
 
     if len(results) == 0:
-        current_app.logger.info("No Subdimension Anomaly Found")
+        logger.info("No Subdimension Anomaly Found")
         return []
 
     # series_type strings are in format {dimension1 == value1, dimension2 == value2,}
@@ -596,7 +595,7 @@ def get_drilldowns_series_type(
         else:
             time_window = timedelta(days=1)
 
-        current_app.logger.info(
+        logger.info(
             (
                 "Could not find any subdimensions for anomaly at"
                 " %s. Looking for time window %s beside the timestamp"
@@ -1199,7 +1198,7 @@ def get_anomaly_end_date(kpi_id: int, hourly: bool) -> Optional[datetime]:
 
         return anomaly_end_date_ts.to_pydatetime()
     except Exception as err:  # noqa B902
-        current_app.logger.info(f"Error Found: {err}")
+        logger.info(f"Error Found: {err}")
 
     return None
 

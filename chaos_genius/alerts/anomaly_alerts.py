@@ -24,6 +24,7 @@ from pydantic import BaseModel, StrictFloat, StrictInt, root_validator, validato
 from pydantic.tools import parse_obj_as
 
 from chaos_genius.alerts.constants import (
+    ALERT_DATE_CSV_FILENAME_FORMAT_INDIVIDUAL,
     ALERT_DATE_FORMAT,
     ALERT_DATETIME_FORMAT,
     ALERT_OVERALL_TOP_N,
@@ -33,6 +34,8 @@ from chaos_genius.alerts.constants import (
     ALERT_READABLE_DATETIME_FORMAT,
     ALERT_RELEVANT_SUBDIMS_TOP_N,
     ALERT_SUBDIM_TOP_N,
+    ANOMALY_REPORT_COLUMN_NAMES_MAPPER,
+    ANOMALY_REPORT_COLUMN_NAMES_ORDERED,
     ANOMALY_TABLE_COLUMN_NAMES_MAPPER,
     ANOMALY_TABLE_COLUMN_NAMES_ORDERED,
     OVERALL_KPI_SERIES_TYPE_REPR,
@@ -555,7 +558,7 @@ class AnomalyPointFormatted(AnomalyPoint):
 class AlertsIndividualData(BaseModel):
     """Data for formatting an individual alert."""
 
-    all_points: List[AnomalyPoint]
+    all_points: List[AnomalyPointFormatted]
     top_overall_points: List[AnomalyPointFormatted]
     top_subdim_points: List[AnomalyPointFormatted]
 
@@ -617,8 +620,12 @@ class AlertsIndividualData(BaseModel):
             _format_anomaly_point_for_template(top_subdim_points, kpi, alert)
         )
 
+        all_points = list(
+            _format_anomaly_point_for_template(points, kpi, alert, include_subdims=True)
+        )
+
         return AlertsIndividualData(
-            all_points=points,
+            all_points=all_points,
             top_overall_points=top_overall_points,
             top_subdim_points=top_subdim_points,
             include_subdims=alert.include_subdims,
@@ -997,7 +1004,6 @@ class AnomalyAlertController:
         self,
         individual_data: AlertsIndividualData,
     ) -> None:
-        # TODO(Samyak): Fix this implementation to use AlertsIndividualData
         alert_channel_conf = individual_data.alert_channel_conf
 
         if not isinstance(alert_channel_conf, dict):
@@ -1022,13 +1028,24 @@ class AnomalyAlertController:
         )
 
         # attach CSV of anomaly data
+        filename_date = individual_data.date.strftime(
+            ALERT_DATE_CSV_FILENAME_FORMAT_INDIVIDUAL
+        )
         files = [
             {
-                "fname": "data.csv",
-                "fdata": _make_anomaly_data_csv(
-                    individual_data.all_points,
-                    include_subdims=individual_data.include_subdims,
+                "fname": (
+                    f"chaosgenius_alert_{individual_data.kpi_name}"
+                    f"_{filename_date}.csv"
                 ),
+                "fdata": make_anomaly_data_csv(
+                    list(
+                        iterate_over_all_points(
+                            individual_data.all_points, individual_data.include_subdims
+                        )
+                    )
+                ),
+                "mime_maintype": "text",
+                "mime_subtype": "csv",
             }
         ]
 
@@ -1067,33 +1084,43 @@ class AnomalyAlertController:
             )
 
 
-def _make_anomaly_data_csv(
-    anomaly_points: List[AnomalyPoint], include_subdims: bool
+def make_anomaly_data_csv(
+    all_anomaly_points: List[AnomalyPointFormatted], for_report=False
 ) -> str:
-    """Create an in-memory string containing the CSV of given anomaly data."""
-    anomaly_df = pd.DataFrame(
-        [
-            point.dict(include=ANOMALY_TABLE_COLUMN_NAMES_MAPPER.keys())
-            for point in iterate_over_all_points(anomaly_points, include_subdims)
-        ]
+    """Create an in-memory string containing the CSV of given anomaly data.
+
+    Note: all_anomaly_points must come from `iterate_over_all_points`.
+    """
+    column_name_mapper = (
+        ANOMALY_TABLE_COLUMN_NAMES_MAPPER
+        if not for_report
+        else ANOMALY_REPORT_COLUMN_NAMES_MAPPER
     )
 
-    anomaly_df.sort_values(by="severity", inplace=True)
+    column_names_ordered = (
+        ANOMALY_TABLE_COLUMN_NAMES_ORDERED
+        if not for_report
+        else ANOMALY_REPORT_COLUMN_NAMES_ORDERED
+    )
+
+    anomaly_df = pd.DataFrame(
+        [point.dict(include=column_name_mapper.keys()) for point in all_anomaly_points]
+    )
+
+    anomaly_df.sort_values(by="severity", inplace=True, ascending=False)
 
     # this is a property that is calculated, so it needs to be assigned separately
     anomaly_df["expected_value"] = [
-        point.expected_value
-        for point in iterate_over_all_points(anomaly_points, include_subdims)
+        point.expected_value for point in all_anomaly_points
     ]
     # this is a property that is calculated, so it needs to be assigned separately
-    anomaly_df["series_type"] = [
-        point.series_type_name
-        for point in iterate_over_all_points(anomaly_points, include_subdims)
-    ]
+    anomaly_df["series_type"] = [point.series_type_name for point in all_anomaly_points]
+    if for_report:
+        anomaly_df["kpi_name"] = [point.kpi_name for point in all_anomaly_points]
 
-    anomaly_df = anomaly_df[ANOMALY_TABLE_COLUMN_NAMES_ORDERED]
+    anomaly_df = anomaly_df[column_names_ordered]
 
-    anomaly_df.rename(ANOMALY_TABLE_COLUMN_NAMES_MAPPER, inplace=True, axis="columns")
+    anomaly_df.rename(column_name_mapper, inplace=True, axis="columns")
 
     with io.StringIO() as buffer:
         anomaly_df.to_csv(buffer, index=False, encoding="utf-8")
@@ -1103,7 +1130,10 @@ def _make_anomaly_data_csv(
 
 
 def _format_anomaly_point_for_template(
-    points: Sequence[AnomalyPoint], kpi: Kpi, alert: Alert
+    points: Sequence[AnomalyPoint],
+    kpi: Kpi,
+    alert: Alert,
+    include_subdims: Optional[bool] = None,
 ) -> Sequence[AnomalyPointFormatted]:
     """Formats fields of each point, to be used in alert templates."""
     return AnomalyPointFormatted.from_points(
@@ -1115,7 +1145,7 @@ def _format_anomaly_point_for_template(
         alert.alert_name,
         alert.alert_channel,
         alert.alert_channel_conf,
-        alert.include_subdims,
+        include_subdims if include_subdims is not None else alert.include_subdims,
     )
 
 

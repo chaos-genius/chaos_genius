@@ -4,7 +4,11 @@ import logging
 from collections import defaultdict
 from typing import DefaultDict, Dict, List, Set, Tuple
 
-from chaos_genius.alerts.constants import FREQUENCY_DICT
+from chaos_genius.alerts.anomaly_alerts import make_anomaly_data_csv
+from chaos_genius.alerts.constants import (
+    ALERT_DATE_CSV_FILENAME_FORMAT_REPORT,
+    FREQUENCY_DICT,
+)
 from chaos_genius.alerts.slack import alert_digest_slack_formatted
 from chaos_genius.alerts.utils import send_email_using_template
 from chaos_genius.controllers.config_controller import get_config_object
@@ -150,6 +154,20 @@ class AlertDigestController:
             )
             return
 
+        # attach CSV of anomaly data
+        filename_date = data.report_date.strftime(ALERT_DATE_CSV_FILENAME_FORMAT_REPORT)
+        files = [
+            {
+                "fname": f"chaosgenius_alerts_report_{filename_date}.csv",
+                "fdata": make_anomaly_data_csv(
+                    data.all_points(),
+                    for_report=True,
+                ),
+                "mime_maintype": "text",
+                "mime_subtype": "csv",
+            }
+        ]
+
         send_email_using_template(
             "digest_template.html",
             [recipient],
@@ -157,7 +175,7 @@ class AlertDigestController:
                 f"Daily Alerts Report ({data.report_date_formatted()}) - "
                 "Chaos Genius Alert❗"
             ),
-            [],
+            files,
             preview_text="",
             data=data,
         )

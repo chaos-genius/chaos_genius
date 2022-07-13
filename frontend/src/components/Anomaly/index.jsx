@@ -617,7 +617,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                           {(dimension || value) && (
                             <div className="filter-container">
                               <span
-                                class="clear-filter"
+                                className="clear-filter"
                                 onClick={() => clearSubdimFilters()}>
                                 Clear filter
                               </span>

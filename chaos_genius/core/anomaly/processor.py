@@ -1,7 +1,7 @@
 """Provides processor class which computes anomaly detection."""
 import datetime
 import logging
-from typing import Dict
+from typing import Dict, Tuple, Union
 
 import pandas as pd
 
@@ -29,7 +29,7 @@ class ProcessAnomalyDetection:
         slack: int,
         series: str,
         subgroup: str = None,
-        deviation_from_mean_dict: Dict[datetime, float] = {},
+        deviation_from_mean_dict: Dict = {},
         model_kwargs={},
     ):
         """Initialize the processor.
@@ -54,8 +54,10 @@ class ProcessAnomalyDetection:
         :type series: str
         :param subgroup: subgroup identifier, defaults to None
         :type subgroup: str, optional
-        :param model_kwargs: parameters to initialize the model with, defaults
-        to {}
+        :param deviation_from_mean_dict: anomaly timestamps and their respective
+            deviation from mean values for overall time series.
+        :type deviation_from_mean_dict: Dict[datetime, float], defaults to empty dict
+        :param model_kwargs: parameters to initialize the model with, defaults to {}
         :type model_kwargs: dict, optional
         """
         self.model_name = model_name
@@ -72,16 +74,17 @@ class ProcessAnomalyDetection:
         self.slack = slack
         self.deviation_from_mean_dict = deviation_from_mean_dict
 
-    def predict(self) -> pd.DataFrame:
+    def predict(self) -> Union[Tuple[pd.DataFrame, Dict], pd.DataFrame]:
         """Run the prediction for anomalies.
 
-        :return: dataframe with detected anomaly_timestamp
-        :rtype: pd.DataFrame
+        :return: dataframe with detected anomaly_timestamp,
+            dictionary of anomaly timestamps with deviation from mean values
+        :rtype: Union[(pd.DataFrame, Dict), pd.DataFrame]
         """
         model = self._get_model()
 
         logger.debug(
-            f"Running Prediction and Detecting Severity for {self.series}-{self.subgroup}"
+            f"Running prediction and metrics for {self.series}-{self.subgroup}"
         )
         anomaly_df = self._predict(model)
 
@@ -92,10 +95,14 @@ class ProcessAnomalyDetection:
 
         return anomaly_df
 
-    def _predict(self, model: AnomalyModel):
+    def _predict(self, model: AnomalyModel) -> pd.DataFrame:
+        """Run the prediction for anomalies.
 
-        # TODO: Write docstrings for entire class
-
+        :param model: Model used for anomaly detection
+        :type model: AnomalyModel
+        :return: dataframe with detected anomaly_timestamp and metrics
+        :rtype: pd.DataFrame
+        """
         input_data = self.input_data
 
         pred_series = pd.DataFrame(
@@ -136,27 +143,11 @@ class ProcessAnomalyDetection:
                     self.freq,
                     pred_df=input_data,
                 )
-
                 prediction["y"] = input_data["y"]
 
-                mean = prediction["y"].mean()
-                prediction["deviation_from_mean"] = prediction["y"] - mean
-
-                prediction = self._detect_anomalies(prediction)
-
-                if self.series == "overall":
-                    self.deviation_from_mean_dict.update(
-                        dict(
-                            prediction.loc[prediction["anomaly"] != 0][
-                                ["dt", "deviation_from_mean"]
-                            ].values
-                        )
-                    )
-
-                prediction_with_metrics = self._calculate_metrics(
-                    prediction, prediction["y"].std()
+                pred_series = self._calculate_metrics(
+                    prediction, prediction["y"].mean(), prediction["y"].std()
                 )
-                pred_series = prediction_with_metrics
             else:
                 logger.warning(f"Insufficient slack for {self.series}-{self.subgroup}")
 
@@ -182,78 +173,109 @@ class ProcessAnomalyDetection:
                         drop=True
                     )
 
-                    mean = df.iloc[:-1]["y"].mean()
-                    prediction["deviation_from_mean"] = prediction["y"] - mean
-
-                    prediction = self._detect_anomalies(prediction)
-
-                    if self.series == "overall":
-                        self.deviation_from_mean_dict.update(
-                            dict(
-                                prediction.loc[prediction["anomaly"] != 0][
-                                    ["dt", "deviation_from_mean"]
-                                ].values
-                            )
-                        )
-
-                    prediction_with_metrics = self._calculate_metrics(
-                        prediction, df.iloc[:-1]["y"].std()
-                    )
-
                     pred_series = pred_series.append(
-                        prediction_with_metrics, ignore_index=True
+                        self._calculate_metrics(
+                            prediction,
+                            df.iloc[:-1]["y"].mean(),
+                            df.iloc[:-1]["y"].std(),
+                        ),
+                        ignore_index=True,
                     )
 
                 date_to_predict += datetime.timedelta(**FREQUENCY_DELTA[self.freq])
 
         return pred_series
 
-    def _detect_anomalies(self, pred_series):
+    def _calculate_metrics(
+        self, prediction_df: pd.DataFrame, mean: float, std_dev: float
+    ) -> pd.DataFrame:
+        """Calculate metrics (sevrity and impact) for the anomaly data.
+
+        :param prediction_df: dataframe with predictions
+        :type prediction_df: pd.DataFrame
+        :param mean: average of the anomaly data
+        :type mean: float
+        :param std_dev: standard deviation of the anomaly data
+        :type std_dev: float
+        :return: dataframe with detected anomalies and metrics
+        :rtype: pd.DataFrame
+        """
+        prediction_df = self._detect_anomalies(prediction_df)
+
+        prediction_df["severity"], prediction_df["impact"] = 0, 0
+        if std_dev == 0:
+            return prediction_df
+
+        prediction_df = self._compute_deviations(prediction_df, mean)
+
+        prediction_df["zscore"] = prediction_df.apply(
+            lambda x: self._compute_zscore(x, std_dev), axis=1
+        )
+
+        prediction_df["severity"] = prediction_df["zscore"].apply(
+            lambda zscore: self._compute_severity(zscore)
+        )
+
+        if self.series == "subdim":
+            prediction_df = self._compute_impact(prediction_df)
+
+        prediction_df = prediction_df.drop(["zscore", "deviation_from_mean"], axis=1)
+
+        return prediction_df
+
+    def _detect_anomalies(self, pred_series: pd.DataFrame) -> pd.DataFrame:
+        """Detect anomalous values in timeseries.
+
+        :param pred_series: dataframe with predictions
+        :type pred_series: pd.DataFrame
+        :return: dataframe with detected anomalies
+        :rtype: pd.DataFrame
+        """
         pred_series["anomaly"] = 0
         high_sel = pred_series["y"] > pred_series["yhat_upper"]
         low_sel = pred_series["y"] < pred_series["yhat_lower"]
+        # anomaly = 1, if value > upper bound of CI
         pred_series.loc[high_sel, "anomaly"] = 1
+        # anomaly = -1, if value < lower bound of CI
         pred_series.loc[low_sel, "anomaly"] = -1
 
         return pred_series
 
-    def _calculate_metrics(self, anomaly_prediction, std_dev):
-        anomaly_prediction["zscore"], anomaly_prediction["severity"] = 0, 0
-        anomaly_prediction["impact"] = 0
-        if std_dev == 0:
-            return anomaly_prediction
+    def _compute_deviations(
+        self, prediction_df: pd.DataFrame, mean: float
+    ) -> pd.DataFrame:
+        """Calculate deviation of values from average of the data.
 
-        anomaly_prediction["zscore"] = anomaly_prediction.apply(
-            lambda x: self._compute_zscore(x, std_dev), axis=1
-        )
+        :param prediction_df: dataframe with predictions and detected anomalies
+        :type prediction_df: pd.DataFrame
+        :param mean: average of the anomaly data
+        :type mean: float
+        :return: dataframe with deviation from mean values
+        :rtype: pd.DataFrame
+        """
+        prediction_df["deviation_from_mean"] = prediction_df["y"] - mean
 
-        # Map zscore of 0-3 to 0-100
-        # Bound between min and max score
-        # If above 100, we return 100; If below -100, we return -100
-        anomaly_prediction["severity"] = anomaly_prediction["zscore"].apply(
-            lambda x: bound_between(0, x * 100 / ZSCORE_UPPER_BOUND, 100)
-        )
+        if self.series == "overall":
+            self.deviation_from_mean_dict.update(
+                dict(
+                    prediction_df.loc[prediction_df["anomaly"] != 0][
+                        ["dt", "deviation_from_mean"]
+                    ].values
+                )
+            )
 
-        if self.series == "subdim":
-            for (
-                anomaly_date,
-                deviation_from_mean,
-            ) in self.deviation_from_mean_dict.items():
-                anomaly_prediction.loc[
-                    anomaly_prediction["dt"] == anomaly_date, "impact"
-                ] = (
-                    (anomaly_prediction["deviation_from_mean"] / deviation_from_mean)
-                    * anomaly_prediction["zscore"]
-                ).abs()
+        return prediction_df
 
-        anomaly_prediction = anomaly_prediction.drop(
-            ["zscore", "deviation_from_mean"], axis=1
-        )
+    def _compute_zscore(self, row: pd.DataFrame, std_dev: float) -> float:
+        """Calculate zscore for anomalous data.
 
-        return anomaly_prediction
-
-    def _compute_zscore(self, row, std_dev):
-        # TODO: Create docstring for these comments
+        :param row: single row of anomaly dataframe
+        :type row: pd.DataFrame
+        :param std_dev: standard deviation of the anomaly data
+        :type std_dev: float
+        :return: zscore of the anomaly row data
+        :rtype: float
+        """
         if row["anomaly"] == 0:
             # No anomaly. Severity is 0
             return 0
@@ -266,17 +288,55 @@ class ProcessAnomalyDetection:
 
         return zscore
 
+    def _compute_severity(self, zscore: float) -> float:
+        """Calculate severity given zscore.
+
+        :param zscore: zscore of the anomaly data
+        :type zscore: float
+        :return: severity of the anomaly data
+        :rtype: float
+        """
+        # Map zscore of 0-3 to 0-100
+        severity = zscore * 100 / ZSCORE_UPPER_BOUND
+
+        # Bound between min and max score
+        # If above 100, we return 100; If below -100, we return -100
+        return bound_between(0, severity, 100)
+
+    def _compute_impact(self, prediction_df: pd.DataFrame) -> pd.DataFrame:
+        """Calculate impact for sub-dimensional anomaly data.
+
+        :param prediction_df: dataframe with predictions
+        :type prediction_df: pd.DataFrame
+        :return: dataframe with impact score
+        :rtype: pd.DataFrame
+        """
+        for anomaly_date, deviation_from_mean in self.deviation_from_mean_dict.items():
+            prediction_df.loc[prediction_df["dt"] == anomaly_date, "impact"] = (
+                (prediction_df["deviation_from_mean"] / deviation_from_mean)
+                * prediction_df["zscore"]
+            ).abs()
+
+        return prediction_df
+
     def _get_model(self) -> AnomalyModel:
+        """Return Anomaly Detection Model.
+
+        :return: anomaly model
+        :rtype: AnomalyModel
+        """
         model = MODEL_MAPPER[self.model_name]
         try:
             return model.load(self.model_path, model_kwargs=self.model_kwargs)
         except NotImplementedError:
             return model(model_kwargs=self.model_kwargs)
 
-    def _save_model(
-        self,
-        model: AnomalyModel,
-    ) -> None:
+    def _save_model(self, model: AnomalyModel) -> None:
+        """Save Anomaly Detection Model.
+
+        :param model: Anomaly Detection model to be saved
+        :type model: AnomalyModel
+        """
         try:
             model.save(self.model_path)
         except NotImplementedError:

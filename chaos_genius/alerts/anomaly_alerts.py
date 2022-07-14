@@ -58,7 +58,7 @@ from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.triggered_alerts_model import TriggeredAlerts
 from chaos_genius.settings import DAYS_OFFSET_FOR_ANALTYICS
-from chaos_genius.utils.utils import jsonable_encoder
+from chaos_genius.utils.utils import jsonable_encoder, make_path_safe
 
 logger = logging.getLogger(__name__)
 
@@ -1034,7 +1034,7 @@ class AnomalyAlertController:
         files = [
             {
                 "fname": (
-                    f"chaosgenius_alert_{individual_data.kpi_name}"
+                    f"chaosgenius_alert_{make_path_safe(individual_data.kpi_name)}"
                     f"_{filename_date}.csv"
                 ),
                 "fdata": make_anomaly_data_csv(

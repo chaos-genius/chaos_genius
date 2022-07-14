@@ -463,19 +463,27 @@ def convert_to_graph_json(
 
     kpi_name = kpi_info["metric"]
 
+    # convert pd.Timestamp to a UNIX timestamp float
+    # converting to int64 gives the result in nanoseconds
+    # dividing by 1e6 converts it to milliseconds
     results["timestamp"] = results["data_datetime"].astype("int64") / 1e6
 
     def round_column_in_df(df: pd.DataFrame, col: str):
         df[col] = df[col].abs()
+
         df[col] = np.where(
+            # if value < 1, round to 3 decimals
             df[col] < 1,
             df[col].round(3),
             np.where(
+                # if value between 1 and 100, round to 2
                 (df[col] >= 1) & (df[col] < 100),
                 df[col].round(2),
                 np.where(
+                    # if value between 100 and 10000, round to 1
                     (df[col] >= 100) & (df[col] < 10000),
                     df[col].round(1),
+                    # if value > 10000, round to integer
                     df[col].round(),
                 ),
             ),

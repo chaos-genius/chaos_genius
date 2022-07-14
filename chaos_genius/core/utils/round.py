@@ -2,6 +2,7 @@
 
 from typing import Union
 
+import numpy as np
 import pandas as pd
 
 
@@ -32,3 +33,29 @@ def round_df(df: pd.DataFrame) -> pd.DataFrame:
     for col in new_df.columns:
         new_df[col] = round_series(new_df[col])
     return new_df
+
+
+def round_column_in_df(df: pd.DataFrame, col: str):
+    """Round given column in dataframe based on its size.
+
+    This is vectorized and does not use `apply`.
+    """
+    df[col] = df[col].abs()
+
+    df[col] = np.where(
+        # if value < 1, round to 3 decimals
+        df[col] < 1,
+        df[col].round(3),
+        np.where(
+            # if value between 1 and 100, round to 2
+            (df[col] >= 1) & (df[col] < 100),
+            df[col].round(2),
+            np.where(
+                # if value between 100 and 10000, round to 1
+                (df[col] >= 100) & (df[col] < 10000),
+                df[col].round(1),
+                # if value > 10000, round to integer
+                df[col].round(),
+            ),
+        ),
+    )

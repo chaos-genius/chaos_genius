@@ -6,7 +6,6 @@ from collections import defaultdict
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional, Sequence, Tuple, cast
 
-import numpy as np
 import pandas as pd
 from flask.blueprints import Blueprint
 from flask.globals import request
@@ -19,6 +18,7 @@ from chaos_genius.controllers.kpi_controller import (
     get_kpi_data_from_id,
 )
 from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
+from chaos_genius.core.utils.round import round_column_in_df
 from chaos_genius.core.utils.utils import get_user_string_from_subgroup_dict
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.kpi_model import Kpi
@@ -467,27 +467,6 @@ def convert_to_graph_json(
     # converting to int64 gives the result in nanoseconds
     # dividing by 1e6 converts it to milliseconds
     results["timestamp"] = results["data_datetime"].astype("int64") / 1e6
-
-    def round_column_in_df(df: pd.DataFrame, col: str):
-        df[col] = df[col].abs()
-
-        df[col] = np.where(
-            # if value < 1, round to 3 decimals
-            df[col] < 1,
-            df[col].round(3),
-            np.where(
-                # if value between 1 and 100, round to 2
-                (df[col] >= 1) & (df[col] < 100),
-                df[col].round(2),
-                np.where(
-                    # if value between 100 and 10000, round to 1
-                    (df[col] >= 100) & (df[col] < 10000),
-                    df[col].round(1),
-                    # if value > 10000, round to integer
-                    df[col].round(),
-                ),
-            ),
-        )
 
     round_column_in_df(results, "yhat_lower")
     round_column_in_df(results, "yhat_upper")

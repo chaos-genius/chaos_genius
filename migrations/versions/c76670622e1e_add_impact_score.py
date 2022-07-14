@@ -73,10 +73,10 @@ def _calculate_metric(df, period):
         subgroup_list = df.loc[df["anomaly_type"] == series]["series_type"].unique()
         for subgroup in subgroup_list:
             if series == "overall":
-                df_sub = df.loc[(df["anomaly_type"] == series)]
+                df_sub = df.loc[(df["anomaly_type"] == series)].reset_index(drop=True)
             else:
                 df_sub = df.loc[
-                    (df["anomaly_type"] == series) & (df["series_type"] == subgroup)
+                    (df["anomaly_type"] == series) & (df["series_type"] == subgroup).reset_index(drop=True)
                 ]
             df_sub = df_sub.sort_values(by=["data_datetime"])
             df_sub["mean"], df_sub["std_dev"] = 0.0, 0.0
@@ -99,7 +99,7 @@ def _calculate_metric(df, period):
             df_with_metric = df_with_metric.append(df_sub, ignore_index=True)
 
         if series == "overall":
-            df_overall = df_with_metric.loc[df["anomaly_type"] == series]
+            df_overall = df_with_metric.loc[df_with_metric["anomaly_type"] == series]
             deviation_from_mean_dict.update(
                 dict(
                     df_overall.loc[df_overall["is_anomaly"] != 0][

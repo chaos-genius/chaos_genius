@@ -149,7 +149,7 @@ IN_DOCKER = _make_bool(os.getenv("IN_DOCKER", default=False))
 TASK_CHECKPOINT_LIMIT: int = int(os.getenv("TASK_CHECKPOINT_LIMIT", 1000))
 """Number of last checkpoints to retrieve in Task Monitor"""
 
-CHAOSGENIUS_VERSION_MAIN = os.getenv("CHAOSGENIUS_VERSION_MAIN", "0.8.0")
+CHAOSGENIUS_VERSION_MAIN = os.getenv("CHAOSGENIUS_VERSION_MAIN", "0.9.1")
 """ChaosGenius version - semver part only"""
 CHAOSGENIUS_VERSION_POSTFIX = os.getenv("CHAOSGENIUS_VERSION_POSTFIX", "git")
 """ChaosGenius version - postfix to identify deployment"""

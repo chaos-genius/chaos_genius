@@ -40,7 +40,7 @@
 </ul>
 {% endif %}
 
-{% if data.include_subdims %}
+{% if data.include_subdims and data.top_subdim_points %}
 <h3 style="{{ common.main_text }}">Sub-dimensional anomalies</h3>
 <ul>
     {% for point in data.top_subdim_points %}

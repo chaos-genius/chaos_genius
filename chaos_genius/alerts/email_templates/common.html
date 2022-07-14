@@ -21,11 +21,11 @@
         style="{{ important_text }} text-decoration: underline dotted lightgrey;"
     >
         {% if value_only -%}
-            <span>{{ point.subdim_formatted_value_only() }}</span>
-        {% else -%}
+           <span>{{ point.subdim_formatted_value_only() }}</span><!--
+     -->{% else -%}
             <span>{{ point.subdim_formatted() }}</span>
-        {%- endif %}
-    </a>
+        {%- endif %}<!--
+ --></a>
 {%- endmacro %}
 
 {% macro button_with_link(text, link) -%}
@@ -216,10 +216,10 @@
         {%- endif %}
     {%- endif %}<!--
 
- -->{% if point.relevant_subdims is not none -%}
+ -->{% if point.relevant_subdims -%}
         <ul>
             <li>
-                <span style="{{ non_important_text }}">Key dimensions impacted:</span>
+                <span style="{{ non_important_text }}">Reasons for change:</span>
                 {% for point in point.top_relevant_subdims() %}
                 {{ subdim_name_link(point, value_only=true) }}<!--
                  -->{% if not loop.last -%}

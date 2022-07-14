@@ -51,6 +51,9 @@ class TriggeredAlertData(BaseModel):
 
     created_at: datetime.datetime
 
+    # only used by event alerts
+    date_only: str = ""
+
 
 class TriggeredAlertWithPoints(TriggeredAlertData):
     """TriggeredAlertData but with anomaly points."""
@@ -133,10 +136,15 @@ class AlertsReportData(BaseModel):
 
     def alert_dashboard_link(self) -> str:
         """Return the link to the alert dashboard."""
+        subdim_part = ""
+        if self.top_subdim_anomalies:
+            subdim_part = "&subdims=true"
+
         return (
             f"{webapp_url_prefix()}api/digest"
             + "?date="
             + quote_plus(self.report_date.strftime(ALERT_DATE_FORMAT))
+            + subdim_part
         )
 
     def report_date_formatted(self) -> str:
@@ -183,8 +191,9 @@ def preprocess_triggered_alert(
         alert_type=triggered_alert.alert_type,
         alert_metadata=triggered_alert.alert_metadata,
         created_at=triggered_alert.created_at,
-        kpi_id=kpi_id,
-        kpi_name=kpi.name if kpi is not None else "Doesn't Exist",
+        # using sentinel values here since this is only possible for event alerts
+        kpi_id=kpi_id if kpi_id is not None else 0,
+        kpi_name=kpi.name if kpi is not None else "KPI does not exist",
         alert_name=alert_conf.alert_name,
         alert_channel=alert_conf.alert_channel,
         alert_channel_conf=alert_conf.alert_channel_conf,
@@ -201,9 +210,12 @@ def preprocess_triggered_alert(
             alert_conf, "alert_channel_conf", {}
         ).get(triggered_alert_data.alert_channel)
 
-    points = extract_anomaly_points_from_triggered_alerts(
-        [triggered_alert_data], kpi_cache
-    )
+    if triggered_alert.alert_type == "KPI Alert":
+        points = extract_anomaly_points_from_triggered_alerts(
+            [triggered_alert_data], kpi_cache
+        )
+    else:
+        points = []
 
     return TriggeredAlertWithPoints.from_triggered_alert_data(
         triggered_alert_data, points
@@ -231,21 +243,26 @@ def extract_anomaly_points_from_triggered_alerts(
                     "Error in extracting an anomaly point from triggered alert",
                     exc_info=e,
                 )
-        anomaly_points.extend(
-            AnomalyPointFormatted.from_points(
-                trig_alert_points,
-                time_series_frequency=getattr(
-                    kpi_cache.get(triggered_alert.kpi_id), "anomaly_params", {}
-                ).get("frequency"),
-                kpi_id=triggered_alert.kpi_id,
-                kpi_name=triggered_alert.kpi_name,
-                alert_id=triggered_alert.alert_conf_id,
-                alert_name=triggered_alert.alert_name,
-                alert_channel=triggered_alert.alert_channel,
-                alert_channel_conf=triggered_alert.alert_channel_conf,
-                include_subdims=triggered_alert.include_subdims,
-            )
+
+        anomaly_params = getattr(
+            kpi_cache.get(triggered_alert.kpi_id), "anomaly_params", {}
         )
+
+        # consider only KPIs which have anomaly enabled
+        if anomaly_params is not None:
+            anomaly_points.extend(
+                AnomalyPointFormatted.from_points(
+                    trig_alert_points,
+                    time_series_frequency=anomaly_params.get("frequency"),
+                    kpi_id=triggered_alert.kpi_id,
+                    kpi_name=triggered_alert.kpi_name,
+                    alert_id=triggered_alert.alert_conf_id,
+                    alert_name=triggered_alert.alert_name,
+                    alert_channel=triggered_alert.alert_channel,
+                    alert_channel_conf=triggered_alert.alert_channel_conf,
+                    include_subdims=triggered_alert.include_subdims,
+                )
+            )
 
     return anomaly_points
 

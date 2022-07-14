@@ -1207,8 +1207,8 @@ def get_anomaly_end_date(kpi_id: int, hourly: bool) -> Optional[datetime]:
             anomaly_end_date_ts: pd.Timestamp = pd.to_datetime(anomaly_end_date.date())
 
         return anomaly_end_date_ts.to_pydatetime()
-    except Exception as err:  # noqa B902
-        logger.info(f"Error Found: {err}")
+    except Exception as err:  # noqa: B902
+        logger.error(f"Error Found: {err}", exc_info=err)
 
     return None
 

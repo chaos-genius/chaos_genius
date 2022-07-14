@@ -82,6 +82,11 @@ class AnomalyPointOriginal(BaseModel):
     yhat_upper: float
     # severity of the anomaly (0 to 100)
     severity: float
+    impact: Optional[float]
+    """Impact score of the anomaly.
+
+    Only for sub-dimensional points.
+    """
 
     # overall, subdim or data_quality
     anomaly_type: str
@@ -246,6 +251,7 @@ class AnomalyPoint(AnomalyPointOriginal):
             yhat_lower=yhat_lower,
             yhat_upper=yhat_upper,
             severity=severity,
+            impact=point.impact,
             anomaly_type=point.anomaly_type,
             series_type=series_type,
             created_at=point.created_at,
@@ -293,7 +299,11 @@ class AnomalyPoint(AnomalyPointOriginal):
                 if subdim_point.data_datetime == point.data_datetime
             ]
 
-            relevant_subdims.sort(key=lambda point: point.severity, reverse=True)
+            # the sort key is a two tuple. `False` is sorted before `True`, so all the
+            # `None`s will be at the end of the list.
+            relevant_subdims.sort(
+                key=lambda point: (point.impact is None, point.impact), reverse=True
+            )
 
             # remove them from original list
             for subdim_point in relevant_subdims:

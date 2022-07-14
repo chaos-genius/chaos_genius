@@ -78,7 +78,7 @@ def _calculate_metric(df, period):
                 df_sub = df.loc[
                     (df["anomaly_type"] == series) & (df["series_type"] == subgroup).reset_index(drop=True)
                 ]
-            df_sub = df_sub.sort_values(by=["data_datetime"])
+            df_sub = df_sub.sort_values(by=["data_datetime"]).reset_index(drop=True)
             df_sub["mean"], df_sub["std_dev"] = 0.0, 0.0
             df_sub.iloc[0:period]["mean"] = df_sub.iloc[0:period]["y"].mean()
             df_sub.iloc[0:period]["std_dev"] = df_sub.iloc[0:period]["y"].std()

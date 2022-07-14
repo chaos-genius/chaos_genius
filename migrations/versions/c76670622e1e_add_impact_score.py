@@ -5,9 +5,14 @@ Revises: e3cb5f234bbf
 Create Date: 2022-07-13 15:11:52.699325
 
 """
+import json
+import warnings
+
 import pandas as pd
 import sqlalchemy as sa
 from alembic import op
+
+warnings.filterwarnings("ignore")
 
 # revision identifiers, used by Alembic.
 revision = "c76670622e1e"
@@ -24,6 +29,9 @@ def upgrade():
 
     df = pd.read_sql("SELECT * from anomaly_data_output;", conn)
     df["data_datetime"] = pd.to_datetime(df["data_datetime"])
+    df["series_type"] = df["series_type"].apply(
+        lambda series: json.dumps(series) if series else None
+    )
     df_with_metrics = pd.DataFrame()
 
     kpi_ids = df["kpi_id"].unique()
@@ -31,16 +39,20 @@ def upgrade():
         # split data based on kpi id
         df_kpi = df.loc[df["kpi_id"] == kpi_id].reset_index(drop=True)
         # fetch anomaly period from kpi table
-        anom_period = int(
-            conn.execute(
-                f"SELECT anomaly_params ->> 'anomaly_period' FROM kpi WHERE id={kpi_id}"
-            )
+        anom_period_query_result = conn.execute(
+            f"SELECT anomaly_params ->> 'anomaly_period' FROM kpi WHERE id={kpi_id}"
         )
+        for row in anom_period_query_result:
+            anom_period = int(row[0])
+
         df_kpi_with_metric = _calculate_metric(df_kpi, anom_period)
         df_with_metrics = df_with_metrics.append(df_kpi_with_metric, ignore_index=True)
 
     conn.execute("TRUNCATE TABLE anomaly_data_output;")
-    op.add_column("anomaly_data_output", sa.Column("impact", sa.Float(), nullable=True))
+    op.add_column(
+        "anomaly_data_output",
+        sa.Column("impact", sa.Float(), autoincrement=False, nullable=True),
+    )
     df_with_metrics.to_sql("anomaly_data_output", conn, if_exists="append", index=False)
     # ### end Alembic commands ###
 
@@ -58,12 +70,14 @@ def _calculate_metric(df, period):
     df_with_metric = pd.DataFrame()
 
     for series in df["anomaly_type"].unique():
-        subgroup_list = df["series_type"].unique()
+        subgroup_list = df.loc[df["anomaly_type"] == series]["series_type"].unique()
         for subgroup in subgroup_list:
-            df_sub = df.loc[
-                (df["anomaly_type"] == series) & (df["series_type"] == subgroup)
-            ]
-
+            if series == "overall":
+                df_sub = df.loc[(df["anomaly_type"] == series)]
+            else:
+                df_sub = df.loc[
+                    (df["anomaly_type"] == series) & (df["series_type"] == subgroup)
+                ]
             df_sub = df_sub.sort_values(by=["data_datetime"])
             df_sub["mean"], df_sub["std_dev"] = 0.0, 0.0
             df_sub.iloc[0:period]["mean"] = df_sub.iloc[0:period]["y"].mean()

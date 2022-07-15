@@ -76,15 +76,16 @@ def _calculate_metric(df, period):
                 df_sub = df.loc[(df["anomaly_type"] == series)].reset_index(drop=True)
             else:
                 df_sub = df.loc[
-                    (df["anomaly_type"] == series) & (df["series_type"] == subgroup).reset_index(drop=True)
+                    (df["anomaly_type"] == series)
+                    & (df["series_type"] == subgroup).reset_index(drop=True)
                 ]
             df_sub = df_sub.sort_values(by=["data_datetime"]).reset_index(drop=True)
             df_sub["mean"], df_sub["std_dev"] = 0.0, 0.0
             df_sub.iloc[0:period]["mean"] = df_sub.iloc[0:period]["y"].mean()
             df_sub.iloc[0:period]["std_dev"] = df_sub.iloc[0:period]["y"].std()
             for i in range(period, len(df_sub)):
-                df_sub["mean"][i] = df_sub.iloc[i - period: i]["y"].mean()
-                df_sub["std_dev"][i] = df_sub.iloc[i - period: i]["y"].std()
+                df_sub["mean"][i] = df_sub.iloc[i - period : i]["y"].mean()
+                df_sub["std_dev"][i] = df_sub.iloc[i - period : i]["y"].std()
             df_sub["deviation_from_mean"] = df_sub["y"] - df_sub["mean"]
 
             df_sub["zscore"] = 0.0

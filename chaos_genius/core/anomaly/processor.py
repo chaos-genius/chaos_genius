@@ -202,7 +202,7 @@ class ProcessAnomalyDetection:
         """
         prediction_df = self._detect_anomalies(prediction_df)
 
-        prediction_df["severity"], prediction_df["impact"] = 0, 0
+        prediction_df["severity"], prediction_df["impact"] = 0.0, 0.0
         if std_dev == 0:
             return prediction_df
 

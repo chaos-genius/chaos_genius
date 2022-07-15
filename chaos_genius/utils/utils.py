@@ -2,6 +2,7 @@
 """Helper utilities and decorators."""
 import csv
 import io
+import re
 import subprocess
 from typing import Iterator, List
 import time
@@ -83,3 +84,15 @@ def jsonable_encoder(obj):
             obj_dict = obj_dict["__root__"]
         return jsonable_encoder(obj_dict)
     return pydantic_encoder(obj)
+
+
+_invalid_chars_reg = re.compile(r"[^\w\d \[\]\(\)_\-\%]")
+"""Matches characters that are not allowed in a filename."""
+
+
+def make_path_safe(s: str) -> str:
+    """Make a string safe for use as a filename in a path on Linux, MacOS and Windows.
+
+    Does not replace spaces.
+    """
+    return re.sub(_invalid_chars_reg, "_", s)

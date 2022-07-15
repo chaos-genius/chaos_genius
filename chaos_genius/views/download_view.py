@@ -15,7 +15,7 @@ from chaos_genius.core.rca.rca_utils.api_utils import (
 )
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.kpi_model import Kpi
-from chaos_genius.utils.utils import iter_csv
+from chaos_genius.utils.utils import iter_csv, make_path_safe
 from chaos_genius.views.anomaly_data_view import get_anomaly_output_end_date
 
 blueprint = Blueprint("downloads", __name__)
@@ -122,7 +122,10 @@ def download_anomaly_data(kpi_id: int):
         suffix = ""
         if dimension and value:
             suffix = f"_{dimension}_{value}"
-        filename = f"chaosgenius_{kpi.name}_anomaly_data_{end_date_str}{suffix}.csv"
+        filename = (
+            f"chaosgenius_{make_path_safe(kpi.name)}_anomaly_data_{end_date_str}"
+            f"{make_path_safe(suffix)}.csv"
+        )
 
         response = Response(iter_csv(row_gen(data_points)), mimetype="text/csv")
         response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'

@@ -507,28 +507,6 @@ def convert_to_graph_json(
     return graph_data
 
 
-def get_overall_data_points(kpi_id: int, n: int = 60) -> List:
-    """Retrieve overall data points for a KPI for the last n days."""
-    kpi_info = get_kpi_data_from_id(kpi_id)
-    if not kpi_info["anomaly_params"]:
-        return []
-
-    end_date = get_anomaly_output_end_date(kpi_info)
-
-    start_date = end_date - timedelta(days=n)
-    start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
-
-    return (
-        AnomalyDataOutput.query.filter(
-            (AnomalyDataOutput.kpi_id == kpi_id)
-            & (AnomalyDataOutput.data_datetime >= start_date)
-            & (AnomalyDataOutput.anomaly_type == "overall")
-        )
-        .order_by(AnomalyDataOutput.data_datetime)
-        .all()
-    )
-
-
 def get_overall_data(kpi_id: int, end_date: datetime, n=90):
     """Retrieve overall data for a KPI for the last n days from end_date.
 
@@ -1071,26 +1049,6 @@ def update_anomaly_params(
 
         anomaly_params[field] = new_anomaly_params[field]
 
-    if "scheduler_params_time" in new_anomaly_params:
-        # TODO: use JSONB functions to update these, to avoid data races
-        scheduler_params: Optional[dict] = kpi.scheduler_params
-
-        if scheduler_params is None:
-            scheduler_params = {}
-
-        err = is_editable(
-            "scheduler_params_time",
-            scheduler_params.get("time"),
-            new_anomaly_params["scheduler_params_time"],
-        )
-        if err != "":
-            return err, kpi
-
-        scheduler_params["time"] = new_anomaly_params["scheduler_params_time"]
-
-        kpi.scheduler_params = scheduler_params
-        flag_modified(kpi, "scheduler_params")
-
     if "scheduler_frequency" in new_anomaly_params:
         # TODO: use JSONB functions to update these, to avoid data races
         scheduler_params: Optional[dict] = kpi.scheduler_params
@@ -1109,6 +1067,39 @@ def update_anomaly_params(
         scheduler_params["scheduler_frequency"] = new_anomaly_params[
             "scheduler_frequency"
         ]
+
+        # make summary/DD run at default time (KPI setup time) if it was changed from
+        # daily to hourly.
+        if (
+            scheduler_params["scheduler_frequency"] != "D"
+            and scheduler_params.get("rca_time") == scheduler_params["time"]
+        ):
+            scheduler_params.pop("rca_time")
+
+        kpi.scheduler_params = scheduler_params
+        flag_modified(kpi, "scheduler_params")
+
+    if "scheduler_params_time" in new_anomaly_params:
+        # TODO: use JSONB functions to update these, to avoid data races
+        scheduler_params: Optional[dict] = kpi.scheduler_params
+
+        if scheduler_params is None:
+            scheduler_params = {}
+
+        err = is_editable(
+            "scheduler_params_time",
+            scheduler_params.get("time"),
+            new_anomaly_params["scheduler_params_time"],
+        )
+        if err != "":
+            return err, kpi
+
+        scheduler_params["time"] = new_anomaly_params["scheduler_params_time"]
+
+        # run DD/summary at anomaly time for daily model frequency KPIs
+        # note: relies on the assumption that scheduler frequency is updated before this
+        if scheduler_params.get("scheduler_frequency") == "D":
+            scheduler_params["rca_time"] = scheduler_params["time"]
 
         kpi.scheduler_params = scheduler_params
         flag_modified(kpi, "scheduler_params")

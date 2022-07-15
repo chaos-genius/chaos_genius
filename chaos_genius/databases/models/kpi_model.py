@@ -28,7 +28,7 @@ class Kpi(PkModel):
     timezone_aware = Column(db.Boolean(), nullable=False, default=False)
 
     run_anomaly = Column(db.Boolean(), default=True)
-    anomaly_params = Column(db.JSON)
+    anomaly_params = Column(JSONB)
     scheduler_params = Column(JSONB, default=lambda: {})
     anomaly_frequency = Column(db.String(80))
 

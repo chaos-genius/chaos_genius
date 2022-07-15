@@ -507,28 +507,6 @@ def convert_to_graph_json(
     return graph_data
 
 
-def get_overall_data_points(kpi_id: int, n: int = 60) -> List:
-    """Retrieve overall data points for a KPI for the last n days."""
-    kpi_info = get_kpi_data_from_id(kpi_id)
-    if not kpi_info["anomaly_params"]:
-        return []
-
-    end_date = get_anomaly_output_end_date(kpi_info)
-
-    start_date = end_date - timedelta(days=n)
-    start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
-
-    return (
-        AnomalyDataOutput.query.filter(
-            (AnomalyDataOutput.kpi_id == kpi_id)
-            & (AnomalyDataOutput.data_datetime >= start_date)
-            & (AnomalyDataOutput.anomaly_type == "overall")
-        )
-        .order_by(AnomalyDataOutput.data_datetime)
-        .all()
-    )
-
-
 def get_overall_data(kpi_id: int, end_date: datetime, n=90):
     """Retrieve overall data for a KPI for the last n days from end_date.
 

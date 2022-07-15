@@ -220,11 +220,16 @@ export const anomalyDownloadFailure = () => {
   };
 };
 
-export const anomalyDownloadCsv = (id) => {
+export const anomalyDownloadCsv = (id, params) => {
   return async (dispatch) => {
     dispatch(anomalyDownloadRequest());
+    const url = `${BASE_URL}/api/downloads/${id}/anomaly_data`;
+    const finalUrl =
+      Object.keys(params).length === 0 && params.constructor === Object
+        ? url
+        : attachParams(url, params);
     const { data, error, status } = await getRequest({
-      url: `${BASE_URL}/api/downloads/${id}/anomaly_data`
+      url: finalUrl
     });
     if (error) {
       dispatch(anomalyDownloadFailure());

@@ -1049,26 +1049,6 @@ def update_anomaly_params(
 
         anomaly_params[field] = new_anomaly_params[field]
 
-    if "scheduler_params_time" in new_anomaly_params:
-        # TODO: use JSONB functions to update these, to avoid data races
-        scheduler_params: Optional[dict] = kpi.scheduler_params
-
-        if scheduler_params is None:
-            scheduler_params = {}
-
-        err = is_editable(
-            "scheduler_params_time",
-            scheduler_params.get("time"),
-            new_anomaly_params["scheduler_params_time"],
-        )
-        if err != "":
-            return err, kpi
-
-        scheduler_params["time"] = new_anomaly_params["scheduler_params_time"]
-
-        kpi.scheduler_params = scheduler_params
-        flag_modified(kpi, "scheduler_params")
-
     if "scheduler_frequency" in new_anomaly_params:
         # TODO: use JSONB functions to update these, to avoid data races
         scheduler_params: Optional[dict] = kpi.scheduler_params
@@ -1087,6 +1067,39 @@ def update_anomaly_params(
         scheduler_params["scheduler_frequency"] = new_anomaly_params[
             "scheduler_frequency"
         ]
+
+        # make summary/DD run at default time (KPI setup time) if it was changed from
+        # daily to hourly.
+        if (
+            scheduler_params["scheduler_frequency"] != "D"
+            and scheduler_params.get("rca_time") == scheduler_params["time"]
+        ):
+            scheduler_params.pop("rca_time")
+
+        kpi.scheduler_params = scheduler_params
+        flag_modified(kpi, "scheduler_params")
+
+    if "scheduler_params_time" in new_anomaly_params:
+        # TODO: use JSONB functions to update these, to avoid data races
+        scheduler_params: Optional[dict] = kpi.scheduler_params
+
+        if scheduler_params is None:
+            scheduler_params = {}
+
+        err = is_editable(
+            "scheduler_params_time",
+            scheduler_params.get("time"),
+            new_anomaly_params["scheduler_params_time"],
+        )
+        if err != "":
+            return err, kpi
+
+        scheduler_params["time"] = new_anomaly_params["scheduler_params_time"]
+
+        # run DD/summary at anomaly time for daily model frequency KPIs
+        # note: relies on the assumption that scheduler frequency is updated before this
+        if scheduler_params.get("scheduler_frequency") == "D":
+            scheduler_params["rca_time"] = scheduler_params["time"]
 
         kpi.scheduler_params = scheduler_params
         flag_modified(kpi, "scheduler_params")

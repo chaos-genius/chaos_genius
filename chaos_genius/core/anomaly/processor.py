@@ -312,6 +312,9 @@ class ProcessAnomalyDetection:
         :rtype: pd.DataFrame
         """
         for anomaly_date, deviation_from_mean in self.deviation_from_mean_dict.items():
+            if deviation_from_mean == 0:
+                continue
+
             prediction_df.loc[prediction_df["dt"] == anomaly_date, "impact"] = (
                 (prediction_df["deviation_from_mean"] / deviation_from_mean)
                 * prediction_df["zscore"]

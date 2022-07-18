@@ -18,7 +18,7 @@ from chaos_genius.controllers.kpi_controller import (
     get_kpi_data_from_id,
 )
 from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
-from chaos_genius.core.utils.round import round_number
+from chaos_genius.core.utils.round import round_column_in_df
 from chaos_genius.core.utils.utils import get_user_string_from_subgroup_dict
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.kpi_model import Kpi
@@ -442,36 +442,6 @@ def _get_dimensions_values(
     return dimension_values_list
 
 
-def fill_graph_data(row: pd.Series, graph_data: Dict[str, Any]):
-    """Fills graph_data with values for a given row.
-
-    :param row: A single row from the anomaly dataframe
-    :type row: pandas.core.series.Series
-    :param graph_data: Dictionary object with the current graph
-    :type graph_data: Dict
-    """
-    # Do not include rows where there is no data
-    if row.notna()["y"]:
-        # Convert to milliseconds for HighCharts
-        timestamp = row["data_datetime"].timestamp() * 1000
-
-        # Create and append a point for the interval
-        interval = [
-            timestamp,
-            round_number(row["yhat_lower"]),
-            round_number(row["yhat_upper"]),
-        ]
-        graph_data["intervals"].append(interval)
-
-        # Create and append a point for the value
-        value = [timestamp, round_number(row["y"])]
-        graph_data["values"].append(value)
-
-        # Create and append a point for the severity
-        severity = [timestamp, round_number(row["severity"])]
-        graph_data["severity"].append(severity)
-
-
 def convert_to_graph_json(
     results: pd.DataFrame,
     kpi_id: int,
@@ -492,17 +462,30 @@ def convert_to_graph_json(
         title = get_user_string_from_subgroup_dict(series_type)
 
     kpi_name = kpi_info["metric"]
+
+    # convert pd.Timestamp to a UNIX timestamp float
+    # converting to int64 gives the result in nanoseconds
+    # dividing by 1e6 converts it to milliseconds
+    results["timestamp"] = results["data_datetime"].astype("int64") / 1e6
+
+    round_column_in_df(results, "yhat_lower")
+    round_column_in_df(results, "yhat_upper")
+    round_column_in_df(results, "y")
+    round_column_in_df(results, "severity")
+
+    intervals = results[["timestamp", "yhat_lower", "yhat_upper"]].values.tolist()
+    values = results[["timestamp", "y"]].values.tolist()
+    severities = results[["timestamp", "severity"]].values.tolist()
+
     graph_data = {
         "title": title,
         "y_axis_label": kpi_name,
         "x_axis_label": "Datetime",
         "sub_dimension": anomaly_type,
-        "intervals": [],
-        "values": [],
-        "severity": [],
+        "intervals": intervals,
+        "values": values,
+        "severity": severities,
     }
-
-    results.apply(lambda row: fill_graph_data(row, graph_data), axis=1)
 
     return graph_data
 
@@ -1216,8 +1199,8 @@ def get_anomaly_end_date(kpi_id: int, hourly: bool) -> Optional[datetime]:
             anomaly_end_date_ts: pd.Timestamp = pd.to_datetime(anomaly_end_date.date())
 
         return anomaly_end_date_ts.to_pydatetime()
-    except Exception as err:  # noqa B902
-        logger.info(f"Error Found: {err}")
+    except Exception as err:  # noqa: B902
+        logger.error(f"Error Found: {err}", exc_info=err)
 
     return None
 

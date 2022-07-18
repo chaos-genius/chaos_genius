@@ -32,7 +32,7 @@ def upgrade():
             return None
         if string in ("mean", "max", "count","min"):
             return json.dumps({"dq": string})
-        pattern = re.compile(r'`(.+?)` == "(.+?)"')
+        pattern = re.compile(r'`(.+?)` == "(.*?)"')
         try:
             return json.dumps(dict(
                 pattern.match(s).groups() for s in string.split(" and ")

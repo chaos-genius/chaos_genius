@@ -29,6 +29,7 @@ from chaos_genius.utils.datetime_helper import (
     get_datetime_string_with_tz,
     get_lastscan_string_with_tz,
 )
+from chaos_genius.utils.utils import make_path_safe
 
 blueprint = Blueprint("anomaly_data", __name__)
 
@@ -52,6 +53,8 @@ def kpi_anomaly_detection(kpi_id: int):
     is_overall = True
     dimensions_values = []
     anomaly_last_scan = ""
+    # used for CSV download
+    kpi_name_path_safe = ""
     try:
         kpi_info = get_kpi_data_from_id(kpi_id)
 
@@ -68,6 +71,7 @@ def kpi_anomaly_detection(kpi_id: int):
 
         period = kpi_info["anomaly_params"]["anomaly_period"]
         hourly = kpi_info["anomaly_params"]["frequency"] == "H"
+        kpi_name_path_safe = make_path_safe(kpi_info["name"])
 
         end_date = get_anomaly_output_end_date(kpi_info)
 
@@ -113,6 +117,7 @@ def kpi_anomaly_detection(kpi_id: int):
             "anomaly_end_date": end_date,
             "last_run_time_anomaly": anomaly_last_scan,
             "is_overall": is_overall,
+            "kpi_name_path_safe": kpi_name_path_safe,
         }
     )
 
@@ -431,8 +436,13 @@ def _get_dimensions_values(
         {
             "label": dimension,
             "value": dimension,
+            "label_path_safe": make_path_safe(dimension),
             "subdim_value_options": [
-                {"label": value, "value": value}
+                {
+                    "label": value,
+                    "value": value,
+                    "label_path_safe": make_path_safe(value),
+                }
                 for value in dimension_values_dict[dimension]
             ],
         }

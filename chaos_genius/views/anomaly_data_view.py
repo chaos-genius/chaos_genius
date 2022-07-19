@@ -1056,7 +1056,8 @@ def update_anomaly_params(
         # daily to hourly.
         if (
             scheduler_params["scheduler_frequency"] != "D"
-            and scheduler_params.get("rca_time") == scheduler_params["time"]
+            and "rca_time" in scheduler_params
+            and scheduler_params.get("rca_time") == scheduler_params.get("time")
         ):
             scheduler_params.pop("rca_time")
 

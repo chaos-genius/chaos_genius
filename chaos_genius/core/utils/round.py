@@ -40,19 +40,19 @@ def round_column_in_df(df: pd.DataFrame, col: str):
 
     This is vectorized and does not use `apply`.
     """
-    df[col] = df[col].abs()
+    col_abs = df[col].abs()
 
     df[col] = np.where(
         # if value < 1, round to 3 decimals
-        df[col] < 1,
+        col_abs < 1,
         df[col].round(3),
         np.where(
             # if value between 1 and 100, round to 2
-            (df[col] >= 1) & (df[col] < 100),
+            (col_abs >= 1) & (col_abs < 100),
             df[col].round(2),
             np.where(
                 # if value between 100 and 10000, round to 1
-                (df[col] >= 100) & (df[col] < 10000),
+                (col_abs >= 100) & (col_abs < 10000),
                 df[col].round(1),
                 # if value > 10000, round to integer
                 df[col].round(),

@@ -172,7 +172,33 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
       anomalyCsv.length !== 0 &&
       anomalyCsv.status !== 'failure'
     ) {
-      downloadCsv(anomalyCsv, `KPI-${kpi}-anomaly-data.csv`);
+      let dimensionName = undefined;
+      let valueName = undefined;
+      if (dimension && dimensionOptions) {
+        const filterObj = dimensionOptions.find((option) => {
+          return option.value === dimension.value;
+        });
+        if (filterObj) {
+          dimensionName = filterObj.label_path_safe;
+        }
+      }
+      if (value && valueOptions) {
+        const filterObj = valueOptions.find((option) => {
+          return option.value === value.value;
+        });
+        if (filterObj) {
+          valueName = filterObj.label_path_safe;
+        }
+      }
+      downloadCsv(
+        anomalyCsv,
+        anomalyDetectionData &&
+          anomalyDetectionData?.kpi_name_path_safe &&
+          dimensionName &&
+          valueName
+          ? `chaosgenius_${anomalyDetectionData?.kpi_name_path_safe}_anomaly_data_${dimensionName}_${valueName}.csv`
+          : `KPI-${kpi}-anomaly-data.csv`
+      );
       store.dispatch(RESET_CSV);
     } else if (
       anomalyCsv &&

@@ -4,6 +4,7 @@ from datetime import datetime
 
 import pandas as pd
 import pytest
+from pandas.testing import assert_frame_equal
 
 from chaos_genius.core.anomaly.models.ewma_model import EWMAModel
 from chaos_genius.core.anomaly.processor import ProcessAnomalyDetection
@@ -78,9 +79,9 @@ anomaly_data_metrics = {
 
 
 testdata_calculate_metrics = [
-    (anomaly_data_metrics["negative_anomaly"], "overall", 20000, 6000, {}, [6.19, 0]),
-    (anomaly_data_metrics["positive_anomaly"], "subdim", 20000, 6000, {pd.Timestamp("2022-03-10"): 1000}, [44.89, 17.22]),
-    (anomaly_data_metrics["no_anomaly"], "overall", 20000, 0, {}, [0, 0]),
+    (anomaly_data_metrics["negative_anomaly"], "overall", 20000, 6000, None, [6.19, 0]),
+    (anomaly_data_metrics["positive_anomaly"], "subdim", 20000, 6000, pd.DataFrame({"dt": pd.Timestamp("2022-03-10"), "deviation_from_mean_overall":  1000}, index=[0]), [44.89, 17.22]),
+    (anomaly_data_metrics["no_anomaly"], "overall", 20000, 0, None, [0, 0]),
 ]
 
 
@@ -159,9 +160,7 @@ def test_compute_deviations():
     pred_series = pred_series_obj._compute_deviations(input_data, 20000)
 
     assert pred_series["deviation_from_mean"].iloc[0] == -9234
-    assert pred_series_obj.deviation_from_mean_dict == {
-        pd.Timestamp("2022-03-10"): -9234
-    }
+    assert_frame_equal(pred_series_obj.deviation_from_mean_df, pd.DataFrame({"dt": pd.Timestamp("2022-03-10"), "deviation_from_mean_overall":  -9234}, index=[0]))
 
 
 @pytest.mark.parametrize(
@@ -221,17 +220,18 @@ def test_compute_impact():
         [
             [pd.Timestamp("2022-03-10"), 1000, 1.2, 0],
             [pd.Timestamp("2022-03-11"), -500, 0.5, 0],
-            [pd.Timestamp("2022-03-12"), 23, 0.03, 0],
-            [pd.Timestamp("2022-03-13"), 2500, 3, 0],
-            [pd.Timestamp("2022-03-14"), 10, 0.01, 0],
+            [pd.Timestamp("2022-03-12"), 2500, 3, 0],
         ],
         columns=["dt", "deviation_from_mean", "zscore", "impact"],
     )
-    deviation_dict = {
-        pd.Timestamp("2022-03-10"): 5000,
-        pd.Timestamp("2022-03-11"): 2000,
-        pd.Timestamp("2022-03-13"): 4000,
-    }
+    deviation_dict_df = pd.DataFrame(
+        [
+            [pd.Timestamp("2022-03-10"), 5000],
+            [pd.Timestamp("2022-03-11"), 2000],
+            [pd.Timestamp("2022-03-12"), 4000],
+        ],
+        columns=["dt", "deviation_from_mean_overall"],
+    )
 
     pred_series = ProcessAnomalyDetection(
         "EWMAModel",
@@ -244,7 +244,7 @@ def test_compute_impact():
         14,
         "subdim",
         None,
-        deviation_dict,
+        deviation_dict_df,
     )._compute_impact(input_data)
 
-    assert pred_series["impact"].to_list() == [0.24, 0.125, 0, 1.875, 0]
+    assert pred_series["impact"].to_list() == [0.24, 0.125, 1.875]

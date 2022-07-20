@@ -87,14 +87,15 @@ def _calculate_metric(df, period):
                     & (df["series_type"] == subgroup).reset_index(drop=True)
                 ]
                 df_sub = _calculate_for_series(df_sub, period)
-                df_sub = df_sub.merge(deviation_from_mean_df, how="left", on="data_datetime")
-                df_sub.loc[df_sub["deviation_from_mean_overall"] != 0, "impact"] = (
-                    (
-                        df_sub["deviation_from_mean"] / df_sub["deviation_from_mean_overall"]
-                    )
-                    * df_sub["zscore"]
-                ).abs()
-                df_sub = df_sub.drop("deviation_from_mean_overall", axis=1)
+                if series == "subdim":
+                    df_sub = df_sub.merge(deviation_from_mean_df, how="left", on="data_datetime")
+                    df_sub.loc[df_sub["deviation_from_mean_overall"] != 0, "impact"] = (
+                        (
+                            df_sub["deviation_from_mean"] / df_sub["deviation_from_mean_overall"]
+                        )
+                        * df_sub["zscore"]
+                    ).abs()
+                    df_sub = df_sub.drop("deviation_from_mean_overall", axis=1)
                 df_with_metric = df_with_metric.append(df_sub, ignore_index=True)
 
     df_with_metric = df_with_metric.drop(["zscore", "deviation_from_mean"], axis=1)

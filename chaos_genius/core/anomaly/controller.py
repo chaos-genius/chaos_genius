@@ -84,7 +84,7 @@ class AnomalyDetectionController(object):
 
         self._task_id = task_id
 
-        self.deviation_from_mean_dict = {}
+        self.deviation_from_mean_df = None
 
         # TODO: Make this connection type agnostic.
         conn_type = DataSource.get_by_id(kpi_info["data_source"]).as_dict[
@@ -205,7 +205,7 @@ class AnomalyDetectionController(object):
             self.slack,
             series,
             subgroup,
-            self.deviation_from_mean_dict,
+            self.deviation_from_mean_df,
             self.kpi_info.get("model_kwargs", {}),
         ).predict()
 
@@ -515,7 +515,7 @@ class AnomalyDetectionController(object):
             if series == "overall":
                 (
                     overall_anomaly_output,
-                    self.deviation_from_mean_dict,
+                    self.deviation_from_mean_df,
                 ) = self._detect_anomaly(
                     model_name, series_data, last_date, series, subgroup, freq
                 )

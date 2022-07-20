@@ -192,12 +192,9 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
       }
       downloadCsv(
         anomalyCsv,
-        anomalyDetectionData &&
-          anomalyDetectionData?.kpi_name_path_safe &&
-          dimensionName &&
-          valueName
+        anomalyDetectionData?.kpi_name_path_safe && dimensionName && valueName
           ? `chaosgenius_${anomalyDetectionData?.kpi_name_path_safe}_anomaly_data_${dimensionName}_${valueName}.csv`
-          : `KPI-${kpi}-anomaly-data.csv`
+          : `KPI-${anomalyDetectionData?.kpi_name_path_safe}-anomaly-data.csv`
       );
       store.dispatch(RESET_CSV);
     } else if (

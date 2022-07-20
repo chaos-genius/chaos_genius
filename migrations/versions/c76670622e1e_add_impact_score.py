@@ -66,59 +66,60 @@ def downgrade():
 
 def _calculate_metric(df, period):
     """Caclulate metrics and impact."""
-    deviation_from_mean_dict = {}
     df_with_metric = pd.DataFrame()
 
-    for series in df["anomaly_type"].unique():
+    for series in ["overall", "subdim", "dq"]:
         subgroup_list = df.loc[df["anomaly_type"] == series]["series_type"].unique()
         for subgroup in subgroup_list:
             if series == "overall":
                 df_sub = df.loc[(df["anomaly_type"] == series)].reset_index(drop=True)
+                df_sub = _calculate_for_series(df_sub, period)
+                deviation_from_mean_df = pd.DataFrame(
+                    {
+                        "data_datetime": df_sub["data_datetime"],
+                        "deviation_from_mean_overall": df_sub["deviation_from_mean"],
+                    }
+                )
+                df_with_metric = df_with_metric.append(df_sub, ignore_index=True)
             else:
                 df_sub = df.loc[
                     (df["anomaly_type"] == series)
                     & (df["series_type"] == subgroup).reset_index(drop=True)
                 ]
-            df_sub = df_sub.sort_values(by=["data_datetime"]).reset_index(drop=True)
-            df_sub["mean"], df_sub["std_dev"] = 0.0, 0.0
-            df_sub.iloc[0:period]["mean"] = df_sub.iloc[0:period]["y"].mean()
-            df_sub.iloc[0:period]["std_dev"] = df_sub.iloc[0:period]["y"].std()
-            for i in range(period, len(df_sub)):
-                df_sub["mean"][i] = df_sub.iloc[i - period : i]["y"].mean()
-                df_sub["std_dev"][i] = df_sub.iloc[i - period : i]["y"].std()
-            df_sub["deviation_from_mean"] = df_sub["y"] - df_sub["mean"]
-
-            df_sub["zscore"] = 0.0
-            df_sub.loc[df_sub["is_anomaly"] == 1, "zscore"] = (
-                df_sub["y"] - df_sub["yhat_upper"]
-            ) / df_sub["std_dev"]
-            df_sub.loc[df_sub["is_anomaly"] == -1, "zscore"] = (
-                df_sub["yhat_lower"] - df_sub["y"]
-            ) / df_sub["std_dev"]
-            df_sub["impact"] = 0.0
-            df_sub = df_sub.drop(["mean", "std_dev"], axis=1)
-            df_with_metric = df_with_metric.append(df_sub, ignore_index=True)
-
-        if series == "overall":
-            df_overall = df_with_metric.loc[df_with_metric["anomaly_type"] == series]
-            deviation_from_mean_dict.update(
-                dict(
-                    df_overall.loc[df_overall["is_anomaly"] != 0][
-                        ["data_datetime", "deviation_from_mean"]
-                    ].values
-                )
-            )
-
-    for anomaly_date, deviation_from_mean in deviation_from_mean_dict.items():
-        df_with_metric.loc[
-            (df_with_metric["anomaly_type"] == "subdim")
-            & (df_with_metric["data_datetime"] == anomaly_date),
-            "impact",
-        ] = (
-            (df_with_metric["deviation_from_mean"] / deviation_from_mean)
-            * df_with_metric["zscore"]
-        ).abs()
+                df_sub = _calculate_for_series(df_sub, period)
+                df_sub = df_sub.merge(deviation_from_mean_df, how="left", on="data_datetime")
+                df_sub.loc[df_sub["deviation_from_mean_overall"] != 0, "impact"] = (
+                    (
+                        df_sub["deviation_from_mean"] / df_sub["deviation_from_mean_overall"]
+                    )
+                    * df_sub["zscore"]
+                ).abs()
+                df_sub = df_sub.drop("deviation_from_mean_overall", axis=1)
+                df_with_metric = df_with_metric.append(df_sub, ignore_index=True)
 
     df_with_metric = df_with_metric.drop(["zscore", "deviation_from_mean"], axis=1)
 
     return df_with_metric
+
+
+def _calculate_for_series(df_sub, period):
+    df_sub = df_sub.sort_values(by=["data_datetime"]).reset_index(drop=True)
+    df_sub["mean"], df_sub["std_dev"] = 0.0, 0.0
+    df_sub.iloc[0:period]["mean"] = df_sub.iloc[0:period]["y"].mean()
+    df_sub.iloc[0:period]["std_dev"] = df_sub.iloc[0:period]["y"].std()
+    for i in range(period, len(df_sub)):
+        df_sub["mean"][i] = df_sub.iloc[i - period : i]["y"].mean()
+        df_sub["std_dev"][i] = df_sub.iloc[i - period : i]["y"].std()
+    df_sub["deviation_from_mean"] = df_sub["y"] - df_sub["mean"]
+
+    df_sub["zscore"] = 0.0
+    df_sub.loc[df_sub["is_anomaly"] == 1, "zscore"] = (
+        df_sub["y"] - df_sub["yhat_upper"]
+    ) / df_sub["std_dev"]
+    df_sub.loc[df_sub["is_anomaly"] == -1, "zscore"] = (
+        df_sub["yhat_lower"] - df_sub["y"]
+    ) / df_sub["std_dev"]
+    df_sub["impact"] = 0.0
+    df_sub = df_sub.drop(["mean", "std_dev"], axis=1)
+
+    return df_sub

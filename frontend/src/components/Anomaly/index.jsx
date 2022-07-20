@@ -631,7 +631,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                               value={value}
                               placeholder="select"
                               styles={customStyles}
-                              classNamePrefix="selectcategory"
+                              classNamePrefix="select_value selectcategory"
                               isSearchable={false}
                               options={valueOptions}
                               onChange={(e) => handleValueChange(e)}

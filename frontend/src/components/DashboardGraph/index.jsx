@@ -148,8 +148,8 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
       downloadCsv(
         rcaCsv,
         aggregationData && aggregationData?.kpi_name_path_safe
-          ? `KPI-${aggregationData?.kpi_name_path_safe}-panel-chart-data.csv`
-          : `KPI-${kpi}-panel-chart-data.csv`
+          ? `chaosgenius-${aggregationData?.kpi_name_path_safe}-panel-chart-data.csv`
+          : `chaosgenius-${kpi}-panel-chart-data.csv`
       );
       store.dispatch(RESET_RCA_CSV);
     } else if (rcaCsv && rcaCsv.length !== 0 && rcaCsv.status === 'failure') {
@@ -169,8 +169,10 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
       downloadCsv(
         graphCsv.data,
         aggregationData && aggregationData?.kpi_name_path_safe
-          ? `KPI-${aggregationData?.kpi_name_path_safe}-panel-chart-data.csv`
-          : `KPI-${kpi}-Deepdrills-${graphCsv?.name ? graphCsv.name : ''}.csv`
+          ? `chaosgenius-${aggregationData?.kpi_name_path_safe}-panel-chart-data.csv`
+          : `chaosgenius-${kpi}-Deepdrills-${
+              graphCsv?.name ? graphCsv.name : ''
+            }.csv`
       );
       store.dispatch(RESET_RCA_CSV);
     } else if (

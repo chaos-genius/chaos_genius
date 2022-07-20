@@ -194,7 +194,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
         anomalyCsv,
         anomalyDetectionData?.kpi_name_path_safe && dimensionName && valueName
           ? `chaosgenius_${anomalyDetectionData?.kpi_name_path_safe}_anomaly_data_${dimensionName}_${valueName}.csv`
-          : `KPI-${anomalyDetectionData?.kpi_name_path_safe}-anomaly-data.csv`
+          : `chaosgenius_${anomalyDetectionData?.kpi_name_path_safe}_anomaly_data.csv`
       );
       store.dispatch(RESET_CSV);
     } else if (

@@ -40,10 +40,14 @@ def upgrade():
         df_kpi = df.loc[df["kpi_id"] == kpi_id].reset_index(drop=True)
         # fetch anomaly period from kpi table
         anom_period_query_result = conn.execute(
-            f"SELECT anomaly_params ->> 'anomaly_period' FROM kpi WHERE id={kpi_id}"
+            f"SELECT anomaly_params ->> 'anomaly_period', anomaly_params ->> 'frequency' FROM kpi WHERE id={kpi_id}"
         )
-        for row in anom_period_query_result:
-            anom_period = int(row[0])
+        row = next(anom_period_query_result)
+        anom_period = int(row[0])
+        frequency = row[1]
+
+        if frequency == "H":
+            anom_period = 24 * anom_period
 
         df_kpi_with_metric = _calculate_metric(df_kpi, anom_period)
         df_with_metrics = df_with_metrics.append(df_kpi_with_metric, ignore_index=True)

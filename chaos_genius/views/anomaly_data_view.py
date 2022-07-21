@@ -610,7 +610,7 @@ def get_drilldowns_series_type(
             & (AnomalyDataOutput.data_datetime <= end_date)
             & (AnomalyDataOutput.data_datetime >= start_date)
             & (AnomalyDataOutput.anomaly_type == "subdim")
-            & (AnomalyDataOutput.impact > 0)
+            & ((AnomalyDataOutput.impact > 0) | (AnomalyDataOutput.severity > 0))
         )
 
         results = pd.read_sql(query.statement, query.session.bind)
@@ -621,7 +621,9 @@ def get_drilldowns_series_type(
             results["data_datetime"] - pd.to_datetime(drilldown_date)
         )
         results.sort_values(
-            ["distance", "impact"], ascending=[True, False], inplace=True
+            ["distance", "impact", "severity"],
+            ascending=[True, False, False],
+            inplace=True,
         )
         results.drop("distance", axis=1, inplace=True)
 

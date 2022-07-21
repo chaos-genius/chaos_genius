@@ -74,6 +74,16 @@ class RootCauseAnalysisController:
 
         self._task_id = task_id
 
+        # TODO: Figure out a better way of handling this.
+        # Also fix in RootCauseAnalysisController._load_data,
+        # DataLoader._preprocess_df, AnomalyDetectionController.__init__ and
+        # AnomalyDetectionController._load_data.
+        if self._preaggregated and self.metric == self._preaggregated_count_col:
+            logger.info(
+                "Preaggregated count column same as metric column. "
+                "`self._preaggregated_count_column` will be updated after data loading."
+            )
+
     def _load_data(
         self, timeline: str = "last_30_days"
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -90,17 +100,35 @@ class RootCauseAnalysisController:
             curr_end_date,
         ) = TIME_RANGES_BY_KEY[timeline]["function"](self.end_date)
 
-        base_df = DataLoader(
+        new_preagg = None
+
+        base_dl = DataLoader(
             self.kpi_info,
             end_date=prev_end_date,
             start_date=prev_start_date,
-        ).get_data(return_empty=True)
+        )
+        base_df = base_dl.get_data(return_empty=True)
 
-        rca_df = DataLoader(
+        # get new name of preaggregated count column if its the same as metric column
+        if self._preaggregated and self.metric == self._preaggregated_count_col:
+            new_preagg = base_dl.pre_aggregated_count_column
+
+        rca_dl = DataLoader(
             self.kpi_info,
             end_date=curr_end_date,
             start_date=curr_start_date,
-        ).get_data(return_empty=True)
+        )
+        rca_df = rca_dl.get_data(return_empty=True)
+
+        # get new name of preaggregated count column if its the same as metric column
+        # rename preaggregated count column to be same as in base_df
+        if self._preaggregated and self.metric == self._preaggregated_count_col:
+            rca_df.rename(
+                columns={rca_dl.pre_aggregated_count_column: new_preagg}, inplace=True
+            )
+
+        if new_preagg:
+            self._preaggregated_count_col = new_preagg
 
         if base_df.empty and rca_df.empty:
             raise ValueError(

@@ -93,6 +93,15 @@ class AnomalyDetectionController(object):
         self._preaggregated = conn_type == "Druid"
         self._preaggregated_count_col = self.kpi_info["count_column"]
 
+        if (
+            self._preaggregated
+            and self.kpi_info["metric"] == self._preaggregated_count_col
+        ):
+            logger.info(
+                "Preaggregated count column same as metric column. "
+                "`self._preaggregated_count_column` will be updated after data loading."
+            )
+
         logger.info(f"Anomaly controller initialized for KPI ID: {kpi_info['id']}")
 
     def _load_anomaly_data(self) -> pd.DataFrame:
@@ -110,17 +119,29 @@ class AnomalyDetectionController(object):
             period /= 24
 
         if not last_date:
-            return DataLoader(
+            dl = DataLoader(
                 self.kpi_info,
                 end_date=self.end_date,
                 days_before=period,
-            ).get_data()
-        start_date = last_date - timedelta(days=period)
-        return DataLoader(
-            self.kpi_info,
-            end_date=self.end_date,
-            start_date=start_date,
-        ).get_data()
+            )
+        else:
+            start_date = last_date - timedelta(days=period)
+            dl = DataLoader(
+                self.kpi_info,
+                end_date=self.end_date,
+                start_date=start_date,
+            )
+
+        df = dl.get_data()
+
+        # get new name of preaggregated count column if its the same as metric column
+        if (
+            self._preaggregated
+            and self.kpi_info["metric"] == self._preaggregated_count_col
+        ):
+            self._preaggregated_count_col = dl.pre_aggregated_count_column
+
+        return df
 
     def _get_last_date_in_db(self, series: str, subgroup: str = None) -> datetime:
         """Return the last date for which we have data for the given series.

@@ -367,8 +367,8 @@ class AnomalyDetectionController(object):
             logger.info(f"Formatting input data for {series}-{subgroup}")
 
             relevant_cols = (
-                [dt_col, metric_col, self._preaggregated_count_col]
-                if self._preaggregated
+                [dt_col, self._preaggregated_count_col]
+                if self._preaggregated and agg == "count"
                 else [dt_col, metric_col]
             )
 
@@ -383,7 +383,9 @@ class AnomalyDetectionController(object):
                     period,
                     self.end_date,
                     freq,
-                    self._preaggregated_count_col if self._preaggregated else None,
+                    self._preaggregated_count_col
+                    if self._preaggregated and agg == "count"
+                    else None,
                 )
 
                 if subgroup_str == "missing":
@@ -392,7 +394,9 @@ class AnomalyDetectionController(object):
                         dt_col,
                         metric_col,
                         RESAMPLE_FREQUENCY[freq],
-                        self._preaggregated_count_col if self._preaggregated else None,
+                        self._preaggregated_count_col
+                        if self._preaggregated and agg == "count"
+                        else None,
                     )
 
                 else:
@@ -421,7 +425,9 @@ class AnomalyDetectionController(object):
                     period,
                     self.end_date,
                     freq,
-                    self._preaggregated_count_col if self._preaggregated else None,
+                    self._preaggregated_count_col
+                    if self._preaggregated and agg == "count"
+                    else None,
                 )
 
                 if self._preaggregated:
@@ -461,7 +467,9 @@ class AnomalyDetectionController(object):
                     period,
                     self.end_date,
                     freq,
-                    self._preaggregated_count_col if self._preaggregated else None,
+                    self._preaggregated_count_col
+                    if self._preaggregated and agg == "count"
+                    else None,
                 )
 
                 if self._preaggregated:

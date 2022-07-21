@@ -268,7 +268,7 @@ class DataLoader:
             self._preaggregated
             and self._preaggregated_count_col == self.kpi_info["metric"]
         ):
-            self.pre_aggregated_count_column = randomword(10)
+            self.pre_aggregated_count_column = f"count_col_duplicate_{randomword(10)}"
             df[self.pre_aggregated_count_column] = df[self.kpi_info["metric"]].copy()
 
     def get_count(self) -> int:

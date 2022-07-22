@@ -93,7 +93,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
 
   const handleDownloadClick = () => {
     const params =
-      dimension?.value && value?.value
+      dimension?.value && value?.value !== undefined && value?.value !== null
         ? { dimension: dimension?.value, value: value?.value }
         : {};
     dispatch(anomalyDownloadCsv(kpi, params));

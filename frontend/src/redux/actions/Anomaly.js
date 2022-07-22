@@ -44,7 +44,10 @@ export const anomalyDetectionFailure = () => {
 export const anomalyDetection = (kpi, dimFilterObj) => {
   return async (dispatch) => {
     let URL =
-      dimFilterObj && dimFilterObj.dimension && dimFilterObj.value
+      dimFilterObj &&
+      dimFilterObj?.dimension &&
+      dimFilterObj?.value !== undefined &&
+      dimFilterObj?.value !== null
         ? `${BASE_URL}/api/anomaly-data/${kpi}/anomaly-detection?dimension=${dimFilterObj?.dimension}&value=${dimFilterObj?.value}`
         : `${BASE_URL}/api/anomaly-data/${kpi}/anomaly-detection`;
     dispatch(anomalyDetectionRequest());

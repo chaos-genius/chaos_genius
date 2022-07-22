@@ -94,6 +94,8 @@ class RootCauseAnalysisController:
         :return: tuple with baseline data and rca data for
         :rtype: Tuple[pd.DataFrame, pd.DataFrame]
         """
+        self._preaggregated_count_col = self.kpi_info["count_column"]
+
         # TODO: Write data loader which can cache data and pull from cache
         (prev_start_date, prev_end_date), (
             curr_start_date,

@@ -80,7 +80,7 @@ def kpi_anomaly_detection(kpi_id: int):
         dimension = request.args.get("dimension", default=None)
         value = request.args.get("value", default=None)
 
-        if dimension and value:
+        if dimension is not None and value is not None:
             is_overall = False
             series_type = {dimension: value}
             anom_data = get_dq_and_subdim_data(

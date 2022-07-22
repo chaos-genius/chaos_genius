@@ -75,7 +75,9 @@ def download_anomaly_data(kpi_id: int):
 
         end_date = get_anomaly_output_end_date(kpi.as_dict)
 
-        if dimension and value:
+        is_subdim = dimension is not None and value is not None
+
+        if is_subdim:
             logger.info(
                 "Downloading subdim anomaly data for KPI: %d, subdim: %s=%s",
                 kpi_id,
@@ -120,7 +122,7 @@ def download_anomaly_data(kpi_id: int):
         else:
             end_date_str = end_date.strftime("%Y-%m-%dT%H-%M-%S")
         suffix = ""
-        if dimension and value:
+        if is_subdim:
             suffix = f"_{dimension}_{value}"
         filename = (
             f"chaosgenius_{make_path_safe(kpi.name)}_anomaly_data_{end_date_str}"

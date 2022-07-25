@@ -145,7 +145,12 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
 
   useEffect(() => {
     if (rcaCsv && rcaCsv.length !== 0 && rcaCsv.status !== 'failure') {
-      downloadCsv(rcaCsv, `KPI-${kpi}-panel-chart-data.csv`);
+      downloadCsv(
+        rcaCsv,
+        aggregationData && aggregationData?.kpi_name_path_safe
+          ? `chaosgenius-${aggregationData?.kpi_name_path_safe}-panel-chart-data.csv`
+          : `chaosgenius-${kpi}-panel-chart-data.csv`
+      );
       store.dispatch(RESET_RCA_CSV);
     } else if (rcaCsv && rcaCsv.length !== 0 && rcaCsv.status === 'failure') {
       customToast({
@@ -163,7 +168,11 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
     ) {
       downloadCsv(
         graphCsv.data,
-        `KPI-${kpi}-Deepdrills-${graphCsv?.name ? graphCsv.name : ''}.csv`
+        aggregationData && aggregationData?.kpi_name_path_safe
+          ? `chaosgenius-${aggregationData?.kpi_name_path_safe}-panel-chart-data.csv`
+          : `chaosgenius-${kpi}-Deepdrills-${
+              graphCsv?.name ? graphCsv.name : ''
+            }.csv`
       );
       store.dispatch(RESET_RCA_CSV);
     } else if (

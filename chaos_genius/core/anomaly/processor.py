@@ -99,10 +99,14 @@ class ProcessAnomalyDetection:
 
         return anomaly_df
 
-    def _predict(self, model: AnomalyModel):
+    def _predict(self, model: AnomalyModel) -> pd.DataFrame:
+        """Run the prediction for anomalies.
 
-        # TODO: Write docstrings for entire class
-
+        :param model: Model used for anomaly detection
+        :type model: AnomalyModel
+        :return: dataframe with detected anomaly_timestamp and metrics
+        :rtype: pd.DataFrame
+        """
         input_data = self.input_data
 
         pred_series = pd.DataFrame(
@@ -120,14 +124,17 @@ class ProcessAnomalyDetection:
         input_last_date = input_data["dt"].iloc[-1]
         input_first_date = input_data["dt"].iloc[0]
 
-        logger.info(f"Prediction data stats for {self.series}-{self.subgroup}", extra={
-            "period": self.period,
-            "inp_len": len(input_data),
-            "slack": self.slack,
-            "start_date": input_first_date,
-            "end_date": input_last_date,
-            "last_date": self.last_date
-        })
+        logger.info(
+            f"Prediction data stats for {self.series}-{self.subgroup}",
+            extra={
+                "period": self.period,
+                "inp_len": len(input_data),
+                "slack": self.slack,
+                "start_date": input_first_date,
+                "end_date": input_last_date,
+                "last_date": self.last_date,
+            },
+        )
 
         if self.last_date is None:
             # pass complete input data frame in here as pred_df

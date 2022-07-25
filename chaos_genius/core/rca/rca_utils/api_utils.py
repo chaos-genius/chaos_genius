@@ -14,6 +14,7 @@ from chaos_genius.utils.datetime_helper import (
     get_lastscan_string_with_tz,
     get_rca_date_from_string,
 )
+from chaos_genius.utils.utils import make_path_safe
 from sqlalchemy import func, and_
 
 logger = logging.getLogger(__name__)
@@ -80,6 +81,7 @@ def kpi_aggregation(kpi_id, timeline="last_30_days"):
                     kpi_info["scheduler_params"]["last_scheduled_time_rca"]
                 ),
                 "anomalous_points_str": "Last 7 Days",
+                "kpi_name_path_safe": make_path_safe(kpi_info["name"]),
             }
         else:
             raise ValueError("No data found")

@@ -542,6 +542,10 @@ const KpiAlertConfigurationForm = ({
                 <div className="range-category">
                   <span>Low</span> <span>Med</span> <span>High</span>
                 </div>
+                <div className="range-category-description">
+                  <span>(0 - 30)</span> <span>(31 - 70)</span>{' '}
+                  <span>(71 - 100)</span>
+                </div>
               </div>
             </div>
           </div>

@@ -15,6 +15,12 @@ ALERT_READABLE_DATA_TIMESTAMP_FORMAT = "%b %d %Y %H:%M:%S"
 ALERT_READABLE_DATA_TIME_ONLY_FORMAT = "%I %p"
 """Format for time (without date) of anomaly."""
 
+ALERT_DATE_CSV_FILENAME_FORMAT_INDIVIDUAL = "%Y-%m-%d"
+"""Date format to be included in the CSV file name for individual alerts."""
+
+ALERT_DATE_CSV_FILENAME_FORMAT_REPORT = "%Y-%m-%d"
+"""Date format to be included in the CSV file name for report alerts."""
+
 ANOMALY_TABLE_COLUMN_NAMES_MAPPER = {
     "series_type": "Dimension",
     "data_datetime": "Time of Occurrence",
@@ -24,6 +30,9 @@ ANOMALY_TABLE_COLUMN_NAMES_MAPPER = {
     "expected_value": "Expected Value",
     "previous_value": "Previous Value",
 }
+ANOMALY_REPORT_COLUMN_NAMES_MAPPER = dict(
+    ANOMALY_TABLE_COLUMN_NAMES_MAPPER, kpi_name="KPI Name"
+)
 ANOMALY_TABLE_COLUMN_NAMES_ORDERED = [
     "series_type",
     "data_datetime",
@@ -33,6 +42,7 @@ ANOMALY_TABLE_COLUMN_NAMES_ORDERED = [
     "severity",
     "expected_value",
 ]
+ANOMALY_REPORT_COLUMN_NAMES_ORDERED = ["kpi_name"] + ANOMALY_TABLE_COLUMN_NAMES_ORDERED
 
 FREQUENCY_DICT = {
     "weekly": datetime.timedelta(days=7, hours=0, minutes=0),

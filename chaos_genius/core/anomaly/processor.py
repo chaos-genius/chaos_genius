@@ -29,7 +29,7 @@ class ProcessAnomalyDetection:
         slack: int,
         series: str,
         subgroup: str = None,
-        deviation_from_mean_dict: Dict = {},
+        deviation_from_mean_df: pd.DataFrame = None,
         model_kwargs={},
     ):
         """Initialize the processor.
@@ -54,9 +54,9 @@ class ProcessAnomalyDetection:
         :type series: str
         :param subgroup: subgroup identifier, defaults to None
         :type subgroup: str, optional
-        :param deviation_from_mean_dict: anomaly timestamps and their respective
+        :param deviation_from_mean_df: anomaly timestamps and their respective
             deviation from mean values for overall time series.
-        :type deviation_from_mean_dict: Dict[datetime, float], defaults to empty dict
+        :type deviation_from_mean_df: pd.DataFrame, defaults to None
         :param model_kwargs: parameters to initialize the model with, defaults to {}
         :type model_kwargs: dict, optional
         """
@@ -72,7 +72,7 @@ class ProcessAnomalyDetection:
         self.freq = freq
         self.sensitivity = sensitivity
         self.slack = slack
-        self.deviation_from_mean_dict = deviation_from_mean_dict
+        self.deviation_from_mean_df = deviation_from_mean_df
 
     def predict(self) -> Union[Tuple[pd.DataFrame, Dict], pd.DataFrame]:
         """Run the prediction for anomalies.
@@ -91,7 +91,7 @@ class ProcessAnomalyDetection:
         self._save_model(model)
 
         if self.series == "overall":
-            return anomaly_df, self.deviation_from_mean_dict
+            return anomaly_df, self.deviation_from_mean_df
 
         return anomaly_df
 
@@ -256,12 +256,11 @@ class ProcessAnomalyDetection:
         prediction_df["deviation_from_mean"] = prediction_df["y"] - mean
 
         if self.series == "overall":
-            self.deviation_from_mean_dict.update(
-                dict(
-                    prediction_df.loc[prediction_df["anomaly"] != 0][
-                        ["dt", "deviation_from_mean"]
-                    ].values
-                )
+            self.deviation_from_mean_df = pd.DataFrame(
+                {
+                    "dt": prediction_df["dt"],
+                    "deviation_from_mean_overall": prediction_df["deviation_from_mean"],
+                }
             )
 
         return prediction_df
@@ -311,14 +310,15 @@ class ProcessAnomalyDetection:
         :return: dataframe with impact score
         :rtype: pd.DataFrame
         """
-        for anomaly_date, deviation_from_mean in self.deviation_from_mean_dict.items():
-            if deviation_from_mean == 0:
-                continue
-
-            prediction_df.loc[prediction_df["dt"] == anomaly_date, "impact"] = (
-                (prediction_df["deviation_from_mean"] / deviation_from_mean)
-                * prediction_df["zscore"]
-            ).abs()
+        prediction_df = prediction_df.merge(self.deviation_from_mean_df, how="left", on="dt") # noqa E501
+        prediction_df.loc[prediction_df["deviation_from_mean_overall"] != 0, "impact"] = ( # noqa E501
+            (
+                prediction_df["deviation_from_mean"]
+                / prediction_df["deviation_from_mean_overall"]
+            )
+            * prediction_df["zscore"]
+        ).abs()
+        prediction_df = prediction_df.drop("deviation_from_mean_overall", axis=1)
 
         return prediction_df
 

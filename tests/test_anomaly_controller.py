@@ -77,7 +77,7 @@ testdata_detect_anomaly = [
                 "severity": [0.0],
                 "impact": [0.0],
             }
-        ), {}],
+        ), pd.DataFrame({"dt": pd.Timestamp("2022-01-16"), "deviation_from_mean_overall":  -143.633333}, index=[0])],
     ),
     (
         kpi_info_hourly,
@@ -97,7 +97,7 @@ testdata_detect_anomaly = [
                 "severity": [34.071323],
                 "impact": [0.0]
             }
-        ), {pd.Timestamp("2022-01-16 00:00:00"): 0.7138862287384846}],
+        ), pd.DataFrame({"dt": pd.Timestamp("2022-01-16"), "deviation_from_mean_overall":  0.7138862287384846}, index=[0])]
     ),
 ]
 
@@ -136,11 +136,13 @@ def test_detect_anomaly(
 
     input_data = load_input_data(input_data_str)
     adc = AnomalyDetectionController(kpi_info, datetime(2022, 1, 16))
-    pred_series, deviation_dict = adc._detect_anomaly(
+    pred_series, deviation_df = adc._detect_anomaly(
         model_name, input_data, last_date, series, subgroup, frequency
     )
     columns = ["y", "yhat_lower", "yhat_upper", "anomaly"]
     pred_series[columns] = pred_series[columns].apply(pd.to_numeric)
+    deviation_df["deviation_from_mean_overall"] = deviation_df["deviation_from_mean_overall"].apply(pd.to_numeric)
 
     assert_frame_equal(pred_series, expected[0])
-    assert deviation_dict == expected[1]
+    assert_frame_equal(deviation_df, expected[1])
+

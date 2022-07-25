@@ -1,6 +1,7 @@
 """Provides processor class which computes anomaly detection."""
 import datetime
 import logging
+from typing import Dict, Tuple, Union
 
 import pandas as pd
 
@@ -29,10 +30,10 @@ class ProcessAnomalyDetection:
         series: str,
         subgroup: str = None,
         min_number_of_days: int = 0,
+        deviation_from_mean_dict: Dict = {},
         model_kwargs={},
     ):
         """Initialize the processor.
-
         :param model_name: model to use
         :type model_name: str
         :param data: dataframe to run anomaly detection on
@@ -56,8 +57,10 @@ class ProcessAnomalyDetection:
         :param min_number_of_days: the min number of days to day by day train
             for in the initial batch training, defaults to 0
         :type min_number_of_days: int
-        :param model_kwargs: parameters to initialize the model with, defaults
-        to {}
+        :param deviation_from_mean_dict: anomaly timestamps and their respective
+            deviation from mean values for overall time series.
+        :type deviation_from_mean_dict: Dict[datetime, float], defaults to empty dict
+        :param model_kwargs: parameters to initialize the model with, defaults to {}
         :type model_kwargs: dict, optional
         """
         self.model_name = model_name
@@ -73,19 +76,26 @@ class ProcessAnomalyDetection:
         self.sensitivity = sensitivity
         self.slack = slack
         self.min_number_of_days = min_number_of_days
+        self.deviation_from_mean_dict = deviation_from_mean_dict
 
-    def predict(self) -> pd.DataFrame:
+    def predict(self) -> Union[Tuple[pd.DataFrame, Dict], pd.DataFrame]:
         """Run the prediction for anomalies.
 
-        :return: dataframe with detected anomaly_timestamp
-        :rtype: pd.DataFrame
+        :return: dataframe with detected anomaly_timestamp,
+            dictionary of anomaly timestamps with deviation from mean values
+        :rtype: Union[(pd.DataFrame, Dict), pd.DataFrame]
         """
         model = self._get_model()
 
-        logger.debug(f"Running Prediction and Detecting Severity for {self.series}-{self.subgroup}")
+        logger.debug(
+            f"Running prediction and metrics for {self.series}-{self.subgroup}"
+        )
         anomaly_df = self._predict(model)
 
         self._save_model(model)
+
+        if self.series == "overall":
+            return anomaly_df, self.deviation_from_mean_dict
 
         return anomaly_df
 
@@ -95,7 +105,17 @@ class ProcessAnomalyDetection:
 
         input_data = self.input_data
 
-        pred_series = pd.DataFrame(columns=["dt", "y", "yhat_lower", "yhat_upper", "anomaly", "severity"])
+        pred_series = pd.DataFrame(
+            columns=[
+                "dt",
+                "y",
+                "yhat_lower",
+                "yhat_upper",
+                "anomaly",
+                "severity",
+                "impact",
+            ]
+        )
 
         input_last_date = input_data["dt"].iloc[-1]
         input_first_date = input_data["dt"].iloc[0]
@@ -122,8 +142,10 @@ class ProcessAnomalyDetection:
                     )
 
                     prediction["y"] = input_data["y"]
-                    prediction_with_severity = self._detect_severity(self._detect_anomalies(prediction))
-                    pred_series = prediction_with_severity
+                    prediction_with_metrics = self._calculate_metrics(
+                        prediction, prediction["y"].mean(), prediction["y"].std()
+                    )
+                    pred_series = prediction_with_metrics
                 else:
                     logger.warning(
                         f"Insufficient slack for {self.series}-{self.subgroup}")
@@ -139,18 +161,20 @@ class ProcessAnomalyDetection:
                     pred_df=pred_df
                 )
                 prediction['y'] = pred_df['y']
-                prediction_with_severity = self._detect_severity(self._detect_anomalies(prediction))
-                daily_train_with_severity = self._day_by_day_predict(input_data, model, self.min_number_of_days)
+                prediction_with_metrics = self._calculate_metrics(
+                    prediction, prediction["y"].mean(), prediction["y"].std()
+                )
+                daily_train_with_metrics = self._day_by_day_predict(input_data, model, self.min_number_of_days)
                 pred_series = pd.concat(
                     [
-                        prediction_with_severity,
-                        daily_train_with_severity
+                        prediction_with_metrics,
+                        daily_train_with_metrics
                     ]
                 )
 
         else:
-            prediction_with_severity = self._day_by_day_predict(self.input_data, model)
-            pred_series = prediction_with_severity
+            prediction_with_metrics = self._day_by_day_predict(self.input_data, model)
+            pred_series = prediction_with_metrics
 
         return pred_series
 
@@ -186,61 +210,133 @@ class ProcessAnomalyDetection:
                     df.iloc[:-1], self.sensitivity, self.freq
                 )
                 prediction["y"] = df["y"].to_list()
-                prediction_with_severity = self._detect_severity(self._detect_anomalies(prediction))
-                to_append = prediction_with_severity.iloc[-1].copy()
 
-                pred_series = pred_series.append(
-                    to_append, ignore_index=True)
+                prediction = pd.DataFrame(prediction.iloc[-1].copy()).T.reset_index(
+                    drop=True
+                )
+
+                prediction_with_metrics = self._calculate_metrics(
+                    prediction,
+                    df.iloc[:-1]["y"].mean(),
+                    df.iloc[:-1]["y"].std(),
+                )
+
+                pred_series = pred_series.append(prediction_with_metrics, ignore_index=True)
 
             elif curr_period < max_period and days_to_train is not None:
                 df = input_data[input_data['dt'] <= last_date]
+
                 prediction = model.predict(
                     df.iloc[:-1], self.sensitivity, self.freq
                 )
                 prediction["y"] = df["y"].to_list()
-                prediction_with_severity = self._detect_severity(self._detect_anomalies(prediction))
-                to_append = prediction_with_severity.iloc[-1].copy()
 
-                pred_series = pred_series.append(
-                    to_append, ignore_index=True
+                prediction = pd.DataFrame(prediction.iloc[-1].copy()).T.reset_index(
+                    drop=True
                 )
+
+                prediction_with_metrics = self._calculate_metrics(
+                    prediction,
+                    df.iloc[:-1]["y"].mean(),
+                    df.iloc[:-1]["y"].std(),
+                )
+
+                pred_series = pred_series.append(prediction_with_metrics, ignore_index=True)
 
             last_date = last_date + datetime.timedelta(**FREQUENCY_DELTA[self.freq])
 
         return pred_series
 
-    def _detect_anomalies(self, pred_series):
+    def _calculate_metrics(
+        self, prediction_df: pd.DataFrame, mean: float, std_dev: float
+    ) -> pd.DataFrame:
+        """Calculate metrics (sevrity and impact) for the anomaly data.
+
+        :param prediction_df: dataframe with predictions
+        :type prediction_df: pd.DataFrame
+        :param mean: average of the anomaly data
+        :type mean: float
+        :param std_dev: standard deviation of the anomaly data
+        :type std_dev: float
+        :return: dataframe with detected anomalies and metrics
+        :rtype: pd.DataFrame
+        """
+        prediction_df = self._detect_anomalies(prediction_df)
+
+        prediction_df["severity"], prediction_df["impact"] = 0.0, 0.0
+        if std_dev == 0:
+            return prediction_df
+
+        prediction_df = self._compute_deviations(prediction_df, mean)
+
+        prediction_df["zscore"] = prediction_df.apply(
+            lambda x: self._compute_zscore(x, std_dev), axis=1
+        )
+
+        prediction_df["severity"] = prediction_df["zscore"].apply(
+            lambda zscore: self._compute_severity(zscore)
+        )
+
+        if self.series == "subdim":
+            prediction_df = self._compute_impact(prediction_df)
+
+        prediction_df = prediction_df.drop(["zscore", "deviation_from_mean"], axis=1)
+
+        return prediction_df
+
+    def _detect_anomalies(self, pred_series: pd.DataFrame) -> pd.DataFrame:
+        """Detect anomalous values in timeseries.
+
+        :param pred_series: dataframe with predictions
+        :type pred_series: pd.DataFrame
+        :return: dataframe with detected anomalies
+        :rtype: pd.DataFrame
+        """
         pred_series["anomaly"] = 0
         high_sel = pred_series["y"] > pred_series["yhat_upper"]
         low_sel = pred_series["y"] < pred_series["yhat_lower"]
+        # anomaly = 1, if value > upper bound of CI
         pred_series.loc[high_sel, "anomaly"] = 1
+        # anomaly = -1, if value < lower bound of CI
         pred_series.loc[low_sel, "anomaly"] = -1
 
         return pred_series
 
-    def _detect_severity(self, anomaly_prediction):
-        std_dev = anomaly_prediction["y"].std()
+    def _compute_deviations(
+        self, prediction_df: pd.DataFrame, mean: float
+    ) -> pd.DataFrame:
+        """Calculate deviation of values from average of the data.
 
-        logger.info(f"Severity stats for {self.series}-{self.subgroup}", extra={
-            "Start/End Date": list([anomaly_prediction["dt"][0], anomaly_prediction["dt"].iloc[-1]]),
-            "Start/End Value": list([anomaly_prediction["y"][0], anomaly_prediction["y"].iloc[-1]]),
-            "len": list([len(anomaly_prediction["y"]), len(anomaly_prediction["y"])]),
-            "std_dev": std_dev,
-            "period": self.period,
-        })
+        :param prediction_df: dataframe with predictions and detected anomalies
+        :type prediction_df: pd.DataFrame
+        :param mean: average of the anomaly data
+        :type mean: float
+        :return: dataframe with deviation from mean values
+        :rtype: pd.DataFrame
+        """
+        prediction_df["deviation_from_mean"] = prediction_df["y"] - mean
 
-        anomaly_prediction["severity"] = 0
-        if std_dev == 0:
-            return anomaly_prediction
+        if self.series == "overall":
+            self.deviation_from_mean_dict.update(
+                dict(
+                    prediction_df.loc[prediction_df["anomaly"] != 0][
+                        ["dt", "deviation_from_mean"]
+                    ].values
+                )
+            )
 
-        anomaly_prediction["severity"] = anomaly_prediction.apply(
-            lambda x: self._compute_severity(x, std_dev), axis=1
-        )
+        return prediction_df
 
-        return anomaly_prediction
+    def _compute_zscore(self, row: pd.DataFrame, std_dev: float) -> float:
+        """Calculate zscore for anomalous data.
 
-    def _compute_severity(self, row, std_dev):
-        # TODO: Create docstring for these comments
+        :param row: single row of anomaly dataframe
+        :type row: pd.DataFrame
+        :param std_dev: standard deviation of the anomaly data
+        :type std_dev: float
+        :return: zscore of the anomaly row data
+        :rtype: float
+        """
         if row["anomaly"] == 0:
             # No anomaly. Severity is 0
             return 0
@@ -249,37 +345,62 @@ class ProcessAnomalyDetection:
             zscore = (row["y"] - row["yhat_upper"]) / std_dev
         elif row["anomaly"] == -1:
             # Check num deviations from lower bound of CI
-            zscore = (row["y"] - row["yhat_lower"]) / std_dev
+            zscore = (row["yhat_lower"] - row["y"]) / std_dev
 
+        return zscore
+
+    def _compute_severity(self, zscore: float) -> float:
+        """Calculate severity given zscore.
+
+        :param zscore: zscore of the anomaly data
+        :type zscore: float
+        :return: severity of the anomaly data
+        :rtype: float
+        """
         # Map zscore of 0-3 to 0-100
         severity = zscore * 100 / ZSCORE_UPPER_BOUND
-        logger.info("Severity Score Info: ", extra={
-            "Anomaly" : row["anomaly"],
-            "Date" : row["dt"],
-            "Value": row["y"],
-            "std_dev": std_dev,
-            "Upper Bound": row["yhat_upper"],
-            "Lower Bound": row["yhat_lower"],
-            "zscore" : zscore,
-            "Severity": severity
-        })
-        severity = abs(severity)
 
         # Bound between min and max score
         # If above 100, we return 100; If below -100, we return -100
         return bound_between(0, severity, 100)
 
+    def _compute_impact(self, prediction_df: pd.DataFrame) -> pd.DataFrame:
+        """Calculate impact for sub-dimensional anomaly data.
+
+        :param prediction_df: dataframe with predictions
+        :type prediction_df: pd.DataFrame
+        :return: dataframe with impact score
+        :rtype: pd.DataFrame
+        """
+        for anomaly_date, deviation_from_mean in self.deviation_from_mean_dict.items():
+            if deviation_from_mean == 0:
+                continue
+
+            prediction_df.loc[prediction_df["dt"] == anomaly_date, "impact"] = (
+                (prediction_df["deviation_from_mean"] / deviation_from_mean)
+                * prediction_df["zscore"]
+            ).abs()
+
+        return prediction_df
+
     def _get_model(self) -> AnomalyModel:
+        """Return Anomaly Detection Model.
+
+        :return: anomaly model
+        :rtype: AnomalyModel
+        """
         model = MODEL_MAPPER[self.model_name]
         try:
             return model.load(self.model_path, model_kwargs=self.model_kwargs)
         except NotImplementedError:
             return model(model_kwargs=self.model_kwargs)
 
-    def _save_model(
-        self,
-        model: AnomalyModel,
-    ) -> None:
+    def _save_model(self, model: AnomalyModel) -> None:
+        """Save Anomaly Detection Model.
+
+        :param model: Anomaly Detection model to be saved
+        :type model: AnomalyModel
+        """
         try:
             model.save(self.model_path)
         except NotImplementedError:

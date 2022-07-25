@@ -186,7 +186,16 @@ class ProcessAnomalyDetection:
     ) -> pd.DataFrame:
 
         pred_series = pd.DataFrame(
-            columns=["dt", "y", "yhat_lower", "yhat_upper", "anomaly", "severity"])
+            columns=[
+                "dt",
+                "y",
+                "yhat_lower",
+                "yhat_upper",
+                "anomaly",
+                "severity",
+                "impact",
+            ]
+        )
 
         input_first_date = input_data["dt"].iloc[0]
         input_last_date = input_data["dt"].iloc[-1]

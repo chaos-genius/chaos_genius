@@ -42,9 +42,15 @@ def upgrade():
         anom_period_query_result = conn.execute(
             f"SELECT anomaly_params ->> 'anomaly_period', anomaly_params ->> 'frequency' FROM kpi WHERE id={kpi_id}"
         )
-        row = next(anom_period_query_result)
+        anomaly_setup = True
+        try:
+            row = next(anom_period_query_result)
+            if row[0] is None:
+                anomaly_setup = False
+        except StopIteration:
+            anomaly_setup = False
 
-        if row[0]:
+        if anomaly_setup:
             anom_period = int(row[0])
             frequency = row[1]
 

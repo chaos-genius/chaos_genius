@@ -130,7 +130,6 @@ class AlertsReportData(BaseModel):
             point
             for trig_alert in self.triggered_alerts
             for point in iterate_over_all_points(trig_alert.points, True)
-            if point.is_subdim
         ]
 
         return points

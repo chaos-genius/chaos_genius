@@ -166,7 +166,6 @@ def fill_data(
             if preagg_count_col:
                 t_df = pd.DataFrame({
                     dt_col: [last_date_diff_period],
-                    metric_col: [0],
                     preagg_count_col: [0]
                 })
             else:
@@ -183,7 +182,6 @@ def fill_data(
             if preagg_count_col:
                 t_df = pd.DataFrame({
                     dt_col: [end_datetime],
-                    metric_col: [0],
                     preagg_count_col: [0]
                 })
             else:

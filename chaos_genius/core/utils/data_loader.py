@@ -260,6 +260,17 @@ class DataLoader:
             .dt.tz_localize(None)
         )
 
+        # check if preaggregated count column and metric column are the same
+        # if yes, then duplicate the count column and store it as an object variable
+        self._preaggregated = self.connection_info["connection_type"] == "Druid"
+        self._preaggregated_count_col = self.kpi_info["count_column"]
+        if (
+            self._preaggregated
+            and self._preaggregated_count_col == self.kpi_info["metric"]
+        ):
+            self.pre_aggregated_count_column = f"count_col_duplicate_{randomword(10)}"
+            df[self.pre_aggregated_count_column] = df[self.kpi_info["metric"]].copy()
+
     def get_count(self) -> int:
         """Return count of rows in KPI data."""
         query = self._build_query(count=True)

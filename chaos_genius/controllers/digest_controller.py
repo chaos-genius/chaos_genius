@@ -124,6 +124,16 @@ class AlertsReportData(BaseModel):
             top_subdim_anomalies=top_subdim_anomalies,
         )
 
+    def all_points(self) -> List[AnomalyPointFormatted]:
+        """All anomaly points considered in the report."""
+        points = [
+            point
+            for trig_alert in self.triggered_alerts
+            for point in iterate_over_all_points(trig_alert.points, True)
+        ]
+
+        return points
+
     @property
     def has_anomalies(self) -> bool:
         """Whether any anomalies have been observed."""

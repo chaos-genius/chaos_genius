@@ -44,7 +44,10 @@ export const anomalyDetectionFailure = () => {
 export const anomalyDetection = (kpi, dimFilterObj) => {
   return async (dispatch) => {
     let URL =
-      dimFilterObj && dimFilterObj.dimension && dimFilterObj.value
+      dimFilterObj &&
+      dimFilterObj?.dimension &&
+      dimFilterObj?.value !== undefined &&
+      dimFilterObj?.value !== null
         ? `${BASE_URL}/api/anomaly-data/${kpi}/anomaly-detection?dimension=${dimFilterObj?.dimension}&value=${dimFilterObj?.value}`
         : `${BASE_URL}/api/anomaly-data/${kpi}/anomaly-detection`;
     dispatch(anomalyDetectionRequest());
@@ -220,11 +223,16 @@ export const anomalyDownloadFailure = () => {
   };
 };
 
-export const anomalyDownloadCsv = (id) => {
+export const anomalyDownloadCsv = (id, params) => {
   return async (dispatch) => {
     dispatch(anomalyDownloadRequest());
+    const url = `${BASE_URL}/api/downloads/${id}/anomaly_data`;
+    const finalUrl =
+      Object.keys(params).length === 0 && params.constructor === Object
+        ? url
+        : attachParams(url, params);
     const { data, error, status } = await getRequest({
-      url: `${BASE_URL}/api/downloads/${id}/anomaly_data`
+      url: finalUrl
     });
     if (error) {
       dispatch(anomalyDownloadFailure());

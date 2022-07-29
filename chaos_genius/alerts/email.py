@@ -126,8 +126,16 @@ def send_static_alert_email(
     for file_detail in files:
         fname = file_detail["fname"]
         fdata = file_detail["fdata"]
-        attachment = MIMEApplication(fdata, fname)
+        mime_maintype = file_detail.get("mime_maintype", "application")
+        mime_subtype = file_detail.get("mime_subtype", fname)
+
+        if mime_maintype == "text":
+            attachment = MIMEText(fdata, mime_subtype)
+        else:
+            attachment = MIMEApplication(fdata, mime_subtype)
+
         attachment["Content-Disposition"] = 'attachment; filename="{}"'.format(fname)
+
         message.attach(attachment)
 
     send_email(recipient_emails, message, host, port, user, password, sender)

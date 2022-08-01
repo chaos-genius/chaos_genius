@@ -35,7 +35,7 @@ def _make_bool(val: Union[str, bool]) -> bool:
 
 CWD = os.getcwd()
 
-ENV = os.getenv("FLASK_ENV", default="production")
+ENV = os.getenv("ENV", default="production")
 DEBUG = ENV == "development"
 SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL_CG_DB")
 SECRET_KEY = os.getenv(

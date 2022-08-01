@@ -433,7 +433,7 @@ def edit_kpi(kpi_id):
                         "subdim": True,
                     }
                 # add run_anomaly flag
-                if kpi_obj.run_anomaly and kpi_obj.anomaly_params is not None and (
+                if (kpi_obj.run_anomaly is True) and (kpi_obj.anomaly_params is not None) and (
                     "run_optional" not in kpi_obj.anomaly_params or (
                         kpi_obj.anomaly_params["run_optional"]["subdim"]
                         != run_optional["subdim"]

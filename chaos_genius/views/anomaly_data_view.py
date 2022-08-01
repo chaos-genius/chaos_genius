@@ -233,7 +233,6 @@ def kpi_anomaly_params(kpi_id: int):
     # when it's POST, update anomaly params
 
     # check if this is first time anomaly setup or edit config
-    # add run_anomaly flag
     is_first_time = kpi.anomaly_params is None
 
     if is_first_time:
@@ -405,7 +404,7 @@ def disable_anomaly(kpi_id):
     else:
         message = f"Falied to Disable Analytics for KPI ID: {kpi_id}"
         status = "failure"
-    current_app.logger.info(message)
+    logger.info(message)
     return jsonify({"msg": message, "status": status})
 
 

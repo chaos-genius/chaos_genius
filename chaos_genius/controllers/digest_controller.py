@@ -263,7 +263,7 @@ def extract_anomaly_points_from_triggered_alerts(
 
         # consider only KPIs which have anomaly enabled
         # add run_anomaly flag
-        if anomaly_params is not None and run_anomaly_flag:
+        if (anomaly_params is not None) and (run_anomaly_flag is True):
             anomaly_points.extend(
                 AnomalyPointFormatted.from_points(
                     trig_alert_points,

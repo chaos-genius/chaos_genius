@@ -90,8 +90,9 @@ class AnalyticsScheduler:
         # 2. anomaly is set up
         # anomaly is setup if model_name is set in anomaly_params
         scheduler_params = kpi.scheduler_params
+        # add run_anomaly flag
         anomaly_is_setup = (
-            kpi.anomaly_params is not None and "model_name" in kpi.anomaly_params
+            (kpi.run_anomaly is True) and (kpi.anomaly_params is not None) and ("model_name" in kpi.anomaly_params)
         )
         anomaly_already_run = (
             scheduler_params is not None

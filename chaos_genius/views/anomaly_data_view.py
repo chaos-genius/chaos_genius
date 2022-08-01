@@ -422,7 +422,7 @@ def enable_anomaly(kpi_id):
             message = f"Enabled Analytics for KPI ID: {kpi_id}"
             status = "success"
         else:
-            message = f"Falied to Enable Analytics for KPI ID: {kpi_id}"
+            message = f"Failed to Enable Anomaly because it is either already enabled or not set up for KPI ID: {kpi_id}"
             status = "failure"
     else:
         message = f"KPI {kpi_id} could not be retreived"

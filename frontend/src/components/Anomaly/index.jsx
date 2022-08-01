@@ -620,7 +620,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                               placeholder="select"
                               styles={customStyles}
                               classNamePrefix="selectcategory"
-                              isSearchable={false}
+                              isSearchable={true}
                               options={dimensionOptions}
                               onChange={(e) => handleDimensionChange(e)}
                             />
@@ -632,7 +632,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                               placeholder="select"
                               styles={customStyles}
                               classNamePrefix="select_value selectcategory"
-                              isSearchable={false}
+                              isSearchable={true}
                               options={valueOptions}
                               onChange={(e) => handleValueChange(e)}
                             />

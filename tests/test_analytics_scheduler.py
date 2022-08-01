@@ -145,12 +145,30 @@ def test_get_scheduled_time_daily(monkeypatch, time, created_at, expected):
 
 
 test_cases_test_to_run_anomaly = [
-    ({"anomaly_params": {}}, f"{now_date} {now_hr}:12:19", False),  # anomaly not setup
+    (
+        {"anomaly_params": {}},
+        f"{now_date} {now_hr}:12:19",
+        True,
+        False,
+    ),  # anomaly not setup
+    (
+        {"anomaly_params": {}},
+        f"{now_date} {now_hr}:12:19",
+        False,
+        False,
+    ),  # anomaly not setup
     (
         {"scheduler_params": {}},
         f"{now_date} {now_hr}:12:19",
         True,
-    ),  # need to recheck this
+        True,
+    ),
+    (
+        {"scheduler_params": {}},
+        f"{now_date} {now_hr}:12:19",
+        False,
+        False,
+    ),
     (
         {
             "scheduler_params": {
@@ -158,6 +176,7 @@ test_cases_test_to_run_anomaly = [
             }
         },
         f"{now_date} {now_hr}:12:14",
+        True,
         True,
     ),
     (
@@ -168,6 +187,17 @@ test_cases_test_to_run_anomaly = [
         },
         f"{now_date} {now_hr}:12:10",
         True,
+        True,
+    ),
+    (
+        {
+            "scheduler_params": {
+                "last_scheduled_time_anomaly": f"{now_date} {now_hr}:15:12"
+            }
+        },
+        f"{now_date} {now_hr}:12:14",
+        True,
+        False,
     ),
     (
         {
@@ -177,6 +207,7 @@ test_cases_test_to_run_anomaly = [
         },
         f"{now_date} {now_hr}:12:14",
         False,
+        False,
     ),
     (
         {
@@ -185,6 +216,7 @@ test_cases_test_to_run_anomaly = [
             }
         },
         f"{now_date} {now_hr}:10:00",
+        True,
         False,
     ),
     (
@@ -195,6 +227,7 @@ test_cases_test_to_run_anomaly = [
         },
         f"{now_date} {now_hr}:12:14",
         True,
+        True,
     ),
     (
         {
@@ -204,16 +237,29 @@ test_cases_test_to_run_anomaly = [
         },
         f"{now_date} {now_hr}:10:00",
         True,
+        True,
+    ),
+    (
+        {
+            "scheduler_params": {
+                "last_scheduled_time_anomaly": f"{(now - timedelta(hours=2)).date()} {make_2_digit((now - timedelta(hours=2)).hour)}:49:08"
+            }
+        },
+        f"{now_date} {now_hr}:10:00",
+        False,
+        False,
     ),
 ]
 
 
 @pytest.mark.parametrize(
-    "kpi_params,scheduled_time,expected", test_cases_test_to_run_anomaly
+    "kpi_params,scheduled_time,run_anomaly,expected", test_cases_test_to_run_anomaly
 )
-def test_to_run_anomaly(monkeypatch, kpi_params, scheduled_time, expected):
+def test_to_run_anomaly(monkeypatch, kpi_params, scheduled_time, run_anomaly, expected):
     for key in kpi_params:
         monkeypatch.setattr(test_kpi, key, kpi_params[key])
+    monkeypatch.setattr(test_kpi, "run_anomaly", run_anomaly)
+
     scheduler = AnalyticsScheduler()
     scheduled_time = datetime.strptime(scheduled_time, DATETIME_FMT)
 

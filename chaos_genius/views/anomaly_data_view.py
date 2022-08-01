@@ -412,7 +412,6 @@ def disable_anomaly(kpi_id):
 def enable_anomaly(kpi_id):
     """API end point which enables analytics by modifying the run_anomaly flag."""
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
-    # check if anomaly is setup
     if (not kpi.run_anomaly) and kpi.anomaly_params:
         kpi.run_anomaly = True
         flag_modified(kpi, "run_anomaly")

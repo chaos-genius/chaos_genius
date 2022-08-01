@@ -199,8 +199,8 @@ def run_anomaly_rca_scheduler():
 
     Note: a celery worker needs to be active for this to work.
     """
-    from chaos_genius.jobs.anomaly_tasks import anomaly_scheduler
-    res = anomaly_scheduler.delay()
+    from chaos_genius.jobs.analytics_scheduler import scheduler_wrapper
+    res = scheduler_wrapper.delay()
     res.get()
     click.echo("Completed running scheduler. Tasks should be running in the worker.")
 

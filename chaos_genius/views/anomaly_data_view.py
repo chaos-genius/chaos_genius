@@ -398,7 +398,6 @@ def disable_anomaly(kpi_id):
         # check if anomaly is setup
         if kpi.run_anomaly and kpi.anomaly_params:
             kpi.run_anomaly = False
-            flag_modified(kpi, "run_anomaly")
             kpi.update(commit=True)
             message = f"Disabled Analytics for KPI ID: {kpi_id}"
             status = "success"

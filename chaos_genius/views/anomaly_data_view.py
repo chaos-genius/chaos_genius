@@ -391,7 +391,7 @@ def kpi_anomaly_retraining(kpi_id: int):
 
 
 @blueprint.route("/<int:kpi_id>/disable-anomaly", methods=["GET", "POST"])
-def disable_anomaly(kpi_id):
+def disable_anomaly(kpi_id): 
     """API end point which disables analytics by modifying the run_anomaly flag."""
     kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
     # check if anomaly is setup
@@ -403,6 +403,24 @@ def disable_anomaly(kpi_id):
         status = "success"
     else:
         message = f"Falied to Disable Analytics for KPI ID: {kpi_id}"
+        status = "failure"
+    logger.info(message)
+    return jsonify({"msg": message, "status": status})
+
+
+@blueprint.route("/<int:kpi_id>/enable-anomaly", methods=["GET", "POST"])
+def enable_anomaly(kpi_id):
+    """API end point which enables analytics by modifying the run_anomaly flag."""
+    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
+    # check if anomaly is setup
+    if (not kpi.run_anomaly) and kpi.anomaly_params:
+        kpi.run_anomaly = True
+        flag_modified(kpi, "run_anomaly")
+        kpi.update(commit=True)
+        message = f"Enabled Analytics for KPI ID: {kpi_id}"
+        status = "success"
+    else:
+        message = f"Falied to Enable Analytics for KPI ID: {kpi_id}"
         status = "failure"
     logger.info(message)
     return jsonify({"msg": message, "status": status})

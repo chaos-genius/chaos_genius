@@ -403,8 +403,6 @@ def edit_kpi(kpi_id):
         kpi_obj = Kpi.get_by_id(kpi_id)
 
         data = request.get_json()
-        print("*********************")
-        print(data)
         if data is None:
             raise Exception("Request body is not a JSON.")
 

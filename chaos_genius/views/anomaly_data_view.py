@@ -4,7 +4,7 @@ import logging
 import time
 from collections import defaultdict
 from datetime import date, datetime, timedelta
-from typing import Any, Dict, List, Optional, Sequence, Tuple, cast
+from typing import Any, DefaultDict, Dict, List, Optional, Sequence, Tuple, cast
 
 import pandas as pd
 from flask.blueprints import Blueprint
@@ -426,7 +426,7 @@ def _get_dimensions_values(
 
     # series_type strings are in format {dimension1 == value1, dimension2 == value2,}
     # create a default dict mapping each dimension to a list of their values
-    dimension_values_dict = defaultdict(list)
+    dimension_values_dict: DefaultDict[str, List[str]] = defaultdict(list)
     for dim_val_row in results:
         for dimension in dim_val_row[0].keys():
             if dim_val_row[0][dimension] not in dimension_values_dict[dimension]:
@@ -443,10 +443,10 @@ def _get_dimensions_values(
                     "value": value,
                     "label_path_safe": make_path_safe(value),
                 }
-                for value in dimension_values_dict[dimension]
+                for value in sorted(dimension_values_dict[dimension])
             ],
         }
-        for dimension in dimension_values_dict
+        for dimension in sorted(dimension_values_dict)
     ]
 
     return dimension_values_list

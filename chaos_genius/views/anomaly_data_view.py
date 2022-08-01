@@ -406,7 +406,7 @@ def disable_anomaly(kpi_id):
             message = f"Falied to Disable Analytics for KPI ID: {kpi_id}"
             status = "failure"
     else:
-        message = f"KPI {kpi.id} could not be retreived."
+        message = f"KPI {kpi_id} could not be retreived."
         status = "failure"
     logger.info(message)
     return jsonify({"msg": message, "status": status})

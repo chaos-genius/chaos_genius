@@ -421,6 +421,9 @@ def enable_anomaly(kpi_id):
         else:
             message = f"Falied to Enable Analytics for KPI ID: {kpi_id}"
             status = "failure"
+    else:
+        message = "KPI Object is None"
+        status = "failure"
     logger.info(message)
     return jsonify({"msg": message, "status": status})
 

@@ -282,7 +282,6 @@ def all_dashboard_names() -> Dict[int, str]:
     return {
         row[0]: row[1]
         for row in db.session.query(Dashboard.id, Dashboard.name)
-        .filter(Dashboard.active == True)  # noqa: E712
         .order_by(Dashboard.name)
         .all()
     }

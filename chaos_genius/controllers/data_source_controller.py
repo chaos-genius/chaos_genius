@@ -146,7 +146,6 @@ def used_data_source_types() -> List[str]:
     return [
         row[0]
         for row in db.session.query(DataSource.connection_type)
-        .filter(DataSource.active == True)  # noqa: E712
         .order_by(DataSource.connection_type)
         .distinct()
         .all()

@@ -21,6 +21,7 @@ test_kpi = Kpi(
     table_name="ecom_retail_data",
     metric="ItemTotalPrice",
     aggregation="mean",
+    run_anomaly="true",
     datetime_column="date",
     filters=[],
     dimensions=["DayOfWeek", "PurchaseTime", "Country"],

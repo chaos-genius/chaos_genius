@@ -209,7 +209,7 @@ def kpi_anomaly_params(kpi_id: int):
 
     (This is where anomaly is setup/configured or updated).
     """
-    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
+    kpi = cast(Optional[Kpi], Kpi.get_by_id(kpi_id))
 
     if kpi is None:
         return (
@@ -336,7 +336,7 @@ def kpi_anomaly_params(kpi_id: int):
 def anomaly_settings_status(kpi_id: int):
     """Get anomaly status for a KPI."""
     logger.info(f"Retrieving anomaly settings for kpi: {kpi_id}")
-    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
+    kpi = cast(Optional[Kpi], Kpi.get_by_id(kpi_id))
 
     if kpi is None:
         return (
@@ -393,7 +393,7 @@ def kpi_anomaly_retraining(kpi_id: int):
 @blueprint.route("/<int:kpi_id>/disable-anomaly", methods=["GET", "POST"])
 def disable_anomaly(kpi_id): 
     """API end point which disables analytics by modifying the run_anomaly flag."""
-    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
+    kpi = cast(Optional[Kpi], Kpi.get_by_id(kpi_id))
     if kpi is not None:
         # check if anomaly is setup
         if kpi.run_anomaly and kpi.anomaly_params:
@@ -415,7 +415,7 @@ def disable_anomaly(kpi_id):
 @blueprint.route("/<int:kpi_id>/enable-anomaly", methods=["GET", "POST"])
 def enable_anomaly(kpi_id):
     """API end point which enables analytics by modifying the run_anomaly flag."""
-    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
+    kpi = cast(Optional[Kpi], Kpi.get_by_id(kpi_id))
     if kpi is not None:
         if (not kpi.run_anomaly) and kpi.anomaly_params:
             kpi.run_anomaly = True

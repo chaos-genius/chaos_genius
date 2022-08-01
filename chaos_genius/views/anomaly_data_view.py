@@ -391,7 +391,7 @@ def kpi_anomaly_retraining(kpi_id: int):
 
 
 @blueprint.route("/<int:kpi_id>/disable-anomaly", methods=["GET", "POST"])
-def disable_anomaly(kpi_id): 
+def disable_anomaly(kpi_id):
     """API end point which disables analytics by modifying the run_anomaly flag."""
     kpi = cast(Optional[Kpi], Kpi.get_by_id(kpi_id))
     if kpi is not None:
@@ -407,7 +407,11 @@ def disable_anomaly(kpi_id):
     else:
         message = f"KPI {kpi_id} could not be retreived."
         status = "failure"
-    logger.info(message)
+
+    if status == "success":
+        logger.info(message)
+    else:
+        logger.error(message)
     return jsonify({"msg": message, "status": status})
 
 
@@ -428,6 +432,11 @@ def enable_anomaly(kpi_id):
         message = f"KPI {kpi_id} could not be retreived"
         status = "failure"
     logger.info(message)
+
+    if status == "success":
+        logger.info(message)
+    else:
+        logger.error(message)
     return jsonify({"msg": message, "status": status})
 
 

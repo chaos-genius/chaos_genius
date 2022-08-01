@@ -233,6 +233,7 @@ def kpi_anomaly_params(kpi_id: int):
     # when it's POST, update anomaly params
 
     # check if this is first time anomaly setup or edit config
+    # add run_anomaly flag
     is_first_time = kpi.anomaly_params is None
 
     if is_first_time:
@@ -388,6 +389,24 @@ def kpi_anomaly_retraining(kpi_id: int):
     anomaly_task.apply_async()
     logger.info(f"Retraining started for KPI ID: {kpi_id}")
     return jsonify({"msg": f"retraining started for KPI: {kpi_id}"})
+
+
+@blueprint.route("/<int:kpi_id>/disable-anomaly", methods=["GET", "POST"])
+def disable_anomaly(kpi_id):
+    """API end point which disables analytics by modifying the run_anomaly flag."""
+    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
+    # check if anomaly is setup
+    if kpi.run_anomaly and kpi.anomaly_params:
+        kpi.run_anomaly = False
+        flag_modified(kpi, "run_anomaly")
+        kpi.update(commit=True)
+        message = f"Disabled Analytics for KPI ID: {kpi_id}"
+        status = "success"
+    else:
+        message = f"Falied to Disable Analytics for KPI ID: {kpi_id}"
+        status = "failure"
+    current_app.logger.info(message)
+    return jsonify({"msg": message, "status": status})
 
 
 def _get_dimensions_values(

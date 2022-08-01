@@ -88,6 +88,7 @@ def kpi():
             count_column=data.get("count_column"),
             filters=data.get("filters"),
             dimensions=data.get("dimensions"),
+            run_anomaly=False
         )
         # Perform KPI Validation
         status, message, tz_aware = validate_kpi(
@@ -402,6 +403,8 @@ def edit_kpi(kpi_id):
         kpi_obj = Kpi.get_by_id(kpi_id)
 
         data = request.get_json()
+        print("*********************")
+        print(data)
         if data is None:
             raise Exception("Request body is not a JSON.")
 
@@ -429,8 +432,8 @@ def edit_kpi(kpi_id):
                         "overall": True,
                         "subdim": True,
                     }
-
-                if kpi_obj.anomaly_params is not None and (
+                # add run_anomaly flag
+                if kpi_obj.run_anomaly and kpi_obj.anomaly_params is not None and (
                     "run_optional" not in kpi_obj.anomaly_params or (
                         kpi_obj.anomaly_params["run_optional"]["subdim"]
                         != run_optional["subdim"]

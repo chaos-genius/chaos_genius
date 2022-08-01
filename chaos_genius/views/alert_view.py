@@ -168,6 +168,8 @@ def edit_alert(alert_id):
 
         meta_info = Alert.meta_info()
         if data.get("alert_name") and data.get("alert_type"):
+            print("------------------------------")
+            print(data)
             if alert_obj:
                 for key, values in data.items():
                     if chech_editable_field(meta_info, key):

@@ -402,7 +402,7 @@ def disable_anomaly(kpi_id):
             message = f"Disabled Analytics for KPI ID: {kpi_id}"
             status = "success"
         else:
-            message = f"Falied to Disable Analytics for KPI ID: {kpi_id}"
+            message = f"Failed to Disable Anomaly because it is not enabled for KPI ID: {kpi_id}"
             status = "failure"
     else:
         message = f"KPI {kpi_id} could not be retreived."

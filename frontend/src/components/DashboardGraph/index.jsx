@@ -454,7 +454,8 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
             name: 'Value',
             id: 'first series',
             zIndex: 2,
-            type: 'line'
+            type: 'line',
+            showInLegend: false
           }
         ]
       };

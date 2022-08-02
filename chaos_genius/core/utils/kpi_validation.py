@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
+from pandas.api.types import is_float_dtype as is_float
 from pandas.api.types import is_integer_dtype as is_integer
 
 from chaos_genius.core.rca.root_cause_analysis import SUPPORTED_AGGREGATIONS
@@ -306,17 +307,21 @@ def _validate_count_column_is_number(
     df: pd.core.frame.DataFrame,
     count_column_name: Optional[str],
 ) -> Tuple[bool, str]:
-    """Validate if specified date column is parseable.
+    """Validate if specified count column is parseable.
 
     :param df: A pandas DataFrame
     :type df: pd.core.frame.DataFrame
     :param count_column_name: Name of the count column, relevant for preaggregated data
-    :type date_column_name: Optional[str]
+    :type count_column_name: Optional[str]
     :return: returns a tuple with the status as a bool and a status message
     :rtype: Tuple[bool, str]
     """
     # has to be integer if count_column_name exists, only then proceed else exit
-    if count_column_name and not (is_integer(df[count_column_name])):
+    if (
+        count_column_name
+        and not is_integer(df[count_column_name])
+        and not is_float(df[count_column_name])
+    ):
         invalid_type_err_msg = (
             "The count column is of the type"
             f" {df[count_column_name].dtype}, use 'cast' to convert to integer."

@@ -209,7 +209,7 @@ def kpi_anomaly_params(kpi_id: int):
 
     (This is where anomaly is setup/configured or updated).
     """
-    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
+    kpi = cast(Optional[Kpi], Kpi.get_by_id(kpi_id))
 
     if kpi is None:
         return (
@@ -336,7 +336,7 @@ def kpi_anomaly_params(kpi_id: int):
 def anomaly_settings_status(kpi_id: int):
     """Get anomaly status for a KPI."""
     logger.info(f"Retrieving anomaly settings for kpi: {kpi_id}")
-    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
+    kpi = cast(Optional[Kpi], Kpi.get_by_id(kpi_id))
 
     if kpi is None:
         return (
@@ -388,6 +388,59 @@ def kpi_anomaly_retraining(kpi_id: int):
     anomaly_task.apply_async()
     logger.info(f"Retraining started for KPI ID: {kpi_id}")
     return jsonify({"msg": f"retraining started for KPI: {kpi_id}"})
+
+
+@blueprint.route("/<int:kpi_id>/disable-anomaly", methods=["GET", "POST"])
+def disable_anomaly(kpi_id):
+    """API end point which disables analytics by modifying the run_anomaly flag."""
+    kpi = cast(Optional[Kpi], Kpi.get_by_id(kpi_id))
+    if kpi is not None:
+        # check if anomaly is setup
+        if kpi.run_anomaly and kpi.anomaly_params:
+            kpi.run_anomaly = False
+            kpi.update(commit=True)
+            message = f"Disabled Analytics for KPI ID: {kpi_id}"
+            status = "success"
+        else:
+            message = f"Failed to Disable Anomaly because it is not enabled for KPI ID: {kpi_id}"
+            status = "failure"
+    else:
+        message = f"KPI {kpi_id} could not be retreived."
+        status = "failure"
+
+    if status == "success":
+        logger.info(message)
+    else:
+        logger.error(message)
+    return jsonify({"msg": message, "status": status})
+
+
+@blueprint.route("/<int:kpi_id>/enable-anomaly", methods=["GET", "POST"])
+def enable_anomaly(kpi_id):
+    """API end point which enables analytics by modifying the run_anomaly flag."""
+    kpi = cast(Optional[Kpi], Kpi.get_by_id(kpi_id))
+    if kpi is not None:
+        if (not kpi.run_anomaly) and kpi.anomaly_params:
+            kpi.run_anomaly = True
+            kpi.update(commit=True)
+            message = f"Enabled Analytics for KPI ID: {kpi_id}"
+            status = "success"
+        else:
+            message = (
+                "Failed to Enable Anomaly because it is either already enabled"
+                f" or not set up for KPI ID: {kpi_id}"
+            )
+            status = "failure"
+    else:
+        message = f"KPI {kpi_id} could not be retreived"
+        status = "failure"
+    logger.info(message)
+
+    if status == "success":
+        logger.info(message)
+    else:
+        logger.error(message)
+    return jsonify({"msg": message, "status": status})
 
 
 def _get_dimensions_values(

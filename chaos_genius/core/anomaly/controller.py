@@ -257,6 +257,8 @@ class AnomalyDetectionController(object):
 
         anomaly_output["created_at"] = datetime.now()
 
+        anomaly_output["y"] = anomaly_output["y"].astype(float)
+
         anomaly_output.to_sql(
             AnomalyDataOutput.__tablename__,
             db.engine,

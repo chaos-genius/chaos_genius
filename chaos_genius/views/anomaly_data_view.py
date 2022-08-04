@@ -377,17 +377,28 @@ def anomaly_settings_status(kpi_id: int):
 def kpi_anomaly_retraining(kpi_id: int):
     """Delete all anomaly data and retrain anomaly for a KPI."""
     # delete all data in anomaly output table
-    delete_anomaly_output_for_kpi(kpi_id)
-
-    # add anomaly to queue
-    from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task
-
-    anomaly_task = ready_anomaly_task(kpi_id)
-    if anomaly_task is None:
-        return jsonify({"msg": f"retraining failed for KPI: {kpi_id}, KPI id is None"})
-    anomaly_task.apply_async()
-    logger.info(f"Retraining started for KPI ID: {kpi_id}")
-    return jsonify({"msg": f"retraining started for KPI: {kpi_id}"})
+    kpi = cast(Optional[Kpi], Kpi.get_by_id(kpi_id))
+    if kpi is not None:
+        if kpi.run_anomaly:
+            delete_anomaly_output_for_kpi(kpi_id)
+            # add anomaly to queue
+            from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task
+            anomaly_task = ready_anomaly_task(kpi_id)
+            if anomaly_task is None:
+                message = f"retraining failed for KPI: {kpi_id}, KPI id is None"
+                status = "failure"
+            else:
+                anomaly_task.apply_async()
+                logger.info(f"Retraining started for KPI ID: {kpi_id}")
+                message = f"retraining started for KPI: {kpi_id}"
+                status = "success"
+        else:
+            message = f"Please enable anomaly for KPI ID: {kpi_id} before retraining"
+            status = "failure" 
+    else:
+        message = f"KPI {kpi_id} could not be retreived."
+        status = "failure"
+    return jsonify({"msg": message, "status": status})
 
 
 @blueprint.route("/<int:kpi_id>/disable-anomaly", methods=["GET", "POST"])

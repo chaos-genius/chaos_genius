@@ -88,7 +88,7 @@ def kpi():
             count_column=data.get("count_column"),
             filters=data.get("filters"),
             dimensions=data.get("dimensions"),
-            run_anomaly=False
+            run_anomaly=True
         )
         # Perform KPI Validation
         status, message, tz_aware = validate_kpi(

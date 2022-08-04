@@ -396,7 +396,7 @@ def disable_anomaly(kpi_id):
     kpi = cast(Optional[Kpi], Kpi.get_by_id(kpi_id))
     if kpi is not None:
         # check if anomaly is setup
-        if kpi.run_anomaly and kpi.anomaly_params:
+        if kpi.anomaly_params:
             kpi.run_anomaly = False
             kpi.update(commit=True)
             message = f"Disabled Analytics for KPI ID: {kpi_id}"

@@ -379,7 +379,7 @@ def kpi_anomaly_retraining(kpi_id: int):
     # delete all data in anomaly output table
     kpi = cast(Optional[Kpi], Kpi.get_by_id(kpi_id))
     if kpi is not None:
-        if kpi.run_anomaly:
+        if kpi.run_anomaly and kpi.anomaly_params is not None:
             delete_anomaly_output_for_kpi(kpi_id)
             # add anomaly to queue
             from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task

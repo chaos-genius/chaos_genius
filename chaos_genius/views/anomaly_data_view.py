@@ -436,6 +436,10 @@ def enable_anomaly(kpi_id):
             kpi.update(commit=True)
             message = f"Enabled Analytics for KPI ID: {kpi_id}"
             status = "success"
+        elif not kpi.run_anomaly and kpi.anomaly_params is None:
+            message = f"KPI ID: {kpi_id}. Analytics enabled but is not configured. Please Configure it to run anomaly."
+            status = f"success"
+            logger.warn(message)
         else:
             message = (
                 "Failed to Enable Anomaly because it is either already enabled"
@@ -445,7 +449,6 @@ def enable_anomaly(kpi_id):
     else:
         message = f"KPI {kpi_id} could not be retreived"
         status = "failure"
-    logger.info(message)
 
     if status == "success":
         logger.info(message)

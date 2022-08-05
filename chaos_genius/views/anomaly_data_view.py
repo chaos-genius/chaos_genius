@@ -394,7 +394,7 @@ def kpi_anomaly_retraining(kpi_id: int):
                 status = "success"
         else:
             message = f"Please enable anomaly for KPI ID: {kpi_id} before retraining"
-            status = "failure" 
+            status = "failure"
     else:
         message = f"KPI {kpi_id} could not be retreived."
         status = "failure"
@@ -431,15 +431,16 @@ def enable_anomaly(kpi_id):
     """API end point which enables analytics by modifying the run_anomaly flag."""
     kpi = cast(Optional[Kpi], Kpi.get_by_id(kpi_id))
     if kpi is not None:
-        if (not kpi.run_anomaly) and kpi.anomaly_params:
+        if not kpi.run_anomaly:
             kpi.run_anomaly = True
             kpi.update(commit=True)
-            message = f"Enabled Analytics for KPI ID: {kpi_id}"
-            status = "success"
-        elif not kpi.run_anomaly and kpi.anomaly_params is None:
-            message = f"KPI ID: {kpi_id}. Analytics enabled but is not configured. Please Configure it to run anomaly."
-            status = f"success"
-            logger.warn(message)
+            if kpi.anomaly_params is not None:
+                message = f"Enabled Analytics for KPI ID: {kpi_id}"
+                status = "success"
+            else:
+                message = f"KPI ID: {kpi_id}. Analytics enabled but is not configured. Please Configure it to run anomaly."
+                status = "success"
+                logger.warn(message)
         else:
             message = (
                 "Failed to Enable Anomaly because it is either already enabled"

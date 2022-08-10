@@ -451,10 +451,11 @@ const Dashboardgraph = ({ kpi, kpiName, anomalystatus }) => {
           {
             color: '#60ca9a',
             data: line.map((linedata) => linedata.value),
-            name: monthWeek.grp1_name,
+            name: 'Value',
             id: 'first series',
             zIndex: 2,
-            type: 'line'
+            type: 'line',
+            showInLegend: false
           }
         ]
       };

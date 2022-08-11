@@ -177,6 +177,7 @@ const Alerts = () => {
         header: 'Successfully Deleted'
       });
       store.dispatch(RESET_DELETE_DATA);
+      dispatch(getAllAlerts(pgInfo));
     } else if (kpiAlertDeleteData && kpiAlertDeleteData.status === 'failure') {
       customToast({
         type: 'error',
@@ -184,6 +185,7 @@ const Alerts = () => {
         description: kpiAlertDeleteData.message
       });
       store.dispatch(RESET_DELETE_DATA);
+      dispatch(getAllAlerts(pgInfo));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kpiAlertDisableData, kpiAlertEnableData, kpiAlertDeleteData]);

@@ -78,7 +78,11 @@ class AnomalyDetectionController(object):
             self.debug = True
         if self.debug == "False":
             self.debug = False
-        self.slack = MAX_ANOMALY_SLACK_DAYS
+        self.slack = (
+            MAX_ANOMALY_SLACK_DAYS * 24
+            if self.kpi_info["anomaly_params"]["frequency"] == "H"
+            else MAX_ANOMALY_SLACK_DAYS
+        )
 
         if self.kpi_info["anomaly_params"]["frequency"] == "H":
             period = int(self.kpi_info["anomaly_params"]["anomaly_period"]) * 24

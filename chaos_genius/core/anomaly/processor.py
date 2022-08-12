@@ -3,6 +3,7 @@ import datetime
 import logging
 from typing import Dict, Tuple, Union
 
+import numpy as np
 import pandas as pd
 
 from chaos_genius.core.anomaly.constants import FREQUENCY_DELTA
@@ -109,16 +110,17 @@ class ProcessAnomalyDetection:
         """
         input_data = self.input_data
 
-        pred_series = pd.DataFrame(
-            columns=[
-                "dt",
-                "y",
-                "yhat_lower",
-                "yhat_upper",
-                "anomaly",
-                "severity",
-                "impact",
-            ]
+        pred_series_schema = {
+            "dt": np.datetime64,
+            "y": float,
+            "yhat_lower": float,
+            "yhat_upper": float,
+            "anomaly": int,
+            "severity": float,
+            "impact": float,
+        }
+        pred_series = pd.DataFrame(columns=pred_series_schema.keys()).astype(
+            pred_series_schema
         )
 
         input_last_date = input_data["dt"].iloc[-1]
@@ -192,16 +194,17 @@ class ProcessAnomalyDetection:
         days_to_train: int = None
     ) -> pd.DataFrame:
 
-        pred_series = pd.DataFrame(
-            columns=[
-                "dt",
-                "y",
-                "yhat_lower",
-                "yhat_upper",
-                "anomaly",
-                "severity",
-                "impact",
-            ]
+        pred_series_schema = {
+            "dt": np.datetime64,
+            "y": float,
+            "yhat_lower": float,
+            "yhat_upper": float,
+            "anomaly": int,
+            "severity": float,
+            "impact": float,
+        }
+        pred_series = pd.DataFrame(columns=pred_series_schema.keys()).astype(
+            pred_series_schema
         )
 
         input_first_date = input_data["dt"].iloc[0]
@@ -227,9 +230,7 @@ class ProcessAnomalyDetection:
                 )
                 prediction["y"] = df["y"].to_list()
 
-                prediction = pd.DataFrame(prediction.iloc[-1].copy()).T.reset_index(
-                    drop=True
-                )
+                prediction = prediction.iloc[[-1]]
 
                 prediction_with_metrics = self._calculate_metrics(
                     prediction,
@@ -247,9 +248,7 @@ class ProcessAnomalyDetection:
                 )
                 prediction["y"] = df["y"].to_list()
 
-                prediction = pd.DataFrame(prediction.iloc[-1].copy()).T.reset_index(
-                    drop=True
-                )
+                prediction = prediction.iloc[[-1]]
 
                 prediction_with_metrics = self._calculate_metrics(
                     prediction,

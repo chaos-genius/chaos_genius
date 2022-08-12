@@ -320,16 +320,17 @@ class StaticEventAlertController:
         subject = f"{self.alert_info['alert_name']} - Chaos Genius Event Alert❗"
         if not recipient_emails:
             return False, None
-        test = self.send_template_email(
-            template="missing_data_alert.html",
-            recipient_emails=recipient_emails,
-            subject=subject,
-            files=[],
-            alert_message=self.alert_info.get("alert_message", ""),
-            alert_frequency=self.alert_info.get("alert_frequency", "").capitalize(),
-            alert_name=self.alert_info.get("alert_name", ""),
-            preview_text="Missing Data Alert",
-        )
+        # test = self.send_template_email(
+        #     template="missing_data_alert.html",
+        #     recipient_emails=recipient_emails,
+        #     subject=subject,
+        #     files=[],
+        #     alert_message=self.alert_info.get("alert_message", ""),
+        #     alert_frequency=self.alert_info.get("alert_frequency", "").capitalize(),
+        #     alert_name=self.alert_info.get("alert_name", ""),
+        #     preview_text="Missing Data Alert",
+        # )
+        test = False
 
         return test, []
 

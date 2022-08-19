@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@amcharts/amcharts4": "^4.10.22",
+    "@amcharts/amcharts4": "^4.10.27",
     "@popperjs/core": "^2.9.2",
     "@ramonak/react-progress-bar": "^3.2.1",
     "@testing-library/jest-dom": "^5.11.4",

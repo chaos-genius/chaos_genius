@@ -6,7 +6,8 @@ SCHEMAS_AVAILABLE = {
     "Snowflake": True,
     "Druid": False,
     "AWS Athena": True,
-    "Databricks": True
+    "Databricks": True,
+    "ClickHouse": False
 }
 
 TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY = {
@@ -63,6 +64,13 @@ TABLE_VIEW_MATERIALIZED_VIEW_AVAILABILITY = {
         "tables": True,
         "views": True,
         "materialized_views": True,
+        "supported_aggregations": ["mean", "sum", "count"],
+        "supports_multidim_dd": True
+    },
+    "ClickHouse": {
+        "tables": True,
+        "views": False,
+        "materialized_views": False,
         "supported_aggregations": ["mean", "sum", "count"],
         "supports_multidim_dd": True
     },

@@ -23,6 +23,7 @@ sqlalchemy-redshift==0.8.6
 pydruid[sqlalchemy]~=0.6.2
 PyAthena[SQLAlchemy,Pandas]==2.5.2
 sqlalchemy-databricks==0.2.0
+clickhouse-sqlalchemy==0.2.1
 
 # Migrations
 Flask-Migrate==2.7.0

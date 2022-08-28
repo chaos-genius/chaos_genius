@@ -41,7 +41,10 @@
           },
           "required": [
             "host",
-            "port"
+            "port",
+            "username",
+            "password",
+            "database"
           ],
           "title": "ClickHouse Source Spec",
           "type": "object"

@@ -66,9 +66,8 @@ SOURCE_WHITELIST_AND_TYPE = {
     "5B45DB62-303C-4E70-92DA-419D3CDBD506": False,  # Druid
     "F2A65364-07BA-4542-BA1B-0805E5A0572D": False,  # AWS Athena
     "ba49e8e6-eed6-11ec-8ea0-0242ac120002": False,  # Databricks
-    "15323c3e-222d-11ed-861d-0242ac120002": False #Clickhouse
+    "15323c3e-222d-11ed-861d-0242ac120002": False  # Clickhouse
     # "29b409d9-30a5-4cc8-ad50-886eb846fea3", # Quickbooks
-    
 }
 
 # KEY: source configuration for creating the database connection

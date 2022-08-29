@@ -136,26 +136,23 @@ def register_hooks(app):
     def demo_endpoints_blocker():
         """Hook to allow access to only whitelisted APIs in demo."""
         if REACT_APP_IS_DEMO:
-
-            @app.before_request
-            def before_request():
-                if request.endpoint not in DEMO_ENDPOINT_WHITELIST:
+            if request.endpoint not in DEMO_ENDPOINT_WHITELIST:
+                return jsonify(
+                    {
+                        "status": "failure",
+                        "message": "Endpoint not accessible in demo version",
+                    }
+                )
+            else:
+                if request.method not in DEMO_ENDPOINT_WHITELIST[request.endpoint]:
                     return jsonify(
                         {
                             "status": "failure",
-                            "message": "Endpoint not accessible in demo version",
+                            "message": f"{request.method} method is not allowed for this endpoint in demo version",
                         }
                     )
                 else:
-                    if request.method not in DEMO_ENDPOINT_WHITELIST[request.endpoint]:
-                        return jsonify(
-                            {
-                                "status": "failure",
-                                "message": f"{request.method} method is not allowed for this endpoint in demo version",
-                            }
-                        )
-                    else:
-                        pass
+                    pass
 
 
 def register_commands(app):

@@ -124,6 +124,16 @@ class AlertsReportData(BaseModel):
             top_subdim_anomalies=top_subdim_anomalies,
         )
 
+    def all_points(self) -> List[AnomalyPointFormatted]:
+        """All anomaly points considered in the report."""
+        points = [
+            point
+            for trig_alert in self.triggered_alerts
+            for point in iterate_over_all_points(trig_alert.points, True)
+        ]
+
+        return points
+
     @property
     def has_anomalies(self) -> bool:
         """Whether any anomalies have been observed."""
@@ -243,21 +253,26 @@ def extract_anomaly_points_from_triggered_alerts(
                     "Error in extracting an anomaly point from triggered alert",
                     exc_info=e,
                 )
-        anomaly_points.extend(
-            AnomalyPointFormatted.from_points(
-                trig_alert_points,
-                time_series_frequency=getattr(
-                    kpi_cache.get(triggered_alert.kpi_id), "anomaly_params", {}
-                ).get("frequency"),
-                kpi_id=triggered_alert.kpi_id,
-                kpi_name=triggered_alert.kpi_name,
-                alert_id=triggered_alert.alert_conf_id,
-                alert_name=triggered_alert.alert_name,
-                alert_channel=triggered_alert.alert_channel,
-                alert_channel_conf=triggered_alert.alert_channel_conf,
-                include_subdims=triggered_alert.include_subdims,
-            )
+
+        anomaly_params = getattr(
+            kpi_cache.get(triggered_alert.kpi_id), "anomaly_params", {}
         )
+
+        # consider only KPIs which have anomaly enabled
+        if anomaly_params is not None:
+            anomaly_points.extend(
+                AnomalyPointFormatted.from_points(
+                    trig_alert_points,
+                    time_series_frequency=anomaly_params.get("frequency"),
+                    kpi_id=triggered_alert.kpi_id,
+                    kpi_name=triggered_alert.kpi_name,
+                    alert_id=triggered_alert.alert_conf_id,
+                    alert_name=triggered_alert.alert_name,
+                    alert_channel=triggered_alert.alert_channel,
+                    alert_channel_conf=triggered_alert.alert_channel_conf,
+                    include_subdims=triggered_alert.include_subdims,
+                )
+            )
 
     return anomaly_points
 

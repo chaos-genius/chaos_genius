@@ -187,7 +187,30 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
       anomalyCsv.length !== 0 &&
       anomalyCsv.status !== 'failure'
     ) {
-      downloadCsv(anomalyCsv, `KPI-${kpi}-anomaly-data.csv`);
+      let dimensionName = undefined;
+      let valueName = undefined;
+      if (dimension && dimensionOptions) {
+        const filterObj = dimensionOptions.find((option) => {
+          return option.value === dimension.value;
+        });
+        if (filterObj) {
+          dimensionName = filterObj.label_path_safe;
+        }
+      }
+      if (value && valueOptions) {
+        const filterObj = valueOptions.find((option) => {
+          return option.value === value.value;
+        });
+        if (filterObj) {
+          valueName = filterObj.label_path_safe;
+        }
+      }
+      downloadCsv(
+        anomalyCsv,
+        anomalyDetectionData?.kpi_name_path_safe && dimensionName && valueName
+          ? `chaosgenius_${anomalyDetectionData?.kpi_name_path_safe}_anomaly_data_${dimensionName}_${valueName}.csv`
+          : `chaosgenius_${anomalyDetectionData?.kpi_name_path_safe}_anomaly_data.csv`
+      );
       store.dispatch(RESET_CSV);
     } else if (
       anomalyCsv &&
@@ -542,7 +565,11 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
   };
 
   const handleDownloadClick = () => {
-    dispatch(anomalyDownloadCsv(kpi));
+    const params =
+      dimension?.value && value?.value !== undefined && value?.value !== null
+        ? { dimension: dimension?.value, value: value?.value }
+        : {};
+    dispatch(anomalyDownloadCsv(kpi, params));
   };
 
   return (
@@ -593,7 +620,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                               placeholder="select"
                               styles={customStyles}
                               classNamePrefix="selectcategory"
-                              isSearchable={false}
+                              isSearchable={true}
                               options={dimensionOptions}
                               onChange={(e) => handleDimensionChange(e)}
                             />
@@ -604,8 +631,8 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                               value={value}
                               placeholder="select"
                               styles={customStyles}
-                              classNamePrefix="selectcategory"
-                              isSearchable={false}
+                              classNamePrefix="select_value selectcategory"
+                              isSearchable={true}
                               options={valueOptions}
                               onChange={(e) => handleValueChange(e)}
                             />
@@ -613,7 +640,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                           {(dimension || value) && (
                             <div className="filter-container">
                               <span
-                                class="clear-filter"
+                                className="clear-filter"
                                 onClick={() => clearSubdimFilters()}>
                                 Clear filter
                               </span>

@@ -5,7 +5,7 @@ import contextlib
 import json
 import logging
 from datetime import date, datetime, timedelta
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import pandas as pd
 
@@ -76,7 +76,11 @@ class AnomalyDetectionController(object):
             self.debug = True
         if self.debug == "False":
             self.debug = False
-        self.slack = MAX_ANOMALY_SLACK_DAYS
+        self.slack = (
+            MAX_ANOMALY_SLACK_DAYS * 24
+            if self.kpi_info["anomaly_params"]["frequency"] == "H"
+            else MAX_ANOMALY_SLACK_DAYS
+        )
 
         if self.kpi_info["anomaly_params"]["frequency"] == "H":
             period = int(self.kpi_info["anomaly_params"]["anomaly_period"]) * 24
@@ -84,12 +88,23 @@ class AnomalyDetectionController(object):
 
         self._task_id = task_id
 
+        self.deviation_from_mean_dict = {}
+
         # TODO: Make this connection type agnostic.
-        conn_type = DataSource.get_by_id(
-            kpi_info["data_source"]
-        ).as_dict["connection_type"]
+        conn_type = DataSource.get_by_id(kpi_info["data_source"]).as_dict[
+            "connection_type"
+        ]
         self._preaggregated = conn_type == "Druid"
         self._preaggregated_count_col = self.kpi_info["count_column"]
+
+        if (
+            self._preaggregated
+            and self.kpi_info["metric"] == self._preaggregated_count_col
+        ):
+            logger.info(
+                "Preaggregated count column same as metric column. "
+                "`self._preaggregated_count_column` will be updated after data loading."
+            )
 
         logger.info(f"Anomaly controller initialized for KPI ID: {kpi_info['id']}")
 
@@ -108,17 +123,29 @@ class AnomalyDetectionController(object):
             period /= 24
 
         if not last_date:
-            return DataLoader(
+            dl = DataLoader(
                 self.kpi_info,
                 end_date=self.end_date,
                 days_before=period,
-            ).get_data()
-        start_date = last_date - timedelta(days=period)
-        return DataLoader(
-            self.kpi_info,
-            end_date=self.end_date,
-            start_date=start_date,
-        ).get_data()
+            )
+        else:
+            start_date = last_date - timedelta(days=period)
+            dl = DataLoader(
+                self.kpi_info,
+                end_date=self.end_date,
+                start_date=start_date,
+            )
+
+        df = dl.get_data()
+
+        # get new name of preaggregated count column if its the same as metric column
+        if (
+            self._preaggregated
+            and self.kpi_info["metric"] == self._preaggregated_count_col
+        ):
+            self._preaggregated_count_col = dl.pre_aggregated_count_column
+
+        return df
 
     def _get_last_date_in_db(self, series: str, subgroup: str = None) -> datetime:
         """Return the last date for which we have data for the given series.
@@ -144,8 +171,8 @@ class AnomalyDetectionController(object):
 
         # If last_datetime=2022-02-03 04:45:50 & offset=0,
         # then end_date_str=2022-02-03 04:00:00
-        end_date_str = (
-            last_datetime.floor(freq='H') - timedelta(hours=HOURS_OFFSET_FOR_ANALTYICS)
+        end_date_str = last_datetime.floor(freq="H") - timedelta(
+            hours=HOURS_OFFSET_FOR_ANALTYICS
         )
         # If end_date_str=2022-02-03 04:00:00
         # then we have complete data until 4PM (not inclusive)
@@ -164,7 +191,7 @@ class AnomalyDetectionController(object):
         last_date: datetime,
         series: str,
         subgroup: str,
-        freq,
+        freq: str,
     ) -> pd.DataFrame:
         """Detect anomalies in the given data.
 
@@ -174,6 +201,12 @@ class AnomalyDetectionController(object):
         :type input_data: pd.DataFrame
         :param last_date: Last date for which we have output data
         :type last_date: datetime
+        :param series: series name (overall, subdim or dq)
+        :type series: str
+        :param subgroup: subgroup identifier
+        :type subgroup: str
+        :param freq: frequency of data
+        :type freq: str
         :return: Dataframe with anomaly data
         :rtype: pd.DataFrame
         """
@@ -197,6 +230,7 @@ class AnomalyDetectionController(object):
             self.slack,
             series,
             subgroup,
+            self.deviation_from_mean_dict,
             self.kpi_info.get("model_kwargs", {}),
         ).predict()
 
@@ -231,24 +265,24 @@ class AnomalyDetectionController(object):
             AnomalyDataOutput.__tablename__,
             db.engine,
             if_exists="append",
-            chunksize=AnomalyDataOutput.__chunksize__
+            chunksize=AnomalyDataOutput.__chunksize__,
         )
 
-    def _querify(self, col_names, raw_combinations):
-        query_list = []
-        for comb in raw_combinations:
-            if type(comb) == str:
-                unjoined_query = [f'`{col_names[0]}` == "{comb}"']
-            elif type(comb) == tuple:
-                unjoined_query = [
-                    f'`{col_names[i]}` == "{comb[i]}"' for i in range(len(comb))
-                ]
-            query_string = " and ".join(unjoined_query)
-            query_list.append(query_string)
-        return query_list
+    def _get_dimension_combinations(
+        self, dimension_list: List[str]
+    ) -> Union[List[str], List[List[str]]]:
+        """Return list of subgroups combination.
 
-    def _get_dimension_combinations(self, dimension_list):
+        If multi-dimensional drilldowns is enabled:
+            Output is a single list of all valid subdims
+            [dimension1, dimension2, dimension3,.. ]
 
+        Else each valid dimension is a single list of its own:
+            [[dimension1], [dimension2], [dimension3],.. ]
+
+        :param dimension_list: List of valid subdims
+        :type dimension_list: List[str]
+        """
         if MULTIDIM_ANALYSIS_FOR_ANOMALY:
             # return subgroup combination of style AxBxC
             return [dimension_list]
@@ -305,15 +339,17 @@ class AnomalyDetectionController(object):
         :rtype: list
         """
         if self._preaggregated:
-            grouped_input_data = input_data.groupby(
-                self.kpi_info["dimensions"]
-            ).agg({self._preaggregated_count_col: "sum"}).rename(
-                columns={self._preaggregated_count_col: self.kpi_info["metric"]}
+            grouped_input_data = (
+                input_data.groupby(self.kpi_info["dimensions"])
+                .agg({self._preaggregated_count_col: "sum"})
+                .rename(
+                    columns={self._preaggregated_count_col: self.kpi_info["metric"]}
+                )
             )
         else:
-            grouped_input_data = input_data.groupby(
-                self.kpi_info["dimensions"]
-            ).agg({self.kpi_info["metric"]: "count"})
+            grouped_input_data = input_data.groupby(self.kpi_info["dimensions"]).agg(
+                {self.kpi_info["metric"]: "count"}
+            )
 
         filtered_subgroups = []
 
@@ -321,9 +357,7 @@ class AnomalyDetectionController(object):
             with contextlib.suppress(IndexError):
                 filter_data_len = get_subgroup_from_df(
                     grouped_input_data.reset_index(), subgroup
-                )[
-                    self.kpi_info["metric"]
-                ].sum()
+                )[self.kpi_info["metric"]].sum()
                 if filter_data_len >= MIN_DATA_IN_SUBGROUP:
                     filtered_subgroups.append((subgroup, filter_data_len))
         filtered_subgroups.sort(key=lambda x: x[1], reverse=True)
@@ -357,11 +391,11 @@ class AnomalyDetectionController(object):
 
             logger.info(f"Formatting input data for {series}-{subgroup}")
 
-            relevant_cols = [
-                dt_col,
-                metric_col,
-                self._preaggregated_count_col
-            ] if self._preaggregated else [dt_col, metric_col]
+            relevant_cols = (
+                [dt_col, self._preaggregated_count_col]
+                if self._preaggregated and agg == "count"
+                else [dt_col, metric_col]
+            )
 
             if series == "dq":
                 subgroup_str = subgroup["dq"]
@@ -374,7 +408,9 @@ class AnomalyDetectionController(object):
                     period,
                     self.end_date,
                     freq,
-                    self._preaggregated_count_col if self._preaggregated else None,
+                    self._preaggregated_count_col
+                    if self._preaggregated and agg == "count"
+                    else None,
                 )
 
                 if subgroup_str == "missing":
@@ -383,19 +419,25 @@ class AnomalyDetectionController(object):
                         dt_col,
                         metric_col,
                         RESAMPLE_FREQUENCY[freq],
-                        self._preaggregated_count_col if self._preaggregated else None
+                        self._preaggregated_count_col
+                        if self._preaggregated and agg == "count"
+                        else None,
                     )
 
                 else:
                     series_data = (
-                        temp_input_data.set_index(dt_col)
-                        .resample(RESAMPLE_FREQUENCY[freq])
-                        .agg({self._preaggregated_count_col: "sum"})
-                        .rename(columns={self._preaggregated_count_col: metric_col})
-                    ) if self._preaggregated and subgroup_str == "count" else (
-                        temp_input_data.set_index(dt_col)
-                        .resample(RESAMPLE_FREQUENCY[freq])
-                        .agg({metric_col: subgroup_str})
+                        (
+                            temp_input_data.set_index(dt_col)
+                            .resample(RESAMPLE_FREQUENCY[freq])
+                            .agg({self._preaggregated_count_col: "sum"})
+                            .rename(columns={self._preaggregated_count_col: metric_col})
+                        )
+                        if self._preaggregated and subgroup_str == "count"
+                        else (
+                            temp_input_data.set_index(dt_col)
+                            .resample(RESAMPLE_FREQUENCY[freq])
+                            .agg({metric_col: subgroup_str})
+                        )
                     )
 
             elif series == "overall":
@@ -408,7 +450,9 @@ class AnomalyDetectionController(object):
                     period,
                     self.end_date,
                     freq,
-                    self._preaggregated_count_col if self._preaggregated else None,
+                    self._preaggregated_count_col
+                    if self._preaggregated and agg == "count"
+                    else None,
                 )
 
                 if self._preaggregated:
@@ -417,9 +461,7 @@ class AnomalyDetectionController(object):
                             temp_input_data.set_index(dt_col)
                             .resample(RESAMPLE_FREQUENCY[freq])
                             .agg({self._preaggregated_count_col: "sum"})
-                            .rename(columns={
-                                self._preaggregated_count_col: metric_col
-                            })
+                            .rename(columns={self._preaggregated_count_col: metric_col})
                         )
                     elif agg == "sum":
                         series_data = (
@@ -439,9 +481,9 @@ class AnomalyDetectionController(object):
                     )
 
             elif series == "subdim":
-                temp_input_data = get_subgroup_from_df(
-                    input_data, subgroup
-                )[relevant_cols]
+                temp_input_data = get_subgroup_from_df(input_data, subgroup)[
+                    relevant_cols
+                ]
                 temp_input_data = fill_data(
                     temp_input_data,
                     dt_col,
@@ -450,7 +492,9 @@ class AnomalyDetectionController(object):
                     period,
                     self.end_date,
                     freq,
-                    self._preaggregated_count_col if self._preaggregated else None,
+                    self._preaggregated_count_col
+                    if self._preaggregated and agg == "count"
+                    else None,
                 )
 
                 if self._preaggregated:
@@ -459,9 +503,7 @@ class AnomalyDetectionController(object):
                             temp_input_data.set_index(dt_col)
                             .resample(RESAMPLE_FREQUENCY[freq])
                             .agg({self._preaggregated_count_col: "sum"})
-                            .rename(columns={
-                                self._preaggregated_count_col: metric_col
-                            })
+                            .rename(columns={self._preaggregated_count_col: metric_col})
                         )
                     elif agg == "sum":
                         series_data = (
@@ -490,7 +532,7 @@ class AnomalyDetectionController(object):
 
             # Fix end_date for hourly anomaly alerts
             if self.kpi_info["scheduler_params"]["scheduler_frequency"] == "H":
-                self.end_date = self.end_date.floor(freq='H')
+                self.end_date = self.end_date.floor(freq="H")
                 logger.info(
                     f"End Date for Hourly Input Dataframe for KPI {self.end_date}"
                 )
@@ -503,9 +545,17 @@ class AnomalyDetectionController(object):
 
         try:
             logger.info(f"Running anomaly detection for {series}-{subgroup}")
-            overall_anomaly_output = self._detect_anomaly(
-                model_name, series_data, last_date, series, subgroup, freq
-            )
+            if series == "overall":
+                (
+                    overall_anomaly_output,
+                    self.deviation_from_mean_dict,
+                ) = self._detect_anomaly(
+                    model_name, series_data, last_date, series, subgroup, freq
+                )
+            else:
+                overall_anomaly_output = self._detect_anomaly(
+                    model_name, series_data, last_date, series, subgroup, freq
+                )
         except Exception as e:  # noqa B902
             self._checkpoint_failure("Overall KPI - Anomaly Detector", e, is_overall)
             raise e
@@ -578,9 +628,9 @@ class AnomalyDetectionController(object):
             if self._preaggregated:
                 dq_list = ["count"]
             else:
-                dq_list = [
-                    "max", "count", "mean"
-                ] if agg != "mean" else ["max", "count"]
+                dq_list = (
+                    ["max", "count", "mean"] if agg != "mean" else ["max", "count"]
+                )
             is_categorical_metric = (
                 1 if input_data[self.kpi_info["metric"]].dtypes == "object" else 0
             )
@@ -640,18 +690,18 @@ class AnomalyDetectionController(object):
     @staticmethod
     def _to_run_overall(kpi_info: dict):
         run_optional = kpi_info.get("anomaly_params", {}).get("run_optional", None)
-
         return run_optional is None or run_optional["overall"] is True
 
     @staticmethod
     def _to_run_subdim(kpi_info: dict):
+        if len(kpi_info.get("dimensions", [])) == 0:
+            return False
         run_optional = kpi_info.get("anomaly_params", {}).get("run_optional", None)
         return run_optional is None or run_optional["subdim"] is True
 
     @staticmethod
     def _to_run_data_quality(kpi_info: dict):
         run_optional = kpi_info.get("anomaly_params", {}).get("run_optional", None)
-
         return run_optional is None or run_optional["data_quality"] is True
 
     def detect(self) -> None:

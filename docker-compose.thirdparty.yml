@@ -38,7 +38,7 @@ services:
 
   chaosgenius-server:
     container_name: chaosgenius-server
-    image: chaosgenius/chaosgenius-server:0.9.0
+    image: chaosgenius/chaosgenius-server:0.10.1
     command: sh setup/run-backend-docker.sh
     restart: unless-stopped
     volumes:
@@ -98,7 +98,7 @@ services:
 
   chaosgenius-webapp:
     container_name: chaosgenius-webapp
-    image: chaosgenius/chaosgenius-webapp:0.9.0
+    image: chaosgenius/chaosgenius-webapp:0.10.1
     command: >
       sh -c "npx react-inject-env set -d ./ &&
              nginx -g 'daemon off;'"
@@ -140,7 +140,7 @@ services:
     
   chaosgenius-scheduler:
     container_name: chaosgenius-scheduler
-    image: chaosgenius/chaosgenius-server:0.9.0
+    image: chaosgenius/chaosgenius-server:0.10.1
     command: celery -A run.celery beat --loglevel=DEBUG
     restart: unless-stopped
     environment:
@@ -177,7 +177,7 @@ services:
   
   chaosgenius-worker-analytics:
     container_name: chaosgenius-worker-analytics
-    image: chaosgenius/chaosgenius-server:0.9.0
+    image: chaosgenius/chaosgenius-server:0.10.1
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q anomaly-rca
     restart: unless-stopped
     environment:
@@ -231,7 +231,7 @@ services:
 
   chaosgenius-worker-alerts:
     container_name: chaosgenius-worker-alerts
-    image: chaosgenius/chaosgenius-server:0.9.0
+    image: chaosgenius/chaosgenius-server:0.10.1
     command: celery -A run.celery worker --loglevel=INFO --concurrency=2 -P processes -Q alerts
     restart: unless-stopped
     environment:
@@ -258,6 +258,23 @@ services:
       - INTEGRATION_DATABASE=${INTEGRATION_DATABASE}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - CACHE_DEFAULT_TIMEOUT=${CACHE_DEFAULT_TIMEOUT}
+      - MULTIDIM_ANALYSIS_FOR_ANOMALY=${MULTIDIM_ANALYSIS_FOR_ANOMALY}
+      - MAX_SUBDIM_CARDINALITY=${MAX_SUBDIM_CARDINALITY}
+      - TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN=${TOP_DIMENSIONS_FOR_ANOMALY_DRILLDOWN}
+      - MIN_DATA_IN_SUBGROUP=${MIN_DATA_IN_SUBGROUP}
+      - TOP_SUBDIMENSIONS_FOR_ANOMALY=${TOP_SUBDIMENSIONS_FOR_ANOMALY}
+      - MAX_ROWS_IN_KPI=${MAX_ROWS_IN_KPI}
+      - MAX_FILTER_SUBGROUPS_ANOMALY=${MAX_FILTER_SUBGROUPS_ANOMALY}
+      - MAX_SUMMARY_DEEPDRILLS_SLACK_DAYS=${MAX_SUMMARY_DEEPDRILLS_SLACK_DAYS}
+      - MAX_ANOMALY_SLACK_DAYS=${MAX_ANOMALY_SLACK_DAYS}
+      - DAYS_OFFSET_FOR_ANALTYICS=${DAYS_OFFSET_FOR_ANALTYICS}
+      - HOURS_OFFSET_FOR_ANALTYICS=${HOURS_OFFSET_FOR_ANALTYICS}
+      - DEEPDRILLS_HTABLE_MAX_PARENTS=${DEEPDRILLS_HTABLE_MAX_PARENTS}
+      - DEEPDRILLS_HTABLE_MAX_CHILDREN=${DEEPDRILLS_HTABLE_MAX_CHILDREN}
+      - DEEPDRILLS_HTABLE_MAX_DEPTH=${DEEPDRILLS_HTABLE_MAX_DEPTH}
+      - SUMMARY_DEEPDRILLS_ENABLED_TIME_RANGES=${SUMMARY_DEEPDRILLS_ENABLED_TIME_RANGES}
+      - DEEPDRILLS_ENABLED=${DEEPDRILLS_ENABLED}
       - REACT_APP_EVENT_ALERT=${REACT_APP_EVENT_ALERT}
       - SENTRY_DSN=${SENTRY_DSN}
       - CHAOSGENIUS_ENTERPRISE_EDITION_KEY=${CHAOSGENIUS_ENTERPRISE_EDITION_KEY}

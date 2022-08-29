@@ -142,8 +142,25 @@
         }
       }
     }
+
+    .range-category-description {
+      display: flex;
+      justify-content: space-between;
+      text-align: center;
+      span {
+        font-weight: $font-weight-400;
+        font-size: $font-size-10;
+        line-height: $line-height-14;
+        letter-spacing: $letter-spacing-point15;
+        color: $grey_variation-3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+    }
   }
 }
-.form-check.check-box {
+.form-check.check-box.kpialertconfig {
   margin-bottom: 0px;
 }

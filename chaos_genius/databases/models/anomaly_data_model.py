@@ -19,6 +19,7 @@ class AnomalyDataOutput(PkModel):
     yhat_lower = Column(db.Float)
     is_anomaly = Column(db.BigInteger)
     severity = Column(db.Float)
+    impact = Column(db.Float)
     kpi_id = Column(db.Integer, nullable=False)
     # overall, drilldown, data_quality
     anomaly_type = Column(db.String(80), nullable=False)
@@ -51,6 +52,7 @@ class AnomalyDataOutput(PkModel):
             "yhat_lower": self.yhat_lower,
             "is_anomaly": self.is_anomaly,
             "severity": self.severity,
+            "impact": self.impact,
             "kpi_id": self.kpi_id,
             "anomaly_type": self.anomaly_type,
             "series_type": self.series_type,

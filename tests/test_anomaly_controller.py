@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from datetime import datetime
 
 import pandas as pd
-from pandas.core.base import NoNewAttributesMixin
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from pandas.testing import assert_frame_equal
@@ -68,7 +67,7 @@ testdata_detect_anomaly = [
         "overall",
         None,
         "D",
-        pd.DataFrame(
+        [pd.DataFrame(
             {
                 "dt": [datetime(2022, 1, 16, 0, 0, 0)],
                 "y": [19353.0],
@@ -76,8 +75,9 @@ testdata_detect_anomaly = [
                 "yhat_upper": [21216.619383],
                 "anomaly": [0],
                 "severity": [0.0],
+                "impact": [0.0],
             }
-        ),
+        ), {}],
     ),
     (
         kpi_info_hourly,
@@ -87,16 +87,17 @@ testdata_detect_anomaly = [
         "overall",
         None,
         "H",
-        pd.DataFrame(
+        [pd.DataFrame(
             {
                 "dt": [datetime(2022, 1, 16, 0, 0, 0)],
                 "y": [6.81],
                 "yhat_lower": [9.582939],
                 "yhat_upper": [14.374409],
                 "anomaly": [-1],
-                "severity": [34.093368],
+                "severity": [34.071323],
+                "impact": [0.0]
             }
-        ),
+        ), {pd.Timestamp("2022-01-16 00:00:00"): 0.7138862287384846}],
     ),
 ]
 
@@ -135,9 +136,11 @@ def test_detect_anomaly(
 
     input_data = load_input_data(input_data_str)
     adc = AnomalyDetectionController(kpi_info, datetime(2022, 1, 16))
-    pred_series = adc._detect_anomaly(
+    pred_series, deviation_dict = adc._detect_anomaly(
         model_name, input_data, last_date, series, subgroup, frequency
     )
-    pred_series["anomaly"] = int(pred_series["anomaly"])
+    columns = ["y", "yhat_lower", "yhat_upper", "anomaly"]
+    pred_series[columns] = pred_series[columns].apply(pd.to_numeric)
 
-    assert_frame_equal(pred_series, expected)
+    assert_frame_equal(pred_series, expected[0])
+    assert deviation_dict == expected[1]

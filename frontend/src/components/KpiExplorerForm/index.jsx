@@ -226,11 +226,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
           const foundIndex = option.datasource.find((item) => {
             return +kpiEditData.data_source === +item.id;
           });
-          if (
-            foundIndex &&
-            foundIndex.connection_type === 'Druid' &&
-            !hasDruidDropDown
-          ) {
+          if (foundIndex && foundIndex.connection_type === 'Druid') {
             setHasDruidDropDown(true);
           }
         }
@@ -487,7 +483,7 @@ const KpiExplorerForm = ({ onboarding, setModal, setText }) => {
 
   const formOption = (e) => {
     //Add extra dropDown column for Druid
-    if (e.connection_type === 'Druid' && !hasDruidDropDown) {
+    if (e.connection_type === 'Druid') {
       setHasDruidDropDown(true);
     } else {
       setHasDruidDropDown(false);

@@ -32,7 +32,7 @@ class ClickHouseDb(BaseDb):
                 "Database Credential not found for ClickHouse."
             )
         self.sqlalchemy_db_uri = (
-            f"clickhouse+http://{username}:{password}@{host}:{port}/{database}"
+            f"clickhouse+native://{username}:{password}@{host}:{port}/{database}"
         )
         return self.sqlalchemy_db_uri
 

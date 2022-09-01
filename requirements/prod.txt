@@ -1,6 +1,13 @@
 # Everything needed in production
 requests==2.25.1
 
+# pinned transitive dependencies
+pyparsing==3.0.9
+python-dateutil==2.8.2
+pytz==2022.1
+PyJWT==2.4.0
+PyYAML==6.0
+pyOpenSSL==21.0.0
 
 # Flask
 Flask==2.0.0

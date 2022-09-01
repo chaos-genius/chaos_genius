@@ -2,7 +2,6 @@
 -r prod.txt
 
 # pinned transitive dependencies
-watchdog==2.1.8
 parse==1.19.0
 parse-type==0.6.0
 Mako==1.2.0

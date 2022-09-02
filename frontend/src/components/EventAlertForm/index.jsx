@@ -94,8 +94,12 @@ const EventAlertForm = ({
     if (alertFormData.data_source === 0 || alertFormData.data_source === null) {
       obj['data_source'] = 'Enter Data Source';
     }
-    if (alertFormData.alert_query === '') {
-      obj['alert_query'] = 'Enter Query';
+    if (
+      alertFormData.alert_query === '' ||
+      testQueryData?.data?.status === undefined ||
+      testQueryData?.data?.status === 'failure'
+    ) {
+      obj['alert_query'] = 'Enter Valid Query and Test';
     }
     if (alertFormData.alert_settings === '') {
       obj['alert_settings'] = 'Enter Alert Settings';

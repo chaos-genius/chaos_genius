@@ -52,7 +52,7 @@ const EventAlertForm = ({
   const { kpiFormLoading, kpiFormData, testQueryData } = useSelector(
     (state) => state.kpiExplorer
   );
-
+  const [testqrylocal, setTestqrylocal] = useState(testQueryData);
   const [option, setOption] = useState([]);
   const [datasourceid, setDataSourceId] = useState(undefined);
   const [query, setQuery] = useState(undefined);
@@ -96,8 +96,9 @@ const EventAlertForm = ({
     }
     if (
       alertFormData.alert_query === '' ||
-      testQueryData?.data?.status === undefined ||
-      testQueryData?.data?.status === 'failure'
+      testqrylocal === undefined ||
+      testqrylocal?.data?.status === undefined ||
+      testqrylocal?.data?.status === 'failure'
     ) {
       obj['alert_query'] = 'Enter Valid Query and Test';
     }
@@ -171,6 +172,7 @@ const EventAlertForm = ({
   }, [kpiFormData, connectionType]);
 
   useEffect(() => {
+    setTestqrylocal(testQueryData);
     if (
       testQueryData &&
       testQueryData?.data &&
@@ -193,6 +195,7 @@ const EventAlertForm = ({
         description: testQueryData?.data?.msg
       });
     }
+    setError({ ...error, alert_query: '' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [testQueryData]);
 
@@ -438,6 +441,7 @@ const EventAlertForm = ({
                 ...alertFormData,
                 alert_query: e.target.value
               });
+              setTestqrylocal(undefined);
             }}></textarea>
           <div className="test-query-connection">
             <div className="test-query" onClick={() => onTestQuery()}>

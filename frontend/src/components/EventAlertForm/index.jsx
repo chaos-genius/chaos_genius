@@ -167,18 +167,26 @@ const EventAlertForm = ({
   }, [kpiFormData, connectionType]);
 
   useEffect(() => {
-    if (testQueryData && testQueryData?.status === 'success') {
+    if (
+      testQueryData &&
+      testQueryData?.data &&
+      testQueryData?.data?.status === 'success'
+    ) {
       customToast({
         type: 'success',
         header: 'Test Connection Successful',
-        description: testQueryData.msg
+        description: testQueryData?.data?.msg
       });
     }
-    if (testQueryData && testQueryData?.status === 'failure') {
+    if (
+      testQueryData &&
+      testQueryData?.data &&
+      testQueryData?.data?.status === 'failure'
+    ) {
       customToast({
         type: 'error',
         header: 'Test Connection Failed',
-        description: testQueryData.msg
+        description: testQueryData?.data?.msg
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -93,7 +93,6 @@ def integration_connector():
 
 
 @click.command()
-@with_appcontext
 @click.option('--kpi', required=True, type=int, help="Perform the anomaly detection for given KPI.")
 @click.option('--end_date', type=str, help="Perform the anomaly detection for given KPI.")
 def run_anomaly(kpi, end_date):
@@ -112,7 +111,6 @@ def run_anomaly(kpi, end_date):
 
 
 @click.command()
-@with_appcontext
 @click.option('--kpi', required=True, type=int, help="Perform Root Cause Analysis for given KPI.")
 @click.option('--end_date', type=str, help="Set end date of analysis.")
 def run_rca(kpi, end_date):
@@ -147,7 +145,6 @@ def _fetch_metadata(id: int):
 
 
 @click.command()
-@with_appcontext
 @click.option(
     "--id", required=True, type=int, help="Fetch the metadata of provided data source."
 )
@@ -161,7 +158,6 @@ def fetch_metadata(id):
     
 
 @click.command()
-@with_appcontext
 @click.option(
     "--id",
     required=True,
@@ -182,7 +178,6 @@ def run_alert(id, last_anomaly_timestamp: datetime):
     click.echo(f"Completed the alert check for ID: {id}, with status: {status}.")
 
 @click.command()
-@with_appcontext
 @click.option("-f", "--frequency", required=True, type=str, help="Trigger Alert Digest for provided frequency.")
 def run_digest(frequency):
     """Trigger alert digests"""
@@ -193,7 +188,6 @@ def run_digest(frequency):
 
 
 @click.command()
-@with_appcontext
 def run_anomaly_rca_scheduler():
     """Run the anomaly_scheduler celery task.
 
@@ -206,7 +200,6 @@ def run_anomaly_rca_scheduler():
 
 
 @click.command()
-@with_appcontext
 def reinstall_db():
     """Delete the db and reinstall again."""
     from chaos_genius.databases.demo_data import install_demo_db
@@ -224,7 +217,6 @@ def reinstall_db():
 
 
 @click.command()
-@with_appcontext
 def insert_demo_data():
     """Insert the demo data."""
     install_demo_data()

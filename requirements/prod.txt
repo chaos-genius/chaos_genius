@@ -72,7 +72,7 @@ prophet==1.1
 # greykite==0.2.0
 
 # Forms
-WTForms==2.3.3
+WTForms==3.0.1
 
 # Deployment
 gunicorn>=19.9.0

@@ -65,18 +65,29 @@ class AlertDigestController:
         )
 
         for triggered_alert in triggered_alerts:
-            triggered_alert = preprocess_triggered_alert(
-                triggered_alert, self.alert_config_cache, self.kpi_cache
-            )
+            alert = self.alert_config_cache[triggered_alert.alert_conf_id]
+            if alert.active and alert.alert_status:
+                triggered_alert = preprocess_triggered_alert(
+                    triggered_alert, self.alert_config_cache, self.kpi_cache
+                )
 
-            if getattr(
-                self.alert_config_cache[triggered_alert.alert_conf_id],
-                ALERT_ATTRIBUTES_MAPPER[self.frequency],
-            ):
-                if triggered_alert.alert_channel == "slack":
-                    slack_alerts.append(triggered_alert)
-                if triggered_alert.alert_channel == "email":
-                    email_alerts.append(triggered_alert)
+                if getattr(
+                    self.alert_config_cache[triggered_alert.alert_conf_id],
+                    ALERT_ATTRIBUTES_MAPPER[self.frequency],
+                ):
+                    if triggered_alert.alert_channel == "slack":
+                        slack_alerts.append(triggered_alert)
+                    if triggered_alert.alert_channel == "email":
+                        email_alerts.append(triggered_alert)
+            else:
+                logger.info(
+                    (
+                        "Alert %d is inactive/deleted. "
+                        "Not including triggered alert %d in report."
+                    ),
+                    triggered_alert.alert_conf_id,
+                    triggered_alert.id,
+                )
 
         if len(email_alerts) > 0:
             report_data = AlertsReportData.from_triggered_alerts(

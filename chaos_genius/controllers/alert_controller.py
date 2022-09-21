@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*-
 """alert controlller."""
+import datetime
 from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, overload
 
 from flask_sqlalchemy import Pagination
+from sqlalchemy import delete
 
 from chaos_genius.databases.models.alert_model import Alert
+from chaos_genius.databases.models.triggered_alerts_model import (
+    TriggeredAlerts,
+    triggered_alerts_data_datetime,
+)
+from chaos_genius.extensions import db
+from chaos_genius.settings import DAYS_OFFSET_FOR_ANALTYICS
 
 ALERT_CHANNELS = {
     "email": "E-mail",
@@ -94,3 +102,45 @@ def get_alert_info(alert_id: int) -> Dict[str, Any]:
         raise Exception(f"Alert with ID {alert_id} does not exist.")
     else:
         return alert.as_dict
+
+
+def clear_triggered_alerts_from_offset(alert_ids: List[int]):
+    """Clear all triggered alerts data from T-offset day (inclusive)."""
+    db.session.execute(
+        delete(TriggeredAlerts)
+        .where(
+            (TriggeredAlerts.alert_conf_id.in_(alert_ids))
+            & (
+                triggered_alerts_data_datetime()
+                >= datetime.date.today()
+                - datetime.timedelta(days=DAYS_OFFSET_FOR_ANALTYICS)
+            ),
+        )
+        .execution_options(synchronize_session="fetch")
+    )
+    db.session.commit()
+
+
+def set_last_anomaly_timestamp_to_offset(alert: Alert, time_series_frequency: str):
+    """Set last_anomaly_timestamp such that the next alert runs for offset."""
+    if time_series_frequency == "D":
+        previous_point_offset = datetime.timedelta(days=1)
+    elif time_series_frequency == "H":
+        previous_point_offset = datetime.timedelta(hours=1)
+    else:
+        raise Exception(f"Invalid time series frequency: {time_series_frequency}")
+
+    just_before_offset = (
+        datetime.datetime.combine(datetime.date.today(), datetime.time())
+        - datetime.timedelta(days=DAYS_OFFSET_FOR_ANALTYICS)
+        - previous_point_offset
+    )
+
+    if alert.last_anomaly_timestamp is not None:
+        alert.last_anomaly_timestamp = min(
+            alert.last_anomaly_timestamp,
+            just_before_offset,
+        )
+    else:
+        alert.last_anomaly_timestamp = just_before_offset
+    db.session.commit()

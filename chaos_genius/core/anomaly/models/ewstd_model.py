@@ -52,8 +52,6 @@ class EWSTDModel(AnomalyModel):
         columns
         :rtype: pd.DataFrame
         """
-        df = df.rename(columns={"dt": "ds", "y": "y"})
-
         num_dev = EWSTDSENS[sensitivity.lower()]
 
         if pred_df is None:
@@ -62,9 +60,9 @@ class EWSTDModel(AnomalyModel):
             threshold_u = ew_mean + (num_dev * ew_std_dev)
             threshold_l = ew_mean - (num_dev * ew_std_dev)
             forecast_value = (threshold_l + threshold_u)/2
-            forecast_time = df['ds'].iloc[-1] + get_timedelta(frequency, 1)
+            forecast_time = df['dt'].iloc[-1] + get_timedelta(frequency, 1)
             df = df.append(
-                {'ds': forecast_time, 'y': forecast_value}, ignore_index=True)
+                {'dt': forecast_time, 'y': forecast_value}, ignore_index=True)
 
         df['ew_mean'] = df["y"].ewm(span=EWSTDFREQ[frequency]).mean()
         df['ew_std_dev'] = df["y"].ewm(span=EWSTDFREQ[frequency]).std().fillna(0)
@@ -72,13 +70,6 @@ class EWSTDModel(AnomalyModel):
         df['yhat_upper'] = df['ew_mean'] + (num_dev * df['ew_std_dev'])
         df['yhat'] = (df['yhat_lower'] + df['yhat_upper'])/2
 
-        df = df[["ds", "yhat", "yhat_lower", "yhat_upper"]]
+        df = df[["dt", "yhat", "yhat_lower", "yhat_upper"]]
 
-        return df.rename(
-            columns={
-                "ds": "dt",
-                "yhat": "y",
-                "yhat_lower": "yhat_lower",
-                "yhat_upper": "yhat_upper",
-            }
-        )
+        return df

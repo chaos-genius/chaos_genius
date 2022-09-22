@@ -43,8 +43,6 @@ class StandardDeviationModel(AnomalyModel):
         columns
         :rtype: pd.DataFrame
         """
-        df = df.rename(columns={"dt": "ds", "y": "y"})
-
         mean = df["y"].mean()
         std_dev = df["y"].std()
 
@@ -61,10 +59,10 @@ class StandardDeviationModel(AnomalyModel):
         threshold_l = mean - (num_dev_l * std_dev)
 
         if pred_df is None:
-            forecast_time = df["ds"].iloc[-1] + get_timedelta(frequency, 1)
+            forecast_time = df["dt"].iloc[-1] + get_timedelta(frequency, 1)
             forecast_value = (threshold_l + threshold_u) / 2
             df = df.append(
-                {"ds": forecast_time, "y": forecast_value}, ignore_index=True
+                {"dt": forecast_time, "y": forecast_value}, ignore_index=True
             )
 
         df["yhat_lower"] = threshold_l
@@ -72,16 +70,9 @@ class StandardDeviationModel(AnomalyModel):
         df["yhat"] = (threshold_l + threshold_u) / 2
 
         df_anomaly = self._detect_anomalies(df)
-        df_anomaly = df_anomaly[["ds", "yhat", "yhat_lower", "yhat_upper"]]
+        df_anomaly = df_anomaly[["dt", "yhat", "yhat_lower", "yhat_upper"]]
 
-        return df_anomaly.rename(
-            columns={
-                "ds": "dt",
-                "yhat": "y",
-                "yhat_lower": "yhat_lower",
-                "yhat_upper": "yhat_upper",
-            }
-        )
+        return df_anomaly
 
     def _detect_anomalies(self, forecast):
         forecasted = forecast[["ds", "yhat", "yhat_lower", "yhat_upper", "y"]].copy()

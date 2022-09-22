@@ -63,7 +63,7 @@ numpy==1.23.3
 numpyencoder==0.3.0
 pandas==1.5.0
 statsmodels==0.13.2
-prophet==1.1
+prophet==1.1.1
 # neuralprophet==0.2.7
 # greykite==0.2.0
 

@@ -65,7 +65,6 @@ matplotlib==3.4.2
 numpy==1.23.3
 numpyencoder==0.3.0
 pandas==1.4.4
-altair==4.1.0
 statsmodels==0.13.2
 prophet==1.1
 # neuralprophet==0.2.7

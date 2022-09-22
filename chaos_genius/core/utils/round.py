@@ -45,7 +45,7 @@ def round_column_in_df(df: pd.DataFrame, col: str):
 
     df[col] = np.where(
         # if value is not null
-        df[col],
+        df[col].notna(),
         np.where(
             # if value < 1, round to 3 decimals
             col_abs < 1,

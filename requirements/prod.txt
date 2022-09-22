@@ -58,7 +58,7 @@ pyarrow==8.0.0
 Flask-Migrate==3.1.0
 
 # Alert
-slack-sdk==3.18.2
+slack-sdk==3.18.3
 
 # Data Analysis
 matplotlib==3.4.2

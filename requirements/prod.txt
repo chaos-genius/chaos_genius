@@ -48,7 +48,7 @@ snowflake-sqlalchemy==1.4.1
 snowflake-connector-python[pandas]==2.7.12
 sqlalchemy-redshift==0.8.11
 # For apache druid
-pydruid[sqlalchemy]==0.6.3
+pydruid[sqlalchemy]==0.6.4
 PyAthena[SQLAlchemy,Pandas]==2.14.0
 sqlalchemy-databricks==0.2.0
 clickhouse-sqlalchemy==0.2.2
@@ -58,7 +58,7 @@ pyarrow==8.0.0
 Flask-Migrate==3.1.0
 
 # Alert
-slack-sdk==3.18.2
+slack-sdk==3.18.3
 
 # Data Analysis
 matplotlib==3.4.2

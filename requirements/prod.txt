@@ -14,7 +14,7 @@ websocket-client==1.4.1
 vine==5.0.0
 urllib3==1.26.12
 typing_extensions==4.3.0
-tqdm==4.64.0
+tqdm==4.64.1
 tenacity==8.0.1
 six==1.16.0
 setuptools-git==1.2
@@ -61,7 +61,7 @@ slack-sdk==3.18.3
 matplotlib==3.4.2
 numpy==1.23.3
 numpyencoder==0.3.0
-pandas==1.4.4
+pandas==1.5.0
 statsmodels==0.13.2
 prophet==1.1
 # neuralprophet==0.2.7

@@ -336,7 +336,9 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
             );
             const expected_value = graphData?.expected_values?.find((row) => {
               return row[0] === this.x;
-            });
+            })[1];
+            console.log(graphData);
+            console.log(expected_value);
             let s = 'Value: <b>' + Highcharts.numberFormat(this.y, 2) + '</b>';
             s =
               s +

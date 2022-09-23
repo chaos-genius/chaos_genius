@@ -146,7 +146,7 @@ const Anomalygraph = ({ drilldown }) => {
             );
             const expected_value = graphData?.expected_values?.find((row) => {
               return row[0] === this.x;
-            });
+            })[1];
             let s = 'Value: <b>' + Highcharts.numberFormat(this.y, 2) + '</b>';
             s =
               s +

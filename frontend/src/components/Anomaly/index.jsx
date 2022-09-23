@@ -345,7 +345,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
               expected_value !== null &&
               !isNaN(expected_value)
                 ? expected_value
-                : ' - ') +
+                : 'N/A') +
               '</b>';
             s =
               s +

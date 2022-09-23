@@ -67,22 +67,22 @@ def change_message_from_percent(percent_change: Union[str, int, float]) -> str:
 
 
 def find_percentage_change(
-    curr_val: Union[int, float], prev_val: Optional[Union[int, float]]
+    actual_val: Union[int, float], expected_val: Optional[Union[int, float]]
 ) -> Union[int, float, str]:
-    """Calculates percentage change between previous and current value."""
-    if prev_val is None:
-        # previous point wasn't found
-        return "–"
-    elif curr_val == 0 and prev_val == curr_val:
-        # both current and previous value are 0
-        return "–"
-    elif prev_val == 0:
+    """Calculates percentage change between expected and actual value."""
+    if expected_val is None:
+        # expected value has not been calculated for this point
+        return "N/A"
+    elif actual_val == 0 and expected_val == actual_val:
+        # both current and expected value are 0
+        return 0
+    elif expected_val == 0:
         # previous value is 0, but current value isn't
-        sign_ = "+" if curr_val > 0 else "-"
+        sign_ = "+" if actual_val > 0 else "-"
         return sign_ + "inf"
     else:
-        change = curr_val - prev_val
-        percentage_change = (change / prev_val) * 100
+        change = actual_val - expected_val
+        percentage_change = (change / expected_val) * 100
         return round_number(percentage_change)
 
 

@@ -79,6 +79,8 @@ class AnomalyPointOriginal(BaseModel):
 
     # y-value of point
     y: float
+    # model prediction (expected value)
+    yhat: Optional[float]
     # lower bound of expected value
     yhat_lower: float
     # upper bound of expected value
@@ -232,15 +234,14 @@ class AnomalyPoint(AnomalyPointOriginal):
         relevant_subdims: Optional[List["AnomalyPoint"]],
     ) -> "AnomalyPoint":
         y = round(point.y, 2)
+        yhat = round(point.yhat, 2) if point.yhat is not None else None
         yhat_lower = round(point.yhat_lower, 2)
         yhat_upper = round(point.yhat_upper, 2)
         severity = round(point.severity)
 
         series_type = point.series_type
 
-        percent_change = find_percentage_change(
-            point.y, previous_anomaly_point.y if previous_anomaly_point else None
-        )
+        percent_change = find_percentage_change(point.y, point.yhat)
         change_message = change_message_from_percent(percent_change)
 
         previous_value = (
@@ -251,6 +252,7 @@ class AnomalyPoint(AnomalyPointOriginal):
 
         return AnomalyPoint(
             y=y,
+            yhat=yhat,
             yhat_lower=yhat_lower,
             yhat_upper=yhat_upper,
             severity=severity,
@@ -1161,6 +1163,7 @@ def _format_anomaly_point_for_template(
 
 def top_anomalies(points: Iterable[TAnomalyPointOrig], n=10) -> List[TAnomalyPointOrig]:
     """Returns top n anomalies according to severity."""
+    # TODO: how to incorporate impact here?
     return heapq.nlargest(n, points, key=lambda point: point.severity)
 
 

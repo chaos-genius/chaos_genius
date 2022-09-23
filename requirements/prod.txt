@@ -22,7 +22,7 @@ scipy==1.8.1
 fsspec==2022.8.2
 s3fs==2022.8.2
 PyHive==0.6.5
-pycryptodomex==3.14.1
+pycryptodomex==3.15.0
 
 # Flask
 Flask==2.2.2

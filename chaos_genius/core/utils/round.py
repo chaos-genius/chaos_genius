@@ -63,5 +63,5 @@ def round_column_in_df(df: pd.DataFrame, col: str):
                 ),
             ),
         ),
-        df[col]
+        None,
     )

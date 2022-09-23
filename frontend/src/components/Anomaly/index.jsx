@@ -334,16 +334,25 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
             const severity_score = graphData.severity.find(
               (row) => row[0] === this.x
             );
-            let s =
-              'Confidence Interval: <b>' +
-              intervals[1] +
-              ' - ' +
-              intervals[2] +
+            const expected_value = graphData?.expected_values?.find((row) => {
+              return row[0] === this.x;
+            });
+            let s = 'Value: <b>' + Highcharts.numberFormat(this.y, 2) + '</b>';
+            s =
+              s +
+              '<br>Expected Value: <b>' +
+              (expected_value !== undefined &&
+              expected_value !== null &&
+              !isNaN(expected_value)
+                ? expected_value
+                : ' - ') +
               '</b>';
             s =
               s +
-              '<br>Value: <b>' +
-              Highcharts.numberFormat(this.y, 2) +
+              '<br>Expected Range: <b>' +
+              intervals[1] +
+              ' - ' +
+              intervals[2] +
               '</b>';
             s = s + '<br>Severity: <b>' + severity_score[1] + '</b>';
             s =

@@ -174,12 +174,15 @@ class ProcessAnomalyDetection:
 
                     prediction = prediction.iloc[[-1]]
 
-                    pred_series = pred_series.append(
-                        self._calculate_metrics(
-                            prediction,
-                            df.iloc[:-1]["y"].mean(),
-                            df.iloc[:-1]["y"].std(),
-                        ),
+                    pred_series = pd.concat(
+                        [
+                            pred_series,
+                            self._calculate_metrics(
+                                prediction,
+                                df.iloc[:-1]["y"].mean(),
+                                df.iloc[:-1]["y"].std(),
+                            )
+                        ],
                         ignore_index=True,
                     )
 

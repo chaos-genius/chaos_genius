@@ -61,8 +61,12 @@ class StandardDeviationModel(AnomalyModel):
         if pred_df is None:
             forecast_time = df["dt"].iloc[-1] + get_timedelta(frequency, 1)
             forecast_value = (threshold_l + threshold_u) / 2
-            df = df.append(
-                {"dt": forecast_time, "y": forecast_value}, ignore_index=True
+            df = pd.concat(
+                [
+                    df,
+                    pd.DataFrame({'dt': forecast_time, 'y': forecast_value}, index=[0])
+                ],
+                ignore_index=True
             )
 
         df["yhat_lower"] = threshold_l

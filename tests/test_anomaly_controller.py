@@ -71,6 +71,7 @@ testdata_detect_anomaly = [
             {
                 "dt": [datetime(2022, 1, 16, 0, 0, 0)],
                 "y": [19353.0],
+                "yhat": [17680.51615244616],
                 "yhat_lower": [14144.412922],
                 "yhat_upper": [21216.619383],
                 "anomaly": [0],
@@ -91,11 +92,12 @@ testdata_detect_anomaly = [
             {
                 "dt": [datetime(2022, 1, 16, 0, 0, 0)],
                 "y": [6.81],
+                "yhat": [11.978673964933531],
                 "yhat_lower": [9.582939],
                 "yhat_upper": [14.374409],
                 "anomaly": [-1],
                 "severity": [34.071323],
-                "impact": [0.0]
+                "impact": [0.0],
             }
         ), {pd.Timestamp("2022-01-16 00:00:00"): 0.7138862287384846}],
     ),
@@ -139,8 +141,8 @@ def test_detect_anomaly(
     pred_series, deviation_dict = adc._detect_anomaly(
         model_name, input_data, last_date, series, subgroup, frequency
     )
-    columns = ["y", "yhat_lower", "yhat_upper", "anomaly"]
-    pred_series[columns] = pred_series[columns].apply(pd.to_numeric)
+    # columns = ["y", "yhat_lower", "yhat_upper", "anomaly"]
+    # pred_series[columns] = pred_series[columns].apply(pd.to_numeric)
 
     assert_frame_equal(pred_series, expected[0])
     assert deviation_dict == expected[1]

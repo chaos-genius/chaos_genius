@@ -25,8 +25,8 @@ ANOMALY_TABLE_COLUMN_NAMES_MAPPER = {
     "series_type": "Dimension",
     "data_datetime": "Time of Occurrence",
     "y": "Value",
+    "yhat": "Expected Value",
     "severity": "Severity Score",
-    "change_message": "Change",
     "expected_range": "Expected Range",
     "previous_value": "Previous Value",
 }
@@ -38,7 +38,7 @@ ANOMALY_TABLE_COLUMN_NAMES_ORDERED = [
     "data_datetime",
     "y",
     "previous_value",
-    "change_message",
+    "yhat",
     "severity",
     "expected_range",
 ]

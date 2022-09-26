@@ -138,12 +138,12 @@
     {% else -%}
         {% if point.y > point.previous_value %}
             <strong style="color: rgb(6, 182, 212);">
-                ↑ {{ point.formatted_change_percent }}
+                ↑ {{ point.percent_change_formatted }}
                 Spike
             </strong>
         {% elif point.y < point.previous_value %}
             <strong style="color: orange;">
-                ↓ {{ point.formatted_change_percent }}
+                ↓ {{ point.percent_change_formatted }}
                 Drop
             </strong>
         {% endif %}
@@ -201,7 +201,7 @@
 
         {%- endif %}
 
-        <!--(<span style="{{ important_text }}">{{ point.formatted_change_percent }}</span>)--><!--
+        <!--(<span style="{{ important_text }}">{{ point.percent_change_formatted }}</span>)--><!--
 
      -->{% if point.is_hourly -%}
             <span style="{{ non_important_text }}">

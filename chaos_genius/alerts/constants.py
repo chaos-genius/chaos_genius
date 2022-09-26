@@ -27,7 +27,7 @@ ANOMALY_TABLE_COLUMN_NAMES_MAPPER = {
     "y": "Value",
     "severity": "Severity Score",
     "change_message": "Change",
-    "expected_value": "Expected Value",
+    "expected_range": "Expected Range",
     "previous_value": "Previous Value",
 }
 ANOMALY_REPORT_COLUMN_NAMES_MAPPER = dict(
@@ -40,7 +40,7 @@ ANOMALY_TABLE_COLUMN_NAMES_ORDERED = [
     "previous_value",
     "change_message",
     "severity",
-    "expected_value",
+    "expected_range",
 ]
 ANOMALY_REPORT_COLUMN_NAMES_ORDERED = ["kpi_name"] + ANOMALY_TABLE_COLUMN_NAMES_ORDERED
 

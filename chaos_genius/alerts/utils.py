@@ -47,25 +47,6 @@ def webapp_url_prefix():
     return f"{CHAOSGENIUS_WEBAPP_URL}{forward_slash}"
 
 
-def change_message_from_percent(percent_change: Union[str, int, float]) -> str:
-    """Creates a change message from given percentage change.
-
-    percent_change will be:
-        - "–" in case the last data point was missing or both the points had values 0
-        - 0 (int) in case there was no change
-        - positive value (int/float) in case there was an increase
-        - negative value (int/float) in case there was a decrease
-    """
-    if isinstance(percent_change, str):
-        return percent_change
-    elif percent_change == 0:
-        return "No change (–)"
-    elif percent_change > 0:
-        return f"Increased by ({percent_change}%)"
-    else:
-        return f"Decreased by ({percent_change}%)"
-
-
 def find_percentage_change(
     actual_val: Union[int, float], expected_val: Optional[Union[int, float]]
 ) -> Union[int, float, str]:

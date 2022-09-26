@@ -105,9 +105,6 @@
                                             Channel
                                         </th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
-                                            Change
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
                                             Date
                                         </th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
@@ -115,6 +112,9 @@
                                         </th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle desc">
                                             Severity Score
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
+                                            Alert Description
                                         </th>
                                     </tr>
                                 </thead>
@@ -362,15 +362,6 @@
                       {% endfor %}
                   ],
                   "{{ point.alert_channel }}",
-                  {% if point.percent_change is string %}
-                    "{{ point.percent_change_formatted }}",
-                  {% else %}
-                    {% if point.percent_change >= 0 %}
-                        "<span style=\"color: rgb(96, 202, 154); font-weight: 600;\">{{ point.percent_change_formatted }} higher</span> than expected",
-                    {% else %}
-                        "<span style=\"color: #FF2C1F; font-weight: 600;\">{{ point.percent_change_formatted }} lower</span> than expected",
-                    {% endif %}
-                  {% endif %}
                   "{{ point.date_only }}",
                   "{{ point.expected_range }}",
                   `{% if point.severity >= 65 %}
@@ -386,7 +377,16 @@
   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 </svg>
                     {% endif %}
-                        {{ point.severity }}</span>`,
+                  {{ point.severity }}</span>`,
+                  {% if point.percent_change is string %}
+                    "{{ point.percent_change_formatted }}",
+                  {% else %}
+                    {% if point.percent_change >= 0 %}
+                        "<span style=\"color: rgb(96, 202, 154); font-weight: 600;\">{{ point.percent_change_formatted }} higher</span> than expected",
+                    {% else %}
+                        "<span style=\"color: #FF2C1F; font-weight: 600;\">{{ point.percent_change_formatted }} lower</span> than expected",
+                    {% endif %}
+                  {% endif %}
                 ],
             {% endfor %}
         ];
@@ -406,14 +406,15 @@
         dataTableAnomaly.kpiIdColIndex = 3;
         dataTableAnomaly.emailColIndex = 9;
         dataTableAnomaly.channelColIndex = 10;
-        dataTableAnomaly.dateOnlyColIndex = 12;
+        dataTableAnomaly.dateOnlyColIndex = 11;
         dataTableAnomaly.valueColIndex = 6;
         dataTableAnomaly.previousValueColIndex = 7;
         dataTableAnomaly.expectedValueColIndex = 8;
         dataTableAnomaly.dimensionColIndex = 4;
         dataTableAnomaly.timeStampColIndex = 5;
-        dataTableAnomaly.expectedRangeColIndex = 13;
-        dataTableAnomaly.severityColIndex = 14;
+        dataTableAnomaly.expectedRangeColIndex = 12;
+        dataTableAnomaly.severityColIndex = 13;
+        dataTableAnomaly.alertDescColIndex = 14;
 
         dataTableAnomaly.on('datatable.init', function(args) {
             dataTableAnomaly.head.getElementsByTagName('th')[dataTableAnomaly.valueColIndex].getElementsByTagName('a')[0].classList.add('desc');

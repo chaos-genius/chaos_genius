@@ -89,11 +89,11 @@
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle desc">
                                             Timestamp
                                         </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle desc">
-                                            Actual Value
-                                        </th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
                                             Previous Value
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle desc">
+                                            Actual Value
                                         </th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider align-middle">
                                             Expected Value
@@ -353,8 +353,8 @@
                   "{{ point.kpi_id }}",
                   "{{ point.series_type_name }}",
                   "{{ point.readable_data_timestamp }}",
-                  "{{ point.y }}",
                   "{{ point.previous_value if point.previous_value is not none else "-" }}",
+                  "{{ point.y }}",
                   "{{ point.yhat if point.yhat is not none else "N/A" }}",
                   [
                       {% for email in (point.alert_channel_conf or []) %}
@@ -407,8 +407,8 @@
         dataTableAnomaly.emailColIndex = 9;
         dataTableAnomaly.channelColIndex = 10;
         dataTableAnomaly.dateOnlyColIndex = 11;
-        dataTableAnomaly.valueColIndex = 6;
-        dataTableAnomaly.previousValueColIndex = 7;
+        dataTableAnomaly.valueColIndex = 7;
+        dataTableAnomaly.previousValueColIndex = 6;
         dataTableAnomaly.expectedValueColIndex = 8;
         dataTableAnomaly.dimensionColIndex = 4;
         dataTableAnomaly.timeStampColIndex = 5;

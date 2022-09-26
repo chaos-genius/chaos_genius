@@ -24,7 +24,7 @@ ALERT_DATE_CSV_FILENAME_FORMAT_REPORT = "%Y-%m-%d"
 ANOMALY_TABLE_COLUMN_NAMES_MAPPER = {
     "series_type": "Dimension",
     "data_datetime": "Time of Occurrence",
-    "y": "Value",
+    "y": "Actual Value",
     "yhat": "Expected Value",
     "severity": "Severity Score",
     "expected_range": "Expected Range",
@@ -36,8 +36,8 @@ ANOMALY_REPORT_COLUMN_NAMES_MAPPER = dict(
 ANOMALY_TABLE_COLUMN_NAMES_ORDERED = [
     "series_type",
     "data_datetime",
-    "y",
     "previous_value",
+    "y",
     "yhat",
     "severity",
     "expected_range",

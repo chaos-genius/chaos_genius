@@ -61,8 +61,13 @@ class EWSTDModel(AnomalyModel):
             threshold_l = ew_mean - (num_dev * ew_std_dev)
             forecast_value = (threshold_l + threshold_u)/2
             forecast_time = df['dt'].iloc[-1] + get_timedelta(frequency, 1)
-            df = df.append(
-                {'dt': forecast_time, 'y': forecast_value}, ignore_index=True)
+            df = pd.concat(
+                [
+                    df,
+                    pd.DataFrame({'dt': forecast_time, 'y': forecast_value}, index=[0])
+                ],
+                ignore_index=True
+            )
 
         df['ew_mean'] = df["y"].ewm(span=EWSTDFREQ[frequency]).mean()
         df['ew_std_dev'] = df["y"].ewm(span=EWSTDFREQ[frequency]).std().fillna(0)

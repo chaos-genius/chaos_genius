@@ -268,57 +268,26 @@ def anomaly_point_formatting(
 
     include_kpi_name = kpi_link_prefix is not None
 
-    if point.previous_value is None or point.y == point.previous_value:
+    if isinstance(point.percent_change, str):
         out += "- :black_circle_for_record: Anomalous behavior"
-
-        if include_kpi_name:
-            out += f" in *{kpi_name_link(kpi_link_prefix, point)}* "
-            if point.is_subdim:
-                out += f"{subdim_name_link(point)} "
-        else:
-            out += " detected "
-            if point.is_subdim:
-                out += f"in {subdim_name_link(point)} "
-
-        if point.previous_value is None:
-            out += f"- changed to *{point.y_readable}*"
-            if point.is_hourly:
-                out += f" at {point.anomaly_time_only}"
-        else:
-            if point.is_hourly:
-                out += (
-                    f"- with constant value *{point.y_readable}*"
-                    + f" from {point.previous_point_time_only}"
-                    + f" to {point.anomaly_time_only}"
-                )
-            else:
-                out += f"- with same value *{point.y_readable}* as previous day"
-
+    elif point.percent_change >= 0:
+        out += f"- :arrow_up: {point.percent_change_formatted} higher than expected"
     else:
-        if point.y > point.previous_value:
-            out += f"- :arrow_up: {point.formatted_change_percent} Spike"
-        elif point.y < point.previous_value:
-            out += f"- :arrow_down_small: {point.formatted_change_percent} Drop"
+        out += (
+            f"- :arrow_down_small: {point.percent_change_formatted} lower than expected"
+        )
 
-        if include_kpi_name:
-            out += f" in *{kpi_name_link(kpi_link_prefix, point)}* "
-            if point.is_subdim:
-                out += f"{subdim_name_link(point)} "
-        else:
-            out += " detected "
-            if point.is_subdim:
-                out += f"in {subdim_name_link(point)} "
+    out += " - "
 
-        out += f"- changed to *{point.y_readable}*"
+    if include_kpi_name:
+        out += f"*{kpi_name_link(kpi_link_prefix, point)}* "
 
-        if point.previous_value_readable is not None:
-            out += f" from {point.previous_value_readable}"
+    if point.is_subdim:
+        out += f"{subdim_name_link(point)} "
 
-        if point.is_hourly:
-            out += (
-                f" from {point.previous_point_time_only}"
-                + f" to {point.anomaly_time_only}"
-            )
+    out += f"changed to *{point.y_readable}*"
+    if point.is_hourly:
+        out += f" at {point.anomaly_time_only}"
 
     if point.relevant_subdims:
         out += "\n      - Reasons for change: "

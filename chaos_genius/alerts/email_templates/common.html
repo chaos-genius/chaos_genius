@@ -55,7 +55,7 @@
     {% set include_kpi_name = kpi_link_prefix is not none %}
 
     {% if point.percent_change is string %}
-        <strong>Anomaly detected</strong>
+        <strong style="color: orange;">∿ Anomaly detected</strong>
     {% elif point.percent_change >= 0 %}
         <strong style="color: rgb(6, 182, 212);">↑ {{ point.percent_change_formatted }} higher </strong> <span style="{{ non_important_text }}">than expected</span>
     {% else %}

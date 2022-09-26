@@ -54,169 +54,38 @@
 {% macro anomaly_point_formatting(point, kpi_link_prefix=none) -%}
     {% set include_kpi_name = kpi_link_prefix is not none %}
 
-    {% if point.previous_value is none or point.y == point.previous_value -%}
-        <strong style="color: orange;">
-            ∿ Anomalous behavior
-        </strong>
+    {% if point.percent_change is string %}
+        <strong>Anomaly detected</strong>
+    {% elif point.percent_change >= 0 %}
+        <strong style="color: rgb(6, 182, 212);">↑ {{ point.percent_change_formatted }} higher </strong> <span style="{{ non_important_text }}">than expected</span>
+    {% else %}
+        <strong style="color: orange;">↓ {{ point.percent_change_formatted }} lower </strong> <span style="{{ non_important_text }}">than expected</span>
+    {% endif %}
 
-        {% if include_kpi_name -%}
-            <span style="{{ non_important_text }}">
+    <span style="{{ non_important_text }}"> - </span>
 
-                in
+    {% if include_kpi_name -%}
+        {{ kpi_name_link(kpi_link_prefix, point) }}
+    {% endif %}
 
-            </span>
+    {% if point.is_subdim %}
+        {{ subdim_name_link(point) }}
+    {% endif %}
 
-            {{ kpi_name_link(kpi_link_prefix, point) }}
+    <span style="{{ non_important_text }}">
+        changed to
+    </span>
 
-            {% if point.is_subdim %}
-                {{ subdim_name_link(point) }}
-            {% endif %}
-        {% else -%}
-            <span style="{{ non_important_text }}">
+    <strong style="{{ important_text }}">{{point.y_readable}}</strong>
 
-                detected
-
-            </span>
-
-            {% if point.is_subdim -%}
-                <span style="{{ non_important_text }}">
-
-                    in
-
-                </span>
-
-                {{ subdim_name_link(point) }}
-            {%- endif %}
-        {%- endif %}
-
-        -
-
-        {% if point.previous_value is none -%}
-            <span style="{{ non_important_text }}">
-
-                changed to
-
-            </span>
-            <strong style="{{ important_text }}">{{point.y_readable}}</strong>
-
-            {% if point.is_hourly -%}
-                <span style="{{ non_important_text }}">
-                    at
-                </span>
-                <span style="{{ important_text }}">{{ point.anomaly_time_only }}</span>
-            {%- endif %}
-        {% else -%}
-            {% if point.is_hourly %}
-                <span style="{{ non_important_text }}">
-                    with constant value
-                </span>
-
-                <strong style="{{ important_text }}">{{point.y_readable}}</strong>
-
-                <span style="{{ non_important_text }}">
-                    from
-                </span>
-                <span style="{{ important_text }}">{{ point.previous_point_time_only }}</span>
-
-                <span style="{{ non_important_text }}">
-                    to
-                </span>
-                <span style="{{ important_text }}">{{ point.anomaly_time_only }}</span>
-            {% else %}
-                <span style="{{ non_important_text }}">
-                    with same value
-                </span>
-
-                <strong style="{{ important_text }}">{{point.y_readable}}</strong>
-
-                <span style="{{ non_important_text }}">
-                    as previous day
-                </span>
-            {% endif %}
-        {%- endif %}
-
-    {% else -%}
-        {% if point.y > point.previous_value %}
-            <strong style="color: rgb(6, 182, 212);">
-                ↑ {{ point.percent_change_formatted }}
-                Spike
-            </strong>
-        {% elif point.y < point.previous_value %}
-            <strong style="color: orange;">
-                ↓ {{ point.percent_change_formatted }}
-                Drop
-            </strong>
-        {% endif %}
-
-        {% if include_kpi_name %}
-            <span style="{{ non_important_text }}">
-
-                in
-
-            </span>
-
-            {{ kpi_name_link(kpi_link_prefix, point) }}
-
-            {% if point.is_subdim %}
-                {{ subdim_name_link(point) }}
-            {% endif %}
-        {% else %}
-            <span style="{{ non_important_text }}">
-
-                detected
-
-            </span>
-
-            {% if point.is_subdim %}
-                <span style="{{ non_important_text }}">
-
-                    in
-
-                </span>
-
-                {{ subdim_name_link(point) }}
-            {% endif %}
-        {% endif %}
-
+    {% if point.is_hourly -%}
         <span style="{{ non_important_text }}">
-
-            -
-
-            changed
-
+            at
         </span>
+        <span style="{{ important_text }}">{{ point.anomaly_time_only }}</span>
+    {%- endif %}
 
-        <span style="{{ non_important_text }}">
-            to
-        </span>
-
-        <strong style="{{ important_text }}">{{point.y_readable}}</strong>
-
-        {% if point.previous_value_readable is not none -%}
-
-            <span style="{{ non_important_text }}">
-                from
-            </span>
-            <span style="{{ important_text }}">{{point.previous_value_readable}}</span>
-
-        {%- endif %}
-
-        <!--(<span style="{{ important_text }}">{{ point.percent_change_formatted }}</span>)--><!--
-
-     -->{% if point.is_hourly -%}
-            <span style="{{ non_important_text }}">
-                from
-            </span>
-            <span style="{{ important_text }}">{{ point.previous_point_time_only }}</span>
-
-            <span style="{{ non_important_text }}">
-                to
-            </span>
-            <span style="{{ important_text }}">{{ point.anomaly_time_only }}</span>
-        {%- endif %}
-    {%- endif %}<!--
-
- -->{% if point.relevant_subdims -%}
+    {% if point.relevant_subdims -%}
         <ul>
             <li>
                 <span style="{{ non_important_text }}">Reasons for change:</span>

@@ -85,6 +85,10 @@
         <span style="{{ important_text }}">{{ point.anomaly_time_only }}</span>
     {%- endif %}
 
+    <span style="{{ non_important_text }}">
+        . Expected: {{ point.yhat_lower_readable }} - {{ point.yhat_upper_readable }}.
+    </span>
+
     {% if point.relevant_subdims -%}
         <ul>
             <li>

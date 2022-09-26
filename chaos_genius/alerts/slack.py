@@ -288,6 +288,7 @@ def anomaly_point_formatting(
     out += f"changed to *{point.y_readable}*"
     if point.is_hourly:
         out += f" at {point.anomaly_time_only}"
+    out += f". Expected: {point.yhat_lower_readable} - {point.yhat_upper_readable}."
 
     if point.relevant_subdims:
         out += "\n      - Reasons for change: "

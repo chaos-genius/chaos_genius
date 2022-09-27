@@ -77,4 +77,4 @@ class NeuralProphetModel(AnomalyModel):
         forecast["yhat_upper"] = threshold_u
         forecast = forecast[["ds", "yhat", "yhat_lower", "yhat_upper"]]
 
-        return forecast.rename(columns={"ds": "dt", "yhat": "y"})
+        return forecast.rename(columns={"ds": "dt"})

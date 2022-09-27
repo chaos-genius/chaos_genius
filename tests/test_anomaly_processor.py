@@ -79,7 +79,7 @@ anomaly_data_metrics = {
 
 testdata_calculate_metrics = [
     (anomaly_data_metrics["negative_anomaly"], "overall", 20000, 6000, {}, [6.19, 0]),
-    (anomaly_data_metrics["positive_anomaly"], "subdim", 20000, 6000, {pd.Timestamp("2022-03-10"): 1000}, [44.89, 17.22]),
+    (anomaly_data_metrics["positive_anomaly"], "subdim", 20000, 6000, {pd.Timestamp("2022-03-10"): 1000}, [44.89, 17.22]),  # noqa: E501
     (anomaly_data_metrics["no_anomaly"], "overall", 20000, 0, {}, [0, 0]),
 ]
 

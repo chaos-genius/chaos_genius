@@ -15,6 +15,7 @@ class AnomalyDataOutput(PkModel):
 
     data_datetime = Column(db.DateTime, default=dt.datetime.utcnow)
     y = Column(db.Float)
+    yhat = Column(db.Float)
     yhat_upper = Column(db.Float)
     yhat_lower = Column(db.Float)
     is_anomaly = Column(db.BigInteger)
@@ -48,6 +49,7 @@ class AnomalyDataOutput(PkModel):
         return {
             "data_datetime": self.data_datetime,
             "y": self.y,
+            "yhat": self.yhat,
             "yhat_upper": self.yhat_upper,
             "yhat_lower": self.yhat_lower,
             "is_anomaly": self.is_anomaly,

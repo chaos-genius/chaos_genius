@@ -431,7 +431,10 @@ def disable_anomaly(kpi_id):
             message = f"Disabled Analytics for KPI ID: {kpi_id}"
             status = "success"
         else:
-            message = f"Failed to Disable Anomaly because it is not enabled for KPI ID: {kpi_id}"
+            message = (
+                "Failed to Disable Anomaly because it is not enabled for"
+                f" KPI ID: {kpi_id}"
+            )
             status = "failure"
     else:
         message = f"KPI {kpi_id} could not be retreived."
@@ -456,7 +459,10 @@ def enable_anomaly(kpi_id):
                 message = f"Enabled Analytics for KPI ID: {kpi_id}"
                 status = "success"
             else:
-                message = f"KPI ID: {kpi_id}. Analytics enabled but is not configured. Please Configure it to run anomaly."
+                message = (
+                    f"KPI ID: {kpi_id}. Analytics enabled but is not configured."
+                    " Please Configure it to run anomaly."
+                )
                 status = "success"
                 logger.warn(message)
         else:
@@ -566,10 +572,12 @@ def convert_to_graph_json(
     round_column_in_df(results, "yhat_lower")
     round_column_in_df(results, "yhat_upper")
     round_column_in_df(results, "y")
+    round_column_in_df(results, "yhat")
     round_column_in_df(results, "severity")
 
     intervals = results[["timestamp", "yhat_lower", "yhat_upper"]].values.tolist()
     values = results[["timestamp", "y"]].values.tolist()
+    expected_values = results[["timestamp", "yhat"]].values.tolist()
     severities = results[["timestamp", "severity"]].values.tolist()
 
     graph_data = {
@@ -579,6 +587,7 @@ def convert_to_graph_json(
         "sub_dimension": anomaly_type,
         "intervals": intervals,
         "values": values,
+        "expected_values": expected_values,
         "severity": severities,
     }
 

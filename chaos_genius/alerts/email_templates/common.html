@@ -76,17 +76,17 @@
         changed to
     </span>
 
-    <strong style="{{ important_text }}">{{point.y_readable}}</strong>
+    <strong style="{{ important_text }}">{{point.y_readable}}</strong><!--
 
-    {% if point.is_hourly -%}
-        <span style="{{ non_important_text }}">
+ -->{% if point.is_hourly -%}<!--
+     --><span style="{{ non_important_text }}">
             at
         </span>
-        <span style="{{ important_text }}">{{ point.anomaly_time_only }}</span>
-    {%- endif %}
+        <span style="{{ important_text }}">{{ point.anomaly_time_only }}</span><!--
+ -->{%- endif %}<!--
 
-    <span style="{{ non_important_text }}">
-        . Expected: {{ point.yhat_lower_readable }} - {{ point.yhat_upper_readable }}.
+ --><span style="{{ non_important_text }}"><!--
+      -->. (Expected range: {{ point.yhat_lower_readable }} - {{ point.yhat_upper_readable }}).
     </span>
 
     {% if point.relevant_subdims -%}

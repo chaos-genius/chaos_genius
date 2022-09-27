@@ -413,7 +413,10 @@ def disable_anomaly(kpi_id):
             message = f"Disabled Analytics for KPI ID: {kpi_id}"
             status = "success"
         else:
-            message = f"Failed to Disable Anomaly because it is not enabled for KPI ID: {kpi_id}"  # noqa: E501
+            message = (
+                "Failed to Disable Anomaly because it is not enabled for"
+                f" KPI ID: {kpi_id}"
+            )
             status = "failure"
     else:
         message = f"KPI {kpi_id} could not be retreived."
@@ -438,7 +441,10 @@ def enable_anomaly(kpi_id):
                 message = f"Enabled Analytics for KPI ID: {kpi_id}"
                 status = "success"
             else:
-                message = f"KPI ID: {kpi_id}. Analytics enabled but is not configured. Please Configure it to run anomaly."  # noqa: E501
+                message = (
+                    f"KPI ID: {kpi_id}. Analytics enabled but is not configured."
+                    " Please Configure it to run anomaly."
+                )
                 status = "success"
                 logger.warn(message)
         else:

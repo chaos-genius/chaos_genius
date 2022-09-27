@@ -141,8 +141,6 @@ def test_detect_anomaly(
     pred_series, deviation_dict = adc._detect_anomaly(
         model_name, input_data, last_date, series, subgroup, frequency
     )
-    # columns = ["y", "yhat_lower", "yhat_upper", "anomaly"]
-    # pred_series[columns] = pred_series[columns].apply(pd.to_numeric)
 
     assert_frame_equal(pred_series, expected[0])
     assert deviation_dict == expected[1]

@@ -1171,6 +1171,6 @@ def iterate_over_all_points(
         if point.is_overall or (point.is_subdim and include_subdims):
             yield point
 
-        if point.is_overall and point.relevant_subdims is not None:
+        if point.is_overall and point.relevant_subdims is not None and include_subdims:
             for subdim_point in point.relevant_subdims:
                 yield subdim_point

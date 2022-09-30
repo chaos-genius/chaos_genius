@@ -198,6 +198,7 @@ class ProcessAnomalyDetection:
         pred_series_schema = {
             "dt": np.datetime64,
             "y": float,
+            "yhat": float,
             "yhat_lower": float,
             "yhat_upper": float,
             "anomaly": int,
@@ -239,7 +240,13 @@ class ProcessAnomalyDetection:
                     df.iloc[:-1]["y"].std(),
                 )
 
-                pred_series = pred_series.append(prediction_with_metrics, ignore_index=True)
+                pred_series = pd.concat(
+                    [
+                        pred_series,
+                        prediction_with_metrics,
+                    ],
+                    ignore_index=True,
+                )
 
             elif curr_period < max_period and days_to_train is not None:
                 df = input_data[input_data['dt'] <= last_date]
@@ -257,7 +264,13 @@ class ProcessAnomalyDetection:
                     df.iloc[:-1]["y"].std(),
                 )
 
-                pred_series = pred_series.append(prediction_with_metrics, ignore_index=True)
+                pred_series = pd.concat(
+                    [
+                        pred_series,
+                        prediction_with_metrics,
+                    ],
+                    ignore_index=True,
+                )
 
             last_date = last_date + datetime.timedelta(**FREQUENCY_DELTA[self.freq])
 

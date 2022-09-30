@@ -81,7 +81,7 @@ class GreyKiteModel(AnomalyModel):
         forecast_df = forecast_df.rename(
             columns={
                 "ds": "dt",
-                "forecast": "y",
+                "forecast": "yhat",
                 "forecast_lower": "yhat_lower",
                 "forecast_upper": "yhat_upper",
             }

@@ -113,6 +113,7 @@ class ProcessAnomalyDetection:
         pred_series_schema = {
             "dt": np.datetime64,
             "y": float,
+            "yhat": float,
             "yhat_lower": float,
             "yhat_upper": float,
             "anomaly": int,

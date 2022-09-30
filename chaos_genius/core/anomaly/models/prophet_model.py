@@ -75,14 +75,7 @@ class ProphetModel(AnomalyModel):
         forecast = self.model.predict(future)
         forecast = forecast[["ds", "yhat", "yhat_lower", "yhat_upper"]]
 
-        return forecast.rename(
-            columns={
-                "ds": "dt",
-                "yhat": "y",
-                "yhat_lower": "yhat_lower",
-                "yhat_upper": "yhat_upper",
-            }
-        )
+        return forecast.rename(columns={"ds": "dt"})
 
     def stan_init(self, model):
         """Retrieve parameters from a trained model.

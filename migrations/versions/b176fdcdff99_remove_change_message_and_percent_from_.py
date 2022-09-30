@@ -29,12 +29,14 @@ def upgrade():
 
         if "alert_data" in alert_metadata:
             for data in alert_metadata["alert_data"]:
-                data["_old_percent_change"] = data.pop("percent_change")
+                if "percent_change" in data:
+                    data["_old_percent_change"] = data.pop("percent_change")
 
                 for subdim_data in data.get("relevant_subdims_", []) or []:
-                    subdim_data["_old_percent_change"] = subdim_data.pop(
-                        "percent_change"
-                    )
+                    if "percent_change" in subdim_data:
+                        subdim_data["_old_percent_change"] = subdim_data.pop(
+                            "percent_change"
+                        )
 
             conn.execute(
                 sa.text(
@@ -58,12 +60,14 @@ def downgrade():
 
         if "alert_data" in alert_metadata:
             for data in alert_metadata["alert_data"]:
-                data["percent_change"] = data.pop("_old_percent_change")
+                if "_old_percent_change" in data:
+                    data["percent_change"] = data.pop("_old_percent_change")
 
                 for subdim_data in data.get("relevant_subdims_", []) or []:
-                    subdim_data["percent_change"] = subdim_data.pop(
-                        "_old_percent_change"
-                    )
+                    if "_old_percent_change" in subdim_data:
+                        subdim_data["percent_change"] = subdim_data.pop(
+                            "_old_percent_change"
+                        )
 
             conn.execute(
                 sa.text(

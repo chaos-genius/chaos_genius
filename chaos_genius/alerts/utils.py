@@ -63,7 +63,7 @@ def find_percentage_change(
         return sign_ + "inf"
     else:
         change = actual_val - expected_val
-        percentage_change = (change / expected_val) * 100
+        percentage_change = (change / abs(expected_val)) * 100
         return round_number(percentage_change)
 
 

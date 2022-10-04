@@ -13,6 +13,11 @@ from flask.json import jsonify
 from sqlalchemy import func
 from sqlalchemy.orm.attributes import flag_modified
 
+from chaos_genius.controllers.alert_controller import (
+    clear_triggered_alerts_from_offset,
+    get_alert_list,
+    set_last_anomaly_timestamp_to_offset,
+)
 from chaos_genius.controllers.kpi_controller import (
     delete_anomaly_output_for_kpi,
     get_kpi_data_from_id,
@@ -20,6 +25,7 @@ from chaos_genius.controllers.kpi_controller import (
 from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
 from chaos_genius.core.utils.round import round_column_in_df
 from chaos_genius.core.utils.utils import get_user_string_from_subgroup_dict
+from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.rca_data_model import RcaData
@@ -381,8 +387,20 @@ def kpi_anomaly_retraining(kpi_id: int):
     if kpi is not None:
         if kpi.run_anomaly and kpi.anomaly_params is not None:
             delete_anomaly_output_for_kpi(kpi_id)
+
+            # clear triggered alerts data from T-offset day
+            # and set last_anomaly_timestamp such that the alert run
+            # after anomaly completes uses data from T-offset.
+            alerts = get_alert_list(extra_filters=[Alert.kpi == kpi_id], as_obj=True)
+            clear_triggered_alerts_from_offset([alert.id for alert in alerts])
+            for alert in alerts:
+                set_last_anomaly_timestamp_to_offset(
+                    alert, kpi.anomaly_params.get("frequency")
+                )
+
             # add anomaly to queue
             from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task
+
             anomaly_task = ready_anomaly_task(kpi_id)
             if anomaly_task is None:
                 message = f"retraining failed for KPI: {kpi_id}, KPI id is None"
@@ -413,7 +431,10 @@ def disable_anomaly(kpi_id):
             message = f"Disabled Analytics for KPI ID: {kpi_id}"
             status = "success"
         else:
-            message = f"Failed to Disable Anomaly because it is not enabled for KPI ID: {kpi_id}"
+            message = (
+                "Failed to Disable Anomaly because it is not enabled for"
+                f" KPI ID: {kpi_id}"
+            )
             status = "failure"
     else:
         message = f"KPI {kpi_id} could not be retreived."
@@ -438,7 +459,10 @@ def enable_anomaly(kpi_id):
                 message = f"Enabled Analytics for KPI ID: {kpi_id}"
                 status = "success"
             else:
-                message = f"KPI ID: {kpi_id}. Analytics enabled but is not configured. Please Configure it to run anomaly."
+                message = (
+                    f"KPI ID: {kpi_id}. Analytics enabled but is not configured."
+                    " Please Configure it to run anomaly."
+                )
                 status = "success"
                 logger.warn(message)
         else:
@@ -548,10 +572,12 @@ def convert_to_graph_json(
     round_column_in_df(results, "yhat_lower")
     round_column_in_df(results, "yhat_upper")
     round_column_in_df(results, "y")
+    round_column_in_df(results, "yhat")
     round_column_in_df(results, "severity")
 
     intervals = results[["timestamp", "yhat_lower", "yhat_upper"]].values.tolist()
     values = results[["timestamp", "y"]].values.tolist()
+    expected_values = results[["timestamp", "yhat"]].values.tolist()
     severities = results[["timestamp", "severity"]].values.tolist()
 
     graph_data = {
@@ -561,6 +587,7 @@ def convert_to_graph_json(
         "sub_dimension": anomaly_type,
         "intervals": intervals,
         "values": values,
+        "expected_values": expected_values,
         "severity": severities,
     }
 

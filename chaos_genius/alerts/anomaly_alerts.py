@@ -43,7 +43,6 @@ from chaos_genius.alerts.constants import (
 from chaos_genius.alerts.slack import anomaly_alert_slack
 from chaos_genius.alerts.utils import (
     AlertException,
-    change_message_from_percent,
     find_percentage_change,
     human_readable,
     send_email_using_template,
@@ -79,6 +78,8 @@ class AnomalyPointOriginal(BaseModel):
 
     # y-value of point
     y: float
+    # model prediction (expected value)
+    yhat: Optional[float]
     # lower bound of expected value
     yhat_lower: float
     # upper bound of expected value
@@ -102,8 +103,8 @@ class AnomalyPointOriginal(BaseModel):
     data_datetime: datetime.datetime
 
     @property
-    def expected_value(self) -> str:
-        """Expected values represented in a string."""
+    def expected_range(self) -> str:
+        """Expected values range represented in a string."""
         return f"{self.yhat_lower} to {self.yhat_upper}"
 
     @property
@@ -202,10 +203,6 @@ class AnomalyPoint(AnomalyPointOriginal):
     severity: int
     # previous data point (y-value)
     previous_value: Optional[float]
-    # percentage change from previous point
-    percent_change: Union[StrictFloat, StrictInt, str]
-    # human readable message describing the percent_change
-    change_message: str
 
     relevant_subdims_: Optional[List]
 
@@ -232,16 +229,12 @@ class AnomalyPoint(AnomalyPointOriginal):
         relevant_subdims: Optional[List["AnomalyPoint"]],
     ) -> "AnomalyPoint":
         y = round(point.y, 2)
+        yhat = round(point.yhat, 2) if point.yhat is not None else None
         yhat_lower = round(point.yhat_lower, 2)
         yhat_upper = round(point.yhat_upper, 2)
         severity = round(point.severity)
 
         series_type = point.series_type
-
-        percent_change = find_percentage_change(
-            point.y, previous_anomaly_point.y if previous_anomaly_point else None
-        )
-        change_message = change_message_from_percent(percent_change)
 
         previous_value = (
             round(previous_anomaly_point.y, 2)
@@ -251,6 +244,7 @@ class AnomalyPoint(AnomalyPointOriginal):
 
         return AnomalyPoint(
             y=y,
+            yhat=yhat,
             yhat_lower=yhat_lower,
             yhat_upper=yhat_upper,
             severity=severity,
@@ -260,8 +254,6 @@ class AnomalyPoint(AnomalyPointOriginal):
             created_at=point.created_at,
             data_datetime=point.data_datetime,
             previous_value=previous_value,
-            percent_change=percent_change,
-            change_message=change_message,
             relevant_subdims_=relevant_subdims,
         )
 
@@ -375,7 +367,8 @@ class AnomalyPointFormatted(AnomalyPoint):
     alert_channel_conf: Any
 
     formatted_date: str
-    formatted_change_percent: str
+    percent_change: Union[StrictFloat, StrictInt, str]
+    percent_change_formatted: str
 
     is_hourly: bool
 
@@ -395,24 +388,25 @@ class AnomalyPointFormatted(AnomalyPoint):
             dt_format = ALERT_READABLE_DATE_FORMAT
         formatted_date = point.data_datetime.strftime(dt_format)
 
-        formatted_change_percent = point.percent_change
-        if isinstance(point.percent_change, (int, float)):
+        percent_change = find_percentage_change(point.y, point.yhat)
+        percent_change_formatted = percent_change
+        if isinstance(percent_change, (int, float)):
             # TODO: decide on this and simplify
             change_percent = (
-                f"{point.percent_change:.0f}"
-                if abs(point.percent_change) < 10
-                else f"{point.percent_change:.0f}"
+                f"{percent_change:.0f}"
+                if abs(percent_change) < 10
+                else f"{percent_change:.0f}"
             )
-            if point.percent_change > 0:
-                formatted_change_percent = f"{change_percent}%"
+            if percent_change > 0:
+                percent_change_formatted = f"{change_percent}%"
             else:
-                formatted_change_percent = f"{change_percent[1:]}%"
+                percent_change_formatted = f"{change_percent[1:]}%"
         if (
-            isinstance(point.percent_change, str)
-            and point.percent_change.endswith("inf")
-            and point.previous_value is not None
+            isinstance(percent_change, str)
+            and percent_change.endswith("inf")
+            and point.yhat is not None
         ):
-            formatted_change_percent = f"{point.percent_change}%"
+            percent_change_formatted = f"{percent_change}%"
 
         is_hourly = time_series_frequency is not None and time_series_frequency == "H"
 
@@ -442,7 +436,8 @@ class AnomalyPointFormatted(AnomalyPoint):
             alert_channel=alert_channel,
             alert_channel_conf=alert_channel_conf,
             formatted_date=formatted_date,
-            formatted_change_percent=str(formatted_change_percent),
+            percent_change=percent_change,
+            percent_change_formatted=str(percent_change_formatted),
             is_hourly=is_hourly,
         )
 
@@ -1120,8 +1115,8 @@ def make_anomaly_data_csv(
     anomaly_df.sort_values(by="severity", inplace=True, ascending=False)
 
     # this is a property that is calculated, so it needs to be assigned separately
-    anomaly_df["expected_value"] = [
-        point.expected_value for point in all_anomaly_points
+    anomaly_df["expected_range"] = [
+        point.expected_range for point in all_anomaly_points
     ]
     # this is a property that is calculated, so it needs to be assigned separately
     anomaly_df["series_type"] = [point.series_type_name for point in all_anomaly_points]
@@ -1161,6 +1156,7 @@ def _format_anomaly_point_for_template(
 
 def top_anomalies(points: Iterable[TAnomalyPointOrig], n=10) -> List[TAnomalyPointOrig]:
     """Returns top n anomalies according to severity."""
+    # TODO: how to incorporate impact here?
     return heapq.nlargest(n, points, key=lambda point: point.severity)
 
 
@@ -1175,6 +1171,6 @@ def iterate_over_all_points(
         if point.is_overall or (point.is_subdim and include_subdims):
             yield point
 
-        if point.is_overall and point.relevant_subdims is not None:
+        if point.is_overall and point.relevant_subdims is not None and include_subdims:
             for subdim_point in point.relevant_subdims:
                 yield subdim_point

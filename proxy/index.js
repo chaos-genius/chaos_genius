@@ -20,5 +20,5 @@ const server = http.createServer(function (req, res) {
     }
 });
 
-console.log(`Listening to port ${CHAOSGENIUS_WEBAPP_URL}`);
-server.listen(CHAOSGENIUS_WEBAPP_URL);
+console.log(`Listening to port ${REACT_APP_PROXY_PORT}`);
+server.listen(REACT_APP_PROXY_PORT);

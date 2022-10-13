@@ -73,28 +73,4 @@ class StandardDeviationModel(AnomalyModel):
         df["yhat_upper"] = threshold_u
         df["yhat"] = (threshold_l + threshold_u) / 2
 
-        df_anomaly = self._detect_anomalies(df)
-        df_anomaly = df_anomaly[["dt", "yhat", "yhat_lower", "yhat_upper"]]
-
-        return df_anomaly
-
-    def _detect_anomalies(self, forecast):
-        forecasted = forecast[["ds", "yhat", "yhat_lower", "yhat_upper", "y"]].copy()
-        forecasted["anomaly"] = 0
-
-        forecasted.loc[forecasted["y"] > forecasted["yhat_upper"], "anomaly"] = 1
-
-        forecasted.loc[forecasted["y"] < forecasted["yhat_lower"], "anomaly"] = -1
-
-        # anomaly importances
-
-        forecasted["importance"] = 0
-        forecasted.loc[forecasted["anomaly"] == 1, "importance"] = (
-            forecasted["y"] - forecasted["yhat_upper"]
-        ) / forecast["y"]
-
-        forecasted.loc[forecasted["anomaly"] == -1, "importance"] = (
-            forecasted["yhat_lower"] - forecasted["y"]
-        ) / forecast["y"]
-
-        return forecasted
+        return df[["dt", "yhat", "yhat_lower", "yhat_upper"]]

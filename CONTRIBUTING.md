@@ -113,16 +113,16 @@ Steps to set up a development environment:
 - Note: this does not start any of the celery schedulers or workers, which are needed if you want to run any analytics.
 
 #### *Troubleshooting*
-a> If you come across cases where python libraries are failing with this error 
+- If you come across cases where python libraries are failing with this error 
  ```
 ERROR: Failed building wheel for numpy
  Failed to build pyarrow numpy
 ERROR: Could not build wheels for pyarrow, numpy which use PEP 517 and cannot be installed directly
 ```
 
-Resolution -> Upgrade your pip version 
+Resolution: Upgrade your pip version by running `pip install --upgrade pip`
 
-b> Missing Python.h file
+- Missing Python.h file
 ```
 lib/zoneinfo_module.c:1:10: fatal error: 'Python.h' file not found
     #include "Python.h"
@@ -138,7 +138,7 @@ Failed to build backports.zoneinfo
 ERROR: Could not build wheels for backports.zoneinfo, which is required to install pyproject.toml-based projects
 ```
 
-Resolution -> This requires python development files. You could refer this [link](https://stackoverflow.com/questions/21530577/fatal-error-python-h-no-such-file-or-directory) and install the library according to your system configuration. 
+Resolution: This requires python development files. You could refer this [link](https://stackoverflow.com/questions/21530577/fatal-error-python-h-no-such-file-or-directory) and install the library according to your system configuration. 
 For mac users, if you have installed python through homebrew then you can skip it as homebrew includes development files. If you would like to reinstall it then run `brew reinstall python`.
 
 #### **Frontend/UI/Webapp**

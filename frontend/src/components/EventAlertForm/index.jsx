@@ -52,7 +52,7 @@ const EventAlertForm = ({
   const { kpiFormLoading, kpiFormData, testQueryData } = useSelector(
     (state) => state.kpiExplorer
   );
-
+  const [testqrylocal, setTestqrylocal] = useState(testQueryData);
   const [option, setOption] = useState([]);
   const [datasourceid, setDataSourceId] = useState(undefined);
   const [query, setQuery] = useState(undefined);
@@ -94,8 +94,13 @@ const EventAlertForm = ({
     if (alertFormData.data_source === 0 || alertFormData.data_source === null) {
       obj['data_source'] = 'Enter Data Source';
     }
-    if (alertFormData.alert_query === '') {
-      obj['alert_query'] = 'Enter Query';
+    if (
+      alertFormData.alert_query === '' ||
+      testqrylocal === undefined ||
+      testqrylocal?.data?.status === undefined ||
+      testqrylocal?.data?.status === 'failure'
+    ) {
+      obj['alert_query'] = 'Enter Valid Query and Test';
     }
     if (alertFormData.alert_settings === '') {
       obj['alert_settings'] = 'Enter Alert Settings';
@@ -167,20 +172,30 @@ const EventAlertForm = ({
   }, [kpiFormData, connectionType]);
 
   useEffect(() => {
-    if (testQueryData && testQueryData?.status === 'success') {
+    setTestqrylocal(testQueryData);
+    if (
+      testQueryData &&
+      testQueryData?.data &&
+      testQueryData?.data?.status === 'success'
+    ) {
       customToast({
         type: 'success',
         header: 'Test Connection Successful',
-        description: testQueryData.msg
+        description: testQueryData?.data?.msg
       });
     }
-    if (testQueryData && testQueryData?.status === 'failure') {
+    if (
+      testQueryData &&
+      testQueryData?.data &&
+      testQueryData?.data?.status === 'failure'
+    ) {
       customToast({
         type: 'error',
         header: 'Test Connection Failed',
-        description: testQueryData.msg
+        description: testQueryData?.data?.msg
       });
     }
+    setError({ ...error, alert_query: '' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [testQueryData]);
 
@@ -426,6 +441,7 @@ const EventAlertForm = ({
                 ...alertFormData,
                 alert_query: e.target.value
               });
+              setTestqrylocal(undefined);
             }}></textarea>
           <div className="test-query-connection">
             <div className="test-query" onClick={() => onTestQuery()}>

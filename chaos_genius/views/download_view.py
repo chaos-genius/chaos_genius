@@ -7,7 +7,6 @@ from flask.globals import request
 from flask.json import jsonify
 from flask.wrappers import Response
 
-from chaos_genius.controllers.kpi_controller import get_kpi_data_from_id
 from chaos_genius.core.rca.rca_utils.api_utils import (
     kpi_line_data,
     rca_analysis,
@@ -76,7 +75,6 @@ def download_anomaly_data(kpi_id: int):
         end_date = get_anomaly_output_end_date(kpi.as_dict)
 
         is_subdim = dimension is not None and value is not None
-
         if is_subdim:
             logger.info(
                 "Downloading subdim anomaly data for KPI: %d, subdim: %s=%s",
@@ -91,7 +89,9 @@ def download_anomaly_data(kpi_id: int):
             logger.info("Downloading overall anomaly data for KPI: %d", kpi_id)
             data_points = get_anomaly_data_points(kpi_id, end_date)
 
-        if not data_points:
+        if not data_points and not kpi.run_anomaly:
+            raise Exception(f"Anomaly disabled, No data found for KPI: {kpi_id}")
+        elif not data_points:
             raise Exception(f"No anomaly data found for KPI: {kpi_id}")
 
         def row_gen(data_points: List[AnomalyDataOutput]):

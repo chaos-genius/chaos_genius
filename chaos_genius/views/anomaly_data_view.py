@@ -4,7 +4,7 @@ import logging
 import time
 from collections import defaultdict
 from datetime import date, datetime, timedelta
-from typing import Any, Dict, List, Optional, Sequence, Tuple, cast
+from typing import Any, DefaultDict, Dict, List, Optional, Sequence, Set, Tuple, cast
 
 import pandas as pd
 from flask.blueprints import Blueprint
@@ -13,6 +13,11 @@ from flask.json import jsonify
 from sqlalchemy import func
 from sqlalchemy.orm.attributes import flag_modified
 
+from chaos_genius.controllers.alert_controller import (
+    clear_triggered_alerts_from_offset,
+    get_alert_list,
+    set_last_anomaly_timestamp_to_offset,
+)
 from chaos_genius.controllers.kpi_controller import (
     delete_anomaly_output_for_kpi,
     get_kpi_data_from_id,
@@ -20,6 +25,7 @@ from chaos_genius.controllers.kpi_controller import (
 from chaos_genius.core.anomaly.constants import MODEL_NAME_MAPPING
 from chaos_genius.core.utils.round import round_column_in_df
 from chaos_genius.core.utils.utils import get_user_string_from_subgroup_dict
+from chaos_genius.databases.models.alert_model import Alert
 from chaos_genius.databases.models.anomaly_data_model import AnomalyDataOutput
 from chaos_genius.databases.models.kpi_model import Kpi
 from chaos_genius.databases.models.rca_data_model import RcaData
@@ -209,7 +215,7 @@ def kpi_anomaly_params(kpi_id: int):
 
     (This is where anomaly is setup/configured or updated).
     """
-    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
+    kpi = cast(Optional[Kpi], Kpi.get_by_id(kpi_id))
 
     if kpi is None:
         return (
@@ -336,7 +342,7 @@ def kpi_anomaly_params(kpi_id: int):
 def anomaly_settings_status(kpi_id: int):
     """Get anomaly status for a KPI."""
     logger.info(f"Retrieving anomaly settings for kpi: {kpi_id}")
-    kpi = cast(Kpi, Kpi.get_by_id(kpi_id))
+    kpi = cast(Optional[Kpi], Kpi.get_by_id(kpi_id))
 
     if kpi is None:
         return (
@@ -377,17 +383,103 @@ def anomaly_settings_status(kpi_id: int):
 def kpi_anomaly_retraining(kpi_id: int):
     """Delete all anomaly data and retrain anomaly for a KPI."""
     # delete all data in anomaly output table
-    delete_anomaly_output_for_kpi(kpi_id)
+    kpi = cast(Optional[Kpi], Kpi.get_by_id(kpi_id))
+    if kpi is not None:
+        if kpi.run_anomaly and kpi.anomaly_params is not None:
+            delete_anomaly_output_for_kpi(kpi_id)
 
-    # add anomaly to queue
-    from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task
+            # clear triggered alerts data from T-offset day
+            # and set last_anomaly_timestamp such that the alert run
+            # after anomaly completes uses data from T-offset.
+            alerts = get_alert_list(extra_filters=[Alert.kpi == kpi_id], as_obj=True)
+            clear_triggered_alerts_from_offset([alert.id for alert in alerts])
+            for alert in alerts:
+                set_last_anomaly_timestamp_to_offset(
+                    alert, kpi.anomaly_params.get("frequency")
+                )
 
-    anomaly_task = ready_anomaly_task(kpi_id)
-    if anomaly_task is None:
-        return jsonify({"msg": f"retraining failed for KPI: {kpi_id}, KPI id is None"})
-    anomaly_task.apply_async()
-    logger.info(f"Retraining started for KPI ID: {kpi_id}")
-    return jsonify({"msg": f"retraining started for KPI: {kpi_id}"})
+            # add anomaly to queue
+            from chaos_genius.jobs.anomaly_tasks import ready_anomaly_task
+
+            anomaly_task = ready_anomaly_task(kpi_id)
+            if anomaly_task is None:
+                message = f"retraining failed for KPI: {kpi_id}, KPI id is None"
+                status = "failure"
+            else:
+                anomaly_task.apply_async()
+                logger.info(f"Retraining started for KPI ID: {kpi_id}")
+                message = f"retraining started for KPI: {kpi_id}"
+                status = "success"
+        else:
+            message = f"Please enable anomaly for KPI ID: {kpi_id} before retraining"
+            status = "failure"
+    else:
+        message = f"KPI {kpi_id} could not be retreived."
+        status = "failure"
+    return jsonify({"msg": message, "status": status})
+
+
+@blueprint.route("/<int:kpi_id>/disable-anomaly", methods=["GET", "POST"])
+def disable_anomaly(kpi_id):
+    """API end point which disables analytics by modifying the run_anomaly flag."""
+    kpi = cast(Optional[Kpi], Kpi.get_by_id(kpi_id))
+    if kpi is not None:
+        # check if anomaly is setup
+        if kpi.anomaly_params:
+            kpi.run_anomaly = False
+            kpi.update(commit=True)
+            message = f"Disabled Analytics for KPI ID: {kpi_id}"
+            status = "success"
+        else:
+            message = (
+                "Failed to Disable Anomaly because it is not enabled for"
+                f" KPI ID: {kpi_id}"
+            )
+            status = "failure"
+    else:
+        message = f"KPI {kpi_id} could not be retreived."
+        status = "failure"
+
+    if status == "success":
+        logger.info(message)
+    else:
+        logger.error(message)
+    return jsonify({"msg": message, "status": status})
+
+
+@blueprint.route("/<int:kpi_id>/enable-anomaly", methods=["GET", "POST"])
+def enable_anomaly(kpi_id):
+    """API end point which enables analytics by modifying the run_anomaly flag."""
+    kpi = cast(Optional[Kpi], Kpi.get_by_id(kpi_id))
+    if kpi is not None:
+        if not kpi.run_anomaly:
+            kpi.run_anomaly = True
+            kpi.update(commit=True)
+            if kpi.anomaly_params is not None:
+                message = f"Enabled Analytics for KPI ID: {kpi_id}"
+                status = "success"
+            else:
+                message = (
+                    f"KPI ID: {kpi_id}. Analytics enabled but is not configured."
+                    " Please Configure it to run anomaly."
+                )
+                status = "success"
+                logger.warn(message)
+        else:
+            message = (
+                "Failed to Enable Anomaly because it is either already enabled"
+                f" or not set up for KPI ID: {kpi_id}"
+            )
+            status = "failure"
+    else:
+        message = f"KPI {kpi_id} could not be retreived"
+        status = "failure"
+
+    if status == "success":
+        logger.info(message)
+    else:
+        logger.error(message)
+    return jsonify({"msg": message, "status": status})
 
 
 def _get_dimensions_values(
@@ -426,11 +518,10 @@ def _get_dimensions_values(
 
     # series_type strings are in format {dimension1 == value1, dimension2 == value2,}
     # create a default dict mapping each dimension to a list of their values
-    dimension_values_dict = defaultdict(list)
+    dimension_values_dict: DefaultDict[str, Set[str]] = defaultdict(set)
     for dim_val_row in results:
         for dimension in dim_val_row[0].keys():
-            if dim_val_row[0][dimension] not in dimension_values_dict[dimension]:
-                dimension_values_dict[dimension].append(dim_val_row[0][dimension])
+            dimension_values_dict[dimension].add(dim_val_row[0][dimension])
 
     dimension_values_list = [
         {
@@ -443,10 +534,10 @@ def _get_dimensions_values(
                     "value": value,
                     "label_path_safe": make_path_safe(value),
                 }
-                for value in dimension_values_dict[dimension]
+                for value in sorted(dimension_values_dict[dimension])
             ],
         }
-        for dimension in dimension_values_dict
+        for dimension in sorted(dimension_values_dict)
     ]
 
     return dimension_values_list
@@ -481,10 +572,12 @@ def convert_to_graph_json(
     round_column_in_df(results, "yhat_lower")
     round_column_in_df(results, "yhat_upper")
     round_column_in_df(results, "y")
+    round_column_in_df(results, "yhat")
     round_column_in_df(results, "severity")
 
     intervals = results[["timestamp", "yhat_lower", "yhat_upper"]].values.tolist()
     values = results[["timestamp", "y"]].values.tolist()
+    expected_values = results[["timestamp", "yhat"]].values.tolist()
     severities = results[["timestamp", "severity"]].values.tolist()
 
     graph_data = {
@@ -494,6 +587,7 @@ def convert_to_graph_json(
         "sub_dimension": anomaly_type,
         "intervals": intervals,
         "values": values,
+        "expected_values": expected_values,
         "severity": severities,
     }
 

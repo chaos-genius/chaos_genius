@@ -1,4 +1,5 @@
 import logging
+import re
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import exc as sqlalchemy_exc
@@ -104,7 +105,7 @@ class BaseDb:
         query = query.strip()
         if query[-1] == ";":
             query = query[:-1]
-        if "limit" not in query:
+        if not re.search(r"\s+limit\s+", query, re.IGNORECASE):
             query += " limit 1 "
 
         query_text = text(query)

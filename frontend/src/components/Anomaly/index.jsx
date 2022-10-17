@@ -334,16 +334,25 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
             const severity_score = graphData.severity.find(
               (row) => row[0] === this.x
             );
-            let s =
-              'Confidence Interval: <b>' +
-              intervals[1] +
-              ' - ' +
-              intervals[2] +
+            const expected_value = graphData?.expected_values?.find((row) => {
+              return row[0] === this.x;
+            })[1];
+            let s = 'Value: <b>' + Highcharts.numberFormat(this.y, 2) + '</b>';
+            s =
+              s +
+              '<br>Expected Value: <b>' +
+              (expected_value !== undefined &&
+              expected_value !== null &&
+              !isNaN(expected_value)
+                ? expected_value
+                : 'N/A') +
               '</b>';
             s =
               s +
-              '<br>Value: <b>' +
-              Highcharts.numberFormat(this.y, 2) +
+              '<br>Expected Range: <b>' +
+              intervals[1] +
+              ' - ' +
+              intervals[2] +
               '</b>';
             s = s + '<br>Severity: <b>' + severity_score[1] + '</b>';
             s =
@@ -620,7 +629,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                               placeholder="select"
                               styles={customStyles}
                               classNamePrefix="selectcategory"
-                              isSearchable={false}
+                              isSearchable={true}
                               options={dimensionOptions}
                               onChange={(e) => handleDimensionChange(e)}
                             />
@@ -632,7 +641,7 @@ const Anomaly = ({ kpi, anomalystatus, dashboard }) => {
                               placeholder="select"
                               styles={customStyles}
                               classNamePrefix="select_value selectcategory"
-                              isSearchable={false}
+                              isSearchable={true}
                               options={valueOptions}
                               onChange={(e) => handleValueChange(e)}
                             />

@@ -62,7 +62,7 @@ class ExpTSModel(AnomalyModel):
         forecast_df = forecast_df.reset_index().rename(
             columns={
                 "index": "dt",
-                "mean": "y",
+                "mean": "yhat",
                 "pi_lower": "yhat_lower",
                 "pi_upper": "yhat_upper",
             }

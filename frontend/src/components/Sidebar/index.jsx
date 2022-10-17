@@ -12,7 +12,7 @@ import datasource from '../../assets/images/sidebar/datasource.svg';
 import datasourceactive from '../../assets/images/sidebar/datasource-active.svg';
 import alerts from '../../assets/images/sidebar/alerts.svg';
 import alertsactive from '../../assets/images/sidebar/alerts-active.svg';
-import slacklink from '../../assets/images/sidebar/slack-icon.svg';
+import slacklink from '../../assets/images/sidebar/support_slack.svg';
 import './sidebar.scss';
 
 const Sidebar = () => {
@@ -95,7 +95,7 @@ const Sidebar = () => {
               target="_blank"
               rel="noopener noreferrer">
               <img src={slacklink} alt="Slack" />
-              <span>Join Our Slack</span>
+              <span>Troubleshoot</span>
             </a>
           </li>
         </ul>

@@ -75,7 +75,12 @@ const ReportSettings = () => {
   };
 
   const onReportSettingsSave = (e) => {
-    dispatch(saveReportSettingTime(moment(schedule, 'HH:mm')?.format('HH:mm')));
+    dispatch(
+      saveReportSettingTime(
+        moment(schedule, 'HH:mm')?.format('HH:mm'),
+        customToast
+      )
+    );
   };
 
   return (

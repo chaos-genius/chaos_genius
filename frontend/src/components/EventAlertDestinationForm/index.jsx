@@ -229,9 +229,9 @@ const EventAlertDestinationForm = ({
     setError(obj);
     if (error.alert_channel === '') {
       if (path[2] === 'edit') {
-        dispatch(updateKpiAlert(kpiId, alertFormData));
+        dispatch(updateKpiAlert(kpiId, alertFormData, customToast));
       } else {
-        dispatch(createKpiAlert(alertFormData));
+        dispatch(createKpiAlert(alertFormData, customToast));
       }
     }
   };

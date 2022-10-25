@@ -86,7 +86,7 @@ const DataSourceTable = ({
     const payload = {
       data_source_id: datasource.id
     };
-    dispatch(deleteDatasource(payload));
+    dispatch(deleteDatasource(payload, customToast));
   };
 
   const datasourceIcon = (type) => {
@@ -110,7 +110,7 @@ const DataSourceTable = ({
   };
 
   const handleSync = (datasource) => {
-    dispatch(setSyncSchema(datasource));
+    dispatch(setSyncSchema(datasource, customToast));
   };
 
   const customToast = (data) => {

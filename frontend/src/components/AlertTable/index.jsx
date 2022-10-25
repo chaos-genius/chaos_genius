@@ -41,7 +41,8 @@ const AlertTable = ({
   alertSearch,
   setPgInfo,
   pagination,
-  pgInfo
+  pgInfo,
+  customToast
 }) => {
   const dispatch = useDispatch();
 
@@ -59,7 +60,7 @@ const AlertTable = ({
 
   const onDeleteConfirmation = (id) => {
     store.dispatch(RESET_DELETE_DATA);
-    dispatch(kpiAlertDeleteById(id));
+    dispatch(kpiAlertDeleteById(id, customToast));
     setIsOpen(false);
   };
 

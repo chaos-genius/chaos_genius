@@ -1,5 +1,5 @@
 import { attachParams, BASE_URL } from '../../utils/url-helper';
-
+import { env } from '../../env';
 import { getRequest } from '../../utils/http-helper';
 import {
   ANOMALYDATAQUALITYFAILURE,
@@ -81,19 +81,31 @@ export const retrainFailure = () => {
   };
 };
 
-export const setRetrain = (kpi) => {
-  return async (dispatch) => {
-    dispatch(retrainRequested());
-
-    const { data, error, status } = await getRequest({
-      url: `${BASE_URL}/api/anomaly-data/${kpi}/retrain`
-    });
-    if (error) {
-      dispatch(retrainFailure());
-    } else if (data && status === 200) {
-      dispatch(retrainSuccess(data));
+export const setRetrain = (kpi, customToast) => {
+  if (env.REACT_APP_IS_DEMO === 'true') {
+    if (customToast) {
+      customToast({
+        type: 'error',
+        header: 'This is a demo version'
+      });
     }
-  };
+    return {
+      type: 'default'
+    };
+  } else {
+    return async (dispatch) => {
+      dispatch(retrainRequested());
+
+      const { data, error, status } = await getRequest({
+        url: `${BASE_URL}/api/anomaly-data/${kpi}/retrain`
+      });
+      if (error) {
+        dispatch(retrainFailure());
+      } else if (data && status === 200) {
+        dispatch(retrainSuccess(data));
+      }
+    };
+  }
 };
 
 export const anomalyQualityDataRequest = () => {

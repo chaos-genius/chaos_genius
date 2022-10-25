@@ -275,9 +275,9 @@ const KpiAlertDestinationForm = ({
     setError(obj);
     if (obj.alert_channel === '') {
       if (path[2] === 'edit') {
-        dispatch(updateKpiAlert(kpiId, alertFormData));
+        dispatch(updateKpiAlert(kpiId, alertFormData, customToast));
       } else {
-        dispatch(createKpiAlert(alertFormData));
+        dispatch(createKpiAlert(alertFormData, customToast));
       }
     }
   };

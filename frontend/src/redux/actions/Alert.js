@@ -16,6 +16,7 @@ import {
 } from '../../utils/url-helper';
 
 import { getRequest, postRequest, putRequest } from '../../utils/http-helper';
+import { env } from '../../env';
 
 import {
   ALERTEMAILREQUEST,
@@ -82,23 +83,35 @@ export const getAlertEmailSuccess = (response) => {
   };
 };
 
-export const getAllAlertEmail = (details) => {
-  return async (dispatch) => {
-    dispatch(getAlertEmailRequest());
-    const { data, error, status } = await postRequest({
-      url: ALERT_EMAIL_URL,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      data: JSON.stringify(details),
-      noAuth: true
-    });
-    if (error) {
-      dispatch(getAlertEmailFailure());
-    } else if (data && status === 200) {
-      dispatch(getAlertEmailSuccess(data));
+export const getAllAlertEmail = (details, customToast) => {
+  if (env.REACT_APP_IS_DEMO === 'true') {
+    if (customToast) {
+      customToast({
+        type: 'error',
+        header: 'This is a demo version'
+      });
     }
-  };
+    return {
+      type: 'default'
+    };
+  } else {
+    return async (dispatch) => {
+      dispatch(getAlertEmailRequest());
+      const { data, error, status } = await postRequest({
+        url: ALERT_EMAIL_URL,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: JSON.stringify(details),
+        noAuth: true
+      });
+      if (error) {
+        dispatch(getAlertEmailFailure());
+      } else if (data && status === 200) {
+        dispatch(getAlertEmailSuccess(data));
+      }
+    };
+  }
 };
 
 export const getChannelStatusRequest = () => {
@@ -291,7 +304,7 @@ export const createKpiAlertFailure = () => {
   };
 };
 
-export const createKpiAlert = (payload) => {
+export const createKpiAlert = (payload, customToast) => {
   return async (dispatch) => {
     dispatch(createKpiAlertRequest());
     const { data, error, status } = await postRequest({
@@ -300,7 +313,8 @@ export const createKpiAlert = (payload) => {
       headers: {
         'Content-Type': 'application/json'
       },
-      noAuth: true
+      noAuth: true,
+      customToast
     });
     if (error) {
       dispatch(createKpiAlertFailure());
@@ -395,23 +409,35 @@ export const updateKpiAlertFailure = () => {
   };
 };
 
-export const updateKpiAlert = (id, payload) => {
-  return async (dispatch) => {
-    dispatch(updateKpiAlertRequest());
-    const { data, error, status } = await putRequest({
-      url: `${UPDATE_KPI_ALERT_URL}/${id}/update`,
-      data: JSON.stringify(payload),
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      noAuth: true
-    });
-    if (error) {
-      dispatch(updateKpiAlertFailure());
-    } else if (data && status === 200) {
-      dispatch(updateKpiAlertSuccess(data));
+export const updateKpiAlert = (id, payload, customToast) => {
+  if (env.REACT_APP_IS_DEMO === 'true') {
+    if (customToast) {
+      customToast({
+        type: 'error',
+        header: 'This is a demo version'
+      });
     }
-  };
+    return {
+      type: 'default'
+    };
+  } else {
+    return async (dispatch) => {
+      dispatch(updateKpiAlertRequest());
+      const { data, error, status } = await putRequest({
+        url: `${UPDATE_KPI_ALERT_URL}/${id}/update`,
+        data: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        noAuth: true
+      });
+      if (error) {
+        dispatch(updateKpiAlertFailure());
+      } else if (data && status === 200) {
+        dispatch(updateKpiAlertSuccess(data));
+      }
+    };
+  }
 };
 
 export const kpiAlertDisableRequest = () => {
@@ -499,20 +525,31 @@ export const kpiAlertDeleteSuccess = (response) => {
   };
 };
 
-export const kpiAlertDeleteById = (id) => {
-  return async (dispatch) => {
-    dispatch(kpiAlertDeleteRequest());
-    const { data, error, status } = await getRequest({
-      url: `${BASE_URL}/api/alert/${id}/delete`
-    });
-    if (error) {
-      dispatch(kpiAlertDeleteFailure());
-    } else if (data && status === 200) {
-      dispatch(kpiAlertDeleteSuccess(data));
+export const kpiAlertDeleteById = (id, customToast) => {
+  if (env.REACT_APP_IS_DEMO === 'true') {
+    if (customToast) {
+      customToast({
+        type: 'error',
+        header: 'This is a demo version'
+      });
     }
-  };
+    return {
+      type: 'default'
+    };
+  } else {
+    return async (dispatch) => {
+      dispatch(kpiAlertDeleteRequest());
+      const { data, error, status } = await getRequest({
+        url: `${BASE_URL}/api/alert/${id}/delete`
+      });
+      if (error) {
+        dispatch(kpiAlertDeleteFailure());
+      } else if (data && status === 200) {
+        dispatch(kpiAlertDeleteSuccess(data));
+      }
+    };
+  }
 };
-
 export const alertChannelForFilterFailure = () => {
   return {
     type: ALERTCHANNELFORFILTERFAILURE

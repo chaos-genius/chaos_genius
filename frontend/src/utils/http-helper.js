@@ -1,7 +1,9 @@
 import axios from 'axios';
+import { env } from '../env';
 
 //import { forceLogout } from './user-helper';
 import { getCookie } from './cookie-helper';
+import { checkBlackList } from './url-helper';
 
 export const sendRequest = async (args) => {
   try {
@@ -39,6 +41,16 @@ export const sendRequest = async (args) => {
 };
 
 export const getRequest = async (args) => {
+  if (env.REACT_APP_IS_DEMO === 'true') {
+    const isBlackListed = checkBlackList(args?.url);
+    if (isBlackListed && args.customToast) {
+      args.customToast({ type: 'failure', header: 'This is demo version' });
+      return {
+        data: null,
+        error: true
+      };
+    }
+  }
   const { data, headers, error, status } = await sendRequest({
     ...args,
     method: 'get'
@@ -59,6 +71,16 @@ export const getRequest = async (args) => {
 };
 
 export const postRequest = async (args) => {
+  if (env.REACT_APP_IS_DEMO === 'true') {
+    const isBlackListed = checkBlackList(args?.url);
+    if (isBlackListed && args.customToast) {
+      args.customToast({ type: 'failure', header: 'This is demo version' });
+      return {
+        data: null,
+        error: true
+      };
+    }
+  }
   const { data, headers, error, status } = await sendRequest({
     ...args,
     method: 'post'
@@ -80,6 +102,16 @@ export const postRequest = async (args) => {
 };
 
 export const patchRequest = async (args) => {
+  if (env.REACT_APP_IS_DEMO === 'true') {
+    const isBlackListed = checkBlackList(args?.url);
+    if (isBlackListed && args.customToast) {
+      args.customToast({ type: 'failure', header: 'This is demo version' });
+      return {
+        data: null,
+        error: true
+      };
+    }
+  }
   const { data, headers, error, status } = await sendRequest({
     ...args,
     method: 'patch'
@@ -100,6 +132,16 @@ export const patchRequest = async (args) => {
 };
 
 export const deleteRequest = async (args) => {
+  if (env.REACT_APP_IS_DEMO === 'true') {
+    const isBlackListed = checkBlackList(args?.url);
+    if (isBlackListed && args.customToast) {
+      args.customToast({ type: 'failure', header: 'This is demo version' });
+      return {
+        data: null,
+        error: true
+      };
+    }
+  }
   const { data, error, status, headers } = await sendRequest({
     ...args,
     method: 'delete'
@@ -120,6 +162,16 @@ export const deleteRequest = async (args) => {
 };
 
 export const putRequest = async (args) => {
+  if (env.REACT_APP_IS_DEMO === 'true') {
+    const isBlackListed = checkBlackList(args?.url);
+    if (isBlackListed && args.customToast) {
+      args.customToast({ type: 'failure', header: 'This is demo version' });
+      return {
+        data: null,
+        error: true
+      };
+    }
+  }
   const { data, error, status, headers } = await sendRequest({
     ...args,
     method: 'put'

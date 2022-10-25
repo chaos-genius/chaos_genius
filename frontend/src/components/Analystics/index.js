@@ -331,7 +331,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
       if (edit && Object.keys(needForCleanup)?.length) {
         setModalOpen(true);
       } else {
-        dispatch(kpiSettingSetup(kpi, data));
+        dispatch(kpiSettingSetup(kpi, data, customToast));
       }
     }
   };
@@ -913,7 +913,7 @@ const Analystics = ({ kpi, setAnalystics, onboarding }) => {
                     const data = {
                       anomaly_params: { ...editForm }
                     };
-                    dispatch(kpiSettingSetup(kpi, data));
+                    dispatch(kpiSettingSetup(kpi, data, customToast));
                     setModalOpen(false);
                   }}>
                   <span>Save Changes</span>

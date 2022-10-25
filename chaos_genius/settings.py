@@ -169,6 +169,7 @@ CHAOSGENIUS_ENTERPRISE_EDITION_KEY = os.getenv(
     "CHAOSGENIUS_ENTERPRISE_EDITION_KEY"
 )
 
+REACT_APP_IS_DEMO = _make_bool(os.getenv("REACT_APP_IS_DEMO", default=True))
 """Dynamic Third Party Data Sources"""
 SOURCE_GOOGLE_ANALYTICS = _make_bool(
     os.getenv("SOURCE_GOOGLE_ANALYTICS", default=True)

@@ -1,5 +1,5 @@
 """Utilities for retrieving channel credentials from config-setting."""
-from typing import Tuple
+from typing import Dict, Tuple
 
 from chaos_genius.controllers.config_controller import get_config_object
 
@@ -58,3 +58,28 @@ def get_slack_creds() -> str:
         )
 
     return configs["webhook_url"]
+
+
+def get_webhook_creds() -> Dict[str, str]:
+    """Retrieves webhook configuration.
+
+    Returns:
+        Dict with webhook url and auth token (if present)
+
+    Raises:
+        Exception: if webhook channel is not configured.
+    """
+    config_obj = get_config_object("webhook_config")
+    if not config_obj:
+        raise Exception("Webhook alert channel was not configured")
+
+    configs = config_obj.as_dict.get("config_setting")
+    if not configs:
+        raise Exception("Webhook alert channel was not configured")
+
+    if "webhook_url" not in configs:
+        raise Exception(
+            "Webhook alert channel configuration is invalid. webhook_url was not found."
+        )
+
+    return configs

@@ -11,7 +11,7 @@ from chaos_genius.utils.utils import jsonable_encoder
 logger = logging.getLogger(__name__)
 
 
-def get_webhook() -> Dict:
+def get_webhook() -> Dict[str, str]:
     config = get_webhook_creds()
     return config
 

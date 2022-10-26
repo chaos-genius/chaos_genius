@@ -60,7 +60,7 @@ def get_slack_creds() -> str:
     return configs["webhook_url"]
 
 
-def get_webhook_creds() -> Dict:
+def get_webhook_creds() -> Dict[str, str]:
     """Retrieves webhook configuration.
 
     Returns:

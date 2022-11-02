@@ -81,7 +81,7 @@ Flask-Static-Digest==0.2.1
 Flask-Login==0.6.2
 Flask-Bcrypt==1.0.1
 # not upgraded to 37 yet because of snowflake-connector-python
-cryptography==36.0.2
+cryptography==38.0.3
 
 # Caching
 Flask-Caching==1.11.1

@@ -35,7 +35,7 @@ redis==4.3.4
 
 # Database
 Flask-SQLAlchemy==2.5.1
-SQLAlchemy==1.4.27
+SQLAlchemy==1.4.45
 psycopg2-binary==2.9.3
 PyMySQL==1.0.2
 # revert below once this is merged: https://github.com/googleapis/python-bigquery-sqlalchemy/pull/479

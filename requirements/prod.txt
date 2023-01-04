@@ -18,7 +18,7 @@ tqdm==4.64.0
 tenacity==8.0.1
 six==1.16.0
 setuptools-git==1.2
-scipy==1.8.1
+scipy==1.10.0
 fsspec==2022.8.2
 s3fs==2022.8.2
 PyHive==0.6.5

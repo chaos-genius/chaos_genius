@@ -272,7 +272,7 @@ def kpi_anomaly_params(kpi_id: int):
         )
 
     err, new_anomaly_params = validate_partial_anomaly_params(
-        req_data["anomaly_params"]
+        req_data["anomaly_params"] is None
     )
 
     if err != "":

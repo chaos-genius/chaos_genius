@@ -46,7 +46,7 @@ Chaos Genius 是一个开源的机器学习驱动的分析引擎，用于异常�
 **在短期和中期规划中*
 
 ### 演示
-查看[演示.](https://demo-github.chaosgenius.io/#/0) 来试用一下或者探索实时仪表板:
+查看[演示](https://demo-github.chaosgenius.io/#/0) 来试用一下或者探索实时仪表板:
 
 - [电子商务](https://demo-github.chaosgenius.io/#/dashboard/1/deepdrills/4)
 - [音乐](https://demo-github.chaosgenius.io/#/dashboard/3/deepdrills/8)

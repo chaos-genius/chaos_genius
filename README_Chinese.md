@@ -1,11 +1,11 @@
 ![CG Header](https://raw.githubusercontent.com/chaos-genius/.github/main/images/CG-banner.png)
 
 <p align="center">
-    <a href="https://www.chaosgenius.io/"><b>Website</b></a> •
-    <a href="https://docs.chaosgenius.io"><b>Docs</b></a> •
-    <a href="https://www.chaosgenius.io/blog/"><b>Blog</b></a> •
-    <a href="https://www.linkedin.com/company/chaosgenius/"><b>LinkedIn</b></a> •
-    <a href="https://join.slack.com/t/chaosgenius/shared_invite/zt-140042uac-rrm~xbx9o_aydi6PTmp_Mg"><b>Community Slack</b></a>
+    <a href="https://www.chaosgenius.io/"><b>网站</b></a> •
+    <a href="https://docs.chaosgenius.io"><b>文档</b></a> •
+    <a href="https://www.chaosgenius.io/blog/"><b>博客</b></a> •
+    <a href="https://www.linkedin.com/company/chaosgenius/"><b>领英</b></a> •
+    <a href="https://join.slack.com/t/chaosgenius/shared_invite/zt-140042uac-rrm~xbx9o_aydi6PTmp_Mg"><b>社区Slack</b></a>
 </p>
 
 <p align="center">
@@ -20,39 +20,39 @@
 
 </p>
 
-<h3 align="center">ML powered analytics engine for outlier detection and root cause analysis</h3>
+<h3 align="center">机器学习驱动，用于异常值检测和根本原因分析的引擎</h3>
 
 <br/>
 
-## ✨ What is Chaos Genius?
+## ✨ 什么是Chaos Genius?
 
 
-Chaos Genius is an open source ML powered analytics engine for outlier detection and root cause analysis. Chaos Genius can be used to monitor and analyse high dimensionality business, data and system metrics at scale. 
+Chaos Genius 是一个开源的机器学习驱动的分析引擎，用于异常值检测和根本原因分析。Chaos Genius 可用于大规模监控和分析高维业务、数据和系统指标。
 
-Using Chaos Genius, users can segment large datasets by key performance metrics (e.g. Daily Active Users, Cloud Costs, Failure Rates) and important dimensions (e.g., countryID, DeviceID, ProductID, DayofWeek) across which they want to monitor and analyse the key metrics.
+使用 Chaos Genius，用户可以根据关键性能指标（例如每日活跃用户、云成本、故障率）和他们想要监控和分析关键指标的重要维度（例如，countryID、DeviceID、ProductID、DayofWeek）对大型数据集进行细分.
 
 <!--Chaos Genius comes with a UI that offers simple point-and-click functionality for various tasks like adding data sources, defining the key performance metrics with dimensions and setting up advaned analytics. -->
 
 
-### Use Chaos Genius if you want: 
-- Multidimensional Drill Downs & Insights
-- Anomaly Detection
-- Smart Alerting
-- Seasonality Detection*
-- Automated Root Cause Analysis*
-- Forecasting*
-- What-If Analysis*
+### 当你有以下需求时可以使用 Chaos Genius：
+- 多维钻取和见解 Multidimensional Drill Downs & Insights
+- 异常检测 Anomaly Detection
+- 智能警报 Smart Alerting
+- 季节性检测* Seasonality Detection*
+- 自动根本原因分析* Automated Root Cause Analysis*
+- 预测* Forecasting*
+- 假设分析* What-If Analysis*
 
-**in Short and Medium-term Roadmap*
+**在短期和中期规划中*
 
-### Demo
-To try it out, check out our [Demo.](https://demo-github.chaosgenius.io/#/0) Or explore live dashboards for:
+### 演示
+查看[演示.]来试用一下(https://demo-github.chaosgenius.io/#/0) 或者探索实时仪表板:
 
-- [E-commmerce](https://demo-github.chaosgenius.io/#/dashboard/1/deepdrills/4)
-- [Music](https://demo-github.chaosgenius.io/#/dashboard/3/deepdrills/8)
-- [Ride-Hailing](https://demo-github.chaosgenius.io/#/dashboard/4/deepdrills/25)
-- [Cloud Monitoring](https://demo-github.chaosgenius.io/#/dashboard/2/deepdrills/27)
-- [Data Quality](#) (coming soon)
+- [电子商务](https://demo-github.chaosgenius.io/#/dashboard/1/deepdrills/4)
+- [音乐](https://demo-github.chaosgenius.io/#/dashboard/3/deepdrills/8)
+- [网约车](https://demo-github.chaosgenius.io/#/dashboard/4/deepdrills/25)
+- [云监控](https://demo-github.chaosgenius.io/#/dashboard/2/deepdrills/27)
+- [数据质量](#) (即将推出)
 
 <!--[See more on our website. ](https://chaosgenius.io/)-->
 
@@ -64,7 +64,7 @@ To try it out, check out our [Demo.](https://demo-github.chaosgenius.io/#/0) Or 
 
 ![image](/img/cg-high-level-arch.png) -->
 
-## ⚙️ Quick Start
+## ⚙️ 快速开始
 
 <a href="https://docs.chaosgenius.io/docs/setup/local-setup/"><img src=".github/images/local_button_noborder.png" width="120px" /><a/>
 <a href="https://docs.chaosgenius.io/docs/setup/aws-setup/"><img src=".github/images/aws_button_noborder.png" width="120px" /><a/>
@@ -78,25 +78,25 @@ cd chaos_genius
 docker-compose up
 ```
 
-Visit [http://localhost:8080](http://localhost:8080/)
+访问 [http://localhost:8080](http://localhost:8080/)
 
-Follow this [Quick Start guide](https://docs.chaosgenius.io/docs/Quick_Start/prereqs) or read our [Documentation](https://docs.chaosgenius.io/docs/introduction) for more details.
+遵循 [快速指南](https://docs.chaosgenius.io/docs/Quick_Start/prereqs) 或阅读我们的 [文档](https://docs.chaosgenius.io/docs/introduction) 获取更多信息。
 
-## :dizzy: Key Features
+## :dizzy: 主要功能
 
-### 1. Automated DeepDrills 
-
-Generate multidimensional drilldowns to identify the key drivers of change in defined metrics (e.g. Sales) across a large number of high cardinality dimensions (e.g. CountryID, ProductID, BrandID, Device_type).
-- Techniques: Statistical Filtering, A* like path based search to deal with combinatorial explosion
+### 1. 自动化钻取 Automated DeepDrills 
+    
+生成多维向下钻取以识别大量高基数维度（例如 CountryID、ProductID、BrandID、Device_type）中已定义指标（例如 Sales）变化的关键驱动指标。
+- 技巧: 统计过滤, A*类基于路径的搜索来处理组合爆炸（Statistical Filtering, A* like path based search to deal with combinatorial explosion）
 
 ![DD](https://raw.githubusercontent.com/chaos-genius/.github/main/images/DeepDrills.png)
 
 <!-- TODO: add an image or illustration here -->
 
-### 2. Anomaly Detection
+### 2. 异常检测 Anomaly Detection
 
-Modular anomaly detection toolkit for monitoring high-dimensional time series with ability to select from different models. Tackle variations caused by seasonality, trends and holidays in the time series data.
-- Models: Prophet, EWMA, EWSTD, Neural Prophet, Greykite
+用于监控高维时间序列的模块化异常检测工具包，具有从不同模型中进行选择的能力。处理由时间序列数据中的季节性、趋势和假期引起的变化。
+- 模型: Prophet, EWMA, EWSTD, Neural Prophet, Greykite
     
 ![Anomaly](https://raw.githubusercontent.com/chaos-genius/.github/main/images/AnomalyDrillDowns.png)
 
@@ -104,52 +104,52 @@ Modular anomaly detection toolkit for monitoring high-dimensional time series wi
 <!-- TODO: add an image or illustration here -->
 
 
-### 3. Smart Alerts
+### 3. 智能警报
 
-Actionable alerts with self-learning thresholds. Configurations to setup alert frequency & reporting to combat alert fatigue. 
-- Channels: Email, Slack
+具有自学习阈值的可操作警报。配置设置警报频率和报告以减少警报的疲劳。
+- 通知渠道: 电子邮件, Slack
 <!-- TODO: add an image or illustration here -->
     
 ![Alerting](https://raw.githubusercontent.com/chaos-genius/.github/main/images/Alerting-Dark.png)
 
-## :octocat: Community
+## :octocat: 社区
 
-For any help, discussions and suggestions feel free to reach out to the Chaos Genius team and the community here:
+如需任何帮助、讨论和建议，请随时联系 Chaos Genius 团队和社区：
 
--   [GitHub](https://github.com/chaos-genius/.github) (report bugs, contribute, follow roadmap)
+-   [GitHub](https://github.com/chaos-genius/.github) (报告错误、贡献、路线图)
 
--   [Slack](https://join.slack.com/t/chaosgenius/shared_invite/zt-140042uac-rrm~xbx9o_aydi6PTmp_Mg) (discuss with the community and Chaos Genius team)
+-   [Slack](https://join.slack.com/t/chaosgenius/shared_invite/zt-140042uac-rrm~xbx9o_aydi6PTmp_Mg) (与社区和 Chaos Genius 团队讨论)
 
--   [Book Office Hours](https://calendly.com/chaosgenius/30min) (set up time with the Chaos Genius team for any questions or help with setup)
+-   [Book Office Hours](https://calendly.com/chaosgenius/30min) (与 Chaos Genius 团队安排时间以解决任何问题或帮助设置)
 
--   [Blog](https://chaosgenius.io/blog/) (follow us on latest trends on Data, Machine Learning, Open Source and more)
-
-
-## 🚦 Roadmap
-
-Our goal is to make Chaos Genius production ready for all organisations irrespective of their data infrasturcture, data sources and scale requirements. With that in mind we have created a [roadmap](https://docs.chaosgenius.io/docs/roadmap/) for Chaos Genius. If you see something missing or wish to make suggestions, please drop us a line on our [Community Slack](https://join.slack.com/t/chaosgenius/shared_invite/zt-140042uac-rrm~xbx9o_aydi6PTmp_Mg) or raise an issue.
+-   [Blog](https://chaosgenius.io/blog/) (关注我们关于数据、机器学习、开源等的最新趋势)
 
 
+## 🚦 路线图
 
-## :seedling: Contributing 
+我们的目标是让 Chaos Genius 产品为所有使用者做好准备，无论他们的数据基础设施、数据源和规模要求如何。 考虑到这一点，我们为Chaos Genius制定了 [路线图](https://docs.chaosgenius.io/docs/roadmap/)。 如果你发现有什么缺失或者希望提出建议， 请在 [社区Slack](https://join.slack.com/t/chaosgenius/shared_invite/zt-140042uac-rrm~xbx9o_aydi6PTmp_Mg) 上给我们留言或提出问题。
 
-Want to contribute? Get started with:
 
--   Show us some love - Give us a :star2:!
+
+## :seedling: 贡献
+
+想要为项目做贡献吗？从这里开始：
+
+-   给我们一些爱心 - 给我们一个 :star2:!
     
--   Submit an issue.
+-   在Issues中提交问题。
 
--   Share a part of the documentation that you find difficult to follow.
+-   分享文档中您觉得难以理解的部分。
 
--   [Translate our Readme](https://github.com/chaos-genius/chaos_genius/blob/main/README.md).
+-   [翻译Readme](https://github.com/chaos-genius/chaos_genius/blob/main/README.md).
 
--   Create a pull request. Here's a [list of issues](https://github.com/chaos-genius/chaos_genius/issues) to start with. Please review our [contribution guidelines](https://github.com/chaos-genius/chaos_genius/blob/main/CONTRIBUTING.md) before opening a pull request. Thank you for contributing!
+-   创建拉取请求。下面是要开始的问题列表。请求之前查看我们的贡献指南。感谢您的贡献！提交Pull Request。 可以从这个[问题列表](https://github.com/chaos-genius/chaos_genius/issues)开始。 请在打开请求之前查看 [贡献指南](https://github.com/chaos-genius/chaos_genius/blob/main/CONTRIBUTING.md)。感谢您的贡献！
 
 
 
-## :heart: Contributors 
+## :heart: 贡献者
 
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+感谢这些很棒的人 ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
@@ -204,8 +204,8 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+该项目遵循[all-contributors](https://github.com/all-contributors/all-contributors) 规范。欢迎任何形式的贡献！
 
-## 📜 License
+## 📜 许可证
 
 Chaos Genius is licensed under the [MIT license](https://github.com/chaos-genius/chaos_genius/blob/main/LICENSE.md).

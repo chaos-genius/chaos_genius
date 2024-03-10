@@ -46,6 +46,8 @@ Using Chaos Genius, users can segment large datasets by key performance metrics 
 **in Short and Medium-term Roadmap*
 
 ### Demo
+
+<!--
 To try it out, check out our [Demo.](https://demo-github.chaosgenius.io/#/0) Or explore live dashboards for:
 
 - [E-commmerce](https://demo-github.chaosgenius.io/#/dashboard/1/deepdrills/4)
@@ -53,12 +55,12 @@ To try it out, check out our [Demo.](https://demo-github.chaosgenius.io/#/0) Or 
 - [Ride-Hailing](https://demo-github.chaosgenius.io/#/dashboard/4/deepdrills/25)
 - [Cloud Monitoring](https://demo-github.chaosgenius.io/#/dashboard/2/deepdrills/27)
 - [Data Quality](#) (coming soon)
+-->
 
 <!--[See more on our website. ](https://chaosgenius.io/)-->
 
+[A small demo of Chaos Genius](https://chaosgenius-public.s3.amazonaws.com/test-cg-1-small.gif)
 
-
-<!--![A small demo of Chaos Genius](https://chaosgenius-public.s3.amazonaws.com/test-cg-1-small.gif)-->
 
 <!-- ## Architecture
 

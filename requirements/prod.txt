@@ -104,4 +104,4 @@ docker==6.0.0
 Pygments==2.13.0
 
 # converting to/from JSON and custom classes
-pydantic==1.10.2
+pydantic==1.10.13

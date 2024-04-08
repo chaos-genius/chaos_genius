@@ -105,3 +105,4 @@ Pygments==2.13.0
 
 # converting to/from JSON and custom classes
 pydantic==1.10.2
+holidays>=0.45 # not directly required, pinned by Snyk to avoid a vulnerability

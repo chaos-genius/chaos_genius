@@ -53,6 +53,60 @@
         "isThirdParty": false,
         "name": "ClickHouse",
         "sourceDefinitionId": "15323c3e-222d-11ed-861d-0242ac120002"
+    },
+    {
+        "connectionSpecification": {
+          "properties": {
+            "host": {
+              "description": "Hostname of the database.",
+              "order": 0,
+              "title": "Host",
+              "type": "string"
+            },
+            "database": {
+                "description": "Name of the database.",
+                "order": 2,
+                "type": "string"
+              },
+            "password": {
+              "airbyte_secret": true,
+              "description": "Password associated with the username.",
+              "order": 4,
+              "title": "Password",
+              "type": "string"
+            },
+            "port": {
+              "default": 9000,
+              "description": "Port of the database.",
+              "examples": [
+                "9000"
+              ],
+              "maximum": 65536,
+              "minimum": 0,
+              "order": 1,
+              "title": "Port",
+              "type": "integer"
+            },
+            "username": {
+              "description": "Username to use to access the database.",
+              "order": 3,
+              "title": "User",
+              "type": "string"
+            }
+          },
+          "required": [
+            "host",
+            "port",
+            "username",
+            "password",
+            "database"
+          ],
+          "title": "Vertica Source Spec",
+          "type": "object"
+        },
+        "icon": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<svg width=\"250\" height=\"250\" viewBox=\"0 0 250 250\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<rect x=\"30\" y=\"30\" width=\"191\" height=\"191\" fill=\"#0595DA\"/>\n<path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M83.1152 50.7504H51.3213L111.527 200.25H137.233L198.791 50.7504H169.027L124.769 165.819L83.1152 50.7504Z\" fill=\"white\"/>\n</svg>",
+        "isThirdParty": false,
+        "name": "Vertica",
+        "sourceDefinitionId": "ea358fce-651d-11ee-b2c3-ab709e72ab12"
     }
-
 ]

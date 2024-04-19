@@ -49,6 +49,7 @@ pydruid[sqlalchemy]==0.6.3
 PyAthena[SQLAlchemy,Pandas]==2.14.0
 sqlalchemy-databricks==0.2.0
 clickhouse-sqlalchemy==0.2.2
+sqlalchemy-vertica-python==0.6.3
 pyarrow==8.0.0
 
 # Migrations

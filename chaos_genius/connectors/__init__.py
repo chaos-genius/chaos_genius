@@ -8,6 +8,7 @@ from chaos_genius.connectors.druid import Druid
 from chaos_genius.connectors.aws_athena import AwsAthenaDb
 from chaos_genius.connectors.databricks import Databricks
 from chaos_genius.connectors.clickhouse import ClickHouseDb
+from chaos_genius.connectors.vertica import VerticaDb
 
 
 DB_CLASS_MAPPER = {
@@ -19,7 +20,8 @@ DB_CLASS_MAPPER = {
     "Druid": Druid,
     "AWS Athena": AwsAthenaDb,
     "Databricks": Databricks,
-    "ClickHouse": ClickHouseDb
+    "ClickHouse": ClickHouseDb,
+    "Vertica": VerticaDb,
 }
 
 

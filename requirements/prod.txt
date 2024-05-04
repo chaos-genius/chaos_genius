@@ -14,7 +14,7 @@ websocket-client==1.4.1
 vine==5.0.0
 urllib3==1.26.12
 typing_extensions==4.3.0
-tqdm==4.64.0
+tqdm==4.66.3
 tenacity==8.0.1
 six==1.16.0
 setuptools-git==1.2

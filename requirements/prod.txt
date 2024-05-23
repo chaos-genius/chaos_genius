@@ -1,5 +1,5 @@
 # Everything needed in production
-requests==2.28.1
+requests==2.32.0
 
 # pinned transitive dependencies
 pyparsing==3.0.9
@@ -37,7 +37,7 @@ redis==4.3.4
 Flask-SQLAlchemy==2.5.1
 SQLAlchemy==1.4.27
 psycopg2-binary==2.9.3
-PyMySQL==1.0.2
+PyMySQL==1.1.1
 # revert below once this is merged: https://github.com/googleapis/python-bigquery-sqlalchemy/pull/479
 # sqlalchemy-bigquery==1.4.4
 git+https://github.com/googleapis/python-bigquery-sqlalchemy.git@refs/pull/479/head

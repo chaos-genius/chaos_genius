@@ -21,7 +21,7 @@ factory-boy==3.2.1
 pdbpp==0.10.3
 
 # Lint and code style
-black==22.8.0
+black==24.3.0
 flake8==5.0.4
 flake8-blind-except==0.2.1
 flake8-debugger==4.1.2
@@ -33,3 +33,4 @@ pep8-naming==0.13.2
 # for auto-reloading celery workers when code changes
 watchdog[watchmedo]==2.1.9
 
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability

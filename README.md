@@ -24,6 +24,11 @@
 
 <br/>
 
+## Repository Status: Archived
+
+⚠️ **Notice:** This repository is no longer actively maintained or developed. It remains available for historical reference, but no further updates or support will be provided. Users are advised to consider more up-to-date alternatives.
+<br/>
+
 ## ✨ What is Chaos Genius?
 
 
